@@ -48,6 +48,6 @@ mod tests {
 
         let gnbcu = GNBCU::test_default(mock_ngap_transport_provider).await;
         let message: Vec<u8> = "hello world".into();
-        send_ngap.send(Box::new(message));
+        send_ngap.send(message).await;
     }
 }

@@ -8,7 +8,7 @@ pub struct Binding;
 #[async_trait]
 pub trait TransportMessageReceiver: Send + Clone {
     /// Receive a non UE associated message.
-    async fn recv_non_ue_associated_message(&self, buf: Box<Vec<u8>>);
+    async fn recv_non_ue_associated_message(&self, buf: Vec<u8>);
 
     //async fn recv_ue_associated_message(&self, buf: &[u8], tnla_binding: Binding);
 }

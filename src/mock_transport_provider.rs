@@ -12,15 +12,15 @@ use std::marker::Sync;
 #[derive(Debug, Clone)]
 pub struct MockServerTransportProvider<R: TransportMessageReceiver + Sync> {
     receive_handler: Option<R>,
-    server_receiver: Receiver<Box<Vec<u8>>>,
+    server_receiver: Receiver<Vec<u8>>,
 }
 
 impl<R: TransportMessageReceiver + Sync> MockServerTransportProvider<R> {
     /// Create a mock transport provider.
     pub fn new() -> (
         MockServerTransportProvider<R>,
-        Sender<Box<Vec<u8>>>,
-        Receiver<Box<Vec<u8>>>,
+        Sender<Vec<u8>>,
+        Receiver<Vec<u8>>,
     ) {
         let (server_sender, client_receiver) = async_channel::unbounded();
         let (client_sender, server_receiver) = async_channel::unbounded();
@@ -62,7 +62,7 @@ impl<R: 'static + TransportMessageReceiver + Sync> TransportProvider
 impl<R: TransportMessageReceiver + Sync> TransportMessageReceiver
     for MockServerTransportProvider<R>
 {
-    async fn recv_non_ue_associated_message(&self, buf: Box<Vec<u8>>) {
+    async fn recv_non_ue_associated_message(&self, buf: Vec<u8>) {
         unimplemented!();
     }
 }

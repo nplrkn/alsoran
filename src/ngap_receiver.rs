@@ -6,7 +6,7 @@ pub struct NgapReceiver {}
 
 #[async_trait]
 impl TransportMessageReceiver for NgapReceiver {
-    async fn recv_non_ue_associated_message(&self, buf: Box<Vec<u8>>) {
+    async fn recv_non_ue_associated_message(&self, buf: Vec<u8>) {
         unimplemented!();
     }
 }
