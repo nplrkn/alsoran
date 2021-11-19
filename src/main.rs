@@ -1,5 +1,4 @@
 mod gnbcu;
-mod ngap_receiver;
 mod transport_provider;
 
 #[cfg(test)]

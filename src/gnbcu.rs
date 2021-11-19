@@ -1,23 +1,41 @@
-use crate::ngap_receiver::NgapReceiver;
 use crate::transport_provider::TransportProvider;
-/// The gNB-CU.
-use async_net::AsyncToSocketAddrs;
 
-pub struct GNBCU<T> {
-    ngap_receiver: NgapReceiver,
+/// The gNB-CU.
+
+#[derive(Debug, Clone)]
+pub struct GNBCU<T, F> {
     ngap_transport_provider: T,
+    f1_transport_provider: F,
 }
 
-impl<T: TransportProvider> GNBCU<T> {
-    pub async fn new<A: AsyncToSocketAddrs>(
-        f1_listen_address: A,
+impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
+    pub async fn new(
         ngap_transport_provider: T,
-    ) -> Result<GNBCU<T>, String> {
-        let ngap_receiver = NgapReceiver {};
-        Ok(GNBCU {
-            ngap_receiver,
+        f1_transport_provider: F,
+    ) -> Result<GNBCU<T, F>, String> {
+        let gnbcu = GNBCU {
             ngap_transport_provider,
-        })
+            f1_transport_provider,
+        };
+
+        // When we receive a message, call the callback
+        let ngap_transport_provider = gnbcu.ngap_transport_provider.clone();
+        let f1_transport_provider = gnbcu.f1_transport_provider.clone();
+        async_std::task::spawn(async move {
+            while let Some(message) = f1_transport_provider.recv_message().await {
+                ngap_transport_provider.send_message(message).await.unwrap();
+            }
+        });
+
+        let ngap_transport_provider = gnbcu.ngap_transport_provider.clone();
+        let f1_transport_provider = gnbcu.f1_transport_provider.clone();
+        async_std::task::spawn(async move {
+            while let Some(message) = ngap_transport_provider.recv_message().await {
+                f1_transport_provider.send_message(message).await.unwrap();
+            }
+        });
+
+        Ok(gnbcu)
     }
 }
 
@@ -26,15 +44,10 @@ mod tests {
     use crate::mock_transport_provider::MockServerTransportProvider;
 
     use super::*;
-    use std::net::Ipv4Addr;
 
-    // TODO move into F1 modules
-    const F1AP_SCTP_DESTINATION_PORT: u16 = 38472;
-
-    impl<T: TransportProvider> GNBCU<T> {
-        pub async fn test_default(prov: T) -> GNBCU<T> {
-            let f1_listen_address = (Ipv4Addr::UNSPECIFIED, F1AP_SCTP_DESTINATION_PORT);
-            GNBCU::new(f1_listen_address, prov).await.unwrap()
+    impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
+        pub async fn test_default(ngap_transport: T, f1_transport: F) -> GNBCU<T, F> {
+            GNBCU::new(ngap_transport, f1_transport).await.unwrap()
         }
     }
 
@@ -42,12 +55,20 @@ mod tests {
     async fn initial_access_procedure() {
         // Creating a GNBCU will use a real SCTP transport.  However we can also create it with a mock tranport that
         // uses channels instead.
-        let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
-            MockServerTransportProvider::<NgapReceiver>::new();
-        //let mock_f1_transport_provider = MockServerTransportProvider::<F1>::new();
+        println!("initial access procedure");
 
-        let gnbcu = GNBCU::test_default(mock_ngap_transport_provider).await;
+        let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
+            MockServerTransportProvider::new();
+        let (mock_f1_transport_provider, send_f1, receive_f1) = MockServerTransportProvider::new();
+
+        GNBCU::test_default(mock_ngap_transport_provider, mock_f1_transport_provider).await;
         let message: Vec<u8> = "hello world".into();
-        send_ngap.send(message).await;
+        println!("send in message");
+        send_ngap.send(message).await.unwrap();
+        let message = receive_f1.recv().await.unwrap();
+        println!("Got F1 message {:?}, now send it back in", message);
+        send_f1.send(message).await.unwrap();
+        let message = receive_ngap.recv().await.unwrap();
+        println!("Got NGAP message {:?}, done", message);
     }
 }

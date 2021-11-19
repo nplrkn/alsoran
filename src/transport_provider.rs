@@ -1,24 +1,14 @@
 /// Transport provider
-use async_net::AsyncToSocketAddrs;
-use async_std::sync::Arc;
 use async_trait::async_trait;
 
-pub struct Binding;
+//pub struct Binding;
+
+pub type Message = Vec<u8>;
 
 #[async_trait]
-pub trait TransportMessageReceiver: Send + Clone {
-    /// Receive a non UE associated message.
-    async fn recv_non_ue_associated_message(&self, buf: Vec<u8>);
-
-    //async fn recv_ue_associated_message(&self, buf: &[u8], tnla_binding: Binding);
-}
-
-#[async_trait]
-pub trait TransportProvider {
-    type Receiver;
-    async fn set_receiver(&mut self, receiver: Self::Receiver);
-    async fn send_non_ue_associated_message(&self, buf: &[u8]) -> Result<usize, String>;
-    //async fn send_ue_associated(&self, buf: &[u8], requested_ue_tnla_binding: Binding) -> Result<(usize, Binding)>
+pub trait TransportProvider: 'static + Send + Sync + Clone {
+    async fn send_message(&self, message: Message) -> Result<(), String>;
+    async fn recv_message(&self) -> Option<Message>;
 }
 
 // #[async_trait]
