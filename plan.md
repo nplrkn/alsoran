@@ -1,9 +1,10 @@
 Ideas for what next
--  add logging
 -  add error handling / back pressure handling
--  reinstate a callback model that lets the transport provider be aware of ue or non ue associated signaling
-   -  idea is to type parameterize receive method not the whole trait
 
+
+-  [done] reinstate a callback model that lets the transport provider be aware of ue or non ue associated signaling
+   -  idea is to type parameterize receive method not the whole trait
+-  [done] add logging
 -  [done] do two exchanges concurrently in UT
 
 

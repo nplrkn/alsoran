@@ -1,39 +1,98 @@
-use crate::transport_provider::TransportProvider;
+use crate::transport_provider::{Handler, Message, TransportProvider};
+use async_trait::async_trait;
+use slog::Logger;
+use slog::{info, o};
+use std::sync::Arc;
 
 /// The gNB-CU.
 
 #[derive(Debug, Clone)]
-pub struct GNBCU<T, F> {
+pub struct GNBCU<T, F>
+where
+    T: TransportProvider,
+    F: TransportProvider,
+{
     ngap_transport_provider: T,
     f1_transport_provider: F,
+}
+
+#[derive(Debug, Clone)]
+struct NgapHandler<T: TransportProvider, F: TransportProvider> {
+    gnbcu: Arc<GNBCU<T, F>>,
+}
+
+#[async_trait]
+impl<T, F> Handler for NgapHandler<T, F>
+where
+    T: TransportProvider,
+    F: TransportProvider,
+{
+    async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
+        info!(
+            logger,
+            "NgapHandler got non UE associated message {:?} - forward to F1 transport", message
+        );
+        let logger = logger.new(o!("component" => "F1"));
+        self.gnbcu
+            .f1_transport_provider
+            .send_message(message, &logger)
+            .await
+            .unwrap();
+    }
+}
+
+struct F1Handler<T: TransportProvider, F: TransportProvider> {
+    gnbcu: Arc<GNBCU<T, F>>,
+}
+
+#[async_trait]
+impl<T, F> Handler for F1Handler<T, F>
+where
+    T: TransportProvider,
+    F: TransportProvider,
+{
+    async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
+        info!(
+            logger,
+            "F1Handler got non UE associated message {:?} - forward to NGAP transport", message
+        );
+        let logger = logger.new(o!("component" => "NGAP"));
+        self.gnbcu
+            .ngap_transport_provider
+            .send_message(message, &logger)
+            .await
+            .unwrap();
+    }
 }
 
 impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
     pub async fn new(
         ngap_transport_provider: T,
         f1_transport_provider: F,
+        logger: Logger,
     ) -> Result<GNBCU<T, F>, String> {
         let gnbcu = GNBCU {
             ngap_transport_provider,
             f1_transport_provider,
         };
 
-        // When we receive a message, call the callback
-        let ngap_transport_provider = gnbcu.ngap_transport_provider.clone();
-        let f1_transport_provider = gnbcu.f1_transport_provider.clone();
-        async_std::task::spawn(async move {
-            while let Some(message) = f1_transport_provider.recv_message().await {
-                ngap_transport_provider.send_message(message).await.unwrap();
-            }
-        });
+        let ngap_handler = NgapHandler {
+            gnbcu: Arc::new(gnbcu.clone()),
+        };
+        gnbcu
+            .ngap_transport_provider
+            .start_receiving(ngap_handler, &logger.new(o!("component" => "NGAP")))
+            .await;
+        info!(logger, "Started NGAP handler");
 
-        let ngap_transport_provider = gnbcu.ngap_transport_provider.clone();
-        let f1_transport_provider = gnbcu.f1_transport_provider.clone();
-        async_std::task::spawn(async move {
-            while let Some(message) = ngap_transport_provider.recv_message().await {
-                f1_transport_provider.send_message(message).await.unwrap();
-            }
-        });
+        let f1_handler = F1Handler {
+            gnbcu: Arc::new(gnbcu.clone()),
+        };
+        gnbcu
+            .f1_transport_provider
+            .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
+            .await;
+        info!(logger, "Started F1 handler");
 
         Ok(gnbcu)
     }
@@ -46,15 +105,9 @@ mod tests {
 
     use super::*;
 
-    impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
-        pub async fn test_default(ngap_transport: T, f1_transport: F) -> GNBCU<T, F> {
-            GNBCU::new(ngap_transport, f1_transport).await.unwrap()
-        }
-    }
-
     #[async_std::test]
     async fn initial_access_procedure() {
-        let logger = crate::logging::init();
+        let root_logger = crate::logging::test_init();
         // Creating a GNBCU will use a real SCTP transport.  However we can also create it with a mock tranport that
         // uses channels instead.
 
@@ -62,21 +115,46 @@ mod tests {
             MockServerTransportProvider::new();
         let (mock_f1_transport_provider, send_f1, receive_f1) = MockServerTransportProvider::new();
 
-        GNBCU::test_default(mock_ngap_transport_provider, mock_f1_transport_provider).await;
+        let _gnbcu = GNBCU::new(
+            mock_ngap_transport_provider,
+            mock_f1_transport_provider,
+            root_logger.clone(),
+        )
+        .await;
         let message_1: Vec<u8> = "hello world".into();
         let message_2: Vec<u8> = "goodbye cruel world".into();
-        info!(logger, "send in message");
+
+        // ----------------- SUBTEST 1 --------------------------
+        let logger = root_logger.new(o!("subtest" => 1));
+        info!(logger, "Test script sends in message");
+
+        // This sends the message into the channel.  It will be received in the
+        // GNBCU's NGAP handler.
+        info!(logger, "Test script sends in NGAP message");
         send_ngap.send(message_1).await.unwrap();
-        send_f1.send(message_2).await.unwrap();
-        let message_2 = receive_ngap.recv().await.unwrap();
-        send_ngap.send(message_2).await.unwrap();
+
+        // The GNBCU's NGAP handler then forwards the message out on the F1 provider.
         let message_1 = receive_f1.recv().await.unwrap();
-        let message_2 = receive_f1.recv().await.unwrap();
-        send_f1.send(message_1).await.unwrap();
-        let message_1 = receive_ngap.recv().await.unwrap();
+        info!(logger, "Test script receives F1 message {:?}", message_1);
+
+        // ----------------- SUBTEST 2 --------------------------
+        let logger = root_logger.new(o!("subtest" => 2));
+
+        // Send in a message on F1 and catch on the NGAP side.
+        info!(logger, "Test script sends in F1 message");
+        send_f1.send(message_2).await.unwrap();
+
+        // THIS HANGS!!!!!!
+        let message_2 = receive_ngap.recv().await.unwrap();
+        info!(logger, "Test script receives NGAP message {:?}", message_2);
+
+        // send_ngap.send(message_2).await.unwrap();
+        // let message_2 = receive_f1.recv().await.unwrap();
+        // send_f1.send(message_1).await.unwrap();
+        // let message_1 = receive_ngap.recv().await.unwrap();
         info!(
             logger,
-            "Got messages {:?}, {:?}, done", message_1, message_2
+            "Test framework got messages {:?}, {:?}, done", message_1, message_2
         );
     }
 }

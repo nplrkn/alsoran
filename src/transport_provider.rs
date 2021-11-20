@@ -1,5 +1,6 @@
 /// Transport provider
 use async_trait::async_trait;
+use slog::Logger;
 
 //pub struct Binding;
 
@@ -7,8 +8,14 @@ pub type Message = Vec<u8>;
 
 #[async_trait]
 pub trait TransportProvider: 'static + Send + Sync + Clone {
-    async fn send_message(&self, message: Message) -> Result<(), String>;
+    async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String>;
     async fn recv_message(&self) -> Option<Message>;
+    async fn start_receiving<R: Handler>(&self, handler: R, logger: &Logger);
+}
+
+#[async_trait]
+pub trait Handler: 'static + Send + Sync {
+    async fn recv_non_ue_associated(&self, m: Message, logger: &Logger);
 }
 
 // #[async_trait]
