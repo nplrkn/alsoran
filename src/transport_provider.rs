@@ -9,7 +9,6 @@ pub type Message = Vec<u8>;
 #[async_trait]
 pub trait TransportProvider: 'static + Send + Sync + Clone {
     async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String>;
-    async fn recv_message(&self) -> Option<Message>;
     async fn start_receiving<R: Handler>(&self, handler: R, logger: &Logger);
 }
 

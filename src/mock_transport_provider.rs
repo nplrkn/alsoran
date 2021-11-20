@@ -45,10 +45,6 @@ impl TransportProvider for MockServerTransportProvider {
         self.server_sender.send(message).await.unwrap();
         Ok(())
     }
-    async fn recv_message(&self) -> Option<Message> {
-        let message = self.server_receiver.recv().await;
-        message.ok()
-    }
     async fn start_receiving<R: Handler>(&self, receiver: R, logger: &Logger) {
         let server_receiver = self.server_receiver.clone();
         let logger = logger.clone();
