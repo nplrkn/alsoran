@@ -42,6 +42,7 @@ impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
 #[cfg(test)]
 mod tests {
     use crate::mock_transport_provider::MockServerTransportProvider;
+    use slog::info;
 
     use super::*;
 
@@ -53,22 +54,29 @@ mod tests {
 
     #[async_std::test]
     async fn initial_access_procedure() {
+        let logger = crate::logging::init();
         // Creating a GNBCU will use a real SCTP transport.  However we can also create it with a mock tranport that
         // uses channels instead.
-        println!("initial access procedure");
 
         let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
             MockServerTransportProvider::new();
         let (mock_f1_transport_provider, send_f1, receive_f1) = MockServerTransportProvider::new();
 
         GNBCU::test_default(mock_ngap_transport_provider, mock_f1_transport_provider).await;
-        let message: Vec<u8> = "hello world".into();
-        println!("send in message");
-        send_ngap.send(message).await.unwrap();
-        let message = receive_f1.recv().await.unwrap();
-        println!("Got F1 message {:?}, now send it back in", message);
-        send_f1.send(message).await.unwrap();
-        let message = receive_ngap.recv().await.unwrap();
-        println!("Got NGAP message {:?}, done", message);
+        let message_1: Vec<u8> = "hello world".into();
+        let message_2: Vec<u8> = "goodbye cruel world".into();
+        info!(logger, "send in message");
+        send_ngap.send(message_1).await.unwrap();
+        send_f1.send(message_2).await.unwrap();
+        let message_2 = receive_ngap.recv().await.unwrap();
+        send_ngap.send(message_2).await.unwrap();
+        let message_1 = receive_f1.recv().await.unwrap();
+        let message_2 = receive_f1.recv().await.unwrap();
+        send_f1.send(message_1).await.unwrap();
+        let message_1 = receive_ngap.recv().await.unwrap();
+        info!(
+            logger,
+            "Got messages {:?}, {:?}, done", message_1, message_2
+        );
     }
 }

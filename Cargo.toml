@@ -14,4 +14,6 @@ libc = "^0.2"
 async-io = "1.6.0"
 async-net = "1.6.1"
 async-channel = "1.6.1"
+slog = "2.7.0"
+sloggers = "2.1.1"
 
