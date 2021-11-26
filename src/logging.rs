@@ -13,9 +13,7 @@ pub fn test_init() -> Logger {
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::CompactFormat::new(decorator).build();
     let drain = std::sync::Mutex::new(drain).fuse();
-
     let log = slog::Logger::root(drain, o!());
-
     log
 }
 
