@@ -1,7 +1,23 @@
 Ideas for what next
+-  Successful NG Setup with Free5G.
+   -  SCTP connect
+      -  1 unsafe Rust module, 1 that uses Async
+   - NG Setup
+   - Maintain + Retry - i.e. test plan is
+   - 1. start up Alsoran first then Free5GC
+   - 2. start up free5G first then Alsoran
+   - 3. kill and restart Free5GC 
+  
+
+-  it will be hard to test probably without simulated UE / NAS - and this will have to be wrapped in DU
+   -  ok so NAS.py for the NAS?
+-  non UE associated and UE associated signaling
 -  add error handling / back pressure handling
 
-
+-  [done] test against a 5G core
+   -  install free5GC - based on https://www.free5gc.org/installations/stage-3-free5gc-install/
+   -  seems highly unlikely to work on WSL but would be awesome if it did - at least registration and the first bits of PDU session
+   -  THIS LOOKS GOOD ENOUGH FOR NOW!
 -  [done] reinstate a callback model that lets the transport provider be aware of ue or non ue associated signaling
    -  idea is to type parameterize receive method not the whole trait
 -  [done] add logging
