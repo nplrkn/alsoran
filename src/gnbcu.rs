@@ -1,8 +1,8 @@
-use crate::transport_provider::{Handler, Message, TransportProvider};
-use async_trait::async_trait;
+use crate::f1_handler::F1Handler;
+use crate::ngap_handler::NgapHandler;
+use crate::transport_provider::TransportProvider;
 use slog::Logger;
 use slog::{info, o};
-use std::sync::Arc;
 
 /// The gNB-CU.
 
@@ -12,57 +12,8 @@ where
     T: TransportProvider,
     F: TransportProvider,
 {
-    ngap_transport_provider: T,
-    f1_transport_provider: F,
-}
-
-#[derive(Debug, Clone)]
-struct NgapHandler<T: TransportProvider, F: TransportProvider> {
-    gnbcu: Arc<GNBCU<T, F>>,
-}
-
-#[async_trait]
-impl<T, F> Handler for NgapHandler<T, F>
-where
-    T: TransportProvider,
-    F: TransportProvider,
-{
-    async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
-        info!(
-            logger,
-            "NgapHandler got non UE associated message {:?} - forward to F1 transport", message
-        );
-        let logger = logger.new(o!("component" => "F1"));
-        self.gnbcu
-            .f1_transport_provider
-            .send_message(message, &logger)
-            .await
-            .unwrap();
-    }
-}
-
-struct F1Handler<T: TransportProvider, F: TransportProvider> {
-    gnbcu: Arc<GNBCU<T, F>>,
-}
-
-#[async_trait]
-impl<T, F> Handler for F1Handler<T, F>
-where
-    T: TransportProvider,
-    F: TransportProvider,
-{
-    async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
-        info!(
-            logger,
-            "F1Handler got non UE associated message {:?} - forward to NGAP transport", message
-        );
-        let logger = logger.new(o!("component" => "NGAP"));
-        self.gnbcu
-            .ngap_transport_provider
-            .send_message(message, &logger)
-            .await
-            .unwrap();
-    }
+    pub ngap_transport_provider: T,
+    pub f1_transport_provider: F,
 }
 
 impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
@@ -76,18 +27,14 @@ impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
             f1_transport_provider,
         };
 
-        let ngap_handler = NgapHandler {
-            gnbcu: Arc::new(gnbcu.clone()),
-        };
+        let ngap_handler = NgapHandler::new(gnbcu.clone());
         gnbcu
             .ngap_transport_provider
             .start_receiving(ngap_handler, &logger.new(o!("component" => "NGAP")))
             .await;
         info!(logger, "Started NGAP handler");
 
-        let f1_handler = F1Handler {
-            gnbcu: Arc::new(gnbcu.clone()),
-        };
+        let f1_handler = F1Handler::new(gnbcu.clone());
         gnbcu
             .f1_transport_provider
             .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
