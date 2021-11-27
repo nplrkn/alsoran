@@ -54,7 +54,7 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::mock_transport_provider::MockServerTransportProvider;
+    use crate::mock_transport_provider::MockTransportProvider;
     use slog::info;
 
     use super::*;
@@ -65,9 +65,8 @@ mod tests {
         // Creating a Gnbcu will use a real SCTP transport.  However we can also create it with a mock tranport that
         // uses channels instead.
 
-        let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
-            MockServerTransportProvider::new();
-        let (mock_f1_transport_provider, send_f1, receive_f1) = MockServerTransportProvider::new();
+        let (mock_ngap_transport_provider, send_ngap, receive_ngap) = MockTransportProvider::new();
+        let (mock_f1_transport_provider, send_f1, receive_f1) = MockTransportProvider::new();
 
         let _gnbcu = Gnbcu::new(
             mock_ngap_transport_provider,

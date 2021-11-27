@@ -4,82 +4,70 @@ use async_trait::async_trait;
 use slog::info;
 use slog::Logger;
 
-/// MockServerTransportProvider
+/// MockTransportProvider
 /// Provides a message passing mechanism for use by test scripts.
 /// When the business logic calls non_ue_associated_message() or ue_associated_message(),
 /// the message is passed through to the receive channel.
 #[derive(Debug, Clone)]
-pub struct MockServerTransportProvider {
-    server_sender: Sender<Message>,
-    server_receiver: Receiver<Message>,
+pub struct MockTransportProvider {
+    sender: Sender<Message>,
+    receiver: Receiver<Message>,
 }
 
-impl MockServerTransportProvider {
+impl MockTransportProvider {
     /// Create a mock transport provider.
-    pub fn new() -> (
-        MockServerTransportProvider,
-        Sender<Vec<u8>>,
-        Receiver<Vec<u8>>,
-    ) {
-        let (server_sender, client_receiver) = async_channel::unbounded();
-        let (client_sender, server_receiver) = async_channel::unbounded();
+    pub fn new() -> (MockTransportProvider, Sender<Vec<u8>>, Receiver<Vec<u8>>) {
+        let (sender, their_receiver) = async_channel::unbounded();
+        let (their_sender, receiver) = async_channel::unbounded();
 
         (
-            MockServerTransportProvider {
-                server_sender,
-                server_receiver,
-            },
-            client_sender,
-            client_receiver,
+            MockTransportProvider { sender, receiver },
+            their_sender,
+            their_receiver,
         )
     }
 }
 
 #[async_trait]
-impl TransportProvider for MockServerTransportProvider {
+impl TransportProvider for MockTransportProvider {
     async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String> {
-        info!(
-            logger,
-            "MockServerTransportProvider send message {:?}", message
-        );
-        self.server_sender.send(message).await.unwrap();
+        info!(logger, "MockTransportProvider send message {:?}", message);
+        self.sender.send(message).await.unwrap();
         Ok(())
     }
-    async fn start_receiving<R: Handler>(&self, receiver: R, logger: &Logger) {
-        let server_receiver = self.server_receiver.clone();
+    async fn start_receiving<R: Handler>(&self, handler: R, logger: &Logger) {
+        let my_receiver = self.receiver.clone();
         let logger = logger.clone();
         async_std::task::spawn(async move {
-            while let Ok(message) = server_receiver.recv().await {
+            while let Ok(message) = my_receiver.recv().await {
                 info!(
                     logger,
-                    "MockServerTransportProvider received {:?}, forward to handler", message
+                    "MockTransportProvider received {:?}, forward to handler", message
                 );
-                receiver.recv_non_ue_associated(message, &logger).await;
+                handler.recv_non_ue_associated(message, &logger).await;
             }
         });
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct MockClientTransportProvider {
-    client_sender: Sender<Message>,
-    client_receiver: Receiver<Message>,
-}
-
 #[async_trait]
-impl TransportProvider for MockClientTransportProvider {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String> {
-        info!(
-            logger,
-            "MockServerTransportProvider send message {:?}", message
-        );
-        self.server_sender.send(message).await.unwrap();
+impl ClientTransportProvider for MockTransportProvider {
+    async fn connect<R: Handler>(
+        &mut self,
+        _connect_addr_string: String,
+        handler: R,
+        logger: Logger,
+    ) -> Result<(), String> {
+        let receiver = self.receiver.clone();
+        async_std::task::spawn(async move {
+            while let Ok(message) = receiver.recv().await {
+                info!(
+                    logger,
+                    "MockTransportProvider received {:?}, forward to handler", message
+                );
+                handler.recv_non_ue_associated(message, &logger).await;
+            }
+        });
         Ok(())
     }
-    async fn start_receiving<R: Handler>(&self, _handler: R, _logger: &Logger) {
-        unimplemented!();
-    }
 }
-
-#[async_trait]
-impl ClientTransportProvider for MockClientTransportProvider {}
