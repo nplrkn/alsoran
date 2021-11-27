@@ -1,4 +1,4 @@
-use crate::gnbcu::GNBCU;
+use crate::gnbcu::Gnbcu;
 use crate::transport_provider::{Handler, Message, TransportProvider};
 use async_trait::async_trait;
 use slog::Logger;
@@ -7,11 +7,11 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct NgapHandler<T: TransportProvider, F: TransportProvider> {
-    gnbcu: Arc<GNBCU<T, F>>,
+    gnbcu: Arc<Gnbcu<T, F>>,
 }
 
 impl<T: TransportProvider, F: TransportProvider> NgapHandler<T, F> {
-    pub fn new(gnbcu: GNBCU<T, F>) -> NgapHandler<T, F> {
+    pub fn new(gnbcu: Gnbcu<T, F>) -> NgapHandler<T, F> {
         NgapHandler {
             gnbcu: Arc::new(gnbcu),
         }

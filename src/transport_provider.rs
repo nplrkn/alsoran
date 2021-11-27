@@ -1,5 +1,4 @@
 /// Transport provider
-use async_net::AsyncToSocketAddrs;
 use async_trait::async_trait;
 use slog::Logger;
 
@@ -25,5 +24,5 @@ pub trait Handler: 'static + Send + Sync {
 
 #[async_trait]
 pub trait ClientTransportProvider: TransportProvider {
-    async fn connect(connect_addr_string: String) -> Result<(), String>;
+    async fn connect(&mut self, connect_addr_string: String) -> Result<(), String>;
 }

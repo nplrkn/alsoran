@@ -1,15 +1,15 @@
-use crate::gnbcu::GNBCU;
+use crate::gnbcu::Gnbcu;
 use crate::transport_provider::{Handler, Message, TransportProvider};
 use async_trait::async_trait;
 use slog::Logger;
 use slog::{info, o};
 use std::sync::Arc;
 pub struct F1Handler<T: TransportProvider, F: TransportProvider> {
-    gnbcu: Arc<GNBCU<T, F>>,
+    gnbcu: Arc<Gnbcu<T, F>>,
 }
 
 impl<T: TransportProvider, F: TransportProvider> F1Handler<T, F> {
-    pub fn new(gnbcu: GNBCU<T, F>) -> F1Handler<T, F> {
+    pub fn new(gnbcu: Gnbcu<T, F>) -> F1Handler<T, F> {
         F1Handler {
             gnbcu: Arc::new(gnbcu),
         }

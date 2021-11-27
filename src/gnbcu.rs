@@ -7,7 +7,7 @@ use slog::{info, o};
 /// The gNB-CU.
 
 #[derive(Debug, Clone)]
-pub struct GNBCU<T, F>
+pub struct Gnbcu<T, F>
 where
     T: TransportProvider,
     F: TransportProvider,
@@ -16,13 +16,13 @@ where
     pub f1_transport_provider: F,
 }
 
-impl<T: TransportProvider, F: TransportProvider> GNBCU<T, F> {
+impl<T: TransportProvider, F: TransportProvider> Gnbcu<T, F> {
     pub async fn new(
         ngap_transport_provider: T,
         f1_transport_provider: F,
         logger: Logger,
-    ) -> Result<GNBCU<T, F>, String> {
-        let gnbcu = GNBCU {
+    ) -> Result<Gnbcu<T, F>, String> {
+        let gnbcu = Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,
         };
@@ -55,14 +55,14 @@ mod tests {
     #[async_std::test]
     async fn initial_access_procedure() {
         let root_logger = crate::logging::test_init();
-        // Creating a GNBCU will use a real SCTP transport.  However we can also create it with a mock tranport that
+        // Creating a Gnbcu will use a real SCTP transport.  However we can also create it with a mock tranport that
         // uses channels instead.
 
         let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
             MockServerTransportProvider::new();
         let (mock_f1_transport_provider, send_f1, receive_f1) = MockServerTransportProvider::new();
 
-        let _gnbcu = GNBCU::new(
+        let _gnbcu = Gnbcu::new(
             mock_ngap_transport_provider,
             mock_f1_transport_provider,
             root_logger.clone(),
@@ -76,11 +76,11 @@ mod tests {
         info!(logger, "Test script sends in message");
 
         // This sends the message into the channel.  It will be received in the
-        // GNBCU's NGAP handler.
+        // Gnbcu's NGAP handler.
         info!(logger, "Test script sends in NGAP message");
         send_ngap.send(message_1).await.unwrap();
 
-        // The GNBCU's NGAP handler then forwards the message out on the F1 provider.
+        // The Gnbcu's NGAP handler then forwards the message out on the F1 provider.
         let message_1 = receive_f1.recv().await.unwrap();
         info!(logger, "Test script receives F1 message {:?}", message_1);
 

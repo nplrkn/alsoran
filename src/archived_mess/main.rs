@@ -14,13 +14,13 @@ struct Config {
 
 use std::sync::Arc;
 
-struct GNBCU {
+struct Gnbcu {
     f1_transport: F1TransportCu,
     ngap_transport: NGAPTransportCu,
 }
 
-impl GNBCU {
-    pub async fn new(c: Config) -> Result<GNBCU> {
+impl Gnbcu {
+    pub async fn new(c: Config) -> Result<Gnbcu> {
         // Start F1 transport.
         const F1AP_SCTP_DESTINATION_PORT: u16 = 38472;
         const NGAP_SCTP_DESTINATION_PORT: u16 = 38412;
@@ -32,7 +32,7 @@ impl GNBCU {
         let ngap_connect_address = (c.amf_sctp_initial_ip_address, NGAP_SCTP_DESTINATION_PORT);
         let ngap_transport = NGAPTransportCu::new(ngap_connect_address)?;
 
-        let gnbcu = GNBCU {
+        let gnbcu = Gnbcu {
             f1_transport,
             ngap_transport,
         };
@@ -47,7 +47,7 @@ impl GNBCU {
     }
 }
 
-impl f1ap_procedures::DuInitiatedOperations for GNBCU {}
+impl f1ap_procedures::DuInitiatedOperations for Gnbcu {}
 
 #[async_std::main]
 async fn main() {
