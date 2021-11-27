@@ -4,8 +4,6 @@ use async_std::task::{Context, Poll};
 use std::io::Result;
 use std::pin::Pin;
 
-pub type Message = Vec<u8>;
-
 pub struct SctpListener {}
 impl SctpListener {
     pub async fn bind<A: AsyncToSocketAddrs>(_addr: A) -> Result<SctpListener> {
@@ -30,25 +28,3 @@ impl Stream for Incoming<'_> {
     }
 }
 
-// An SCTP assocation.
-#[derive(Debug, Clone)]
-pub struct SctpAssociation {}
-
-impl SctpAssociation {
-    // See https://docs.rs/async-net/1.6.1/async_net/struct.TcpStream.html
-    pub async fn establish<A: AsyncToSocketAddrs>(_addr: A) -> Result<SctpAssociation> {
-        unimplemented!();
-    }
-
-    pub async fn send(&self, _buf: &[u8], _stream_id: u32) -> Result<usize> {
-        unimplemented!();
-    }
-
-    pub async fn recv(&self, _buf: &mut [u8]) -> Result<usize> {
-        unimplemented!();
-    }
-
-    pub async fn recv_msg(&self) -> Result<Message> {
-        unimplemented!();
-    }
-}

@@ -10,7 +10,7 @@ pub struct SctpClientTransportProvider {
 
 impl SctpClientTransportProvider {
     pub fn new() -> SctpClientTransportProvider {
-        unimplemented!();
+        SctpClientTransportProvider {}
     }
 }
 
