@@ -24,5 +24,10 @@ pub trait Handler: 'static + Send + Sync {
 
 #[async_trait]
 pub trait ClientTransportProvider: TransportProvider {
-    async fn connect(&mut self, connect_addr_string: String) -> Result<(), String>;
+    async fn connect<R: Handler>(
+        &mut self,
+        connect_addr_string: String,
+        handler: R,
+        logger: Logger,
+    ) -> Result<(), String>;
 }

@@ -4,6 +4,8 @@ use async_std::task::{Context, Poll};
 use std::io::Result;
 use std::pin::Pin;
 
+pub type Message = Vec<u8>;
+
 pub struct SctpListener {}
 impl SctpListener {
     pub async fn bind<A: AsyncToSocketAddrs>(_addr: A) -> Result<SctpListener> {
@@ -43,6 +45,10 @@ impl SctpAssociation {
     }
 
     pub async fn recv(&self, _buf: &mut [u8]) -> Result<usize> {
+        unimplemented!();
+    }
+
+    pub async fn recv_msg(&self) -> Result<Message> {
         unimplemented!();
     }
 }

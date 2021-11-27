@@ -1,14 +1,14 @@
 use crate::gnbcu::Gnbcu;
-use crate::transport_provider::{Handler, Message, TransportProvider};
+use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use async_trait::async_trait;
 use slog::Logger;
 use slog::{info, o};
 use std::sync::Arc;
-pub struct F1Handler<T: TransportProvider, F: TransportProvider> {
+pub struct F1Handler<T: ClientTransportProvider, F: TransportProvider> {
     gnbcu: Arc<Gnbcu<T, F>>,
 }
 
-impl<T: TransportProvider, F: TransportProvider> F1Handler<T, F> {
+impl<T: ClientTransportProvider, F: TransportProvider> F1Handler<T, F> {
     pub fn new(gnbcu: Gnbcu<T, F>) -> F1Handler<T, F> {
         F1Handler {
             gnbcu: Arc::new(gnbcu),
@@ -19,7 +19,7 @@ impl<T: TransportProvider, F: TransportProvider> F1Handler<T, F> {
 #[async_trait]
 impl<T, F> Handler for F1Handler<T, F>
 where
-    T: TransportProvider,
+    T: ClientTransportProvider,
     F: TransportProvider,
 {
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {

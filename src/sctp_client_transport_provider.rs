@@ -1,11 +1,11 @@
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use async_trait::async_trait;
-use slog::Logger;
+use slog::{info, Logger};
 
 #[derive(Debug, Clone)]
 pub struct SctpClientTransportProvider {
-    assocs: Vec<SctpAssociation>,
+    //assocs: Vec<SctpAssociation>,
 }
 
 impl SctpClientTransportProvider {
@@ -16,7 +16,12 @@ impl SctpClientTransportProvider {
 
 #[async_trait]
 impl ClientTransportProvider for SctpClientTransportProvider {
-    async fn connect(&mut self, connect_addr_string: String) -> Result<(), String> {
+    async fn connect<R: Handler>(
+        &mut self,
+        connect_addr_string: String,
+        handler: R,
+        logger: Logger,
+    ) -> Result<(), String> {
         // TODO - this is not how we should deal with errors
         let address_list = async_net::resolve(connect_addr_string)
             .await
@@ -25,7 +30,19 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         let assoc = SctpAssociation::establish(first_address)
             .await
             .map_err(|_| "Establishment failure")?;
-        self.assocs = vec![assoc];
+
+        //    self.assocs = vec![assoc];
+
+        async_std::task::spawn(async move {
+            while let Ok(message) = assoc.recv_msg().await {
+                info!(
+                    logger,
+                    "Sctp client received {:?}, forward to handler", message
+                );
+                handler.recv_non_ue_associated(message, &logger).await;
+            }
+        });
+
         Ok(())
     }
 }

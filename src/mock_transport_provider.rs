@@ -1,4 +1,4 @@
-use super::transport_provider::{Handler, Message, TransportProvider};
+use super::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use slog::info;
@@ -59,3 +59,27 @@ impl TransportProvider for MockServerTransportProvider {
         });
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct MockClientTransportProvider {
+    client_sender: Sender<Message>,
+    client_receiver: Receiver<Message>,
+}
+
+#[async_trait]
+impl TransportProvider for MockClientTransportProvider {
+    async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String> {
+        info!(
+            logger,
+            "MockServerTransportProvider send message {:?}", message
+        );
+        self.server_sender.send(message).await.unwrap();
+        Ok(())
+    }
+    async fn start_receiving<R: Handler>(&self, _handler: R, _logger: &Logger) {
+        unimplemented!();
+    }
+}
+
+#[async_trait]
+impl ClientTransportProvider for MockClientTransportProvider {}

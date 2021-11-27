@@ -1,6 +1,6 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
-use crate::transport_provider::TransportProvider;
+use crate::transport_provider::{ClientTransportProvider, TransportProvider};
 use slog::Logger;
 use slog::{info, o};
 
@@ -9,29 +9,36 @@ use slog::{info, o};
 #[derive(Debug, Clone)]
 pub struct Gnbcu<T, F>
 where
-    T: TransportProvider,
+    T: ClientTransportProvider,
     F: TransportProvider,
 {
     pub ngap_transport_provider: T,
     pub f1_transport_provider: F,
 }
 
-impl<T: TransportProvider, F: TransportProvider> Gnbcu<T, F> {
+impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
     pub async fn new(
         ngap_transport_provider: T,
         f1_transport_provider: F,
         logger: Logger,
     ) -> Result<Gnbcu<T, F>, String> {
-        let gnbcu = Gnbcu {
+        let mut gnbcu = Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,
         };
 
+        let connect_addr_string = "127.0.0.1:38412".to_string();
+
         let ngap_handler = NgapHandler::new(gnbcu.clone());
         gnbcu
             .ngap_transport_provider
-            .start_receiving(ngap_handler, &logger.new(o!("component" => "NGAP")))
-            .await;
+            .connect(
+                connect_addr_string,
+                ngap_handler,
+                logger.new(o!("component" => "NGAP")),
+            )
+            .await
+            .unwrap();
         info!(logger, "Started NGAP handler");
 
         let f1_handler = F1Handler::new(gnbcu.clone());
