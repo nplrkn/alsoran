@@ -29,7 +29,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         let first_address = address_list.get(0).ok_or("Didn't resolve")?;
         let assoc = SctpAssociation::establish(first_address)
             .await
-            .map_err(|_| "Establishment failure")?;
+            .map_err(|e| e.to_string())?;
 
         //    self.assocs = vec![assoc];
 

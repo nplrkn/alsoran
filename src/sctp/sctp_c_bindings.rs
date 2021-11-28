@@ -4254,7 +4254,7 @@ fn bindgen_test_layout_sctp_stream_change_event() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct sctp_event_subscribe {
     pub sctp_data_io_event: __u8,
     pub sctp_association_event: __u8,

@@ -18,4 +18,5 @@ slog = "2.7.0"
 sloggers = "2.1.1"
 slog-term = "2.8.0"
 slog-async = "2.7.0"
+os_socketaddr = "0.2.0"
 
