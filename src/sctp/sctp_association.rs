@@ -1,5 +1,6 @@
 use super::Message;
 //use crate::sctp::sctp_c_bindings::socket;
+use crate::sctp::sctp_c_bindings;
 use crate::sctp::sctp_c_bindings::{SCTP_NODELAY, SCTP_RECVRCVINFO, SOL_SCTP};
 use async_io::Async;
 use async_net::AsyncToSocketAddrs;
@@ -97,7 +98,42 @@ impl SctpAssociation {
     // }
 
     pub async fn recv_msg(&self) -> io::Result<Message> {
-        //let mut buf: [u8; 1500];
-        unimplemented!();
+        // Wait for the socket to become readable
+        Async::new(self.fd)?.readable().await?;
+
+        // Allocate message buffer
+        let mut message: Message = vec![0; 1500];
+        let msg_iov = &mut libc::iovec {
+            iov_base: message.as_mut_ptr() as *mut libc::c_void,
+            iov_len: message.len(),
+        };
+
+        // Ancillary data structure to receive the stream ID
+        let msg_control =
+            &mut sctp_c_bindings::sctp_rcvinfo::default() as *mut _ as *mut libc::c_void;
+
+        // Set up structure to pass info into / get back from recvmsg.
+        let mut msghdr = libc::msghdr {
+            msg_name: std::ptr::null_mut(),
+            msg_namelen: 0,
+            msg_iov,
+            msg_iovlen: 1, // elements in msg_iov
+            msg_control,
+            msg_controllen: std::mem::size_of::<sctp_c_bindings::sctp_rcvinfo>(),
+            msg_flags: 0,
+        };
+
+        let message = unsafe {
+            let bytes_received = libc::recvmsg(self.fd, &mut msghdr, 0);
+            println!("Recvmsg returned {}", bytes_received);
+            if bytes_received >= 0 {
+                message.resize(bytes_received as usize, 0);
+                Ok(message)
+            } else {
+                Err(Error::last_os_error())
+            }
+        }?;
+
+        Ok(message)
     }
 }

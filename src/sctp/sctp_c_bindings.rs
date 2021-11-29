@@ -2834,7 +2834,7 @@ fn bindgen_test_layout_sctp_sndinfo() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct sctp_rcvinfo {
     pub rcv_sid: __u16,
     pub rcv_ssn: __u16,
