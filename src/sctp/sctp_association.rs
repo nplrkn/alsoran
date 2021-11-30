@@ -125,17 +125,12 @@ impl SctpAssociation {
             msg_flags: 0,
         };
 
-        let message = unsafe {
-            let bytes_received = libc::recvmsg(self.fd, &mut msghdr, 0);
-            println!("Recvmsg returned {}", bytes_received);
-            if bytes_received >= 0 {
-                message.resize(bytes_received as usize, 0);
-                Ok(message)
-            } else {
-                Err(Error::last_os_error())
-            }
-        }?;
-
-        Ok(message)
+        let bytes_received = unsafe { libc::recvmsg(self.fd, &mut msghdr, 0) };
+        if bytes_received >= 0 {
+            message.resize(bytes_received as usize, 0);
+            Ok(message)
+        } else {
+            Err(Error::last_os_error())
+        }
     }
 }

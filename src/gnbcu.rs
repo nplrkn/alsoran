@@ -37,8 +37,7 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
                 ngap_handler,
                 logger.new(o!("component" => "NGAP")),
             )
-            .await
-            .unwrap();
+            .await?;
         info!(logger, "Started NGAP handler");
 
         let f1_handler = F1Handler::new(gnbcu.clone());
