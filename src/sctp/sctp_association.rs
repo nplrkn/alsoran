@@ -7,6 +7,7 @@ use async_net::AsyncToSocketAddrs;
 use libc::{connect, setsockopt, socket};
 use libc::{AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
+use slog::{error, warn, Logger};
 use std::io;
 use std::io::Error;
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -25,7 +26,10 @@ impl AsRawFd for SctpAssociation {
 
 impl SctpAssociation {
     // See https://docs.rs/async-net/1.6.1/async_net/struct.TcpStream.html
-    pub async fn establish<A: AsyncToSocketAddrs>(addr: A) -> io::Result<SctpAssociation> {
+    pub async fn establish<A: AsyncToSocketAddrs>(
+        addr: A,
+        logger: &Logger,
+    ) -> io::Result<SctpAssociation> {
         // Set up assocation as client
         let addr = async_net::resolve(addr).await.map(|vec| vec[0])?;
         let addr: OsSocketAddr = addr.into();
@@ -38,12 +42,8 @@ impl SctpAssociation {
             // RFC6458, 8.1.29 - This option expects an integer boolean flag, where a non-zero value
             // turns on the option, and a zero value turns off the option.
             let enabled: libc::c_int = 1;
-            let enabled = &enabled as *const _ as *const libc::c_void;
+            let enabled = &enabled as *const _ as *const _;
             let enabled_len = std::mem::size_of::<libc::c_int>() as libc::socklen_t;
-
-            // let client_sock = SctpSocket::new(raw_addr.family(), SOCK_STREAM).unwrap();
-            // client_sock
-            //     //.setsockopt(sctp_sys::IPPROTO_SCTP, sctp_sys::SCTP_EVENTS, &events)
 
             println!("NODELAY setsockopt {:?}", s);
             if setsockopt(
@@ -54,12 +54,13 @@ impl SctpAssociation {
                 enabled_len,
             ) < 0
             {
-                Err(Error::last_os_error())
-            } else {
-                Ok(())
-            }?;
+                warn!(
+                    logger,
+                    "Failed to set NODELAY socket option - {}",
+                    Error::last_os_error()
+                );
+            };
 
-            println!("SCTP_RECVRCVINFO setsockopt {:?}", s);
             if setsockopt(
                 s,
                 SOL_SCTP as libc::c_int,
@@ -68,17 +69,21 @@ impl SctpAssociation {
                 enabled_len,
             ) < 0
             {
-                Err(Error::last_os_error())
+                let e = Error::last_os_error();
+                error!(
+                    logger,
+                    "Failed to set SCTP_RECVRCVINFO socket option - {}", e
+                );
+                Err(e)
             } else {
                 Ok(())
             }?;
 
-            println!("Do connect");
-
-            // TODO error handling
             // TODO nonblocking connect
             if connect(s, addr.as_ptr(), addr.len()) < 0 {
-                Err(Error::last_os_error())
+                let e = Error::last_os_error();
+                error!(logger, "Failed SCTP connect to {:?} - {}", addr, e);
+                Err(e)
             } else {
                 Ok(s)
             }

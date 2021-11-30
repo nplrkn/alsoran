@@ -27,7 +27,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
             .await
             .map_err(|_| "Didn't resolve")?;
         let first_address = address_list.get(0).ok_or("Didn't resolve")?;
-        let assoc = SctpAssociation::establish(first_address)
+        let assoc = SctpAssociation::establish(first_address, &logger)
             .await
             .map_err(|e| e.to_string())?;
 
