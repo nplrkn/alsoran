@@ -74,17 +74,25 @@ impl SctpAssociation {
         addr: A,
         logger: &Logger,
     ) -> io::Result<SctpAssociation> {
-        // Get a socket
+        // Get a socket and immediately wrap it in an SctpAssociation to ensure it gets closed
+        // properly in the drop function if something fails later in this function.
         let fd = unsafe { socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP) };
+        let assoc = if fd < 0 {
+            let e = Error::last_os_error();
+            error!(logger, "Failed to get SCTP socket - {}", e);
+            Err(e)
+        } else {
+            Ok(SctpAssociation { fd })
+        }?;
 
         // Set up sock opts
-        set_sock_opts(fd, logger)?;
+        set_sock_opts(assoc.fd, logger)?;
 
         // Connect
         // TODO nonblocking
         let addr = async_net::resolve(addr).await.map(|vec| vec[0])?;
         let addr: OsSocketAddr = addr.into();
-        if unsafe { connect(fd, addr.as_ptr(), addr.len()) } < 0 {
+        if unsafe { connect(assoc.fd, addr.as_ptr(), addr.len()) } < 0 {
             let e = Error::last_os_error();
             error!(logger, "Failed SCTP connect to {:?} - {}", addr, e);
             Err(e)
@@ -92,7 +100,7 @@ impl SctpAssociation {
             Ok(())
         }?;
 
-        Ok(SctpAssociation { fd })
+        Ok(assoc)
     }
 
     // pub async fn send(&self, _buf: &[u8], _stream_id: u32) -> Result<usize> {
@@ -132,5 +140,11 @@ impl SctpAssociation {
         } else {
             Err(Error::last_os_error())
         }
+    }
+}
+
+impl Drop for SctpAssociation {
+    fn drop(&mut self) {
+        unsafe { libc::close(self.fd) };
     }
 }

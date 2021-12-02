@@ -1,6 +1,6 @@
 Ideas for what next
+- Properly close sockets when wrapper structs are dropped
 -  Successful NG Setup with Free5G.
-   - Properly close sockets when wrapper structs are dropped
    - NG Setup
    - Maintain + Retry - i.e. test plan is
    - 1. start up Alsoran first then Free5GC
