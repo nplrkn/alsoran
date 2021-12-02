@@ -7,13 +7,26 @@ mod ngap_handler;
 mod sctp;
 mod sctp_client_transport_provider;
 mod transport_provider;
+use async_std::channel::Sender;
+use async_std::prelude::*;
+use signal_hook::consts::signal::*;
+use signal_hook_async_std::Signals;
+use slog::info;
+use std::io::Error;
 
 use gnbcu::Gnbcu;
 use sctp_client_transport_provider::SctpClientTransportProvider;
 
 #[async_std::main]
-async fn main() {
+async fn main() -> Result<(), Error> {
     let root_logger = logging::init();
+
+    // Set up signal catching task
+    // TODO factor out to separate fn module?
+    let signals = Signals::new(&[SIGHUP, SIGTERM, SIGINT, SIGQUIT]).unwrap();
+    let handle = signals.handle();
+    let (sig_sender, sig_receiver) = async_channel::unbounded();
+    let signals_task = async_std::task::spawn(handle_signals(signals, sig_sender));
 
     let ngap_transport_provider = SctpClientTransportProvider::new();
     let f1_transport_provider = SctpClientTransportProvider::new();
@@ -25,13 +38,29 @@ async fn main() {
     )
     .await;
 
-    // Connect to AMF
+    // Block until we receive a signal.
+    let signal = sig_receiver.recv().await.unwrap();
+    info!(root_logger, "Caught signal {} - terminate", signal);
 
-    // Send NG Setup
+    // Terminate the signal stream.
+    handle.close();
+    signals_task.await;
+    Ok(())
+}
 
-    // Get reply
-
-    // or
-
-    // Maintain connection to AMF
+async fn handle_signals(signals: Signals, sig_sender: Sender<i32>) {
+    let mut signals = signals.fuse();
+    while let Some(signal) = signals.next().await {
+        match signal {
+            SIGHUP => {
+                // Reload configuration
+                // Reopen the log file
+            }
+            SIGTERM | SIGINT | SIGQUIT => {
+                // Shutdown the system;
+                sig_sender.send(signal).await;
+            }
+            _ => unreachable!(),
+        }
+    }
 }

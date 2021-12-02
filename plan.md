@@ -1,13 +1,16 @@
 Ideas for what next
 -  Successful NG Setup with Free5G.
-   -  SCTP connect
-      -  1 unsafe Rust module, 1 that uses Async
+   - Properly close sockets when wrapper structs are dropped
    - NG Setup
    - Maintain + Retry - i.e. test plan is
    - 1. start up Alsoran first then Free5GC
    - 2. start up free5G first then Alsoran
    - 3. kill and restart Free5GC 
-  
+
+
+
+-  [done] Stay up until Ctrl-C
+-  [done] SCTP connect
 
 -  it will be hard to test probably without simulated UE / NAS - and this will have to be wrapped in DU
    -  ok so NAS.py for the NAS?
