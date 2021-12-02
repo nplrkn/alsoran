@@ -40,12 +40,12 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
             .await?;
         info!(logger, "Started NGAP handler");
 
-        let f1_handler = F1Handler::new(gnbcu.clone());
-        gnbcu
-            .f1_transport_provider
-            .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
-            .await;
-        info!(logger, "Started F1 handler");
+        // let f1_handler = F1Handler::new(gnbcu.clone());
+        // gnbcu
+        //     .f1_transport_provider
+        //     .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
+        //     .await;
+        // info!(logger, "Started F1 handler");
 
         Ok(gnbcu)
     }
