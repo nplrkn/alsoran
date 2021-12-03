@@ -1,5 +1,4 @@
 use super::Message;
-//use crate::sctp::sctp_c_bindings::socket;
 use crate::sctp::sctp_c_bindings;
 use crate::sctp::sctp_c_bindings::{SCTP_NODELAY, SCTP_RECVRCVINFO, SOL_SCTP};
 use async_io::Async;
@@ -13,7 +12,8 @@ use std::io::Error;
 use std::os::unix::io::{AsRawFd, RawFd};
 
 // An SCTP assocation.
-#[derive(Debug, Clone)]
+// Cannot be Cloned since it is the owner of the fd.  Instead use Arc.
+#[derive(Debug)]
 pub struct SctpAssociation {
     fd: i32,
 }
@@ -103,10 +103,6 @@ impl SctpAssociation {
         Ok(assoc)
     }
 
-    // pub async fn send(&self, _buf: &[u8], _stream_id: u32) -> Result<usize> {
-    //     unimplemented!();
-    // }
-
     pub async fn recv_msg(&self) -> io::Result<Message> {
         // Wait for the socket to become readable
         Async::new(self.fd)?.readable().await?;
@@ -140,6 +136,10 @@ impl SctpAssociation {
         } else {
             Err(Error::last_os_error())
         }
+    }
+
+    pub async fn send_msg(&self, message: Message) -> io::Result<()> {
+        unimplemented!();
     }
 }
 

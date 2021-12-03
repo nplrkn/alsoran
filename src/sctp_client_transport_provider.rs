@@ -1,16 +1,17 @@
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use async_std::sync::Arc;
 use async_trait::async_trait;
 use slog::{info, Logger};
 
 #[derive(Debug, Clone)]
 pub struct SctpClientTransportProvider {
-    //assocs: Vec<SctpAssociation>,
+    assoc: Option<Arc<SctpAssociation>>,
 }
 
 impl SctpClientTransportProvider {
     pub fn new() -> SctpClientTransportProvider {
-        SctpClientTransportProvider {}
+        SctpClientTransportProvider { assoc: None }
     }
 }
 
@@ -31,7 +32,9 @@ impl ClientTransportProvider for SctpClientTransportProvider {
             .await
             .map_err(|e| e.to_string())?;
 
-        //    self.assocs = vec![assoc];
+        let assoc = Arc::new(assoc);
+
+        self.assoc = Some(assoc.clone());
 
         async_std::task::spawn(async move {
             while let Ok(message) = assoc.recv_msg().await {
@@ -49,8 +52,13 @@ impl ClientTransportProvider for SctpClientTransportProvider {
 
 #[async_trait]
 impl TransportProvider for SctpClientTransportProvider {
-    async fn send_message(&self, _message: Message, _logger: &Logger) -> Result<(), String> {
-        unimplemented!();
+    async fn send_message(&self, message: Message, _logger: &Logger) -> Result<(), String> {
+        // TODO proper error mapping
+        if let Some(assoc) = &self.assoc {
+            assoc.send_msg(message).await.map_err(|x| x.to_string())
+        } else {
+            Err("No association up".to_string())
+        }
     }
     async fn start_receiving<R: Handler>(&self, _handler: R, _logger: &Logger) {
         unimplemented!();

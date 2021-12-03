@@ -58,7 +58,7 @@ async fn handle_signals(signals: Signals, sig_sender: Sender<i32>) {
             }
             SIGTERM | SIGINT | SIGQUIT => {
                 // Shutdown the system;
-                sig_sender.send(signal).await;
+                let _ = sig_sender.send(signal).await;
             }
             _ => unreachable!(),
         }

@@ -1,14 +1,25 @@
-Ideas for what next
-- Properly close sockets when wrapper structs are dropped
--  Successful NG Setup with Free5G.
+Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
+-  [active] send a fake ng setup and test the sctp receive function
+   -  by running wireshark and getting byte dump
+      -  wireshark Copy as hex stream, then hex::decode()
+         00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140
+- get rid of haphazard error conversion - see TODOs
+-  Clippy
+-  See if the aper codec used in work is open source.
+-  Implement the node controller / investigate OpenAPI
+-  Be test driven and get CI going
+
+-  [blocked] Successful NG Setup with Free5G.
    - NG Setup
    - Maintain + Retry - i.e. test plan is
    - 1. start up Alsoran first then Free5GC
    - 2. start up free5G first then Alsoran
    - 3. kill and restart Free5GC 
 
+------
 
 
+- [done] Properly close sockets when wrapper structs are dropped
 -  [done] Stay up until Ctrl-C
 -  [done] SCTP connect
 
