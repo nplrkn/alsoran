@@ -28,7 +28,6 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         let address_list = async_net::resolve(connect_addr_string).await?;
         let first_address = address_list.get(0).ok_or(anyhow!("Didn't resolve"))?;
         let assoc = SctpAssociation::establish(first_address, self.ppid, &logger).await?;
-
         let assoc = Arc::new(assoc);
 
         self.assoc = Some(assoc.clone());
@@ -50,7 +49,6 @@ impl ClientTransportProvider for SctpClientTransportProvider {
 #[async_trait]
 impl TransportProvider for SctpClientTransportProvider {
     async fn send_message(&self, message: Message, _logger: &Logger) -> Result<()> {
-        // TODO proper error mapping
         if let Some(assoc) = &self.assoc {
             Ok(assoc.send_msg(message).await?)
         } else {
