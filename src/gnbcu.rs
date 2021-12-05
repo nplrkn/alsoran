@@ -47,7 +47,7 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
             .await
             .unwrap();
 
-        // let f1_handler = F1Handler::new(gnbcu.clone());
+        let _f1_handler = F1Handler::new(gnbcu.clone());
         // gnbcu
         //     .f1_transport_provider
         //     .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
