@@ -1,6 +1,7 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
 use crate::transport_provider::{ClientTransportProvider, TransportProvider};
+use anyhow::Result;
 use slog::Logger;
 use slog::{info, o};
 
@@ -21,7 +22,7 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
         ngap_transport_provider: T,
         f1_transport_provider: F,
         logger: Logger,
-    ) -> Result<Gnbcu<T, F>, String> {
+    ) -> Result<Gnbcu<T, F>> {
         let mut gnbcu = Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,

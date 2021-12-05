@@ -1,5 +1,4 @@
 Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
--  clean up sctp_association.rs
 -  get rid of haphazard error conversion - see TODOs
 -  get info / trace levels right
 -  test the sctp receive function
@@ -17,6 +16,7 @@ Other ideas while we wait in the hope that https://github.com/gabhijit/hampi get
 ------
 
 
+-  [done] clean up sctp_association.rs
 -  [done] Clippy
 -  [done] send a fake ng setup and test the sctp receive function
    -  by running wireshark and getting byte dump

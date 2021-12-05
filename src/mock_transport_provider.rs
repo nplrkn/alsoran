@@ -1,4 +1,5 @@
 use super::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use slog::info;
@@ -30,7 +31,7 @@ impl MockTransportProvider {
 
 #[async_trait]
 impl TransportProvider for MockTransportProvider {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String> {
+    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
         info!(logger, "MockTransportProvider send message {:?}", message);
         self.sender.send(message).await.unwrap();
         Ok(())
@@ -57,7 +58,7 @@ impl ClientTransportProvider for MockTransportProvider {
         _connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<(), String> {
+    ) -> Result<()> {
         let receiver = self.receiver.clone();
         async_std::task::spawn(async move {
             while let Ok(message) = receiver.recv().await {

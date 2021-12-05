@@ -1,5 +1,6 @@
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_trait::async_trait;
 use slog::{info, Logger};
@@ -23,15 +24,10 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<(), String> {
-        // TODO - this is not how we should deal with errors
-        let address_list = async_net::resolve(connect_addr_string)
-            .await
-            .map_err(|_| "Didn't resolve")?;
-        let first_address = address_list.get(0).ok_or("Didn't resolve")?;
-        let assoc = SctpAssociation::establish(first_address, self.ppid, &logger)
-            .await
-            .map_err(|e| e.to_string())?;
+    ) -> Result<()> {
+        let address_list = async_net::resolve(connect_addr_string).await?;
+        let first_address = address_list.get(0).ok_or(anyhow!("Didn't resolve"))?;
+        let assoc = SctpAssociation::establish(first_address, self.ppid, &logger).await?;
 
         let assoc = Arc::new(assoc);
 
@@ -53,12 +49,12 @@ impl ClientTransportProvider for SctpClientTransportProvider {
 
 #[async_trait]
 impl TransportProvider for SctpClientTransportProvider {
-    async fn send_message(&self, message: Message, _logger: &Logger) -> Result<(), String> {
+    async fn send_message(&self, message: Message, _logger: &Logger) -> Result<()> {
         // TODO proper error mapping
         if let Some(assoc) = &self.assoc {
-            assoc.send_msg(message).await.map_err(|x| x.to_string())
+            Ok(assoc.send_msg(message).await?)
         } else {
-            Err("No association up".to_string())
+            Err(anyhow!("No association up"))
         }
     }
     async fn start_receiving<R: Handler>(&self, _handler: R, _logger: &Logger) {

@@ -1,3 +1,4 @@
+use anyhow::Result;
 /// Transport provider
 use async_trait::async_trait;
 use slog::Logger;
@@ -8,7 +9,7 @@ pub type Message = Vec<u8>;
 
 #[async_trait]
 pub trait TransportProvider: 'static + Send + Sync + Clone {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<(), String>;
+    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()>;
     async fn start_receiving<R: Handler>(&self, handler: R, logger: &Logger);
 }
 
@@ -29,5 +30,5 @@ pub trait ClientTransportProvider: TransportProvider {
         connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<(), String>;
+    ) -> Result<()>;
 }
