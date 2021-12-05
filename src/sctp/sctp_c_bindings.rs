@@ -2762,7 +2762,7 @@ fn bindgen_test_layout_sctp_sndrcvinfo() {
     );
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct sctp_sndinfo {
     pub snd_sid: __u16,
     pub snd_flags: __u16,

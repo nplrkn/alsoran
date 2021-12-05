@@ -44,7 +44,8 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
         gnbcu
             .ngap_transport_provider
             .send_message(precanned_ng_setup, &logger)
-            .await?;
+            .await
+            .unwrap();
 
         // let f1_handler = F1Handler::new(gnbcu.clone());
         // gnbcu

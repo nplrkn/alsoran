@@ -16,6 +16,7 @@ use std::os::unix::io::{AsRawFd, RawFd};
 #[derive(Debug)]
 pub struct SctpAssociation {
     fd: i32,
+    ppid: u32,
 }
 
 impl AsRawFd for SctpAssociation {
@@ -72,6 +73,7 @@ impl SctpAssociation {
     // Establish an association as a client
     pub async fn establish<A: AsyncToSocketAddrs>(
         addr: A,
+        ppid: u32,
         logger: &Logger,
     ) -> io::Result<SctpAssociation> {
         // Get a socket and immediately wrap it in an SctpAssociation to ensure it gets closed
@@ -82,7 +84,7 @@ impl SctpAssociation {
             error!(logger, "Failed to get SCTP socket - {}", e);
             Err(e)
         } else {
-            Ok(SctpAssociation { fd })
+            Ok(SctpAssociation { fd, ppid })
         }?;
 
         // Set up sock opts
@@ -114,7 +116,7 @@ impl SctpAssociation {
             iov_len: message.len(),
         };
 
-        // Ancillary data structure to receive the stream ID
+        // Ancillary data structure to send the stream ID
         let msg_control =
             &mut sctp_c_bindings::sctp_rcvinfo::default() as *mut _ as *mut libc::c_void;
 
@@ -138,8 +140,60 @@ impl SctpAssociation {
         }
     }
 
-    pub async fn send_msg(&self, message: Message) -> io::Result<()> {
-        unimplemented!();
+    pub async fn send_msg(&self, mut message: Message) -> io::Result<()> {
+        // Wait for the socket to become writable
+        //Async::new(self.fd)?.writable().await?;
+
+        let msg_iov = &mut libc::iovec {
+            iov_base: message.as_mut_ptr() as *mut libc::c_void,
+            iov_len: message.len(),
+        };
+
+        // TODO make this precanned + reuse apart from stream ID?
+        let sndinfo = &mut sctp_c_bindings::sctp_sndinfo {
+            snd_sid: 1,
+            snd_flags: 0,
+            snd_ppid: self.ppid.to_be(),
+            snd_context: 0,
+            snd_assoc_id: 0,
+        } as *mut _ as *mut libc::c_void;
+
+        let cmsg_len =
+            unsafe { libc::CMSG_SPACE(std::mem::size_of::<sctp_c_bindings::sctp_sndinfo>() as _) };
+        let mut cmsg_buffer: [u8; 128] = [0; 128];
+        assert!(cmsg_len < 128);
+
+        let msghdr = libc::msghdr {
+            msg_name: std::ptr::null_mut(),
+            msg_namelen: 0,
+            msg_iov,
+            msg_iovlen: 1, // elements in msg_iov
+            msg_control: cmsg_buffer.as_mut_ptr().cast(),
+            msg_controllen: cmsg_len as _,
+            msg_flags: 0,
+        };
+
+        unsafe {
+            let mut cmsg = libc::CMSG_FIRSTHDR(&msghdr);
+            (*cmsg).cmsg_len = cmsg_len as _;
+            (*cmsg).cmsg_level = IPPROTO_SCTP;
+            (*cmsg).cmsg_type = sctp_c_bindings::sctp_cmsg_type_SCTP_SNDINFO as _;
+            libc::memcpy(
+                libc::CMSG_DATA(cmsg).cast(),
+                sndinfo,
+                std::mem::size_of::<sctp_c_bindings::sctp_sndinfo>() as _,
+            );
+        }
+
+        let bytes_sent = unsafe { libc::sendmsg(self.fd, &msghdr, libc::MSG_DONTWAIT) };
+        if bytes_sent == message.len() as isize {
+            Ok(())
+        } else if bytes_sent >= 0 {
+            // TODO Back pressure partial send
+            unimplemented!();
+        } else {
+            Err(Error::last_os_error())
+        }
     }
 }
 

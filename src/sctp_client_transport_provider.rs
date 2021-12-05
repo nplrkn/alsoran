@@ -7,11 +7,12 @@ use slog::{info, Logger};
 #[derive(Debug, Clone)]
 pub struct SctpClientTransportProvider {
     assoc: Option<Arc<SctpAssociation>>,
+    ppid: u32,
 }
 
 impl SctpClientTransportProvider {
-    pub fn new() -> SctpClientTransportProvider {
-        SctpClientTransportProvider { assoc: None }
+    pub fn new(ppid: u32) -> SctpClientTransportProvider {
+        SctpClientTransportProvider { assoc: None, ppid }
     }
 }
 
@@ -28,7 +29,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
             .await
             .map_err(|_| "Didn't resolve")?;
         let first_address = address_list.get(0).ok_or("Didn't resolve")?;
-        let assoc = SctpAssociation::establish(first_address, &logger)
+        let assoc = SctpAssociation::establish(first_address, self.ppid, &logger)
             .await
             .map_err(|e| e.to_string())?;
 
