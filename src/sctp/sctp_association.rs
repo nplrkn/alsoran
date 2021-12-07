@@ -1,15 +1,19 @@
+use super::sctp_c_bindings::sctp_paddr_change;
 use super::Message;
 use crate::sctp::sctp_c_bindings;
-use crate::sctp::sctp_c_bindings::{SCTP_NODELAY, SCTP_RECVRCVINFO, SOL_SCTP};
+use crate::sctp::sctp_c_bindings::{
+    sctp_paddrparams, sctp_spp_flags_SPP_HB_ENABLE, sockaddr_storage, SCTP_NODELAY,
+    SCTP_PEER_ADDR_PARAMS, SCTP_RECVRCVINFO, SOL_SCTP,
+};
 use async_io::Async;
 use async_net::AsyncToSocketAddrs;
-use libc::{connect, setsockopt, socket};
-use libc::{AF_INET, IPPROTO_SCTP, SOCK_STREAM};
+use io::Error;
+use libc::{connect, setsockopt, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{error, warn, Logger};
-use std::io;
-use std::io::Error;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::os::unix::io::{AsRawFd, RawFd};
+use std::{io, mem};
 
 // An SCTP assocation.
 // Cannot be Cloned since it is the owner of the fd.  Instead use Arc.
@@ -79,7 +83,7 @@ impl SctpAssociation {
 
         let mut msghdr = make_msghdr(&mut sctp_c_bindings::sctp_rcvinfo::default(), msg_iov);
         let bytes_received = unsafe { libc::recvmsg(self.fd, &mut msghdr, 0) };
-        if bytes_received >= 0 {
+        if bytes_received > 0 {
             message.resize(bytes_received as _, 0);
             Ok(message)
         } else {
@@ -106,7 +110,7 @@ impl SctpAssociation {
         }
 
         let mut sndinfo = Sndinfo {
-            cmsg_len: std::mem::size_of::<Sndinfo>(),
+            cmsg_len: mem::size_of::<Sndinfo>(),
             cmsg_level: IPPROTO_SCTP,
             cmsg_type: sctp_c_bindings::sctp_cmsg_type_SCTP_SNDINFO as _,
             snd_sid: 1,
@@ -142,17 +146,17 @@ fn make_msghdr<T>(msg_control: &mut T, msg_iov: &mut libc::iovec) -> libc::msghd
         msg_iov,
         msg_iovlen: 1,
         msg_control: msg_control as *mut _ as _,
-        msg_controllen: std::mem::size_of::<T>(),
+        msg_controllen: mem::size_of::<T>(),
         msg_flags: 0,
     }
 }
 
-// Disable nagling and enable SCTP_RCVINFO on a given socket.
+// Set socket options - used on all connections.
 fn set_sock_opts(fd: i32, logger: &Logger) -> io::Result<()> {
-    // RFC6458, 8.1.29 - This option expects an integer boolean flag, where a non-zero value
-    // turns on the option, and a zero value turns off the option.
     let enabled = &1 as *const _ as _;
-    let enabled_len = std::mem::size_of::<libc::c_int>() as _;
+    let enabled_len = mem::size_of::<libc::c_int>() as _;
+
+    // NODELAY - so message get sent immediately
     if unsafe { setsockopt(fd, SOL_SCTP as _, SCTP_NODELAY as _, enabled, enabled_len) } < 0 {
         warn!(
             logger,
@@ -161,6 +165,7 @@ fn set_sock_opts(fd: i32, logger: &Logger) -> io::Result<()> {
         );
     };
 
+    // SCTP_RCVINFO - so that we get the stream ID on message receive
     if unsafe {
         setsockopt(
             fd,
@@ -175,6 +180,32 @@ fn set_sock_opts(fd: i32, logger: &Logger) -> io::Result<()> {
         error!(
             logger,
             "Failed to set SCTP_RECVRCVINFO socket option - {}", e
+        );
+        Err(e)
+    } else {
+        Ok(())
+    }?;
+
+    // SCTP_PEER_ADDR_PARAMS - heartbeat so that we rapidly detect peer failures.
+    let mut sctp_paddrparams = unsafe { mem::zeroed::<sctp_paddrparams>() };
+    sctp_paddrparams.spp_address.ss_family = libc::AF_INET as _;
+    sctp_paddrparams.spp_hbinterval = 1000;
+    sctp_paddrparams.spp_flags = sctp_spp_flags_SPP_HB_ENABLE;
+
+    if unsafe {
+        setsockopt(
+            fd,
+            SOL_SCTP as _,
+            SCTP_PEER_ADDR_PARAMS as _,
+            &sctp_paddrparams as *const _ as _,
+            156,
+        )
+    } < 0
+    {
+        let e = Error::last_os_error();
+        error!(
+            logger,
+            "Failed to set SCTP_PEER_ADDR_PARAMS socket option - {}", e
         );
         Err(e)
     } else {

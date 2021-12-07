@@ -4994,7 +4994,7 @@ pub const sctp_spp_flags_SPP_HB_TIME_IS_ZERO: sctp_spp_flags = 128;
 pub const sctp_spp_flags_SPP_IPV6_FLOWLABEL: sctp_spp_flags = 256;
 pub const sctp_spp_flags_SPP_DSCP: sctp_spp_flags = 512;
 pub type sctp_spp_flags = ::std::os::raw::c_uint;
-#[repr(C, packed(4))]
+#[repr(C, packed(2))] // bindgen seems to have got this wrong - was packed(4)
 #[derive(Debug, Copy, Clone)]
 pub struct sctp_paddrparams {
     pub spp_assoc_id: sctp_assoc_t,
@@ -5007,111 +5007,111 @@ pub struct sctp_paddrparams {
     pub spp_ipv6_flowlabel: __u32,
     pub spp_dscp: __u8,
 }
-// #[test]
-// fn bindgen_test_layout_sctp_paddrparams() {
-//     assert_eq!(
-//         ::std::mem::size_of::<sctp_paddrparams>(),
-//         156usize,
-//         concat!("Size of: ", stringify!(sctp_paddrparams))
-//     );
-//     assert_eq!(
-//         ::std::mem::align_of::<sctp_paddrparams>(),
-//         4usize,
-//         concat!("Alignment of ", stringify!(sctp_paddrparams))
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_assoc_id as *const _ as usize },
-//         0usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_assoc_id)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_address as *const _ as usize },
-//         4usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_address)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_hbinterval as *const _ as usize },
-//         132usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_hbinterval)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_pathmaxrxt as *const _ as usize },
-//         136usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_pathmaxrxt)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_pathmtu as *const _ as usize },
-//         138usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_pathmtu)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_sackdelay as *const _ as usize },
-//         142usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_sackdelay)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_flags as *const _ as usize },
-//         146usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_flags)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe {
-//             &(*(::std::ptr::null::<sctp_paddrparams>())).spp_ipv6_flowlabel as *const _ as usize
-//         },
-//         150usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_ipv6_flowlabel)
-//         )
-//     );
-//     assert_eq!(
-//         unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_dscp as *const _ as usize },
-//         154usize,
-//         concat!(
-//             "Offset of field: ",
-//             stringify!(sctp_paddrparams),
-//             "::",
-//             stringify!(spp_dscp)
-//         )
-//     );
-// }
+#[test]
+fn bindgen_test_layout_sctp_paddrparams() {
+    assert_eq!(
+        ::std::mem::size_of::<sctp_paddrparams>(),
+        156usize,
+        concat!("Size of: ", stringify!(sctp_paddrparams))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<sctp_paddrparams>(),
+        2usize, // bindgen seems to have got this wrong - was 4usize
+        concat!("Alignment of ", stringify!(sctp_paddrparams))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_assoc_id as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_assoc_id)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_address as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_address)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_hbinterval as *const _ as usize },
+        132usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_hbinterval)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_pathmaxrxt as *const _ as usize },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_pathmaxrxt)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_pathmtu as *const _ as usize },
+        138usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_pathmtu)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_sackdelay as *const _ as usize },
+        142usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_sackdelay)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_flags as *const _ as usize },
+        146usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_flags)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<sctp_paddrparams>())).spp_ipv6_flowlabel as *const _ as usize
+        },
+        150usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_ipv6_flowlabel)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<sctp_paddrparams>())).spp_dscp as *const _ as usize },
+        154usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(sctp_paddrparams),
+            "::",
+            stringify!(spp_dscp)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct sctp_authchunk {

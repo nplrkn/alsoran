@@ -1,14 +1,18 @@
-Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
-   - Maintain + Retry - i.e. test plan is
-   - 1. start up Alsoran first then Free5GC
-   - 2. start up free5G first then Alsoran
-   - 3. kill and restart Free5GC 
+# Backlog
 
--  test the sctp receive function
--  get info / trace levels right
--  See if the aper codec used in work is open source.
--  Implement the node controller / investigate OpenAPI
--  Be test driven and get CI going
+Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
+
+- Maintain + Retry - i.e. test plan is
+
+1. start up Alsoran first then Free5GC [pass]
+2. start up free5G first then Alsoran [pass]
+3. kill and restart Free5GC [fail - doesn't notice]
+
+- test the sctp receive function
+- get info / trace levels right
+- See if the aper codec used in work is open source.
+- Implement the node controller / investigate OpenAPI
+- Be test driven and get CI going
 
 
 ------
