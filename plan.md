@@ -1,21 +1,20 @@
 Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
--  get rid of haphazard error conversion - see TODOs
--  get info / trace levels right
--  test the sctp receive function
--  See if the aper codec used in work is open source.
--  Implement the node controller / investigate OpenAPI
--  Be test driven and get CI going
-
--  [blocked] Successful NG Setup with Free5G.
-   - NG Setup
    - Maintain + Retry - i.e. test plan is
    - 1. start up Alsoran first then Free5GC
    - 2. start up free5G first then Alsoran
    - 3. kill and restart Free5GC 
 
+-  test the sctp receive function
+-  get info / trace levels right
+-  See if the aper codec used in work is open source.
+-  Implement the node controller / investigate OpenAPI
+-  Be test driven and get CI going
+
+
 ------
 
-
+-  [done] Successful NG Setup with Free5G.
+-  [done] get rid of haphazard error conversion - see TODOs
 -  [done] clean up sctp_association.rs
 -  [done] Clippy
 -  [done] send a fake ng setup and test the sctp receive function

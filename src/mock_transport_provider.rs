@@ -53,8 +53,8 @@ impl TransportProvider for MockTransportProvider {
 
 #[async_trait]
 impl ClientTransportProvider for MockTransportProvider {
-    async fn connect<R: Handler>(
-        &mut self,
+    async fn maintain_connection<R: Handler>(
+        &self,
         _connect_addr_string: String,
         handler: R,
         logger: Logger,

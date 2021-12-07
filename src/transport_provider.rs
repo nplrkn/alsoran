@@ -25,8 +25,16 @@ pub trait Handler: 'static + Send + Sync {
 
 #[async_trait]
 pub trait ClientTransportProvider: TransportProvider {
-    async fn connect<R: Handler>(
-        &mut self,
+    // async fn connect<R: Handler>(
+    //     &mut self,
+    //     connect_addr_string: String,
+    //     handler: R,
+    //     logger: Logger,
+    // ) -> Result<()>;
+
+    // TODO Eventually this will evolve into add_connection_target (?)
+    async fn maintain_connection<R: Handler>(
+        &self,
         connect_addr_string: String,
         handler: R,
         logger: Logger,
