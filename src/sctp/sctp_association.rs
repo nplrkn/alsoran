@@ -1,17 +1,15 @@
-use super::sctp_c_bindings::sctp_paddr_change;
 use super::Message;
 use crate::sctp::sctp_c_bindings;
 use crate::sctp::sctp_c_bindings::{
-    sctp_paddrparams, sctp_spp_flags_SPP_HB_ENABLE, sockaddr_storage, SCTP_NODELAY,
-    SCTP_PEER_ADDR_PARAMS, SCTP_RECVRCVINFO, SOL_SCTP,
+    sctp_paddrparams, sctp_spp_flags_SPP_HB_ENABLE, SCTP_NODELAY, SCTP_PEER_ADDR_PARAMS,
+    SCTP_RECVRCVINFO, SOL_SCTP,
 };
+use anyhow::{Context, Result};
 use async_io::Async;
-use async_net::AsyncToSocketAddrs;
 use io::Error;
 use libc::{connect, setsockopt, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
-use slog::{error, warn, Logger};
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use slog::{warn, Logger};
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::{io, mem};
 
@@ -35,43 +33,45 @@ impl Drop for SctpAssociation {
     }
 }
 
+macro_rules! try_io {
+    ( $x:expr  ) => {{
+        let rc = unsafe { $x };
+        if rc < 0 {
+            Err(Error::last_os_error())
+        } else {
+            Ok(rc)
+        }
+    }};
+}
+
 impl SctpAssociation {
     // Establish an association as a client
-    pub async fn establish<A: AsyncToSocketAddrs>(
-        addr: A,
+    pub async fn establish(
+        addr: OsSocketAddr,
         ppid: u32,
         logger: &Logger,
-    ) -> io::Result<SctpAssociation> {
+    ) -> Result<SctpAssociation> {
         // Get a socket and immediately wrap it in an SctpAssociation to ensure it gets closed
         // properly in the drop function if something fails later in this function.
-        let fd = unsafe { socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP) };
-        let assoc = if fd < 0 {
-            let e = Error::last_os_error();
-            error!(logger, "Failed to get SCTP socket - {}", e);
-            Err(e)
-        } else {
-            Ok(SctpAssociation { fd, ppid })
-        }?;
+        let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)).context("Failed socket ()")?;
+        let assoc = SctpAssociation { fd, ppid };
 
         // Set up sock opts
-        set_sock_opts(assoc.fd, logger)?;
+        enable_sctp_heartbeat(assoc.fd, 1000).unwrap_or_else(|e| {
+            warn!(logger, "Carrying on without heartbeat - {}", e);
+        });
+        enable_sock_opt(fd, SCTP_NODELAY as _).unwrap_or_else(|e| {
+            warn!(logger, "Carrying on without NODELAY - {}", e);
+        });
+        enable_sock_opt(fd, SCTP_RECVRCVINFO as _).context("Failed SCTP_RECVRCVINFO sock opt")?;
 
         // Connect
         // TODO nonblocking
-        let addr = async_net::resolve(addr).await.map(|vec| vec[0])?;
-        let addr: OsSocketAddr = addr.into();
-        if unsafe { connect(assoc.fd, addr.as_ptr(), addr.len()) } < 0 {
-            let e = Error::last_os_error();
-            error!(logger, "Failed SCTP connect to {:?} - {}", addr, e);
-            Err(e)
-        } else {
-            Ok(())
-        }?;
-
+        try_io!(connect(assoc.fd, addr.as_ptr(), addr.len())).context("Failed connect()")?;
         Ok(assoc)
     }
 
-    pub async fn recv_msg(&self) -> io::Result<Message> {
+    pub async fn recv_msg(&self) -> Result<Message> {
         // Wait for the socket to become readable
         Async::new(self.fd)?.readable().await?;
 
@@ -82,13 +82,9 @@ impl SctpAssociation {
         };
 
         let mut msghdr = make_msghdr(&mut sctp_c_bindings::sctp_rcvinfo::default(), msg_iov);
-        let bytes_received = unsafe { libc::recvmsg(self.fd, &mut msghdr, 0) };
-        if bytes_received > 0 {
-            message.resize(bytes_received as _, 0);
-            Ok(message)
-        } else {
-            Err(Error::last_os_error())
-        }
+        let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0))?;
+        message.resize(bytes_received as _, 0);
+        Ok(message)
     }
 
     pub async fn send_msg(&self, mut message: Message) -> io::Result<()> {
@@ -126,15 +122,13 @@ impl SctpAssociation {
         };
         let msghdr = make_msghdr(&mut sndinfo, msg_iov);
 
-        let bytes_sent = unsafe { libc::sendmsg(self.fd, &msghdr, libc::MSG_DONTWAIT) };
+        let bytes_sent = try_io!(libc::sendmsg(self.fd, &msghdr, libc::MSG_DONTWAIT))?;
         if bytes_sent == message.len() as _ {
             Ok(())
-        } else if bytes_sent >= 0 {
+        } else {
             // TODO Back pressure partial send
             println!("Partial send {} bytes of {}", bytes_sent, message.len());
             unimplemented!();
-        } else {
-            Err(Error::last_os_error())
         }
     }
 }
@@ -151,64 +145,26 @@ fn make_msghdr<T>(msg_control: &mut T, msg_iov: &mut libc::iovec) -> libc::msghd
     }
 }
 
-// Set socket options - used on all connections.
-fn set_sock_opts(fd: i32, logger: &Logger) -> io::Result<()> {
-    let enabled = &1 as *const _ as _;
-    let enabled_len = mem::size_of::<libc::c_int>() as _;
-
-    // NODELAY - so message get sent immediately
-    if unsafe { setsockopt(fd, SOL_SCTP as _, SCTP_NODELAY as _, enabled, enabled_len) } < 0 {
-        warn!(
-            logger,
-            "Failed to set NODELAY socket option - {}",
-            Error::last_os_error()
-        );
-    };
-
-    // SCTP_RCVINFO - so that we get the stream ID on message receive
-    if unsafe {
-        setsockopt(
-            fd,
-            SOL_SCTP as _,
-            SCTP_RECVRCVINFO as _,
-            enabled,
-            enabled_len,
-        )
-    } < 0
-    {
-        let e = Error::last_os_error();
-        error!(
-            logger,
-            "Failed to set SCTP_RECVRCVINFO socket option - {}", e
-        );
-        Err(e)
-    } else {
-        Ok(())
-    }?;
-
+fn enable_sctp_heartbeat(fd: i32, interval_ms: u32) -> Result<()> {
     // SCTP_PEER_ADDR_PARAMS - heartbeat so that we rapidly detect peer failures.
     let mut sctp_paddrparams = unsafe { mem::zeroed::<sctp_paddrparams>() };
     sctp_paddrparams.spp_address.ss_family = libc::AF_INET as _;
-    sctp_paddrparams.spp_hbinterval = 1000;
+    sctp_paddrparams.spp_hbinterval = interval_ms;
     sctp_paddrparams.spp_flags = sctp_spp_flags_SPP_HB_ENABLE;
 
-    if unsafe {
-        setsockopt(
-            fd,
-            SOL_SCTP as _,
-            SCTP_PEER_ADDR_PARAMS as _,
-            &sctp_paddrparams as *const _ as _,
-            156,
-        )
-    } < 0
-    {
-        let e = Error::last_os_error();
-        error!(
-            logger,
-            "Failed to set SCTP_PEER_ADDR_PARAMS socket option - {}", e
-        );
-        Err(e)
-    } else {
-        Ok(())
-    }
+    try_io!(setsockopt(
+        fd,
+        SOL_SCTP as _,
+        SCTP_PEER_ADDR_PARAMS as _,
+        &sctp_paddrparams as *const _ as _,
+        mem::size_of::<sctp_paddrparams>() as _,
+    ))?;
+    Ok(())
+}
+
+fn enable_sock_opt(fd: i32, name: libc::c_int) -> Result<()> {
+    let enabled = &1 as *const _ as _;
+    let enabled_len = mem::size_of::<libc::c_int>() as _;
+    try_io!(setsockopt(fd, SOL_SCTP as _, name, enabled, enabled_len))?;
+    Ok(())
 }

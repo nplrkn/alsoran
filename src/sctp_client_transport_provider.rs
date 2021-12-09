@@ -5,6 +5,7 @@ use async_std::sync::Arc;
 use async_std::sync::Mutex;
 use async_std::task;
 use async_trait::async_trait;
+use os_socketaddr::OsSocketAddr;
 use slog::{info, warn, Logger};
 use std::collections::HashMap;
 use std::time::Duration;
@@ -32,11 +33,16 @@ impl ClientTransportProvider for SctpClientTransportProvider {
     ) -> Result<()> {
         let shared_assocs = self.assocs.clone();
         let ppid = self.ppid.clone();
+
         task::spawn(async move {
             loop {
+                let addr = async_net::resolve(connect_addr_string.clone())
+                    .await
+                    .map(|vec| vec[0])
+                    .unwrap(); // TODO
+                let addr: OsSocketAddr = addr.into();
                 let assoc_id = 3; // TODO
-                let assoc =
-                    SctpAssociation::establish(connect_addr_string.clone(), ppid, &logger).await;
+                let assoc = SctpAssociation::establish(addr, ppid, &logger).await;
 
                 let retry_duration = if let Ok(assoc) = assoc {
                     let assoc = Arc::new(assoc);

@@ -29,7 +29,7 @@ where
             logger,
             "NgapHandler got non UE associated message {:?} - forward to F1 transport", message
         );
-        let logger = logger.new(o!("component" => "F1"));
+        let _logger = logger.new(o!("component" => "F1"));
         // self.gnbcu
         //     .f1_transport_provider
         //     .send_message(message, &logger)
