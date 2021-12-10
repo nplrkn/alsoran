@@ -4,7 +4,7 @@ use crate::sctp::sctp_c_bindings::{
     sctp_paddrparams, sctp_spp_flags_SPP_HB_ENABLE, SCTP_NODELAY, SCTP_PEER_ADDR_PARAMS,
     SCTP_RECVRCVINFO, SOL_SCTP,
 };
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Result};
 use async_io::Async;
 use io::Error;
 use libc::{connect, setsockopt, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
@@ -34,10 +34,14 @@ impl Drop for SctpAssociation {
 }
 
 macro_rules! try_io {
-    ( $x:expr  ) => {{
+    ( $x:expr, $operation_name:expr  ) => {{
         let rc = unsafe { $x };
         if rc < 0 {
-            Err(Error::last_os_error())
+            Err(anyhow!(format!(
+                "{} during SCTP {}",
+                Error::last_os_error(),
+                $operation_name
+            )))
         } else {
             Ok(rc)
         }
@@ -53,7 +57,7 @@ impl SctpAssociation {
     ) -> Result<SctpAssociation> {
         // Get a socket and immediately wrap it in an SctpAssociation to ensure it gets closed
         // properly in the drop function if something fails later in this function.
-        let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)).context("Failed socket ()")?;
+        let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?;
         let assoc = SctpAssociation { fd, ppid };
 
         // Set up sock opts
@@ -63,11 +67,11 @@ impl SctpAssociation {
         enable_sock_opt(fd, SCTP_NODELAY as _).unwrap_or_else(|e| {
             warn!(logger, "Carrying on without NODELAY - {}", e);
         });
-        enable_sock_opt(fd, SCTP_RECVRCVINFO as _).context("Failed SCTP_RECVRCVINFO sock opt")?;
+        enable_sock_opt(fd, SCTP_RECVRCVINFO as _)?;
 
         // Connect
         // TODO nonblocking
-        try_io!(connect(assoc.fd, addr.as_ptr(), addr.len())).context("Failed connect()")?;
+        try_io!(connect(assoc.fd, addr.as_ptr(), addr.len()), "connect")?;
         Ok(assoc)
     }
 
@@ -82,12 +86,16 @@ impl SctpAssociation {
         };
 
         let mut msghdr = make_msghdr(&mut sctp_c_bindings::sctp_rcvinfo::default(), msg_iov);
-        let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0))?;
-        message.resize(bytes_received as _, 0);
-        Ok(message)
+        let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0), "recvmsg")?;
+        if bytes_received > 0 {
+            message.resize(bytes_received as _, 0);
+            Ok(message)
+        } else {
+            Err(anyhow!("Connection terminated"))
+        }
     }
 
-    pub async fn send_msg(&self, mut message: Message) -> io::Result<()> {
+    pub async fn send_msg(&self, mut message: Message) -> Result<()> {
         // Wait for the socket to become writable
         //Async::new(self.fd)?.writable().await?;
 
@@ -122,7 +130,10 @@ impl SctpAssociation {
         };
         let msghdr = make_msghdr(&mut sndinfo, msg_iov);
 
-        let bytes_sent = try_io!(libc::sendmsg(self.fd, &msghdr, libc::MSG_DONTWAIT))?;
+        let bytes_sent = try_io!(
+            libc::sendmsg(self.fd, &msghdr, libc::MSG_DONTWAIT),
+            "sendmsg"
+        )?;
         if bytes_sent == message.len() as _ {
             Ok(())
         } else {
@@ -152,19 +163,25 @@ fn enable_sctp_heartbeat(fd: i32, interval_ms: u32) -> Result<()> {
     sctp_paddrparams.spp_hbinterval = interval_ms;
     sctp_paddrparams.spp_flags = sctp_spp_flags_SPP_HB_ENABLE;
 
-    try_io!(setsockopt(
-        fd,
-        SOL_SCTP as _,
-        SCTP_PEER_ADDR_PARAMS as _,
-        &sctp_paddrparams as *const _ as _,
-        mem::size_of::<sctp_paddrparams>() as _,
-    ))?;
+    try_io!(
+        setsockopt(
+            fd,
+            SOL_SCTP as _,
+            SCTP_PEER_ADDR_PARAMS as _,
+            &sctp_paddrparams as *const _ as _,
+            mem::size_of::<sctp_paddrparams>() as _,
+        ),
+        "setsockopt"
+    )?;
     Ok(())
 }
 
 fn enable_sock_opt(fd: i32, name: libc::c_int) -> Result<()> {
     let enabled = &1 as *const _ as _;
     let enabled_len = mem::size_of::<libc::c_int>() as _;
-    try_io!(setsockopt(fd, SOL_SCTP as _, name, enabled, enabled_len))?;
+    try_io!(
+        setsockopt(fd, SOL_SCTP as _, name, enabled, enabled_len),
+        "setsockopt"
+    )?;
     Ok(())
 }

@@ -2,12 +2,10 @@
 
 Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
 
-- Maintain + Retry - i.e. test plan is
 
-1. start up Alsoran first then Free5GC [pass]
-2. start up free5G first then Alsoran [pass]
-3. kill and restart Free5GC [fail - doesn't notice]
-
+- [in progress] socket OS errors getting hidden by anyhow 
+- regression testing of maintain and retry
+- documentation of features and level of testing
 - test the sctp receive function
 - get info / trace levels right
 - See if the aper codec used in work is open source.
@@ -17,6 +15,10 @@ Other ideas while we wait in the hope that https://github.com/gabhijit/hampi get
 
 ------
 
+- [done] Maintain + Retry - i.e. test plan is
+1. start up Alsoran first then Free5GC [pass]
+2. start up free5G first then Alsoran [pass]
+3. kill and restart Free5GC [fail - doesn't notice]
 -  [done] Successful NG Setup with Free5G.
 -  [done] get rid of haphazard error conversion - see TODOs
 -  [done] clean up sctp_association.rs

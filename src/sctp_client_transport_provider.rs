@@ -44,30 +44,30 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                 let assoc_id = 3; // TODO
                 let assoc = SctpAssociation::establish(addr, ppid, &logger).await;
 
-                let retry_duration = if let Ok(assoc) = assoc {
-                    let assoc = Arc::new(assoc);
-                    shared_assocs.lock().await.insert(assoc_id, assoc.clone());
+                let retry_duration = match assoc {
+                    Ok(assoc) => {
+                        let assoc = Arc::new(assoc);
+                        shared_assocs.lock().await.insert(assoc_id, assoc.clone());
 
-                    // TODO Hack
-                    // Instead we should send a notification about this connection being up
-                    let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-                    assoc.send_msg(precanned_ng_setup).await.unwrap();
+                        // TODO Hack
+                        // Instead we should send a notification about this connection being up
+                        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
+                        assoc.send_msg(precanned_ng_setup).await.unwrap();
 
-                    while let Ok(message) = assoc.recv_msg().await {
-                        info!(
-                            logger,
-                            "Sctp client received {:?}, forward to handler", message
-                        );
-                        handler.recv_non_ue_associated(message, &logger).await;
+                        while let Ok(message) = assoc.recv_msg().await {
+                            info!(
+                                logger,
+                                "Sctp client received {:?}, forward to handler", message
+                            );
+                            handler.recv_non_ue_associated(message, &logger).await;
+                        }
+                        warn!(logger, "SCTP connection terminated - 5s pause before retry");
+                        5
                     }
-                    warn!(logger, "SCTP connection terminated - 5s pause before retry");
-                    5
-                } else {
-                    warn!(
-                        logger,
-                        "SCTP connection establish failure - 30s pause before retry"
-                    );
-                    30
+                    Err(e) => {
+                        warn!(logger, "{:?} - 30s pause before retry", e);
+                        30
+                    }
                 };
                 shared_assocs.lock().await.remove(&assoc_id);
                 task::sleep(Duration::from_secs(retry_duration)).await;
