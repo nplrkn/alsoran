@@ -361,6 +361,23 @@ dependencies = [
 [[package]]
 name = "coordinator"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "common",
+ "futures",
+ "hyper",
+ "log",
+ "mime",
+ "node-control-api",
+ "openssl",
+ "serde_ignored",
+ "swagger",
+ "tokio",
+ "tokio-openssl",
+ "url",
+ "uuid",
+]
 
 [[package]]
 name = "core-foundation"
@@ -1144,6 +1161,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "node-control-api"
+version = "1.0.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "clap",
+ "env_logger",
+ "frunk",
+ "frunk-enum-core",
+ "frunk-enum-derive",
+ "frunk_core",
+ "frunk_derives",
+ "futures",
+ "hyper",
+ "hyper-openssl",
+ "hyper-tls",
+ "lazy_static",
+ "log",
+ "mime",
+ "native-tls",
+ "openssl",
+ "percent-encoding 2.1.0",
+ "regex",
+ "serde",
+ "serde_ignored",
+ "serde_json",
+ "swagger",
+ "tokio",
+ "tokio-openssl",
+ "tokio-tls",
+ "url",
+ "uuid",
+]
+
+[[package]]
 name = "num-integer"
 version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1177,41 +1229,6 @@ name = "once_cell"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
-
-[[package]]
-name = "openapi_client"
-version = "1.0.0"
-dependencies = [
- "async-trait",
- "chrono",
- "clap",
- "env_logger",
- "frunk",
- "frunk-enum-core",
- "frunk-enum-derive",
- "frunk_core",
- "frunk_derives",
- "futures",
- "hyper",
- "hyper-openssl",
- "hyper-tls",
- "lazy_static",
- "log",
- "mime",
- "native-tls",
- "openssl",
- "percent-encoding 2.1.0",
- "regex",
- "serde",
- "serde_ignored",
- "serde_json",
- "swagger",
- "tokio",
- "tokio-openssl",
- "tokio-tls",
- "url",
- "uuid",
-]
 
 [[package]]
 name = "openssl"

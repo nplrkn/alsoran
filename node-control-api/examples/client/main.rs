@@ -4,7 +4,7 @@
 #[allow(unused_imports)]
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
-use openapi_client::{Api, ApiNoContext, Client, ContextWrapperExt, models,
+use node_control_api::{Api, ApiNoContext, Client, ContextWrapperExt, models,
                       RefreshWorkerResponse,
                      };
 use clap::{App, Arg};
