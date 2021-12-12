@@ -1,0 +1,15 @@
+[package]
+name = "integration-tests"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+common = { path = "../common" }
+worker = { path = "../worker" }
+coordinator = { path = "../coordinator" }
+async-std = { version = "1.10.0", features = ["attributes","tokio02"] }
+async-trait = "0.1.51"
+slog = "2.7.0"
+

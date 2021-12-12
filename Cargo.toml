@@ -4,5 +4,6 @@ members = [
     "worker",
     "node-control-api",
     "coordinator",
-    "common"
+    "common",
+    "integration-tests"
 ]

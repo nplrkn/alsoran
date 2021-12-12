@@ -93,6 +93,7 @@ dependencies = [
  "futures-lite",
  "num_cpus",
  "once_cell",
+ "tokio",
 ]
 
 [[package]]
@@ -362,6 +363,7 @@ dependencies = [
 name = "coordinator"
 version = "0.1.0"
 dependencies = [
+ "async-std",
  "async-trait",
  "chrono",
  "common",
@@ -372,6 +374,7 @@ dependencies = [
  "node-control-api",
  "openssl",
  "serde_ignored",
+ "slog",
  "swagger",
  "tokio",
  "tokio-openssl",
@@ -956,6 +959,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
 dependencies = [
  "cfg-if 1.0.0",
+]
+
+[[package]]
+name = "integration-tests"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "common",
+ "coordinator",
+ "slog",
+ "worker",
 ]
 
 [[package]]

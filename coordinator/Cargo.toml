@@ -20,4 +20,7 @@ futures = "0.3"
 swagger = "5.0.2"
 log = "0.4.0"
 mime = "0.3"
+async-std = { version = "1.10.0", features = ["attributes","tokio02"] }
 tokio = { version = "0.2", features = ["rt-threaded", "macros", "stream"] }
+slog = "2.7.0"
+#async-compat = "0.2.1"
