@@ -1,6 +1,6 @@
 # Backlog
 
-Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
+Other ideas while we wait in the hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 - ok so let's see if we can get a worker to make a REST call to a node controller?
 - in order to test interesting node control stuff, we need a mock AMF that can send and receive configuration updates.
@@ -32,57 +32,56 @@ Other ideas while we wait in the hope that https://github.com/gabhijit/hampi get
   2021-12-10T09:09:54+01:00 [INFO][AMF][NGAP][127.0.0.1/172.24.71.65:60194] Handle NG Setup request
   2021-12-10T09:09:54+01:00 [INFO][AMF][NGAP][127.0.0.1/172.24.71.65:60194] Send NG-Setup response
 - [started] documentation of features and level of testing
-- [done] socket OS errors getting hidden by anyhow 
+- [done] socket OS errors getting hidden by anyhow
 - [done] Maintain + Retry - i.e. test plan is
+  
 1. start up Alsoran first then Free5GC [pass]
 2. start up free5G first then Alsoran [pass]
 3. kill and restart Free5GC [fail - doesn't notice]
--  [done] Successful NG Setup with Free5G.
--  [done] get rid of haphazard error conversion - see TODOs
--  [done] clean up sctp_association.rs
--  [done] Clippy
--  [done] send a fake ng setup and test the sctp receive function
-   -  by running wireshark and getting byte dump
-      -  wireshark Copy as hex stream, then hex::decode()
+
+- [done] Successful NG Setup with Free5G.
+- [done] get rid of haphazard error conversion - see TODOs
+- [done] clean up sctp_association.rs
+- [done] Clippy
+- [done] send a fake ng setup and test the sctp receive function
+  - by running wireshark and getting byte dump
+    - wireshark Copy as hex stream, then hex::decode()
          00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140
 - [done] Properly close sockets when wrapper structs are dropped
--  [done] Stay up until Ctrl-C
--  [done] SCTP connect
+- [done] Stay up until Ctrl-C
+- [done] SCTP connect
 
--  it will be hard to test probably without simulated UE / NAS - and this will have to be wrapped in DU
-   -  ok so NAS.py for the NAS?
--  non UE associated and UE associated signaling
--  add error handling / back pressure handling
+- it will be hard to test probably without simulated UE / NAS - and this will have to be wrapped in DU
+  - ok so NAS.py for the NAS?
+- non UE associated and UE associated signaling
+- add error handling / back pressure handling
 
--  [done] test against a 5G core
-   -  install free5GC - based on https://www.free5gc.org/installations/stage-3-free5gc-install/
-   -  seems highly unlikely to work on WSL but would be awesome if it did - at least registration and the first bits of PDU session
-   -  THIS LOOKS GOOD ENOUGH FOR NOW!
--  [done] reinstate a callback model that lets the transport provider be aware of ue or non ue associated signaling
-   -  idea is to type parameterize receive method not the whole trait
--  [done] add logging
--  [done] do two exchanges concurrently in UT
-
+- [done] test against a 5G core
+  - install free5GC - based on [https://www.free5gc.org/installations/stage-3-free5gc-install/]
+  - seems highly unlikely to work on WSL but would be awesome if it did - at least registration and the first bits of PDU session
+  - THIS LOOKS GOOD ENOUGH FOR NOW!
+- [done] reinstate a callback model that lets the transport provider be aware of ue or non ue associated signaling
+  - idea is to type parameterize receive method not the whole trait
+- [done] add logging
+- [done] do two exchanges concurrently in UT
 
 Build in chronological order with refactoring.
 
--  Step 1
-   -  Start up and establish a connection with the AMF and perform the NG Setup exchange.
-      *  Ability to connect / send / receive in async code with stream ID
-         *  Got stream ID in sync code.
-         *  Really the Rust crates are not great.
-         *  Create the async API we want.  Start using Async<>.
-         *  Check out impl Stream for https://docs.rs/async-net/1.6.1/async_net/struct.Incoming.html
-            * Can we use this to model each association as a Stream of incoming (messages, stream id)?
-      -  Mock AMF
--  Step 2
-   -  Wait for and receive connections from DUs.
-
-
+- Step 1
+  - Start up and establish a connection with the AMF and perform the NG Setup exchange.
+    - Ability to connect / send / receive in async code with stream ID
+      - Got stream ID in sync code.
+      - Really the Rust crates are not great.
+      - Create the async API we want.  Start using Async<>.
+      - Check out impl Stream for [https://docs.rs/async-net/1.6.1/async_net/struct.Incoming.html]
+        - Can we use this to model each association as a Stream of incoming (messages, stream id)?
+      - Mock AMF
+- Step 2
+  - Wait for and receive connections from DUs.
 
 Most important area to explore is HA + use of SCTP multi-homing.
 
-Node manager.    
+Node manager.
   State
     -  AMF configuration
     -  DU configuration
@@ -93,15 +92,11 @@ Node manager.
     -  Receive F1 SETUP from DU
     -  Send RAN configuration to DU -> ask for new connections
 
-
-
-
-
-
 Dev approach
--  implement an obvious procedure or two with fake messages
--  create SCTP containers to represent the AMF and CU
--  get procedure load balancing between in a sensible way
+
+- implement an obvious procedure or two with fake messages
+- create SCTP containers to represent the AMF and CU
+- get procedure load balancing between in a sensible way
 
 Two instances of a CU must share the same UE context.  
 
@@ -111,27 +106,28 @@ See 6.4 of TS38.401:
 So once a UE is RRC CONNECTED, any CU instance must be able to cope with it.  That said, the AMF will steer all UE traffic over the same SCTP stream if it can.
 
 TS 38.413:
-  NG-RAN node and AMF shall support a configuration with a single SCTP association per NG-RAN node/AMF pair. 
+  NG-RAN node and AMF shall support a configuration with a single SCTP association per NG-RAN node/AMF pair.
 
-  Within the set of SCTP associations established between one AMF and NG-RAN node pair, the AMF may request the NG-RAN node to restrict the usage of SCTP association for certain types of NG-C signalling. 
+  Within the set of SCTP associations established between one AMF and NG-RAN node pair, the AMF may request the NG-RAN node to restrict the usage of SCTP association for certain types of NG-C signalling.
 
   Selection of the SCTP association by the NG-RAN node and the AMF is specified in TS 23.501 [3] and TS 23.502 [4]. The NG-RAN node shall establish the SCTP association.
 
   Between one AMF and NG-RAN node pair:
--	A single pair of stream identifiers shall be reserved over at least one SCTP association for the sole use of NGAP elementary procedures that utilize non UE-associated signalling.
--	At least one pair of stream identifiers over one or several SCTP associations shall be reserved for the sole use of NGAP elementary procedures that utilize UE-associated signallings. However, a few pairs (i.e. more than one) should be reserved.
--	For a single UE-associated signalling, the NG-RAN node shall use one SCTP association and one SCTP stream, and the SCTP association/stream should not be changed during the communication of the UE-associated signalling until after current SCTP association is failed, or TNL binding update is performed as described in TS 23.502 [3].
 
+- A single pair of stream identifiers shall be reserved over at least one SCTP association for the sole use of NGAP elementary procedures that utilize non UE-associated signalling.
+- At least one pair of stream identifiers over one or several SCTP associations shall be reserved for the sole use of NGAP elementary procedures that utilize UE-associated signallings. However, a few pairs (i.e. more than one) should be reserved.
+- For a single UE-associated signalling, the NG-RAN node shall use one SCTP association and one SCTP stream, and the SCTP association/stream should not be changed during the communication of the UE-associated signalling until after current SCTP association is failed, or TNL binding update is performed as described in TS 23.502 [3].
 
 i.e. the last point says that the stream is sticky to UE, but gets reassigned after failure of the SCTP association.
 
 23.502:
 The AMF supplies the 5G-AN node with information about
-a)	the AMF Name and the GUAMI(s) configured on that AMF Name;
-b)	the set of TNL associations to be established between the NG-RAN node and the AMF;
-c)	weight factor associated with each of the TNL association within the AMF; and
-d)	weight factor for each AMF Name within the AMF Set; and
-e)	(optional) for each GUAMI(s) configured on that AMF the corresponding backup AMF Name.
+
+a) the AMF Name and the GUAMI(s) configured on that AMF Name;
+b) the set of TNL associations to be established between the NG-RAN node and the AMF;
+c) weight factor associated with each of the TNL association within the AMF; and
+d) weight factor for each AMF Name within the AMF Set; and
+e) (optional) for each GUAMI(s) configured on that AMF the corresponding backup AMF Name.
 
 The 5G-AN node selects an AMF as defined in clause 6.3.5 of TS 23.501.
 
@@ -148,5 +144,3 @@ An AMF shall be able to update the NGAP UE-TNLA-binding (i.e. change the TNL ass
 An AMF shall be able to update the NGAP UE-TNLA-binding (i.e. change the TNL association for the UE) in response to an N2 message received from the 5G-AN by triangular redirection (e.g. by responding to the 5G-AN node using a different TNL association).
 
 An AMF shall be able to command the 5G-AN node to release the NGAP UE-TNLA-binding for a UE in CM-CONNECTED state while maintaining N3 (user-plane connectivity) for the UE at any time.
-
-
