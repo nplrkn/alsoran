@@ -1,7 +1,6 @@
 mod f1_handler;
 use gnbcu::Gnbcu;
 mod gnbcu;
-pub mod logging;
 #[cfg(test)]
 mod mock_transport_provider;
 mod ngap_handler;

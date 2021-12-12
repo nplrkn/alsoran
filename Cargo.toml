@@ -3,5 +3,6 @@
 members = [
     "worker",
     "node-control-api",
-    "coordinator"
+    "coordinator",
+    "common"
 ]

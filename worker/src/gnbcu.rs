@@ -68,7 +68,7 @@ mod tests {
 
     #[async_std::test]
     async fn initial_access_procedure() {
-        let root_logger = crate::logging::test_init();
+        let root_logger = common::logging::test_init();
         // Creating a Gnbcu will use a real SCTP transport.  However we can also create it with a mock tranport that
         // uses channels instead.
 

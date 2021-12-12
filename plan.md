@@ -2,6 +2,7 @@
 
 Other ideas while we wait in the hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
+- factor out logging and signal handling to common library
 - ok so let's see if we can get a worker to make a REST call to a node controller?
 - in order to test interesting node control stuff, we need a mock AMF that can send and receive configuration updates.
   - realistic testing needs live SCTP connections, node controller, multiple workers

@@ -5,10 +5,8 @@ use sloggers::terminal::{Destination, TerminalLoggerBuilder};
 use sloggers::types::Severity;
 use sloggers::Build;
 
-#[cfg(test)]
 use slog::{o, Drain};
 
-#[cfg(test)]
 pub fn test_init() -> Logger {
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::CompactFormat::new(decorator).build();

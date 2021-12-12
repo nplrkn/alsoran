@@ -335,6 +335,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "common"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-channel",
+ "async-std",
+ "signal-hook",
+ "signal-hook-async-std",
+ "slog",
+ "slog-async",
+ "slog-term",
+ "sloggers",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2273,11 +2288,10 @@ dependencies = [
  "async-std",
  "async-trait",
  "byteorder",
+ "common",
  "hex",
  "libc",
  "os_socketaddr",
- "signal-hook",
- "signal-hook-async-std",
  "slog",
  "slog-async",
  "slog-term",
