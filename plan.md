@@ -2,7 +2,6 @@
 
 Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
 
-- treat that as a separate package within the same workspace for now
 - ok so let's see if we can get a worker to make a REST call to a node controller?
 - in order to test interesting node control stuff, we need a mock AMF that can send and receive configuration updates.
   - realistic testing needs live SCTP connections, node controller, multiple workers
@@ -20,6 +19,7 @@ Other ideas while we wait in the hope that https://github.com/gabhijit/hampi get
 
 ------
 
+- [done] treat that as a separate package within the same workspace for now
 - [done] create a basic POST API (later we add callback server)
 - [done] ok so we need to run OpenAPI generator
 - see if two alsorans can connect to one AMF - yes.  though dubious we are sending two duplicate setups.
