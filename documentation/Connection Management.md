@@ -43,11 +43,17 @@ Implying that when a new GNB-CU worker starts up, an existing worker must find o
 
 ### Between AMF and GNB-CU
 
-Conversely, the AMF may order us to open multiple associations to it.  Here we have the reverse problem.  A single GNB-CU worker gets an AMF Configuration Update, but each worker should then open a connection to the AMF.
+Conversely, the AMF may order us to open multiple associations to it.  Here we have the reverse problem.  A single GNB-CU worker gets an AMF Configuration Update, but each worker should then open a connection to the AMF.  When a worker gets the AMF Configuration Update, it sets up N TNLAs and responds.  
 
-When a worker gets the AMF Configuration Update, it sets up N TNLAs and responds.  
+The NG-RAN node is also allow to add endpoints.  So the other workers catch up by adding their own connections and sending RAN CONFIGURATION UPDATE. 
 
-Then maybe the other workers catch up by adding their own connections and sending RAN CONFIGURATION UPDATE.  But maybe AMFs won't cope with this.  
+> When the configuration with multiple SCTP endpoints per NG-RAN node is supported and the NG-RAN node wants to add additional SCTP endpoints, the RAN configuration update procedure shall be the first NGAP procedure triggered on an additional TNLA of an already setup NG-C interface instance after the TNL association has become operational, and the AMF shall associate the TNLA to the NG-C interface instance using the included Global RAN node ID.
+
+free5GC AMF identifies GNB / creates RAN context by connection.  Each of our workers would manifest as a separate RAN.  So it is never going to do triangular redirection.  And there is no point having a node controller because there is no coordination required.
+
+Open5GS AMF identifies the gNB by address - see amf_gnb_find_by_addr().  Presumably this means it can't do triangular redirection either.  Since both NG Setup and ngap_handle_ran_configuration_update() call amf_gnb_set_gnb_id() the GNB IDs will overwrite each other for the purposes of handover.
+
+If neither of the open source AMFs can cope with multiple parallel connections from same gNB, possibly some of the commerical ones don't either.  It depends on their support for TS 38.412 multi associations.
 
 ## Overload
 
@@ -73,8 +79,3 @@ The idea is that
   - or needs to be an active-standby.
   
 Key example of why a synchronization mechanism is needed is that otherwise two node controller instances might simultaneously try to send NG Setup.
-
-
-
-
-

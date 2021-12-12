@@ -1,0 +1,30 @@
+[package]
+name = "worker"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-std = { version = "1.10.0", features = ["attributes"] }
+async-trait = "0.1.51"
+#rust-sctp = "0.0.5"
+#sctp-sys = "0.0.7"
+libc = "^0.2"
+async-io = "1.6.0"
+async-net = "1.6.1"
+async-channel = "1.6.1"
+slog = "2.7.0"
+sloggers = "2.1.1"
+slog-term = "2.8.0"
+slog-async = "2.7.0"
+os_socketaddr = "0.2.0"
+signal-hook = "0.3.10"
+signal-hook-async-std = "0.2.1"
+#asn1-codecs = "0.1.2"
+#asn1_codecs_derive = "0.1.2"
+#bitvec = "0.22.3"
+#log = "0.4.14"
+hex = "0.4.3"
+byteorder = "1.4.3"
+anyhow = "1.0.51"

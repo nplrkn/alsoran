@@ -1,31 +1,10 @@
-mod f1_handler;
-mod gnbcu;
-mod logging;
-#[cfg(test)]
-mod mock_transport_provider;
-mod ngap_handler;
-mod sctp;
-mod sctp_client_transport_provider;
-mod transport_provider;
 use async_std::channel::Sender;
 use async_std::prelude::*;
 use signal_hook::consts::signal::*;
 use signal_hook_async_std::Signals;
 use slog::info;
 use std::io::Error;
-
-use gnbcu::Gnbcu;
-use sctp_client_transport_provider::SctpClientTransportProvider;
-
-// TS38.412, 7
-// The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol NGAP
-// is 60, and 66 for DTLS over SCTP (IETF RFC 6083 [8]).
-const NGAP_SCTP_PPID: u32 = 60;
-
-// TS38.472, 7
-// The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol F1AP is 62,
-// and 68 for DTLS over SCTP (IETF RFC 6083 [9]). The byte order of the ppid shall be big-endian.
-const F1AP_NGAP_PPID: u32 = 62;
+use worker::logging;
 
 #[async_std::main]
 async fn main() -> Result<(), Error> {
@@ -38,15 +17,7 @@ async fn main() -> Result<(), Error> {
     let (sig_sender, sig_receiver) = async_channel::unbounded();
     let signals_task = async_std::task::spawn(handle_signals(signals, sig_sender));
 
-    let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID);
-    let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID);
-
-    let _gnbcu = Gnbcu::new(
-        ngap_transport_provider,
-        f1_transport_provider,
-        root_logger.clone(),
-    )
-    .await;
+    worker::run(root_logger.clone()).await;
 
     // Block until we receive a signal.
     let signal = sig_receiver.recv().await.unwrap();

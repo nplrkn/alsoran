@@ -1,0 +1,9 @@
+# OpenAPI generation
+
+openapitools was installed using the launcher script at https://github.com/OpenAPITools/openapi-generator#1---installation.
+
+To run,
+
+```bash
+openapi-generator-cli generate --generate-alias-as-model -i node-control.yaml -g rust-server
+```

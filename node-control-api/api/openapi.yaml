@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  license:
+    name: MIT
+  title: AlsoRAN Node Control API
+  version: 1.0.0
+servers:
+- url: http://localhost/v1
+paths:
+  /worker:
+    post:
+      operationId: refreshWorker
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefeshWorkerReq'
+        description: Worker information
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefeshWorkerRsp'
+          description: Refresh worker response
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Refresh worker request
+components:
+  schemas:
+    RefeshWorkerReq:
+      example:
+        workerUniqueId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        connectedAmfs:
+        - connectedAmfs
+        - connectedAmfs
+        f1Address:
+          port: 5249
+          host: host
+        connectedDus:
+        - connectedDus
+        - connectedDus
+      properties:
+        workerUniqueId:
+          format: uuid
+          type: string
+        f1Address:
+          $ref: '#/components/schemas/TransportAddress'
+        connectedAmfs:
+          items:
+            type: string
+          type: array
+        connectedDus:
+          items:
+            type: string
+          type: array
+      required:
+      - connectedAmfs
+      - connectedDus
+      - f1Address
+      - workerUniqueId
+      type: object
+    RefeshWorkerRsp:
+      example:
+        amfAddresses:
+        - port: 5249
+          host: host
+        - port: 5249
+          host: host
+      properties:
+        amfAddresses:
+          items:
+            $ref: '#/components/schemas/TransportAddress'
+          minItems: 1
+          type: array
+          uniqueItems: true
+      required:
+      - amfAddresses
+      type: object
+    TransportAddress:
+      example:
+        port: 5249
+        host: host
+      properties:
+        host:
+          format: hostname
+          type: string
+        port:
+          maximum: 65535
+          minimum: 1
+          type: integer
+      required:
+      - host
+      type: object
+    Error:
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+

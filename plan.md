@@ -2,19 +2,37 @@
 
 Other ideas while we wait in the hope that https://github.com/gabhijit/hampi gets an encode function.
 
-
-- [in progress] socket OS errors getting hidden by anyhow 
-- regression testing of maintain and retry
-- documentation of features and level of testing
+- treat that as a separate package within the same workspace for now
+- ok so let's see if we can get a worker to make a REST call to a node controller?
+- in order to test interesting node control stuff, we need a mock AMF that can send and receive configuration updates.
+  - realistic testing needs live SCTP connections, node controller, multiple workers
+  - does that mean we now need K8S?  no, we can do all this from a single process Rust async test script
+    - create node controller
+    - start worker 1 passing node controller address:port
+    - start worker 2 passing node controller address:port
+    - start fake amf
+- regression testing of maintain and retry scenarios
 - test the sctp receive function
 - get info / trace levels right
 - See if the aper codec used in work is open source.
 - Implement the node controller / investigate OpenAPI
 - Be test driven and get CI going
 
-
 ------
 
+- [done] create a basic POST API (later we add callback server)
+- [done] ok so we need to run OpenAPI generator
+- see if two alsorans can connect to one AMF - yes.  though dubious we are sending two duplicate setups.
+  2021-12-10T09:09:50+01:00 [INFO][AMF][NGAP] [AMF] SCTP Accept from: 127.0.0.1/172.24.71.65:36674
+  2021-12-10T09:09:50+01:00 [INFO][AMF][NGAP] Create a new NG connection for: 127.0.0.1/172.24.71.65:36674
+  2021-12-10T09:09:50+01:00 [INFO][AMF][NGAP][127.0.0.1/172.24.71.65:36674] Handle NG Setup request
+  2021-12-10T09:09:50+01:00 [INFO][AMF][NGAP][127.0.0.1/172.24.71.65:36674] Send NG-Setup response
+  2021-12-10T09:09:54+01:00 [INFO][AMF][NGAP] [AMF] SCTP Accept from: 127.0.0.1/172.24.71.65:60194
+  2021-12-10T09:09:54+01:00 [INFO][AMF][NGAP] Create a new NG connection for: 127.0.0.1/172.24.71.65:60194
+  2021-12-10T09:09:54+01:00 [INFO][AMF][NGAP][127.0.0.1/172.24.71.65:60194] Handle NG Setup request
+  2021-12-10T09:09:54+01:00 [INFO][AMF][NGAP][127.0.0.1/172.24.71.65:60194] Send NG-Setup response
+- [started] documentation of features and level of testing
+- [done] socket OS errors getting hidden by anyhow 
 - [done] Maintain + Retry - i.e. test plan is
 1. start up Alsoran first then Free5GC [pass]
 2. start up free5G first then Alsoran [pass]

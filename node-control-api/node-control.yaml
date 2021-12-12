@@ -1,0 +1,90 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: AlsoRAN Node Control API
+  license:
+    name: MIT
+servers:
+  - url: http://localhost/v1
+paths:
+  /worker:
+    post:
+      summary: Refresh worker request
+      operationId: refreshWorker
+      requestBody:
+        description: Worker information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefeshWorkerReq'
+      responses:
+        '200':
+          description: Refresh worker response
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/RefeshWorkerRsp"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    RefeshWorkerReq:
+      type: object
+      required:
+        - workerUniqueId
+        - f1Address
+        - connectedAmfs
+        - connectedDus
+      properties:
+        workerUniqueId:
+          type: string
+          format: uuid
+        f1Address:
+          $ref: '#/components/schemas/TransportAddress'
+        connectedAmfs:
+          type: array
+          items: 
+            type: string
+        connectedDus:
+          type: array
+          items: 
+            type: string
+    RefeshWorkerRsp:
+      type: object
+      required: 
+        - amfAddresses
+      properties:
+        amfAddresses:
+          type: array
+          items: 
+            $ref: '#/components/schemas/TransportAddress'
+          minItems: 1
+          uniqueItems: true
+    TransportAddress:
+      type: object
+      required: 
+        - host
+      properties:
+        host:
+          type: string
+          format: hostname
+        port: 
+          type: integer
+          minimum: 1
+          maximum: 65535
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
