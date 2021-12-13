@@ -148,31 +148,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_refesh_worker_req: Option<models::RefeshWorkerReq> = if !body.is_empty() {
+                                let param_refresh_worker_req: Option<models::RefreshWorkerReq> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_refesh_worker_req) => param_refesh_worker_req,
+                                        Ok(param_refresh_worker_req) => param_refresh_worker_req,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter RefeshWorkerReq - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter RefeshWorkerReq due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter RefreshWorkerReq - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter RefreshWorkerReq due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_refesh_worker_req = match param_refesh_worker_req {
-                                    Some(param_refesh_worker_req) => param_refesh_worker_req,
+                                let param_refresh_worker_req = match param_refresh_worker_req {
+                                    Some(param_refresh_worker_req) => param_refresh_worker_req,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter RefeshWorkerReq"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter RefeshWorkerReq")),
+                                                        .body(Body::from("Missing required body parameter RefreshWorkerReq"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter RefreshWorkerReq")),
                                 };
 
                                 let result = api_impl.refresh_worker(
-                                            param_refesh_worker_req,
+                                            param_refresh_worker_req,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -225,8 +225,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter RefeshWorkerReq: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter RefeshWorkerReq")),
+                                                .body(Body::from(format!("Couldn't read body parameter RefreshWorkerReq: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter RefreshWorkerReq")),
                         }
             },
 

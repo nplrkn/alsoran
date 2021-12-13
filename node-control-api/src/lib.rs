@@ -17,7 +17,7 @@ pub const API_VERSION: &'static str = "1.0.0";
 pub enum RefreshWorkerResponse {
     /// Refresh worker response
     RefreshWorkerResponse
-    (models::RefeshWorkerRsp)
+    (models::RefreshWorkerRsp)
     ,
     /// unexpected error
     UnexpectedError
@@ -34,7 +34,7 @@ pub trait Api<C: Send + Sync> {
     /// Refresh worker request
     async fn refresh_worker(
         &self,
-        refesh_worker_req: models::RefeshWorkerReq,
+        refresh_worker_req: models::RefreshWorkerReq,
         context: &C) -> Result<RefreshWorkerResponse, ApiError>;
 
 }
@@ -50,7 +50,7 @@ pub trait ApiNoContext<C: Send + Sync> {
     /// Refresh worker request
     async fn refresh_worker(
         &self,
-        refesh_worker_req: models::RefeshWorkerReq,
+        refresh_worker_req: models::RefreshWorkerReq,
         ) -> Result<RefreshWorkerResponse, ApiError>;
 
 }
@@ -81,11 +81,11 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     /// Refresh worker request
     async fn refresh_worker(
         &self,
-        refesh_worker_req: models::RefeshWorkerReq,
+        refresh_worker_req: models::RefreshWorkerReq,
         ) -> Result<RefreshWorkerResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().refresh_worker(refesh_worker_req, &context).await
+        self.api().refresh_worker(refresh_worker_req, &context).await
     }
 
 }

@@ -11,7 +11,7 @@ impl Api<ClientContext> for MockCoordinator {
     /// Refresh worker request
     async fn refresh_worker(
         &self,
-        _refesh_worker_req: models::RefeshWorkerReq,
+        _refresh_worker_req: models::RefreshWorkerReq,
         context: &ClientContext,
     ) -> Result<RefreshWorkerResponse, ApiError> {
         let _context = context.clone();

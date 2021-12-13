@@ -8,18 +8,18 @@ Method | HTTP request | Description
 
 
 # **refreshWorker**
-> models::RefeshWorkerRsp refreshWorker(refesh_worker_req)
+> models::RefreshWorkerRsp refreshWorker(refresh_worker_req)
 Refresh worker request
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **refesh_worker_req** | [**RefeshWorkerReq**](RefeshWorkerReq.md)| Worker information | 
+  **refresh_worker_req** | [**RefreshWorkerReq**](RefreshWorkerReq.md)| Worker information | 
 
 ### Return type
 
-[**models::RefeshWorkerRsp**](RefeshWorkerRsp.md)
+[**models::RefreshWorkerRsp**](RefreshWorkerRsp.md)
 
 ### Authorization
 

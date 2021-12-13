@@ -17,14 +17,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RefeshWorkerReq'
+              $ref: '#/components/schemas/RefreshWorkerReq'
       responses:
         '200':
           description: Refresh worker response
           content:
             application/json:    
               schema:
-                $ref: "#/components/schemas/RefeshWorkerRsp"
+                $ref: "#/components/schemas/RefreshWorkerRsp"
         default:
           description: unexpected error
           content:
@@ -33,7 +33,7 @@ paths:
                 $ref: "#/components/schemas/Error"
 components:
   schemas:
-    RefeshWorkerReq:
+    RefreshWorkerReq:
       type: object
       required:
         - workerUniqueId
@@ -54,7 +54,7 @@ components:
           type: array
           items: 
             type: string
-    RefeshWorkerRsp:
+    RefreshWorkerRsp:
       type: object
       required: 
         - amfAddresses

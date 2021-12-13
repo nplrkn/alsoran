@@ -22,6 +22,7 @@ Other ideas while we wait in the hope that [https://github.com/gabhijit/hampi] g
 
 ------
 
+- [done] fix typo refresh
 - [done] factor out logging and signal handling to common library
 - [done] treat that as a separate package within the same workspace for now
 - [done] create a basic POST API (later we add callback server)

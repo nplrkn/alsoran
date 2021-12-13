@@ -14,7 +14,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RefeshWorkerReq'
+              $ref: '#/components/schemas/RefreshWorkerReq'
         description: Worker information
         required: true
       responses:
@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefeshWorkerRsp'
+                $ref: '#/components/schemas/RefreshWorkerRsp'
           description: Refresh worker response
         default:
           content:
@@ -33,7 +33,7 @@ paths:
       summary: Refresh worker request
 components:
   schemas:
-    RefeshWorkerReq:
+    RefreshWorkerReq:
       example:
         workerUniqueId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         connectedAmfs:
@@ -65,7 +65,7 @@ components:
       - f1Address
       - workerUniqueId
       type: object
-    RefeshWorkerRsp:
+    RefreshWorkerRsp:
       example:
         amfAddresses:
         - port: 5249

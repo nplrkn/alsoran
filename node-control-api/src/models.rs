@@ -129,7 +129,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
-pub struct RefeshWorkerReq {
+pub struct RefreshWorkerReq {
     #[serde(rename = "workerUniqueId")]
     pub worker_unique_id: uuid::Uuid,
 
@@ -144,9 +144,9 @@ pub struct RefeshWorkerReq {
 
 }
 
-impl RefeshWorkerReq {
-    pub fn new(worker_unique_id: uuid::Uuid, f1_address: models::TransportAddress, connected_amfs: Vec<String>, connected_dus: Vec<String>, ) -> RefeshWorkerReq {
-        RefeshWorkerReq {
+impl RefreshWorkerReq {
+    pub fn new(worker_unique_id: uuid::Uuid, f1_address: models::TransportAddress, connected_amfs: Vec<String>, connected_dus: Vec<String>, ) -> RefreshWorkerReq {
+        RefreshWorkerReq {
             worker_unique_id: worker_unique_id,
             f1_address: f1_address,
             connected_amfs: connected_amfs,
@@ -155,10 +155,10 @@ impl RefeshWorkerReq {
     }
 }
 
-/// Converts the RefeshWorkerReq value to the Query Parameters representation (style=form, explode=false)
+/// Converts the RefreshWorkerReq value to the Query Parameters representation (style=form, explode=false)
 /// specified in https://swagger.io/docs/specification/serialization/
 /// Should be implemented in a serde serializer
-impl std::string::ToString for RefeshWorkerReq {
+impl std::string::ToString for RefreshWorkerReq {
     fn to_string(&self) -> String {
         let mut params: Vec<String> = vec![];
         // Skipping workerUniqueId in query parameter serialization
@@ -177,10 +177,10 @@ impl std::string::ToString for RefeshWorkerReq {
     }
 }
 
-/// Converts Query Parameters representation (style=form, explode=false) to a RefeshWorkerReq value
+/// Converts Query Parameters representation (style=form, explode=false) to a RefreshWorkerReq value
 /// as specified in https://swagger.io/docs/specification/serialization/
 /// Should be implemented in a serde deserializer
-impl std::str::FromStr for RefeshWorkerReq {
+impl std::str::FromStr for RefreshWorkerReq {
     type Err = String;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
@@ -202,16 +202,16 @@ impl std::str::FromStr for RefeshWorkerReq {
         while key_result.is_some() {
             let val = match string_iter.next() {
                 Some(x) => x,
-                None => return std::result::Result::Err("Missing value while parsing RefeshWorkerReq".to_string())
+                None => return std::result::Result::Err("Missing value while parsing RefreshWorkerReq".to_string())
             };
 
             if let Some(key) = key_result {
                 match key {
                     "workerUniqueId" => intermediate_rep.worker_unique_id.push(<uuid::Uuid as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
                     "f1Address" => intermediate_rep.f1_address.push(<models::TransportAddress as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
-                    "connectedAmfs" => return std::result::Result::Err("Parsing a container in this style is not supported in RefeshWorkerReq".to_string()),
-                    "connectedDus" => return std::result::Result::Err("Parsing a container in this style is not supported in RefeshWorkerReq".to_string()),
-                    _ => return std::result::Result::Err("Unexpected key while parsing RefeshWorkerReq".to_string())
+                    "connectedAmfs" => return std::result::Result::Err("Parsing a container in this style is not supported in RefreshWorkerReq".to_string()),
+                    "connectedDus" => return std::result::Result::Err("Parsing a container in this style is not supported in RefreshWorkerReq".to_string()),
+                    _ => return std::result::Result::Err("Unexpected key while parsing RefreshWorkerReq".to_string())
                 }
             }
 
@@ -220,43 +220,43 @@ impl std::str::FromStr for RefeshWorkerReq {
         }
 
         // Use the intermediate representation to return the struct
-        std::result::Result::Ok(RefeshWorkerReq {
-            worker_unique_id: intermediate_rep.worker_unique_id.into_iter().next().ok_or("workerUniqueId missing in RefeshWorkerReq".to_string())?,
-            f1_address: intermediate_rep.f1_address.into_iter().next().ok_or("f1Address missing in RefeshWorkerReq".to_string())?,
-            connected_amfs: intermediate_rep.connected_amfs.into_iter().next().ok_or("connectedAmfs missing in RefeshWorkerReq".to_string())?,
-            connected_dus: intermediate_rep.connected_dus.into_iter().next().ok_or("connectedDus missing in RefeshWorkerReq".to_string())?,
+        std::result::Result::Ok(RefreshWorkerReq {
+            worker_unique_id: intermediate_rep.worker_unique_id.into_iter().next().ok_or("workerUniqueId missing in RefreshWorkerReq".to_string())?,
+            f1_address: intermediate_rep.f1_address.into_iter().next().ok_or("f1Address missing in RefreshWorkerReq".to_string())?,
+            connected_amfs: intermediate_rep.connected_amfs.into_iter().next().ok_or("connectedAmfs missing in RefreshWorkerReq".to_string())?,
+            connected_dus: intermediate_rep.connected_dus.into_iter().next().ok_or("connectedDus missing in RefreshWorkerReq".to_string())?,
         })
     }
 }
 
-// Methods for converting between header::IntoHeaderValue<RefeshWorkerReq> and hyper::header::HeaderValue
+// Methods for converting between header::IntoHeaderValue<RefreshWorkerReq> and hyper::header::HeaderValue
 
 #[cfg(any(feature = "client", feature = "server"))]
-impl std::convert::TryFrom<header::IntoHeaderValue<RefeshWorkerReq>> for hyper::header::HeaderValue {
+impl std::convert::TryFrom<header::IntoHeaderValue<RefreshWorkerReq>> for hyper::header::HeaderValue {
     type Error = String;
 
-    fn try_from(hdr_value: header::IntoHeaderValue<RefeshWorkerReq>) -> std::result::Result<Self, Self::Error> {
+    fn try_from(hdr_value: header::IntoHeaderValue<RefreshWorkerReq>) -> std::result::Result<Self, Self::Error> {
         let hdr_value = hdr_value.to_string();
         match hyper::header::HeaderValue::from_str(&hdr_value) {
              std::result::Result::Ok(value) => std::result::Result::Ok(value),
              std::result::Result::Err(e) => std::result::Result::Err(
-                 format!("Invalid header value for RefeshWorkerReq - value: {} is invalid {}",
+                 format!("Invalid header value for RefreshWorkerReq - value: {} is invalid {}",
                      hdr_value, e))
         }
     }
 }
 
 #[cfg(any(feature = "client", feature = "server"))]
-impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<RefeshWorkerReq> {
+impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<RefreshWorkerReq> {
     type Error = String;
 
     fn try_from(hdr_value: hyper::header::HeaderValue) -> std::result::Result<Self, Self::Error> {
         match hdr_value.to_str() {
              std::result::Result::Ok(value) => {
-                    match <RefeshWorkerReq as std::str::FromStr>::from_str(value) {
+                    match <RefreshWorkerReq as std::str::FromStr>::from_str(value) {
                         std::result::Result::Ok(value) => std::result::Result::Ok(header::IntoHeaderValue(value)),
                         std::result::Result::Err(err) => std::result::Result::Err(
-                            format!("Unable to convert header value '{}' into RefeshWorkerReq - {}",
+                            format!("Unable to convert header value '{}' into RefreshWorkerReq - {}",
                                 value, err))
                     }
              },
@@ -270,24 +270,24 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
-pub struct RefeshWorkerRsp {
+pub struct RefreshWorkerRsp {
     #[serde(rename = "amfAddresses")]
     pub amf_addresses: Vec<models::TransportAddress>,
 
 }
 
-impl RefeshWorkerRsp {
-    pub fn new(amf_addresses: Vec<models::TransportAddress>, ) -> RefeshWorkerRsp {
-        RefeshWorkerRsp {
+impl RefreshWorkerRsp {
+    pub fn new(amf_addresses: Vec<models::TransportAddress>, ) -> RefreshWorkerRsp {
+        RefreshWorkerRsp {
             amf_addresses: amf_addresses,
         }
     }
 }
 
-/// Converts the RefeshWorkerRsp value to the Query Parameters representation (style=form, explode=false)
+/// Converts the RefreshWorkerRsp value to the Query Parameters representation (style=form, explode=false)
 /// specified in https://swagger.io/docs/specification/serialization/
 /// Should be implemented in a serde serializer
-impl std::string::ToString for RefeshWorkerRsp {
+impl std::string::ToString for RefreshWorkerRsp {
     fn to_string(&self) -> String {
         let mut params: Vec<String> = vec![];
         // Skipping amfAddresses in query parameter serialization
@@ -296,10 +296,10 @@ impl std::string::ToString for RefeshWorkerRsp {
     }
 }
 
-/// Converts Query Parameters representation (style=form, explode=false) to a RefeshWorkerRsp value
+/// Converts Query Parameters representation (style=form, explode=false) to a RefreshWorkerRsp value
 /// as specified in https://swagger.io/docs/specification/serialization/
 /// Should be implemented in a serde deserializer
-impl std::str::FromStr for RefeshWorkerRsp {
+impl std::str::FromStr for RefreshWorkerRsp {
     type Err = String;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
@@ -318,13 +318,13 @@ impl std::str::FromStr for RefeshWorkerRsp {
         while key_result.is_some() {
             let val = match string_iter.next() {
                 Some(x) => x,
-                None => return std::result::Result::Err("Missing value while parsing RefeshWorkerRsp".to_string())
+                None => return std::result::Result::Err("Missing value while parsing RefreshWorkerRsp".to_string())
             };
 
             if let Some(key) = key_result {
                 match key {
-                    "amfAddresses" => return std::result::Result::Err("Parsing a container in this style is not supported in RefeshWorkerRsp".to_string()),
-                    _ => return std::result::Result::Err("Unexpected key while parsing RefeshWorkerRsp".to_string())
+                    "amfAddresses" => return std::result::Result::Err("Parsing a container in this style is not supported in RefreshWorkerRsp".to_string()),
+                    _ => return std::result::Result::Err("Unexpected key while parsing RefreshWorkerRsp".to_string())
                 }
             }
 
@@ -333,40 +333,40 @@ impl std::str::FromStr for RefeshWorkerRsp {
         }
 
         // Use the intermediate representation to return the struct
-        std::result::Result::Ok(RefeshWorkerRsp {
-            amf_addresses: intermediate_rep.amf_addresses.into_iter().next().ok_or("amfAddresses missing in RefeshWorkerRsp".to_string())?,
+        std::result::Result::Ok(RefreshWorkerRsp {
+            amf_addresses: intermediate_rep.amf_addresses.into_iter().next().ok_or("amfAddresses missing in RefreshWorkerRsp".to_string())?,
         })
     }
 }
 
-// Methods for converting between header::IntoHeaderValue<RefeshWorkerRsp> and hyper::header::HeaderValue
+// Methods for converting between header::IntoHeaderValue<RefreshWorkerRsp> and hyper::header::HeaderValue
 
 #[cfg(any(feature = "client", feature = "server"))]
-impl std::convert::TryFrom<header::IntoHeaderValue<RefeshWorkerRsp>> for hyper::header::HeaderValue {
+impl std::convert::TryFrom<header::IntoHeaderValue<RefreshWorkerRsp>> for hyper::header::HeaderValue {
     type Error = String;
 
-    fn try_from(hdr_value: header::IntoHeaderValue<RefeshWorkerRsp>) -> std::result::Result<Self, Self::Error> {
+    fn try_from(hdr_value: header::IntoHeaderValue<RefreshWorkerRsp>) -> std::result::Result<Self, Self::Error> {
         let hdr_value = hdr_value.to_string();
         match hyper::header::HeaderValue::from_str(&hdr_value) {
              std::result::Result::Ok(value) => std::result::Result::Ok(value),
              std::result::Result::Err(e) => std::result::Result::Err(
-                 format!("Invalid header value for RefeshWorkerRsp - value: {} is invalid {}",
+                 format!("Invalid header value for RefreshWorkerRsp - value: {} is invalid {}",
                      hdr_value, e))
         }
     }
 }
 
 #[cfg(any(feature = "client", feature = "server"))]
-impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<RefeshWorkerRsp> {
+impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<RefreshWorkerRsp> {
     type Error = String;
 
     fn try_from(hdr_value: hyper::header::HeaderValue) -> std::result::Result<Self, Self::Error> {
         match hdr_value.to_str() {
              std::result::Result::Ok(value) => {
-                    match <RefeshWorkerRsp as std::str::FromStr>::from_str(value) {
+                    match <RefreshWorkerRsp as std::str::FromStr>::from_str(value) {
                         std::result::Result::Ok(value) => std::result::Result::Ok(header::IntoHeaderValue(value)),
                         std::result::Result::Err(err) => std::result::Result::Err(
-                            format!("Unable to convert header value '{}' into RefeshWorkerRsp - {}",
+                            format!("Unable to convert header value '{}' into RefreshWorkerRsp - {}",
                                 value, err))
                     }
              },

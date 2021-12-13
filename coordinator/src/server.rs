@@ -64,13 +64,13 @@ where
     /// Refresh worker request
     async fn refresh_worker(
         &self,
-        refesh_worker_req: models::RefeshWorkerReq,
+        refresh_worker_req: models::RefreshWorkerReq,
         context: &C,
     ) -> Result<RefreshWorkerResponse, ApiError> {
         let context = context.clone();
         info!(
             "refresh_worker({:?}) - X-Span-ID: {:?}",
-            refesh_worker_req,
+            refresh_worker_req,
             context.get().0.clone()
         );
         Err("Generic failure".into())

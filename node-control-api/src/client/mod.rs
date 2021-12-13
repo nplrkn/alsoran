@@ -382,7 +382,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn refresh_worker(
         &self,
-        param_refesh_worker_req: models::RefeshWorkerReq,
+        param_refresh_worker_req: models::RefreshWorkerReq,
         context: &C) -> Result<RefreshWorkerResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
@@ -415,7 +415,7 @@ impl<S, C> Api<C> for Client<S, C> where
         };
 
         // Body parameter
-        let body = serde_json::to_string(&param_refesh_worker_req).expect("impossible to fail to serialize");
+        let body = serde_json::to_string(&param_refresh_worker_req).expect("impossible to fail to serialize");
 
                 *request.body_mut() = Body::from(body);
 
@@ -442,7 +442,7 @@ impl<S, C> Api<C> for Client<S, C> where
                         .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
                 let body = str::from_utf8(&body)
                     .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<models::RefeshWorkerRsp>(body)?;
+                let body = serde_json::from_str::<models::RefreshWorkerRsp>(body)?;
                 Ok(RefreshWorkerResponse::RefreshWorkerResponse
                     (body)
                 )

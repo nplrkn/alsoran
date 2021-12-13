@@ -6,7 +6,7 @@ use slog::Logger;
 use slog::{info, o, warn};
 
 use crate::ClientContext;
-use models::{RefeshWorkerRsp, TransportAddress};
+use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use uuid::Uuid;
 // swagger::Has may be unused if there are no examples
@@ -58,7 +58,7 @@ impl<
         let response: RefreshWorkerResponse = gnbcu
             .coordinator_client
             .refresh_worker(
-                models::RefeshWorkerReq {
+                models::RefreshWorkerReq {
                     worker_unique_id: Uuid::new_v4(),
                     f1_address: TransportAddress {
                         host: "127.0.0.1".to_string(),
@@ -78,7 +78,7 @@ impl<
             Err(anyhow!("Coordinator failed request"))
         }?;
 
-        let RefeshWorkerRsp { amf_addresses } = ok_response;
+        let RefreshWorkerRsp { amf_addresses } = ok_response;
         let amf_address = &amf_addresses[0];
 
         let ngap_handler = NgapHandler::new(gnbcu.clone());
