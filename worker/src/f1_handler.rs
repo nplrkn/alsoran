@@ -1,15 +1,27 @@
 use crate::gnbcu::Gnbcu;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use crate::ClientContext;
 use async_trait::async_trait;
+use node_control_api::Api;
 use slog::Logger;
 use slog::{info, o};
 use std::sync::Arc;
-pub struct F1Handler<T: ClientTransportProvider, F: TransportProvider> {
-    gnbcu: Arc<Gnbcu<T, F>>,
+
+pub struct F1Handler<
+    T: ClientTransportProvider,
+    F: TransportProvider,
+    C: Api<ClientContext> + Sync + Send + Clone + 'static,
+> {
+    gnbcu: Arc<Gnbcu<T, F, C>>,
 }
 
-impl<T: ClientTransportProvider, F: TransportProvider> F1Handler<T, F> {
-    pub fn new(gnbcu: Gnbcu<T, F>) -> F1Handler<T, F> {
+impl<
+        T: ClientTransportProvider,
+        F: TransportProvider,
+        C: Api<ClientContext> + Sync + Send + Clone,
+    > F1Handler<T, F, C>
+{
+    pub fn new(gnbcu: Gnbcu<T, F, C>) -> F1Handler<T, F, C> {
         F1Handler {
             gnbcu: Arc::new(gnbcu),
         }
@@ -17,10 +29,11 @@ impl<T: ClientTransportProvider, F: TransportProvider> F1Handler<T, F> {
 }
 
 #[async_trait]
-impl<T, F> Handler for F1Handler<T, F>
+impl<T, F, C> Handler for F1Handler<T, F, C>
 where
     T: ClientTransportProvider,
     F: TransportProvider,
+    C: Api<ClientContext> + Sync + Send + 'static + Clone,
 {
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
         info!(

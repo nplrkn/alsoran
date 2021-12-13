@@ -1,40 +1,91 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
 use crate::transport_provider::{ClientTransportProvider, TransportProvider};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use slog::Logger;
-use slog::{info, o};
+use slog::{info, o, warn};
+
+use crate::ClientContext;
+use models::{RefeshWorkerRsp, TransportAddress};
+use node_control_api::{models, Api, RefreshWorkerResponse};
+use uuid::Uuid;
+// swagger::Has may be unused if there are no examples
+use swagger::{AuthData, EmptyContext, Push, XSpanIdString};
 
 /// The gNB-CU.
 
+//trait CoordClient: Api<C: Send + Sync>;
+
 #[derive(Debug, Clone)]
-pub struct Gnbcu<T, F>
+pub struct Gnbcu<T, F, C>
 where
     T: ClientTransportProvider,
     F: TransportProvider,
+    C: Api<ClientContext> + Clone + Send + Sync + 'static,
 {
     pub ngap_transport_provider: T,
     pub f1_transport_provider: F,
+    pub coordinator_client: C,
 }
 
-impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
+impl<
+        T: ClientTransportProvider,
+        F: TransportProvider,
+        C: Api<ClientContext> + Send + Sync + Clone + 'static,
+    > Gnbcu<T, F, C>
+{
     pub async fn new(
         ngap_transport_provider: T,
         f1_transport_provider: F,
+        coordinator_client: C,
         logger: Logger,
-    ) -> Result<Gnbcu<T, F>> {
+    ) -> Result<Gnbcu<T, F, C>> {
         let gnbcu = Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,
+            coordinator_client,
         };
 
-        let connect_addr_string = "127.0.0.1:38412".to_string();
+        // Get the AMF address from the Coordinator.
+        // Create client for talking to the coordinator.
+        let context: ClientContext = swagger::make_context!(
+            ContextBuilder,
+            EmptyContext,
+            None as Option<AuthData>,
+            XSpanIdString::default()
+        );
+
+        let response: RefreshWorkerResponse = gnbcu
+            .coordinator_client
+            .refresh_worker(
+                models::RefeshWorkerReq {
+                    worker_unique_id: Uuid::new_v4(),
+                    f1_address: TransportAddress {
+                        host: "127.0.0.1".to_string(),
+                        port: Some(345),
+                    },
+                    connected_amfs: Vec::new(),
+                    connected_dus: Vec::new(),
+                },
+                &context,
+            )
+            .await?;
+
+        let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
+            Ok(response)
+        } else {
+            warn!(logger, "Error response {:?}", response);
+            Err(anyhow!("Coordinator failed request"))
+        }?;
+
+        let RefeshWorkerRsp { amf_addresses } = ok_response;
+        let amf_address = &amf_addresses[0];
 
         let ngap_handler = NgapHandler::new(gnbcu.clone());
         gnbcu
             .ngap_transport_provider
             .maintain_connection(
-                connect_addr_string,
+                format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212)),
                 ngap_handler,
                 logger.new(o!("component" => "NGAP")),
             )
@@ -61,7 +112,9 @@ impl<T: ClientTransportProvider, F: TransportProvider> Gnbcu<T, F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::mock_transport_provider::MockTransportProvider;
+    use crate::{
+        mock_coordinator::MockCoordinator, mock_transport_provider::MockTransportProvider,
+    };
     use slog::info;
 
     use super::*;
@@ -74,10 +127,12 @@ mod tests {
 
         let (mock_ngap_transport_provider, send_ngap, receive_ngap) = MockTransportProvider::new();
         let (mock_f1_transport_provider, send_f1, receive_f1) = MockTransportProvider::new();
+        let mock_coordinator = MockCoordinator {};
 
         let _gnbcu = Gnbcu::new(
             mock_ngap_transport_provider,
             mock_f1_transport_provider,
+            mock_coordinator,
             root_logger.clone(),
         )
         .await;

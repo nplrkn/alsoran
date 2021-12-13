@@ -3,6 +3,8 @@
 Other ideas while we wait in the hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 - ok so let's see if we can get a worker to make a REST call to a node controller?
+  - on startup, the worker should connect to node controller, get AMF address, connect
+  - is that just a loop.  it calls set connections.  then sleeps for the interval.  start coordinator loop.
 - in order to test interesting node control stuff, we need a mock AMF that can send and receive configuration updates.
   - realistic testing needs live SCTP connections, node controller, multiple workers
   - does that mean we now need K8S?  no, we can do all this from a single process Rust async test script
@@ -10,6 +12,7 @@ Other ideas while we wait in the hope that [https://github.com/gabhijit/hampi] g
     - start worker 1 passing node controller address:port
     - start worker 2 passing node controller address:port
     - start fake amf
+- pass logger in context
 - regression testing of maintain and retry scenarios
 - test the sctp receive function
 - get info / trace levels right

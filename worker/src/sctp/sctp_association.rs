@@ -134,7 +134,7 @@ impl SctpAssociation {
             libc::sendmsg(self.fd, &msghdr, libc::MSG_DONTWAIT),
             "sendmsg"
         )?;
-        if bytes_sent == message.len() as _ {
+        if bytes_sent == message.len() as isize {
             Ok(())
         } else {
             // TODO Back pressure partial send

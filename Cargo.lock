@@ -2323,11 +2323,14 @@ dependencies = [
  "common",
  "hex",
  "libc",
+ "node-control-api",
  "os_socketaddr",
  "slog",
  "slog-async",
  "slog-term",
  "sloggers",
+ "swagger",
+ "uuid",
 ]
 
 [[package]]

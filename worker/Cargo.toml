@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 common = { path = "../common" }
 async-std = { version = "1.10.0", features = ["attributes"] }
+node-control-api = { path = "../node-control-api", features = ["client"] }
 async-trait = "0.1.51"
 #rust-sctp = "0.0.5"
 #sctp-sys = "0.0.7"
@@ -27,3 +28,7 @@ os_socketaddr = "0.2.0"
 hex = "0.4.3"
 byteorder = "1.4.3"
 anyhow = "1.0.51"
+swagger = "5.0.2"
+uuid = {version = "0.8", features = ["serde", "v4"]}
+
+
