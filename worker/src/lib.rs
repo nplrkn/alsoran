@@ -11,6 +11,7 @@ mod sctp_client_transport_provider;
 use node_control_api::Client;
 use sctp_client_transport_provider::SctpClientTransportProvider;
 mod transport_provider;
+use async_std::task::JoinHandle;
 use slog::{info, Logger};
 use stop_token::StopSource;
 use swagger::{AuthData, ContextBuilder, EmptyContext, XSpanIdString};
@@ -32,7 +33,7 @@ const NGAP_SCTP_PPID: u32 = 60;
 // and 68 for DTLS over SCTP (IETF RFC 6083 [9]).
 const F1AP_NGAP_PPID: u32 = 62;
 
-pub async fn run(logger: Logger) -> StopSource {
+pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
     info!(logger, "Start");
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
@@ -44,7 +45,7 @@ pub async fn run(logger: Logger) -> StopSource {
     let coordinator_client =
         Client::try_new_http(&base_path).expect("Failed to create HTTP client");
 
-    async_std::task::spawn(async move {
+    let task = async_std::task::spawn(async move {
         let _gnbcu = Gnbcu::new(
             ngap_transport_provider,
             f1_transport_provider,
@@ -55,5 +56,5 @@ pub async fn run(logger: Logger) -> StopSource {
         stop_token.await;
         info!(logger, "Exit");
     });
-    stop_source
+    (stop_source, task)
 }
