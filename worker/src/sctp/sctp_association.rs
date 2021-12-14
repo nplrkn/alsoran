@@ -1,8 +1,7 @@
 use super::Message;
-use crate::sctp::sctp_c_bindings;
 use crate::sctp::sctp_c_bindings::{
-    sctp_paddrparams, sctp_spp_flags_SPP_HB_ENABLE, SCTP_NODELAY, SCTP_PEER_ADDR_PARAMS,
-    SCTP_RECVRCVINFO, SOL_SCTP,
+    sctp_assoc_t, sctp_cmsg_type_SCTP_SNDINFO, sctp_paddrparams, sctp_rcvinfo,
+    sctp_spp_flags_SPP_HB_ENABLE, SCTP_NODELAY, SCTP_PEER_ADDR_PARAMS, SCTP_RECVRCVINFO, SOL_SCTP,
 };
 use anyhow::{anyhow, Result};
 use async_io::Async;
@@ -85,7 +84,7 @@ impl SctpAssociation {
             iov_len: message.len(),
         };
 
-        let mut msghdr = make_msghdr(&mut sctp_c_bindings::sctp_rcvinfo::default(), msg_iov);
+        let mut msghdr = make_msghdr(&mut sctp_rcvinfo::default(), msg_iov);
         let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0), "recvmsg")?;
         if bytes_received > 0 {
             message.resize(bytes_received as _, 0);
@@ -110,13 +109,13 @@ impl SctpAssociation {
             pub snd_flags: libc::__u16,
             pub snd_ppid: libc::__u32,
             pub snd_context: libc::__u32,
-            pub snd_assoc_id: sctp_c_bindings::sctp_assoc_t,
+            pub snd_assoc_id: sctp_assoc_t,
         }
 
         let mut sndinfo = Sndinfo {
             cmsg_len: mem::size_of::<Sndinfo>(),
             cmsg_level: IPPROTO_SCTP,
-            cmsg_type: sctp_c_bindings::sctp_cmsg_type_SCTP_SNDINFO as _,
+            cmsg_type: sctp_cmsg_type_SCTP_SNDINFO as _,
             snd_sid: 1,
             snd_flags: 0,
             snd_ppid: self.ppid.to_be(),
