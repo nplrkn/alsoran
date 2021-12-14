@@ -2,6 +2,8 @@
 
 Other ideas while we wait in the hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
+- get tests passing cleanly 
+  - remove bindgen test cruft
 - ok so let's see if we can get a worker to make a REST call to a node controller?
   - on startup, the worker should connect to node controller, get AMF address, connect
   - is that just a loop.  it calls set connections.  then sleeps for the interval.  start coordinator loop.

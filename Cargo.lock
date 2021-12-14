@@ -375,6 +375,7 @@ dependencies = [
  "openssl",
  "serde_ignored",
  "slog",
+ "stop-token",
  "swagger",
  "tokio",
  "tokio-openssl",
@@ -999,6 +1000,7 @@ dependencies = [
  "common",
  "coordinator",
  "slog",
+ "stop-token",
  "worker",
 ]
 
@@ -1809,6 +1811,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "stop-token"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3829f0fc642e19ef8a1072ba8e33139a385f609ba56761df501c5272a9704918"
+dependencies = [
+ "async-channel",
+ "cfg-if 1.0.0",
+ "futures-core",
+ "pin-project-lite 0.2.7",
+]
+
+[[package]]
 name = "strsim"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2358,6 +2372,7 @@ dependencies = [
  "slog-async",
  "slog-term",
  "sloggers",
+ "stop-token",
  "swagger",
  "uuid",
 ]

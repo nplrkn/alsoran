@@ -1,8 +1,5 @@
+use super::sctp_bindings::*;
 use super::Message;
-use crate::sctp::sctp_c_bindings::{
-    sctp_assoc_t, sctp_cmsg_type_SCTP_SNDINFO, sctp_paddrparams, sctp_rcvinfo,
-    sctp_spp_flags_SPP_HB_ENABLE, SCTP_NODELAY, SCTP_PEER_ADDR_PARAMS, SCTP_RECVRCVINFO, SOL_SCTP,
-};
 use anyhow::{anyhow, Result};
 use async_io::Async;
 use io::Error;
@@ -12,7 +9,7 @@ use slog::{warn, Logger};
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::{io, mem};
 
-// An SCTP assocation.
+/// An SCTP assocation.
 // Cannot be Cloned since it is the owner of the fd.  Instead use Arc.
 #[derive(Debug)]
 pub struct SctpAssociation {

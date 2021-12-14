@@ -30,5 +30,7 @@ byteorder = "1.4.3"
 anyhow = "1.0.51"
 swagger = "5.0.2"
 uuid = {version = "0.8", features = ["serde", "v4"]}
+stop-token = "0.6.1"
+
 
 
