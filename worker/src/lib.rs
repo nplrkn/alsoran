@@ -35,8 +35,6 @@ const F1AP_NGAP_PPID: u32 = 62;
 
 pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
     info!(logger, "Start");
-    let stop_source = StopSource::new();
-    let stop_token = stop_source.token();
     let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID);
     let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID);
 
@@ -45,16 +43,11 @@ pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
     let coordinator_client =
         Client::try_new_http(&base_path).expect("Failed to create HTTP client");
 
-    let task = async_std::task::spawn(async move {
-        let _gnbcu = Gnbcu::new(
-            ngap_transport_provider,
-            f1_transport_provider,
-            coordinator_client,
-            logger.clone(),
-        )
-        .await;
-        stop_token.await;
-        info!(logger, "Exit");
-    });
-    (stop_source, task)
+    Gnbcu::new(
+        ngap_transport_provider,
+        f1_transport_provider,
+        coordinator_client,
+        logger.clone(),
+    )
+    .spawn()
 }

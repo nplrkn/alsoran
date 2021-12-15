@@ -60,6 +60,7 @@ impl ClientTransportProvider for MockTransportProvider {
         logger: Logger,
     ) -> Result<()> {
         let receiver = self.receiver.clone();
+        info!(logger, "Spawning mock receiver");
         async_std::task::spawn(async move {
             while let Ok(message) = receiver.recv().await {
                 info!(
