@@ -38,7 +38,7 @@ pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
     let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID);
     let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID);
 
-    let base_path = "http://127.0.0.1:232156";
+    let base_path = "http://127.0.0.1:23156";
 
     let coordinator_client =
         Client::try_new_http(&base_path).expect("Failed to create HTTP client");
