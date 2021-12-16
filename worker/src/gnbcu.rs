@@ -41,8 +41,9 @@ impl<
         ngap_transport_provider: T,
         f1_transport_provider: F,
         coordinator_client: C,
-        logger: Logger,
+        logger: &Logger,
     ) -> Gnbcu<T, F, C> {
+        let logger = logger.new(o!("gnbcu" => 1));
         Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,
@@ -92,7 +93,7 @@ impl<
             .await?;
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
-            trace!(logger, "OK refresh worker response");
+            trace!(logger, "Received refresh worker response");
             Ok(response)
         } else {
             warn!(logger, "Error response {:?}", response);
@@ -107,17 +108,16 @@ impl<
             .maintain_connection(
                 format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212)),
                 ngap_handler,
-                logger.new(o!("component" => "NGAP")),
+                logger.new(o!("NGAP handler"=>1))
             )
             .await?;
-        info!(logger, "Started NGAP handler");
 
-        // let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-        // gnbcu
-        //     .ngap_transport_provider
-        //     .send_message(precanned_ng_setup, &logger)
-        //     .await
-        //     .unwrap();
+        trace!(logger, "Send NG Setup");
+        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
+        self.ngap_transport_provider
+            .send_message(precanned_ng_setup, &logger)
+            .await
+            .unwrap();
 
         let _f1_handler = F1Handler::new(self.clone());
         // gnbcu
@@ -147,25 +147,25 @@ mod tests {
 
     #[async_std::test]
     async fn initial_access_procedure() -> Result<()> {
-        let logger = common::logging::test_init();
+        let root_logger = common::logging::test_init();
+        let logger = root_logger.new(o!("script" => "1"));
 
         // Create GNBCU with mock tranports + coordinator.
         let (mock_ngap_transport_provider, send_ngap, receive_ngap) = MockTransportProvider::new();
-        let (mock_f1_transport_provider, send_f1, receive_f1) = MockTransportProvider::new();
+        let (mock_f1_transport_provider, _send_f1, _receive_f1) = MockTransportProvider::new();
         let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
-
-        info!(logger, "------------ SUBTEST 1 ------------");
 
         let (stop_source, worker_task) = Gnbcu::new(
             mock_ngap_transport_provider,
             mock_f1_transport_provider,
             mock_coordinator,
-            logger.clone(),
+            &root_logger,
         )
         .spawn();
 
-        info!(logger, "Handle node control request");
+        info!(logger, "Wait for refresh worker request");
         let _ignored = node_control_req.recv().await?;
+        info!(logger, "Received refresh worker request - send response");
         node_control_rsp
             .send(NodeControlResponse::RefreshWorkerResponse(
                 RefreshWorkerResponse::RefreshWorkerResponse(RefreshWorkerRsp {
@@ -177,18 +177,15 @@ mod tests {
             ))
             .await?;
 
-        info!(logger, "Handle NGAP NG Setup");
+        info!(logger, "Wait for NG Setup");
         let _ignored_ngap = receive_ngap.recv().await.unwrap();
-        let ng_setup_response: Vec<u8> = "incorrect NG setup response".into();
+        info!(logger, "Received NGAP NG Setup - send response");
+        send_ngap.send("incorrect NG setup response".into()).await.unwrap();
 
-        // This sends the message into the channel.  It will be received in the
-        // Gnbcu's NGAP handler.
-        info!(logger, "Test script sends in NGAP message");
-        send_ngap.send(ng_setup_response).await.unwrap();
-
-        info!(logger, "Gracefully shut down worker");
+        info!(logger, "Start graceful shutdown of worker");
         drop(stop_source);
         worker_task.await;
+        info!(logger, "Worker stopped");
 
         Ok(())
     }

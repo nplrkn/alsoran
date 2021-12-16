@@ -47,7 +47,7 @@ pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
         ngap_transport_provider,
         f1_transport_provider,
         coordinator_client,
-        logger.clone(),
+        &logger,
     )
     .spawn()
 }

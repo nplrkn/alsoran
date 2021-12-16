@@ -4,7 +4,7 @@ use crate::ClientContext;
 use async_trait::async_trait;
 use node_control_api::Api;
 use slog::Logger;
-use slog::{info, o};
+use slog::info;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -40,9 +40,8 @@ where
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
         info!(
             logger,
-            "NgapHandler got non UE associated message {:?} - forward to F1 transport", message
+            "NgapHandler got non UE associated message {:?}", message
         );
-        let _logger = logger.new(o!("component" => "F1"));
         // self.gnbcu
         //     .f1_transport_provider
         //     .send_message(message, &logger)

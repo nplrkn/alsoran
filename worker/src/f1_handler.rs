@@ -3,8 +3,7 @@ use crate::transport_provider::{ClientTransportProvider, Handler, Message, Trans
 use crate::ClientContext;
 use async_trait::async_trait;
 use node_control_api::Api;
-use slog::Logger;
-use slog::{info, o};
+use slog::{Logger,trace};
 use std::sync::Arc;
 
 pub struct F1Handler<
@@ -36,11 +35,11 @@ where
     C: Api<ClientContext> + Sync + Send + 'static + Clone,
 {
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
-        info!(
+        trace!(
             logger,
-            "F1Handler got non UE associated message {:?} - forward to NGAP transport", message
+            "F1Handler got non UE associated message {:?}",
+            message
         );
-        let logger = logger.new(o!("component" => "NGAP"));
         self.gnbcu
             .ngap_transport_provider
             .send_message(message, &logger)
