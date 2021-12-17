@@ -1,23 +1,18 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
 use crate::transport_provider::{ClientTransportProvider, TransportProvider};
+use crate::ClientContext;
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
+use models::{RefreshWorkerRsp, TransportAddress};
+use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
 use slog::{info, o, trace, warn};
 use stop_token::{StopSource, StopToken};
-
-use crate::ClientContext;
-use models::{RefreshWorkerRsp, TransportAddress};
-use node_control_api::{models, Api, RefreshWorkerResponse};
-use uuid::Uuid;
-// swagger::Has may be unused if there are no examples
 use swagger::{AuthData, EmptyContext, Push, XSpanIdString};
+use uuid::Uuid;
 
 /// The gNB-CU.
-
-//trait CoordClient: Api<C: Send + Sync>;
-
 #[derive(Debug, Clone)]
 pub struct Gnbcu<T, F, C>
 where
@@ -66,7 +61,6 @@ impl<
         let logger = &self.logger;
         info!(logger, "Start");
 
-        // Get the AMF address from the Coordinator.
         // Create client for talking to the coordinator.
         let context: ClientContext = swagger::make_context!(
             ContextBuilder,
@@ -104,20 +98,23 @@ impl<
         let amf_address = &amf_addresses[0];
 
         let ngap_handler = NgapHandler::new(self.clone());
+        let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
+        info!(logger, "Maintain connection to AMF {}", address);
         self.ngap_transport_provider
-            .maintain_connection(
-                format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212)),
-                ngap_handler,
-                logger.new(o!("NGAP handler"=>1))
-            )
+            .maintain_connection(address, ngap_handler, logger.new(o!("NGAP handler"=>1)))
             .await?;
 
+        // TODO - the coordinator should determine whether and when we send Setup, or RAN configuration update
         trace!(logger, "Send NG Setup");
         let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-        self.ngap_transport_provider
+        match self
+            .ngap_transport_provider
             .send_message(precanned_ng_setup, &logger)
             .await
-            .unwrap();
+        {
+            Ok(()) => (),
+            Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
+        };
 
         let _f1_handler = F1Handler::new(self.clone());
         // gnbcu
@@ -180,7 +177,10 @@ mod tests {
         info!(logger, "Wait for NG Setup");
         let _ignored_ngap = receive_ngap.recv().await.unwrap();
         info!(logger, "Received NGAP NG Setup - send response");
-        send_ngap.send("incorrect NG setup response".into()).await.unwrap();
+        send_ngap
+            .send("incorrect NG setup response".into())
+            .await
+            .unwrap();
 
         info!(logger, "Start graceful shutdown of worker");
         drop(stop_source);
