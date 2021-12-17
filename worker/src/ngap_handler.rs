@@ -1,10 +1,10 @@
 use crate::gnbcu::Gnbcu;
-use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use crate::ClientContext;
 use async_trait::async_trait;
+use common::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use node_control_api::Api;
-use slog::Logger;
 use slog::info;
+use slog::Logger;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]

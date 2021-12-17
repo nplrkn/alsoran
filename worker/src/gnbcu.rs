@@ -1,9 +1,9 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
-use crate::transport_provider::{ClientTransportProvider, TransportProvider};
 use crate::ClientContext;
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
+use common::transport_provider::{ClientTransportProvider, TransportProvider};
 use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -131,11 +131,9 @@ impl<
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        mock_coordinator::{MockCoordinator, NodeControlResponse},
-        mock_transport_provider::MockTransportProvider,
-    };
+    use crate::mock_coordinator::{MockCoordinator, NodeControlResponse};
     use anyhow::Result;
+    use common::mock_transport_provider::MockTransportProvider;
     use models::RefreshWorkerRsp;
     use node_control_api::{models, RefreshWorkerResponse};
     use slog::info;

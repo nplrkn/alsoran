@@ -3,15 +3,10 @@ use gnbcu::Gnbcu;
 mod gnbcu;
 #[cfg(test)]
 mod mock_coordinator;
-#[cfg(test)]
-mod mock_transport_provider;
 mod ngap_handler;
-mod sctp;
-mod sctp_client_transport_provider;
-use node_control_api::Client;
-use sctp_client_transport_provider::SctpClientTransportProvider;
-mod transport_provider;
 use async_std::task::JoinHandle;
+use common::sctp_client_transport_provider::SctpClientTransportProvider;
+use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
 use swagger::{AuthData, ContextBuilder, EmptyContext, XSpanIdString};

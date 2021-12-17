@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 async-std = { version = "1.10.0", features = ["attributes"] }
+async-trait = "0.1.51"
 slog = "2.7.0"
 sloggers = "2.1.1"
 slog-term = "2.8.0"
@@ -15,3 +16,11 @@ signal-hook = "0.3.10"
 signal-hook-async-std = "0.2.1"
 anyhow = "1.0.51"
 async-channel = "1.6.1"
+os_socketaddr = "0.2.0"
+libc = "^0.2"
+async-io = "1.6.0"
+async-net = "1.6.1"
+hex = "0.4.3"
+
+
+

@@ -49,11 +49,6 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                         let assoc = Arc::new(assoc);
                         shared_assocs.lock().await.insert(assoc_id, assoc.clone());
 
-                        // TODO Hack
-                        // Instead we should send a notification about this connection being up
-                        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-                        assoc.send_msg(precanned_ng_setup).await.unwrap();
-
                         while let Ok(message) = assoc.recv_msg().await {
                             info!(
                                 logger,
