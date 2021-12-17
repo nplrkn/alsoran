@@ -93,7 +93,7 @@ dependencies = [
  "futures-lite",
  "num_cpus",
  "once_cell",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -377,8 +377,8 @@ dependencies = [
  "slog",
  "stop-token",
  "swagger",
- "tokio",
- "tokio-openssl",
+ "tokio 0.2.25",
+ "tokio-openssl 0.6.3",
  "url",
  "uuid",
 ]
@@ -819,7 +819,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio",
+ "tokio 0.2.25",
  "tokio-util",
  "tracing",
  "tracing-futures",
@@ -906,7 +906,7 @@ dependencies = [
  "itoa",
  "pin-project",
  "socket2 0.3.19",
- "tokio",
+ "tokio 0.2.25",
  "tower-service",
  "tracing",
  "want",
@@ -943,8 +943,8 @@ dependencies = [
  "once_cell",
  "openssl",
  "openssl-sys",
- "tokio",
- "tokio-openssl",
+ "tokio 0.2.25",
+ "tokio-openssl 0.4.0",
  "tower-layer",
 ]
 
@@ -957,7 +957,7 @@ dependencies = [
  "bytes 0.5.6",
  "hyper",
  "native-tls",
- "tokio",
+ "tokio 0.2.25",
  "tokio-tls",
 ]
 
@@ -1234,8 +1234,8 @@ dependencies = [
  "serde_ignored",
  "serde_json",
  "swagger",
- "tokio",
- "tokio-openssl",
+ "tokio 0.2.25",
+ "tokio-openssl 0.6.3",
  "tokio-tls",
  "url",
  "uuid",
@@ -1974,6 +1974,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio"
+version = "1.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbbf1c778ec206785635ce8ad57fe52b3009ae9e0c9f574a728f3049d3e55838"
+dependencies = [
+ "pin-project-lite 0.2.7",
+]
+
+[[package]]
 name = "tokio-macros"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1991,7 +2000,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c4b08c5f4208e699ede3df2520aca2e82401b2de33f45e96696a074480be594"
 dependencies = [
  "openssl",
- "tokio",
+ "tokio 0.2.25",
+]
+
+[[package]]
+name = "tokio-openssl"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c08f9ffb7809f1b20c1b398d92acf4cc719874b3b2b2d9ea2f09b4a80350878a"
+dependencies = [
+ "futures-util",
+ "openssl",
+ "openssl-sys",
+ "tokio 1.15.0",
 ]
 
 [[package]]
@@ -2001,7 +2022,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a70f4fcd7b3b24fb194f837560168208f669ca8cb70d0c4b862944452396343"
 dependencies = [
  "native-tls",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -2015,7 +2036,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project-lite 0.1.12",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
