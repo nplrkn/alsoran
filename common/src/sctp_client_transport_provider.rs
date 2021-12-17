@@ -81,7 +81,4 @@ impl TransportProvider for SctpClientTransportProvider {
             Err(anyhow!("No association up"))
         }
     }
-    async fn start_receiving<R: Handler>(&self, _handler: R, _logger: &Logger) {
-        unimplemented!();
-    }
 }
