@@ -21,7 +21,7 @@ native-tls = { version = "0.2", optional = true }
 hyper-tls = { version = "0.4", optional = true }
 
 [target.'cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))'.dependencies]
-hyper-openssl = { version = "0.8", optional = true }
+hyper-openssl = { version = "0.9", optional = true }
 openssl = {version = "0.10", optional = true }
 
 [dependencies]
