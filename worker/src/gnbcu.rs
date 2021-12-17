@@ -1,21 +1,18 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
 use crate::transport_provider::{ClientTransportProvider, TransportProvider};
-use anyhow::{anyhow, Result};
-use slog::Logger;
-use slog::{info, o, warn};
-
 use crate::ClientContext;
+use anyhow::{anyhow, Result};
+use async_std::task::JoinHandle;
 use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
-use uuid::Uuid;
-// swagger::Has may be unused if there are no examples
+use slog::Logger;
+use slog::{info, o, trace, warn};
+use stop_token::{StopSource, StopToken};
 use swagger::{AuthData, EmptyContext, Push, XSpanIdString};
+use uuid::Uuid;
 
 /// The gNB-CU.
-
-//trait CoordClient: Api<C: Send + Sync>;
-
 #[derive(Debug, Clone)]
 pub struct Gnbcu<T, F, C>
 where
@@ -26,6 +23,7 @@ where
     pub ngap_transport_provider: T,
     pub f1_transport_provider: F,
     pub coordinator_client: C,
+    pub logger: Logger,
 }
 
 impl<
@@ -34,19 +32,35 @@ impl<
         C: Api<ClientContext> + Send + Sync + Clone + 'static,
     > Gnbcu<T, F, C>
 {
-    pub async fn new(
+    pub fn new(
         ngap_transport_provider: T,
         f1_transport_provider: F,
         coordinator_client: C,
-        logger: Logger,
-    ) -> Result<Gnbcu<T, F, C>> {
-        let gnbcu = Gnbcu {
+        logger: &Logger,
+    ) -> Gnbcu<T, F, C> {
+        let logger = logger.new(o!("gnbcu" => 1));
+        Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,
             coordinator_client,
-        };
+            logger,
+        }
+    }
 
-        // Get the AMF address from the Coordinator.
+    pub fn spawn(self) -> (StopSource, JoinHandle<()>) {
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
+        let task = async_std::task::spawn(async move {
+            // Crash if this task exits, because there is no recovery loop.
+            self.serve(stop_token).await.expect("Fatal error in worker");
+        });
+        (stop_source, task)
+    }
+
+    async fn serve(self, stop_token: StopToken) -> Result<()> {
+        let logger = &self.logger;
+        info!(logger, "Start");
+
         // Create client for talking to the coordinator.
         let context: ClientContext = swagger::make_context!(
             ContextBuilder,
@@ -55,7 +69,8 @@ impl<
             XSpanIdString::default()
         );
 
-        let response: RefreshWorkerResponse = gnbcu
+        trace!(logger, "Send refresh worker request");
+        let response: RefreshWorkerResponse = self
             .coordinator_client
             .refresh_worker(
                 models::RefreshWorkerReq {
@@ -72,6 +87,7 @@ impl<
             .await?;
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
+            trace!(logger, "Received refresh worker response");
             Ok(response)
         } else {
             warn!(logger, "Error response {:?}", response);
@@ -81,95 +97,96 @@ impl<
         let RefreshWorkerRsp { amf_addresses } = ok_response;
         let amf_address = &amf_addresses[0];
 
-        let ngap_handler = NgapHandler::new(gnbcu.clone());
-        gnbcu
-            .ngap_transport_provider
-            .maintain_connection(
-                format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212)),
-                ngap_handler,
-                logger.new(o!("component" => "NGAP")),
-            )
+        let ngap_handler = NgapHandler::new(self.clone());
+        let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
+        info!(logger, "Maintain connection to AMF {}", address);
+        self.ngap_transport_provider
+            .maintain_connection(address, ngap_handler, logger.new(o!("NGAP handler"=>1)))
             .await?;
-        info!(logger, "Started NGAP handler");
 
-        // let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-        // gnbcu
-        //     .ngap_transport_provider
-        //     .send_message(precanned_ng_setup, &logger)
-        //     .await
-        //     .unwrap();
+        // TODO - the coordinator should determine whether and when we send Setup, or RAN configuration update
+        trace!(logger, "Send NG Setup");
+        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
+        match self
+            .ngap_transport_provider
+            .send_message(precanned_ng_setup, &logger)
+            .await
+        {
+            Ok(()) => (),
+            Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
+        };
 
-        let _f1_handler = F1Handler::new(gnbcu.clone());
+        let _f1_handler = F1Handler::new(self.clone());
         // gnbcu
         //     .f1_transport_provider
         //     .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
         //     .await;
         // info!(logger, "Started F1 handler");
 
-        Ok(gnbcu)
+        stop_token.await;
+        info!(logger, "Stop");
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        mock_coordinator::MockCoordinator, mock_transport_provider::MockTransportProvider,
+        mock_coordinator::{MockCoordinator, NodeControlResponse},
+        mock_transport_provider::MockTransportProvider,
     };
+    use anyhow::Result;
+    use models::RefreshWorkerRsp;
+    use node_control_api::{models, RefreshWorkerResponse};
     use slog::info;
 
     use super::*;
 
     #[async_std::test]
-    async fn initial_access_procedure() {
+    async fn initial_access_procedure() -> Result<()> {
         let root_logger = common::logging::test_init();
-        // Creating a Gnbcu will use a real SCTP transport.  However we can also create it with a mock tranport that
-        // uses channels instead.
+        let logger = root_logger.new(o!("script" => "1"));
 
+        // Create GNBCU with mock tranports + coordinator.
         let (mock_ngap_transport_provider, send_ngap, receive_ngap) = MockTransportProvider::new();
-        let (mock_f1_transport_provider, send_f1, receive_f1) = MockTransportProvider::new();
-        let mock_coordinator = MockCoordinator {};
+        let (mock_f1_transport_provider, _send_f1, _receive_f1) = MockTransportProvider::new();
+        let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
 
-        let _gnbcu = Gnbcu::new(
+        let (stop_source, worker_task) = Gnbcu::new(
             mock_ngap_transport_provider,
             mock_f1_transport_provider,
             mock_coordinator,
-            root_logger.clone(),
+            &root_logger,
         )
-        .await;
-        let message_1: Vec<u8> = "hello world".into();
-        let message_2: Vec<u8> = "goodbye cruel world".into();
+        .spawn();
 
-        // ----------------- SUBTEST 1 --------------------------
-        let logger = root_logger.new(o!("subtest" => 1));
-        info!(logger, "Test script sends in message");
+        info!(logger, "Wait for refresh worker request");
+        let _ignored = node_control_req.recv().await?;
+        info!(logger, "Received refresh worker request - send response");
+        node_control_rsp
+            .send(NodeControlResponse::RefreshWorkerResponse(
+                RefreshWorkerResponse::RefreshWorkerResponse(RefreshWorkerRsp {
+                    amf_addresses: vec![TransportAddress {
+                        host: "6.7.8.9".to_string(),
+                        port: Some(10),
+                    }],
+                }),
+            ))
+            .await?;
 
-        // This sends the message into the channel.  It will be received in the
-        // Gnbcu's NGAP handler.
-        info!(logger, "Test script sends in NGAP message");
-        send_ngap.send(message_1).await.unwrap();
+        info!(logger, "Wait for NG Setup");
+        let _ignored_ngap = receive_ngap.recv().await.unwrap();
+        info!(logger, "Received NGAP NG Setup - send response");
+        send_ngap
+            .send("incorrect NG setup response".into())
+            .await
+            .unwrap();
 
-        // The Gnbcu's NGAP handler then forwards the message out on the F1 provider.
-        let message_1 = receive_f1.recv().await.unwrap();
-        info!(logger, "Test script receives F1 message {:?}", message_1);
+        info!(logger, "Start graceful shutdown of worker");
+        drop(stop_source);
+        worker_task.await;
+        info!(logger, "Worker stopped");
 
-        // ----------------- SUBTEST 2 --------------------------
-        let logger = root_logger.new(o!("subtest" => 2));
-
-        // Send in a message on F1 and catch on the NGAP side.
-        info!(logger, "Test script sends in F1 message");
-        send_f1.send(message_2).await.unwrap();
-
-        // THIS HANGS!!!!!!
-        let message_2 = receive_ngap.recv().await.unwrap();
-        info!(logger, "Test script receives NGAP message {:?}", message_2);
-
-        // send_ngap.send(message_2).await.unwrap();
-        // let message_2 = receive_f1.recv().await.unwrap();
-        // send_f1.send(message_1).await.unwrap();
-        // let message_1 = receive_ngap.recv().await.unwrap();
-        info!(
-            logger,
-            "Test framework got messages {:?}, {:?}, done", message_1, message_2
-        );
+        Ok(())
     }
 }

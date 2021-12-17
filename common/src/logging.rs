@@ -1,8 +1,8 @@
 extern crate slog;
 
-use slog::Logger;
+use slog::{Logger};
 use sloggers::terminal::{Destination, TerminalLoggerBuilder};
-use sloggers::types::Severity;
+use sloggers::types::{Severity, Format};
 use sloggers::Build;
 
 use slog::{o, Drain};
@@ -19,7 +19,7 @@ pub fn init() -> Logger {
     let mut builder = TerminalLoggerBuilder::new();
     builder.level(Severity::Debug);
     builder.destination(Destination::Stdout);
+    builder.format(Format::Compact);
 
-    let logger = builder.build().unwrap();
-    logger
+  builder.build().unwrap()
 }
