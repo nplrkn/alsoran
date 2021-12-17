@@ -467,9 +467,9 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
 name = "env_logger"
-version = "0.7.1"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44533bbbb3bb3c1fa17d9f2e4e38bbbaf8396ba82193c4cb1b6445d711445d36"
+checksum = "0b2cf0344971ee6c64c31be0d530793fba457d322dfec2810c453d0ef228f9c3"
 dependencies = [
  "atty",
  "humantime",
@@ -542,7 +542,18 @@ checksum = "dd01808c133782ef54e23f527c997819c7825e9f698c3175ae8f9f013aa756ca"
 dependencies = [
  "frunk_core 0.3.2",
  "frunk_derives 0.3.2",
- "frunk_proc_macros",
+ "frunk_proc_macros 0.0.5",
+]
+
+[[package]]
+name = "frunk"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cd67cf7d54b7e72d0ea76f3985c3747d74aee43e0218ad993b7903ba7a5395e"
+dependencies = [
+ "frunk_core 0.4.0",
+ "frunk_derives 0.4.0",
+ "frunk_proc_macros 0.1.0",
 ]
 
 [[package]]
@@ -551,7 +562,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b752626f1f25ccc9c2309f27206a456798c572149c0eecace0f80a3a8792e845"
 dependencies = [
- "frunk",
+ "frunk 0.3.2",
 ]
 
 [[package]]
@@ -644,7 +655,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4735f7fbe65ed61442264f1d2cc98c93c5df4ca1a308851a645351c4912ebeb9"
 dependencies = [
  "frunk_core 0.3.2",
- "frunk_proc_macros_impl",
+ "frunk_proc_macros_impl 0.0.5",
+ "proc-macro-hack",
+]
+
+[[package]]
+name = "frunk_proc_macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a078bd8459eccbb85e0b007b8f756585762a72a9efc53f359b371c3b6351dbcc"
+dependencies = [
+ "frunk_core 0.4.0",
+ "frunk_proc_macros_impl 0.1.0",
  "proc-macro-hack",
 ]
 
@@ -659,6 +681,19 @@ dependencies = [
  "proc-macro-hack",
  "quote 0.6.13",
  "syn 0.15.44",
+]
+
+[[package]]
+name = "frunk_proc_macros_impl"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ffba99f0fa4f57e42f57388fbb9a0ca863bc2b4261f3c5570fed579d5df6c32"
+dependencies = [
+ "frunk_core 0.4.0",
+ "frunk_proc_macro_helpers 0.1.0",
+ "proc-macro-hack",
+ "quote 1.0.10",
+ "syn 1.0.82",
 ]
 
 [[package]]
@@ -881,12 +916,9 @@ checksum = "494b4d60369511e7dea41cf646832512a94e542f68bb9c49e54518e0f468eb47"
 
 [[package]]
 name = "humantime"
-version = "1.3.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f"
-dependencies = [
- "quick-error",
-]
+checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "hyper"
@@ -1214,7 +1246,7 @@ dependencies = [
  "chrono",
  "clap",
  "env_logger",
- "frunk",
+ "frunk 0.4.0",
  "frunk-enum-core",
  "frunk-enum-derive",
  "frunk_core 0.3.2",
@@ -1432,12 +1464,6 @@ checksum = "fb37d2df5df740e582f28f8560cf425f52bb267d872fe58358eadb554909f07a"
 dependencies = [
  "unicode-xid 0.2.2",
 ]
-
-[[package]]
-name = "quick-error"
-version = "1.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
 name = "quote"
