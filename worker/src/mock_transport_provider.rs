@@ -2,8 +2,7 @@ use super::transport_provider::{ClientTransportProvider, Handler, Message, Trans
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
-use slog::info;
-use slog::Logger;
+use slog::{Logger, trace};
 
 /// MockTransportProvider
 /// Provides a message passing mechanism for use by test scripts.
@@ -32,7 +31,7 @@ impl MockTransportProvider {
 #[async_trait]
 impl TransportProvider for MockTransportProvider {
     async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
-        info!(logger, "MockTransportProvider send message {:?}", message);
+        trace!(logger, "MockTransportProvider send message {:?}", message);
         self.sender.send(message).await.unwrap();
         Ok(())
     }
@@ -41,9 +40,10 @@ impl TransportProvider for MockTransportProvider {
         let logger = logger.clone();
         async_std::task::spawn(async move {
             while let Ok(message) = my_receiver.recv().await {
-                info!(
+                trace!(
                     logger,
-                    "MockTransportProvider received {:?}, forward to handler", message
+                    "MockTransportProvider received {:?}, forward to handler",
+                    message
                 );
                 handler.recv_non_ue_associated(message, &logger).await;
             }
@@ -62,9 +62,10 @@ impl ClientTransportProvider for MockTransportProvider {
         let receiver = self.receiver.clone();
         async_std::task::spawn(async move {
             while let Ok(message) = receiver.recv().await {
-                info!(
+                trace!(
                     logger,
-                    "MockTransportProvider received {:?}, forward to handler", message
+                    "MockTransportProvider received {:?}, forward to handler",
+                    message
                 );
                 handler.recv_non_ue_associated(message, &logger).await;
             }

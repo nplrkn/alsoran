@@ -12,4 +12,5 @@ coordinator = { path = "../coordinator" }
 async-std = { version = "1.10.0", features = ["attributes","tokio02"] }
 async-trait = "0.1.51"
 slog = "2.7.0"
+stop-token = "0.6.1"
 

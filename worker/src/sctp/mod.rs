@@ -1,5 +1,5 @@
 mod sctp_association;
-mod sctp_c_bindings;
+mod sctp_bindings;
 
 pub use sctp_association::SctpAssociation;
 
