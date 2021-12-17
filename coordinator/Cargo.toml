@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 common = { path = "../common" }
 node-control-api = { path = "../node-control-api", features = ["server"] }
-hyper = "0.13"
+hyper = "0.14"
 serde_ignored = "0.1.1"
 url = "2.1"
 tokio-openssl = "0.4"
