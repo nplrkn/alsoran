@@ -1,19 +1,27 @@
+use crate::sctp::SctpAssociation;
 use crate::sctp::SctpListener;
 use crate::transport_provider::{Handler, ServerTransportProvider};
 use anyhow::Result;
 use async_std::prelude::Future;
-use async_std::stream::StreamExt;
+use async_std::sync::{Arc, Mutex};
 use async_std::task;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use os_socketaddr::OsSocketAddr;
 use slog::{info, o, trace, Logger};
+use std::collections::HashMap;
 
+// TODO common structure with the client version
 #[derive(Debug, Clone)]
-pub struct SctpServerTransportProvider;
+pub struct SctpServerTransportProvider {
+    assocs: Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>,
+    ppid: u32,
+}
 
 impl SctpServerTransportProvider {
-    pub fn new() -> SctpServerTransportProvider {
-        SctpServerTransportProvider {}
+    pub fn new(ppid: u32) -> SctpServerTransportProvider {
+        let assocs = Arc::new(Mutex::new(Box::new(HashMap::new())));
+        SctpServerTransportProvider { assocs, ppid }
     }
 }
 
@@ -30,13 +38,26 @@ impl ServerTransportProvider for SctpServerTransportProvider {
         F: Future<Output = ()> + Send + Sync,
         H: Handler,
     {
-        let listener = SctpListener::bind(listen_addr).await?;
+        let addr = async_net::resolve(listen_addr.clone())
+            .await
+            .map(|vec| vec[0])
+            .unwrap(); // TODO
+        let addr: OsSocketAddr = addr.into();
+        let shared_assocs = self.assocs.clone();
+
+        let listener = SctpListener::bind(addr, self.ppid, logger.clone())?;
         Ok(task::spawn(async move {
-            while let Some(Ok(assoc)) = listener.incoming().next().await {
+            info!(logger, "Listening for connections");
+            //while let Some(assoc) = listener.next().await {
+            while let Ok(assoc) = listener.accept_next().await {
+                let assoc = Arc::new(assoc);
                 info!(logger, "Accepted new connection");
+                let assoc_id = 53; // TODO
+                let shared_assocs = shared_assocs.clone();
                 let connection_logger = logger.new(o!("connection" => 1));
                 let handler_clone = handler.clone();
                 task::spawn(async move {
+                    shared_assocs.lock().await.insert(assoc_id, assoc.clone());
                     while let Ok(message) = assoc.recv_msg().await {
                         trace!(
                             connection_logger,
@@ -48,6 +69,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
                             .await;
                     }
                     info!(connection_logger, "Connection terminated");
+                    shared_assocs.lock().await.remove(&assoc_id);
                 });
             }
         }))

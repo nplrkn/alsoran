@@ -1,8 +1,7 @@
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use anyhow::{anyhow, Result};
-use async_std::sync::Arc;
-use async_std::sync::Mutex;
+use async_std::sync::{Arc, Mutex};
 use async_std::task;
 use async_trait::async_trait;
 use os_socketaddr::OsSocketAddr;
