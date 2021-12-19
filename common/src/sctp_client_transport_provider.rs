@@ -9,6 +9,7 @@ use os_socketaddr::OsSocketAddr;
 use slog::{info, warn, Logger};
 use std::collections::HashMap;
 use std::time::Duration;
+use task::JoinHandle;
 
 #[derive(Debug, Clone)]
 pub struct SctpClientTransportProvider {
@@ -30,11 +31,11 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<()> {
+    ) -> Result<JoinHandle<()>> {
         let shared_assocs = self.assocs.clone();
         let ppid = self.ppid.clone();
 
-        task::spawn(async move {
+        let task = task::spawn(async move {
             loop {
                 let addr = async_net::resolve(connect_addr_string.clone())
                     .await
@@ -68,7 +69,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                 task::sleep(Duration::from_secs(retry_duration)).await;
             }
         });
-        Ok(())
+        Ok(task)
     }
 }
 

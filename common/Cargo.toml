@@ -21,6 +21,7 @@ libc = "^0.2"
 async-io = "1.6.0"
 async-net = "1.6.1"
 hex = "0.4.3"
+futures = "0.3.19"
 
 
 

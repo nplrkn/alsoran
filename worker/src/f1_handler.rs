@@ -6,6 +6,7 @@ use node_control_api::Api;
 use slog::{trace, Logger};
 use std::sync::Arc;
 
+#[derive(Debug, Clone)]
 pub struct F1Handler<
     T: ClientTransportProvider,
     F: TransportProvider,

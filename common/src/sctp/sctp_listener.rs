@@ -1,5 +1,6 @@
+use super::SctpAssociation;
 use async_net::AsyncToSocketAddrs;
-use async_std::prelude::Stream;
+use async_std::prelude::*;
 use async_std::task::{Context, Poll};
 use std::io::Result;
 use std::pin::Pin;
@@ -11,14 +12,13 @@ impl SctpListener {
     }
 
     /// Returns an infinite stream of incoming connections.
-    fn incoming(&self) -> Incoming<'_> {
+    pub fn incoming(&self) -> Incoming<'_> {
         unimplemented!()
     }
 }
 
-/// A stream of incoming SCTP associations.
 pub struct Incoming<'a> {
-    _incoming: Pin<Box<dyn Stream<Item = Result<SctpAssociation>> + Send + Sync + 'a>>,
+    incoming: Pin<Box<dyn Stream<Item = Result<SctpAssociation>> + Send + Sync + 'a>>,
 }
 
 impl Stream for Incoming<'_> {
@@ -27,4 +27,3 @@ impl Stream for Incoming<'_> {
         unimplemented!();
     }
 }
-

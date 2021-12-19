@@ -1,5 +1,6 @@
 use anyhow::Result;
 use async_std::prelude::Future;
+use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::Logger;
 
@@ -13,7 +14,7 @@ pub trait TransportProvider: 'static + Send + Sync + Clone {
 }
 
 #[async_trait]
-pub trait Handler: 'static + Send + Sync {
+pub trait Handler: 'static + Send + Sync + Clone {
     async fn recv_non_ue_associated(&self, m: Message, logger: &Logger);
 }
 
@@ -24,9 +25,11 @@ pub trait ServerTransportProvider {
         listen_addr: String,
         graceful_shutdown_signal: F,
         hander: H,
-    ) -> Result<()>
+        logger: Logger,
+    ) -> Result<JoinHandle<()>>
     where
-        F: Future<Output = ()>;
+        F: Future<Output = ()> + Send + Sync,
+        H: Handler;
 }
 
 #[async_trait]
@@ -37,5 +40,5 @@ pub trait ClientTransportProvider: TransportProvider {
         connect_addr_string: String,
         handler: H,
         logger: Logger,
-    ) -> Result<()>;
+    ) -> Result<JoinHandle<()>>;
 }

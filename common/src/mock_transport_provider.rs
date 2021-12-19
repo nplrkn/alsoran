@@ -1,6 +1,7 @@
 use super::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
+use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::{trace, Logger};
 
@@ -44,9 +45,9 @@ impl ClientTransportProvider for MockTransportProvider {
         _connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<()> {
+    ) -> Result<JoinHandle<()>> {
         let receiver = self.receiver.clone();
-        async_std::task::spawn(async move {
+        Ok(async_std::task::spawn(async move {
             while let Ok(message) = receiver.recv().await {
                 trace!(
                     logger,
@@ -55,7 +56,6 @@ impl ClientTransportProvider for MockTransportProvider {
                 );
                 handler.recv_non_ue_associated(message, &logger).await;
             }
-        });
-        Ok(())
+        }))
     }
 }
