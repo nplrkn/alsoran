@@ -1,8 +1,9 @@
 use super::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
+use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use slog::{Logger, trace};
+use slog::{trace, Logger};
 
 /// MockTransportProvider
 /// Provides a message passing mechanism for use by test scripts.
@@ -35,20 +36,6 @@ impl TransportProvider for MockTransportProvider {
         self.sender.send(message).await.unwrap();
         Ok(())
     }
-    async fn start_receiving<R: Handler>(&self, handler: R, logger: &Logger) {
-        let my_receiver = self.receiver.clone();
-        let logger = logger.clone();
-        async_std::task::spawn(async move {
-            while let Ok(message) = my_receiver.recv().await {
-                trace!(
-                    logger,
-                    "MockTransportProvider received {:?}, forward to handler",
-                    message
-                );
-                handler.recv_non_ue_associated(message, &logger).await;
-            }
-        });
-    }
 }
 
 #[async_trait]
@@ -58,9 +45,9 @@ impl ClientTransportProvider for MockTransportProvider {
         _connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<()> {
+    ) -> Result<JoinHandle<()>> {
         let receiver = self.receiver.clone();
-        async_std::task::spawn(async move {
+        Ok(async_std::task::spawn(async move {
             while let Ok(message) = receiver.recv().await {
                 trace!(
                     logger,
@@ -69,7 +56,6 @@ impl ClientTransportProvider for MockTransportProvider {
                 );
                 handler.recv_non_ue_associated(message, &logger).await;
             }
-        });
-        Ok(())
+        }))
     }
 }

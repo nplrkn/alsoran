@@ -1,11 +1,12 @@
 use crate::gnbcu::Gnbcu;
-use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use crate::ClientContext;
 use async_trait::async_trait;
+use common::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use node_control_api::Api;
-use slog::{Logger,trace};
+use slog::{trace, Logger};
 use std::sync::Arc;
 
+#[derive(Debug, Clone)]
 pub struct F1Handler<
     T: ClientTransportProvider,
     F: TransportProvider,
@@ -42,7 +43,7 @@ where
         );
         self.gnbcu
             .ngap_transport_provider
-            .send_message(message, &logger)
+            .send_message(message, logger)
             .await
             .unwrap();
     }

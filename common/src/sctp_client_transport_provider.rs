@@ -1,18 +1,19 @@
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use anyhow::{anyhow, Result};
-use async_std::sync::Arc;
-use async_std::sync::Mutex;
+use async_std::sync::{Arc, Mutex};
 use async_std::task;
 use async_trait::async_trait;
 use os_socketaddr::OsSocketAddr;
 use slog::{info, warn, Logger};
 use std::collections::HashMap;
 use std::time::Duration;
+use task::JoinHandle;
 
+type SharedAssocHash = Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>;
 #[derive(Debug, Clone)]
 pub struct SctpClientTransportProvider {
-    assocs: Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>,
+    assocs: SharedAssocHash,
     ppid: u32,
 }
 
@@ -30,11 +31,11 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         connect_addr_string: String,
         handler: R,
         logger: Logger,
-    ) -> Result<()> {
+    ) -> Result<JoinHandle<()>> {
         let shared_assocs = self.assocs.clone();
-        let ppid = self.ppid.clone();
+        let ppid = self.ppid;
 
-        task::spawn(async move {
+        let task = task::spawn(async move {
             loop {
                 let addr = async_net::resolve(connect_addr_string.clone())
                     .await
@@ -48,11 +49,6 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                     Ok(assoc) => {
                         let assoc = Arc::new(assoc);
                         shared_assocs.lock().await.insert(assoc_id, assoc.clone());
-
-                        // TODO Hack
-                        // Instead we should send a notification about this connection being up
-                        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-                        assoc.send_msg(precanned_ng_setup).await.unwrap();
 
                         while let Ok(message) = assoc.recv_msg().await {
                             info!(
@@ -73,7 +69,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                 task::sleep(Duration::from_secs(retry_duration)).await;
             }
         });
-        Ok(())
+        Ok(task)
     }
 }
 
@@ -85,8 +81,5 @@ impl TransportProvider for SctpClientTransportProvider {
         } else {
             Err(anyhow!("No association up"))
         }
-    }
-    async fn start_receiving<R: Handler>(&self, _handler: R, _logger: &Logger) {
-        unimplemented!();
     }
 }

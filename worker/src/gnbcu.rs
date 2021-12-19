@@ -1,9 +1,9 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
-use crate::transport_provider::{ClientTransportProvider, TransportProvider};
 use crate::ClientContext;
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
+use common::transport_provider::{ClientTransportProvider, TransportProvider};
 use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -109,7 +109,7 @@ impl<
         let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
         match self
             .ngap_transport_provider
-            .send_message(precanned_ng_setup, &logger)
+            .send_message(precanned_ng_setup, logger)
             .await
         {
             Ok(()) => (),
@@ -131,11 +131,9 @@ impl<
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        mock_coordinator::{MockCoordinator, NodeControlResponse},
-        mock_transport_provider::MockTransportProvider,
-    };
+    use crate::mock_coordinator::{MockCoordinator, NodeControlResponse};
     use anyhow::Result;
+    use common::mock_transport_provider::MockTransportProvider;
     use models::RefreshWorkerRsp;
     use node_control_api::{models, RefreshWorkerResponse};
     use slog::info;

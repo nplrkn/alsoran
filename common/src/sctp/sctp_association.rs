@@ -1,9 +1,11 @@
 use super::sctp_bindings::*;
+use super::sock_opt;
+use super::try_io::try_io;
 use super::Message;
 use anyhow::{anyhow, Result};
 use async_io::Async;
 use io::Error;
-use libc::{connect, setsockopt, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
+use libc::{connect, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -29,21 +31,6 @@ impl Drop for SctpAssociation {
     }
 }
 
-macro_rules! try_io {
-    ( $x:expr, $operation_name:expr  ) => {{
-        let rc = unsafe { $x };
-        if rc < 0 {
-            Err(anyhow!(format!(
-                "{} during SCTP {}",
-                Error::last_os_error(),
-                $operation_name
-            )))
-        } else {
-            Ok(rc)
-        }
-    }};
-}
-
 impl SctpAssociation {
     // Establish an association as a client
     pub async fn establish(
@@ -56,19 +43,32 @@ impl SctpAssociation {
         let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?;
         let assoc = SctpAssociation { fd, ppid };
 
-        // Set up sock opts
-        enable_sctp_heartbeat(assoc.fd, 1000).unwrap_or_else(|e| {
-            warn!(logger, "Carrying on without heartbeat - {}", e);
-        });
-        enable_sock_opt(fd, SCTP_NODELAY as _).unwrap_or_else(|e| {
-            warn!(logger, "Carrying on without NODELAY - {}", e);
-        });
-        enable_sock_opt(fd, SCTP_RECVRCVINFO as _)?;
-
         // Connect
         // TODO nonblocking
         try_io!(connect(assoc.fd, addr.as_ptr(), addr.len()), "connect")?;
+
+        assoc.set_sock_opts(logger)?;
+
         Ok(assoc)
+    }
+
+    pub fn from_accepted(fd: i32, ppid: u32, logger: &Logger) -> Result<SctpAssociation> {
+        let assoc = SctpAssociation { fd, ppid };
+        assoc.set_sock_opts(logger)?;
+        Ok(assoc)
+    }
+
+    fn set_sock_opts(&self, logger: &Logger) -> Result<()> {
+        let fd = self.fd;
+
+        sock_opt::enable_sctp_heartbeat(fd, 1000).unwrap_or_else(|e| {
+            warn!(logger, "Carrying on without heartbeat - {}", e);
+        });
+        sock_opt::enable_sock_opt(fd, SCTP_NODELAY as _).unwrap_or_else(|e| {
+            warn!(logger, "Carrying on without NODELAY - {}", e);
+        });
+        sock_opt::enable_sock_opt(fd, SCTP_RECVRCVINFO as _)?;
+        Ok(())
     }
 
     pub async fn recv_msg(&self) -> Result<Message> {
@@ -150,34 +150,4 @@ fn make_msghdr<T>(msg_control: &mut T, msg_iov: &mut libc::iovec) -> libc::msghd
         msg_controllen: mem::size_of::<T>(),
         msg_flags: 0,
     }
-}
-
-fn enable_sctp_heartbeat(fd: i32, interval_ms: u32) -> Result<()> {
-    // SCTP_PEER_ADDR_PARAMS - heartbeat so that we rapidly detect peer failures.
-    let mut sctp_paddrparams = unsafe { mem::zeroed::<sctp_paddrparams>() };
-    sctp_paddrparams.spp_address.ss_family = libc::AF_INET as _;
-    sctp_paddrparams.spp_hbinterval = interval_ms;
-    sctp_paddrparams.spp_flags = sctp_spp_flags_SPP_HB_ENABLE;
-
-    try_io!(
-        setsockopt(
-            fd,
-            SOL_SCTP as _,
-            SCTP_PEER_ADDR_PARAMS as _,
-            &sctp_paddrparams as *const _ as _,
-            mem::size_of::<sctp_paddrparams>() as _,
-        ),
-        "setsockopt"
-    )?;
-    Ok(())
-}
-
-fn enable_sock_opt(fd: i32, name: libc::c_int) -> Result<()> {
-    let enabled = &1 as *const _ as _;
-    let enabled_len = mem::size_of::<libc::c_int>() as _;
-    try_io!(
-        setsockopt(fd, SOL_SCTP as _, name, enabled, enabled_len),
-        "setsockopt"
-    )?;
-    Ok(())
 }

@@ -1,8 +1,8 @@
 extern crate slog;
 
-use slog::{Logger};
+use slog::Logger;
 use sloggers::terminal::{Destination, TerminalLoggerBuilder};
-use sloggers::types::{Severity, Format};
+use sloggers::types::{Format, Severity};
 use sloggers::Build;
 
 use slog::{o, Drain};
@@ -11,8 +11,7 @@ pub fn test_init() -> Logger {
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::CompactFormat::new(decorator).build();
     let drain = std::sync::Mutex::new(drain).fuse();
-    let log = slog::Logger::root(drain, o!());
-    log
+    slog::Logger::root(drain, o!())
 }
 
 pub fn init() -> Logger {
@@ -21,5 +20,5 @@ pub fn init() -> Logger {
     builder.destination(Destination::Stdout);
     builder.format(Format::Compact);
 
-  builder.build().unwrap()
+    builder.build().unwrap()
 }
