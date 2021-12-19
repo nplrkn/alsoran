@@ -1304,7 +1304,7 @@ dependencies = [
  "frunk 0.4.0",
  "frunk-enum-core",
  "frunk-enum-derive",
- "frunk_core 0.3.2",
+ "frunk_core 0.4.0",
  "frunk_derives 0.4.0",
  "futures",
  "hyper",
