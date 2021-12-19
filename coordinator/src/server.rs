@@ -30,7 +30,7 @@ where
         refresh_worker_req: models::RefreshWorkerReq,
         context: &C,
     ) -> Result<RefreshWorkerResponse, ApiError> {
-        let context = context.clone();
+        //let context = context.clone();
         trace!(
             "refresh_worker({:?}) - X-Span-ID: {:?}",
             refresh_worker_req,

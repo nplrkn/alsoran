@@ -12,9 +12,11 @@ use slog::{info, o, trace, Logger};
 use std::collections::HashMap;
 
 // TODO common structure with the client version
+type SharedAssocHash = Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>;
+
 #[derive(Debug, Clone)]
 pub struct SctpServerTransportProvider {
-    assocs: Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>,
+    assocs: SharedAssocHash,
     ppid: u32,
 }
 

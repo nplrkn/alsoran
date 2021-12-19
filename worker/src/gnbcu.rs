@@ -109,7 +109,7 @@ impl<
         let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
         match self
             .ngap_transport_provider
-            .send_message(precanned_ng_setup, &logger)
+            .send_message(precanned_ng_setup, logger)
             .await
         {
             Ok(()) => (),

@@ -1,6 +1,7 @@
-use futures::{future, future::BoxFuture, Stream, stream, future::FutureExt, stream::TryStreamExt};
-use hyper::{Request, Response, StatusCode, Body, HeaderMap};
+#![allow(clippy::all)]
+use futures::{future, future::BoxFuture, future::FutureExt, stream, stream::TryStreamExt, Stream};
 use hyper::header::{HeaderName, HeaderValue, CONTENT_TYPE};
+use hyper::{Body, HeaderMap, Request, Response, StatusCode};
 use log::warn;
 #[allow(unused_imports)]
 use std::convert::{TryFrom, TryInto};
@@ -8,58 +9,57 @@ use std::error::Error;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::task::{Context, Poll};
-use swagger::{ApiError, BodyExt, Has, RequestParser, XSpanIdString};
 pub use swagger::auth::Authorization;
 use swagger::auth::Scopes;
+use swagger::{ApiError, BodyExt, Has, RequestParser, XSpanIdString};
 use url::form_urlencoded;
 
+use crate::header;
 #[allow(unused_imports)]
 use crate::models;
-use crate::header;
 
 pub use crate::context;
 
 type ServiceFuture = BoxFuture<'static, Result<Response<Body>, crate::ServiceError>>;
 
-use crate::{Api,
-     RefreshWorkerResponse
-};
+use crate::{Api, RefreshWorkerResponse};
 
 mod paths {
     use lazy_static::lazy_static;
 
     lazy_static! {
-        pub static ref GLOBAL_REGEX_SET: regex::RegexSet = regex::RegexSet::new(vec![
-            r"^/v1/worker$"
-        ])
-        .expect("Unable to create global regex set");
+        pub static ref GLOBAL_REGEX_SET: regex::RegexSet =
+            regex::RegexSet::new(vec![r"^/v1/worker$"]).expect("Unable to create global regex set");
     }
     pub(crate) static ID_WORKER: usize = 0;
 }
 
-pub struct MakeService<T, C> where
+pub struct MakeService<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     api_impl: T,
     marker: PhantomData<C>,
 }
 
-impl<T, C> MakeService<T, C> where
+impl<T, C> MakeService<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     pub fn new(api_impl: T) -> Self {
         MakeService {
             api_impl,
-            marker: PhantomData
+            marker: PhantomData,
         }
     }
 }
 
-impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
+impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     type Response = Service<T, C>;
     type Error = crate::ServiceError;
@@ -70,43 +70,43 @@ impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
     }
 
     fn call(&mut self, target: Target) -> Self::Future {
-        futures::future::ok(Service::new(
-            self.api_impl.clone(),
-        ))
+        futures::future::ok(Service::new(self.api_impl.clone()))
     }
 }
 
 fn method_not_allowed() -> Result<Response<Body>, crate::ServiceError> {
-    Ok(
-        Response::builder().status(StatusCode::METHOD_NOT_ALLOWED)
-            .body(Body::empty())
-            .expect("Unable to create Method Not Allowed response")
-    )
+    Ok(Response::builder()
+        .status(StatusCode::METHOD_NOT_ALLOWED)
+        .body(Body::empty())
+        .expect("Unable to create Method Not Allowed response"))
 }
 
-pub struct Service<T, C> where
+pub struct Service<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     api_impl: T,
     marker: PhantomData<C>,
 }
 
-impl<T, C> Service<T, C> where
+impl<T, C> Service<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     pub fn new(api_impl: T) -> Self {
         Service {
             api_impl: api_impl,
-            marker: PhantomData
+            marker: PhantomData,
         }
     }
 }
 
-impl<T, C> Clone for Service<T, C> where
+impl<T, C> Clone for Service<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     fn clone(&self) -> Self {
         Service {
@@ -116,9 +116,10 @@ impl<T, C> Clone for Service<T, C> where
     }
 }
 
-impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
+impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C>
+where
     T: Api<C> + Clone + Send + Sync + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString> + Send + Sync + 'static,
 {
     type Response = Response<Body>;
     type Error = crate::ServiceError;
@@ -128,24 +129,28 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
         self.api_impl.poll_ready(cx)
     }
 
-    fn call(&mut self, req: (Request<Body>, C)) -> Self::Future { async fn run<T, C>(mut api_impl: T, req: (Request<Body>, C)) -> Result<Response<Body>, crate::ServiceError> where
-        T: Api<C> + Clone + Send + 'static,
-        C: Has<XSpanIdString>  + Send + Sync + 'static
-    {
-        let (request, context) = req;
-        let (parts, body) = request.into_parts();
-        let (method, uri, headers) = (parts.method, parts.uri, parts.headers);
-        let path = paths::GLOBAL_REGEX_SET.matches(uri.path());
+    fn call(&mut self, req: (Request<Body>, C)) -> Self::Future {
+        async fn run<T, C>(
+            mut api_impl: T,
+            req: (Request<Body>, C),
+        ) -> Result<Response<Body>, crate::ServiceError>
+        where
+            T: Api<C> + Clone + Send + 'static,
+            C: Has<XSpanIdString> + Send + Sync + 'static,
+        {
+            let (request, context) = req;
+            let (parts, body) = request.into_parts();
+            let (method, uri, headers) = (parts.method, parts.uri, parts.headers);
+            let path = paths::GLOBAL_REGEX_SET.matches(uri.path());
 
-        match &method {
-
-            // RefreshWorker - POST /worker
-            &hyper::Method::POST if path.matched(paths::ID_WORKER) => {
-                // Body parameters (note that non-required body parameters will ignore garbage
-                // values, rather than causing a 400 response). Produce warning header and logs for
-                // any unused fields.
-                let result = body.to_raw().await;
-                match result {
+            match &method {
+                // RefreshWorker - POST /worker
+                &hyper::Method::POST if path.matched(paths::ID_WORKER) => {
+                    // Body parameters (note that non-required body parameters will ignore garbage
+                    // values, rather than causing a 400 response). Produce warning header and logs for
+                    // any unused fields.
+                    let result = body.to_raw().await;
+                    match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
                                 let param_refresh_worker_req: Option<models::RefreshWorkerReq> = if !body.is_empty() {
@@ -228,14 +233,17 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 .body(Body::from(format!("Couldn't read body parameter RefreshWorkerReq: {}", e)))
                                                 .expect("Unable to create Bad Request response due to unable to read body parameter RefreshWorkerReq")),
                         }
-            },
+                }
 
-            _ if path.matched(paths::ID_WORKER) => method_not_allowed(),
-            _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
+                _ if path.matched(paths::ID_WORKER) => method_not_allowed(),
+                _ => Ok(Response::builder()
+                    .status(StatusCode::NOT_FOUND)
                     .body(Body::empty())
-                    .expect("Unable to create Not Found response"))
+                    .expect("Unable to create Not Found response")),
+            }
         }
-    } Box::pin(run(self.api_impl.clone(), req)) }
+        Box::pin(run(self.api_impl.clone(), req))
+    }
 }
 
 /// Request parser for `Api`.

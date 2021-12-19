@@ -43,7 +43,7 @@ where
         );
         self.gnbcu
             .ngap_transport_provider
-            .send_message(message, &logger)
+            .send_message(message, logger)
             .await
             .unwrap();
     }

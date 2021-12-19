@@ -35,8 +35,7 @@ pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
 
     let base_path = "http://127.0.0.1:23156";
 
-    let coordinator_client =
-        Client::try_new_http(&base_path).expect("Failed to create HTTP client");
+    let coordinator_client = Client::try_new_http(base_path).expect("Failed to create HTTP client");
 
     Gnbcu::new(
         ngap_transport_provider,

@@ -10,9 +10,10 @@ use std::collections::HashMap;
 use std::time::Duration;
 use task::JoinHandle;
 
+type SharedAssocHash = Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>;
 #[derive(Debug, Clone)]
 pub struct SctpClientTransportProvider {
-    assocs: Arc<Mutex<Box<HashMap<u32, Arc<SctpAssociation>>>>>,
+    assocs: SharedAssocHash,
     ppid: u32,
 }
 
@@ -32,7 +33,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
         let shared_assocs = self.assocs.clone();
-        let ppid = self.ppid.clone();
+        let ppid = self.ppid;
 
         let task = task::spawn(async move {
             loop {
