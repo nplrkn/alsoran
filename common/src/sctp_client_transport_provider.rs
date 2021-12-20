@@ -5,7 +5,7 @@ use async_std::sync::{Arc, Mutex};
 use async_std::task;
 use async_trait::async_trait;
 use os_socketaddr::OsSocketAddr;
-use slog::{info, warn, Logger};
+use slog::{trace, warn, Logger};
 use std::collections::HashMap;
 use std::time::Duration;
 use task::JoinHandle;
@@ -51,9 +51,10 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                         shared_assocs.lock().await.insert(assoc_id, assoc.clone());
 
                         while let Ok(message) = assoc.recv_msg().await {
-                            info!(
+                            trace!(
                                 logger,
-                                "Sctp client received {:?}, forward to handler", message
+                                "Sctp client received {:?}, forward to handler",
+                                message
                             );
                             handler.recv_non_ue_associated(message, &logger).await;
                         }

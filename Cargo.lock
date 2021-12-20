@@ -1119,6 +1119,7 @@ dependencies = [
 name = "integration-tests"
 version = "0.1.0"
 dependencies = [
+ "async-channel",
  "async-std",
  "async-trait",
  "backtrace",
