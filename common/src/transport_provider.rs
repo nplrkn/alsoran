@@ -19,7 +19,7 @@ pub trait Handler: 'static + Send + Sync + Clone {
 }
 
 #[async_trait]
-pub trait ServerTransportProvider {
+pub trait ServerTransportProvider: TransportProvider {
     async fn serve<F, H>(
         &self,
         listen_addr: String,

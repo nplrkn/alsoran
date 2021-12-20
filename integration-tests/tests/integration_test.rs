@@ -1,7 +1,7 @@
 use async_std;
 use backtrace::Backtrace;
 use common::sctp_server_transport_provider::SctpServerTransportProvider;
-use common::transport_provider::{Handler, Message, ServerTransportProvider};
+use common::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
 use slog::{error, info, o, Logger};
 use std::panic;
 use std::process;
@@ -50,6 +50,12 @@ async fn run_everything() {
 
     let (coord_stop_source, coord_task) = coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
     let (worker_stop_source, worker_task) = worker::spawn(logger.new(o!("nodetype"=> "cu-w")));
+
+    let precanned_ng_setup_response = hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f839000110080102031008112233").unwrap();
+    server
+        .send_message(precanned_ng_setup_response, &logger)
+        .await
+        .unwrap();
 
     async_std::task::sleep(std::time::Duration::from_secs(5)).await;
 

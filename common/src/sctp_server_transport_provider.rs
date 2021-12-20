@@ -1,6 +1,7 @@
 use crate::sctp::SctpAssociation;
 use crate::sctp::SctpListener;
-use crate::transport_provider::{Handler, ServerTransportProvider};
+use crate::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
+use anyhow::anyhow;
 use anyhow::Result;
 use async_std::prelude::Future;
 use async_std::sync::{Arc, Mutex};
@@ -24,6 +25,18 @@ impl SctpServerTransportProvider {
     pub fn new(ppid: u32) -> SctpServerTransportProvider {
         let assocs = Arc::new(Mutex::new(Box::new(HashMap::new())));
         SctpServerTransportProvider { assocs, ppid }
+    }
+}
+
+// TODO share implementation with sctp_client_transport_provider
+#[async_trait]
+impl TransportProvider for SctpServerTransportProvider {
+    async fn send_message(&self, message: Message, _logger: &Logger) -> Result<()> {
+        if let Some(assoc) = self.assocs.lock().await.values().next() {
+            Ok(assoc.send_msg(message).await?)
+        } else {
+            Err(anyhow!("No association up"))
+        }
     }
 }
 

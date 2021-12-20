@@ -22,6 +22,9 @@ anyhow = "1.0.51"
 swagger = "5.0.2"
 uuid = {version = "0.8", features = ["serde", "v4"]}
 stop-token = "0.6.1"
+asn1-codecs = "0.1.2"
+asn1_codecs_derive = "0.1.2"
+
 
 
 

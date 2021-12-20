@@ -30,6 +30,9 @@ where
     }
 }
 
+use asn1_codecs::aper::{AperCodec, AperCodecData};
+use common::ngap::NGAP_PDU;
+
 #[async_trait]
 impl<T, F, C> Handler for NgapHandler<T, F, C>
 where
@@ -42,6 +45,9 @@ where
             logger,
             "NgapHandler got non UE associated message {:?}", message
         );
+        let mut codec_data = AperCodecData::from_slice(&message);
+        let ngap_pdu = NGAP_PDU::decode(&mut codec_data).unwrap();
+        info!(logger, "ngap_pdu: {:#?}", ngap_pdu);
         // self.gnbcu
         //     .f1_transport_provider
         //     .send_message(message, &logger)

@@ -1,19 +1,19 @@
 # Backlog
-TO DO
-- start fake amf
-- start worker 2 passing node controller address:port
+
+## TO DO
+
+- try out the Hampi library to decode the response at least?
+- (blocked on NGAP encode) start worker 2 passing node controller address:port and have it send a RAN configuration update
 - pass logger in context
 - sort out TODOs and unwraps()
 - regression testing of maintain and retry scenarios
 - test the sctp receive function
-- See if the aper codec used in work is open source.
 - Be test driven and get CI going
 - hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
-------
+## DONE
 
-DONE
-
+- start fake amf
 - get info / trace levels right
 - get tests passing cleanly
 - remove bindgen test cruft
