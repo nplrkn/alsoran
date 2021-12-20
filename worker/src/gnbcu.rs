@@ -174,11 +174,11 @@ mod tests {
 
         info!(logger, "Wait for NG Setup");
         let _ignored_ngap = receive_ngap.recv().await.unwrap();
+
+        // TODO - due to an apparent bug in the decoder, this has a spurious 00 on the end.
+        let precanned_ng_setup_response = hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f83900011008010203100811223300").unwrap();
         info!(logger, "Received NGAP NG Setup - send response");
-        send_ngap
-            .send("incorrect NG setup response".into())
-            .await
-            .unwrap();
+        send_ngap.send(precanned_ng_setup_response).await.unwrap();
 
         info!(logger, "Start graceful shutdown of worker");
         drop(stop_source);

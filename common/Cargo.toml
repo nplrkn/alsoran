@@ -23,6 +23,10 @@ async-net = "1.6.1"
 hex = "0.4.3"
 futures = "0.3.19"
 futures-lite = "1.12.0"
+bitvec = "0.22"
+asn1-codecs = "0.1.2"
+asn1_codecs_derive = "0.1.2"
+log = "0.4.3"
 
 
 
