@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use common::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use node_control_api::Api;
 use slog::Logger;
-use slog::{info, warn};
+use slog::{info, trace, warn};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -40,6 +40,20 @@ where
     F: TransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
+    async fn tnla_established(&self, assoc_id: u32, logger: &Logger) {
+        // TODO - the coordinator should determine whether and when we send Setup, or RAN configuration update
+        trace!(logger, "TNLA {} established", assoc_id);
+        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
+        match self
+            .gnbcu
+            .ngap_transport_provider
+            .send_message(precanned_ng_setup, logger)
+            .await
+        {
+            Ok(()) => (),
+            Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
+        };
+    }
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
         // info!(
         //     logger,
@@ -48,7 +62,7 @@ where
         let mut codec_data = AperCodecData::from_slice(&message);
 
         match NGAP_PDU::decode(&mut codec_data) {
-            Ok(ngap_pdu) => info!(logger, "ngap_pdu: {:#?}", ngap_pdu),
+            Ok(ngap_pdu) => info!(logger, "ngap_pdu: {:?}", ngap_pdu),
             Err(e) => warn!(logger, "ngap decode failure {:?}", e),
         };
         // self.gnbcu

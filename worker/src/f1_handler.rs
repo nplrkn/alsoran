@@ -35,6 +35,9 @@ where
     F: TransportProvider,
     C: Api<ClientContext> + Sync + Send + 'static + Clone,
 {
+    async fn tnla_established(&self, _tnla_id: u32, _logger: &Logger) {
+        unimplemented!()
+    }
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
         trace!(
             logger,
