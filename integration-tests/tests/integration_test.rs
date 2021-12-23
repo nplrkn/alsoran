@@ -1,11 +1,11 @@
 use async_channel::{Receiver, Sender};
 use async_std;
-use backtrace::Backtrace;
+//use backtrace::Backtrace;
 use common::sctp_server_transport_provider::SctpServerTransportProvider;
 use common::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
-use slog::{error, info, o, Logger};
-use std::panic;
-use std::process;
+use slog::{info, o, Logger};
+//use std::panic;
+//use std::process;
 use stop_token::StopSource;
 
 #[derive(Debug, Clone)]
@@ -23,6 +23,10 @@ impl MockAmf {
 
 #[async_trait::async_trait]
 impl Handler for MockAmf {
+    async fn tnla_established(&self, _tnla_id: u32, _logger: &Logger) {
+        self.sender.send(vec![]).await.unwrap();
+    }
+
     async fn recv_non_ue_associated(&self, m: Message, _logger: &Logger) {
         self.sender.send(m).await.unwrap();
     }
@@ -61,6 +65,9 @@ async fn run_everything() {
 
     let (coord_stop_source, coord_task) = coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
     let (worker_stop_source, worker_task) = worker::spawn(logger.new(o!("nodetype"=> "cu-w")));
+
+    // Wait for connection to be established - the mock sends us an empty message to indicate this.
+    assert!(amf_receiver.recv().await.unwrap().len() == 0);
 
     // Catch NG Setup from the GNB
     info!(logger, "Wait for NG Setup from GNB");

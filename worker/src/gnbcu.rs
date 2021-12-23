@@ -104,18 +104,6 @@ impl<
             .maintain_connection(address, ngap_handler, logger.new(o!("NGAP handler"=>1)))
             .await?;
 
-        // TODO - the coordinator should determine whether and when we send Setup, or RAN configuration update
-        trace!(logger, "Send NG Setup");
-        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-        match self
-            .ngap_transport_provider
-            .send_message(precanned_ng_setup, logger)
-            .await
-        {
-            Ok(()) => (),
-            Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
-        };
-
         let _f1_handler = F1Handler::new(self.clone());
         // gnbcu
         //     .f1_transport_provider

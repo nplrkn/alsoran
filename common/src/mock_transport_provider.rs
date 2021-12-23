@@ -47,6 +47,7 @@ impl ClientTransportProvider for MockTransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
         let receiver = self.receiver.clone();
+        handler.tnla_established(1, &logger).await;
         Ok(async_std::task::spawn(async move {
             while let Ok(message) = receiver.recv().await {
                 trace!(

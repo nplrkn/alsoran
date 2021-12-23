@@ -2,7 +2,6 @@
 
 ## TO DO
 
-- try out the Hampi library to decode the response at least?
 - (blocked on NGAP encode) start worker 2 passing node controller address:port and have it send a RAN configuration update
 - pass logger in context
 - sort out TODOs and unwraps()
@@ -13,6 +12,8 @@
 
 ## DONE
 
+- commonize TNLA pool
+- try out the Hampi library to decode the response at least?
 - start fake amf
 - get info / trace levels right
 - get tests passing cleanly
