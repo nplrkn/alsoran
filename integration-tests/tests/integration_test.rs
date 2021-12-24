@@ -27,6 +27,10 @@ impl Handler for MockAmf {
         self.sender.send(vec![]).await.unwrap();
     }
 
+    async fn tnla_terminated(&self, _tnla_id: u32, _logger: &Logger) {
+        self.sender.send(vec![]).await.unwrap();
+    }
+
     async fn recv_non_ue_associated(&self, m: Message, _logger: &Logger) {
         self.sender.send(m).await.unwrap();
     }
@@ -53,7 +57,7 @@ async fn run_everything() {
     let server_stop_token = server_stop_source.token();
     let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID);
     let (amf_handler, amf_receiver) = MockAmf::new();
-    let _server_task = server
+    let server_task = server
         .serve(
             amf_address.to_string(),
             server_stop_token,
@@ -67,7 +71,7 @@ async fn run_everything() {
     let (worker_stop_source, worker_task) = worker::spawn(logger.new(o!("nodetype"=> "cu-w")));
 
     // Wait for connection to be established - the mock sends us an empty message to indicate this.
-    assert!(amf_receiver.recv().await.unwrap().len() == 0);
+    assert!(amf_receiver.recv().await.expect("Failed mock recv").len() == 0);
 
     // Catch NG Setup from the GNB
     info!(logger, "Wait for NG Setup from GNB");
@@ -79,15 +83,30 @@ async fn run_everything() {
     server
         .send_message(precanned_ng_setup_response, &logger)
         .await
-        .unwrap();
+        .expect("Failed mock send");
 
-    async_std::task::sleep(std::time::Duration::from_secs(5)).await;
-
+    info!(logger, "Terminate coordinator");
     drop(coord_stop_source);
+
+    info!(logger, "Terminate worker");
     drop(worker_stop_source);
+
+    info!(logger, "Wait for worker to terminate connection");
+    assert!(
+        amf_receiver
+            .recv()
+            .await
+            .expect("Expected connection termination")
+            .len()
+            == 0
+    );
+
+    info!(logger, "Terminate mock AMF");
     drop(server_stop_source);
+
+    info!(logger, "Wait for all tasks to terminate cleanly");
     coord_task.await;
     worker_task.await;
-    //server_task.await;  // TODO
+    server_task.await;
     drop(logger);
 }

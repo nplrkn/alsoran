@@ -1,8 +1,8 @@
 use anyhow::Result;
-use async_std::prelude::Future;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::Logger;
+use stop_token::StopToken;
 
 //pub struct Binding;
 
@@ -19,6 +19,7 @@ pub trait TransportProvider: 'static + Send + Sync + Clone {
 #[async_trait]
 pub trait Handler: 'static + Send + Sync + Clone {
     async fn tnla_established(&self, tnla_id: u32, logger: &Logger);
+    async fn tnla_terminated(&self, tnla_id: u32, logger: &Logger);
     async fn recv_non_ue_associated(&self, m: Message, logger: &Logger);
 }
 
@@ -26,15 +27,14 @@ pub trait Handler: 'static + Send + Sync + Clone {
 /// side of the reference point (which accepts connections from the active side).
 #[async_trait]
 pub trait ServerTransportProvider: TransportProvider {
-    async fn serve<F, H>(
+    async fn serve<H>(
         &self,
         listen_addr: String,
-        graceful_shutdown_signal: F,
+        stop_token: StopToken,
         hander: H,
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        F: Future<Output = ()> + Send + Sync,
         H: Handler;
 }
 
@@ -47,6 +47,9 @@ pub trait ClientTransportProvider: TransportProvider {
         &self,
         connect_addr_string: String,
         handler: H,
+        stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>>;
+
+    //async fn close_all();
 }

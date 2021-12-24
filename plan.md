@@ -1,10 +1,10 @@
 # Backlog
 
 ## TO DO
-
+- sort out TODOs and unwraps()
+- regression test connection failures and retries
 - (blocked on NGAP encode) start worker 2 passing node controller address:port and have it send a RAN configuration update
 - pass logger in context
-- sort out TODOs and unwraps()
 - regression testing of maintain and retry scenarios
 - test the sctp receive function
 - Be test driven and get CI going

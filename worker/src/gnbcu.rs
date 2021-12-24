@@ -101,7 +101,12 @@ impl<
         let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
         info!(logger, "Maintain connection to AMF {}", address);
         self.ngap_transport_provider
-            .maintain_connection(address, ngap_handler, logger.new(o!("NGAP handler"=>1)))
+            .maintain_connection(
+                address,
+                ngap_handler,
+                stop_token.clone(),
+                logger.new(o!("NGAP handler"=>1)),
+            )
             .await?;
 
         let _f1_handler = F1Handler::new(self.clone());
@@ -112,6 +117,10 @@ impl<
         // info!(logger, "Started F1 handler");
 
         stop_token.await;
+
+        // Close all client connections.
+        //self.ngap_transport_provider.close_all();
+
         info!(logger, "Stop");
         Ok(())
     }

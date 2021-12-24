@@ -5,7 +5,7 @@ use super::Message;
 use anyhow::{anyhow, Result};
 use async_io::Async;
 use io::Error;
-use libc::{connect, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
+use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -44,12 +44,31 @@ impl SctpAssociation {
         let assoc = SctpAssociation { fd, ppid };
 
         // Connect
-        // TODO nonblocking
-        try_io!(connect(assoc.fd, addr.as_ptr(), addr.len()), "connect")?;
-
-        assoc.set_sock_opts(logger)?;
-
-        Ok(assoc)
+        // See https://cr.yp.to/docs/connect.html.
+        let async_fd = Async::new(fd)?;
+        let rc = unsafe { connect(fd, addr.as_ptr(), addr.len()) };
+        let errno = errno::errno();
+        if (rc < 0) && (errno.0 != libc::EINPROGRESS) && (errno.0 != libc::EWOULDBLOCK) {
+            return Err(anyhow!("Error connecting {:?}", errno));
+        }
+        async_fd.writable().await?;
+        let mut address = unsafe { std::mem::zeroed::<libc::sockaddr>() };
+        let mut address_len = std::mem::size_of::<libc::sockaddr>() as socklen_t;
+        let rc = unsafe {
+            getpeername(
+                fd,
+                &mut address as *mut _ as _,
+                &mut address_len as *mut _ as _,
+            )
+        };
+        if rc == 0 {
+            assoc.set_sock_opts(logger)?;
+            Ok(assoc)
+        } else {
+            let mut buf = [0u8; 1];
+            try_io!(read(fd, &mut buf as *mut _ as _, 1), "connect")?;
+            Err(anyhow!("Connect failure followed by read success")) // Unhittable
+        }
     }
 
     pub fn from_accepted(fd: i32, ppid: u32, logger: &Logger) -> Result<SctpAssociation> {

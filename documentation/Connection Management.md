@@ -78,3 +78,11 @@ The idea is that
   - or needs to be an active-standby.
   
 Key example of why a synchronization mechanism is needed is that otherwise two node controller instances might simultaneously try to send NG Setup.
+
+### TNLA handling
+
+TNLAs are stored in the StcpTnlaPool.  Anyone can use this pool to send a message.
+A client attempts to maintain one TNLA to each endpoint at all times.  
+The client has one task per endpoint, either resolving, or waiting for a retry, or handling the connection.  Connections are added/removed from the pool as they get successfully estalbished / fail / are retracted.  This shows that there is not a 1:1 relationship between connections in the pool and tasks.  Therefore the pool can't store a task handle.
+The server has N connections.  These can simply hang off the listen.
+When gracefully deleting the client, we signal all of the per endpoint tasks to stop what they are doing and then join the tasks.

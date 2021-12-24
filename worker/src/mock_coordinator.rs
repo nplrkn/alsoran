@@ -56,7 +56,6 @@ impl Api<ClientContext> for MockCoordinator {
         {
             Ok(response)
         } else {
-            // TODO log
             panic!("Bad response from test script")
         }
     }

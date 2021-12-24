@@ -54,6 +54,10 @@ where
             Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
         };
     }
+    async fn tnla_terminated(&self, assoc_id: u32, logger: &Logger) {
+        warn!(logger, "TNLA {} closed", assoc_id);
+    }
+
     async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
         // info!(
         //     logger,

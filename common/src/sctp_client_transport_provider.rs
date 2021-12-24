@@ -1,13 +1,13 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
-use os_socketaddr::OsSocketAddr;
 use slog::{info, o, warn, Logger};
 use std::time::Duration;
+use stop_token::StopToken;
 use task::JoinHandle;
 
 #[derive(Debug, Clone)]
@@ -25,28 +25,36 @@ impl SctpClientTransportProvider {
     }
 }
 
+async fn resolve_and_connect(
+    connect_addr_string: &String,
+    ppid: u32,
+    logger: &Logger,
+) -> Result<SctpAssociation> {
+    let addr = async_net::resolve(connect_addr_string)
+        .await?
+        .into_iter()
+        .nth(0)
+        .ok_or(anyhow!("Address resolved to empty array"))? // Don't know if this is actually hittable
+        .into();
+    SctpAssociation::establish(addr, ppid, logger).await
+}
+
 #[async_trait]
 impl ClientTransportProvider for SctpClientTransportProvider {
     async fn maintain_connection<R: Handler>(
         &self,
         connect_addr_string: String,
         handler: R,
+        stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
         let tnla_pool = self.tnla_pool.clone();
         let ppid = self.ppid;
+        let assoc_id = 3; // TODO
 
         let task = task::spawn(async move {
             loop {
-                let addr = async_net::resolve(connect_addr_string.clone())
-                    .await
-                    .map(|vec| vec[0])
-                    .unwrap(); // TODO
-                let addr: OsSocketAddr = addr.into();
-                let assoc_id = 3; // TODO
-                let assoc = SctpAssociation::establish(addr, ppid, &logger).await;
-
-                match assoc {
+                match resolve_and_connect(&connect_addr_string, ppid, &logger).await {
                     Ok(assoc) => {
                         let logger = logger.new(o!("connection" => assoc_id));
                         info!(logger, "Established connection");
@@ -56,6 +64,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                                 assoc_id,
                                 Arc::new(assoc),
                                 handler.clone(),
+                                stop_token.clone(),
                                 logger.clone(),
                             )
                             .await;

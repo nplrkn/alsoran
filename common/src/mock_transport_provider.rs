@@ -4,6 +4,7 @@ use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::{trace, Logger};
+use stop_token::StopToken;
 
 /// MockTransportProvider
 /// Provides a message passing mechanism for use by test scripts.
@@ -44,6 +45,7 @@ impl ClientTransportProvider for MockTransportProvider {
         &self,
         _connect_addr_string: String,
         handler: R,
+        _stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
         let receiver = self.receiver.clone();
