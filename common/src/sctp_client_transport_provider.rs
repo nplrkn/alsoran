@@ -7,6 +7,7 @@ use async_std::task;
 use async_trait::async_trait;
 use slog::{info, o, warn, Logger};
 use std::time::Duration;
+use stop_token::StopToken;
 use task::JoinHandle;
 
 #[derive(Debug, Clone)]
@@ -44,6 +45,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         &self,
         connect_addr_string: String,
         handler: R,
+        stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
         let tnla_pool = self.tnla_pool.clone();
@@ -62,6 +64,7 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                                 assoc_id,
                                 Arc::new(assoc),
                                 handler.clone(),
+                                stop_token.clone(),
                                 logger.clone(),
                             )
                             .await;

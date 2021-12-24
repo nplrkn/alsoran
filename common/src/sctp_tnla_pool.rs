@@ -5,8 +5,10 @@ use anyhow::Result;
 use async_std::sync::{Arc, Mutex};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use futures::{pin_mut, FutureExt};
 use slog::{info, trace, Logger};
 use std::collections::HashMap;
+use stop_token::StopToken;
 
 type TnlaId = u32;
 type SharedAssocHash = Arc<Mutex<Box<HashMap<TnlaId, Arc<SctpAssociation>>>>>;
@@ -27,6 +29,7 @@ impl SctpTnlaPool {
         assoc_id: u32,
         assoc: Arc<SctpAssociation>,
         handler: H,
+        stop_token: StopToken,
         logger: Logger,
     ) -> JoinHandle<()>
     where
@@ -40,10 +43,22 @@ impl SctpTnlaPool {
         let assocs = self.assocs.clone();
         async_std::task::spawn(async move {
             trace!(logger, "Started handler");
-            while let Ok(message) = assoc.recv_msg().await {
-                handler.recv_non_ue_associated(message, &logger).await;
+            let fused_stop_token = stop_token.fuse();
+            pin_mut!(fused_stop_token);
+            loop {
+                let next = assoc.recv_msg().fuse();
+                pin_mut!(next);
+                futures::select! {
+                    message = next => match message {
+                        Ok(message) => handler.recv_non_ue_associated(message, &logger).await,
+                        Err(e) => {
+                            info!(logger, "Connection terminated - {:?}", e);
+                            handler.tnla_terminated(assoc_id, &logger).await
+                        }
+                    },
+                    () = fused_stop_token => break
+                }
             }
-            info!(logger, "Connection terminated");
 
             trace!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
             assocs.lock().await.remove(&assoc_id);

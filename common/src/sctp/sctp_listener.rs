@@ -13,21 +13,18 @@ pub struct SctpListener {
     logger: Logger,
 }
 impl SctpListener {
-    pub fn bind(addr: OsSocketAddr, ppid: u32, logger: Logger) -> Result<SctpListener> {
+    pub fn new_listen(
+        addr: OsSocketAddr,
+        ppid: u32,
+        backlog: i32,
+        logger: Logger,
+    ) -> Result<SctpListener> {
         // Get a socket and immediately wrap it in a SctpListener to ensure it gets closed
         // properly in the drop function if something fails later in this function.
-        // TODO wrap that in SctpSocket so it can be commonized with assoc?
         let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?;
         let listener = SctpListener { fd, ppid, logger };
-
         try_io!(bind(fd, addr.as_ptr(), addr.len()), "bind")?;
-
-        // TODO this function shouldn't choose
-        let backlog = 10;
-
-        // TODO Relocate or rename
         try_io!(listen(fd, backlog), "listen")?;
-
         Ok(listener)
     }
 
