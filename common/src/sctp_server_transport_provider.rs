@@ -10,7 +10,6 @@ use async_trait::async_trait;
 use os_socketaddr::OsSocketAddr;
 use slog::{info, o, Logger};
 
-// TODO common structure with the client version
 #[derive(Debug, Clone)]
 pub struct SctpServerTransportProvider {
     tnla_pool: SctpTnlaPool,
@@ -49,8 +48,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
     {
         let addr = async_net::resolve(listen_addr.clone())
             .await
-            .map(|vec| vec[0])
-            .unwrap(); // TODO
+            .map(|vec| vec[0])?;
         let addr: OsSocketAddr = addr.into();
         let listener = SctpListener::bind(addr, self.ppid, logger.clone())?;
         let tnla_pool = self.tnla_pool.clone();
