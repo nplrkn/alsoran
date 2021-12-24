@@ -429,6 +429,7 @@ dependencies = [
  "slog-async",
  "slog-term",
  "sloggers",
+ "stop-token",
 ]
 
 [[package]]
