@@ -4,11 +4,13 @@ use super::try_io::try_io;
 use super::Message;
 use anyhow::{anyhow, Result};
 use async_io::Async;
+use async_std::task::{Context, Poll};
+use futures_lite::future::FutureExt;
 use io::Error;
 use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
-use std::os::unix::io::{AsRawFd, RawFd};
+use std::pin::Pin;
 use std::{io, mem};
 
 /// An SCTP assocation.
@@ -17,12 +19,6 @@ use std::{io, mem};
 pub struct SctpAssociation {
     fd: i32,
     ppid: u32,
-}
-
-impl AsRawFd for SctpAssociation {
-    fn as_raw_fd(&self) -> RawFd {
-        self.fd.as_raw_fd()
-    }
 }
 
 impl Drop for SctpAssociation {
@@ -90,7 +86,11 @@ impl SctpAssociation {
         Ok(())
     }
 
-    pub async fn recv_msg(&self) -> Result<Message> {
+    pub fn recv_msg_stream(&self) -> MessageStream {
+        MessageStream { fd: self.fd }
+    }
+
+    async fn recv_msg(&self) -> Result<Message> {
         // Wait for the socket to become readable
         Async::new(self.fd)?.readable().await?;
 
@@ -156,6 +156,50 @@ impl SctpAssociation {
             println!("Partial send {} bytes of {}", bytes_sent, message.len());
             unimplemented!();
         }
+    }
+}
+
+pub struct MessageStream {
+    fd: i32,
+}
+
+impl MessageStream {
+    async fn recv_msg(&self) -> Result<Message> {
+        // Wait for the socket to become readable
+        Async::new(self.fd)?.readable().await?;
+
+        let mut message: Message = vec![0; 1500];
+        let msg_iov = &mut libc::iovec {
+            iov_base: message.as_mut_ptr() as _,
+            iov_len: message.len(),
+        };
+
+        let mut msghdr = make_msghdr(&mut sctp_rcvinfo::default(), msg_iov);
+        let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0), "recvmsg")?;
+        if bytes_received > 0 {
+            message.resize(bytes_received as _, 0);
+            Ok(message)
+        } else {
+            Err(anyhow!("Connection terminated"))
+        }
+    }
+}
+
+impl async_std::stream::Stream for MessageStream {
+    type Item = Message;
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        let future_message = async { self.recv_msg().await.ok() };
+        futures::pin_mut!(future_message);
+        future_message.poll(cx)
+    }
+}
+
+impl async_std::stream::Stream for SctpAssociation {
+    type Item = Message;
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        let future_message = async { self.recv_msg().await.ok() };
+        futures::pin_mut!(future_message);
+        future_message.poll(cx)
     }
 }
 

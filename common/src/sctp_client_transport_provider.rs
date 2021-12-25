@@ -2,10 +2,10 @@ use super::sctp_tnla_pool::SctpTnlaPool;
 use crate::sctp::SctpAssociation;
 use crate::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
 use anyhow::{anyhow, Result};
+use async_std::future;
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
-use futures::FutureExt;
 use slog::{info, o, warn, Logger};
 use std::time::Duration;
 use stop_token::StopToken;
@@ -49,13 +49,8 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
-        //let tnla_pool = self.tnla_pool.clone();
-        //let ppid = self.ppid;
         let assoc_id = 3; // TODO
         let task = task::spawn(async move {
-            let fused_stop_token = stop_token.clone().fuse();
-            futures::pin_mut!(fused_stop_token);
-
             loop {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
                     Ok(assoc) => {
@@ -80,12 +75,12 @@ impl ClientTransportProvider for SctpClientTransportProvider {
                         );
                     }
                 };
-                let retry_duration = 30;
-                let sleep = task::sleep(Duration::from_secs(retry_duration)).fuse();
-                futures::pin_mut!(sleep);
-                futures::select! {
-                    () = sleep => (),
-                    () = fused_stop_token => break
+                let retry_duration = Duration::from_secs(30);
+                if future::timeout(retry_duration, stop_token.clone())
+                    .await
+                    .is_ok()
+                {
+                    break;
                 }
             }
         });

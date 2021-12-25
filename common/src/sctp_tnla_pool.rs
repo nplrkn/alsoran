@@ -5,8 +5,8 @@ use anyhow::Result;
 use async_std::sync::{Arc, Mutex};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use futures::{pin_mut, FutureExt};
-use slog::{info, trace, Logger};
+use futures::stream::StreamExt;
+use slog::{trace, Logger};
 use std::collections::HashMap;
 use stop_token::StopToken;
 
@@ -39,22 +39,11 @@ impl SctpTnlaPool {
         handler.tnla_established(assoc_id, &logger).await;
 
         trace!(logger, "Start TNLA event loop");
-        let fused_stop_token = stop_token.fuse();
-        pin_mut!(fused_stop_token);
-        loop {
-            let next = assoc.recv_msg().fuse();
-            pin_mut!(next);
-            futures::select! {
-                message = next => match message {
-                    Ok(message) => handler.recv_non_ue_associated(message, &logger).await,
-                    Err(e) => {
-                        info!(logger, "TNLA terminated - {:?}", e);
-                        handler.tnla_terminated(assoc_id, &logger).await
-                    }
-                },
-                () = fused_stop_token => break
-            }
+        let mut message_stream = assoc.recv_msg_stream().take_until(stop_token);
+        while let Some(message) = message_stream.next().await {
+            handler.recv_non_ue_associated(message, &logger).await;
         }
+        handler.tnla_terminated(assoc_id, &logger).await;
 
         trace!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
         self.assocs.lock().await.remove(&assoc_id);

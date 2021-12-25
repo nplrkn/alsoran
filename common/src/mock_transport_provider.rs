@@ -3,6 +3,7 @@ use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use futures::stream::StreamExt;
 use slog::{trace, Logger};
 use stop_token::StopToken;
 
@@ -38,8 +39,6 @@ impl TransportProvider for MockTransportProvider {
         Ok(())
     }
 }
-
-use futures::stream::StreamExt;
 
 #[async_trait]
 impl ClientTransportProvider for MockTransportProvider {

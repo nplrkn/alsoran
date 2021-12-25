@@ -2,14 +2,13 @@ use crate::sctp::SctpListener;
 use crate::sctp_tnla_pool::SctpTnlaPool;
 use crate::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
 use anyhow::Result;
-use async_std::stream::StreamExt;
 use async_std::sync::Arc;
 use async_std::task;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use futures::future;
-use futures::{pin_mut, FutureExt};
-use slog::{info, o, trace, warn, Logger};
+use futures::stream::StreamExt;
+use slog::{info, o, trace, Logger};
 use stop_token::StopToken;
 
 #[derive(Debug, Clone)]
@@ -52,36 +51,32 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             .await
             .map(|vec| vec[0])?
             .into();
-        let mut listener =
+
+        let listener =
             SctpListener::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
+
         Ok(task::spawn(async move {
             info!(logger, "Listening for connections");
             let mut connection_tasks = vec![];
-            let cloned_stop_token = stop_token.clone();
-            let fused_stop_token = stop_token.fuse();
-            pin_mut!(fused_stop_token);
-            loop {
-                let next = listener.next().fuse();
-                let cloned_tnla_pool = self.tnla_pool.clone();
-                pin_mut!(next);
-                futures::select! {
-                    assoc = next => {
-                        match assoc {
-                            Some(assoc) => {
-                                let assoc_id = 53; // TODO
-                                let logger = logger.new(o!("connection" => assoc_id));
-                                info!(logger, "Accepted connection");
-                                let task = cloned_tnla_pool
-                                    .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), cloned_stop_token.clone(), logger)
-                                    .await;
-                                connection_tasks.push(task);
-                            },
-                            None => warn!(logger, "Accept connection failed")
-                        }
-                    },
-                    () = fused_stop_token => break
-                }
+            let mut incoming = listener.take_until(stop_token.clone());
+            while let Some(assoc) = incoming.next().await {
+                let assoc_id = 53; // TODO
+                let logger = logger.new(o!("connection" => assoc_id));
+                info!(logger, "Accepted connection");
+                let task = self
+                    .tnla_pool
+                    .clone()
+                    .add_and_handle(
+                        assoc_id,
+                        Arc::new(assoc),
+                        handler.clone(),
+                        stop_token.clone(),
+                        logger,
+                    )
+                    .await;
+                connection_tasks.push(task);
             }
+
             info!(logger, "Graceful shutdown");
             trace!(logger, "Wait for connection tasks to finish");
             future::join_all(connection_tasks).await;
