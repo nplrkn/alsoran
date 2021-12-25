@@ -100,7 +100,9 @@ impl<
         let ngap_handler = NgapHandler::new(self.clone());
         let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
         info!(logger, "Maintain connection to AMF {}", address);
-        self.ngap_transport_provider
+        let connection_task = self
+            .ngap_transport_provider
+            .clone()
             .maintain_connection(
                 address,
                 ngap_handler,
@@ -118,8 +120,8 @@ impl<
 
         stop_token.await;
 
-        // Close all client connections.
-        //self.ngap_transport_provider.close_all();
+        // Wait for our client connection to terminate.
+        connection_task.await;
 
         info!(logger, "Stop");
         Ok(())

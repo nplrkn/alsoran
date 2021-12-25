@@ -63,6 +63,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             pin_mut!(fused_stop_token);
             loop {
                 let next = listener.accept_next().fuse();
+                let cloned_tnla_pool = tnla_pool.clone();
                 pin_mut!(next);
                 futures::select! {
                     assoc = next => {
@@ -71,7 +72,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
                                 let assoc_id = 53; // TODO
                                 let logger = logger.new(o!("connection" => assoc_id));
                                 info!(logger, "Accepted connection");
-                                let task = tnla_pool
+                                let task = cloned_tnla_pool
                                     .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), cloned_stop_token.clone(), logger)
                                     .await;
                                 connection_tasks.push(task);

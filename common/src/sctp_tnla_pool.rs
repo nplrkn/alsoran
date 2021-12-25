@@ -24,8 +24,44 @@ impl SctpTnlaPool {
         SctpTnlaPool { assocs }
     }
 
-    pub async fn add_and_handle<H>(
+    pub async fn add_and_handle_no_spawn<H: Handler>(
         &self,
+        assoc_id: u32,
+        assoc: Arc<SctpAssociation>,
+        handler: H,
+        stop_token: StopToken,
+        logger: Logger,
+    ) {
+        trace!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
+        self.assocs.lock().await.insert(assoc_id, assoc.clone());
+
+        trace!(logger, "Notify TNLA established");
+        handler.tnla_established(assoc_id, &logger).await;
+
+        trace!(logger, "Start TNLA event loop");
+        let fused_stop_token = stop_token.fuse();
+        pin_mut!(fused_stop_token);
+        loop {
+            let next = assoc.recv_msg().fuse();
+            pin_mut!(next);
+            futures::select! {
+                message = next => match message {
+                    Ok(message) => handler.recv_non_ue_associated(message, &logger).await,
+                    Err(e) => {
+                        info!(logger, "TNLA terminated - {:?}", e);
+                        handler.tnla_terminated(assoc_id, &logger).await
+                    }
+                },
+                () = fused_stop_token => break
+            }
+        }
+
+        trace!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
+        self.assocs.lock().await.remove(&assoc_id);
+    }
+
+    pub async fn add_and_handle<H>(
+        self,
         assoc_id: u32,
         assoc: Arc<SctpAssociation>,
         handler: H,
@@ -35,33 +71,9 @@ impl SctpTnlaPool {
     where
         H: Handler,
     {
-        trace!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
-        self.assocs.lock().await.insert(assoc_id, assoc.clone());
-
-        handler.tnla_established(assoc_id, &logger).await;
-
-        let assocs = self.assocs.clone();
         async_std::task::spawn(async move {
-            trace!(logger, "Started handler");
-            let fused_stop_token = stop_token.fuse();
-            pin_mut!(fused_stop_token);
-            loop {
-                let next = assoc.recv_msg().fuse();
-                pin_mut!(next);
-                futures::select! {
-                    message = next => match message {
-                        Ok(message) => handler.recv_non_ue_associated(message, &logger).await,
-                        Err(e) => {
-                            info!(logger, "Connection terminated - {:?}", e);
-                            handler.tnla_terminated(assoc_id, &logger).await
-                        }
-                    },
-                    () = fused_stop_token => break
-                }
-            }
-
-            trace!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
-            assocs.lock().await.remove(&assoc_id);
+            self.add_and_handle_no_spawn(assoc_id, assoc, handler, stop_token, logger)
+                .await;
         })
     }
 }

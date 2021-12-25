@@ -1,7 +1,7 @@
 # Backlog
 
 ## TO DO
-- sort out TODOs and unwraps()
+- improve integration test logging so it is possible to see what thread is doing what 
 - regression test connection failures and retries
 - (blocked on NGAP encode) start worker 2 passing node controller address:port and have it send a RAN configuration update
 - pass logger in context
@@ -12,6 +12,7 @@
 
 ## DONE
 
+- sort out TODOs and unwraps()
 - commonize TNLA pool
 - try out the Hampi library to decode the response at least?
 - start fake amf

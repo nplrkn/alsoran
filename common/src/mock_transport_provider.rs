@@ -42,7 +42,7 @@ impl TransportProvider for MockTransportProvider {
 #[async_trait]
 impl ClientTransportProvider for MockTransportProvider {
     async fn maintain_connection<R: Handler>(
-        &self,
+        self,
         _connect_addr_string: String,
         handler: R,
         _stop_token: StopToken,
