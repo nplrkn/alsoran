@@ -3,6 +3,7 @@ use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use futures::stream::StreamExt;
 use slog::{trace, Logger};
 use stop_token::StopToken;
 
@@ -42,16 +43,17 @@ impl TransportProvider for MockTransportProvider {
 #[async_trait]
 impl ClientTransportProvider for MockTransportProvider {
     async fn maintain_connection<R: Handler>(
-        &self,
+        self,
         _connect_addr_string: String,
         handler: R,
-        _stop_token: StopToken,
+        stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>> {
         let receiver = self.receiver.clone();
         handler.tnla_established(1, &logger).await;
+        let mut stream = receiver.take_until(stop_token);
         Ok(async_std::task::spawn(async move {
-            while let Ok(message) = receiver.recv().await {
+            while let Some(message) = stream.next().await {
                 trace!(
                     logger,
                     "MockTransportProvider received {:?}, forward to handler",

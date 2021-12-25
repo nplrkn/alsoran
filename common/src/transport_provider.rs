@@ -28,7 +28,7 @@ pub trait Handler: 'static + Send + Sync + Clone {
 #[async_trait]
 pub trait ServerTransportProvider: TransportProvider {
     async fn serve<H>(
-        &self,
+        self,
         listen_addr: String,
         stop_token: StopToken,
         hander: H,
@@ -44,12 +44,10 @@ pub trait ServerTransportProvider: TransportProvider {
 pub trait ClientTransportProvider: TransportProvider {
     // TODO Eventually this will evolve into add_connection_target (?)
     async fn maintain_connection<H: Handler>(
-        &self,
+        self,
         connect_addr_string: String,
         handler: H,
         stop_token: StopToken,
         logger: Logger,
     ) -> Result<JoinHandle<()>>;
-
-    //async fn close_all();
 }
