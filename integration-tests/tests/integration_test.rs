@@ -58,6 +58,7 @@ async fn run_everything() {
     let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID);
     let (amf_handler, amf_receiver) = MockAmf::new();
     let server_task = server
+        .clone()
         .serve(
             amf_address.to_string(),
             server_stop_token,

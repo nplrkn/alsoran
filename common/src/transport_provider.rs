@@ -28,7 +28,7 @@ pub trait Handler: 'static + Send + Sync + Clone {
 #[async_trait]
 pub trait ServerTransportProvider: TransportProvider {
     async fn serve<H>(
-        &self,
+        self,
         listen_addr: String,
         stop_token: StopToken,
         hander: H,

@@ -9,7 +9,6 @@ use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use futures::future;
 use futures::{pin_mut, FutureExt};
-use os_socketaddr::OsSocketAddr;
 use slog::{info, o, trace, warn, Logger};
 use stop_token::StopToken;
 
@@ -40,7 +39,7 @@ const MAX_LISTEN_BACKLOG: i32 = 5;
 #[async_trait]
 impl ServerTransportProvider for SctpServerTransportProvider {
     async fn serve<H>(
-        &self,
+        self,
         listen_addr: String,
         stop_token: StopToken,
         handler: H,
@@ -49,13 +48,12 @@ impl ServerTransportProvider for SctpServerTransportProvider {
     where
         H: Handler,
     {
-        let addr = async_net::resolve(listen_addr.clone())
+        let addr = async_net::resolve(listen_addr)
             .await
-            .map(|vec| vec[0])?;
-        let addr: OsSocketAddr = addr.into();
+            .map(|vec| vec[0])?
+            .into();
         let mut listener =
             SctpListener::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
-        let tnla_pool = self.tnla_pool.clone();
         Ok(task::spawn(async move {
             info!(logger, "Listening for connections");
             let mut connection_tasks = vec![];
@@ -64,7 +62,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             pin_mut!(fused_stop_token);
             loop {
                 let next = listener.next().fuse();
-                let cloned_tnla_pool = tnla_pool.clone();
+                let cloned_tnla_pool = self.tnla_pool.clone();
                 pin_mut!(next);
                 futures::select! {
                     assoc = next => {
