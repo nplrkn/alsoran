@@ -2,6 +2,7 @@ use crate::sctp::SctpListener;
 use crate::sctp_tnla_pool::SctpTnlaPool;
 use crate::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
 use anyhow::Result;
+use async_std::stream::StreamExt;
 use async_std::sync::Arc;
 use async_std::task;
 use async_std::task::JoinHandle;
@@ -52,7 +53,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             .await
             .map(|vec| vec[0])?;
         let addr: OsSocketAddr = addr.into();
-        let listener =
+        let mut listener =
             SctpListener::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
         let tnla_pool = self.tnla_pool.clone();
         Ok(task::spawn(async move {
@@ -62,13 +63,13 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             let fused_stop_token = stop_token.fuse();
             pin_mut!(fused_stop_token);
             loop {
-                let next = listener.accept_next().fuse();
+                let next = listener.next().fuse();
                 let cloned_tnla_pool = tnla_pool.clone();
                 pin_mut!(next);
                 futures::select! {
                     assoc = next => {
                         match assoc {
-                            Ok(assoc) => {
+                            Some(assoc) => {
                                 let assoc_id = 53; // TODO
                                 let logger = logger.new(o!("connection" => assoc_id));
                                 info!(logger, "Accepted connection");
@@ -77,7 +78,7 @@ impl ServerTransportProvider for SctpServerTransportProvider {
                                     .await;
                                 connection_tasks.push(task);
                             },
-                            Err(e) => warn!(logger, "Accept connection failed - {:?}", e)
+                            None => warn!(logger, "Accept connection failed")
                         }
                     },
                     () = fused_stop_token => break

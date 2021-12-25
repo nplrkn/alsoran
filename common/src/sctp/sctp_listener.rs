@@ -2,10 +2,12 @@ use super::try_io::try_io;
 use super::SctpAssociation;
 use anyhow::{anyhow, Result};
 use async_io::Async;
-use libc::{accept, bind, listen, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
+use async_std::task::{Context, Poll};
+use futures_lite::future::FutureExt;
+use libc::{accept, bind, listen, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::Logger;
-use std::io::Error;
+use std::{io::Error, pin::Pin};
 
 pub struct SctpListener {
     fd: i32,
@@ -28,21 +30,21 @@ impl SctpListener {
         Ok(listener)
     }
 
-    pub async fn accept_next(&self) -> Result<SctpAssociation> {
-        let async_fd = Async::new(self.fd).unwrap();
-        async_fd.readable().await?;
-        let mut sockaddr = unsafe { std::mem::zeroed::<libc::sockaddr>() };
-        let mut restrict = std::mem::size_of::<libc::sockaddr>() as socklen_t;
-        let assoc_fd = try_io!(
-            accept(
-                self.fd,
-                &mut sockaddr as *mut _ as _,
-                &mut restrict as *mut _ as _
-            ),
-            "accept"
-        )?;
-
+    async fn accept_next(&self) -> Result<SctpAssociation> {
+        Async::new(self.fd)?.readable().await?;
+        let mut addr = OsSocketAddr::new();
+        let mut len = addr.len();
+        let assoc_fd = try_io!(accept(self.fd, addr.as_mut_ptr(), &mut len), "accept")?;
         SctpAssociation::from_accepted(assoc_fd, self.ppid, &self.logger)
+    }
+}
+
+impl async_std::stream::Stream for SctpListener {
+    type Item = SctpAssociation;
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        let future_assoc = async { self.accept_next().await.ok() };
+        futures::pin_mut!(future_assoc);
+        future_assoc.poll(cx)
     }
 }
 
