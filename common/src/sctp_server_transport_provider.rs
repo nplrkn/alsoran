@@ -6,8 +6,8 @@ use async_std::sync::Arc;
 use async_std::task;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use futures::future;
 use futures::stream::StreamExt;
+use futures::{future, pin_mut};
 use slog::{info, o, trace, Logger};
 use stop_token::StopToken;
 
@@ -52,14 +52,15 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             .map(|vec| vec[0])?
             .into();
 
-        let listener =
-            SctpListener::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
-
         Ok(task::spawn(async move {
+            let stream =
+                SctpListener::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())
+                    .take_until(stop_token.clone());
+            pin_mut!(stream);
+
             info!(logger, "Listening for connections");
             let mut connection_tasks = vec![];
-            let mut incoming = listener.take_until(stop_token.clone());
-            while let Some(assoc) = incoming.next().await {
+            while let Some(Ok(assoc)) = stream.next().await {
                 let assoc_id = 53; // TODO
                 let logger = logger.new(o!("connection" => assoc_id));
                 info!(logger, "Accepted connection");

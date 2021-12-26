@@ -5,6 +5,8 @@ use super::Message;
 use anyhow::{anyhow, Result};
 use async_io::Async;
 use async_std::task::{Context, Poll};
+use async_stream::try_stream;
+use futures_core::stream::Stream;
 use futures_lite::future::FutureExt;
 use io::Error;
 use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
@@ -86,27 +88,14 @@ impl SctpAssociation {
         Ok(())
     }
 
-    pub fn recv_msg_stream(&self) -> MessageStream {
-        MessageStream { fd: self.fd }
-    }
-
-    async fn recv_msg(&self) -> Result<Message> {
-        // Wait for the socket to become readable
-        Async::new(self.fd)?.readable().await?;
-
-        let mut message: Message = vec![0; 1500];
-        let msg_iov = &mut libc::iovec {
-            iov_base: message.as_mut_ptr() as _,
-            iov_len: message.len(),
-        };
-
-        let mut msghdr = make_msghdr(&mut sctp_rcvinfo::default(), msg_iov);
-        let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0), "recvmsg")?;
-        if bytes_received > 0 {
-            message.resize(bytes_received as _, 0);
-            Ok(message)
-        } else {
-            Err(anyhow!("Connection terminated"))
+    pub fn recv_msg_stream(&self) -> impl Stream<Item = Result<Message>> {
+        let fd = self.fd;
+        try_stream! {
+            loop {
+                Async::new(fd)?.readable().await?;
+                let message = recv(fd)?;
+                yield message;
+            }
         }
     }
 
@@ -159,47 +148,21 @@ impl SctpAssociation {
     }
 }
 
-pub struct MessageStream {
-    fd: i32,
-}
+fn recv(fd: i32) -> Result<Message> {
+    let mut message: Message = vec![0; 1500];
+    let mut iov = libc::iovec {
+        iov_base: message.as_mut_ptr() as _,
+        iov_len: message.len(),
+    };
+    let msg_iov = &mut iov;
 
-impl MessageStream {
-    async fn recv_msg(&self) -> Result<Message> {
-        // Wait for the socket to become readable
-        Async::new(self.fd)?.readable().await?;
-
-        let mut message: Message = vec![0; 1500];
-        let msg_iov = &mut libc::iovec {
-            iov_base: message.as_mut_ptr() as _,
-            iov_len: message.len(),
-        };
-
-        let mut msghdr = make_msghdr(&mut sctp_rcvinfo::default(), msg_iov);
-        let bytes_received = try_io!(libc::recvmsg(self.fd, &mut msghdr, 0), "recvmsg")?;
-        if bytes_received > 0 {
-            message.resize(bytes_received as _, 0);
-            Ok(message)
-        } else {
-            Err(anyhow!("Connection terminated"))
-        }
-    }
-}
-
-impl async_std::stream::Stream for MessageStream {
-    type Item = Message;
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let future_message = async { self.recv_msg().await.ok() };
-        futures::pin_mut!(future_message);
-        future_message.poll(cx)
-    }
-}
-
-impl async_std::stream::Stream for SctpAssociation {
-    type Item = Message;
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let future_message = async { self.recv_msg().await.ok() };
-        futures::pin_mut!(future_message);
-        future_message.poll(cx)
+    let mut msghdr = make_msghdr(&mut sctp_rcvinfo::default(), msg_iov);
+    let bytes_received = try_io!(libc::recvmsg(fd, &mut msghdr, 0), "recvmsg")?;
+    if bytes_received > 0 {
+        message.resize(bytes_received as _, 0);
+        Ok(message)
+    } else {
+        Err(anyhow!("Connection terminated"))
     }
 }
 
