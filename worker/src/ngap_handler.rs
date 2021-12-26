@@ -31,7 +31,7 @@ where
 }
 
 use asn1_codecs::aper::{AperCodec, AperCodecData};
-use common::ngap::NGAP_PDU;
+use common::ngap::NgapPdu;
 
 #[async_trait]
 impl<T, F, C> Handler for NgapHandler<T, F, C>
@@ -65,7 +65,7 @@ where
         // );
         let mut codec_data = AperCodecData::from_slice(&message);
 
-        match NGAP_PDU::decode(&mut codec_data) {
+        match NgapPdu::decode(&mut codec_data) {
             Ok(ngap_pdu) => info!(logger, "ngap_pdu: {:?}", ngap_pdu),
             Err(e) => warn!(logger, "ngap decode failure {:?}", e),
         };
