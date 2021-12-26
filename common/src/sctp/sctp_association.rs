@@ -4,15 +4,12 @@ use super::try_io::try_io;
 use super::Message;
 use anyhow::{anyhow, Result};
 use async_io::Async;
-use async_std::task::{Context, Poll};
 use async_stream::try_stream;
 use futures_core::stream::Stream;
-use futures_lite::future::FutureExt;
 use io::Error;
 use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
-use std::pin::Pin;
 use std::{io, mem};
 
 /// An SCTP assocation.

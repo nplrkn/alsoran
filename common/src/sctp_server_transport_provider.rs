@@ -1,4 +1,4 @@
-use crate::sctp::SctpListener;
+use crate::sctp;
 use crate::sctp_tnla_pool::SctpTnlaPool;
 use crate::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
 use anyhow::Result;
@@ -53,9 +53,8 @@ impl ServerTransportProvider for SctpServerTransportProvider {
             .into();
 
         Ok(task::spawn(async move {
-            let stream =
-                SctpListener::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())
-                    .take_until(stop_token.clone());
+            let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())
+                .take_until(stop_token.clone());
             pin_mut!(stream);
 
             info!(logger, "Listening for connections");
