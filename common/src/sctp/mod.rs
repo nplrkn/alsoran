@@ -5,6 +5,6 @@ mod sock_opt;
 mod try_io;
 
 pub use sctp_association::SctpAssociation;
-pub use sctp_listener::SctpListener;
+pub use sctp_listener::new_listen;
 
 pub type Message = Vec<u8>;
