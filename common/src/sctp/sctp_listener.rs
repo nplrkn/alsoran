@@ -2,54 +2,38 @@ use super::try_io::try_io;
 use super::SctpAssociation;
 use anyhow::{anyhow, Result};
 use async_io::Async;
-use async_std::task::{Context, Poll};
-use futures_lite::future::FutureExt;
+use async_stream::try_stream;
+use futures_core::stream::Stream;
 use libc::{accept, bind, listen, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::Logger;
-use std::{io::Error, pin::Pin};
+use std::io::Error;
 
-pub struct SctpListener {
-    fd: i32,
+struct FdGuard(i32);
+
+pub fn new_listen(
+    addr: OsSocketAddr,
     ppid: u32,
+    backlog: i32,
     logger: Logger,
-}
-impl SctpListener {
-    pub fn new_listen(
-        addr: OsSocketAddr,
-        ppid: u32,
-        backlog: i32,
-        logger: Logger,
-    ) -> Result<SctpListener> {
-        // Get a socket and immediately wrap it in a SctpListener to ensure it gets closed
-        // properly in the drop function if something fails later in this function.
-        let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?;
-        let listener = SctpListener { fd, ppid, logger };
-        try_io!(bind(fd, addr.as_ptr(), addr.len()), "bind")?;
-        try_io!(listen(fd, backlog), "listen")?;
-        Ok(listener)
-    }
-
-    async fn accept_next(&self) -> Result<SctpAssociation> {
-        Async::new(self.fd)?.readable().await?;
-        let mut addr = OsSocketAddr::new();
-        let mut len = addr.len();
-        let assoc_fd = try_io!(accept(self.fd, addr.as_mut_ptr(), &mut len), "accept")?;
-        SctpAssociation::from_accepted(assoc_fd, self.ppid, &self.logger)
+) -> impl Stream<Item = Result<SctpAssociation>> {
+    try_stream! {
+        let fd = FdGuard(try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?);
+        try_io!(bind(fd.0, addr.as_ptr(), addr.len()), "bind")?;
+        try_io!(listen(fd.0, backlog), "listen")?;
+        loop {
+            Async::new(fd.0)?.readable().await?;
+            let mut addr = OsSocketAddr::new();
+            let mut len = addr.len();
+            let assoc_fd = try_io!(accept(fd.0, addr.as_mut_ptr(), &mut len), "accept")?;
+            let assoc = SctpAssociation::from_accepted(assoc_fd, ppid, &logger)?;
+            yield assoc;
+        }
     }
 }
 
-impl async_std::stream::Stream for SctpListener {
-    type Item = SctpAssociation;
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let future_assoc = async { self.accept_next().await.ok() };
-        futures::pin_mut!(future_assoc);
-        future_assoc.poll(cx)
-    }
-}
-
-impl Drop for SctpListener {
+impl Drop for FdGuard {
     fn drop(&mut self) {
-        unsafe { libc::close(self.fd) };
+        unsafe { libc::close(self.0) };
     }
 }

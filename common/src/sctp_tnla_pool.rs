@@ -5,6 +5,7 @@ use anyhow::Result;
 use async_std::sync::{Arc, Mutex};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use futures::pin_mut;
 use futures::stream::StreamExt;
 use slog::{trace, Logger};
 use std::collections::HashMap;
@@ -39,8 +40,9 @@ impl SctpTnlaPool {
         handler.tnla_established(assoc_id, &logger).await;
 
         trace!(logger, "Start TNLA event loop");
-        let mut message_stream = assoc.recv_msg_stream().take_until(stop_token);
-        while let Some(message) = message_stream.next().await {
+        let message_stream = assoc.recv_msg_stream().take_until(stop_token);
+        pin_mut!(message_stream);
+        while let Some(Ok(message)) = message_stream.next().await {
             handler.recv_non_ue_associated(message, &logger).await;
         }
         handler.tnla_terminated(assoc_id, &logger).await;
