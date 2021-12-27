@@ -1227,6 +1227,7 @@ dependencies = [
  "common",
  "coordinator",
  "hex",
+ "serde_json",
  "slog",
  "stop-token",
  "worker",

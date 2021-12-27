@@ -6,15 +6,17 @@ use common::transport_provider::{Handler, Message, ServerTransportProvider, Tran
 use slog::{info, o, Logger};
 //use std::panic;
 //use std::process;
+use common::ngap::*;
+use serde_json;
 use stop_token::StopSource;
 
 #[derive(Debug, Clone)]
 struct MockAmf {
-    sender: Sender<Message>,
+    sender: Sender<Option<NgapPdu>>,
 }
 
 impl MockAmf {
-    pub fn new() -> (MockAmf, Receiver<Vec<u8>>) {
+    pub fn new() -> (MockAmf, Receiver<Option<NgapPdu>>) {
         let (sender, their_receiver) = async_channel::unbounded();
 
         (MockAmf { sender }, their_receiver)
@@ -24,15 +26,16 @@ impl MockAmf {
 #[async_trait::async_trait]
 impl Handler for MockAmf {
     async fn tnla_established(&self, _tnla_id: u32, _logger: &Logger) {
-        self.sender.send(vec![]).await.unwrap();
+        self.sender.send(None).await.unwrap();
     }
 
     async fn tnla_terminated(&self, _tnla_id: u32, _logger: &Logger) {
-        self.sender.send(vec![]).await.unwrap();
+        self.sender.send(None).await.unwrap();
     }
 
     async fn recv_non_ue_associated(&self, m: Message, _logger: &Logger) {
-        self.sender.send(m).await.unwrap();
+        let ngap_pdu: NgapPdu = serde_json::from_str(std::str::from_utf8(&m).unwrap()).unwrap();
+        self.sender.send(Some(ngap_pdu)).await.unwrap();
     }
 }
 
@@ -72,12 +75,30 @@ async fn run_everything() {
     let (worker_stop_source, worker_task) = worker::spawn(logger.new(o!("nodetype"=> "cu-w")));
 
     // Wait for connection to be established - the mock sends us an empty message to indicate this.
-    assert!(amf_receiver.recv().await.expect("Failed mock recv").len() == 0);
+    assert!(amf_receiver
+        .recv()
+        .await
+        .expect("Failed mock recv")
+        .is_none());
 
     // Catch NG Setup from the GNB
     info!(logger, "Wait for NG Setup from GNB");
-    let _ng_setup = amf_receiver.recv().await;
-    info!(logger, "Got NG Setup, send setup response");
+
+    // TODO - hide away these expect calls
+    let pdu: NgapPdu = amf_receiver
+        .recv()
+        .await
+        .expect("Expected message")
+        .expect("Expected message");
+    if let NgapPdu::InitiatingMessage(InitiatingMessage {
+        value: InitiatingMessageValue::IdNgSetup(_ng_setup),
+        ..
+    }) = pdu
+    {
+        info!(logger, "Got NG Setup, send setup response");
+    } else {
+        panic!("Not an NG setup");
+    }
 
     // TODO - due to an apparent bug in the decoder, this has a spurious 00 on the end.
     let precanned_ng_setup_response = hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f83900011008010203100811223300").unwrap();
@@ -93,14 +114,11 @@ async fn run_everything() {
     drop(worker_stop_source);
 
     info!(logger, "Wait for worker to terminate connection");
-    assert!(
-        amf_receiver
-            .recv()
-            .await
-            .expect("Expected connection termination")
-            .len()
-            == 0
-    );
+    assert!(amf_receiver
+        .recv()
+        .await
+        .expect("Expected connection termination")
+        .is_none());
 
     info!(logger, "Terminate mock AMF");
     drop(server_stop_source);
