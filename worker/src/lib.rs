@@ -5,7 +5,12 @@ mod gnbcu;
 mod mock_coordinator;
 mod ngap_handler;
 use async_std::task::JoinHandle;
-use common::sctp_client_transport_provider::SctpClientTransportProvider;
+use common::{
+    mock_transport_provider::MockTransportProvider,
+    ngap::NgapPdu,
+    sctp_client_transport_provider::SctpClientTransportProvider,
+    transport_provider::{ClientTransportProvider, TransportProvider},
+};
 use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
@@ -28,10 +33,17 @@ const NGAP_SCTP_PPID: u32 = 60;
 // and 68 for DTLS over SCTP (IETF RFC 6083 [9]).
 const F1AP_NGAP_PPID: u32 = 62;
 
-pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
+pub trait NgapClientTransportProvider:
+    ClientTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
+{
+}
+impl NgapClientTransportProvider for SctpClientTransportProvider {}
+impl NgapClientTransportProvider for MockTransportProvider<NgapPdu> {}
+
+pub fn spawn(logger: Logger, use_json: bool) -> (StopSource, JoinHandle<()>) {
     info!(logger, "Start");
-    let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID);
-    let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID);
+    let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID, use_json);
+    let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID, use_json);
 
     let base_path = "http://127.0.0.1:23156";
 

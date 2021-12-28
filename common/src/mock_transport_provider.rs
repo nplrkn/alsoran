@@ -1,10 +1,12 @@
-use super::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use super::transport_provider::{ClientTransportProvider, TransportProvider};
+use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use futures::stream::StreamExt;
 use slog::{trace, Logger};
+use std::fmt::Debug;
 use stop_token::StopToken;
 
 /// MockTransportProvider
@@ -12,14 +14,14 @@ use stop_token::StopToken;
 /// When the business logic calls non_ue_associated_message() or ue_associated_message(),
 /// the message is passed through to the receive channel.
 #[derive(Debug, Clone)]
-pub struct MockTransportProvider {
-    sender: Sender<Message>,
-    receiver: Receiver<Message>,
+pub struct MockTransportProvider<P: Send + Sync + Clone + 'static + Debug> {
+    sender: Sender<P>,
+    receiver: Receiver<P>,
 }
 
-impl MockTransportProvider {
+impl<P: Send + Sync + Clone + 'static + Debug> MockTransportProvider<P> {
     /// Create a mock transport provider.
-    pub fn new() -> (MockTransportProvider, Sender<Vec<u8>>, Receiver<Vec<u8>>) {
+    pub fn new() -> (MockTransportProvider<P>, Sender<P>, Receiver<P>) {
         let (sender, their_receiver) = async_channel::unbounded();
         let (their_sender, receiver) = async_channel::unbounded();
 
@@ -32,34 +34,43 @@ impl MockTransportProvider {
 }
 
 #[async_trait]
-impl TransportProvider for MockTransportProvider {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
-        trace!(logger, "MockTransportProvider send message {:?}", message);
-        self.sender.send(message).await.unwrap();
+impl<P: Send + Sync + Clone + 'static + Debug> TransportProvider for MockTransportProvider<P> {
+    type Pdu = P;
+    async fn send_pdu(&self, pdu: P, logger: &Logger) -> Result<()> {
+        trace!(logger, "MockTransportProvider send message {:?}", pdu);
+        self.sender.send(pdu).await.unwrap();
         Ok(())
     }
 }
 
 #[async_trait]
-impl ClientTransportProvider for MockTransportProvider {
-    async fn maintain_connection<R: Handler>(
+impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
+    for MockTransportProvider<P>
+{
+    type Pdu = P;
+    async fn maintain_connection<H>(
         self,
         _connect_addr_string: String,
-        handler: R,
+        handler: H,
         stop_token: StopToken,
         logger: Logger,
-    ) -> Result<JoinHandle<()>> {
+    ) -> Result<JoinHandle<()>>
+    where
+        H: TnlaEventHandler<MessageType = <Self as ClientTransportProvider>::Pdu>,
+    {
         let receiver = self.receiver.clone();
-        handler.tnla_established(1, &logger).await;
+        handler
+            .handle_event(TnlaEvent::Established, 1, &logger)
+            .await;
         let mut stream = receiver.take_until(stop_token);
         Ok(async_std::task::spawn(async move {
-            while let Some(message) = stream.next().await {
+            while let Some(pdu) = stream.next().await {
                 trace!(
                     logger,
                     "MockTransportProvider received {:?}, forward to handler",
-                    message
+                    pdu
                 );
-                handler.recv_non_ue_associated(message, &logger).await;
+                handler.handle_message(pdu, 1, &logger).await;
             }
         }))
     }

@@ -1,9 +1,9 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
-use crate::ClientContext;
+use crate::{ClientContext, NgapClientTransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
-use common::transport_provider::{ClientTransportProvider, TransportProvider};
+use common::transport_provider::TransportProvider;
 use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -16,7 +16,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone)]
 pub struct Gnbcu<T, F, C>
 where
-    T: ClientTransportProvider,
+    T: NgapClientTransportProvider,
     F: TransportProvider,
     C: Api<ClientContext> + Clone + Send + Sync + 'static,
 {
@@ -27,7 +27,7 @@ where
 }
 
 impl<
-        T: ClientTransportProvider,
+        T: NgapClientTransportProvider,
         F: TransportProvider,
         C: Api<ClientContext> + Send + Sync + Clone + 'static,
     > Gnbcu<T, F, C>
@@ -132,7 +132,9 @@ impl<
 mod tests {
     use crate::mock_coordinator::{MockCoordinator, NodeControlResponse};
     use anyhow::Result;
+    use bitvec::vec::BitVec;
     use common::mock_transport_provider::MockTransportProvider;
+    use common::ngap::*;
     use models::RefreshWorkerRsp;
     use node_control_api::{models, RefreshWorkerResponse};
     use slog::info;
@@ -145,8 +147,10 @@ mod tests {
         let logger = root_logger.new(o!("script" => "1"));
 
         // Create GNBCU with mock tranports + coordinator.
-        let (mock_ngap_transport_provider, send_ngap, receive_ngap) = MockTransportProvider::new();
-        let (mock_f1_transport_provider, _send_f1, _receive_f1) = MockTransportProvider::new();
+        let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
+            MockTransportProvider::<NgapPdu>::new();
+        let (mock_f1_transport_provider, _send_f1, _receive_f1) =
+            MockTransportProvider::<NgapPdu>::new();
         let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
 
         let (stop_source, worker_task) = Gnbcu::new(
@@ -175,9 +179,27 @@ mod tests {
         let _ignored_ngap = receive_ngap.recv().await.unwrap();
 
         // TODO - due to an apparent bug in the decoder, this has a spurious 00 on the end.
-        let precanned_ng_setup_response = hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f83900011008010203100811223300").unwrap();
+        //let precanned_ng_setup_response = hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f83900011008010203100811223300").unwrap();
         info!(logger, "Received NGAP NG Setup - send response");
-        send_ngap.send(precanned_ng_setup_response).await.unwrap();
+        let ng_setup_response = NgapPdu::InitiatingMessage(InitiatingMessage {
+            procedure_code: ProcedureCode(21),
+            criticality: Criticality(Criticality::REJECT),
+            value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
+                protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
+                    id: ProtocolIeId(27),
+                    criticality: Criticality(Criticality::REJECT),
+                    value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
+                        GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
+                            plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
+                            gnb_id: GnbId::GnbId(BitString26(BitVec::from_element(0x10))),
+                            ie_extensions: None,
+                        }),
+                    ),
+                }]),
+            }),
+        });
+
+        send_ngap.send(ng_setup_response).await.unwrap();
 
         info!(logger, "Start graceful shutdown of worker");
         drop(stop_source);

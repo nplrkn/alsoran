@@ -1,13 +1,12 @@
 use async_channel::{Receiver, Sender};
 use async_std;
-//use backtrace::Backtrace;
-use common::sctp_server_transport_provider::SctpServerTransportProvider;
-use common::transport_provider::{Handler, Message, ServerTransportProvider, TransportProvider};
-use slog::{info, o, Logger};
-//use std::panic;
-//use std::process;
+use bitvec::vec::BitVec;
 use common::ngap::*;
-use serde_json;
+use common::sctp_server_transport_provider::SctpServerTransportProvider;
+use common::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
+use common::transport_provider::{ServerTransportProvider, TransportProvider};
+use slog::{info, o, trace, Logger};
+use std::{panic, process};
 use stop_token::StopSource;
 
 #[derive(Debug, Clone)]
@@ -24,18 +23,17 @@ impl MockAmf {
 }
 
 #[async_trait::async_trait]
-impl Handler for MockAmf {
-    async fn tnla_established(&self, _tnla_id: u32, _logger: &Logger) {
+impl TnlaEventHandler for MockAmf {
+    type MessageType = NgapPdu;
+
+    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
         self.sender.send(None).await.unwrap();
     }
 
-    async fn tnla_terminated(&self, _tnla_id: u32, _logger: &Logger) {
-        self.sender.send(None).await.unwrap();
-    }
-
-    async fn recv_non_ue_associated(&self, m: Message, _logger: &Logger) {
-        let ngap_pdu: NgapPdu = serde_json::from_str(std::str::from_utf8(&m).unwrap()).unwrap();
-        self.sender.send(Some(ngap_pdu)).await.unwrap();
+    // TODO indicate whether it is UE or non UE associated?
+    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
+        trace!(logger, "Got message from GNB");
+        self.sender.send(Some(message)).await.unwrap();
     }
 }
 
@@ -45,20 +43,17 @@ const NGAP_SCTP_PPID: u32 = 60;
 async fn run_everything() {
     let logger = common::logging::test_init();
 
-    // let orig_hook = panic::take_hook();
-    // let logger_clone = logger.clone();
-    // panic::set_hook(Box::new(move |panic_info| {
-    //     // invoke the default handler and exit the process
-    //     orig_hook(panic_info);
-    //     error!(logger_clone, "{:?}", Backtrace::new());
-    //     process::exit(1);
-    // }));
+    let orig_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |panic_info| {
+        orig_hook(panic_info);
+        process::exit(1);
+    }));
 
     // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
     let amf_address = "127.0.0.1:38212";
     let server_stop_source = StopSource::new();
     let server_stop_token = server_stop_source.token();
-    let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID);
+    let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID, true);
     let (amf_handler, amf_receiver) = MockAmf::new();
     let server_task = server
         .clone()
@@ -72,7 +67,8 @@ async fn run_everything() {
         .expect("Server bind failed");
 
     let (coord_stop_source, coord_task) = coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
-    let (worker_stop_source, worker_task) = worker::spawn(logger.new(o!("nodetype"=> "cu-w")));
+    let (worker_stop_source, worker_task) =
+        worker::spawn(logger.new(o!("nodetype"=> "cu-w")), true);
 
     // Wait for connection to be established - the mock sends us an empty message to indicate this.
     assert!(amf_receiver
@@ -101,9 +97,27 @@ async fn run_everything() {
     }
 
     // TODO - due to an apparent bug in the decoder, this has a spurious 00 on the end.
-    let precanned_ng_setup_response = hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f83900011008010203100811223300").unwrap();
+    // TODO - deduplicate with worker test
+    let ng_setup_response = NgapPdu::InitiatingMessage(InitiatingMessage {
+        procedure_code: ProcedureCode(21),
+        criticality: Criticality(Criticality::REJECT),
+        value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
+            protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
+                id: ProtocolIeId(27),
+                criticality: Criticality(Criticality::REJECT),
+                value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
+                    GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
+                        plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
+                        gnb_id: GnbId::GnbId(BitString26(BitVec::from_element(0x10))),
+                        ie_extensions: None,
+                    }),
+                ),
+            }]),
+        }),
+    });
+
     server
-        .send_message(precanned_ng_setup_response, &logger)
+        .send_pdu(ng_setup_response, &logger)
         .await
         .expect("Failed mock send");
 
