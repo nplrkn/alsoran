@@ -1,6 +1,6 @@
 //use crate::ngap::NgapPdu;
-use crate::sctp::Message;
 use async_trait::async_trait;
+use sctp::Message;
 use serde::de::DeserializeOwned;
 use serde_json;
 use slog::{trace, Logger};

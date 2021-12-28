@@ -33,6 +33,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "also-net"
+version = "0.1.0"
+
+[[package]]
+name = "also-sctp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-io",
+ "async-stream",
+ "errno",
+ "futures-core",
+ "libc",
+ "os_socketaddr",
+ "slog",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -429,6 +447,7 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
+ "also-sctp",
  "anyhow",
  "asn1-codecs",
  "asn1_codecs_derive",

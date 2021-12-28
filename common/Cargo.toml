@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+sctp = { package = "also-sctp", path = "../also-sctp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.51"
 slog = "2.7.0"

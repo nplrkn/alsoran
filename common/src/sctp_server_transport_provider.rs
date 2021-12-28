@@ -1,5 +1,4 @@
 use crate::ngap::NgapPdu;
-use crate::sctp;
 use crate::sctp_tnla_pool::SctpTnlaPool;
 use crate::tnla_event_handler::{JsonDecoder, TnlaEventHandler};
 use crate::transport_provider::{ServerTransportProvider, TransportProvider};

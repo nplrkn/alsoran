@@ -1,6 +1,5 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
 use crate::ngap::NgapPdu;
-use crate::sctp::SctpAssociation;
 use crate::tnla_event_handler::{JsonDecoder, TnlaEventHandler};
 use crate::transport_provider::{ClientTransportProvider, TransportProvider};
 use anyhow::{anyhow, Result};
@@ -8,6 +7,7 @@ use async_std::future;
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
+use sctp::SctpAssociation;
 use serde_json;
 use slog::{info, o, trace, warn, Logger};
 use std::time::Duration;

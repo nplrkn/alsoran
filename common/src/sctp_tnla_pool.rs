@@ -1,4 +1,3 @@
-use crate::sctp::{Message, SctpAssociation};
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use anyhow::anyhow;
 use anyhow::Result;
@@ -6,6 +5,7 @@ use async_std::sync::{Arc, Mutex};
 use async_std::task::JoinHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
+use sctp::{Message, SctpAssociation};
 use slog::{trace, Logger};
 use std::collections::HashMap;
 use stop_token::StopToken;
