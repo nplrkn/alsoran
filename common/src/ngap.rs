@@ -13310,7 +13310,7 @@ pub struct RanConfigurationUpdateAcknowledgeProtocolIEsItem {
     sz_ub = "65535"
 )]
 pub struct RanConfigurationUpdateAcknowledgeProtocolIEs(
-    Vec<RanConfigurationUpdateAcknowledgeProtocolIEsItem>,
+    pub Vec<RanConfigurationUpdateAcknowledgeProtocolIEsItem>,
 );
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]

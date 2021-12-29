@@ -1,20 +1,18 @@
-use super::mock_amf::MockAmf;
+use crate::TestContext;
 use also_net::TransportProvider;
 use bitvec::prelude::BitVec;
 use common::ngap::*;
-use slog::{info, Logger};
+use slog::info;
 
-pub async fn handle(amf: &MockAmf, logger: &Logger) {
+pub async fn handle(test_context: &TestContext) {
+    let amf = &test_context.amf;
+    let logger = &test_context.logger;
+
     // Catch NG Setup from the GNB
     info!(logger, "Wait for NG Setup from GNB");
 
-    // TODO - hide away these expect calls
-    let pdu: NgapPdu = amf
-        .receiver
-        .recv()
-        .await
-        .expect("Expected message")
-        .expect("Expected message");
+    let pdu = amf.receive_ngap_pdu().await;
+
     if let NgapPdu::InitiatingMessage(InitiatingMessage {
         value: InitiatingMessageValue::IdNgSetup(_ng_setup),
         ..

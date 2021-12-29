@@ -10,8 +10,12 @@ pub struct TestContext {
     pub logger: Logger,
     coord_stop_source: StopSource,
     coord_task: JoinHandle<()>,
-    worker_stop_source: StopSource,
-    worker_task: JoinHandle<()>,
+    workers: Vec<WorkerInfo>,
+}
+
+struct WorkerInfo {
+    pub stop_source: StopSource,
+    pub task: JoinHandle<()>,
 }
 
 impl TestContext {
@@ -30,43 +34,50 @@ impl TestContext {
 
         let (coord_stop_source, coord_task) =
             coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
-        let (worker_stop_source, worker_task) = worker::spawn(
-            logger.new(o!("nodetype"=> "cu-w")),
-            JsonCodec::new(),
-            JsonCodec::new(),
-        );
-        TestContext {
+        let mut tc = TestContext {
             amf,
             logger,
             coord_stop_source,
             coord_task,
-            worker_stop_source,
-            worker_task,
-        }
+            workers: vec![],
+        };
+        tc.start_worker().await;
+        tc
+    }
+
+    pub async fn start_worker(&mut self) {
+        let (stop_source, task) = worker::spawn(
+            self.logger.new(o!("cu-w"=> self.workers.len())),
+            JsonCodec::new(),
+            JsonCodec::new(),
+        );
+        self.workers.push(WorkerInfo { stop_source, task })
     }
 
     pub async fn terminate(self) {
         info!(self.logger, "Terminate coordinator");
         drop(self.coord_stop_source);
 
-        info!(self.logger, "Terminate worker");
-        drop(self.worker_stop_source);
+        info!(self.logger, "Terminate workers");
+        for worker in self.workers {
+            drop(worker.stop_source);
 
-        info!(self.logger, "Wait for worker to terminate connection");
-        assert!(self
-            .amf
-            .receiver
-            .recv()
-            .await
-            .expect("Expected connection termination")
-            .is_none());
+            info!(self.logger, "Wait for worker to terminate connection");
+            assert!(self
+                .amf
+                .receiver
+                .recv()
+                .await
+                .expect("Expected connection termination")
+                .is_none());
+            worker.task.await;
+        }
 
         info!(self.logger, "Terminate mock AMF");
         drop(self.amf.stop_source);
 
         info!(self.logger, "Wait for all tasks to terminate cleanly");
         self.coord_task.await;
-        self.worker_task.await;
         self.amf.task.await;
     }
 }

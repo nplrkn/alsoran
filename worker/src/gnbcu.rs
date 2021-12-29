@@ -6,7 +6,7 @@ use async_std::task::JoinHandle;
 use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
-use slog::{info, o, trace, warn};
+use slog::{info, trace, warn};
 use stop_token::{StopSource, StopToken};
 use swagger::{AuthData, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
@@ -37,12 +37,11 @@ impl<
         coordinator_client: C,
         logger: &Logger,
     ) -> Gnbcu<T, F, C> {
-        let logger = logger.new(o!("gnbcu" => 1));
         Gnbcu {
             ngap_transport_provider,
             f1_transport_provider,
             coordinator_client,
-            logger,
+            logger: logger.clone(),
         }
     }
 
@@ -58,7 +57,6 @@ impl<
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let logger = &self.logger;
-        info!(logger, "Start");
 
         // Create client for talking to the coordinator.
         let context: ClientContext = swagger::make_context!(
@@ -102,12 +100,7 @@ impl<
         let connection_task = self
             .ngap_transport_provider
             .clone()
-            .maintain_connection(
-                address,
-                ngap_handler,
-                stop_token.clone(),
-                logger.new(o!("NGAP handler"=>1)),
-            )
+            .maintain_connection(address, ngap_handler, stop_token.clone(), logger.clone())
             .await?;
 
         let _f1_handler = F1Handler::new(self.clone());
@@ -136,7 +129,7 @@ mod tests {
     use common::ngap::*;
     use models::RefreshWorkerRsp;
     use node_control_api::{models, RefreshWorkerResponse};
-    use slog::info;
+    use slog::{info, o};
 
     use super::*;
 

@@ -32,7 +32,7 @@ impl MockAmf {
                 amf_address.to_string(),
                 stop_source.token(),
                 Handler(internal_sender),
-                logger.new(o!("nodetype"=> "mock amf")),
+                logger.new(o!("amf" => 1)),
             )
             .await
             .expect("Server bind failed");
@@ -43,6 +43,24 @@ impl MockAmf {
             sender: server,
             task,
         }
+    }
+
+    pub async fn expect_connection(&self) {
+        // Wait for connection to be established - the mock TNLA event handler sends us an empty message to indicate this.
+        assert!(self
+            .receiver
+            .recv()
+            .await
+            .expect("Failed mock recv")
+            .is_none());
+    }
+
+    pub async fn receive_ngap_pdu(&self) -> NgapPdu {
+        self.receiver
+            .recv()
+            .await
+            .expect("Expected message")
+            .expect("Expected message")
     }
 }
 

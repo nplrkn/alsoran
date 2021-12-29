@@ -84,6 +84,6 @@ where
     }
 
     async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
-        info!(logger, "ngap_pdu: {:?}", message);
+        trace!(logger, "ngap_pdu: {:?}", message);
     }
 }

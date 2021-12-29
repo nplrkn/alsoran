@@ -4,21 +4,15 @@ pub use test::*;
 
 #[async_std::test]
 async fn ran_configuration_update_for_second_worker() {
-    let test_context = TestContext::new().await;
-    let logger = &test_context.logger;
-    let amf = &test_context.amf;
+    let mut test_context = TestContext::new().await;
 
-    // We started up with a single worker
+    test_context.amf.expect_connection().await;
+    test::ng_setup::handle(&test_context).await;
 
-    // Wait for connection to be established - the mock sends us an empty message to indicate this.
-    assert!(amf
-        .receiver
-        .recv()
-        .await
-        .expect("Failed mock recv")
-        .is_none());
-
-    test::ng_setup::handle(amf, logger).await;
+    // Start a second worker.
+    test_context.start_worker().await;
+    test_context.amf.expect_connection().await;
+    test::ran_configuration_update::handle(&test_context).await;
 
     test_context.terminate().await;
 }
