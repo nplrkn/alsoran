@@ -1,42 +1,11 @@
-use also_net::{
-    JsonCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
-    TransportProvider,
-};
-use async_channel::{Receiver, Sender};
+mod test;
+use also_net::{JsonCodec, TransportProvider};
 use async_std;
 use bitvec::vec::BitVec;
 use common::ngap::*;
-use slog::{info, o, trace, Logger};
+use slog::{info, o};
 use std::{panic, process};
-use stop_token::StopSource;
-
-#[derive(Debug, Clone)]
-struct MockAmf {
-    sender: Sender<Option<NgapPdu>>,
-}
-
-impl MockAmf {
-    pub fn new() -> (MockAmf, Receiver<Option<NgapPdu>>) {
-        let (sender, their_receiver) = async_channel::unbounded();
-
-        (MockAmf { sender }, their_receiver)
-    }
-}
-
-#[async_trait::async_trait]
-impl TnlaEventHandler for MockAmf {
-    type MessageType = NgapPdu;
-
-    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-        self.sender.send(None).await.unwrap();
-    }
-
-    // TODO indicate whether it is UE or non UE associated?
-    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
-        trace!(logger, "Got message from GNB");
-        self.sender.send(Some(message)).await.unwrap();
-    }
-}
+use test::mock_amf::MockAmf;
 
 const NGAP_SCTP_PPID: u32 = 60;
 
@@ -52,22 +21,7 @@ async fn run_everything() {
 
     // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
     let amf_address = "127.0.0.1:38212";
-    let server_stop_source = StopSource::new();
-    let server_stop_token = server_stop_source.token();
-
-    // We use a JSON encoding for now given that we do not have a working ASN.1 Per codec
-    let server = SctpTransportProvider::new(NGAP_SCTP_PPID, JsonCodec::new());
-    let (amf_handler, amf_receiver) = MockAmf::new();
-    let server_task = server
-        .clone()
-        .serve(
-            amf_address.to_string(),
-            server_stop_token,
-            amf_handler,
-            logger.new(o!("nodetype"=> "mock amf")),
-        )
-        .await
-        .expect("Server bind failed");
+    let amf = MockAmf::new(amf_address, &logger).await;
 
     let (coord_stop_source, coord_task) = coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
     let (worker_stop_source, worker_task) = worker::spawn(
@@ -77,7 +31,8 @@ async fn run_everything() {
     );
 
     // Wait for connection to be established - the mock sends us an empty message to indicate this.
-    assert!(amf_receiver
+    assert!(amf
+        .receiver
         .recv()
         .await
         .expect("Failed mock recv")
@@ -87,7 +42,8 @@ async fn run_everything() {
     info!(logger, "Wait for NG Setup from GNB");
 
     // TODO - hide away these expect calls
-    let pdu: NgapPdu = amf_receiver
+    let pdu: NgapPdu = amf
+        .receiver
         .recv()
         .await
         .expect("Expected message")
@@ -122,7 +78,7 @@ async fn run_everything() {
         }),
     });
 
-    server
+    amf.sender
         .send_pdu(ng_setup_response, &logger)
         .await
         .expect("Failed mock send");
@@ -134,18 +90,19 @@ async fn run_everything() {
     drop(worker_stop_source);
 
     info!(logger, "Wait for worker to terminate connection");
-    assert!(amf_receiver
+    assert!(amf
+        .receiver
         .recv()
         .await
         .expect("Expected connection termination")
         .is_none());
 
     info!(logger, "Terminate mock AMF");
-    drop(server_stop_source);
+    drop(amf.stop_source);
 
     info!(logger, "Wait for all tasks to terminate cleanly");
     coord_task.await;
     worker_task.await;
-    server_task.await;
+    amf.task.await;
     drop(logger);
 }
