@@ -1,5 +1,5 @@
 use also_net::{
-    JsonCodec, SctpServerTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
+    JsonCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
     TransportProvider,
 };
 use async_channel::{Receiver, Sender};
@@ -56,7 +56,7 @@ async fn run_everything() {
     let server_stop_token = server_stop_source.token();
 
     // We use a JSON encoding for now given that we do not have a working ASN.1 Per codec
-    let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID, JsonCodec::new());
+    let server = SctpTransportProvider::new(NGAP_SCTP_PPID, JsonCodec::new());
     let (amf_handler, amf_receiver) = MockAmf::new();
     let server_task = server
         .clone()
