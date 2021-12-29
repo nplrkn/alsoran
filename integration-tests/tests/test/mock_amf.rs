@@ -9,7 +9,7 @@ use slog::{o, trace, Logger};
 use std::fmt::Debug;
 use stop_token::StopSource;
 
-use crate::NGAP_SCTP_PPID;
+const NGAP_SCTP_PPID: u32 = 60;
 
 pub struct MockAmf {
     pub stop_source: StopSource,
