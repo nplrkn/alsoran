@@ -4,13 +4,12 @@ mod gnbcu;
 #[cfg(test)]
 mod mock_coordinator;
 mod ngap_handler;
-use async_std::task::JoinHandle;
-use common::{
-    mock_transport_provider::MockTransportProvider,
-    ngap::NgapPdu,
-    sctp_client_transport_provider::SctpClientTransportProvider,
-    transport_provider::{ClientTransportProvider, TransportProvider},
+use also_net::{
+    ClientTransportProvider, Codec, MockTransportProvider, SctpClientTransportProvider,
+    SctpServerTransportProvider, ServerTransportProvider, TransportProvider,
 };
+use async_std::task::JoinHandle;
+use common::ngap::NgapPdu;
 use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
@@ -37,13 +36,30 @@ pub trait NgapClientTransportProvider:
     ClientTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
 {
 }
-impl NgapClientTransportProvider for SctpClientTransportProvider {}
+impl<C> NgapClientTransportProvider for SctpClientTransportProvider<C, NgapPdu> where
+    C: Codec<Pdu = NgapPdu>
+{
+}
 impl NgapClientTransportProvider for MockTransportProvider<NgapPdu> {}
 
-pub fn spawn(logger: Logger, use_json: bool) -> (StopSource, JoinHandle<()>) {
+pub trait F1ServerTransportProvider:
+    ServerTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
+{
+}
+impl<C> F1ServerTransportProvider for SctpServerTransportProvider<C, NgapPdu> where
+    C: Codec<Pdu = NgapPdu>
+{
+}
+impl F1ServerTransportProvider for MockTransportProvider<NgapPdu> {}
+
+pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'static>(
+    logger: Logger,
+    ngap_codec: N,
+    f1_codec: F,
+) -> (StopSource, JoinHandle<()>) {
     info!(logger, "Start");
-    let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID, use_json);
-    let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID, use_json);
+    let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID, ngap_codec);
+    let f1_transport_provider = SctpServerTransportProvider::new(F1AP_NGAP_PPID, f1_codec);
 
     let base_path = "http://127.0.0.1:23156";
 

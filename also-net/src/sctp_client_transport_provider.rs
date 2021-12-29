@@ -1,32 +1,38 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
-use crate::ngap::NgapPdu;
-use crate::tnla_event_handler::{JsonDecoder, TnlaEventHandler};
-use crate::transport_provider::{ClientTransportProvider, TransportProvider};
+use crate::{ClientTransportProvider, Codec, TnlaEventHandler, TransportProvider, Wrapper};
 use anyhow::{anyhow, Result};
 use async_std::future;
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
 use sctp::SctpAssociation;
-use serde_json;
-use slog::{info, o, trace, warn, Logger};
+use slog::{info, o, warn, Logger};
+use std::fmt::Debug;
 use std::time::Duration;
 use stop_token::StopToken;
 use task::JoinHandle;
 
 #[derive(Debug, Clone)]
-pub struct SctpClientTransportProvider {
+pub struct SctpClientTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
     tnla_pool: SctpTnlaPool,
     ppid: u32,
-    use_json: bool,
+    codec: C,
 }
 
-impl SctpClientTransportProvider {
-    pub fn new(ppid: u32, use_json: bool) -> SctpClientTransportProvider {
+impl<C, P> SctpClientTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
+    pub fn new(ppid: u32, codec: C) -> SctpClientTransportProvider<C, P> {
         SctpClientTransportProvider {
             tnla_pool: SctpTnlaPool::new(),
             ppid,
-            use_json,
+            codec,
         }
     }
 }
@@ -46,8 +52,25 @@ async fn resolve_and_connect(
 }
 
 #[async_trait]
-impl ClientTransportProvider for SctpClientTransportProvider {
-    type Pdu = NgapPdu; // TODO
+impl<C, P> TransportProvider for SctpClientTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
+    type Pdu = P;
+    async fn send_pdu(&self, pdu: P, logger: &Logger) -> Result<()> {
+        let message: Vec<u8> = self.codec.to_wire(pdu)?;
+        self.tnla_pool.send_message(message, logger).await
+    }
+}
+
+#[async_trait]
+impl<C, P> ClientTransportProvider for SctpClientTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
+    type Pdu = P;
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
@@ -59,7 +82,11 @@ impl ClientTransportProvider for SctpClientTransportProvider {
         H: TnlaEventHandler<MessageType = <Self as ClientTransportProvider>::Pdu>,
     {
         let assoc_id = 3; // TODO
-        let wrapped_handler = JsonDecoder(handler);
+        let wrapped_handler = Wrapper {
+            handler,
+            codec: self.codec,
+        };
+
         let task = task::spawn(async move {
             loop {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
@@ -95,21 +122,5 @@ impl ClientTransportProvider for SctpClientTransportProvider {
             }
         });
         Ok(task)
-    }
-}
-
-#[async_trait]
-impl TransportProvider for SctpClientTransportProvider {
-    type Pdu = NgapPdu;
-    async fn send_pdu(&self, pdu: NgapPdu, logger: &Logger) -> Result<()> {
-        let message: Vec<u8> = if self.use_json {
-            trace!(logger, "Encode NGAP PDU as JSON");
-            serde_json::to_string(&pdu).unwrap().into()
-        } else {
-            // The only real message we can send is an NG Setup
-            trace!(logger, "Encode NGAP PDU as ASN.1");
-            hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap()
-        };
-        self.tnla_pool.send_message(message, logger).await
     }
 }

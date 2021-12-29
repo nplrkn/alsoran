@@ -35,6 +35,27 @@ dependencies = [
 [[package]]
 name = "also-net"
 version = "0.1.0"
+dependencies = [
+ "also-sctp",
+ "anyhow",
+ "async-channel",
+ "async-io",
+ "async-net",
+ "async-std",
+ "async-stream",
+ "async-trait",
+ "errno",
+ "futures",
+ "futures-core",
+ "futures-lite",
+ "hex",
+ "log",
+ "serde",
+ "serde_json",
+ "slog",
+ "sloggers",
+ "stop-token",
+]
 
 [[package]]
 name = "also-sctp"
@@ -1240,6 +1261,7 @@ dependencies = [
 name = "integration-tests"
 version = "0.1.0"
 dependencies = [
+ "also-net",
  "async-channel",
  "async-std",
  "async-trait",
@@ -2696,6 +2718,7 @@ dependencies = [
 name = "worker"
 version = "0.1.0"
 dependencies = [
+ "also-net",
  "anyhow",
  "asn1-codecs",
  "asn1_codecs_derive",

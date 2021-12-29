@@ -1,10 +1,11 @@
+use also_net::{
+    JsonCodec, SctpServerTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
+    TransportProvider,
+};
 use async_channel::{Receiver, Sender};
 use async_std;
 use bitvec::vec::BitVec;
 use common::ngap::*;
-use common::sctp_server_transport_provider::SctpServerTransportProvider;
-use common::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
-use common::transport_provider::{ServerTransportProvider, TransportProvider};
 use slog::{info, o, trace, Logger};
 use std::{panic, process};
 use stop_token::StopSource;
@@ -53,7 +54,9 @@ async fn run_everything() {
     let amf_address = "127.0.0.1:38212";
     let server_stop_source = StopSource::new();
     let server_stop_token = server_stop_source.token();
-    let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID, true);
+
+    // We use a JSON encoding for now given that we do not have a working ASN.1 Per codec
+    let server = SctpServerTransportProvider::new(NGAP_SCTP_PPID, JsonCodec::new());
     let (amf_handler, amf_receiver) = MockAmf::new();
     let server_task = server
         .clone()
@@ -67,8 +70,11 @@ async fn run_everything() {
         .expect("Server bind failed");
 
     let (coord_stop_source, coord_task) = coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
-    let (worker_stop_source, worker_task) =
-        worker::spawn(logger.new(o!("nodetype"=> "cu-w")), true);
+    let (worker_stop_source, worker_task) = worker::spawn(
+        logger.new(o!("nodetype"=> "cu-w")),
+        JsonCodec::new(),
+        JsonCodec::new(),
+    );
 
     // Wait for connection to be established - the mock sends us an empty message to indicate this.
     assert!(amf_receiver

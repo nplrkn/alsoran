@@ -1,9 +1,8 @@
 use crate::gnbcu::Gnbcu;
-use crate::{ClientContext, NgapClientTransportProvider};
+use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use also_net::{TnlaEvent, TnlaEventHandler};
 use async_trait::async_trait;
 use common::ngap::NgapPdu;
-use common::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
-use common::transport_provider::TransportProvider;
 use node_control_api::Api;
 use slog::Logger;
 use std::sync::Arc;
@@ -11,7 +10,7 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 pub struct F1Handler<
     T: NgapClientTransportProvider,
-    F: TransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Sync + Send + Clone + 'static,
 > {
     gnbcu: Arc<Gnbcu<T, F, C>>,
@@ -19,7 +18,7 @@ pub struct F1Handler<
 
 impl<
         T: NgapClientTransportProvider,
-        F: TransportProvider,
+        F: F1ServerTransportProvider,
         C: Api<ClientContext> + Sync + Send + Clone,
     > F1Handler<T, F, C>
 {
@@ -34,7 +33,7 @@ impl<
 impl<T, F, C> TnlaEventHandler for F1Handler<T, F, C>
 where
     T: NgapClientTransportProvider,
-    F: TransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Sync + Send + 'static + Clone,
 {
     type MessageType = NgapPdu; // TODO

@@ -1,7 +1,8 @@
-use crate::ngap::NgapPdu;
 use crate::sctp_tnla_pool::SctpTnlaPool;
-use crate::tnla_event_handler::{JsonDecoder, TnlaEventHandler};
-use crate::transport_provider::{ServerTransportProvider, TransportProvider};
+use crate::Codec;
+use crate::TnlaEventHandler;
+use crate::Wrapper;
+use crate::{ServerTransportProvider, TransportProvider};
 use anyhow::Result;
 use async_std::sync::Arc;
 use async_std::task;
@@ -10,37 +11,43 @@ use async_trait::async_trait;
 use futures::stream::StreamExt;
 use futures::{future, pin_mut};
 use slog::{info, o, trace, Logger};
+use std::fmt::Debug;
 use stop_token::StopToken;
 
 #[derive(Debug, Clone)]
-pub struct SctpServerTransportProvider {
+pub struct SctpServerTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
     tnla_pool: SctpTnlaPool,
     ppid: u32,
-    use_json: bool,
+    codec: C,
 }
 
-impl SctpServerTransportProvider {
-    pub fn new(ppid: u32, use_json: bool) -> SctpServerTransportProvider {
+impl<C, P> SctpServerTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
+    pub fn new(ppid: u32, codec: C) -> SctpServerTransportProvider<C, P> {
         SctpServerTransportProvider {
             tnla_pool: SctpTnlaPool::new(),
             ppid,
-            use_json,
+            codec,
         }
     }
 }
 
 #[async_trait]
-impl TransportProvider for SctpServerTransportProvider {
-    type Pdu = NgapPdu;
-    async fn send_pdu(&self, pdu: NgapPdu, logger: &Logger) -> Result<()> {
-        let message: Vec<u8> = if self.use_json {
-            trace!(logger, "JSON encode NGAP PDU");
-            serde_json::to_string(&pdu).unwrap().into()
-        } else {
-            // The only real message we can send as a server is an NG Setup response
-            trace!(logger, "ASN.1 encode NGAP PDU");
-            hex::decode("20150031000004000100050100414d4600600008000002f839cafe0000564001ff005000100002f83900011008010203100811223300").unwrap()
-        };
+impl<C, P> TransportProvider for SctpServerTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
+    type Pdu = P;
+    async fn send_pdu(&self, pdu: P, logger: &Logger) -> Result<()> {
+        let message: Vec<u8> = self.codec.to_wire(pdu)?;
         self.tnla_pool.send_message(message, logger).await
     }
 }
@@ -48,8 +55,12 @@ impl TransportProvider for SctpServerTransportProvider {
 const MAX_LISTEN_BACKLOG: i32 = 5;
 
 #[async_trait]
-impl ServerTransportProvider for SctpServerTransportProvider {
-    type Pdu = NgapPdu;
+impl<C, P> ServerTransportProvider for SctpServerTransportProvider<C, P>
+where
+    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
+    P: Send + Sync + Clone + 'static + Debug,
+{
+    type Pdu = P;
     async fn serve<H>(
         self,
         listen_addr: String,
@@ -58,14 +69,17 @@ impl ServerTransportProvider for SctpServerTransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = <Self as ServerTransportProvider>::Pdu>,
+        H: TnlaEventHandler<MessageType = P>,
     {
         let addr = async_net::resolve(listen_addr)
             .await
             .map(|vec| vec[0])?
             .into();
 
-        let wrapped_handler = JsonDecoder(handler);
+        let wrapped_handler = Wrapper {
+            handler,
+            codec: self.codec,
+        };
 
         Ok(task::spawn(async move {
             let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())

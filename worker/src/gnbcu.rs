@@ -1,9 +1,8 @@
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
-use crate::{ClientContext, NgapClientTransportProvider};
+use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
-use common::transport_provider::TransportProvider;
 use models::{RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -17,7 +16,7 @@ use uuid::Uuid;
 pub struct Gnbcu<T, F, C>
 where
     T: NgapClientTransportProvider,
-    F: TransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Clone + Send + Sync + 'static,
 {
     pub ngap_transport_provider: T,
@@ -28,7 +27,7 @@ where
 
 impl<
         T: NgapClientTransportProvider,
-        F: TransportProvider,
+        F: F1ServerTransportProvider,
         C: Api<ClientContext> + Send + Sync + Clone + 'static,
     > Gnbcu<T, F, C>
 {
@@ -131,9 +130,9 @@ impl<
 #[cfg(test)]
 mod tests {
     use crate::mock_coordinator::{MockCoordinator, NodeControlResponse};
+    use also_net::MockTransportProvider;
     use anyhow::Result;
     use bitvec::vec::BitVec;
-    use common::mock_transport_provider::MockTransportProvider;
     use common::ngap::*;
     use models::RefreshWorkerRsp;
     use node_control_api::{models, RefreshWorkerResponse};

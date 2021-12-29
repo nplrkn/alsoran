@@ -7,8 +7,6 @@ use stop_token::StopToken;
 
 //pub struct Binding;
 
-pub type Message = Vec<u8>;
-
 /// The TransportProvider trait allows the user to send UE and non-UE-associated messages over
 /// some reference point without needing to understand the details of transport connections.  
 #[async_trait]
@@ -16,15 +14,6 @@ pub trait TransportProvider: 'static + Send + Sync + Clone {
     type Pdu;
     async fn send_pdu(&self, pdu: Self::Pdu, logger: &Logger) -> Result<()>;
 }
-
-/// The Handler trait covers the function needed to receive messages over a transport.
-// #[async_trait]
-// pub trait Handler: 'static + Send + Sync + Clone {
-//     type Pdu;
-//     async fn tnla_established(&self, tnla_id: u32, logger: &Logger);
-//     async fn tnla_terminated(&self, tnla_id: u32, logger: &Logger);
-//     async fn recv_non_ue_associated(&self, pdu: Self::Pdu, logger: &Logger);
-// }
 
 /// The ServerTransportProvider trait provides the functions needed on the passive
 /// side of the reference point (which accepts connections from the active side).

@@ -1,10 +1,9 @@
 use crate::gnbcu::Gnbcu;
-use crate::{ClientContext, NgapClientTransportProvider};
+use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use also_net::{TnlaEvent, TnlaEventHandler};
 use async_trait::async_trait;
 use bitvec::vec::BitVec;
 use common::ngap::*;
-use common::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
-use common::transport_provider::TransportProvider;
 use node_control_api::Api;
 use slog::Logger;
 use slog::{info, trace, warn};
@@ -14,7 +13,7 @@ use std::sync::Arc;
 pub struct NgapHandler<T, F, C>
 where
     T: NgapClientTransportProvider,
-    F: TransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     gnbcu: Arc<Gnbcu<T, F, C>>,
@@ -23,7 +22,7 @@ where
 impl<T, F, C> NgapHandler<T, F, C>
 where
     T: NgapClientTransportProvider,
-    F: TransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     pub fn new(gnbcu: Gnbcu<T, F, C>) -> NgapHandler<T, F, C> {
@@ -37,7 +36,7 @@ where
 impl<T, F, C> TnlaEventHandler for NgapHandler<T, F, C>
 where
     T: NgapClientTransportProvider,
-    F: TransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     type MessageType = NgapPdu;

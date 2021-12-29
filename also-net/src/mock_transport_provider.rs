@@ -1,4 +1,6 @@
-use super::transport_provider::{ClientTransportProvider, TransportProvider};
+use super::transport_provider::{
+    ClientTransportProvider, ServerTransportProvider, TransportProvider,
+};
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
@@ -56,7 +58,7 @@ impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = <Self as ClientTransportProvider>::Pdu>,
+        H: TnlaEventHandler<MessageType = P>,
     {
         let receiver = self.receiver.clone();
         handler
@@ -73,5 +75,24 @@ impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
                 handler.handle_message(pdu, 1, &logger).await;
             }
         }))
+    }
+}
+
+#[async_trait]
+impl<P: Send + Sync + Clone + 'static + Debug> ServerTransportProvider
+    for MockTransportProvider<P>
+{
+    type Pdu = P;
+    async fn serve<H>(
+        self,
+        _listen_addr: String,
+        _stop_token: StopToken,
+        _handler: H,
+        _logger: Logger,
+    ) -> Result<JoinHandle<()>>
+    where
+        H: TnlaEventHandler<MessageType = P>,
+    {
+        unimplemented!()
     }
 }
