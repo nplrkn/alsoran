@@ -1,34 +1,19 @@
 mod test;
-use also_net::{JsonCodec, TransportProvider};
+use also_net::TransportProvider;
 use async_std;
 use bitvec::vec::BitVec;
 use common::ngap::*;
-use slog::{info, o};
-use std::{panic, process};
-use test::mock_amf::MockAmf;
+use slog::info;
+use std::panic;
+use test::test_context::TestContext;
 
 const NGAP_SCTP_PPID: u32 = 60;
 
 #[async_std::test]
 async fn run_everything() {
-    let logger = common::logging::test_init();
-
-    let orig_hook = panic::take_hook();
-    panic::set_hook(Box::new(move |panic_info| {
-        orig_hook(panic_info);
-        process::exit(1);
-    }));
-
-    // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
-    let amf_address = "127.0.0.1:38212";
-    let amf = MockAmf::new(amf_address, &logger).await;
-
-    let (coord_stop_source, coord_task) = coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
-    let (worker_stop_source, worker_task) = worker::spawn(
-        logger.new(o!("nodetype"=> "cu-w")),
-        JsonCodec::new(),
-        JsonCodec::new(),
-    );
+    let test_context = TestContext::new().await;
+    let logger = &test_context.logger;
+    let amf = &test_context.amf;
 
     // Wait for connection to be established - the mock sends us an empty message to indicate this.
     assert!(amf
@@ -83,26 +68,5 @@ async fn run_everything() {
         .await
         .expect("Failed mock send");
 
-    info!(logger, "Terminate coordinator");
-    drop(coord_stop_source);
-
-    info!(logger, "Terminate worker");
-    drop(worker_stop_source);
-
-    info!(logger, "Wait for worker to terminate connection");
-    assert!(amf
-        .receiver
-        .recv()
-        .await
-        .expect("Expected connection termination")
-        .is_none());
-
-    info!(logger, "Terminate mock AMF");
-    drop(amf.stop_source);
-
-    info!(logger, "Wait for all tasks to terminate cleanly");
-    coord_task.await;
-    worker_task.await;
-    amf.task.await;
-    drop(logger);
+    test_context.terminate().await;
 }
