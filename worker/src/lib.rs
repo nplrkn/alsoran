@@ -4,8 +4,12 @@ mod gnbcu;
 #[cfg(test)]
 mod mock_coordinator;
 mod ngap_handler;
+use also_net::{
+    ClientTransportProvider, Codec, MockTransportProvider, SctpTransportProvider,
+    ServerTransportProvider, TransportProvider,
+};
 use async_std::task::JoinHandle;
-use common::sctp_client_transport_provider::SctpClientTransportProvider;
+use common::ngap::NgapPdu;
 use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
@@ -28,10 +32,32 @@ const NGAP_SCTP_PPID: u32 = 60;
 // and 68 for DTLS over SCTP (IETF RFC 6083 [9]).
 const F1AP_NGAP_PPID: u32 = 62;
 
-pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>) {
+pub trait NgapClientTransportProvider:
+    ClientTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
+{
+}
+impl<C> NgapClientTransportProvider for SctpTransportProvider<C, NgapPdu> where
+    C: Codec<Pdu = NgapPdu>
+{
+}
+impl NgapClientTransportProvider for MockTransportProvider<NgapPdu> {}
+
+pub trait F1ServerTransportProvider:
+    ServerTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
+{
+}
+impl<C> F1ServerTransportProvider for SctpTransportProvider<C, NgapPdu> where C: Codec<Pdu = NgapPdu>
+{}
+impl F1ServerTransportProvider for MockTransportProvider<NgapPdu> {}
+
+pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'static>(
+    logger: Logger,
+    ngap_codec: N,
+    f1_codec: F,
+) -> (StopSource, JoinHandle<()>) {
     info!(logger, "Start");
-    let ngap_transport_provider = SctpClientTransportProvider::new(NGAP_SCTP_PPID);
-    let f1_transport_provider = SctpClientTransportProvider::new(F1AP_NGAP_PPID);
+    let ngap_transport_provider = SctpTransportProvider::new(NGAP_SCTP_PPID, ngap_codec);
+    let f1_transport_provider = SctpTransportProvider::new(F1AP_NGAP_PPID, f1_codec);
 
     let base_path = "http://127.0.0.1:23156";
 

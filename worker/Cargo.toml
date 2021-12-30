@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../common" }
+also-net = { path = "../also-net" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 node-control-api = { path = "../node-control-api", features = ["client"] }
 async-trait = "0.1.51"
@@ -24,7 +25,4 @@ uuid = {version = "0.8", features = ["serde", "v4"]}
 stop-token = "0.6.1"
 asn1-codecs = "0.1.2"
 asn1_codecs_derive = "0.1.2"
-
-
-
-
+bitvec = {version = "0.22", features = ["serde"] }

@@ -1,23 +1,24 @@
 use crate::gnbcu::Gnbcu;
-use crate::ClientContext;
+use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use also_net::{TnlaEvent, TnlaEventHandler};
 use async_trait::async_trait;
-use common::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use common::ngap::NgapPdu;
 use node_control_api::Api;
-use slog::{trace, Logger};
+use slog::Logger;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct F1Handler<
-    T: ClientTransportProvider,
-    F: TransportProvider,
+    T: NgapClientTransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Sync + Send + Clone + 'static,
 > {
     gnbcu: Arc<Gnbcu<T, F, C>>,
 }
 
 impl<
-        T: ClientTransportProvider,
-        F: TransportProvider,
+        T: NgapClientTransportProvider,
+        F: F1ServerTransportProvider,
         C: Api<ClientContext> + Sync + Send + Clone,
     > F1Handler<T, F, C>
 {
@@ -29,28 +30,20 @@ impl<
 }
 
 #[async_trait]
-impl<T, F, C> Handler for F1Handler<T, F, C>
+impl<T, F, C> TnlaEventHandler for F1Handler<T, F, C>
 where
-    T: ClientTransportProvider,
-    F: TransportProvider,
+    T: NgapClientTransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Sync + Send + 'static + Clone,
 {
-    async fn tnla_established(&self, _tnla_id: u32, _logger: &Logger) {
+    type MessageType = NgapPdu; // TODO
+
+    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
         unimplemented!()
     }
-    async fn tnla_terminated(&self, _tnla_id: u32, _logger: &Logger) {
+
+    // TODO indicate whether it is UE or non UE associated?
+    async fn handle_message(&self, _message: NgapPdu, _tnla_id: u32, _logger: &Logger) {
         unimplemented!()
-    }
-    async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
-        trace!(
-            logger,
-            "F1Handler got non UE associated message {:?}",
-            message
-        );
-        self.gnbcu
-            .ngap_transport_provider
-            .send_message(message, logger)
-            .await
-            .unwrap();
     }
 }

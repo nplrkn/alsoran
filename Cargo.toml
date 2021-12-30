@@ -5,5 +5,7 @@ members = [
     "node-control-api",
     "coordinator",
     "common",
-    "integration-tests"
+    "integration-tests",
+    "also-sctp",
+    "also-net"
 ]

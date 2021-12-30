@@ -1,7 +1,9 @@
 use crate::gnbcu::Gnbcu;
-use crate::ClientContext;
+use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use also_net::{TnlaEvent, TnlaEventHandler};
 use async_trait::async_trait;
-use common::transport_provider::{ClientTransportProvider, Handler, Message, TransportProvider};
+use bitvec::vec::BitVec;
+use common::ngap::*;
 use node_control_api::Api;
 use slog::Logger;
 use slog::{info, trace, warn};
@@ -10,8 +12,8 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 pub struct NgapHandler<T, F, C>
 where
-    T: ClientTransportProvider,
-    F: TransportProvider,
+    T: NgapClientTransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     gnbcu: Arc<Gnbcu<T, F, C>>,
@@ -19,8 +21,8 @@ where
 
 impl<T, F, C> NgapHandler<T, F, C>
 where
-    T: ClientTransportProvider,
-    F: TransportProvider,
+    T: NgapClientTransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     pub fn new(gnbcu: Gnbcu<T, F, C>) -> NgapHandler<T, F, C> {
@@ -30,49 +32,58 @@ where
     }
 }
 
-use asn1_codecs::aper::{AperCodec, AperCodecData};
-use common::ngap::NgapPdu;
-
 #[async_trait]
-impl<T, F, C> Handler for NgapHandler<T, F, C>
+impl<T, F, C> TnlaEventHandler for NgapHandler<T, F, C>
 where
-    T: ClientTransportProvider,
-    F: TransportProvider,
+    T: NgapClientTransportProvider,
+    F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
-    async fn tnla_established(&self, assoc_id: u32, logger: &Logger) {
-        // TODO - the coordinator should determine whether and when we send Setup, or RAN configuration update
-        trace!(logger, "TNLA {} established", assoc_id);
-        let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
-        match self
-            .gnbcu
-            .ngap_transport_provider
-            .send_message(precanned_ng_setup, logger)
-            .await
-        {
-            Ok(()) => (),
-            Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
+    type MessageType = NgapPdu;
+
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        match event {
+            TnlaEvent::Established => {
+                trace!(logger, "TNLA {} established", tnla_id);
+
+                info!(logger, "Send NG setup to AMF");
+                let ng_setup = NgapPdu::InitiatingMessage(InitiatingMessage {
+                    procedure_code: ProcedureCode(21),
+                    criticality: Criticality(Criticality::REJECT),
+                    value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
+                        protocol_i_es: NgSetupRequestProtocolIEs(vec![
+                            NgSetupRequestProtocolIEsItem {
+                                id: ProtocolIeId(27),
+                                criticality: Criticality(Criticality::REJECT),
+                                value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
+                                    GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
+                                        plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
+                                        gnb_id: GnbId::GnbId(BitString26(BitVec::from_element(
+                                            0x10,
+                                        ))),
+                                        ie_extensions: None,
+                                    }),
+                                ),
+                            },
+                        ]),
+                    }),
+                });
+                //let precanned_ng_setup = hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
+                match self
+                    .gnbcu
+                    .ngap_transport_provider
+                    .send_pdu(ng_setup, logger)
+                    .await
+                {
+                    Ok(()) => (),
+                    Err(e) => warn!(logger, "Failed NG Setup send - {:?}", e),
+                }
+            }
+            TnlaEvent::Terminated => warn!(logger, "TNLA {} closed", tnla_id),
         };
     }
-    async fn tnla_terminated(&self, assoc_id: u32, logger: &Logger) {
-        warn!(logger, "TNLA {} closed", assoc_id);
-    }
 
-    async fn recv_non_ue_associated(&self, message: Message, logger: &Logger) {
-        // info!(
-        //     logger,
-        //     "NgapHandler got non UE associated message {:?}", message
-        // );
-        let mut codec_data = AperCodecData::from_slice(&message);
-
-        match NgapPdu::decode(&mut codec_data) {
-            Ok(ngap_pdu) => info!(logger, "ngap_pdu: {:?}", ngap_pdu),
-            Err(e) => warn!(logger, "ngap decode failure {:?}", e),
-        };
-        // self.gnbcu
-        //     .f1_transport_provider
-        //     .send_message(message, &logger)
-        //     .await
-        //     .unwrap();
+    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
+        info!(logger, "ngap_pdu: {:?}", message);
     }
 }
