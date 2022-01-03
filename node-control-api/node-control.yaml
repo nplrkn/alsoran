@@ -26,11 +26,39 @@ paths:
               schema:
                 $ref: "#/components/schemas/RefreshWorkerRsp"
         default:
-          description: unexpected error
+          description: Unexpected error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      callbacks:
+        interfaceManagement:
+          /trigger/{tnlaId}:
+            post: 
+              summary: A worker is instructed to trigger an interface management procedure on the given TNLA.
+              operationId: triggerInterfaceManagement
+              parameters: 
+                - in: path
+                  name: tnlaId
+                  required: true
+                  schema:
+                    type: integer
+                    minimum: 1
+              requestBody: 
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/InterfaceManagementReq'
+              responses:
+                '204':
+                  description: Interface management response
+                default:
+                  description: Unexpected error
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Error"
 components:
   schemas:
     RefreshWorkerReq:
@@ -65,6 +93,16 @@ components:
             $ref: '#/components/schemas/TransportAddress'
           minItems: 1
           uniqueItems: true
+    InterfaceManagementReq:
+      type: object
+      required: 
+        - procedure
+      properties:
+        procedure: 
+          type: string
+          enum: 
+            - ngSetup
+            - ranConfigurationUpdate
     TransportAddress:
       type: object
       required: 

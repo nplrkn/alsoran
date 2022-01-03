@@ -1,7 +1,8 @@
 # Backlog
 
 ## TO DO
-
+- Start callback server on worker and drive NG Setup from it
+- Create callback client on coordinator and drive NG Setup from it
 - (blocked on NGAP encode) start worker 2 passing node controller address:port and have it send a RAN configuration update
 - then do the F1 side of things
 - improve integration test logging so it is possible to see what thread is doing what 
@@ -13,6 +14,7 @@
 
 ## DONE
 
+- Develop callback in node control API.
 - test the sctp receive function
 - sort out TODOs and unwraps()
 - commonize TNLA pool

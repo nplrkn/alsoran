@@ -4,10 +4,12 @@ use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvide
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
 use models::{RefreshWorkerRsp, TransportAddress};
+use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
-use slog::{info, trace, warn};
+use slog::{error, info, trace, warn};
 use stop_token::{StopSource, StopToken};
+use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::{AuthData, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
 
@@ -55,10 +57,29 @@ impl<
         (stop_source, task)
     }
 
+    fn start_callback_server(&self, stop_token: StopToken, logger: Logger) -> JoinHandle<()> {
+        let addr = "127.0.0.1:23256"
+            .parse()
+            .expect("Failed to parse bind address"); // TODO
+        let service = MakeService::new(self.clone());
+        let service = MakeAllowAllAuthenticator::new(service, "cosmo");
+        let service =
+            node_control_api::server::context::MakeAddContext::<_, EmptyContext>::new(service);
+        async_std::task::spawn(async move {
+            let server = hyper::server::Server::bind(&addr)
+                .serve(service)
+                .with_graceful_shutdown(stop_token);
+            if let Err(e) = server.await {
+                error!(logger, "Server error: {}", e);
+            } else {
+                info!(logger, "Server graceful shutdown");
+            }
+        })
+    }
+
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let logger = &self.logger;
 
-        // Create client for talking to the coordinator.
         let context: ClientContext = swagger::make_context!(
             ContextBuilder,
             EmptyContext,
@@ -82,6 +103,9 @@ impl<
                 &context,
             )
             .await?;
+
+        // Start node control callback server in a separate task.
+        let callback_server_task = self.start_callback_server(stop_token.clone(), logger.clone());
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
             trace!(logger, "Received refresh worker response");
@@ -112,8 +136,9 @@ impl<
 
         stop_token.await;
 
-        // Wait for our client connection to terminate.
+        // Wait for our tasks to terminate.
         connection_task.await;
+        callback_server_task.await;
 
         info!(logger, "Stop");
         Ok(())
