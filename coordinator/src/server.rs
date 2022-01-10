@@ -1,20 +1,23 @@
+use async_channel::Sender;
 use async_trait::async_trait;
 use log::trace;
-use node_control_api::models::{self, RefreshWorkerRsp, TransportAddress};
+use node_control_api::models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
 use node_control_api::{Api, RefreshWorkerResponse};
 use std::marker::PhantomData;
 use swagger::ApiError;
 use swagger::{Has, XSpanIdString};
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Server<C> {
     marker: PhantomData<C>,
+    sender: Sender<RefreshWorkerReq>,
 }
 
 impl<C> Server<C> {
-    pub fn new() -> Self {
+    pub fn new(sender: Sender<RefreshWorkerReq>) -> Self {
         Server {
             marker: PhantomData,
+            sender,
         }
     }
 }
@@ -27,7 +30,7 @@ where
     /// Refresh worker request
     async fn refresh_worker(
         &self,
-        refresh_worker_req: models::RefreshWorkerReq,
+        refresh_worker_req: RefreshWorkerReq,
         context: &C,
     ) -> Result<RefreshWorkerResponse, ApiError> {
         //let context = context.clone();
@@ -36,6 +39,9 @@ where
             refresh_worker_req,
             context.get().0.clone()
         );
+
+        // Signal the control task
+
         Ok(RefreshWorkerResponse::RefreshWorkerResponse(
             RefreshWorkerRsp {
                 amf_addresses: vec![TransportAddress {

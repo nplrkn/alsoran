@@ -246,6 +246,9 @@ pub struct RefreshWorkerReq {
     #[serde(rename = "workerUniqueId")]
     pub worker_unique_id: uuid::Uuid,
 
+    #[serde(rename = "callbackUrl")]
+    pub callback_url: String,
+
     #[serde(rename = "f1Address")]
     pub f1_address: models::TransportAddress,
 
@@ -258,9 +261,10 @@ pub struct RefreshWorkerReq {
 }
 
 impl RefreshWorkerReq {
-    pub fn new(worker_unique_id: uuid::Uuid, f1_address: models::TransportAddress, connected_amfs: Vec<String>, connected_dus: Vec<String>, ) -> RefreshWorkerReq {
+    pub fn new(worker_unique_id: uuid::Uuid, callback_url: String, f1_address: models::TransportAddress, connected_amfs: Vec<String>, connected_dus: Vec<String>, ) -> RefreshWorkerReq {
         RefreshWorkerReq {
             worker_unique_id: worker_unique_id,
+            callback_url: callback_url,
             f1_address: f1_address,
             connected_amfs: connected_amfs,
             connected_dus: connected_dus,
@@ -275,6 +279,10 @@ impl std::string::ToString for RefreshWorkerReq {
     fn to_string(&self) -> String {
         let mut params: Vec<String> = vec![];
         // Skipping workerUniqueId in query parameter serialization
+
+
+        params.push("callbackUrl".to_string());
+        params.push(self.callback_url.to_string());
 
         // Skipping f1Address in query parameter serialization
 
@@ -301,6 +309,7 @@ impl std::str::FromStr for RefreshWorkerReq {
         // An intermediate representation of the struct to use for parsing.
         struct IntermediateRep {
             pub worker_unique_id: Vec<uuid::Uuid>,
+            pub callback_url: Vec<String>,
             pub f1_address: Vec<models::TransportAddress>,
             pub connected_amfs: Vec<Vec<String>>,
             pub connected_dus: Vec<Vec<String>>,
@@ -321,6 +330,7 @@ impl std::str::FromStr for RefreshWorkerReq {
             if let Some(key) = key_result {
                 match key {
                     "workerUniqueId" => intermediate_rep.worker_unique_id.push(<uuid::Uuid as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
+                    "callbackUrl" => intermediate_rep.callback_url.push(<String as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
                     "f1Address" => intermediate_rep.f1_address.push(<models::TransportAddress as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
                     "connectedAmfs" => return std::result::Result::Err("Parsing a container in this style is not supported in RefreshWorkerReq".to_string()),
                     "connectedDus" => return std::result::Result::Err("Parsing a container in this style is not supported in RefreshWorkerReq".to_string()),
@@ -335,6 +345,7 @@ impl std::str::FromStr for RefreshWorkerReq {
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(RefreshWorkerReq {
             worker_unique_id: intermediate_rep.worker_unique_id.into_iter().next().ok_or("workerUniqueId missing in RefreshWorkerReq".to_string())?,
+            callback_url: intermediate_rep.callback_url.into_iter().next().ok_or("callbackUrl missing in RefreshWorkerReq".to_string())?,
             f1_address: intermediate_rep.f1_address.into_iter().next().ok_or("f1Address missing in RefreshWorkerReq".to_string())?,
             connected_amfs: intermediate_rep.connected_amfs.into_iter().next().ok_or("connectedAmfs missing in RefreshWorkerReq".to_string())?,
             connected_dus: intermediate_rep.connected_dus.into_iter().next().ok_or("connectedDus missing in RefreshWorkerReq".to_string())?,

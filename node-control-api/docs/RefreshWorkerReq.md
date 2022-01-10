@@ -4,6 +4,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **worker_unique_id** | [***uuid::Uuid**](UUID.md) |  | 
+**callback_url** | **String** |  | 
 **f1_address** | [***models::TransportAddress**](TransportAddress.md) |  | 
 **connected_amfs** | **Vec<String>** |  | 
 **connected_dus** | **Vec<String>** |  | 

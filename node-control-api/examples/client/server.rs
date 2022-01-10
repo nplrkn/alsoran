@@ -105,6 +105,7 @@ impl<C> CallbackApi<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /// A worker is instructed to trigger an interface management procedure on the given TNLA.
     async fn trigger_interface_management(
         &self,
+        callback_request_body_callback_url: String,
         tnla_id: i32,
         interface_management_req: models::InterfaceManagementReq,
         context: &C) -> Result<TriggerInterfaceManagementResponse, ApiError>

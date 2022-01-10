@@ -33,9 +33,13 @@ paths:
                 $ref: "#/components/schemas/Error"
       callbacks:
         interfaceManagement:
-          /trigger/{tnlaId}:
+          '{$request.body#/callbackUrl}/trigger/{tnlaId}':
             post: 
               summary: A worker is instructed to trigger an interface management procedure on the given TNLA.
+              description: | 
+                The worker must carry out the given procedure on the given TNLA.  If the procedure succeeds then  
+                the worker should send a successful response to this call.  If the procedure fails then the
+                worker should send an unsuccessful response to this call.
               operationId: triggerInterfaceManagement
               parameters: 
                 - in: path
@@ -43,7 +47,7 @@ paths:
                   required: true
                   schema:
                     type: integer
-                    minimum: 1
+                    minimum:
               requestBody: 
                 required: true
                 content:
@@ -65,6 +69,7 @@ components:
       type: object
       required:
         - workerUniqueId
+        - callbackUrl
         - f1Address
         - connectedAmfs
         - connectedDus
@@ -72,6 +77,9 @@ components:
         workerUniqueId:
           type: string
           format: uuid
+        callbackUrl:
+          type: string
+          format: url
         f1Address:
           $ref: '#/components/schemas/TransportAddress'
         connectedAmfs:
@@ -101,8 +109,8 @@ components:
         procedure: 
           type: string
           enum: 
-            - ngSetup
-            - ranConfigurationUpdate
+            - ngsetup
+            - ranconfigurationupdate
     TransportAddress:
       type: object
       required: 

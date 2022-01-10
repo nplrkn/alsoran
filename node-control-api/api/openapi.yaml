@@ -11,7 +11,7 @@ paths:
     post:
       callbacks:
         interfaceManagement:
-          /trigger/{tnlaId}:
+          '{$request.body#/callbackUrl}/trigger/{tnlaId}':
             post:
               operationId: triggerInterfaceManagement
               parameters:
@@ -20,7 +20,6 @@ paths:
                 name: tnlaId
                 required: true
                 schema:
-                  minimum: 1
                   type: integer
                 style: simple
               requestBody:
@@ -74,12 +73,16 @@ components:
         f1Address:
           port: 5249
           host: host
+        callbackUrl: http://example.com/aeiou
         connectedDus:
         - connectedDus
         - connectedDus
       properties:
         workerUniqueId:
           format: uuid
+          type: string
+        callbackUrl:
+          format: url
           type: string
         f1Address:
           $ref: '#/components/schemas/TransportAddress'
@@ -92,6 +95,7 @@ components:
             type: string
           type: array
       required:
+      - callbackUrl
       - connectedAmfs
       - connectedDus
       - f1Address

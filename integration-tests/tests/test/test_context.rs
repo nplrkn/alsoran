@@ -10,6 +10,7 @@ pub struct TestContext {
     pub logger: Logger,
     coord_stop_source: StopSource,
     coord_task: JoinHandle<()>,
+    control_task: JoinHandle<()>,
     workers: Vec<WorkerInfo>,
 }
 
@@ -32,13 +33,14 @@ impl TestContext {
         let amf_address = "127.0.0.1:38212";
         let amf = MockAmf::new(amf_address, &logger).await;
 
-        let (coord_stop_source, coord_task) =
+        let (coord_stop_source, coord_task, control_task) =
             coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
         let mut tc = TestContext {
             amf,
             logger,
             coord_stop_source,
             coord_task,
+            control_task,
             workers: vec![],
         };
         tc.start_worker().await;
@@ -78,6 +80,7 @@ impl TestContext {
 
         info!(self.logger, "Wait for all tasks to terminate cleanly");
         self.coord_task.await;
+        self.control_task.await;
         self.amf.task.await;
     }
 }

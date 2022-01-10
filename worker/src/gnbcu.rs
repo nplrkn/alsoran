@@ -3,7 +3,7 @@ use crate::ngap_handler::NgapHandler;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
-use models::{RefreshWorkerRsp, TransportAddress};
+use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -91,7 +91,8 @@ impl<
         let response: RefreshWorkerResponse = self
             .coordinator_client
             .refresh_worker(
-                models::RefreshWorkerReq {
+                RefreshWorkerReq {
+                    callback_url: "http://127.0.0.1:23256".to_string(),
                     worker_unique_id: Uuid::new_v4(),
                     f1_address: TransportAddress {
                         host: "127.0.0.1".to_string(),
