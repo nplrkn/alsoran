@@ -63,7 +63,7 @@ impl<
     }
 
     fn start_callback_server(&self, stop_token: StopToken, logger: Logger) -> JoinHandle<()> {
-        let addr = format!("127.0.0.1:{}", self.config.callback_server_port)
+        let addr = format!("0.0.0.0:{}", self.config.callback_server_port)
             .parse()
             .expect("Failed to parse bind address"); // TODO
         let service = MakeService::new(self.clone());
@@ -92,12 +92,12 @@ impl<
             XSpanIdString::default()
         );
 
-        trace!(logger, "Send refresh worker request");
+        trace!(logger, "Send initial refresh worker request");
         let response: RefreshWorkerResponse = self
             .coordinator_client
             .refresh_worker(
                 RefreshWorkerReq {
-                    callback_url: "http://127.0.0.1:23256".to_string(),
+                    callback_url: self.config.callback_server_url(),
                     worker_unique_id: Uuid::new_v4(),
                     f1_address: TransportAddress {
                         host: "127.0.0.1".to_string(),
