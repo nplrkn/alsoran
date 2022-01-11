@@ -9,10 +9,11 @@ use worker::config::Config;
 async fn main() -> Result<()> {
     let root_logger = logging::init();
 
-    // TODO - get from command line.  (Note callback_server_port is per instance so we
+    // TODO - get from command line.  (Note callback_server_bind_port is per instance so we
     // can't use a shared file unless the instances are dockerized.)
     let config = Config {
-        callback_server_port: 23256,
+        callback_server_bind_port: 23256,
+        callback_server_url_host_port: None,
     };
 
     let (stop_source, task) = worker::spawn(

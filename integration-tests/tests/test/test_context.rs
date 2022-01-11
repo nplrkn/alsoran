@@ -52,7 +52,8 @@ impl TestContext {
         let worker_number = self.workers.len();
 
         let config = Config {
-            callback_server_port: 23256 + worker_number as u16,
+            callback_server_bind_port: 23256 + worker_number as u16,
+            callback_server_url_host_port: None,
         };
 
         let (stop_source, task) = worker::spawn(

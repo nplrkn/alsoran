@@ -6,11 +6,11 @@
 - Drive RAN configuration update from coordinator
 - (blocked on NGAP encode) start worker 2 passing node controller address:port and have it send a RAN configuration update
 - then do the F1 side of things
+- make tests time out rather than hang
 - improve integration test logging so it is possible to see what thread is doing what 
 - regression test connection failures and retries
 - pass logger in context
 - regression testing of maintain and retry scenarios
-- Be test driven and get CI going
 - hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 ## DONE

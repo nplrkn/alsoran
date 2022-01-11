@@ -63,7 +63,7 @@ impl<
     }
 
     fn start_callback_server(&self, stop_token: StopToken, logger: Logger) -> JoinHandle<()> {
-        let addr = format!("0.0.0.0:{}", self.config.callback_server_port)
+        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port)
             .parse()
             .expect("Failed to parse bind address"); // TODO
         let service = MakeService::new(self.clone());
@@ -177,7 +177,8 @@ mod tests {
         let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
 
         let config = Config {
-            callback_server_port: 23256,
+            callback_server_bind_port: 23256,
+            callback_server_url_host_port: None,
         };
 
         let (stop_source, worker_task) = Gnbcu::new(
