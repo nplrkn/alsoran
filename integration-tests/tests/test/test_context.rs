@@ -4,6 +4,7 @@ use async_std::task::JoinHandle;
 use slog::{info, o, Logger};
 use std::{panic, process};
 use stop_token::StopSource;
+use worker::Config;
 
 pub struct TestContext {
     pub amf: MockAmf,
@@ -34,7 +35,7 @@ impl TestContext {
         let amf = MockAmf::new(amf_address, &logger).await;
 
         let (coord_stop_source, coord_task, control_task) =
-            coordinator::spawn(logger.new(o!("nodetype"=> "cu-c")));
+            coordinator::spawn(logger.new(o!("cu-c" => 1)));
         let mut tc = TestContext {
             amf,
             logger,
@@ -48,8 +49,15 @@ impl TestContext {
     }
 
     pub async fn start_worker(&mut self) {
+        let worker_number = self.workers.len();
+
+        let config = Config {
+            callback_server_port: 23256 + worker_number as u16,
+        };
+
         let (stop_source, task) = worker::spawn(
-            self.logger.new(o!("cu-w"=> self.workers.len())),
+            config,
+            self.logger.new(o!("cu-w"=> worker_number)),
             JsonCodec::new(),
             JsonCodec::new(),
         );

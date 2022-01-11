@@ -1,9 +1,10 @@
 use crate::TestContext;
 use also_net::TransportProvider;
+use anyhow::{anyhow, Result};
 use common::ngap::*;
 use slog::info;
 
-pub async fn handle(test_context: &TestContext) {
+pub async fn handle(test_context: &TestContext) -> Result<()> {
     let amf = &test_context.amf;
     let logger = &test_context.logger;
 
@@ -17,9 +18,10 @@ pub async fn handle(test_context: &TestContext) {
     }) = pdu
     {
         info!(logger, "Got RAN configuration update, send response");
+        Ok(())
     } else {
-        panic!("Not a RAN configuration update");
-    }
+        Err(anyhow!("Not a RAN configuration update"))
+    }?;
 
     let response = NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
         procedure_code: ProcedureCode(35),
@@ -31,8 +33,7 @@ pub async fn handle(test_context: &TestContext) {
         ),
     });
 
-    amf.sender
-        .send_pdu(response, &logger)
-        .await
-        .expect("Failed mock send");
+    amf.sender.send_pdu(response, &logger).await?;
+
+    Ok(())
 }

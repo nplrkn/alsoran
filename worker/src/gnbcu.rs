@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::f1_handler::F1Handler;
 use crate::ngap_handler::NgapHandler;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
@@ -21,6 +22,8 @@ where
     F: F1ServerTransportProvider,
     C: Api<ClientContext> + Clone + Send + Sync + 'static,
 {
+    // TODO: why do these need to be pub?
+    pub config: Config,
     pub ngap_transport_provider: T,
     pub f1_transport_provider: F,
     pub coordinator_client: C,
@@ -34,12 +37,14 @@ impl<
     > Gnbcu<T, F, C>
 {
     pub fn new(
+        config: Config,
         ngap_transport_provider: T,
         f1_transport_provider: F,
         coordinator_client: C,
         logger: &Logger,
     ) -> Gnbcu<T, F, C> {
         Gnbcu {
+            config,
             ngap_transport_provider,
             f1_transport_provider,
             coordinator_client,
@@ -58,7 +63,7 @@ impl<
     }
 
     fn start_callback_server(&self, stop_token: StopToken, logger: Logger) -> JoinHandle<()> {
-        let addr = "127.0.0.1:23256"
+        let addr = format!("127.0.0.1:{}", self.config.callback_server_port)
             .parse()
             .expect("Failed to parse bind address"); // TODO
         let service = MakeService::new(self.clone());
@@ -171,7 +176,12 @@ mod tests {
             MockTransportProvider::<NgapPdu>::new();
         let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
 
+        let config = Config {
+            callback_server_port: 23256,
+        };
+
         let (stop_source, worker_task) = Gnbcu::new(
+            config,
             mock_ngap_transport_provider,
             mock_f1_transport_provider,
             mock_coordinator,

@@ -1,6 +1,7 @@
 mod f1_handler;
 mod node_control_callback_server;
 use gnbcu::Gnbcu;
+pub mod config;
 mod gnbcu;
 #[cfg(test)]
 mod mock_coordinator;
@@ -11,6 +12,7 @@ use also_net::{
 };
 use async_std::task::JoinHandle;
 use common::ngap::NgapPdu;
+pub use config::Config;
 use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
@@ -52,6 +54,7 @@ impl<C> F1ServerTransportProvider for SctpTransportProvider<C, NgapPdu> where C:
 impl F1ServerTransportProvider for MockTransportProvider<NgapPdu> {}
 
 pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'static>(
+    config: Config,
     logger: Logger,
     ngap_codec: N,
     f1_codec: F,
@@ -65,6 +68,7 @@ pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'stati
     let coordinator_client = Client::try_new_http(base_path).expect("Failed to create HTTP client");
 
     Gnbcu::new(
+        config,
         ngap_transport_provider,
         f1_transport_provider,
         coordinator_client,
