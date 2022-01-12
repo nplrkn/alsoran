@@ -26,7 +26,8 @@ pub fn new_listen(
             let mut addr = OsSocketAddr::new();
             let mut len = addr.len();
             let assoc_fd = try_io!(accept(fd.0, addr.as_mut_ptr(), &mut len), "accept")?;
-            let assoc = SctpAssociation::from_accepted(assoc_fd, ppid, &logger)?;
+            let addr = addr.into_addr().ok_or(anyhow!("Not IPv4 or IPv6"))?;
+            let assoc = SctpAssociation::from_accepted(assoc_fd, ppid, addr, &logger)?;
             yield assoc;
         }
     }

@@ -31,6 +31,10 @@ where
     }
 }
 
+// TODO the problem is that self doesn't have the GNBCU fields on it
+// so we have to call through to methods on the GNBCU, or we have to have
+// public fields of the GNBCU.  Are we really sure we can't impl this directly on the
+// GNBCU.
 #[async_trait]
 impl<T, F, C> TnlaEventHandler for NgapHandler<T, F, C>
 where
@@ -42,12 +46,10 @@ where
 
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
-            TnlaEvent::Established => {
-                trace!(logger, "TNLA {} established", tnla_id);
-                // TODO update coordinator
-            }
+            TnlaEvent::Established => trace!(logger, "TNLA {} established", tnla_id),
             TnlaEvent::Terminated => warn!(logger, "TNLA {} closed", tnla_id),
         };
+        self.gnbcu.connected_amf_change(logger).await;
     }
 
     async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {

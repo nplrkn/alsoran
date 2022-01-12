@@ -3,6 +3,7 @@ use anyhow::Result;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::Logger;
+use std::net::SocketAddr;
 use stop_token::StopToken;
 
 //pub struct Binding;
@@ -37,7 +38,7 @@ pub trait ServerTransportProvider: TransportProvider {
 pub trait ClientTransportProvider: TransportProvider {
     type Pdu;
 
-    // TODO Eventually this will evolve into add_connection_target (?)
+    // TODO Eventually this will evolve into add_tnla_address (?)
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
@@ -47,4 +48,7 @@ pub trait ClientTransportProvider: TransportProvider {
     ) -> Result<JoinHandle<()>>
     where
         H: TnlaEventHandler<MessageType = <Self as ClientTransportProvider>::Pdu>;
+
+    // Return the set of TNLA remote address to which we are currently connected
+    async fn remote_tnla_addresses(&self) -> Vec<SocketAddr>;
 }

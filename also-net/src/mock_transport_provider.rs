@@ -9,6 +9,7 @@ use async_trait::async_trait;
 use futures::stream::StreamExt;
 use slog::{trace, Logger};
 use std::fmt::Debug;
+use std::net::SocketAddr;
 use stop_token::StopToken;
 
 /// MockTransportProvider
@@ -75,6 +76,10 @@ impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
                 handler.handle_message(pdu, 1, &logger).await;
             }
         }))
+    }
+
+    async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
+        unimplemented!()
     }
 }
 

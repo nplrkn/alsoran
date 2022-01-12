@@ -11,7 +11,7 @@ use slog::Logger;
 use slog::{error, info, trace, warn};
 use stop_token::{StopSource, StopToken};
 use swagger::auth::MakeAllowAllAuthenticator;
-use swagger::{AuthData, EmptyContext, Push, XSpanIdString};
+use swagger::{ApiError, AuthData, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
 
 /// The gNB-CU.
@@ -24,6 +24,7 @@ where
 {
     // TODO: why do these need to be pub?
     pub config: Config,
+    worker_uuid: Uuid,
     pub ngap_transport_provider: T,
     pub f1_transport_provider: F,
     pub coordinator_client: C,
@@ -45,6 +46,7 @@ impl<
     ) -> Gnbcu<T, F, C> {
         Gnbcu {
             config,
+            worker_uuid: Uuid::new_v4(),
             ngap_transport_provider,
             f1_transport_provider,
             coordinator_client,
@@ -84,31 +86,8 @@ impl<
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let logger = &self.logger;
-
-        let context: ClientContext = swagger::make_context!(
-            ContextBuilder,
-            EmptyContext,
-            None as Option<AuthData>,
-            XSpanIdString::default()
-        );
-
         trace!(logger, "Send initial refresh worker request");
-        let response: RefreshWorkerResponse = self
-            .coordinator_client
-            .refresh_worker(
-                RefreshWorkerReq {
-                    callback_url: self.config.callback_server_url(),
-                    worker_unique_id: Uuid::new_v4(),
-                    f1_address: TransportAddress {
-                        host: "127.0.0.1".to_string(),
-                        port: Some(345),
-                    },
-                    connected_amfs: Vec::new(),
-                    connected_dus: Vec::new(),
-                },
-                &context,
-            )
-            .await?;
+        let response = self.send_refresh_worker().await?;
 
         // Start node control callback server in a separate task.
         let callback_server_task = self.start_callback_server(stop_token.clone(), logger.clone());
@@ -148,6 +127,44 @@ impl<
 
         info!(logger, "Stop");
         Ok(())
+    }
+
+    pub async fn connected_amf_change(&self, _logger: &Logger) {
+        // TODO handle error
+        let _response = self.send_refresh_worker().await;
+    }
+
+    async fn send_refresh_worker(&self) -> Result<RefreshWorkerResponse, ApiError> {
+        let context: ClientContext = swagger::make_context!(
+            ContextBuilder,
+            EmptyContext,
+            None as Option<AuthData>,
+            XSpanIdString::default()
+        );
+
+        let connected_amfs = self
+            .ngap_transport_provider
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .map(|a| a.to_string())
+            .collect();
+
+        self.coordinator_client
+            .refresh_worker(
+                RefreshWorkerReq {
+                    callback_url: self.config.callback_server_url(),
+                    worker_unique_id: self.worker_uuid,
+                    f1_address: TransportAddress {
+                        host: "127.0.0.1".to_string(),
+                        port: Some(345),
+                    },
+                    connected_amfs,
+                    connected_dus: Vec::new(),
+                },
+                &context,
+            )
+            .await
     }
 }
 

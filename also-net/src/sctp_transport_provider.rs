@@ -11,6 +11,7 @@ use futures::stream::StreamExt;
 use sctp::SctpAssociation;
 use slog::{info, o, trace, warn, Logger};
 use std::fmt::Debug;
+use std::net::SocketAddr;
 use std::time::Duration;
 use stop_token::StopToken;
 use task::JoinHandle;
@@ -49,8 +50,7 @@ async fn resolve_and_connect(
         .await?
         .into_iter()
         .next()
-        .ok_or(anyhow!("Address resolved to empty array"))? // Don't know if this is actually hittable
-        .into();
+        .ok_or(anyhow!("Address resolved to empty array"))?; // TODO - don't know if this is actually hittable
     SctpAssociation::establish(addr, ppid, logger).await
 }
 
@@ -125,6 +125,11 @@ where
             }
         });
         Ok(task)
+    }
+
+    // Return the set of TNLA remote address to which we are currently connected
+    async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
+        self.tnla_pool.remote_addresses().await
     }
 }
 
