@@ -29,15 +29,15 @@ mod paths {
 
     lazy_static! {
         pub static ref GLOBAL_REGEX_SET: regex::RegexSet = regex::RegexSet::new(vec![
-            r"^/v1/(?P<request_body_callback_url>.*)/trigger/(?P<tnlaId>[^/?#]*)$"
+            r"^/v1/(?P<request_body_callback_url>.*)$"
         ])
         .expect("Unable to create global regex set");
     }
-    pub(crate) static ID_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID: usize = 0;
+    pub(crate) static ID_REQUEST_BODY_CALLBACKURL: usize = 0;
     lazy_static! {
-        pub static ref REGEX_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID: regex::Regex =
-            regex::Regex::new(r"^/v1/(?P<request_body_callback_url>.*)/trigger/(?P<tnlaId>[^/?#]*)$")
-                .expect("Unable to create regex for REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID");
+        pub static ref REGEX_REQUEST_BODY_CALLBACKURL: regex::Regex =
+            regex::Regex::new(r"^/v1/(?P<request_body_callback_url>.*)$")
+                .expect("Unable to create regex for REQUEST_BODY_CALLBACKURL");
     }
 }
 
@@ -145,30 +145,16 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
         match &method {
 
-            // TriggerInterfaceManagement - POST /{$request.body#/callbackUrl}/trigger/{tnlaId}
-            &hyper::Method::POST if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID) => {
+            // TriggerInterfaceManagement - POST /{$request.body#/callbackUrl}
+            &hyper::Method::POST if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL) => {
                 // Path parameters
                 let path: &str = &uri.path().to_string();
                 let path_params =
-                    paths::REGEX_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID
+                    paths::REGEX_REQUEST_BODY_CALLBACKURL
                     .captures(&path)
                     .unwrap_or_else(||
-                        panic!("Path {} matched RE REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID in set but failed match against \"{}\"", path, paths::REGEX_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID.as_str())
+                        panic!("Path {} matched RE REQUEST_BODY_CALLBACKURL in set but failed match against \"{}\"", path, paths::REGEX_REQUEST_BODY_CALLBACKURL.as_str())
                     );
-
-                let param_tnla_id = match percent_encoding::percent_decode(path_params["tnlaId"].as_bytes()).decode_utf8() {
-                    Ok(param_tnla_id) => match param_tnla_id.parse::<i32>() {
-                        Ok(param_tnla_id) => param_tnla_id,
-                        Err(e) => return Ok(Response::builder()
-                                        .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter tnlaId: {}", e)))
-                                        .expect("Unable to create Bad Request response for invalid path parameter")),
-                    },
-                    Err(_) => return Ok(Response::builder()
-                                        .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["tnlaId"])))
-                                        .expect("Unable to create Bad Request response for invalid percent decode"))
-                };
 
                 let callback_request_body_callback_url = path_params["request_body_callback_url"].to_string();
                 // Body parameters (note that non-required body parameters will ignore garbage
@@ -203,7 +189,6 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                 let result = api_impl.trigger_interface_management(
                                             callback_request_body_callback_url,
-                                            param_tnla_id,
                                             param_interface_management_req,
                                         &context
                                     ).await;
@@ -255,7 +240,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         }
             },
 
-            _ if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID) => method_not_allowed(),
+            _ if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL) => method_not_allowed(),
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
                     .body(Body::empty())
                     .expect("Unable to create Not Found response"))
@@ -269,8 +254,8 @@ impl<T> RequestParser<T> for ApiRequestParser {
     fn parse_operation_id(request: &Request<T>) -> Result<&'static str, ()> {
         let path = paths::GLOBAL_REGEX_SET.matches(request.uri().path());
         match request.method() {
-            // TriggerInterfaceManagement - POST /{$request.body#/callbackUrl}/trigger/{tnlaId}
-            &hyper::Method::POST if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL_TRIGGER_TNLAID) => Ok("TriggerInterfaceManagement"),
+            // TriggerInterfaceManagement - POST /{$request.body#/callbackUrl}
+            &hyper::Method::POST if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL) => Ok("TriggerInterfaceManagement"),
             _ => Err(()),
         }
     }

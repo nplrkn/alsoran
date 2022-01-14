@@ -114,7 +114,6 @@ pub trait CallbackApi<C: Send + Sync> {
     async fn trigger_interface_management(
         &self,
         callback_request_body_callback_url: String,
-        tnla_id: i32,
         interface_management_req: models::InterfaceManagementReq,
         context: &C) -> Result<TriggerInterfaceManagementResponse, ApiError>;
 
@@ -131,7 +130,6 @@ pub trait CallbackApiNoContext<C: Send + Sync> {
     async fn trigger_interface_management(
         &self,
         callback_request_body_callback_url: String,
-        tnla_id: i32,
         interface_management_req: models::InterfaceManagementReq,
         ) -> Result<TriggerInterfaceManagementResponse, ApiError>;
 
@@ -163,14 +161,12 @@ impl<T: CallbackApi<C> + Send + Sync, C: Clone + Send + Sync> CallbackApiNoConte
     async fn trigger_interface_management(
         &self,
         callback_request_body_callback_url: String,
-        tnla_id: i32,
         interface_management_req: models::InterfaceManagementReq,
         ) -> Result<TriggerInterfaceManagementResponse, ApiError>
     {
         let context = self.context().clone();
         self.api().trigger_interface_management(
             callback_request_body_callback_url,
-            tnla_id,
             interface_management_req,
             &context).await
     }

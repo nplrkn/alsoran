@@ -16,6 +16,7 @@ pub struct MockAmf {
     pub receiver: Receiver<Option<NgapPdu>>,
     pub sender: SctpTransportProvider<JsonCodec<NgapPdu>, NgapPdu>,
     pub task: JoinHandle<()>,
+    logger: Logger,
 }
 
 #[derive(Debug, Clone)]
@@ -24,6 +25,7 @@ struct Handler(pub Sender<Option<NgapPdu>>);
 impl MockAmf {
     pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
         let (internal_sender, receiver) = async_channel::unbounded();
+        let logger = logger.new(o!("amf" => 1));
         let stop_source = StopSource::new();
         let server = SctpTransportProvider::new(NGAP_SCTP_PPID, JsonCodec::new());
         let task = server
@@ -32,7 +34,7 @@ impl MockAmf {
                 amf_address.to_string(),
                 stop_source.token(),
                 Handler(internal_sender),
-                logger.new(o!("amf" => 1)),
+                logger.clone(),
             )
             .await
             .expect("Server bind failed");
@@ -42,11 +44,13 @@ impl MockAmf {
             stop_source,
             sender: server,
             task,
+            logger,
         }
     }
 
     pub async fn expect_connection(&self) {
         // Wait for connection to be established - the mock TNLA event handler sends us an empty message to indicate this.
+        trace!(self.logger, "Wait for connection from worker");
         assert!(self
             .receiver
             .recv()

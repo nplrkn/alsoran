@@ -106,12 +106,11 @@ impl<C> CallbackApi<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     async fn trigger_interface_management(
         &self,
         callback_request_body_callback_url: String,
-        tnla_id: i32,
         interface_management_req: models::InterfaceManagementReq,
         context: &C) -> Result<TriggerInterfaceManagementResponse, ApiError>
     {
         let context = context.clone();
-        info!("trigger_interface_management({}, {:?}) - X-Span-ID: {:?}", tnla_id, interface_management_req, context.get().0.clone());
+        info!("trigger_interface_management({:?}) - X-Span-ID: {:?}", interface_management_req, context.get().0.clone());
         Err("Generic failure".into())
     }
 

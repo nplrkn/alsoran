@@ -231,14 +231,12 @@ impl<S, C> CallbackApi<C> for Client<S, C> where
     async fn trigger_interface_management(
         &self,
         callback_request_body_callback_url: String,
-        param_tnla_id: i32,
         param_interface_management_req: models::InterfaceManagementReq,
         context: &C) -> Result<TriggerInterfaceManagementResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
         let mut uri = format!(
-            "{request_body_callback_url}/trigger/{tnla_id}"
-            ,tnla_id=utf8_percent_encode(&param_tnla_id.to_string(), ID_ENCODE_SET)
+            "{request_body_callback_url}"
             ,request_body_callback_url=callback_request_body_callback_url
         );
 

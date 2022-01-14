@@ -150,10 +150,16 @@ impl<
             .map(|a| a.to_string())
             .collect();
 
+        // Here, we work around a bug in the Rust OpenAPI generator which produces inconsistent code for the callback client and server.
+        // The callback client needs to pass in a full URL, whereas the callback server matches the URL path after the "v1".
+        // Here we build a URL to the coordinator that it can pass into its client, but that will also pass the regex running on
+        // the (worker's) server.
+        let callback_url = format!("{}/v1/trigger", self.config.callback_server_base_path());
+
         self.coordinator_client
             .refresh_worker(
                 RefreshWorkerReq {
-                    callback_url: self.config.callback_server_url(),
+                    callback_url,
                     worker_unique_id: self.worker_uuid,
                     f1_address: TransportAddress {
                         host: "127.0.0.1".to_string(),

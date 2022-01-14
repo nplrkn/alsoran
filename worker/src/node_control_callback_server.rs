@@ -19,15 +19,19 @@ where
     /// A worker is instructed to trigger an interface management procedure on the given TNLA.
     async fn trigger_interface_management(
         &self,
-        _callback_request_body_callback_url: String,
-        _tnla_id: i32,
+        _callback_url: String,
         interface_management_req: models::InterfaceManagementReq,
         _context: &Cx,
     ) -> Result<TriggerInterfaceManagementResponse, ApiError> {
         let logger = &self.logger;
 
-        // TODO if a worker has max 1 connection to an AMF address, we don't need the TNLA ID.
-        // We just need the AMF endpoint address.  Let's change the above to no longer ref tnla ID.
+        // TODO the interface management request ought to specify which TNLA ID to send to
+        // and we ought to specify that in the send_pdu call.
+        //
+        // The idea of using a TNLA UUID rather than AMF address comes from the fact that
+        // a connection can toggle.  The TNLA ID is the connection instance from a series
+        // of connections to the same AMF endpoint.  If we cannot target a connection instance
+        // then we cannot ensure that each connection has been correctly initialized.
 
         // TODO check procedure and send RAN configuration update.
         info!(logger, "Send NG setup to AMF");

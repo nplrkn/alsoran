@@ -18,7 +18,7 @@ pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>, JoinHandle<()>) {
     let addr = "127.0.0.1:23156"
         .parse()
         .expect("Failed to parse bind address");
-    let server = Server::new(sender);
+    let server = Server::new(sender, logger.clone());
     let service = MakeService::new(server);
     //let service = MakeAllowAllAuthenticator::new(service, "cosmo");
     let service =

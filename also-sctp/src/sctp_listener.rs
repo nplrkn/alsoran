@@ -6,7 +6,7 @@ use async_stream::try_stream;
 use futures_core::stream::Stream;
 use libc::{accept, bind, listen, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
-use slog::Logger;
+use slog::{trace, Logger};
 use std::io::Error;
 
 struct FdGuard(i32);
@@ -24,8 +24,9 @@ pub fn new_listen(
         loop {
             Async::new(fd.0)?.readable().await?;
             let mut addr = OsSocketAddr::new();
-            let mut len = addr.len();
+            let mut len = addr.capacity();
             let assoc_fd = try_io!(accept(fd.0, addr.as_mut_ptr(), &mut len), "accept")?;
+            trace!(logger, "Accepted connection from {:?}", addr);
             let addr = addr.into_addr().ok_or(anyhow!("Not IPv4 or IPv6"))?;
             let assoc = SctpAssociation::from_accepted(assoc_fd, ppid, addr, &logger)?;
             yield assoc;

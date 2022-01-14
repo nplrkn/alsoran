@@ -4,7 +4,7 @@ use futures::stream::StreamExt;
 use node_control_api::models::{InterfaceManagementReq, RefreshWorkerReq};
 use node_control_api::server::callbacks::Client;
 use node_control_api::{CallbackApi, TriggerInterfaceManagementResponse};
-use slog::{error, info, Logger};
+use slog::{error, info, trace, Logger};
 use stop_token::StopToken;
 use swagger::{AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
 
@@ -55,7 +55,6 @@ impl Controller {
         };
 
         // TODO get TNLA ID from message
-        let tnla_id = 1;
 
         // Call the worker to initialize the interface
         let context: ClientContext = swagger::make_context!(
@@ -65,10 +64,16 @@ impl Controller {
             XSpanIdString::default()
         );
 
+        trace!(
+            logger,
+            "Posting to {} to trigger {}",
+            message.callback_url,
+            triggered_procedure
+        );
+
         match Client::new_http()
             .trigger_interface_management(
                 message.callback_url,
-                tnla_id,
                 InterfaceManagementReq {
                     procedure: triggered_procedure.to_string(),
                 },
@@ -83,7 +88,10 @@ impl Controller {
             Ok(TriggerInterfaceManagementResponse::UnexpectedError(e)) => {
                 error!(logger, "Worker returned {:?}", e)
             }
-            Err(_) => error!(logger, "Failed to trigger {}", triggered_procedure),
+            Err(e) => error!(
+                logger,
+                "Failed to trigger {} - {:?}", triggered_procedure, e
+            ),
         }
     }
 }

@@ -33,7 +33,11 @@ paths:
                 $ref: "#/components/schemas/Error"
       callbacks:
         interfaceManagement:
-          '{$request.body#/callbackUrl}/trigger/{tnlaId}':
+          # This path is chosen to work around a bug in the Rust OpenAPI generator.  The
+          # callback client API requires a full URL as input.  The server API is passed just the path
+          # after the http://.../v1.  This construction lets us satisfy both of these inconsistent alternatives.
+          # The essence of this workaround is that the first element of the callback path must be a parameter.
+          '{$request.body#/callbackUrl}':
             post: 
               summary: A worker is instructed to trigger an interface management procedure on the given TNLA.
               description: | 
@@ -41,13 +45,6 @@ paths:
                 the worker should send a successful response to this call.  If the procedure fails then the
                 worker should send an unsuccessful response to this call.
               operationId: triggerInterfaceManagement
-              parameters: 
-                - in: path
-                  name: tnlaId
-                  required: true
-                  schema:
-                    type: integer
-                    minimum:
               requestBody: 
                 required: true
                 content:

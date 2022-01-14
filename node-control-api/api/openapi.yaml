@@ -11,17 +11,13 @@ paths:
     post:
       callbacks:
         interfaceManagement:
-          '{$request.body#/callbackUrl}/trigger/{tnlaId}':
+          '{$request.body#/callbackUrl}':
             post:
+              description: "The worker must carry out the given procedure on the given\
+                \ TNLA.  If the procedure succeeds then  \nthe worker should send\
+                \ a successful response to this call.  If the procedure fails then\
+                \ the\nworker should send an unsuccessful response to this call.\n"
               operationId: triggerInterfaceManagement
-              parameters:
-              - explode: false
-                in: path
-                name: tnlaId
-                required: true
-                schema:
-                  type: integer
-                style: simple
               requestBody:
                 content:
                   application/json:
@@ -120,12 +116,12 @@ components:
       type: object
     InterfaceManagementReq:
       example:
-        procedure: ngSetup
+        procedure: ngsetup
       properties:
         procedure:
           enum:
-          - ngSetup
-          - ranConfigurationUpdate
+          - ngsetup
+          - ranconfigurationupdate
           type: string
       required:
       - procedure

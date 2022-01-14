@@ -12,7 +12,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn callback_server_url(&self) -> String {
+    pub fn callback_server_base_path(&self) -> String {
         self.callback_server_url_host_port
             .clone()
             .unwrap_or_else(|| format!("http://localhost:{}", self.callback_server_bind_port))

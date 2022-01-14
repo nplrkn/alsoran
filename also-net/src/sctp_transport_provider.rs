@@ -169,25 +169,33 @@ where
 
             info!(logger, "Listening for connections");
             let mut connection_tasks = vec![];
-            while let Some(Ok(assoc)) = stream.next().await {
-                let assoc_id = 53; // TODO
-                let logger = logger.new(o!("connection" => assoc_id));
-                info!(logger, "Accepted connection");
-                let task = self
-                    .tnla_pool
-                    .clone()
-                    .add_and_handle(
-                        assoc_id,
-                        Arc::new(assoc),
-                        wrapped_handler.clone(),
-                        stop_token.clone(),
-                        logger,
-                    )
-                    .await;
-                connection_tasks.push(task);
+            loop {
+                match stream.next().await {
+                    Some(Ok(assoc)) => {
+                        let assoc_id = 53; // TODO
+                        let logger = logger.new(o!("connection" => assoc_id));
+                        info!(logger, "Accepted connection from {}", assoc.remote_address);
+                        let task = self
+                            .tnla_pool
+                            .clone()
+                            .add_and_handle(
+                                assoc_id,
+                                Arc::new(assoc),
+                                wrapped_handler.clone(),
+                                stop_token.clone(),
+                                logger,
+                            )
+                            .await;
+                        connection_tasks.push(task);
+                    }
+                    Some(Err(e)) => warn!(logger, "Error on incoming connection - {:?}", e),
+                    None => {
+                        info!(logger, "Graceful shutdown");
+                        break;
+                    }
+                }
             }
 
-            info!(logger, "Graceful shutdown");
             trace!(logger, "Wait for connection tasks to finish");
             future::join_all(connection_tasks).await;
             trace!(logger, "Connection tasks finished");
