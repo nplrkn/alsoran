@@ -163,11 +163,11 @@ where
         };
 
         Ok(task::spawn(async move {
+            info!(logger, "Listening for connections on {:?}", addr);
             let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())
                 .take_until(stop_token.clone());
             pin_mut!(stream);
 
-            info!(logger, "Listening for connections");
             let mut connection_tasks = vec![];
             loop {
                 match stream.next().await {

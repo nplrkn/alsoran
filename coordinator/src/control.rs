@@ -43,6 +43,13 @@ async fn control_task(receiver: Receiver<RefreshWorkerReq>, stop_token: StopToke
 
 impl Controller {
     async fn process_worker_info(&mut self, message: RefreshWorkerReq, logger: &Logger) {
+        // If the connection list is empty, do nothing.
+        // TODO: update the GNB-DU to remove a worker TNLA endpoint?
+        if message.connected_amfs.len() == 0 {
+            trace!(logger, "No connections to AMF - nothing to do");
+            return;
+        }
+
         // If we have not yet initialized the NG interface to a given AMF
         // then do so.
         // TODO - base this off information communicated in the message?
@@ -82,11 +89,11 @@ impl Controller {
             .await
         {
             Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse) => {
-                info!(logger, "NGAP interface initialized");
+                info!(logger, "Worker confirms successful TNLA initialization");
                 self.ngap_state = NgapState::Initialized
             }
             Ok(TriggerInterfaceManagementResponse::UnexpectedError(e)) => {
-                error!(logger, "Worker returned {:?}", e)
+                error!(logger, "Worker reports error initializing TNLA {:?}", e)
             }
             Err(e) => error!(
                 logger,

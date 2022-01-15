@@ -59,7 +59,7 @@ pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'stati
     ngap_codec: N,
     f1_codec: F,
 ) -> (StopSource, JoinHandle<()>) {
-    info!(logger, "Start");
+    info!(logger, "Worker instance start");
     let ngap_transport_provider = SctpTransportProvider::new(NGAP_SCTP_PPID, ngap_codec);
     let f1_transport_provider = SctpTransportProvider::new(F1AP_NGAP_PPID, f1_codec);
 

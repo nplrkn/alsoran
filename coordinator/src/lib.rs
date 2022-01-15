@@ -9,7 +9,7 @@ use stop_token::StopSource;
 use swagger::EmptyContext;
 
 pub fn spawn(logger: Logger) -> (StopSource, JoinHandle<()>, JoinHandle<()>) {
-    info!(logger, "Start");
+    info!(logger, "Coordinator instance start");
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
