@@ -84,9 +84,10 @@ impl MockAmf {
         }) = pdu
         {
             info!(logger, "Got NG Setup, send setup response");
+            Ok(())
         } else {
-            panic!("Not an NG setup");
-        }
+            Err(anyhow!("Not an NG setup"))
+        }?;
 
         // TODO - deduplicate with worker test
         let response = NgapPdu::InitiatingMessage(InitiatingMessage {
