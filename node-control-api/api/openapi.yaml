@@ -9,6 +9,33 @@ servers:
 paths:
   /worker:
     post:
+      callbacks:
+        interfaceManagement:
+          '{$request.body#/callbackUrl}':
+            post:
+              description: "The worker must carry out the given procedure on the given\
+                \ TNLA.  If the procedure succeeds then  \nthe worker should send\
+                \ a successful response to this call.  If the procedure fails then\
+                \ the\nworker should send an unsuccessful response to this call.\n"
+              operationId: triggerInterfaceManagement
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/InterfaceManagementReq'
+                required: true
+              responses:
+                "204":
+                  description: Interface management response
+                default:
+                  content:
+                    application/json:
+                      schema:
+                        $ref: '#/components/schemas/Error'
+                  description: Unexpected error
+              summary: A worker is instructed to trigger an interface management procedure
+                on the given TNLA.
+              x-callback-request: true
       operationId: refreshWorker
       requestBody:
         content:
@@ -29,7 +56,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: unexpected error
+          description: Unexpected error
       summary: Refresh worker request
 components:
   schemas:
@@ -42,12 +69,16 @@ components:
         f1Address:
           port: 5249
           host: host
+        callbackUrl: http://example.com/aeiou
         connectedDus:
         - connectedDus
         - connectedDus
       properties:
         workerUniqueId:
           format: uuid
+          type: string
+        callbackUrl:
+          format: url
           type: string
         f1Address:
           $ref: '#/components/schemas/TransportAddress'
@@ -60,6 +91,7 @@ components:
             type: string
           type: array
       required:
+      - callbackUrl
       - connectedAmfs
       - connectedDus
       - f1Address
@@ -81,6 +113,18 @@ components:
           uniqueItems: true
       required:
       - amfAddresses
+      type: object
+    InterfaceManagementReq:
+      example:
+        procedure: ngsetup
+      properties:
+        procedure:
+          enum:
+          - ngsetup
+          - ranconfigurationupdate
+          type: string
+      required:
+      - procedure
       type: object
     TransportAddress:
       example:

@@ -13284,7 +13284,7 @@ pub struct RanConfigurationUpdateProtocolIEsItem {
     sz_lb = "0",
     sz_ub = "65535"
 )]
-pub struct RanConfigurationUpdateProtocolIEs(Vec<RanConfigurationUpdateProtocolIEsItem>);
+pub struct RanConfigurationUpdateProtocolIEs(pub Vec<RanConfigurationUpdateProtocolIEsItem>);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "OPEN")]
@@ -13310,7 +13310,7 @@ pub struct RanConfigurationUpdateAcknowledgeProtocolIEsItem {
     sz_ub = "65535"
 )]
 pub struct RanConfigurationUpdateAcknowledgeProtocolIEs(
-    Vec<RanConfigurationUpdateAcknowledgeProtocolIEsItem>,
+    pub Vec<RanConfigurationUpdateAcknowledgeProtocolIEsItem>,
 );
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]

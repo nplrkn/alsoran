@@ -1,3 +1,4 @@
+#![allow(dead_code)] // Not clear it is worthwhile maintaining this.  Tests that use it are disabled for now.
 use crate::ClientContext;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;

@@ -79,6 +79,20 @@ The idea is that
   
 Key example of why a synchronization mechanism is needed is that otherwise two node controller instances might simultaneously try to send NG Setup.
 
+### Interface state information - idea - reject
+
+When the coordinator responds to a worker, it lets the worker know if the NG interface instance is up yet.  This means that the worker can automatously decide whether to send NG Setup or RAN Configuration update.
+
+The problem with this idea is that when two workers come up simultaneously, they will both learn that the interface instance is down and thus both send NG Setup.  Hence this idea is rejected and the following idea is used instead.
+
+### Procedure trigger callback
+
+Worker instances provide a procedure trigger callback.  
+
+When the coordinator learns of a new connection to the AMF, it uses the procedure trigger callback to trigger an NG Setup or RAN configuration update.  Either a single task must be used, or a consistent store.
+
+Decision is to go with a single "Interface management" thread that communicates using channels.
+
 ### TNLA handling
 
 TNLAs are stored in the StcpTnlaPool.  Anyone can use this pool to send a message.

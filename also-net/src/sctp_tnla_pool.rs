@@ -8,6 +8,7 @@ use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
 use slog::{trace, Logger};
 use std::collections::HashMap;
+use std::net::SocketAddr;
 use stop_token::StopToken;
 
 type TnlaId = u32;
@@ -22,6 +23,15 @@ impl SctpTnlaPool {
     pub fn new() -> SctpTnlaPool {
         let assocs = Arc::new(Mutex::new(Box::new(HashMap::new())));
         SctpTnlaPool { assocs }
+    }
+
+    pub async fn remote_addresses(&self) -> Vec<SocketAddr> {
+        self.assocs
+            .lock()
+            .await
+            .values()
+            .map(|assoc| assoc.remote_address)
+            .collect()
     }
 
     pub async fn add_and_handle_no_spawn<H>(

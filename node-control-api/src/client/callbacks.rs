@@ -21,23 +21,26 @@ pub use crate::context;
 
 type ServiceFuture = BoxFuture<'static, Result<Response<Body>, crate::ServiceError>>;
 
-use crate::{Api,
-     RefreshWorkerResponse
-};
-
-pub mod callbacks;
+use crate::CallbackApi as Api;
+use crate::TriggerInterfaceManagementResponse;
 
 mod paths {
     use lazy_static::lazy_static;
 
     lazy_static! {
         pub static ref GLOBAL_REGEX_SET: regex::RegexSet = regex::RegexSet::new(vec![
-            r"^/v1/worker$"
+            r"^/v1/(?P<request_body_callback_url>.*)$"
         ])
         .expect("Unable to create global regex set");
     }
-    pub(crate) static ID_WORKER: usize = 0;
+    pub(crate) static ID_REQUEST_BODY_CALLBACKURL: usize = 0;
+    lazy_static! {
+        pub static ref REGEX_REQUEST_BODY_CALLBACKURL: regex::Regex =
+            regex::Regex::new(r"^/v1/(?P<request_body_callback_url>.*)$")
+                .expect("Unable to create regex for REQUEST_BODY_CALLBACKURL");
+    }
 }
+
 
 pub struct MakeService<T, C> where
     T: Api<C> + Clone + Send + 'static,
@@ -77,6 +80,7 @@ impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
         ))
     }
 }
+
 
 fn method_not_allowed() -> Result<Response<Body>, crate::ServiceError> {
     Ok(
@@ -141,8 +145,18 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
         match &method {
 
-            // RefreshWorker - POST /worker
-            &hyper::Method::POST if path.matched(paths::ID_WORKER) => {
+            // TriggerInterfaceManagement - POST /{$request.body#/callbackUrl}
+            &hyper::Method::POST if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL) => {
+                // Path parameters
+                let path: &str = &uri.path().to_string();
+                let path_params =
+                    paths::REGEX_REQUEST_BODY_CALLBACKURL
+                    .captures(&path)
+                    .unwrap_or_else(||
+                        panic!("Path {} matched RE REQUEST_BODY_CALLBACKURL in set but failed match against \"{}\"", path, paths::REGEX_REQUEST_BODY_CALLBACKURL.as_str())
+                    );
+
+                let callback_request_body_callback_url = path_params["request_body_callback_url"].to_string();
                 // Body parameters (note that non-required body parameters will ignore garbage
                 // values, rather than causing a 400 response). Produce warning header and logs for
                 // any unused fields.
@@ -150,31 +164,32 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_refresh_worker_req: Option<models::RefreshWorkerReq> = if !body.is_empty() {
+                                let param_interface_management_req: Option<models::InterfaceManagementReq> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_refresh_worker_req) => param_refresh_worker_req,
+                                        Ok(param_interface_management_req) => param_interface_management_req,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter RefreshWorkerReq - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter RefreshWorkerReq due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter InterfaceManagementReq - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter InterfaceManagementReq due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_refresh_worker_req = match param_refresh_worker_req {
-                                    Some(param_refresh_worker_req) => param_refresh_worker_req,
+                                let param_interface_management_req = match param_interface_management_req {
+                                    Some(param_interface_management_req) => param_interface_management_req,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter RefreshWorkerReq"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter RefreshWorkerReq")),
+                                                        .body(Body::from("Missing required body parameter InterfaceManagementReq"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter InterfaceManagementReq")),
                                 };
 
-                                let result = api_impl.refresh_worker(
-                                            param_refresh_worker_req,
+                                let result = api_impl.trigger_interface_management(
+                                            callback_request_body_callback_url,
+                                            param_interface_management_req,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -192,25 +207,18 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                RefreshWorkerResponse::RefreshWorkerResponse
-                                                    (body)
+                                                TriggerInterfaceManagementResponse::InterfaceManagementResponse
                                                 => {
-                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
-                                                    response.headers_mut().insert(
-                                                        CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for REFRESH_WORKER_REFRESH_WORKER_RESPONSE"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.status_mut() = StatusCode::from_u16(204).expect("Unable to turn 204 into a StatusCode");
                                                 },
-                                                RefreshWorkerResponse::UnexpectedError
+                                                TriggerInterfaceManagementResponse::UnexpectedError
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(0).expect("Unable to turn 0 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for REFRESH_WORKER_UNEXPECTED_ERROR"));
+                                                            .expect("Unable to create Content-Type header for TRIGGER_INTERFACE_MANAGEMENT_UNEXPECTED_ERROR"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
@@ -227,12 +235,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter RefreshWorkerReq: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter RefreshWorkerReq")),
+                                                .body(Body::from(format!("Couldn't read body parameter InterfaceManagementReq: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter InterfaceManagementReq")),
                         }
             },
 
-            _ if path.matched(paths::ID_WORKER) => method_not_allowed(),
+            _ if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL) => method_not_allowed(),
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
                     .body(Body::empty())
                     .expect("Unable to create Not Found response"))
@@ -246,8 +254,8 @@ impl<T> RequestParser<T> for ApiRequestParser {
     fn parse_operation_id(request: &Request<T>) -> Result<&'static str, ()> {
         let path = paths::GLOBAL_REGEX_SET.matches(request.uri().path());
         match request.method() {
-            // RefreshWorker - POST /worker
-            &hyper::Method::POST if path.matched(paths::ID_WORKER) => Ok("RefreshWorker"),
+            // TriggerInterfaceManagement - POST /{$request.body#/callbackUrl}
+            &hyper::Method::POST if path.matched(paths::ID_REQUEST_BODY_CALLBACKURL) => Ok("TriggerInterfaceManagement"),
             _ => Err(()),
         }
     }

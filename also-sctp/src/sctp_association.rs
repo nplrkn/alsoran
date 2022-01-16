@@ -10,6 +10,7 @@ use io::Error;
 use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
+use std::net::SocketAddr;
 use std::{io, mem};
 
 /// An SCTP assocation.
@@ -18,6 +19,7 @@ use std::{io, mem};
 pub struct SctpAssociation {
     fd: i32,
     ppid: u32,
+    pub remote_address: SocketAddr,
 }
 
 impl Drop for SctpAssociation {
@@ -29,18 +31,23 @@ impl Drop for SctpAssociation {
 impl SctpAssociation {
     // Establish an association as a client
     pub async fn establish(
-        addr: OsSocketAddr,
+        remote_address: SocketAddr,
         ppid: u32,
         logger: &Logger,
     ) -> Result<SctpAssociation> {
         // Get a socket and immediately wrap it in an SctpAssociation to ensure it gets closed
         // properly in the drop function if something fails later in this function.
         let fd = try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?;
-        let assoc = SctpAssociation { fd, ppid };
+        let assoc = SctpAssociation {
+            fd,
+            ppid,
+            remote_address,
+        };
 
         // Connect
         // See https://cr.yp.to/docs/connect.html.
         let async_fd = Async::new(fd)?;
+        let addr: OsSocketAddr = assoc.remote_address.into();
         let rc = unsafe { connect(fd, addr.as_ptr(), addr.len()) };
         let errno = errno::errno();
         if (rc < 0) && (errno.0 != libc::EINPROGRESS) && (errno.0 != libc::EWOULDBLOCK) {
@@ -66,8 +73,17 @@ impl SctpAssociation {
         }
     }
 
-    pub fn from_accepted(fd: i32, ppid: u32, logger: &Logger) -> Result<SctpAssociation> {
-        let assoc = SctpAssociation { fd, ppid };
+    pub fn from_accepted(
+        fd: i32,
+        ppid: u32,
+        remote_address: SocketAddr,
+        logger: &Logger,
+    ) -> Result<SctpAssociation> {
+        let assoc = SctpAssociation {
+            fd,
+            ppid,
+            remote_address,
+        };
         assoc.set_sock_opts(logger)?;
         Ok(assoc)
     }
