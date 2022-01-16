@@ -1,13 +1,17 @@
 mod test;
+use anyhow::Result;
 use async_std;
 pub use test::*;
 
 #[async_std::test]
-async fn run_everything() {
-    let test_context = TestContext::new().await;
+async fn run_everything() -> Result<()> {
+    let tc = TestContext::new().await;
+    let amf = &tc.amf;
+    let logger = &tc.logger;
 
-    test_context.amf.expect_connection().await;
-    test::ng_setup::handle(&test_context).await;
+    amf.expect_connection().await;
+    amf.handle_ng_setup(logger).await?;
 
-    test_context.terminate().await;
+    tc.terminate().await;
+    Ok(())
 }

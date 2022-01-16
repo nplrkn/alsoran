@@ -35,7 +35,7 @@ impl TestContext {
         let amf = MockAmf::new(amf_address, &logger).await;
 
         let (coord_stop_source, coord_task, control_task) =
-            coordinator::spawn(logger.new(o!("cu-c" => 1)));
+            coordinator::spawn(logger.new(o!("cu-c" => 1))).unwrap();
         let mut tc = TestContext {
             amf,
             logger,
@@ -61,7 +61,8 @@ impl TestContext {
             self.logger.new(o!("cu-w"=> worker_number)),
             JsonCodec::new(),
             JsonCodec::new(),
-        );
+        )
+        .unwrap();
         self.workers.push(WorkerInfo { stop_source, task })
     }
 

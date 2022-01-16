@@ -28,7 +28,6 @@ where
         self.handler.handle_event(event, tnla_id, logger).await
     }
 
-    // TODO indicate whether it is UE or non UE associated?
     async fn handle_message(&self, message: Message, tnla_id: u32, logger: &Logger) {
         match self.codec.from_wire(message) {
             Ok(converted) => {

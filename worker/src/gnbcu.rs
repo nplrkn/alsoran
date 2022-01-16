@@ -64,15 +64,17 @@ impl<
         (stop_source, task)
     }
 
-    fn start_callback_server(&self, stop_token: StopToken, logger: Logger) -> JoinHandle<()> {
-        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port)
-            .parse()
-            .expect("Failed to parse bind address"); // TODO
+    fn start_callback_server(
+        &self,
+        stop_token: StopToken,
+        logger: Logger,
+    ) -> Result<JoinHandle<()>> {
+        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
         let service = MakeService::new(self.clone());
         let service = MakeAllowAllAuthenticator::new(service, "cosmo");
         let service =
             node_control_api::server::context::MakeAddContext::<_, EmptyContext>::new(service);
-        async_std::task::spawn(async move {
+        Ok(async_std::task::spawn(async move {
             let server = hyper::server::Server::bind(&addr)
                 .serve(service)
                 .with_graceful_shutdown(stop_token);
@@ -81,7 +83,7 @@ impl<
             } else {
                 info!(logger, "Server graceful shutdown");
             }
-        })
+        }))
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
@@ -90,7 +92,8 @@ impl<
         let response = self.send_refresh_worker().await?;
 
         // Start node control callback server in a separate task.
-        let callback_server_task = self.start_callback_server(stop_token.clone(), logger.clone());
+        let callback_server_task =
+            self.start_callback_server(stop_token.clone(), logger.clone())?;
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
             trace!(logger, "Received refresh worker response");

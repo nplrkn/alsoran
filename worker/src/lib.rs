@@ -10,6 +10,7 @@ use also_net::{
     ClientTransportProvider, Codec, MockTransportProvider, SctpTransportProvider,
     ServerTransportProvider, TransportProvider,
 };
+use anyhow::Result;
 use async_std::task::JoinHandle;
 use common::ngap::NgapPdu;
 pub use config::Config;
@@ -58,21 +59,21 @@ pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'stati
     logger: Logger,
     ngap_codec: N,
     f1_codec: F,
-) -> (StopSource, JoinHandle<()>) {
+) -> Result<(StopSource, JoinHandle<()>)> {
     info!(logger, "Worker instance start");
     let ngap_transport_provider = SctpTransportProvider::new(NGAP_SCTP_PPID, ngap_codec);
     let f1_transport_provider = SctpTransportProvider::new(F1AP_NGAP_PPID, f1_codec);
 
     let base_path = "http://127.0.0.1:23156";
 
-    let coordinator_client = Client::try_new_http(base_path).expect("Failed to create HTTP client");
+    let coordinator_client = Client::try_new_http(base_path)?;
 
-    Gnbcu::new(
+    Ok(Gnbcu::new(
         config,
         ngap_transport_provider,
         f1_transport_provider,
         coordinator_client,
         &logger,
     )
-    .spawn()
+    .spawn())
 }

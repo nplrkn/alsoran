@@ -1,10 +1,15 @@
+use also_net::TransportProvider;
 use also_net::{
     JsonCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
 };
+use anyhow::{anyhow, Result};
 use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use bitvec::prelude::BitVec;
 use common::ngap::NgapPdu;
+use common::ngap::*;
+use slog::info;
 use slog::{o, trace, Logger};
 use std::fmt::Debug;
 use stop_token::StopSource;
@@ -59,12 +64,83 @@ impl MockAmf {
             .is_none());
     }
 
-    pub async fn receive_ngap_pdu(&self) -> NgapPdu {
+    async fn receive_ngap_pdu(&self) -> NgapPdu {
         self.receiver
             .recv()
             .await
             .expect("Expected message")
             .expect("Expected message")
+    }
+
+    pub async fn handle_ng_setup(&self, logger: &Logger) -> Result<()> {
+        // Catch NG Setup from the GNB
+        info!(logger, "Wait for NG Setup from GNB");
+
+        let pdu = self.receive_ngap_pdu().await;
+
+        if let NgapPdu::InitiatingMessage(InitiatingMessage {
+            value: InitiatingMessageValue::IdNgSetup(_ng_setup),
+            ..
+        }) = pdu
+        {
+            info!(logger, "Got NG Setup, send setup response");
+        } else {
+            panic!("Not an NG setup");
+        }
+
+        // TODO - deduplicate with worker test
+        let response = NgapPdu::InitiatingMessage(InitiatingMessage {
+            procedure_code: ProcedureCode(21),
+            criticality: Criticality(Criticality::REJECT),
+            value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
+                protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
+                    id: ProtocolIeId(27),
+                    criticality: Criticality(Criticality::REJECT),
+                    value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
+                        GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
+                            plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
+                            gnb_id: GnbId::GnbId(BitString26(BitVec::from_element(0x10))),
+                            ie_extensions: None,
+                        }),
+                    ),
+                }]),
+            }),
+        });
+
+        self.sender.send_pdu(response, &logger).await?;
+
+        Ok(())
+    }
+
+    pub async fn handle_ran_configuration_update(&self, logger: &Logger) -> Result<()> {
+        info!(logger, "Wait for RAN Configuration Update from GNB");
+
+        let pdu = self.receive_ngap_pdu().await;
+
+        if let NgapPdu::InitiatingMessage(InitiatingMessage {
+            value: InitiatingMessageValue::IdRanConfigurationUpdate(_ran_configuration_update),
+            ..
+        }) = pdu
+        {
+            info!(logger, "Got RAN configuration update, send response");
+            Ok(())
+        } else {
+            Err(anyhow!("Not a RAN configuration update"))
+        }?;
+
+        let response = NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
+            procedure_code: ProcedureCode(35),
+            criticality: Criticality(Criticality::REJECT),
+            value: SuccessfulOutcomeValue::IdRanConfigurationUpdate(
+                RanConfigurationUpdateAcknowledge {
+                    protocol_i_es: RanConfigurationUpdateAcknowledgeProtocolIEs(vec![]),
+                },
+            ),
+        });
+
+        self.sender.send_pdu(response, &logger).await?;
+
+        Ok(())
     }
 }
 

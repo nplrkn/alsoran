@@ -9,7 +9,6 @@ pub trait Codec: Send + Sync + Clone {
 use anyhow::Result;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use serde_json;
 
 #[derive(Clone)]
 pub struct JsonCodec<P>(pub PhantomData<P>)
@@ -23,6 +22,15 @@ where
         JsonCodec(PhantomData)
     }
 }
+impl<P> Default for JsonCodec<P>
+where
+    P: Send + Sync + Clone,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<P> Codec for JsonCodec<P>
 where
     P: Serialize + DeserializeOwned + Send + Sync + Clone,
@@ -37,8 +45,6 @@ where
     }
 }
 
-use hex;
-
 #[derive(Clone)]
 pub struct Asn1PerCodec<P>(pub PhantomData<P>)
 where
@@ -49,6 +55,15 @@ where
 {
     pub fn new() -> Asn1PerCodec<P> {
         Asn1PerCodec(PhantomData)
+    }
+}
+
+impl<P> Default for Asn1PerCodec<P>
+where
+    P: Send + Sync + Clone,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }
 
