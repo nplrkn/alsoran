@@ -5,17 +5,16 @@ pub use test::*;
 
 #[async_std::test]
 async fn ran_configuration_update_for_second_worker() -> Result<()> {
-    let mut test_context = TestContext::new().await;
-
-    test_context.amf.expect_connection().await;
-    test::ng_setup::handle(&test_context).await; // TODO change to amf.expect_connection(), amf.handle_ng_setup
+    let mut tc = TestContext::new().await;
+    tc.amf.expect_connection().await;
+    tc.amf.handle_ng_setup(&tc.logger).await?;
 
     // Start a second worker.
-    test_context.start_worker().await;
-    test_context.amf.expect_connection().await;
-    test::ran_configuration_update::handle(&test_context).await?;
+    tc.start_worker().await;
+    tc.amf.expect_connection().await;
+    tc.amf.handle_ran_configuration_update(&tc.logger).await?;
 
-    test_context.terminate().await;
+    tc.terminate().await;
 
     Ok(())
 }

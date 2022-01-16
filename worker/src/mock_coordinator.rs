@@ -46,8 +46,6 @@ impl Api<ClientContext> for MockCoordinator {
         context: &ClientContext,
     ) -> Result<RefreshWorkerResponse, ApiError> {
         let _context = context.clone();
-        //TODO logger from context info!(logger, "MockTransportProvider send message {:?}", message);
-
         self.sender
             .send(NodeControlRequest::RefreshWorkerReq(refresh_worker_req))
             .await

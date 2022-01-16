@@ -50,7 +50,7 @@ async fn resolve_and_connect(
         .await?
         .into_iter()
         .next()
-        .ok_or(anyhow!("Address resolved to empty array"))?; // TODO - don't know if this is actually hittable
+        .ok_or(anyhow!("Address resolved to empty array"))?; // Don't know if this is actually hittable
     SctpAssociation::establish(addr, ppid, logger).await
 }
 
@@ -152,10 +152,7 @@ where
     where
         H: TnlaEventHandler<MessageType = P>,
     {
-        let addr = async_net::resolve(listen_addr)
-            .await
-            .map(|vec| vec[0])?
-            .into();
+        let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
 
         let wrapped_handler = Wrapper {
             handler,

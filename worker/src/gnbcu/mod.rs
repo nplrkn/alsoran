@@ -1,9 +1,12 @@
+mod node_control_callback_server;
 use crate::config::Config;
 use crate::f1_handler::F1Handler;
-use crate::ngap_handler::NgapHandler;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use also_net::{TnlaEvent, TnlaEventHandler};
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
+use async_trait::async_trait;
+use common::ngap::NgapPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, RefreshWorkerResponse};
@@ -22,13 +25,12 @@ where
     F: F1ServerTransportProvider,
     C: Api<ClientContext> + Clone + Send + Sync + 'static,
 {
-    // TODO: why do these need to be pub?
-    pub config: Config,
+    config: Config,
     worker_uuid: Uuid,
-    pub ngap_transport_provider: T,
-    pub f1_transport_provider: F,
-    pub coordinator_client: C,
-    pub logger: Logger,
+    ngap_transport_provider: T,
+    f1_transport_provider: F,
+    coordinator_client: C,
+    logger: Logger,
 }
 
 impl<
@@ -64,15 +66,17 @@ impl<
         (stop_source, task)
     }
 
-    fn start_callback_server(&self, stop_token: StopToken, logger: Logger) -> JoinHandle<()> {
-        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port)
-            .parse()
-            .expect("Failed to parse bind address"); // TODO
+    fn start_callback_server(
+        &self,
+        stop_token: StopToken,
+        logger: Logger,
+    ) -> Result<JoinHandle<()>> {
+        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
         let service = MakeService::new(self.clone());
         let service = MakeAllowAllAuthenticator::new(service, "cosmo");
         let service =
             node_control_api::server::context::MakeAddContext::<_, EmptyContext>::new(service);
-        async_std::task::spawn(async move {
+        Ok(async_std::task::spawn(async move {
             let server = hyper::server::Server::bind(&addr)
                 .serve(service)
                 .with_graceful_shutdown(stop_token);
@@ -81,7 +85,7 @@ impl<
             } else {
                 info!(logger, "Server graceful shutdown");
             }
-        })
+        }))
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
@@ -90,7 +94,8 @@ impl<
         let response = self.send_refresh_worker().await?;
 
         // Start node control callback server in a separate task.
-        let callback_server_task = self.start_callback_server(stop_token.clone(), logger.clone());
+        let callback_server_task =
+            self.start_callback_server(stop_token.clone(), logger.clone())?;
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
             trace!(logger, "Received refresh worker response");
@@ -103,13 +108,12 @@ impl<
         let RefreshWorkerRsp { amf_addresses } = ok_response;
         let amf_address = &amf_addresses[0];
 
-        let ngap_handler = NgapHandler::new(self.clone());
         let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
         info!(logger, "Maintain connection to AMF {}", address);
         let connection_task = self
             .ngap_transport_provider
             .clone()
-            .maintain_connection(address, ngap_handler, stop_token.clone(), logger.clone())
+            .maintain_connection(address, self.clone(), stop_token.clone(), logger.clone())
             .await?;
 
         let _f1_handler = F1Handler::new(self.clone());
@@ -171,6 +175,28 @@ impl<
                 &context,
             )
             .await
+    }
+}
+
+#[async_trait]
+impl<T, F, C> TnlaEventHandler for Gnbcu<T, F, C>
+where
+    T: NgapClientTransportProvider,
+    F: F1ServerTransportProvider,
+    C: Api<ClientContext> + Send + Sync + 'static + Clone,
+{
+    type MessageType = NgapPdu;
+
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        match event {
+            TnlaEvent::Established => trace!(logger, "TNLA {} established", tnla_id),
+            TnlaEvent::Terminated => warn!(logger, "TNLA {} closed", tnla_id),
+        };
+        self.connected_amf_change(logger).await;
+    }
+
+    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
+        trace!(logger, "ngap_pdu: {:?}", message);
     }
 }
 

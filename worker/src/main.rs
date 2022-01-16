@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
         root_logger.clone(),
         Asn1PerCodec::new(),
         Asn1PerCodec::new(),
-    );
+    )?;
     let s = signal::wait_for_signal().await?;
     info!(root_logger, "Caught signal {} - terminate", s);
     drop(stop_source);
