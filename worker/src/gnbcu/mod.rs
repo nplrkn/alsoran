@@ -1,6 +1,6 @@
+mod f1ap_handler;
 mod node_control_callback_server;
 use crate::config::Config;
-use crate::f1_handler::F1Handler;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
 use also_net::{TnlaEvent, TnlaEventHandler};
 use anyhow::{anyhow, Result};
@@ -8,12 +8,10 @@ use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use common::ngap::NgapPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
-use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
-use slog::{error, info, trace, warn};
+use slog::{info, trace, warn};
 use stop_token::{StopSource, StopToken};
-use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::{ApiError, AuthData, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
 
@@ -66,36 +64,13 @@ impl<
         (stop_source, task)
     }
 
-    fn start_callback_server(
-        &self,
-        stop_token: StopToken,
-        logger: Logger,
-    ) -> Result<JoinHandle<()>> {
-        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
-        let service = MakeService::new(self.clone());
-        let service = MakeAllowAllAuthenticator::new(service, "cosmo");
-        let service =
-            node_control_api::server::context::MakeAddContext::<_, EmptyContext>::new(service);
-        Ok(async_std::task::spawn(async move {
-            let server = hyper::server::Server::bind(&addr)
-                .serve(service)
-                .with_graceful_shutdown(stop_token);
-            if let Err(e) = server.await {
-                error!(logger, "Server error: {}", e);
-            } else {
-                info!(logger, "Server graceful shutdown");
-            }
-        }))
-    }
-
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let logger = &self.logger;
         trace!(logger, "Send initial refresh worker request");
         let response = self.send_refresh_worker().await?;
 
         // Start node control callback server in a separate task.
-        let callback_server_task =
-            self.start_callback_server(stop_token.clone(), logger.clone())?;
+        let callback_server_task = self.start_callback_server(stop_token.clone())?;
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
             trace!(logger, "Received refresh worker response");
@@ -116,18 +91,14 @@ impl<
             .maintain_connection(address, self.clone(), stop_token.clone(), logger.clone())
             .await?;
 
-        let _f1_handler = F1Handler::new(self.clone());
-        // gnbcu
-        //     .f1_transport_provider
-        //     .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
-        //     .await;
-        // info!(logger, "Started F1 handler");
+        let f1_server_task = self.start_f1ap_handler(stop_token.clone()).await?;
 
         stop_token.await;
 
         // Wait for our tasks to terminate.
         connection_task.await;
         callback_server_task.await;
+        f1_server_task.await;
 
         info!(logger, "Stop");
         Ok(())
@@ -179,14 +150,12 @@ impl<
 }
 
 #[async_trait]
-impl<T, F, C> TnlaEventHandler for Gnbcu<T, F, C>
+impl<T, F, C> TnlaEventHandler<NgapPdu> for Gnbcu<T, F, C>
 where
     T: NgapClientTransportProvider,
     F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
-    type MessageType = NgapPdu;
-
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established => trace!(logger, "TNLA {} established", tnla_id),

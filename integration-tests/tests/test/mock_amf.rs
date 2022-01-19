@@ -16,6 +16,7 @@ use stop_token::StopSource;
 
 const NGAP_SCTP_PPID: u32 = 60;
 
+// TODO why pub?
 pub struct MockAmf {
     pub stop_source: StopSource,
     pub receiver: Receiver<Option<NgapPdu>>,
@@ -83,7 +84,7 @@ impl MockAmf {
             ..
         }) = pdu
         {
-            info!(logger, "Got NG Setup, send setup response");
+            info!(self.logger, "Got NG Setup, send setup response");
             Ok(())
         } else {
             Err(anyhow!("Not an NG setup"))
@@ -146,9 +147,7 @@ impl MockAmf {
 }
 
 #[async_trait]
-impl TnlaEventHandler for Handler {
-    type MessageType = NgapPdu;
-
+impl TnlaEventHandler<NgapPdu> for Handler {
     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
         self.0.send(None).await.unwrap();
     }

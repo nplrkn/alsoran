@@ -47,10 +47,9 @@ impl<P: Send + Sync + Clone + 'static + Debug> TransportProvider for MockTranspo
 }
 
 #[async_trait]
-impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
+impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider<P>
     for MockTransportProvider<P>
 {
-    type Pdu = P;
     async fn maintain_connection<H>(
         self,
         _connect_addr_string: String,
@@ -59,7 +58,7 @@ impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = P>,
+        H: TnlaEventHandler<P>,
     {
         let receiver = self.receiver.clone();
         handler
@@ -84,10 +83,9 @@ impl<P: Send + Sync + Clone + 'static + Debug> ClientTransportProvider
 }
 
 #[async_trait]
-impl<P: Send + Sync + Clone + 'static + Debug> ServerTransportProvider
+impl<P: Send + Sync + Clone + 'static + Debug> ServerTransportProvider<P>
     for MockTransportProvider<P>
 {
-    type Pdu = P;
     async fn serve<H>(
         self,
         _listen_addr: String,
@@ -96,7 +94,7 @@ impl<P: Send + Sync + Clone + 'static + Debug> ServerTransportProvider
         _logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = P>,
+        H: TnlaEventHandler<P>,
     {
         unimplemented!()
     }

@@ -1,4 +1,3 @@
-mod f1_handler;
 use gnbcu::Gnbcu;
 pub mod config;
 mod gnbcu;
@@ -10,6 +9,7 @@ use also_net::{
 };
 use anyhow::Result;
 use async_std::task::JoinHandle;
+use common::f1ap::F1apPdu;
 use common::ngap::NgapPdu;
 pub use config::Config;
 use node_control_api::Client;
@@ -35,7 +35,7 @@ const NGAP_SCTP_PPID: u32 = 60;
 const F1AP_NGAP_PPID: u32 = 62;
 
 pub trait NgapClientTransportProvider:
-    ClientTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
+    ClientTransportProvider<NgapPdu> + TransportProvider<Pdu = NgapPdu>
 {
 }
 impl<C> NgapClientTransportProvider for SctpTransportProvider<C, NgapPdu> where
@@ -45,14 +45,14 @@ impl<C> NgapClientTransportProvider for SctpTransportProvider<C, NgapPdu> where
 impl NgapClientTransportProvider for MockTransportProvider<NgapPdu> {}
 
 pub trait F1ServerTransportProvider:
-    ServerTransportProvider<Pdu = NgapPdu> + TransportProvider<Pdu = NgapPdu>
+    ServerTransportProvider<F1apPdu> + TransportProvider<Pdu = F1apPdu>
 {
 }
-impl<C> F1ServerTransportProvider for SctpTransportProvider<C, NgapPdu> where C: Codec<Pdu = NgapPdu>
+impl<C> F1ServerTransportProvider for SctpTransportProvider<C, F1apPdu> where C: Codec<Pdu = F1apPdu>
 {}
-impl F1ServerTransportProvider for MockTransportProvider<NgapPdu> {}
+impl F1ServerTransportProvider for MockTransportProvider<F1apPdu> {}
 
-pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = NgapPdu> + 'static>(
+pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = F1apPdu> + 'static>(
     config: Config,
     logger: Logger,
     ngap_codec: N,

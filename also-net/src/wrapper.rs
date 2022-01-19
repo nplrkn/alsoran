@@ -7,7 +7,7 @@ use std::fmt::Debug;
 #[derive(Clone)]
 pub struct Wrapper<T, P, C>
 where
-    T: TnlaEventHandler<MessageType = P>,
+    T: TnlaEventHandler<P>,
     P: Send + Sync + Clone + 'static + Debug,
     C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
 {
@@ -16,14 +16,12 @@ where
 }
 
 #[async_trait]
-impl<T, P, C> TnlaEventHandler for Wrapper<T, P, C>
+impl<T, P, C> TnlaEventHandler<Message> for Wrapper<T, P, C>
 where
-    T: TnlaEventHandler<MessageType = P>,
+    T: TnlaEventHandler<P>,
     P: Send + Sync + Clone + 'static + Debug,
     C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
 {
-    type MessageType = Message;
-
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         self.handler.handle_event(event, tnla_id, logger).await
     }

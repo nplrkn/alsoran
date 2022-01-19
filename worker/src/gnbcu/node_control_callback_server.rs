@@ -2,12 +2,43 @@
 use crate::gnbcu::Gnbcu;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
 use anyhow::{anyhow, Result};
+use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::vec::BitVec;
 use common::ngap::*;
+use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, CallbackApi, TriggerInterfaceManagementResponse};
-use slog::{info, warn, Logger};
+use slog::{error, info, warn, Logger};
+use stop_token::StopToken;
+use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::ApiError;
+use swagger::EmptyContext;
+
+impl<
+        T: NgapClientTransportProvider,
+        F: F1ServerTransportProvider,
+        C: Api<ClientContext> + Send + Sync + Clone + 'static,
+    > Gnbcu<T, F, C>
+{
+    pub fn start_callback_server(&self, stop_token: StopToken) -> Result<JoinHandle<()>> {
+        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
+        let service = MakeService::new(self.clone());
+        let service = MakeAllowAllAuthenticator::new(service, "cosmo");
+        let service =
+            node_control_api::server::context::MakeAddContext::<_, EmptyContext>::new(service);
+        let logger = self.logger.clone();
+        Ok(async_std::task::spawn(async move {
+            let server = hyper::server::Server::bind(&addr)
+                .serve(service)
+                .with_graceful_shutdown(stop_token);
+            if let Err(e) = server.await {
+                error!(logger, "Server error: {}", e);
+            } else {
+                info!(logger, "Server graceful shutdown");
+            }
+        }))
+    }
+}
 
 #[async_trait]
 impl<T, F, C, Cx> CallbackApi<Cx> for Gnbcu<T, F, C>
@@ -53,6 +84,8 @@ where
     }
 }
 
+// TODO should the following be a separate module.  Unclear to have them in
+// node control callback server.
 impl<T, F, C> Gnbcu<T, F, C>
 where
     T: NgapClientTransportProvider,
