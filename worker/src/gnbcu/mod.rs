@@ -1,12 +1,10 @@
 mod f1ap_handler;
+mod ngap_handler;
 mod node_control_callback_server;
 use crate::config::Config;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
-use also_net::{TnlaEvent, TnlaEventHandler};
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
-use async_trait::async_trait;
-use common::ngap::NgapPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -146,26 +144,6 @@ impl<
                 &context,
             )
             .await
-    }
-}
-
-#[async_trait]
-impl<T, F, C> TnlaEventHandler<NgapPdu> for Gnbcu<T, F, C>
-where
-    T: NgapClientTransportProvider,
-    F: F1ServerTransportProvider,
-    C: Api<ClientContext> + Send + Sync + 'static + Clone,
-{
-    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
-        match event {
-            TnlaEvent::Established => trace!(logger, "TNLA {} established", tnla_id),
-            TnlaEvent::Terminated => warn!(logger, "TNLA {} closed", tnla_id),
-        };
-        self.connected_amf_change(logger).await;
-    }
-
-    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
-        trace!(logger, "ngap_pdu: {:?}", message);
     }
 }
 

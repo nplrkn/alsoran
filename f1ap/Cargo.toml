@@ -1,0 +1,16 @@
+[package]
+name = "f1ap"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+asn1-codecs = "0.1.2"
+asn1_codecs_derive = "0.1.2"
+bitvec = {version = "0.22", features = ["serde"] }
+serde = {version = "1.0.133", features = ["derive"] }
+#serde_json = "1.0.74"
+log = "0.4.3"   
+pdu-convert-derive = { path = "../pdu-convert-derive" }
+

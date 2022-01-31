@@ -10,6 +10,7 @@ common = { path = "../common" }
 also-net = { path = "../also-net" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 node-control-api = { path = "../node-control-api", features = ["client"] }
+f1ap = {path = "../f1ap" }
 async-trait = "0.1.51"
 async-channel = "1.6.1"
 slog = "2.7.0"

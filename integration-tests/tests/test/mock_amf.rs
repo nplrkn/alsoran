@@ -90,7 +90,7 @@ impl MockAmf {
             Err(anyhow!("Not an NG setup"))
         }?;
 
-        // TODO - deduplicate with worker test
+        // TODO - turn this into an actual response
         let response = NgapPdu::InitiatingMessage(InitiatingMessage {
             procedure_code: ProcedureCode(21),
             criticality: Criticality(Criticality::REJECT),

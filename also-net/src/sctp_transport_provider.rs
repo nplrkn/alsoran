@@ -160,7 +160,7 @@ where
         };
 
         Ok(task::spawn(async move {
-            info!(logger, "Listening for connections on {:?}", addr);
+            info!(logger, "Listening for SCTP connections on {:?}", addr);
             let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())
                 .take_until(stop_token.clone());
             pin_mut!(stream);
@@ -171,7 +171,10 @@ where
                     Some(Ok(assoc)) => {
                         let assoc_id = 53; // TODO
                         let logger = logger.new(o!("connection" => assoc_id));
-                        info!(logger, "Accepted connection from {}", assoc.remote_address);
+                        info!(
+                            logger,
+                            "Accepted SCTP connection from {}", assoc.remote_address
+                        );
                         let task = self
                             .tnla_pool
                             .clone()

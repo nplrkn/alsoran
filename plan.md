@@ -1,10 +1,8 @@
 # Backlog
 
 ## TO DO
-
-- Test script as DU can connect to CU
-- Test script as DU can send Setup and get response 
-- F1 connection management with single worker
+- 'Worker confirms successul TNLA initialization' is output before output of AMF sending setup response
+- Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 
 - F1 connection management with 2nd worker
 - test, with a single AMF and DU, all variants of connection ordering and 2nd worker addition
 - make tests time out rather than hang
@@ -15,7 +13,8 @@
 - hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 ## DONE
-
+- Test script as DU can send Setup and get response 
+- Test script as DU can connect to CU
 - Create callback client on coordinator
 - Drive NG Setup from callback server
 - Drive RAN configuration update from coordinator

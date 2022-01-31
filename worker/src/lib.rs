@@ -9,9 +9,9 @@ use also_net::{
 };
 use anyhow::Result;
 use async_std::task::JoinHandle;
-use common::f1ap::F1apPdu;
 use common::ngap::NgapPdu;
 pub use config::Config;
+use f1ap::F1apPdu;
 use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
