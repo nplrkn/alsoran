@@ -1,6 +1,7 @@
 # Backlog
 
 ## TO DO
+- send request instead of send pdu
 - 'Worker confirms successul TNLA initialization' is output before output of AMF sending setup response
 - Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 
 - F1 connection management with 2nd worker

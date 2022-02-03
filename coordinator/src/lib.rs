@@ -1,7 +1,6 @@
 mod control;
 mod server;
 use anyhow::Result;
-use async_channel;
 use async_std::task::JoinHandle;
 use node_control_api::server::MakeService;
 use server::Server;

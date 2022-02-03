@@ -66,12 +66,9 @@ where
         // then we cannot ensure that each connection has been correctly initialized.
         info!(logger, "Trigger {}", interface_management_req.procedure);
 
-        match self
-            .trigger_procedure(interface_management_req.procedure.as_str(), logger)
+        self.trigger_procedure(interface_management_req.procedure.as_str(), logger)
             .await
-        {
-            Ok(()) => Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse),
-            Err(e) => {
+            .or_else(|e| {
                 warn!(logger, "Failed NG Setup send - {:?}", e);
                 Ok(TriggerInterfaceManagementResponse::UnexpectedError(
                     models::Error {
@@ -79,8 +76,7 @@ where
                         message: format!("Failed {}: {:?}", interface_management_req.procedure, e),
                     },
                 ))
-            }
-        }
+            })
     }
 }
 
@@ -92,7 +88,11 @@ where
     F: F1ServerTransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
-    async fn trigger_procedure(&self, procedure: &str, logger: &Logger) -> Result<()> {
+    async fn trigger_procedure(
+        &self,
+        procedure: &str,
+        logger: &Logger,
+    ) -> Result<TriggerInterfaceManagementResponse> {
         let pdu = match procedure {
             "ngsetup" => Ok(self.ng_setup()),
             "ranconfigurationupdate" => Ok(self.ran_configuration_update()),
@@ -100,7 +100,11 @@ where
         }?;
 
         // TODO use tnla_id
-        self.ngap_transport_provider.send_pdu(pdu, logger).await
+        let _response = self
+            .ngap_transport_provider
+            .send_request(pdu, logger)
+            .await?;
+        Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse)
     }
 
     fn ng_setup(&self) -> NgapPdu {

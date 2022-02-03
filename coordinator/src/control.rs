@@ -45,7 +45,7 @@ impl Controller {
     async fn process_worker_info(&mut self, message: RefreshWorkerReq, logger: &Logger) {
         // If the connection list is empty, do nothing.
         // TODO: update the GNB-DU to remove a worker TNLA endpoint?
-        if message.connected_amfs.len() == 0 {
+        if message.connected_amfs.is_empty() {
             trace!(logger, "No connections to AMF - nothing to do");
             return;
         }
