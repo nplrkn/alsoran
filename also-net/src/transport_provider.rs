@@ -10,6 +10,7 @@ use stop_token::StopToken;
 
 /// The TransportProvider trait allows the user to send UE and non-UE-associated messages over
 /// some reference point without needing to understand the details of transport connections.  
+// Rename PduSender ?
 #[async_trait]
 pub trait TransportProvider: 'static + Send + Sync + Clone {
     type Pdu;

@@ -1,10 +1,17 @@
 mod f1ap_handler;
 mod ngap_handler;
 mod node_control_callback_server;
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use crate::config::Config;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use also_net::{HasTransactionId, SharedTransactions, TransactionSender};
 use anyhow::{anyhow, Result};
+use async_std::sync::Mutex;
 use async_std::task::JoinHandle;
+use common::ngap::NgapPdu;
+use f1ap::F1apPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -23,9 +30,11 @@ where
 {
     config: Config,
     worker_uuid: Uuid,
-    ngap_transport_provider: T,
+    ngap_transport_provider: TransactionSender<T, NgapPdu>, // rename to ngap?
     f1_transport_provider: F,
     coordinator_client: C,
+    ngap_transaction_hash: SharedTransactions<NgapPdu>,
+    f1ap_transaction_hash: SharedTransactions<F1apPdu>,
     logger: Logger,
 }
 
@@ -42,12 +51,17 @@ impl<
         coordinator_client: C,
         logger: &Logger,
     ) -> Gnbcu<T, F, C> {
+        let ngap_transaction_hash = Arc::new(Mutex::new(Box::new(HashMap::new())));
+        let ngap = TransactionSender::new(ngap_transport_provider, ngap_transaction_hash);
+        let f1ap_transaction_hash = Arc::new(Mutex::new(Box::new(HashMap::new())));
         Gnbcu {
             config,
             worker_uuid: Uuid::new_v4(),
             ngap_transport_provider,
             f1_transport_provider,
             coordinator_client,
+            ngap_transaction_hash,
+            f1ap_transaction_hash,
             logger: logger.clone(),
         }
     }

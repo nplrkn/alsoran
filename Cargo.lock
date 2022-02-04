@@ -660,8 +660,6 @@ checksum = "f7531096570974c3a9dcf9e4b8e1cede1ec26cf5046219fb3b9d897503b9be59"
 name = "f1ap"
 version = "0.1.0"
 dependencies = [
- "asn1-codecs",
- "asn1_codecs_derive",
  "bitvec",
  "log",
  "pdu-convert-derive",
