@@ -93,52 +93,73 @@ where
         procedure: &str,
         logger: &Logger,
     ) -> Result<TriggerInterfaceManagementResponse> {
-        let pdu = match procedure {
+        let (pdu, request_procedure_code) = match procedure {
             "ngsetup" => Ok(self.ng_setup()),
             "ranconfigurationupdate" => Ok(self.ran_configuration_update()),
             x => Err(anyhow!(format!("Unknown procedure requested {}", x))),
         }?;
 
+        let match_fn = move |p: &NgapPdu| match p {
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
+                procedure_code: ProcedureCode(x),
+                ..
+            }) if *x == request_procedure_code => true,
+            NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome {
+                procedure_code: ProcedureCode(x),
+                ..
+            }) if *x == request_procedure_code => true,
+            _ => false,
+        };
+
         // TODO use tnla_id
         let _response = self
             .ngap_transport_provider
-            .send_request(pdu, logger)
+            .send_request(pdu, Box::new(match_fn), logger)
             .await?;
         Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse)
     }
 
-    fn ng_setup(&self) -> NgapPdu {
-        NgapPdu::InitiatingMessage(InitiatingMessage {
-            procedure_code: ProcedureCode(21),
-            criticality: Criticality(Criticality::REJECT),
-            value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
-                protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
-                    id: ProtocolIeId(27),
-                    criticality: Criticality(Criticality::REJECT),
-                    value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
-                        self.global_ran_node_id(),
-                    ),
-                }]),
-            }),
-        })
-    }
-
-    fn ran_configuration_update(&self) -> NgapPdu {
-        NgapPdu::InitiatingMessage(InitiatingMessage {
-            procedure_code: ProcedureCode(35),
-            criticality: Criticality(Criticality::REJECT),
-            value: InitiatingMessageValue::IdRanConfigurationUpdate(RanConfigurationUpdate {
-                protocol_i_es: RanConfigurationUpdateProtocolIEs(vec![
-                    RanConfigurationUpdateProtocolIEsItem {
+    fn ng_setup(&self) -> (NgapPdu, u8) {
+        let procedure_code = 21;
+        (
+            NgapPdu::InitiatingMessage(InitiatingMessage {
+                procedure_code: ProcedureCode(procedure_code),
+                criticality: Criticality(Criticality::REJECT),
+                value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
+                    protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
                         id: ProtocolIeId(27),
                         criticality: Criticality(Criticality::REJECT),
-                        value: RanConfigurationUpdateProtocolIEsItemValue::IdGlobalRanNodeId(
+                        value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
                             self.global_ran_node_id(),
                         ),
-                    },
-                ]),
+                    }]),
+                }),
             }),
-        })
+            procedure_code,
+        )
+    }
+
+    fn ran_configuration_update(&self) -> (NgapPdu, u8) {
+        let procedure_code = 35;
+
+        (
+            NgapPdu::InitiatingMessage(InitiatingMessage {
+                procedure_code: ProcedureCode(procedure_code),
+                criticality: Criticality(Criticality::REJECT),
+                value: InitiatingMessageValue::IdRanConfigurationUpdate(RanConfigurationUpdate {
+                    protocol_i_es: RanConfigurationUpdateProtocolIEs(vec![
+                        RanConfigurationUpdateProtocolIEsItem {
+                            id: ProtocolIeId(27),
+                            criticality: Criticality(Criticality::REJECT),
+                            value: RanConfigurationUpdateProtocolIEsItemValue::IdGlobalRanNodeId(
+                                self.global_ran_node_id(),
+                            ),
+                        },
+                    ]),
+                }),
+            }),
+            procedure_code,
+        )
     }
 
     fn global_ran_node_id(&self) -> GlobalRanNodeId {

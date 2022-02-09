@@ -20,5 +20,6 @@ pub use transaction_sender::TransactionSender;
 pub use transport_provider::{ClientTransportProvider, ServerTransportProvider, TransportProvider};
 pub use wrapper::Wrapper;
 
-pub type TransactionMatchFn<M> = fn(&M) -> bool;
+pub type TransactionMatchFn<M> = Box<dyn Fn(&M) -> bool + Send + Sync>;
+
 pub type SharedTransactions<M> = Arc<Mutex<Box<Vec<(TransactionMatchFn<M>, Sender<M>)>>>>;

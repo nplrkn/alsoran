@@ -1,11 +1,8 @@
 #![allow(dead_code, unreachable_patterns)]
-use super::HasTransactionId;
 use asn1_codecs_derive::AperCodec;
 use bitvec::order::Msb0;
 use bitvec::vec::BitVec;
 use serde::{Deserialize, Serialize};
-
-impl HasTransactionId for NgapPdu {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE", extensible = true, optional_fields = 1)]

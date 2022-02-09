@@ -13,6 +13,19 @@ where
     receiver: R,
 }
 
+impl<R, M> TransactionReceiver<R, M>
+where
+    R: TnlaEventHandler<M>,
+    M: Clone + Send + Sync + 'static,
+{
+    pub fn new(receiver: R, transactions: SharedTransactions<M>) -> Self {
+        TransactionReceiver {
+            pending_requests: transactions,
+            receiver,
+        }
+    }
+}
+
 #[async_trait]
 impl<R, M> TnlaEventHandler<M> for TransactionReceiver<R, M>
 where

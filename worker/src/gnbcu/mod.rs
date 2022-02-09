@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use crate::config::Config;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
-use also_net::{HasTransactionId, SharedTransactions, TransactionSender};
+use also_net::{SharedTransactions, TransactionReceiver, TransactionSender};
 use anyhow::{anyhow, Result};
 use async_std::sync::Mutex;
 use async_std::task::JoinHandle;
@@ -21,7 +21,7 @@ use swagger::{ApiError, AuthData, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
 
 /// The gNB-CU.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Gnbcu<T, F, C>
 where
     T: NgapClientTransportProvider,
@@ -33,8 +33,8 @@ where
     ngap_transport_provider: TransactionSender<T, NgapPdu>, // rename to ngap?
     f1_transport_provider: F,
     coordinator_client: C,
-    ngap_transaction_hash: SharedTransactions<NgapPdu>,
-    f1ap_transaction_hash: SharedTransactions<F1apPdu>,
+    ngap_transactions: SharedTransactions<NgapPdu>,
+    f1ap_transactions: SharedTransactions<F1apPdu>,
     logger: Logger,
 }
 
@@ -51,17 +51,18 @@ impl<
         coordinator_client: C,
         logger: &Logger,
     ) -> Gnbcu<T, F, C> {
-        let ngap_transaction_hash = Arc::new(Mutex::new(Box::new(HashMap::new())));
-        let ngap = TransactionSender::new(ngap_transport_provider, ngap_transaction_hash);
-        let f1ap_transaction_hash = Arc::new(Mutex::new(Box::new(HashMap::new())));
+        let ngap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
+        let ngap_transport_provider =
+            TransactionSender::new(ngap_transport_provider, ngap_transactions.clone());
+        let f1ap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
         Gnbcu {
             config,
             worker_uuid: Uuid::new_v4(),
             ngap_transport_provider,
             f1_transport_provider,
             coordinator_client,
-            ngap_transaction_hash,
-            f1ap_transaction_hash,
+            ngap_transactions,
+            f1ap_transactions,
             logger: logger.clone(),
         }
     }
@@ -97,10 +98,12 @@ impl<
 
         let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
         info!(logger, "Maintain connection to AMF {}", address);
+        let handler = TransactionReceiver::new(self.clone(), self.ngap_transactions.clone());
         let connection_task = self
             .ngap_transport_provider
+            .transport_provider // TODO we don't want to reach inside like this
             .clone()
-            .maintain_connection(address, self.clone(), stop_token.clone(), logger.clone())
+            .maintain_connection(address, handler, stop_token.clone(), logger.clone())
             .await?;
 
         let f1_server_task = self.start_f1ap_handler(stop_token.clone()).await?;
@@ -131,6 +134,7 @@ impl<
 
         let connected_amfs = self
             .ngap_transport_provider
+            .transport_provider // TODO we don't want to reach inside like this
             .remote_tnla_addresses()
             .await
             .iter()
