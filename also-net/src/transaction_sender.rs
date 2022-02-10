@@ -1,8 +1,8 @@
 use super::{SharedTransactions, TransportProvider};
 use crate::TransactionMatchFn;
 use anyhow::Result;
-use futures::channel::oneshot::{self, Receiver};
-use slog::Logger;
+use async_channel;
+use slog::{info, Logger};
 
 #[derive(Clone)]
 pub struct TransactionSender<T, M>
@@ -31,8 +31,8 @@ where
         pdu: M,
         match_fn: TransactionMatchFn<M>,
         logger: &Logger,
-    ) -> Result<Receiver<M>> {
-        let (sender, receiver) = oneshot::channel::<M>();
+    ) -> Result<M> {
+        let (sender, receiver) = async_channel::bounded::<M>(1);
 
         // TODO - timeout
         self.pending_requests
@@ -40,7 +40,6 @@ where
             .await
             .push((Box::new(match_fn), sender));
         self.transport_provider.send_pdu(pdu, logger).await?;
-
-        Ok(receiver)
+        Ok(receiver.recv().await?)
     }
 }

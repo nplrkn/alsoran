@@ -2,8 +2,7 @@
 
 
 ## TO DO
-- send request instead of send pdu
-- 'Worker confirms successul TNLA initialization' is output before output of AMF sending setup response
+- Test should fail if the F1AP SCTP bind fails 
 - Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 
 - F1 connection management with 2nd worker
 - test, with a single AMF and DU, all variants of connection ordering and 2nd worker addition
@@ -15,6 +14,8 @@
 - hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 ## DONE
+- 'Worker confirms successul TNLA initialization' is output before output of AMF sending setup response
+- send request instead of send pdu
 - Test script as DU can send Setup and get response 
 - Test script as DU can connect to CU
 - Create callback client on coordinator

@@ -8,7 +8,7 @@ use bitvec::vec::BitVec;
 use common::ngap::*;
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, CallbackApi, TriggerInterfaceManagementResponse};
-use slog::{error, info, warn, Logger};
+use slog::{error, info, trace, warn, Logger};
 use stop_token::StopToken;
 use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::ApiError;
@@ -64,9 +64,10 @@ where
         // a connection can toggle.  The TNLA ID is the connection instance from a series
         // of connections to the same AMF endpoint.  If we cannot target a connection instance
         // then we cannot ensure that each connection has been correctly initialized.
-        info!(logger, "Trigger {}", interface_management_req.procedure);
+        trace!(logger, "Trigger {}", interface_management_req.procedure);
 
-        self.trigger_procedure(interface_management_req.procedure.as_str(), logger)
+        let response = self
+            .trigger_procedure(interface_management_req.procedure.as_str(), logger)
             .await
             .or_else(|e| {
                 warn!(logger, "Failed NG Setup send - {:?}", e);
@@ -76,7 +77,13 @@ where
                         message: format!("Failed {}: {:?}", interface_management_req.procedure, e),
                     },
                 ))
-            })
+            });
+        trace!(
+            logger,
+            "Send {} trigger response",
+            interface_management_req.procedure
+        );
+        response
     }
 }
 
@@ -99,23 +106,40 @@ where
             x => Err(anyhow!(format!("Unknown procedure requested {}", x))),
         }?;
 
+        let logger_clone = logger.clone();
         let match_fn = move |p: &NgapPdu| match p {
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
                 procedure_code: ProcedureCode(x),
                 ..
-            }) if *x == request_procedure_code => true,
+            }) if *x == request_procedure_code => {
+                trace!(
+                    logger_clone,
+                    "Matched an ok response for procedure code {}",
+                    *x
+                );
+                true
+            }
             NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome {
                 procedure_code: ProcedureCode(x),
                 ..
-            }) if *x == request_procedure_code => true,
+            }) if *x == request_procedure_code => {
+                trace!(
+                    logger_clone,
+                    "Matched an unsuccessful response for procedure code {}",
+                    *x
+                );
+                true
+            }
             _ => false,
         };
 
         // TODO use tnla_id
+        trace!(logger, "Send request to AMF and wait for response");
         let _response = self
             .ngap_transport_provider
             .send_request(pdu, Box::new(match_fn), logger)
             .await?;
+        trace!(logger, "Got response from AMF, respond to coordinator");
         Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse)
     }
 

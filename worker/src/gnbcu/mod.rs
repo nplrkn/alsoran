@@ -1,7 +1,6 @@
 mod f1ap_handler;
 mod ngap_handler;
 mod node_control_callback_server;
-use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::config::Config;

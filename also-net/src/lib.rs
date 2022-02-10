@@ -1,5 +1,5 @@
+use async_channel::Sender;
 use async_std::sync::{Arc, Mutex};
-use futures::channel::oneshot::Sender;
 
 mod codec;
 mod mock_transport_provider;

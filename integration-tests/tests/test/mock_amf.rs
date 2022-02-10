@@ -90,22 +90,44 @@ impl MockAmf {
             Err(anyhow!("Not an NG setup"))
         }?;
 
-        // TODO - turn this into an actual response
-        let response = NgapPdu::InitiatingMessage(InitiatingMessage {
+        // Mandatory fields are
+        //  - AMF Name
+        //  - Served GUAMI List - ServedGuamiItem - GUAMI
+        //  - Relative AMF Capacity
+        //  - PLMN Support List -- PLMN Support Item -- PLMN Identity, Slice Support List, Extended Slice Support List
+        // TODO add the last two
+        let amf_name = AmfName("MockAmf".to_string());
+        let plmn_identity = PlmnIdentity(vec![0, 0, 1, 0, 1]);
+        let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
+            guami: Guami {
+                plmn_identity,
+                amf_region_id: AmfRegionId(BitVec::new()),
+                amf_set_id: AmfSetId(BitVec::new()),
+                amf_pointer: AmfPointer(BitVec::new()),
+                ie_extensions: None,
+            },
+            backup_amf_name: None,
+            ie_extensions: None,
+        }]);
+
+        let response = NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
             procedure_code: ProcedureCode(21),
             criticality: Criticality(Criticality::REJECT),
-            value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
-                protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
-                    id: ProtocolIeId(27),
-                    criticality: Criticality(Criticality::REJECT),
-                    value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
-                        GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
-                            plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
-                            gnb_id: GnbId::GnbId(BitString26(BitVec::from_element(0x10))),
-                            ie_extensions: None,
-                        }),
-                    ),
-                }]),
+            value: SuccessfulOutcomeValue::IdNgSetup(NgSetupResponse {
+                protocol_i_es: NgSetupResponseProtocolIEs(vec![
+                    NgSetupResponseProtocolIEsItem {
+                        id: ProtocolIeId(1),
+                        criticality: Criticality(Criticality::REJECT),
+                        value: NgSetupResponseProtocolIEsItemValue::IdAmfName(amf_name),
+                    },
+                    NgSetupResponseProtocolIEsItem {
+                        id: ProtocolIeId(96),
+                        criticality: Criticality(Criticality::REJECT),
+                        value: NgSetupResponseProtocolIEsItemValue::IdServedGuamiList(
+                            served_guami_list,
+                        ),
+                    },
+                ]),
             }),
         });
 
