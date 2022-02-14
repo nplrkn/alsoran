@@ -1,6 +1,6 @@
 use super::Gnbcu;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
-use also_net::{TnlaEvent, TnlaEventHandler};
+use also_net::{TnlaEvent, TnlaEventHandler, TransactionReceiver};
 use anyhow::Result;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
@@ -18,12 +18,13 @@ impl<
     pub async fn start_f1ap_handler(&self, stop_token: StopToken) -> Result<JoinHandle<()>> {
         let addr = format!("0.0.0.0:{}", self.config.f1ap_bind_port);
         let task = self
-            .f1_transport_provider
+            .f1ap_transport_provider
+            .transport_provider
             .clone()
             .serve(
                 addr.to_string(),
                 stop_token,
-                self.clone(),
+                TransactionReceiver::new(self.clone(), self.f1ap_transactions.clone()),
                 self.logger.clone(),
             )
             .await?;
@@ -54,7 +55,8 @@ where
                 None
             }
         } {
-            self.f1_transport_provider
+            self.f1ap_transport_provider
+                .transport_provider
                 .send_pdu(response, logger) // include tnla id in future
                 .await
                 .unwrap_or_else(|e| warn!(self.logger, "Failed to send response {:?}", e));

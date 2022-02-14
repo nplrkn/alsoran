@@ -9,6 +9,7 @@ where
     R: TnlaEventHandler<M>,
     M: Clone + Send + Sync + 'static,
 {
+    // TODO - we could remove the unneeded clone of this by creating a trait like HasSharedTransactions<M> on <R>
     pending_requests: SharedTransactions<M>,
     receiver: R,
 }

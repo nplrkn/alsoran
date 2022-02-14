@@ -60,7 +60,7 @@ pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = F1apPdu> + 'stati
 ) -> Result<(StopSource, JoinHandle<()>)> {
     info!(logger, "Worker instance start");
     let ngap_transport_provider = SctpTransportProvider::new(NGAP_SCTP_PPID, ngap_codec);
-    let f1_transport_provider = SctpTransportProvider::new(F1AP_NGAP_PPID, f1_codec);
+    let f1ap_transport_provider = SctpTransportProvider::new(F1AP_NGAP_PPID, f1_codec);
 
     let base_path = "http://127.0.0.1:23156";
 
@@ -69,7 +69,7 @@ pub fn spawn<N: Codec<Pdu = NgapPdu> + 'static, F: Codec<Pdu = F1apPdu> + 'stati
     Ok(Gnbcu::new(
         config,
         ngap_transport_provider,
-        f1_transport_provider,
+        f1ap_transport_provider,
         coordinator_client,
         &logger,
     )

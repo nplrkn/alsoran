@@ -5,6 +5,7 @@
 - Test should fail if the F1AP SCTP bind fails 
 - Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 
 - F1 connection management with 2nd worker
+- TODOs
 - test, with a single AMF and DU, all variants of connection ordering and 2nd worker addition
 - make tests time out rather than hang
 - improve integration test logging so it is possible to see what thread is doing what 

@@ -29,8 +29,8 @@ where
 {
     config: Config,
     worker_uuid: Uuid,
-    ngap_transport_provider: TransactionSender<T, NgapPdu>, // rename to ngap?
-    f1_transport_provider: F,
+    ngap_transport_provider: TransactionSender<T, NgapPdu>, // TODO rename to ngap?
+    f1ap_transport_provider: TransactionSender<F, F1apPdu>, // TODO rename to f1ap
     coordinator_client: C,
     ngap_transactions: SharedTransactions<NgapPdu>,
     f1ap_transactions: SharedTransactions<F1apPdu>,
@@ -46,7 +46,7 @@ impl<
     pub fn new(
         config: Config,
         ngap_transport_provider: T,
-        f1_transport_provider: F,
+        f1ap_transport_provider: F,
         coordinator_client: C,
         logger: &Logger,
     ) -> Gnbcu<T, F, C> {
@@ -54,11 +54,13 @@ impl<
         let ngap_transport_provider =
             TransactionSender::new(ngap_transport_provider, ngap_transactions.clone());
         let f1ap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
+        let f1ap_transport_provider =
+            TransactionSender::new(f1ap_transport_provider, f1ap_transactions.clone());
         Gnbcu {
             config,
             worker_uuid: Uuid::new_v4(),
             ngap_transport_provider,
-            f1_transport_provider,
+            f1ap_transport_provider,
             coordinator_client,
             ngap_transactions,
             f1ap_transactions,
@@ -187,7 +189,7 @@ impl<
 //         // Create GNBCU with mock tranports + coordinator.
 //         let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
 //             MockTransportProvider::<NgapPdu>::new();
-//         let (mock_f1_transport_provider, _send_f1, _receive_f1) =
+//         let (mock_f1ap_transport_provider, _send_f1, _receive_f1) =
 //             MockTransportProvider::<NgapPdu>::new();
 //         let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
 
@@ -199,7 +201,7 @@ impl<
 //         let (stop_source, worker_task) = Gnbcu::new(
 //             config,
 //             mock_ngap_transport_provider,
-//             mock_f1_transport_provider,
+//             mock_f1ap_transport_provider,
 //             mock_coordinator,
 //             &root_logger,
 //         )
