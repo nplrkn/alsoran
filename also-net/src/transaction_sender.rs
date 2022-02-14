@@ -2,7 +2,7 @@ use super::{SharedTransactions, TransportProvider};
 use crate::TransactionMatchFn;
 use anyhow::Result;
 use async_channel;
-use slog::{info, Logger};
+use slog::Logger;
 
 #[derive(Clone)]
 pub struct TransactionSender<T, M>

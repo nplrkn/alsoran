@@ -67,12 +67,11 @@ impl TestContext {
     }
 
     pub async fn start_worker(&mut self) {
-        let worker_number = self.workers.len();
+        let worker_number = self.workers.len() as u16;
 
-        let config = Config {
-            callback_server_bind_port: 23256 + worker_number as u16,
-            ..Config::default()
-        };
+        let mut config = Config::default();
+        config.callback_server_bind_port += worker_number;
+        config.f1ap_bind_port += worker_number;
 
         let (stop_source, task) = worker::spawn(
             config.clone(),

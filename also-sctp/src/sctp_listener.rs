@@ -17,12 +17,15 @@ pub fn new_listen(
     ppid: u32,
     backlog: i32,
     logger: Logger,
-) -> impl Stream<Item = Result<SctpAssociation>> {
-    try_stream! {
-        let addr: OsSocketAddr = addr.try_into()?;
-        let fd = FdGuard(try_io!(socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP), "socket")?);
-        try_io!(bind(fd.0, addr.as_ptr(), addr.len()), "bind")?;
-        try_io!(listen(fd.0, backlog), "listen")?;
+) -> Result<impl Stream<Item = Result<SctpAssociation>>> {
+    let addr: OsSocketAddr = addr.try_into()?;
+    let fd = FdGuard(try_io!(
+        socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP),
+        "socket"
+    )?);
+    try_io!(bind(fd.0, addr.as_ptr(), addr.len()), "bind")?;
+    try_io!(listen(fd.0, backlog), "listen")?;
+    Ok(try_stream! {
         loop {
             Async::new(fd.0)?.readable().await?;
             let mut addr = OsSocketAddr::new();
@@ -33,7 +36,7 @@ pub fn new_listen(
             let assoc = SctpAssociation::from_accepted(assoc_fd, ppid, addr, &logger)?;
             yield assoc;
         }
-    }
+    })
 }
 
 impl Drop for FdGuard {
