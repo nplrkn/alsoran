@@ -10,6 +10,7 @@ common = { path = "../common" }
 also-net = { path = "../also-net" }
 worker = { path = "../worker" }
 coordinator = { path = "../coordinator" }
+f1ap = { path = "../f1ap" }
 async-std = { version = "1.10.0", features = ["attributes","tokio02"] }
 async-trait = "0.1.51"
 slog = "2.7.0"

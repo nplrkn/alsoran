@@ -7,5 +7,7 @@ members = [
     "common",
     "integration-tests",
     "also-sctp",
-    "also-net"
+    "also-net",
+    "f1ap",
+    "pdu-convert-derive"
 ]

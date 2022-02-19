@@ -1,24 +1,26 @@
+mod f1ap_handler;
+mod ngap_handler;
 mod node_control_callback_server;
+use std::sync::Arc;
+
 use crate::config::Config;
-use crate::f1_handler::F1Handler;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
-use also_net::{TnlaEvent, TnlaEventHandler};
+use also_net::{SharedTransactions, TransactionReceiver, TransactionSender};
 use anyhow::{anyhow, Result};
+use async_std::sync::Mutex;
 use async_std::task::JoinHandle;
-use async_trait::async_trait;
 use common::ngap::NgapPdu;
+use f1ap::F1apPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
-use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
-use slog::{error, info, trace, warn};
+use slog::{info, trace, warn};
 use stop_token::{StopSource, StopToken};
-use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::{ApiError, AuthData, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
 
 /// The gNB-CU.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Gnbcu<T, F, C>
 where
     T: NgapClientTransportProvider,
@@ -27,9 +29,11 @@ where
 {
     config: Config,
     worker_uuid: Uuid,
-    ngap_transport_provider: T,
-    f1_transport_provider: F,
+    ngap_transport_provider: TransactionSender<T, NgapPdu>, // TODO rename to ngap?
+    f1ap_transport_provider: TransactionSender<F, F1apPdu>, // TODO rename to f1ap
     coordinator_client: C,
+    ngap_transactions: SharedTransactions<NgapPdu>,
+    f1ap_transactions: SharedTransactions<F1apPdu>,
     logger: Logger,
 }
 
@@ -42,16 +46,24 @@ impl<
     pub fn new(
         config: Config,
         ngap_transport_provider: T,
-        f1_transport_provider: F,
+        f1ap_transport_provider: F,
         coordinator_client: C,
         logger: &Logger,
     ) -> Gnbcu<T, F, C> {
+        let ngap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
+        let ngap_transport_provider =
+            TransactionSender::new(ngap_transport_provider, ngap_transactions.clone());
+        let f1ap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
+        let f1ap_transport_provider =
+            TransactionSender::new(f1ap_transport_provider, f1ap_transactions.clone());
         Gnbcu {
             config,
             worker_uuid: Uuid::new_v4(),
             ngap_transport_provider,
-            f1_transport_provider,
+            f1ap_transport_provider,
             coordinator_client,
+            ngap_transactions,
+            f1ap_transactions,
             logger: logger.clone(),
         }
     }
@@ -66,36 +78,13 @@ impl<
         (stop_source, task)
     }
 
-    fn start_callback_server(
-        &self,
-        stop_token: StopToken,
-        logger: Logger,
-    ) -> Result<JoinHandle<()>> {
-        let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
-        let service = MakeService::new(self.clone());
-        let service = MakeAllowAllAuthenticator::new(service, "cosmo");
-        let service =
-            node_control_api::server::context::MakeAddContext::<_, EmptyContext>::new(service);
-        Ok(async_std::task::spawn(async move {
-            let server = hyper::server::Server::bind(&addr)
-                .serve(service)
-                .with_graceful_shutdown(stop_token);
-            if let Err(e) = server.await {
-                error!(logger, "Server error: {}", e);
-            } else {
-                info!(logger, "Server graceful shutdown");
-            }
-        }))
-    }
-
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let logger = &self.logger;
         trace!(logger, "Send initial refresh worker request");
         let response = self.send_refresh_worker().await?;
 
         // Start node control callback server in a separate task.
-        let callback_server_task =
-            self.start_callback_server(stop_token.clone(), logger.clone())?;
+        let callback_server_task = self.start_callback_server(stop_token.clone())?;
 
         let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
             trace!(logger, "Received refresh worker response");
@@ -110,24 +99,22 @@ impl<
 
         let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
         info!(logger, "Maintain connection to AMF {}", address);
+        let handler = TransactionReceiver::new(self.clone(), self.ngap_transactions.clone());
         let connection_task = self
             .ngap_transport_provider
+            .transport_provider // TODO we don't want to reach inside like this
             .clone()
-            .maintain_connection(address, self.clone(), stop_token.clone(), logger.clone())
+            .maintain_connection(address, handler, stop_token.clone(), logger.clone())
             .await?;
 
-        let _f1_handler = F1Handler::new(self.clone());
-        // gnbcu
-        //     .f1_transport_provider
-        //     .start_receiving(f1_handler, &logger.new(o!("component" => "F1")))
-        //     .await;
-        // info!(logger, "Started F1 handler");
+        let f1_server_task = self.start_f1ap_handler(stop_token.clone()).await?;
 
         stop_token.await;
 
         // Wait for our tasks to terminate.
         connection_task.await;
         callback_server_task.await;
+        f1_server_task.await;
 
         info!(logger, "Stop");
         Ok(())
@@ -148,6 +135,7 @@ impl<
 
         let connected_amfs = self
             .ngap_transport_provider
+            .transport_provider // TODO we don't want to reach inside like this
             .remote_tnla_addresses()
             .await
             .iter()
@@ -178,28 +166,6 @@ impl<
     }
 }
 
-#[async_trait]
-impl<T, F, C> TnlaEventHandler for Gnbcu<T, F, C>
-where
-    T: NgapClientTransportProvider,
-    F: F1ServerTransportProvider,
-    C: Api<ClientContext> + Send + Sync + 'static + Clone,
-{
-    type MessageType = NgapPdu;
-
-    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
-        match event {
-            TnlaEvent::Established => trace!(logger, "TNLA {} established", tnla_id),
-            TnlaEvent::Terminated => warn!(logger, "TNLA {} closed", tnla_id),
-        };
-        self.connected_amf_change(logger).await;
-    }
-
-    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
-        trace!(logger, "ngap_pdu: {:?}", message);
-    }
-}
-
 // Commented out this test.  It is not clear that the additional cost of maintaining the MockTransportProvider
 // gives us any value compared to using a live SCTP transport provider.  Faster tests?
 // #[cfg(test)]
@@ -223,7 +189,7 @@ where
 //         // Create GNBCU with mock tranports + coordinator.
 //         let (mock_ngap_transport_provider, send_ngap, receive_ngap) =
 //             MockTransportProvider::<NgapPdu>::new();
-//         let (mock_f1_transport_provider, _send_f1, _receive_f1) =
+//         let (mock_f1ap_transport_provider, _send_f1, _receive_f1) =
 //             MockTransportProvider::<NgapPdu>::new();
 //         let (mock_coordinator, node_control_rsp, node_control_req) = MockCoordinator::new();
 
@@ -235,7 +201,7 @@ where
 //         let (stop_source, worker_task) = Gnbcu::new(
 //             config,
 //             mock_ngap_transport_provider,
-//             mock_f1_transport_provider,
+//             mock_f1ap_transport_provider,
 //             mock_coordinator,
 //             &root_logger,
 //         )

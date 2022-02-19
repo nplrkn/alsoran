@@ -68,12 +68,11 @@ where
 }
 
 #[async_trait]
-impl<C, P> ClientTransportProvider for SctpTransportProvider<C, P>
+impl<C, P> ClientTransportProvider<P> for SctpTransportProvider<C, P>
 where
     C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
     P: Send + Sync + Clone + 'static + Debug,
 {
-    type Pdu = P;
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
@@ -82,7 +81,7 @@ where
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = <Self as ClientTransportProvider>::Pdu>,
+        H: TnlaEventHandler<P>,
     {
         let assoc_id = 3; // TODO
         let wrapped_handler = Wrapper {
@@ -111,7 +110,9 @@ where
                     Err(e) => {
                         warn!(
                             logger,
-                            "Couldn't establish connection - will retry ({:?})", e
+                            "Couldn't establish connection to {} - will retry ({:?})",
+                            connect_addr_string,
+                            e
                         );
                     }
                 };
@@ -136,12 +137,11 @@ where
 const MAX_LISTEN_BACKLOG: i32 = 5;
 
 #[async_trait]
-impl<C, P> ServerTransportProvider for SctpTransportProvider<C, P>
+impl<C, P> ServerTransportProvider<P> for SctpTransportProvider<C, P>
 where
     C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
     P: Send + Sync + Clone + 'static + Debug,
 {
-    type Pdu = P;
     async fn serve<H>(
         self,
         listen_addr: String,
@@ -150,7 +150,7 @@ where
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = P>,
+        H: TnlaEventHandler<P>,
     {
         let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
 
@@ -159,19 +159,22 @@ where
             codec: self.codec,
         };
 
-        Ok(task::spawn(async move {
-            info!(logger, "Listening for connections on {:?}", addr);
-            let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())
-                .take_until(stop_token.clone());
-            pin_mut!(stream);
+        let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
+        let stream = stream.take_until(stop_token.clone());
 
+        Ok(task::spawn(async move {
+            info!(logger, "Listening for SCTP connections on {:?}", addr);
+            pin_mut!(stream);
             let mut connection_tasks = vec![];
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
                         let assoc_id = 53; // TODO
                         let logger = logger.new(o!("connection" => assoc_id));
-                        info!(logger, "Accepted connection from {}", assoc.remote_address);
+                        info!(
+                            logger,
+                            "Accepted SCTP connection from {}", assoc.remote_address
+                        );
                         let task = self
                             .tnla_pool
                             .clone()

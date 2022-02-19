@@ -1,5 +1,17 @@
 # Connection Management
 
+## Primer on AMF discovery
+
+The starting point is the AMF Set.  Either we get it from the UE (GUAMI, S-TMSI) or from configuration/policy, or from a previous message from the AMF indicating what to do in the event of failure.  (ref 23.501, 6.3.5).
+
+We then use NAPTR to find AMFs in the AMF Set as described in TS 29.303, 7.2.  To quote:
+
+  The S-NAPTR procedure outputs a list of host names (AMFs) each with a service, protocol, port and a list of IPv4 and IPv6 addresses.
+
+The GNB should connect to all AMFs in the AMF Set.  That means finding an address that works, setting up the first TNLA, doing an NG Setup over it, and then letting the AMF instruct it to set up more TNLAs if it so desires.  
+
+Does Kubernetes support NAPTR?  We could set up the same structure in local configuration as a stop gap.
+
 ## Non-UE associated signaling
 
 From TS 38.413:
@@ -100,3 +112,138 @@ A client attempts to maintain one TNLA to each endpoint at all times.
 The client has one task per endpoint, either resolving, or waiting for a retry, or handling the connection.  Connections are added/removed from the pool as they get successfully estalbished / fail / are retracted.  This shows that there is not a 1:1 relationship between connections in the pool and tasks.  Therefore the pool can't store a task handle.
 The server has N connections.  These can simply hang off the listen.
 When gracefully deleting the client, we signal all of the per endpoint tasks to stop what they are doing and then join the tasks.
+
+### Sequencing of connection establishment - first worker
+
+The goal is to avoid the situation where the first message(s) sent by the AMF to the CU can't be passed onto a DU, and vice versa.
+
+For example, if we fully set up the DU side first, it will send us UE messages but we don't have an AMF connection to pass them on. 
+
+```mermaid
+sequenceDiagram
+  participant DU
+  participant W1
+  participant AMF
+  W1->>AMF: establish connection
+  Note over W1: deliberately withhold NG Setup
+  DU->>W1: establish connection
+  DU->>W1: F1 Setup
+  W1->>AMF: NG Setup
+  AMF->>W1: NG Setup Ack
+  Note over AMF: may now send UE messages to W1
+  W1->>DU: F1 Setup Ack
+  Note over DU: may now send UE messages to W1
+```
+
+Still, it is possible that right to left messages may overtake the F1 Setup Ack.  Until proven otherwise, we assume that, upon transmission of an F1 Setup, the DU is capable of receiving new requests from the CU.  Similarly, we ensure that, upon transmission of an NG Setup, the CU is capable of receiving new requests from the AMF.
+
+### Sequencing of connection establishment - second worker
+
+Again, the danger is that the new worker receives a message it can't pass on.  Our choice is to get the DU connection set up first.
+
+```mermaid
+sequenceDiagram
+  participant DU
+  participant W1
+  participant C
+  participant W2
+  participant AMF
+  W2->>C: add F1AP port
+  C->>W1: add F1AP ports
+  W1->>DU: GNB-CU Configuration Update
+  DU->>W2: connect
+  Note over W2: messages from DU can't be handled yet
+  DU->>W1: GNB-CU Configuration Update ack
+  W1->>C: add F1AP ports ok
+  C->>W2: ok, AMF address
+  note over W2: in the error variant, go into activation failed
+  W2->>AMF: connect
+  W2->>C: connected to AMF 
+  C->>W2: trigger configuration update
+  W2->>AMF: RAN configuration update
+  AMF->>W2: RAN configuration update response  
+  W2->>C: ok
+  Note over W2: check that the AMF is actually letting us use the TNLA for UE associated signaling
+  Note over W2: can now pass messages from DU through
+```
+
+### Multiple TNLA endpoints from AMF
+
+```mermaid
+sequenceDiagram
+  participant C
+  participant W1
+  participant W2
+  participant AMF
+  W1->>C: F1AP port, no AMFs connected
+  C->>W1: AMF address 
+  W1->>AMF: connect
+  W1->>C: F1AP port, AMF connected
+  C->>W1: ok 
+  C->>W1: trigger NG setup
+  W1->>AMF: NG Setup
+  AMF->>W1: Ack
+  W1->>C: ok
+```
+
+alternative
+
+```mermaid
+sequenceDiagram
+  participant C
+  participant W1
+  participant W2
+  participant AMF
+  participant AMFb
+  participant AMFc
+  W1->>C: F1AP port, no AMFs connected
+  W2->>C: F1AP port, no AMFs connected
+  C->>W1: AMF address, you may setup 
+  C->>W2: refresh in 5s
+  W1->>AMF: connect
+  W1->>AMF: NG Setup
+  AMF->>W1: Ack
+  W1->>C: F1AP port, AMF connected
+  C->>W1: refresh in 30s
+  AMF->>W1: AMF Configuration Update (2 new ports)
+  W1->>AMFb: connect
+  W1->>AMFc: connect
+  AMF->>W1: AMF Configuration Update ok
+  W1->>C: F1AP port, AMF a, b, c connected
+  C->>W1: refresh in 30s
+  W2->>C: F1AP port, no AMFs connected
+  C->>W2: AMF addresses a, b, c, add yourself
+  W2->>AMF: connect
+  W2->>AMF: RAN configuration update
+  AMF->>W2: ack
+  W2->>AMFb: connect
+  W2->>AMFb: RAN configuration update
+  AMFb->>W2: ack
+  W2->>AMFc: connect
+  W2->>AMFc: RAN configuration update
+  AMFc->>W2: ack
+  W2->>C: F1AP port, AMF a, b, c connected
+  C->>W1: ok, refresh in 30s
+
+```
+
+### Where we need to connect to multiple AMFs
+
+
+This is from 29.303.
+
+The AMFs available within an AMF Set should be provisioned within NAPTR records in the DNS, under the AMF Set FQDN (as defined in clause 28.3.2.7 of 3GPP TS 23.003 [4]), with the Service Parameters "x-3gpp-amf:x-n2".
+The 5G-AN may discover the AMFs available within an AMF Set by:
+-	constructing the AMF Set FQDN, as defined in clause 28.3.2.7 of 3GPP TS 23.003 [4], identifying the AMF Set of the AMFs to be discovered; and
+-	initiating an S-NAPTR procedure, with the Application-Unique String set to that AMF Set FQDN, and with the "Service Parameters" set to "x-3gpp-amf:x-n2".
+
+
+When connecting to an AMF it may provide a backup AMF name per GUAMI in its served GUAMI list.
+This is apparently not a DNS name.  So we are going to find it by doing an NG Setup (or getting an AMF configuration update that changes it).
+
+Simple case.  
+
+```mermaid
+sequenceDiagram
+  participant C
+

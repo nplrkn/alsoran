@@ -1,4 +1,5 @@
 use super::mock_amf::MockAmf;
+use super::mock_du::MockDu;
 use also_net::JsonCodec;
 use async_std::task::JoinHandle;
 use slog::{info, o, Logger};
@@ -8,16 +9,23 @@ use worker::Config;
 
 pub struct TestContext {
     pub amf: MockAmf,
+    pub du: MockDu,
+    du_stop_source: StopSource,
     pub logger: Logger,
     coord_stop_source: StopSource,
     coord_task: JoinHandle<()>,
     control_task: JoinHandle<()>,
-    workers: Vec<WorkerInfo>,
+    workers: Vec<InternalWorkerInfo>,
 }
 
-struct WorkerInfo {
+struct InternalWorkerInfo {
     pub stop_source: StopSource,
     pub task: JoinHandle<()>,
+    pub config: Config,
+}
+
+pub struct WorkerInfo {
+    pub f1ap_host_port: String,
 }
 
 impl TestContext {
@@ -34,10 +42,14 @@ impl TestContext {
         let amf_address = "127.0.0.1:38212";
         let amf = MockAmf::new(amf_address, &logger).await;
 
+        let (du, du_stop_source) = MockDu::new(&logger).await;
+
         let (coord_stop_source, coord_task, control_task) =
             coordinator::spawn(logger.new(o!("cu-c" => 1))).unwrap();
         let mut tc = TestContext {
             amf,
+            du,
+            du_stop_source,
             logger,
             coord_stop_source,
             coord_task,
@@ -48,22 +60,31 @@ impl TestContext {
         tc
     }
 
-    pub async fn start_worker(&mut self) {
-        let worker_number = self.workers.len();
+    pub fn worker_info(&self, index: usize) -> WorkerInfo {
+        WorkerInfo {
+            f1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.f1ap_bind_port),
+        }
+    }
 
-        let config = Config {
-            callback_server_bind_port: 23256 + worker_number as u16,
-            callback_server_url_host_port: None,
-        };
+    pub async fn start_worker(&mut self) {
+        let worker_number = self.workers.len() as u16;
+
+        let mut config = Config::default();
+        config.callback_server_bind_port += worker_number;
+        config.f1ap_bind_port += worker_number;
 
         let (stop_source, task) = worker::spawn(
-            config,
+            config.clone(),
             self.logger.new(o!("cu-w"=> worker_number)),
             JsonCodec::new(),
             JsonCodec::new(),
         )
         .unwrap();
-        self.workers.push(WorkerInfo { stop_source, task })
+        self.workers.push(InternalWorkerInfo {
+            stop_source,
+            task,
+            config,
+        })
     }
 
     pub async fn terminate(self) {
@@ -87,6 +108,9 @@ impl TestContext {
 
         info!(self.logger, "Terminate mock AMF");
         drop(self.amf.stop_source);
+
+        info!(self.logger, "Terminate mock DU");
+        drop(self.du_stop_source);
 
         info!(self.logger, "Wait for all tasks to terminate cleanly");
         self.coord_task.await;

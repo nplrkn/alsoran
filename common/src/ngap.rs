@@ -94,7 +94,7 @@ pub struct AmfConfigurationUpdateFailure {
     sz_lb = "1",
     sz_ub = "150"
 )]
-pub struct AmfName(String);
+pub struct AmfName(pub String);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "UTF8String", sz_extensible = true, sz_lb = "1", sz_ub = "150")]
@@ -122,15 +122,15 @@ pub enum AmfPagingTarget {
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "BITSTRING", sz_extensible = false, sz_lb = "6", sz_ub = "6")]
-pub struct AmfPointer(BitVec<Msb0, u8>);
+pub struct AmfPointer(pub BitVec<Msb0, u8>);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "BITSTRING", sz_extensible = false, sz_lb = "8", sz_ub = "8")]
-pub struct AmfRegionId(BitVec<Msb0, u8>);
+pub struct AmfRegionId(pub BitVec<Msb0, u8>);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "BITSTRING", sz_extensible = false, sz_lb = "10", sz_ub = "10")]
-pub struct AmfSetId(BitVec<Msb0, u8>);
+pub struct AmfSetId(pub BitVec<Msb0, u8>);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE", extensible = true)]
@@ -5520,7 +5520,7 @@ pub struct ServedGuamiItem {
     sz_lb = "1",
     sz_ub = "256"
 )]
-pub struct ServedGuamiList(Vec<ServedGuamiItem>);
+pub struct ServedGuamiList(pub Vec<ServedGuamiItem>);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE-OF", sz_extensible = false, sz_lb = "1", sz_ub = "16")]
@@ -10675,7 +10675,7 @@ pub struct NgSetupResponseProtocolIEsItem {
     sz_lb = "0",
     sz_ub = "65535"
 )]
-pub struct NgSetupResponseProtocolIEs(Vec<NgSetupResponseProtocolIEsItem>);
+pub struct NgSetupResponseProtocolIEs(pub Vec<NgSetupResponseProtocolIEsItem>);
 
 #[derive(Serialize, Deserialize, Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE", extensible = false)]

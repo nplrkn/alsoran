@@ -10,6 +10,7 @@ use stop_token::StopToken;
 
 /// The TransportProvider trait allows the user to send UE and non-UE-associated messages over
 /// some reference point without needing to understand the details of transport connections.  
+// Rename PduSender ?
 #[async_trait]
 pub trait TransportProvider: 'static + Send + Sync + Clone {
     type Pdu;
@@ -18,9 +19,9 @@ pub trait TransportProvider: 'static + Send + Sync + Clone {
 
 /// The ServerTransportProvider trait provides the functions needed on the passive
 /// side of the reference point (which accepts connections from the active side).
+// TODO - change this to not need handler as a parameter but have self impl handler?
 #[async_trait]
-pub trait ServerTransportProvider: TransportProvider {
-    type Pdu;
+pub trait ServerTransportProvider<P>: TransportProvider {
     async fn serve<H>(
         self,
         listen_addr: String,
@@ -29,15 +30,13 @@ pub trait ServerTransportProvider: TransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = <Self as ServerTransportProvider>::Pdu>;
+        H: TnlaEventHandler<P>;
 }
 
 /// The ClientTransportProvider trait provides the functions needed on the active
 /// side of the reference point (which initiates connections towards the passive side).
 #[async_trait]
-pub trait ClientTransportProvider: TransportProvider {
-    type Pdu;
-
+pub trait ClientTransportProvider<Pdu>: TransportProvider {
     // TODO Eventually this will evolve into add_tnla_address (?)
     async fn maintain_connection<H>(
         self,
@@ -47,7 +46,7 @@ pub trait ClientTransportProvider: TransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<MessageType = <Self as ClientTransportProvider>::Pdu>;
+        H: TnlaEventHandler<Pdu>;
 
     // Return the set of TNLA remote address to which we are currently connected
     async fn remote_tnla_addresses(&self) -> Vec<SocketAddr>;

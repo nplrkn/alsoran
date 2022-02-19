@@ -1,7 +1,11 @@
 # Backlog
 
+
 ## TO DO
-- then do the F1 side of things
+- Design sequencing of interface startup with multiple workers in Connection Management.md
+- F1 connection management with 2nd worker
+- TODOs
+- test, with a single AMF and DU, all variants of connection ordering and 2nd worker addition
 - make tests time out rather than hang
 - improve integration test logging so it is possible to see what thread is doing what 
 - regression test connection failures and retries
@@ -10,6 +14,12 @@
 - hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 ## DONE
+- Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 
+- Test should fail if the F1AP SCTP bind fails 
+- 'Worker confirms successul TNLA initialization' is output before output of AMF sending setup response
+- send request instead of send pdu
+- Test script as DU can send Setup and get response 
+- Test script as DU can connect to CU
 - Create callback client on coordinator
 - Drive NG Setup from callback server
 - Drive RAN configuration update from coordinator
