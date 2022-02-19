@@ -6,7 +6,7 @@ and Packet Data Convergence Protocol (PDCP).
 The CU is a subcomponent of a gNodeB.  It connects to 
 - the 5G Core (5GC) using the NG interface
 - the Distributed Unit (DU) using the F1 interface
-- other gNodeB using the Xn C interface.
+- other gNodeB using the Xn-C interface.
 
 The CU control and user plane are interconnected by the E1 interface.
 

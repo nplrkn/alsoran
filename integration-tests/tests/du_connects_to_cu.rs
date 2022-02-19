@@ -14,7 +14,7 @@ async fn du_can_connect() -> Result<()> {
     amf.handle_ng_setup(logger).await?;
 
     let du = &tc.du;
-    du.establish_connection(tc.worker_info(0).f1_host_port)
+    du.establish_connection(tc.worker_info(0).f1ap_host_port)
         .await?;
     du.perform_f1_setup().await?;
 

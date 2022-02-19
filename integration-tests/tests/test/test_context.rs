@@ -25,7 +25,7 @@ struct InternalWorkerInfo {
 }
 
 pub struct WorkerInfo {
-    pub f1_host_port: String,
+    pub f1ap_host_port: String,
 }
 
 impl TestContext {
@@ -62,7 +62,7 @@ impl TestContext {
 
     pub fn worker_info(&self, index: usize) -> WorkerInfo {
         WorkerInfo {
-            f1_host_port: format!("127.0.0.1:{}", self.workers[index].config.f1ap_bind_port),
+            f1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.f1ap_bind_port),
         }
     }
 

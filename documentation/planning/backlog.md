@@ -2,6 +2,7 @@
 
 
 ## TO DO
+- Design sequencing of interface startup with multiple workers in Connection Management.md
 - F1 connection management with 2nd worker
 - TODOs
 - test, with a single AMF and DU, all variants of connection ordering and 2nd worker addition
