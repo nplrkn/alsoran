@@ -10,7 +10,8 @@ from parser import parse_string, parse_file
 from transformer import transform
 
 
-EXTENSION_TO = """enc.append(&false.to_aper(UNCONSTRAINED)?)?;"""
+EXTENSION_TO = """
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;"""
 OPTIONALS_TO = """enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;"""
 EXTENSION_FROM = """let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;"""
 OPTIONALS_FROM = """let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;"""
@@ -69,8 +70,7 @@ class StructFindOptionals(Interpreter):
     def optional_field(self, tree):
         name = tree.children[0]
         self.find_optionals += f"""\
-        optionals.set({self.num_optionals}, self.{name}.is_some());
-"""
+        optionals.set({self.num_optionals}, self.{name}.is_some());"""
         self.num_optionals += 1
 
     def optional_extension_container(self, tree):
@@ -80,6 +80,7 @@ class StructFindOptionals(Interpreter):
 class EnumFields(Interpreter):
     def __init__(self):
         self.enum_fields = ""
+        self.extensible = False
 
     def enum_item(self, tree):
         self.enum_fields += f"""\
@@ -87,6 +88,7 @@ class EnumFields(Interpreter):
 """
 
     def extension_marker(self, _tree):
+        self.extensible = True
         self.enum_fields += f"""\
     Extended,
 """
@@ -144,6 +146,11 @@ class StructFieldsTo(Interpreter):
 
 MUT_OPTIONALS = """let mut optionals = BitString::with_len({num_optionals});"""
 
+ENUM_EXTENSION_FROM = """
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {{
+            return Ok({name}::Extended)
+        }}"""
+
 
 class StructInterpreter(Interpreter):
 
@@ -176,17 +183,14 @@ pub enum {name} {{
 
 impl APerElement for {name} {{
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
-        if bool::from_aper(decoder, Self::CONSTRAINTS)? {{
-            Ok({name}::Extended)
-        }} else {{
-            let v = {typ}::from_aper(decoder, Self::CONSTRAINTS)?;
-            FromPrimitive::from_{typ}(v).ok_or(DecodeError::MalformedInt)
-        }}
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{\
+{ENUM_EXTENSION_FROM.format(name=name) if field_interpreter.extensible else ""}
+        let v = {typ}::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_{typ}(v).ok_or(DecodeError::MalformedInt)
     }}
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
-        let mut enc = Encoding::new();
-        enc.append(&false.to_aper(Self::CONSTRAINTS)?)?;
+        let mut enc = Encoding::new();\
+{EXTENSION_TO if field_interpreter.extensible else ""}
         enc.append(&(*self as {typ}).to_aper(Self::CONSTRAINTS)?)?;
         Ok(enc)
     }}
@@ -301,7 +305,7 @@ impl APerElement for {name} {{
         {MUT_OPTIONALS.format(num_optionals=num_optionals)
                               if num_optionals > 0 else ""}
 {find_opt_interpreter.find_optionals if num_optionals > 0 else ""}
-        {EXTENSION_TO if field_interpreter.extensible else ""}
+{EXTENSION_TO if field_interpreter.extensible else ""}
         {OPTIONALS_TO if num_optionals > 0 else ""}
 {fields_to_interpreter.fields_to}
         Ok(enc)
@@ -512,15 +516,14 @@ impl APerElement for WlanRtt {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            Ok(WlanRtt::Extended)
-        } else {
-            let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
-            FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+            return Ok(WlanRtt::Extended)
         }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
-        enc.append(&false.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
         Ok(enc)
     }
@@ -631,15 +634,14 @@ impl APerElement for MaximumIntegrityProtectedDataRate {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            Ok(MaximumIntegrityProtectedDataRate::Extended)
-        } else {
-            let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
-            FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+            return Ok(MaximumIntegrityProtectedDataRate::Extended)
         }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
-        enc.append(&false.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
         Ok(enc)
     }
