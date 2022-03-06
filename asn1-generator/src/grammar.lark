@@ -30,11 +30,11 @@ choicedef:        assign choice
 objectdef:        IDENTIFIER IDENTIFIER "::=" ies
 
 sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | container)
-sequence:         "SEQUENCE" _fields
-enumerated:       "ENUMERATED" _enumfields
+sequence:         "SEQUENCE" "{" _fielditem* (extension_marker extended_items?)? "}"
+enumerated:       "ENUMERATED" "{" enum_item* (extension_marker extended_enum_items?)? "}"
+choice:           "CHOICE" "{" _choiceitem+ "}"
 integer:          "INTEGER" [ _namedvalues ] ["(" _ranges ")"]
 string:           ("PrintableString" | "VisibleString" | "UTF8String") [_size]
-choice:           "CHOICE" _fields
 bits:             "BIT STRING" [_size]
 bytes:            ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
 boolean:          "BOOLEAN"
@@ -51,18 +51,16 @@ _primitive:     sequenceof
 ies:              "{" ie* [","] extension_marker? "}"
 ie:               "{" "ID" "id-"_identifier "CRITICALITY" ("reject" | "ignore") ("TYPE" | "EXTENSION") _fieldtype + "PRESENCE" (_optional | "mandatory") "}" ["|"]
 
-_enumfields:      "{" _enumitems? (extension_marker extended_enum_items?)? "}"
-_enumitems:       enum_item+
-_fields:          "{" _fielditems? (extension_marker extended_items?)? "}"
-_fielditems:      _fielditem+
-extended_items:   _fielditems
-extended_enum_items:   _enumitems -> extended_items
-_fielditem:       optional_field | field | optional_extension_container
-optional_extension_container:  _identifier container "OPTIONAL"? ","?
+_choiceitem:     choicefield | extension_container
+choicefield:      _identifier _fieldtype ","?
+_fielditem:       optional_field | field | extension_container
+extended_items:   _fielditem+
+enum_item:        _identifier ","?
+extended_enum_items: enum_item+ -> extended_items
+extension_container:  _identifier container "OPTIONAL"? ","?
 container:        _identifier "{" "{" _identifier "}" "}" 
 optional_field:   _identifier _fieldtype "OPTIONAL" ","?
 field.1:            _identifier _fieldtype ","?
-enum_item:        _identifier ","?
 _fieldtype:       _primitive | enumerated | sequence
 _nestedbraces:    "{" (_nestedbraces|/[^\{\}]+/) * "}"
 

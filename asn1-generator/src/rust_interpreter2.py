@@ -73,7 +73,7 @@ class StructFindOptionals(Interpreter):
         optionals.set({self.num_optionals}, self.{name}.is_some());"""
         self.num_optionals += 1
 
-    def optional_extension_container(self, tree):
+    def extension_container(self, tree):
         self.num_optionals += 1
 
 
@@ -97,6 +97,28 @@ class EnumFields(Interpreter):
         pass
 
 
+class ChoiceFields(Interpreter):
+    def __init__(self):
+        self.choice_fields = ""
+
+    def choicefield(self, tree):
+        name = tree.children[0]
+        typ = tree.children[1]
+        if isinstance(typ, Tree):
+            typ = typ.data
+        self.choice_fields += f"""\
+    {name}{"("+typ+")" if typ != "Null" else ""},
+"""
+
+    def extension_container(self, tree):
+        self.choice_fields += f"""\
+    Extended,
+"""
+
+    def extension_marker(self, tree):
+        print("Warning - extensible CHOICE not implemented")
+
+
 class StructFields(Interpreter):
     def __init__(self):
         self.struct_fields = ""
@@ -107,7 +129,6 @@ class StructFields(Interpreter):
 
     def field(self, tree):
         name = tree.children[0]
-        print(name)
         typ = tree.children[1]
         if isinstance(typ, Tree):
             typ = typ.data
@@ -201,6 +222,20 @@ impl APerElement for {name} {{
 
     def choicedef(self, tree):
         print("Warning: CHOICE not implemented")
+        orig_name = tree.children[0]
+        name = orig_name
+        field_interpreter = ChoiceFields()
+        field_interpreter.visit(tree.children[1])
+        print("YAY", field_interpreter.choice_fields)
+
+        self.outfile += f"""\
+// {orig_name}
+pub enum {name} {{
+{field_interpreter.choice_fields}\
+}}
+
+
+"""
 
     # def enum(self, tree):
     #     self.comment(tree)
@@ -349,7 +384,7 @@ impl APerElement for {name} {{
     #     self.output += "}\n\n"
     #     self.flush()
 
-    def optional_extension_container(self, tree):
+    def extension_container(self, tree):
         pass
 
     def extended_item(self, tree):
@@ -414,6 +449,7 @@ class TestGenerator(unittest.TestCase):
         tree = parse_string(input)
         try:
             output = generate(tree)
+            print(output)
             self.assertEqual(output, expected)
         finally:
             if output != expected:
@@ -649,6 +685,49 @@ impl APerElement for MaximumIntegrityProtectedDataRate {
 
 """
         self.should_generate(input, output)
+
+    def test_choice(self):
+        self.should_generate("""\
+EventTrigger ::= CHOICE {
+	outOfCoverage				ENUMERATED { true, ... } ,
+	eventL1LoggedMDTConfig		NULL,
+	short-macroENB-ID 		    BIT STRING (SIZE (18)),
+	choice-Extensions		    ProtocolIE-SingleContainer { { EventTrigger-ExtIEs } }
+}
+""", """\
+// EventTrigger
+pub enum EventTrigger {
+    OutOfCoverage(OutOfCoverage),
+    EventL1LoggedMdtConfig,
+    ShortMacroEnbId(BitString),
+    Extended,
+}
+
+// OutOfCoverage
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum OutOfCoverage {
+    True,
+    Extended,
+}
+
+impl APerElement for OutOfCoverage {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(OutOfCoverage::Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+""")
 
 
 BOUNDED_NEWTYPE_FORMAT = """\

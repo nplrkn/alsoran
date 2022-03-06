@@ -33,6 +33,11 @@ class TypeTransformer(Transformer):
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
+    def choicefield(self, tree):
+        tree = self.transform_type(tree)
+        tree.children[0] = pascal_case(tree.children[0])
+        return tree
+
     def optional_field(self, tree):
         tree = self.transform_type(tree)
         tree.children[0] = snake_case(tree.children[0])
@@ -135,6 +140,28 @@ class TestGenerator(unittest.TestCase):
             if output != expected:
                 print(tree.pretty())
 
+    def test3(self):
+        self.should_generate("""\
+EventTrigger ::= CHOICE {
+	blah-bla		NULL,
+	short-macroENB-ID 		    BIT STRING (SIZE (18)),
+}
+""", """\
+document
+  None
+  choicedef
+    EventTrigger
+    choice
+      choicefield
+        BlahBla
+        Null
+      choicefield
+        ShortMacroEnbId
+        BitString
+          18
+          None
+""")
+
     def test2(self):
         input = """\
 MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
@@ -200,7 +227,7 @@ document
       field
         n2
         N2
-      optional_extension_container
+      extension_container
         iE-Extensions
         container
           ProtocolExtensionContainer
