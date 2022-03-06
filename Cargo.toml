@@ -8,6 +8,7 @@ members = [
     "integration-tests",
     "also-sctp",
     "also-net",
-    "f1ap",
-    "pdu-convert-derive"
+    "pdu-convert-derive",
+    "asn1-generator/src/ngap",
+    "asn1-generator/src/f1ap"
 ]

@@ -1,0 +1,76 @@
+%import common.WS
+%import common.DIGIT
+
+COMMENT: (/--[^\n]*--/ | /--[^\n]*\n/) 
+NEWLINE: "\n"
+%ignore WS
+%ignore COMMENT
+%ignore NEWLINE
+
+IDENTIFIER:       ("a".."z" | "A".."Z" | DIGIT | "-")+
+INTEGER:          "0" | "1-9"["0-9"] *
+BOUND:            INTEGER | IDENTIFIER
+_optional:        "OPTIONAL" | "optional" | "conditional"
+extension_marker: "..." [","]
+
+// For testability, we make the parts before and after the definitions optional
+// This means we can just run small fragments through the grammar.
+document:         [module _OID _begin ["IMPORTS" _IMPORTS]] _definitions ["END"]
+module:           IDENTIFIER
+_OID:             /{[^}]+}/
+_begin:           "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
+_IMPORTS:         /[^;]+;/
+_definitions:     (tuple_struct | struct | enumdef | choicedef | objectdef)+
+
+?assign:          IDENTIFIER "::="
+tuple_struct:     assign _primitive
+struct:           assign sequence
+enumdef:          assign enumerated
+choicedef:        assign choice
+objectdef:        IDENTIFIER IDENTIFIER "::=" ies
+
+sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | container)
+sequence:         "SEQUENCE" _fields
+enumerated:       "ENUMERATED" _enumfields
+integer:          "INTEGER" [ _namedvalues ] ["(" _ranges ")"]
+string:           ("PrintableString" | "VisibleString" | "UTF8String") [_size]
+choice:           "CHOICE" _fields
+bits:             "BIT STRING" [_size]
+bytes:            ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
+boolean:          "BOOLEAN"
+_identifier:    IDENTIFIER
+
+_primitive:     sequenceof
+                | integer
+                | string 
+                | bits 
+                | bytes
+                | boolean
+                | _identifier
+
+ies:              "{" ie* [","] extension_marker? "}"
+ie:               "{" "ID" "id-"_identifier "CRITICALITY" ("reject" | "ignore") ("TYPE" | "EXTENSION") _fieldtype + "PRESENCE" (_optional | "mandatory") "}" ["|"]
+
+_enumfields:      "{" _enumitems? (extension_marker extended_enum_items?)? "}"
+_enumitems:       enum_item+
+_fields:          "{" _fielditems? (extension_marker extended_items?)? "}"
+_fielditems:      _fielditem+
+extended_items:   _fielditems
+extended_enum_items:   _enumitems -> extended_items
+_fielditem:       optional_field | field | optional_extension_container
+optional_extension_container:  _identifier container "OPTIONAL"? ","?
+container:        _identifier "{" "{" _identifier "}" "}" 
+optional_field:   _identifier _fieldtype "OPTIONAL" ","?
+field.1:            _identifier _fieldtype ","?
+enum_item:        _identifier ","?
+_fieldtype:       _primitive | enumerated | sequence
+_nestedbraces:    "{" (_nestedbraces|/[^\{\}]+/) * "}"
+
+_size:            "(" "SIZE" "(" _ranges ")" ")"
+_ranges:          _rangeoptions+
+_rangeoptions:    _range["|" _range] * [","]
+_range:           extension_marker | (BOUND [".." BOUND])        
+
+_namedvalues:     _nestedbraces
+
+
