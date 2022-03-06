@@ -123,6 +123,7 @@ class TypeTransformer(Transformer):
 
 
 def transform(mut_tree):
+    print("---- Transforming ----")
     return TypeTransformer().transform(mut_tree)
 
 

@@ -30,6 +30,39 @@ impl APerElement for TrpInformationListTrpResp {
     }
 }
 
+// SRSType
+pub enum SRSType {
+    SemipersistentSrs(SemipersistentSrs),
+    AperiodicSrs(AperiodicSrs),
+    _Extended,
+}
+
+impl APerElement for SRSType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::SemipersistentSrs(SemipersistentSrs::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::AperiodicSrs(AperiodicSrs::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::SemipersistentSrs(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::AperiodicSrs(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
 // SemipersistentSrs
 pub struct SemipersistentSrs {
     pub srs_resource_set_id: SrsResourceSetId,
@@ -124,14 +157,14 @@ impl APerElement for AperiodicSrs {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum Aperiodic {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for Aperiodic {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(Aperiodic::Extended)
+            return Ok(Aperiodic::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)

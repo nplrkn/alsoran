@@ -85,7 +85,7 @@ class EnumFields(Interpreter):
     def extension_marker(self, _tree):
         self.extensible = True
         self.enum_fields += f"""\
-    Extended,
+    _Extended,
 """
 
     def extended_items(self, _tree):
@@ -107,7 +107,7 @@ class ChoiceFields(Interpreter):
 
     def extension_container(self, tree):
         self.choice_fields += f"""\
-    Extended,
+    _Extended,
 """
 
     def extension_marker(self, tree):
@@ -137,7 +137,7 @@ class ChoiceFieldsTo(Interpreter):
 
     def extension_container(self, tree):
         self.fields_to += f"""\
-            Self::Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => Err(EncodeError::NotImplemented)
 """
         self.field_index += 1
 
@@ -220,7 +220,7 @@ MUT_OPTIONALS = """let mut optionals = BitString::with_len({num_optionals});"""
 
 ENUM_EXTENSION_FROM = """
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {{
-            return Ok({name}::Extended)
+            return Ok({name}::_Extended)
         }}"""
 
 
@@ -239,6 +239,7 @@ class StructInterpreter(Interpreter):
 
     def enumdef(self, tree):
         orig_name = tree.children[0]
+        print(orig_name)
         name = orig_name
         field_interpreter = EnumFields()
         field_interpreter.visit(tree.children[1])
@@ -272,8 +273,8 @@ impl APerElement for {name} {{
         return name
 
     def choicedef(self, tree):
-        print("Warning: CHOICE not implemented")
         orig_name = tree.children[0]
+        print(orig_name)
         name = orig_name
         field_interpreter = ChoiceFields()
         field_interpreter.visit(tree.children[1])
@@ -309,17 +310,9 @@ impl APerElement for {name} {{
 
 """
 
-    # def enum(self, tree):
-    #     self.comment(tree)
-    #     name = unique_type_name(tree.children[0])
-    #     self.output += "pub enum " + name
-    #     self.in_enum = True
-    #     self.field_block(tree.children[1])
-    #     self.in_enum = False
-    #     return name
-
     def tuple_struct(self, tree):
         orig_name = tree.children[0]
+        print(orig_name)
         name = orig_name
         inner = tree.children[1].data
         ub = None
@@ -368,6 +361,7 @@ impl APerElement for {name} {{
             return
 
         orig_name = tree.children[0]
+        print(orig_name)
         name = orig_name
         field_interpreter = StructFields()
         field_interpreter.visit(tree.children[1])
@@ -456,7 +450,7 @@ impl APerElement for {name} {{
 
     def extension_marker(self, tree):
         if self.in_enum:
-            self.output += "    Extended,\n"
+            self.output += "    _Extended,\n"
 
     # def field(self, tree):
     #     name = tree.children[0]
@@ -490,8 +484,9 @@ impl APerElement for {name} {{
 
 def generate(tree):
     tree = transform(tree)
-    print(tree.pretty())
+    # print(tree.pretty())
     visited = StructInterpreter()
+    print("---- Generating ----")
     visited.visit(tree)
     return visited.outfile
 
@@ -609,14 +604,14 @@ impl APerElement for WlanMeasurementConfiguration {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum WlanRtt {
     Thing1,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for WlanRtt {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(WlanRtt::Extended)
+            return Ok(WlanRtt::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -727,14 +722,14 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for MaximumIntegrityProtectedDataRate {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(MaximumIntegrityProtectedDataRate::Extended)
+            return Ok(MaximumIntegrityProtectedDataRate::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -764,7 +759,7 @@ pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig,
     ShortMacroEnbId(BitString),
-    Extended,
+    _Extended,
 }
 
 impl APerElement for EventTrigger {
@@ -789,7 +784,7 @@ impl APerElement for EventTrigger {
             Self::ShortMacroEnbId(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -800,14 +795,14 @@ impl APerElement for EventTrigger {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum OutOfCoverage {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for OutOfCoverage {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(OutOfCoverage::Extended)
+            return Ok(OutOfCoverage::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)

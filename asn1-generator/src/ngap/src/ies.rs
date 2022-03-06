@@ -80,14 +80,14 @@ impl APerElement for XnTnlConfigurationInfo {
 pub enum PniNpnRestricted {
     Restricted,
     NotRestricted,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for PniNpnRestricted {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(PniNpnRestricted::Extended)
+            return Ok(PniNpnRestricted::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -100,54 +100,19 @@ impl APerElement for PniNpnRestricted {
     }
 }
 
-// EventTrigger
-pub enum EventTrigger {
-    OutOfCoverage(OutOfCoverage),
-    EventL1LoggedMdtConfig,
-    ShortMacroEnbId(BitString),
-    Extended,
-}
-
-impl APerElement for EventTrigger {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;   
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::OutOfCoverage(OutOfCoverage::from_aper(decoder, UNCONSTRAINED)?)),
-            1 => Ok(Self::EventL1LoggedMdtConfig),
-            2 => Ok(Self::ShortMacroEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
-            _ => Err(DecodeError::NotImplemented)
-        }
-    }
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        match self {
-            Self::OutOfCoverage(x) => {
-                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
-                enc.append(&x.to_aper(UNCONSTRAINED)?);
-                }
-            Self::EventL1LoggedMdtConfig => {
-                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
-            }
-            _ => unimplemented!()
-        }
-        Ok(enc)
-    }
-}
-
-
 // QosFlowMappingIndication
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum QosFlowMappingIndication {
     Ul,
     Dl,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for QosFlowMappingIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(QosFlowMappingIndication::Extended)
+            return Ok(QosFlowMappingIndication::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -164,14 +129,14 @@ impl APerElement for QosFlowMappingIndication {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum BtRssi {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for BtRssi {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(BtRssi::Extended)
+            return Ok(BtRssi::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -189,14 +154,14 @@ impl APerElement for BtRssi {
 pub enum CnType {
     EpcForbidden,
     FiveGcForbidden,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for CnType {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(CnType::Extended)
+            return Ok(CnType::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -213,14 +178,14 @@ impl APerElement for CnType {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum DapsIndicator {
     DapsHoRequired,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for DapsIndicator {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(DapsIndicator::Extended)
+            return Ok(DapsIndicator::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -238,14 +203,14 @@ impl APerElement for DapsIndicator {
 pub enum Dapsresponseindicator {
     DapsHoAccepted,
     DapsHoNotAccepted,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for Dapsresponseindicator {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(Dapsresponseindicator::Extended)
+            return Ok(Dapsresponseindicator::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -262,14 +227,14 @@ impl APerElement for Dapsresponseindicator {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum OutOfCoverage {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for OutOfCoverage {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(OutOfCoverage::Extended)
+            return Ok(OutOfCoverage::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -288,14 +253,14 @@ pub enum HandoverReportType {
     HoTooEarly,
     HoToWrongCell,
     IntersystemPingPong,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for HandoverReportType {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(HandoverReportType::Extended)
+            return Ok(HandoverReportType::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -313,14 +278,14 @@ impl APerElement for HandoverReportType {
 pub enum EarlyIratho {
     True,
     False,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for EarlyIratho {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(EarlyIratho::Extended)
+            return Ok(EarlyIratho::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -338,14 +303,14 @@ impl APerElement for EarlyIratho {
 pub enum RatType {
     Nr,
     Eutra,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for RatType {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(RatType::Extended)
+            return Ok(RatType::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -363,14 +328,14 @@ impl APerElement for RatType {
 pub enum RatType1 {
     Nr,
     Eutra,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for RatType1 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(RatType1::Extended)
+            return Ok(RatType1::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -388,14 +353,14 @@ impl APerElement for RatType1 {
 pub enum RimRsDetection {
     RsDetected,
     RsDisappeared,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for RimRsDetection {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(RimRsDetection::Extended)
+            return Ok(RimRsDetection::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -412,14 +377,14 @@ impl APerElement for RimRsDetection {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum UncompensatedBarometricConfig {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for UncompensatedBarometricConfig {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(UncompensatedBarometricConfig::Extended)
+            return Ok(UncompensatedBarometricConfig::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -436,14 +401,14 @@ impl APerElement for UncompensatedBarometricConfig {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum UeSpeedConfig {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for UeSpeedConfig {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(UeSpeedConfig::Extended)
+            return Ok(UeSpeedConfig::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -460,14 +425,14 @@ impl APerElement for UeSpeedConfig {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum UeOrientationConfig {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for UeOrientationConfig {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(UeOrientationConfig::Extended)
+            return Ok(UeOrientationConfig::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -485,14 +450,14 @@ impl APerElement for UeOrientationConfig {
 pub enum PeriodicCommunicationIndicator {
     Periodically,
     Ondemand,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for PeriodicCommunicationIndicator {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(PeriodicCommunicationIndicator::Extended)
+            return Ok(PeriodicCommunicationIndicator::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -510,14 +475,14 @@ impl APerElement for PeriodicCommunicationIndicator {
 pub enum StationaryIndication {
     Stationary,
     Mobile,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for StationaryIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(StationaryIndication::Extended)
+            return Ok(StationaryIndication::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -536,14 +501,14 @@ pub enum TrafficProfile {
     SinglePacket,
     DualPackets,
     MultiplePackets,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for TrafficProfile {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(TrafficProfile::Extended)
+            return Ok(TrafficProfile::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -562,14 +527,14 @@ pub enum BatteryIndication {
     BatteryPowered,
     BatteryPoweredNotRechargeableOrReplaceable,
     NotBatteryPowered,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for BatteryIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(BatteryIndication::Extended)
+            return Ok(BatteryIndication::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -586,14 +551,14 @@ impl APerElement for BatteryIndication {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum WlanRssi {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for WlanRssi {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(WlanRssi::Extended)
+            return Ok(WlanRssi::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
@@ -610,14 +575,14 @@ impl APerElement for WlanRssi {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum WlanRtt {
     True,
-    Extended,
+    _Extended,
 }
 
 impl APerElement for WlanRtt {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(WlanRtt::Extended)
+            return Ok(WlanRtt::_Extended)
         }
         let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)

@@ -32,7 +32,7 @@ objectdef:        IDENTIFIER IDENTIFIER "::=" ies
 sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | container)
 sequence:         "SEQUENCE" "{" _fielditem* (extension_marker extended_items?)? "}"
 enumerated:       "ENUMERATED" "{" enum_item* (extension_marker extended_enum_items?)? "}"
-choice:           "CHOICE" "{" _choiceitem+ "}"
+choice:           "CHOICE" "{" _choiceitem+ (extension_marker extended_choice_items?)? "}"
 integer:          "INTEGER" [ _namedvalues ] ["(" _ranges ")"]
 string:           ("PrintableString" | "VisibleString" | "UTF8String") [_size]
 bits:             "BIT STRING" [_size]
@@ -55,6 +55,7 @@ _choiceitem:     choicefield | extension_container
 choicefield:      _identifier _fieldtype ","?
 _fielditem:       optional_field | field | extension_container
 extended_items:   _fielditem+
+extended_choice_items: _choiceitem+
 enum_item:        _identifier ","?
 extended_enum_items: enum_item+ -> extended_items
 extension_container:  _identifier container "OPTIONAL"? ","?
