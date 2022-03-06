@@ -26,11 +26,6 @@ BOUNDED_CONSTRAINTS = \
 UNCONSTRAINED_CONSTRAINTS = """const CONSTRAINTS: Constraints = UNCONSTRAINED;"""
 
 
-# def fix_up_turbofish(s):
-#     # For example, turn "Vec<u8>::from_aper" -> "Vec::<u8>::from_aper"
-#     return s.replace("Vec<u8>::from_aper", "Vec::<u8>::from_aper")
-
-
 class StructFieldsFrom(Interpreter):
     def __init__(self):
         self.fields_from = ""
@@ -117,6 +112,62 @@ class ChoiceFields(Interpreter):
 
     def extension_marker(self, tree):
         print("Warning - extensible CHOICE not implemented")
+
+
+class ChoiceFieldsTo(Interpreter):
+    def __init__(self):
+        self.fields_to = ""
+        self.field_index = 0
+
+    def choicefield(self, tree):
+        name = tree.children[0]
+        typ = tree.children[1]
+        if typ != "Null":
+            self.fields_to += f"""\
+            Self::{name}(x) => {{
+                enc.append(&({self.field_index} as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }}
+"""
+        else:
+            self.fields_to += f"""\
+            Self::{name} => {{
+                enc.append(&({self.field_index} as u8).to_aper(UNCONSTRAINED)?); }}
+"""
+        self.field_index += 1
+
+    def extension_container(self, tree):
+        self.fields_to += f"""\
+            Self::Extended => Err(EncodeError::NotImplemented)
+"""
+        self.field_index += 1
+
+
+class ChoiceFieldsFrom(Interpreter):
+    def __init__(self):
+        self.fields_from = ""
+        self.field_index = 0
+
+    def choicefield(self, tree):
+        name = tree.children[0]
+        typ = tree.children[1]
+        if isinstance(typ, Tree):
+            typ = typ.data
+
+        if typ != "Null":
+            self.fields_from += f"""\
+            {self.field_index} => Ok(Self::{name}({typ}::from_aper(decoder, UNCONSTRAINED)?)),
+"""
+        else:
+            self.fields_from += f"""\
+            {self.field_index} => Ok(Self::{name}),
+"""
+        self.field_index += 1
+
+    def extension_container(self, tree):
+        self.fields_from += f"""\
+            {self.field_index} => Err(DecodeError::NotImplemented),
+"""
+        self.field_index += 1
 
 
 class StructFields(Interpreter):
@@ -226,12 +277,33 @@ impl APerElement for {name} {{
         name = orig_name
         field_interpreter = ChoiceFields()
         field_interpreter.visit(tree.children[1])
-        print("YAY", field_interpreter.choice_fields)
+
+        fields_from_interpreter = ChoiceFieldsFrom()
+        fields_from_interpreter.visit(tree.children[1])
+        fields_to_interpreter = ChoiceFieldsTo()
+        fields_to_interpreter.visit(tree.children[1])
 
         self.outfile += f"""\
 // {orig_name}
 pub enum {name} {{
 {field_interpreter.choice_fields}\
+}}
+
+impl APerElement for {name} {{
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
+        match u8::from_aper(decoder, UNCONSTRAINED)? {{
+{fields_from_interpreter.fields_from}\
+            _ => Err(DecodeError::InvalidChoice)
+        }}
+    }}
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
+        let mut enc = Encoding::new();
+        match self {{
+{fields_to_interpreter.fields_to}\
+        }}
+        Ok(enc)
+    }}
 }}
 
 
@@ -265,7 +337,7 @@ pub struct {name}(pub {inner});
 
 impl APerElement for {name} {{
     {BOUNDED_CONSTRAINTS.format(
-        lb=lb,ub=ub) if lb is not None else UNCONSTRAINED_CONSTRAINTS}
+        lb=lb, ub=ub) if lb is not None else UNCONSTRAINED_CONSTRAINTS}
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
         Ok(Self({"Vec::<u8>" if inner == "Vec<u8>" else inner}::from_aper(decoder, Self::CONSTRAINTS)?))
     }}
@@ -277,14 +349,6 @@ impl APerElement for {name} {{
 }}
 
 """
-
-        # if lb is not None:
-        #     output = BOUNDED_NEWTYPE_FORMAT.format(
-        #         orig_name=orig_name, name=name, type=inner, lb=lb, ub=ub)
-        # else:
-        #     output = UNBOUNDED_NEWTYPE_FORMAT.format(
-        #         orig_name=orig_name, name=name, type=inner)
-
         self.outfile = output
 
     def ie(self, tree):
@@ -326,10 +390,10 @@ pub struct {name} {{
 
 impl APerElement for {name} {{
     {BOUNDED_CONSTRAINTS.format(
-        lb=num_optionals,ub=num_optionals) if num_optionals > 0 else UNCONSTRAINED_CONSTRAINTS}
+        lb=num_optionals, ub=num_optionals) if num_optionals > 0 else UNCONSTRAINED_CONSTRAINTS}
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
-        {EXTENSION_FROM if field_interpreter.extensible else "" }
-        {OPTIONALS_FROM if num_optionals > 0 else "" }
+        {EXTENSION_FROM if field_interpreter.extensible else ""}
+        {OPTIONALS_FROM if num_optionals > 0 else ""}
 {fields_from_interpreter.fields_from}
         Ok(Self {{
 {fields_from_interpreter.self_fields}\
@@ -703,6 +767,35 @@ pub enum EventTrigger {
     Extended,
 }
 
+impl APerElement for EventTrigger {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::OutOfCoverage(OutOfCoverage::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::EventL1LoggedMdtConfig),
+            2 => Ok(Self::ShortMacroEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::OutOfCoverage(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EventL1LoggedMdtConfig => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?); }
+            Self::ShortMacroEnbId(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
 // OutOfCoverage
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum OutOfCoverage {
@@ -729,48 +822,6 @@ impl APerElement for OutOfCoverage {
 
 """)
 
-
-BOUNDED_NEWTYPE_FORMAT = """\
-// {orig_name}
-pub struct {name}(pub {type});
-
-impl APerElement for {name} {{
-    const CONSTRAINTS: Constraints = Constraints {{
-        value: None,
-        size: Some(Constraint {{
-            min: Some({lb}),
-            max: Some({ub}),
-        }}),
-    }};
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
-        Ok(Self({type}::from_aper(decoder, Self::CONSTRAINTS)?))
-    }}
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
-    }}
-}}
-
-"""
-
-UNBOUNDED_NEWTYPE_FORMAT = """\
-// {orig_name}
-pub struct {name}(pub {type});
-
-impl APerElement for {name} {{
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
-    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
-        Ok(Self({type}::from_aper(decoder, Self::CONSTRAINTS)?))
-    }}
-    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
-    }}
-}}
-
-"""
 
 if __name__ == '__main__':
     # unittest.main()
