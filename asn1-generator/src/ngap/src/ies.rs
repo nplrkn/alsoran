@@ -9,6 +9,23563 @@ use asn1::aper::{
 };
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+// AdditionalDluptnlInformationForHoList
+pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
+
+impl APerElement for AdditionalDluptnlInformationForHoList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AdditionalDluptnlInformationForHoItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AdditionalDluptnlInformationForHoItem
+pub struct AdditionalDluptnlInformationForHoItem {
+    pub additional_dl_ngu_up_tnl_information: UpTransportLayerInformation,
+    pub additional_qos_flow_setup_response_list: QosFlowListWithDataForwarding,
+    pub additional_dl_forwarding_uptnl_information: Option<UpTransportLayerInformation>,
+}
+
+impl APerElement for AdditionalDluptnlInformationForHoItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let additional_dl_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let additional_qos_flow_setup_response_list = QosFlowListWithDataForwarding::from_aper(decoder, UNCONSTRAINED)?;
+        let additional_dl_forwarding_uptnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            additional_dl_ngu_up_tnl_information,
+            additional_qos_flow_setup_response_list,
+            additional_dl_forwarding_uptnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.additional_dl_forwarding_uptnl_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.additional_dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.additional_qos_flow_setup_response_list.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.additional_dl_forwarding_uptnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// AdditionalQosFlowInformation
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum AdditionalQosFlowInformation {
+    MoreLikely,
+    _Extended,
+}
+
+impl APerElement for AdditionalQosFlowInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(AdditionalQosFlowInformation::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AllocationAndRetentionPriority
+pub struct AllocationAndRetentionPriority {
+    pub priority_level_arp: PriorityLevelArp,
+    pub pre_emption_capability: PreEmptionCapability,
+    pub pre_emption_vulnerability: PreEmptionVulnerability,
+}
+
+impl APerElement for AllocationAndRetentionPriority {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let priority_level_arp = PriorityLevelArp::from_aper(decoder, UNCONSTRAINED)?;
+        let pre_emption_capability = PreEmptionCapability::from_aper(decoder, UNCONSTRAINED)?;
+        let pre_emption_vulnerability = PreEmptionVulnerability::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            priority_level_arp,
+            pre_emption_capability,
+            pre_emption_vulnerability,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.priority_level_arp.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pre_emption_capability.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pre_emption_vulnerability.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AllowedCagListPerPlmn
+pub struct AllowedCagListPerPlmn(pub Vec<CagId>);
+
+impl APerElement for AllowedCagListPerPlmn {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CagId>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AllowedNssai
+pub struct AllowedNssai(pub Vec<AllowedNssaiItem>);
+
+impl APerElement for AllowedNssai {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AllowedNssaiItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AllowedNssaiItem
+pub struct AllowedNssaiItem {
+    pub s_nssai: SNssai,
+}
+
+impl APerElement for AllowedNssaiItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let s_nssai = SNssai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            s_nssai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AllowedPniNpnList
+pub struct AllowedPniNpnList(pub Vec<AllowedPniNpnItem>);
+
+impl APerElement for AllowedPniNpnList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AllowedPniNpnItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AllowedPniNpnItem
+pub struct AllowedPniNpnItem {
+    pub plmn_identity: PlmnIdentity,
+    pub pni_npn_restricted: PniNpnRestricted,
+    pub allowed_cag_list_per_plmn: AllowedCagListPerPlmn,
+}
+
+impl APerElement for AllowedPniNpnItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let pni_npn_restricted = PniNpnRestricted::from_aper(decoder, UNCONSTRAINED)?;
+        let allowed_cag_list_per_plmn = AllowedCagListPerPlmn::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            pni_npn_restricted,
+            allowed_cag_list_per_plmn,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pni_npn_restricted.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.allowed_cag_list_per_plmn.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AllowedTaCs
+pub struct AllowedTaCs(pub Vec<Tac>);
+
+impl APerElement for AllowedTaCs {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tac>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AlternativeQosParaSetIndex
+pub struct AlternativeQosParaSetIndex(pub u8);
+
+impl APerElement for AlternativeQosParaSetIndex {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AlternativeQosParaSetNotifyIndex
+pub struct AlternativeQosParaSetNotifyIndex(pub u8);
+
+impl APerElement for AlternativeQosParaSetNotifyIndex {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AlternativeQosParaSetList
+pub struct AlternativeQosParaSetList(pub Vec<AlternativeQosParaSetItem>);
+
+impl APerElement for AlternativeQosParaSetList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AlternativeQosParaSetItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AlternativeQosParaSetItem
+pub struct AlternativeQosParaSetItem {
+    pub alternative_qos_para_set_index: AlternativeQosParaSetIndex,
+    pub guaranteed_flow_bit_rate_dl: Option<BitRate>,
+    pub guaranteed_flow_bit_rate_ul: Option<BitRate>,
+    pub packet_delay_budget: Option<PacketDelayBudget>,
+    pub packet_error_rate: Option<PacketErrorRate>,
+}
+
+impl APerElement for AlternativeQosParaSetItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let alternative_qos_para_set_index = AlternativeQosParaSetIndex::from_aper(decoder, UNCONSTRAINED)?;
+        let guaranteed_flow_bit_rate_dl = if optionals.is_set(0) {
+            Some(BitRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let guaranteed_flow_bit_rate_ul = if optionals.is_set(0) {
+            Some(BitRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let packet_delay_budget = if optionals.is_set(0) {
+            Some(PacketDelayBudget::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let packet_error_rate = if optionals.is_set(0) {
+            Some(PacketErrorRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            alternative_qos_para_set_index,
+            guaranteed_flow_bit_rate_dl,
+            guaranteed_flow_bit_rate_ul,
+            packet_delay_budget,
+            packet_error_rate,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(5);
+        optionals.set(0, self.guaranteed_flow_bit_rate_dl.is_some());        optionals.set(1, self.guaranteed_flow_bit_rate_ul.is_some());        optionals.set(2, self.packet_delay_budget.is_some());        optionals.set(3, self.packet_error_rate.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.alternative_qos_para_set_index.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.guaranteed_flow_bit_rate_dl {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.guaranteed_flow_bit_rate_ul {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.packet_delay_budget {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.packet_error_rate {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// AmfName
+pub struct AmfName(pub String);
+
+impl APerElement for AmfName {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(150),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfNameVisibleString
+pub struct AmfNameVisibleString(pub String);
+
+impl APerElement for AmfNameVisibleString {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(150),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfNameUtf8String
+pub struct AmfNameUtf8String(pub String);
+
+impl APerElement for AmfNameUtf8String {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(150),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfPagingTarget
+pub enum AmfPagingTarget {
+    GlobalRanNodeId(GlobalRanNodeId),
+    Tai(Tai),
+    _Extended,
+}
+
+impl APerElement for AmfPagingTarget {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::GlobalRanNodeId(GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::Tai(Tai::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::GlobalRanNodeId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Tai(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// AmfPointer
+pub struct AmfPointer(pub BitString);
+
+impl APerElement for AmfPointer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(6),
+            max: Some(6),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfRegionId
+pub struct AmfRegionId(pub BitString);
+
+impl APerElement for AmfRegionId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfSetId
+pub struct AmfSetId(pub BitString);
+
+impl APerElement for AmfSetId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(10),
+            max: Some(10),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationSetupList
+pub struct AmfTnlAssociationSetupList(pub Vec<AmfTnlAssociationSetupItem>);
+
+impl APerElement for AmfTnlAssociationSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AmfTnlAssociationSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationSetupItem
+pub struct AmfTnlAssociationSetupItem {
+    pub amf_tnl_association_address: CpTransportLayerInformation,
+}
+
+impl APerElement for AmfTnlAssociationSetupItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            amf_tnl_association_address,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_tnl_association_address.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationToAddList
+pub struct AmfTnlAssociationToAddList(pub Vec<AmfTnlAssociationToAddItem>);
+
+impl APerElement for AmfTnlAssociationToAddList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AmfTnlAssociationToAddItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationToAddItem
+pub struct AmfTnlAssociationToAddItem {
+    pub amf_tnl_association_address: CpTransportLayerInformation,
+    pub tnl_association_usage: Option<TnlAssociationUsage>,
+    pub tnl_address_weight_factor: TnlAddressWeightFactor,
+}
+
+impl APerElement for AmfTnlAssociationToAddItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let tnl_association_usage = if optionals.is_set(0) {
+            Some(TnlAssociationUsage::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let tnl_address_weight_factor = TnlAddressWeightFactor::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            amf_tnl_association_address,
+            tnl_association_usage,
+            tnl_address_weight_factor,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.tnl_association_usage.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_tnl_association_address.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.tnl_association_usage {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.tnl_address_weight_factor.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationToRemoveList
+pub struct AmfTnlAssociationToRemoveList(pub Vec<AmfTnlAssociationToRemoveItem>);
+
+impl APerElement for AmfTnlAssociationToRemoveList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AmfTnlAssociationToRemoveItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationToRemoveItem
+pub struct AmfTnlAssociationToRemoveItem {
+    pub amf_tnl_association_address: CpTransportLayerInformation,
+}
+
+impl APerElement for AmfTnlAssociationToRemoveItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            amf_tnl_association_address,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_tnl_association_address.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationToUpdateList
+pub struct AmfTnlAssociationToUpdateList(pub Vec<AmfTnlAssociationToUpdateItem>);
+
+impl APerElement for AmfTnlAssociationToUpdateList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AmfTnlAssociationToUpdateItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AmfTnlAssociationToUpdateItem
+pub struct AmfTnlAssociationToUpdateItem {
+    pub amf_tnl_association_address: CpTransportLayerInformation,
+    pub tnl_association_usage: Option<TnlAssociationUsage>,
+    pub tnl_address_weight_factor: Option<TnlAddressWeightFactor>,
+}
+
+impl APerElement for AmfTnlAssociationToUpdateItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let tnl_association_usage = if optionals.is_set(0) {
+            Some(TnlAssociationUsage::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let tnl_address_weight_factor = if optionals.is_set(0) {
+            Some(TnlAddressWeightFactor::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            amf_tnl_association_address,
+            tnl_association_usage,
+            tnl_address_weight_factor,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.tnl_association_usage.is_some());        optionals.set(1, self.tnl_address_weight_factor.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_tnl_association_address.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.tnl_association_usage {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.tnl_address_weight_factor {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// AmfUeNgapId
+pub struct AmfUeNgapId(pub u64);
+
+impl APerElement for AmfUeNgapId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u64::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaOfInterest
+pub struct AreaOfInterest {
+    pub area_of_interest_tai_list: Option<AreaOfInterestTaiList>,
+    pub area_of_interest_cell_list: Option<AreaOfInterestCellList>,
+    pub area_of_interest_ran_node_list: Option<AreaOfInterestRanNodeList>,
+}
+
+impl APerElement for AreaOfInterest {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let area_of_interest_tai_list = if optionals.is_set(0) {
+            Some(AreaOfInterestTaiList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let area_of_interest_cell_list = if optionals.is_set(0) {
+            Some(AreaOfInterestCellList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let area_of_interest_ran_node_list = if optionals.is_set(0) {
+            Some(AreaOfInterestRanNodeList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            area_of_interest_tai_list,
+            area_of_interest_cell_list,
+            area_of_interest_ran_node_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.area_of_interest_tai_list.is_some());        optionals.set(1, self.area_of_interest_cell_list.is_some());        optionals.set(2, self.area_of_interest_ran_node_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.area_of_interest_tai_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.area_of_interest_cell_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.area_of_interest_ran_node_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestCellList
+pub struct AreaOfInterestCellList(pub Vec<AreaOfInterestCellItem>);
+
+impl APerElement for AreaOfInterestCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AreaOfInterestCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestCellItem
+pub struct AreaOfInterestCellItem {
+    pub ngran_cgi: NgranCgi,
+}
+
+impl APerElement for AreaOfInterestCellItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ngran_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ngran_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestList
+pub struct AreaOfInterestList(pub Vec<AreaOfInterestItem>);
+
+impl APerElement for AreaOfInterestList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AreaOfInterestItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestItem
+pub struct AreaOfInterestItem {
+    pub area_of_interest: AreaOfInterest,
+    pub location_reporting_reference_id: LocationReportingReferenceId,
+}
+
+impl APerElement for AreaOfInterestItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let area_of_interest = AreaOfInterest::from_aper(decoder, UNCONSTRAINED)?;
+        let location_reporting_reference_id = LocationReportingReferenceId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            area_of_interest,
+            location_reporting_reference_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.area_of_interest.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.location_reporting_reference_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestRanNodeList
+pub struct AreaOfInterestRanNodeList(pub Vec<AreaOfInterestRanNodeItem>);
+
+impl APerElement for AreaOfInterestRanNodeList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AreaOfInterestRanNodeItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestRanNodeItem
+pub struct AreaOfInterestRanNodeItem {
+    pub global_ran_node_id: GlobalRanNodeId,
+}
+
+impl APerElement for AreaOfInterestRanNodeItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_ran_node_id = GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            global_ran_node_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_ran_node_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestTaiList
+pub struct AreaOfInterestTaiList(pub Vec<AreaOfInterestTaiItem>);
+
+impl APerElement for AreaOfInterestTaiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AreaOfInterestTaiItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaOfInterestTaiItem
+pub struct AreaOfInterestTaiItem {
+    pub tai: Tai,
+}
+
+impl APerElement for AreaOfInterestTaiItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AssistanceDataForPaging
+pub struct AssistanceDataForPaging {
+    pub assistance_data_for_recommended_cells: Option<AssistanceDataForRecommendedCells>,
+    pub paging_attempt_information: Option<PagingAttemptInformation>,
+}
+
+impl APerElement for AssistanceDataForPaging {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let assistance_data_for_recommended_cells = if optionals.is_set(0) {
+            Some(AssistanceDataForRecommendedCells::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let paging_attempt_information = if optionals.is_set(0) {
+            Some(PagingAttemptInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            assistance_data_for_recommended_cells,
+            paging_attempt_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.assistance_data_for_recommended_cells.is_some());        optionals.set(1, self.paging_attempt_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.assistance_data_for_recommended_cells {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.paging_attempt_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// AssistanceDataForRecommendedCells
+pub struct AssistanceDataForRecommendedCells {
+    pub recommended_cells_for_paging: RecommendedCellsForPaging,
+}
+
+impl APerElement for AssistanceDataForRecommendedCells {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let recommended_cells_for_paging = RecommendedCellsForPaging::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            recommended_cells_for_paging,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.recommended_cells_for_paging.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// AssociatedQosFlowList
+pub struct AssociatedQosFlowList(pub Vec<AssociatedQosFlowItem>);
+
+impl APerElement for AssociatedQosFlowList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AssociatedQosFlowItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AssociatedQosFlowItem
+pub struct AssociatedQosFlowItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub qos_flow_mapping_indication: Option<QosFlowMappingIndication>,
+}
+
+impl APerElement for AssociatedQosFlowItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_flow_mapping_indication = if optionals.is_set(0) {
+            Some(QosFlowMappingIndication::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            qos_flow_mapping_indication,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.qos_flow_mapping_indication.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.qos_flow_mapping_indication {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// AuthenticatedIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum AuthenticatedIndication {
+    True,
+    _Extended,
+}
+
+impl APerElement for AuthenticatedIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(AuthenticatedIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AveragingWindow
+pub struct AveragingWindow(pub u16);
+
+impl APerElement for AveragingWindow {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(4095),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaScopeOfMdtNr
+pub enum AreaScopeOfMdtNr {
+    CellBased(CellBasedMdtNr),
+    TaBased(TaBasedMdt),
+    PlmnWide,
+    TaiBased(TaiBasedMdt),
+    _Extended,
+}
+
+impl APerElement for AreaScopeOfMdtNr {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::CellBased(CellBasedMdtNr::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::TaBased(TaBasedMdt::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::PlmnWide),
+            3 => Ok(Self::TaiBased(TaiBasedMdt::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::CellBased(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaBased(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::PlmnWide => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?); }
+            Self::TaiBased(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// AreaScopeOfMdtEutra
+pub enum AreaScopeOfMdtEutra {
+    CellBased(CellBasedMdtEutra),
+    TaBased(TaBasedMdt),
+    PlmnWide,
+    TaiBased(TaiBasedMdt),
+    _Extended,
+}
+
+impl APerElement for AreaScopeOfMdtEutra {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::CellBased(CellBasedMdtEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::TaBased(TaBasedMdt::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::PlmnWide),
+            3 => Ok(Self::TaiBased(TaiBasedMdt::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::CellBased(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaBased(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::PlmnWide => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?); }
+            Self::TaiBased(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// AreaScopeOfNeighCellsList
+pub struct AreaScopeOfNeighCellsList(pub Vec<AreaScopeOfNeighCellsItem>);
+
+impl APerElement for AreaScopeOfNeighCellsList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AreaScopeOfNeighCellsItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AreaScopeOfNeighCellsItem
+pub struct AreaScopeOfNeighCellsItem {
+    pub nr_frequency_info: NrFrequencyInfo,
+    pub pci_list_for_mdt: Option<PciListForMdt>,
+}
+
+impl APerElement for AreaScopeOfNeighCellsItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_frequency_info = NrFrequencyInfo::from_aper(decoder, UNCONSTRAINED)?;
+        let pci_list_for_mdt = if optionals.is_set(0) {
+            Some(PciListForMdt::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            nr_frequency_info,
+            pci_list_for_mdt,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.pci_list_for_mdt.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_frequency_info.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.pci_list_for_mdt {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// BitRate
+pub struct BitRate(pub u64);
+
+impl APerElement for BitRate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(4000000000000),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u64::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BroadcastCancelledAreaList
+pub enum BroadcastCancelledAreaList {
+    CellIdCancelledEutra(CellIdCancelledEutra),
+    TaiCancelledEutra(TaiCancelledEutra),
+    EmergencyAreaIdCancelledEutra(EmergencyAreaIdCancelledEutra),
+    CellIdCancelledNr(CellIdCancelledNr),
+    TaiCancelledNr(TaiCancelledNr),
+    EmergencyAreaIdCancelledNr(EmergencyAreaIdCancelledNr),
+    _Extended,
+}
+
+impl APerElement for BroadcastCancelledAreaList {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::CellIdCancelledEutra(CellIdCancelledEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::TaiCancelledEutra(TaiCancelledEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::EmergencyAreaIdCancelledEutra(EmergencyAreaIdCancelledEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::CellIdCancelledNr(CellIdCancelledNr::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Ok(Self::TaiCancelledNr(TaiCancelledNr::from_aper(decoder, UNCONSTRAINED)?)),
+            5 => Ok(Self::EmergencyAreaIdCancelledNr(EmergencyAreaIdCancelledNr::from_aper(decoder, UNCONSTRAINED)?)),
+            6 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::CellIdCancelledEutra(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaiCancelledEutra(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EmergencyAreaIdCancelledEutra(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::CellIdCancelledNr(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaiCancelledNr(x) => {
+                enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EmergencyAreaIdCancelledNr(x) => {
+                enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// BroadcastCompletedAreaList
+pub enum BroadcastCompletedAreaList {
+    CellIdBroadcastEutra(CellIdBroadcastEutra),
+    TaiBroadcastEutra(TaiBroadcastEutra),
+    EmergencyAreaIdBroadcastEutra(EmergencyAreaIdBroadcastEutra),
+    CellIdBroadcastNr(CellIdBroadcastNr),
+    TaiBroadcastNr(TaiBroadcastNr),
+    EmergencyAreaIdBroadcastNr(EmergencyAreaIdBroadcastNr),
+    _Extended,
+}
+
+impl APerElement for BroadcastCompletedAreaList {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::CellIdBroadcastEutra(CellIdBroadcastEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::TaiBroadcastEutra(TaiBroadcastEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::EmergencyAreaIdBroadcastEutra(EmergencyAreaIdBroadcastEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::CellIdBroadcastNr(CellIdBroadcastNr::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Ok(Self::TaiBroadcastNr(TaiBroadcastNr::from_aper(decoder, UNCONSTRAINED)?)),
+            5 => Ok(Self::EmergencyAreaIdBroadcastNr(EmergencyAreaIdBroadcastNr::from_aper(decoder, UNCONSTRAINED)?)),
+            6 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::CellIdBroadcastEutra(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaiBroadcastEutra(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EmergencyAreaIdBroadcastEutra(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::CellIdBroadcastNr(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaiBroadcastNr(x) => {
+                enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EmergencyAreaIdBroadcastNr(x) => {
+                enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// BroadcastPlmnList
+pub struct BroadcastPlmnList(pub Vec<BroadcastPlmnItem>);
+
+impl APerElement for BroadcastPlmnList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BroadcastPlmnItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BroadcastPlmnItem
+pub struct BroadcastPlmnItem {
+    pub plmn_identity: PlmnIdentity,
+    pub tai_slice_support_list: SliceSupportList,
+}
+
+impl APerElement for BroadcastPlmnItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let tai_slice_support_list = SliceSupportList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            tai_slice_support_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.tai_slice_support_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// BluetoothMeasurementConfiguration
+pub struct BluetoothMeasurementConfiguration {
+    pub bluetooth_meas_config: BluetoothMeasConfig,
+    pub bluetooth_meas_config_name_list: Option<BluetoothMeasConfigNameList>,
+    pub bt_rssi: Option<BtRssi>,
+}
+
+impl APerElement for BluetoothMeasurementConfiguration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let bluetooth_meas_config = BluetoothMeasConfig::from_aper(decoder, UNCONSTRAINED)?;
+        let bluetooth_meas_config_name_list = if optionals.is_set(0) {
+            Some(BluetoothMeasConfigNameList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let bt_rssi = if optionals.is_set(0) {
+            Some(BtRssi::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            bluetooth_meas_config,
+            bluetooth_meas_config_name_list,
+            bt_rssi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.bluetooth_meas_config_name_list.is_some());        optionals.set(1, self.bt_rssi.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.bluetooth_meas_config.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.bluetooth_meas_config_name_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.bt_rssi {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// BluetoothMeasConfigNameList
+pub struct BluetoothMeasConfigNameList(pub Vec<BluetoothMeasConfigNameItem>);
+
+impl APerElement for BluetoothMeasConfigNameList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BluetoothMeasConfigNameItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BluetoothMeasConfigNameItem
+pub struct BluetoothMeasConfigNameItem {
+    pub bluetooth_name: BluetoothName,
+}
+
+impl APerElement for BluetoothMeasConfigNameItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let bluetooth_name = BluetoothName::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            bluetooth_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.bluetooth_name.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// BluetoothMeasConfig
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum BluetoothMeasConfig {
+    Setup,
+    _Extended,
+}
+
+impl APerElement for BluetoothMeasConfig {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(BluetoothMeasConfig::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BluetoothName
+pub struct BluetoothName(pub Vec<u8>);
+
+impl APerElement for BluetoothName {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BurstArrivalTime
+pub struct BurstArrivalTime(pub Vec<u8>);
+
+impl APerElement for BurstArrivalTime {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CagId
+pub struct CagId(pub BitString);
+
+impl APerElement for CagId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(32),
+            max: Some(32),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CancelAllWarningMessages
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CancelAllWarningMessages {
+    True,
+    _Extended,
+}
+
+impl APerElement for CancelAllWarningMessages {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CancelAllWarningMessages::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInEaiEutra
+pub struct CancelledCellsInEaiEutra(pub Vec<CancelledCellsInEaiEutraItem>);
+
+impl APerElement for CancelledCellsInEaiEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CancelledCellsInEaiEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInEaiEutraItem
+pub struct CancelledCellsInEaiEutraItem {
+    pub eutra_cgi: EutraCgi,
+    pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl APerElement for CancelledCellsInEaiEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let number_of_broadcasts = NumberOfBroadcasts::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+            number_of_broadcasts,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.number_of_broadcasts.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInEaiNr
+pub struct CancelledCellsInEaiNr(pub Vec<CancelledCellsInEaiNrItem>);
+
+impl APerElement for CancelledCellsInEaiNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CancelledCellsInEaiNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInEaiNrItem
+pub struct CancelledCellsInEaiNrItem {
+    pub nr_cgi: NrCgi,
+    pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl APerElement for CancelledCellsInEaiNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let number_of_broadcasts = NumberOfBroadcasts::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_cgi,
+            number_of_broadcasts,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.number_of_broadcasts.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInTaiEutra
+pub struct CancelledCellsInTaiEutra(pub Vec<CancelledCellsInTaiEutraItem>);
+
+impl APerElement for CancelledCellsInTaiEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CancelledCellsInTaiEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInTaiEutraItem
+pub struct CancelledCellsInTaiEutraItem {
+    pub eutra_cgi: EutraCgi,
+    pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl APerElement for CancelledCellsInTaiEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let number_of_broadcasts = NumberOfBroadcasts::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+            number_of_broadcasts,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.number_of_broadcasts.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInTaiNr
+pub struct CancelledCellsInTaiNr(pub Vec<CancelledCellsInTaiNrItem>);
+
+impl APerElement for CancelledCellsInTaiNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CancelledCellsInTaiNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CancelledCellsInTaiNrItem
+pub struct CancelledCellsInTaiNrItem {
+    pub nr_cgi: NrCgi,
+    pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl APerElement for CancelledCellsInTaiNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let number_of_broadcasts = NumberOfBroadcasts::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_cgi,
+            number_of_broadcasts,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.number_of_broadcasts.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CandidateCellList
+pub struct CandidateCellList(pub Vec<CandidateCellItem>);
+
+impl APerElement for CandidateCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CandidateCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CandidateCellItem
+pub struct CandidateCellItem {
+    pub candidate_cell: CandidateCell,
+}
+
+impl APerElement for CandidateCellItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let candidate_cell = CandidateCell::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            candidate_cell,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.candidate_cell.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CandidateCell
+pub enum CandidateCell {
+    CandidateCgi(CandidateCellId),
+    CandidatePci(CandidatePci),
+    _Extended,
+}
+
+impl APerElement for CandidateCell {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::CandidateCgi(CandidateCellId::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::CandidatePci(CandidatePci::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::CandidateCgi(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::CandidatePci(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// CandidateCellId
+pub struct CandidateCellId {
+    pub candidate_cell_id: NrCgi,
+}
+
+impl APerElement for CandidateCellId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let candidate_cell_id = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            candidate_cell_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.candidate_cell_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CandidatePci
+pub struct CandidatePci {
+    pub candidate_pci: u16,
+    pub candidate_nrarfcn: u32,
+}
+
+impl APerElement for CandidatePci {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let candidate_pci = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let candidate_nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            candidate_pci,
+            candidate_nrarfcn,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.candidate_pci.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.candidate_nrarfcn.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Cause
+pub enum Cause {
+    RadioNetwork(CauseRadioNetwork),
+    Transport(CauseTransport),
+    Nas(CauseNas),
+    Protocol(CauseProtocol),
+    Misc(CauseMisc),
+    _Extended,
+}
+
+impl APerElement for Cause {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::RadioNetwork(CauseRadioNetwork::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::Transport(CauseTransport::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::Nas(CauseNas::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::Protocol(CauseProtocol::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Ok(Self::Misc(CauseMisc::from_aper(decoder, UNCONSTRAINED)?)),
+            5 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::RadioNetwork(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Transport(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Nas(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Protocol(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Misc(x) => {
+                enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// CauseMisc
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CauseMisc {
+    ControlProcessingOverload,
+    NotEnoughUserPlaneProcessingResources,
+    HardwareFailure,
+    OmIntervention,
+    UnknownPlmnOrSnpn,
+    Unspecified,
+    _Extended,
+}
+
+impl APerElement for CauseMisc {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CauseMisc::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CauseNas
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CauseNas {
+    NormalRelease,
+    AuthenticationFailure,
+    Deregister,
+    Unspecified,
+    _Extended,
+}
+
+impl APerElement for CauseNas {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CauseNas::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CauseProtocol
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CauseProtocol {
+    TransferSyntaxError,
+    AbstractSyntaxErrorReject,
+    AbstractSyntaxErrorIgnoreAndNotify,
+    MessageNotCompatibleWithReceiverState,
+    SemanticError,
+    AbstractSyntaxErrorFalselyConstructedMessage,
+    Unspecified,
+    _Extended,
+}
+
+impl APerElement for CauseProtocol {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CauseProtocol::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CauseRadioNetwork
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CauseRadioNetwork {
+    Unspecified,
+    TxnrelocoverallExpiry,
+    SuccessfulHandover,
+    ReleaseDueToNgranGeneratedReason,
+    ReleaseDueTo5gcGeneratedReason,
+    HandoverCancelled,
+    PartialHandover,
+    HoFailureInTarget5gcNgranNodeOrTargetSystem,
+    HoTargetNotAllowed,
+    TngrelocoverallExpiry,
+    TngrelocprepExpiry,
+    CellNotAvailable,
+    UnknownTargetId,
+    NoRadioResourcesAvailableInTargetCell,
+    UnknownLocalUeNgapId,
+    InconsistentRemoteUeNgapId,
+    HandoverDesirableForRadioReason,
+    TimeCriticalHandover,
+    ResourceOptimisationHandover,
+    ReduceLoadInServingCell,
+    UserInactivity,
+    RadioConnectionWithUeLost,
+    RadioResourcesNotAvailable,
+    InvalidQosCombination,
+    FailureInRadioInterfaceProcedure,
+    InteractionWithOtherProcedure,
+    UnknownPduSessionId,
+    UnkownQosFlowId,
+    MultiplePduSessionIdInstances,
+    MultipleQosFlowIdInstances,
+    EncryptionAndOrIntegrityProtectionAlgorithmsNotSupported,
+    NgIntraSystemHandoverTriggered,
+    NgInterSystemHandoverTriggered,
+    XnHandoverTriggered,
+    NotSupported5qiValue,
+    UeContextTransfer,
+    ImsVoiceEpsFallbackOrRatFallbackTriggered,
+    UpIntegrityProtectionNotPossible,
+    UpConfidentialityProtectionNotPossible,
+    SliceNotSupported,
+    UeInRrcInactiveStateNotReachable,
+    Redirection,
+    ResourcesNotAvailableForTheSlice,
+    UeMaxIntegrityProtectedDataRateReason,
+    ReleaseDueToCnDetectedMobility,
+    _Extended,
+}
+
+impl APerElement for CauseRadioNetwork {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CauseRadioNetwork::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CauseTransport
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CauseTransport {
+    TransportResourceUnavailable,
+    Unspecified,
+    _Extended,
+}
+
+impl APerElement for CauseTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CauseTransport::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellCagInformation
+pub struct CellCagInformation {
+    pub ngran_cgi: NgranCgi,
+    pub cell_cag_list: CellCagList,
+}
+
+impl APerElement for CellCagInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let cell_cag_list = CellCagList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ngran_cgi,
+            cell_cag_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ngran_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cell_cag_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellCagList
+pub struct CellCagList(pub Vec<CagId>);
+
+impl APerElement for CellCagList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CagId>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellIdBroadcastEutra
+pub struct CellIdBroadcastEutra(pub Vec<CellIdBroadcastEutraItem>);
+
+impl APerElement for CellIdBroadcastEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellIdBroadcastEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellIdBroadcastEutraItem
+pub struct CellIdBroadcastEutraItem {
+    pub eutra_cgi: EutraCgi,
+}
+
+impl APerElement for CellIdBroadcastEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellIdBroadcastNr
+pub struct CellIdBroadcastNr(pub Vec<CellIdBroadcastNrItem>);
+
+impl APerElement for CellIdBroadcastNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellIdBroadcastNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellIdBroadcastNrItem
+pub struct CellIdBroadcastNrItem {
+    pub nr_cgi: NrCgi,
+}
+
+impl APerElement for CellIdBroadcastNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellIdCancelledEutra
+pub struct CellIdCancelledEutra(pub Vec<CellIdCancelledEutraItem>);
+
+impl APerElement for CellIdCancelledEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellIdCancelledEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellIdCancelledEutraItem
+pub struct CellIdCancelledEutraItem {
+    pub eutra_cgi: EutraCgi,
+    pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl APerElement for CellIdCancelledEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let number_of_broadcasts = NumberOfBroadcasts::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+            number_of_broadcasts,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.number_of_broadcasts.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellIdCancelledNr
+pub struct CellIdCancelledNr(pub Vec<CellIdCancelledNrItem>);
+
+impl APerElement for CellIdCancelledNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellIdCancelledNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellIdCancelledNrItem
+pub struct CellIdCancelledNrItem {
+    pub nr_cgi: NrCgi,
+    pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl APerElement for CellIdCancelledNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let number_of_broadcasts = NumberOfBroadcasts::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_cgi,
+            number_of_broadcasts,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.number_of_broadcasts.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellIdListForRestart
+pub enum CellIdListForRestart {
+    EutraCgiListforRestart(EutraCgiList),
+    NrCgiListforRestart(NrCgiList),
+    _Extended,
+}
+
+impl APerElement for CellIdListForRestart {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::EutraCgiListforRestart(EutraCgiList::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::NrCgiListforRestart(NrCgiList::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::EutraCgiListforRestart(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::NrCgiListforRestart(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// CellSize
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CellSize {
+    Verysmall,
+    Small,
+    Medium,
+    Large,
+    _Extended,
+}
+
+impl APerElement for CellSize {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CellSize::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellType
+pub struct CellType {
+    pub cell_size: CellSize,
+}
+
+impl APerElement for CellType {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cell_size = CellSize::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cell_size,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cell_size.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CEmodeBSupportIndicator
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CEmodeBSupportIndicator {
+    Supported,
+    _Extended,
+}
+
+impl APerElement for CEmodeBSupportIndicator {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CEmodeBSupportIndicator::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CEmodeBrestricted
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CEmodeBrestricted {
+    Restricted,
+    NotRestricted,
+    _Extended,
+}
+
+impl APerElement for CEmodeBrestricted {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CEmodeBrestricted::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CnAssistedRanTuning
+pub struct CnAssistedRanTuning {
+    pub expected_ue_behaviour: Option<ExpectedUeBehaviour>,
+}
+
+impl APerElement for CnAssistedRanTuning {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let expected_ue_behaviour = if optionals.is_set(0) {
+            Some(ExpectedUeBehaviour::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            expected_ue_behaviour,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.expected_ue_behaviour.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.expected_ue_behaviour {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// CnTypeRestrictionsForEquivalent
+pub struct CnTypeRestrictionsForEquivalent(pub Vec<CnTypeRestrictionsForEquivalentItem>);
+
+impl APerElement for CnTypeRestrictionsForEquivalent {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CnTypeRestrictionsForEquivalentItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CnTypeRestrictionsForEquivalentItem
+pub struct CnTypeRestrictionsForEquivalentItem {
+    pub plmn_identity: PlmnIdentity,
+    pub cn_type: CnType,
+}
+
+impl APerElement for CnTypeRestrictionsForEquivalentItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let cn_type = CnType::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            cn_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cn_type.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CnTypeRestrictionsForServing
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum CnTypeRestrictionsForServing {
+    EpcForbidden,
+    _Extended,
+}
+
+impl APerElement for CnTypeRestrictionsForServing {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(CnTypeRestrictionsForServing::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CommonNetworkInstance
+pub struct CommonNetworkInstance(pub Vec<u8>);
+
+impl APerElement for CommonNetworkInstance {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInEaiEutra
+pub struct CompletedCellsInEaiEutra(pub Vec<CompletedCellsInEaiEutraItem>);
+
+impl APerElement for CompletedCellsInEaiEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CompletedCellsInEaiEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInEaiEutraItem
+pub struct CompletedCellsInEaiEutraItem {
+    pub eutra_cgi: EutraCgi,
+}
+
+impl APerElement for CompletedCellsInEaiEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInEaiNr
+pub struct CompletedCellsInEaiNr(pub Vec<CompletedCellsInEaiNrItem>);
+
+impl APerElement for CompletedCellsInEaiNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CompletedCellsInEaiNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInEaiNrItem
+pub struct CompletedCellsInEaiNrItem {
+    pub nr_cgi: NrCgi,
+}
+
+impl APerElement for CompletedCellsInEaiNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInTaiEutra
+pub struct CompletedCellsInTaiEutra(pub Vec<CompletedCellsInTaiEutraItem>);
+
+impl APerElement for CompletedCellsInTaiEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CompletedCellsInTaiEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInTaiEutraItem
+pub struct CompletedCellsInTaiEutraItem {
+    pub eutra_cgi: EutraCgi,
+}
+
+impl APerElement for CompletedCellsInTaiEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInTaiNr
+pub struct CompletedCellsInTaiNr(pub Vec<CompletedCellsInTaiNrItem>);
+
+impl APerElement for CompletedCellsInTaiNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CompletedCellsInTaiNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CompletedCellsInTaiNrItem
+pub struct CompletedCellsInTaiNrItem {
+    pub nr_cgi: NrCgi,
+}
+
+impl APerElement for CompletedCellsInTaiNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_cgi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// ConcurrentWarningMessageInd
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ConcurrentWarningMessageInd {
+    True,
+    _Extended,
+}
+
+impl APerElement for ConcurrentWarningMessageInd {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ConcurrentWarningMessageInd::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ConfidentialityProtectionIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ConfidentialityProtectionIndication {
+    Required,
+    Preferred,
+    NotNeeded,
+    _Extended,
+}
+
+impl APerElement for ConfidentialityProtectionIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ConfidentialityProtectionIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ConfidentialityProtectionResult
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ConfidentialityProtectionResult {
+    Performed,
+    NotPerformed,
+    _Extended,
+}
+
+impl APerElement for ConfidentialityProtectionResult {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ConfidentialityProtectionResult::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ConfiguredTacIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ConfiguredTacIndication {
+    True,
+    _Extended,
+}
+
+impl APerElement for ConfiguredTacIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ConfiguredTacIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CoreNetworkAssistanceInformationForInactive
+pub struct CoreNetworkAssistanceInformationForInactive {
+    pub ue_identity_index_value: UeIdentityIndexValue,
+    pub ue_specific_drx: Option<PagingDrx>,
+    pub periodic_registration_update_timer: PeriodicRegistrationUpdateTimer,
+    pub mico_mode_indication: Option<MicoModeIndication>,
+    pub tai_list_for_inactive: TaiListForInactive,
+    pub expected_ue_behaviour: Option<ExpectedUeBehaviour>,
+}
+
+impl APerElement for CoreNetworkAssistanceInformationForInactive {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_identity_index_value = UeIdentityIndexValue::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_specific_drx = if optionals.is_set(0) {
+            Some(PagingDrx::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let periodic_registration_update_timer = PeriodicRegistrationUpdateTimer::from_aper(decoder, UNCONSTRAINED)?;
+        let mico_mode_indication = if optionals.is_set(0) {
+            Some(MicoModeIndication::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let tai_list_for_inactive = TaiListForInactive::from_aper(decoder, UNCONSTRAINED)?;
+        let expected_ue_behaviour = if optionals.is_set(0) {
+            Some(ExpectedUeBehaviour::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ue_identity_index_value,
+            ue_specific_drx,
+            periodic_registration_update_timer,
+            mico_mode_indication,
+            tai_list_for_inactive,
+            expected_ue_behaviour,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.ue_specific_drx.is_some());        optionals.set(1, self.mico_mode_indication.is_some());        optionals.set(2, self.expected_ue_behaviour.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ue_identity_index_value.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.ue_specific_drx {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.periodic_registration_update_timer.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.mico_mode_indication {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.tai_list_for_inactive.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.expected_ue_behaviour {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// CountValueForPdcpSn12
+pub struct CountValueForPdcpSn12 {
+    pub pdcp_sn12: u16,
+    pub hfn_pdcp_sn12: u32,
+}
+
+impl APerElement for CountValueForPdcpSn12 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdcp_sn12 = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let hfn_pdcp_sn12 = u32::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdcp_sn12,
+            hfn_pdcp_sn12,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdcp_sn12.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.hfn_pdcp_sn12.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CountValueForPdcpSn18
+pub struct CountValueForPdcpSn18 {
+    pub pdcp_sn18: u32,
+    pub hfn_pdcp_sn18: u16,
+}
+
+impl APerElement for CountValueForPdcpSn18 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdcp_sn18 = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let hfn_pdcp_sn18 = u16::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdcp_sn18,
+            hfn_pdcp_sn18,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdcp_sn18.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.hfn_pdcp_sn18.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CoverageEnhancementLevel
+pub struct CoverageEnhancementLevel(pub Vec<u8>);
+
+impl APerElement for CoverageEnhancementLevel {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CpTransportLayerInformation
+pub enum CpTransportLayerInformation {
+    EndpointIpAddress(TransportLayerAddress),
+    _Extended,
+}
+
+impl APerElement for CpTransportLayerInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::EndpointIpAddress(TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::EndpointIpAddress(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// CriticalityDiagnostics
+pub struct CriticalityDiagnostics {
+    pub procedure_code: Option<ProcedureCode>,
+    pub triggering_message: Option<TriggeringMessage>,
+    pub procedure_criticality: Option<Criticality>,
+    pub i_es_criticality_diagnostics: Option<CriticalityDiagnosticsIeList>,
+}
+
+impl APerElement for CriticalityDiagnostics {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let procedure_code = if optionals.is_set(0) {
+            Some(ProcedureCode::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let triggering_message = if optionals.is_set(0) {
+            Some(TriggeringMessage::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let procedure_criticality = if optionals.is_set(0) {
+            Some(Criticality::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let i_es_criticality_diagnostics = if optionals.is_set(0) {
+            Some(CriticalityDiagnosticsIeList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            procedure_code,
+            triggering_message,
+            procedure_criticality,
+            i_es_criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(5);
+        optionals.set(0, self.procedure_code.is_some());        optionals.set(1, self.triggering_message.is_some());        optionals.set(2, self.procedure_criticality.is_some());        optionals.set(3, self.i_es_criticality_diagnostics.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.procedure_code {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.triggering_message {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.procedure_criticality {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.i_es_criticality_diagnostics {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// CriticalityDiagnosticsIeList
+pub struct CriticalityDiagnosticsIeList(pub Vec<CriticalityDiagnosticsIeItem>);
+
+impl APerElement for CriticalityDiagnosticsIeList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CriticalityDiagnosticsIeItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CriticalityDiagnosticsIeItem
+pub struct CriticalityDiagnosticsIeItem {
+    pub ie_criticality: Criticality,
+    pub ie_id: ProtocolIeId,
+    pub type_of_error: TypeOfError,
+}
+
+impl APerElement for CriticalityDiagnosticsIeItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ie_criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+        let ie_id = ProtocolIeId::from_aper(decoder, UNCONSTRAINED)?;
+        let type_of_error = TypeOfError::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ie_criticality,
+            ie_id,
+            type_of_error,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ie_criticality.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.type_of_error.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellBasedMdtNr
+pub struct CellBasedMdtNr {
+    pub cell_id_listfor_mdt: CellIdListforMdtNr,
+}
+
+impl APerElement for CellBasedMdtNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cell_id_listfor_mdt = CellIdListforMdtNr::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cell_id_listfor_mdt,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cell_id_listfor_mdt.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellIdListforMdtNr
+pub struct CellIdListforMdtNr(pub Vec<NrCgi>);
+
+impl APerElement for CellIdListforMdtNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NrCgi>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellBasedMdtEutra
+pub struct CellBasedMdtEutra {
+    pub cell_id_listfor_mdt: CellIdListforMdtEutra,
+}
+
+impl APerElement for CellBasedMdtEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cell_id_listfor_mdt = CellIdListforMdtEutra::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cell_id_listfor_mdt,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cell_id_listfor_mdt.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// CellIdListforMdtEutra
+pub struct CellIdListforMdtEutra(pub Vec<EutraCgi>);
+
+impl APerElement for CellIdListforMdtEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EutraCgi>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DataCodingScheme
+pub struct DataCodingScheme(pub BitString);
+
+impl APerElement for DataCodingScheme {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DataForwardingAccepted
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum DataForwardingAccepted {
+    DataForwardingAccepted,
+    _Extended,
+}
+
+impl APerElement for DataForwardingAccepted {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(DataForwardingAccepted::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DataForwardingNotPossible
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum DataForwardingNotPossible {
+    DataForwardingNotPossible,
+    _Extended,
+}
+
+impl APerElement for DataForwardingNotPossible {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(DataForwardingNotPossible::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DataForwardingResponseDrbList
+pub struct DataForwardingResponseDrbList(pub Vec<DataForwardingResponseDrbItem>);
+
+impl APerElement for DataForwardingResponseDrbList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DataForwardingResponseDrbItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DataForwardingResponseDrbItem
+pub struct DataForwardingResponseDrbItem {
+    pub drb_id: DrbId,
+    pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
+    pub ul_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
+}
+
+impl APerElement for DataForwardingResponseDrbItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let drb_id = DrbId::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_forwarding_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ul_forwarding_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            drb_id,
+            dl_forwarding_up_tnl_information,
+            ul_forwarding_up_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.dl_forwarding_up_tnl_information.is_some());        optionals.set(1, self.ul_forwarding_up_tnl_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.drb_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.dl_forwarding_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ul_forwarding_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// DapsRequestInfo
+pub struct DapsRequestInfo {
+    pub daps_indicator: DapsIndicator,
+}
+
+impl APerElement for DapsRequestInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let daps_indicator = DapsIndicator::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            daps_indicator,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.daps_indicator.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DapsResponseInfoList
+pub struct DapsResponseInfoList(pub Vec<DapsResponseInfoItem>);
+
+impl APerElement for DapsResponseInfoList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DapsResponseInfoItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DapsResponseInfoItem
+pub struct DapsResponseInfoItem {
+    pub drb_id: DrbId,
+    pub daps_response_info: DapsResponseInfo,
+}
+
+impl APerElement for DapsResponseInfoItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let drb_id = DrbId::from_aper(decoder, UNCONSTRAINED)?;
+        let daps_response_info = DapsResponseInfo::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            drb_id,
+            daps_response_info,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.drb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.daps_response_info.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DapsResponseInfo
+pub struct DapsResponseInfo {
+    pub dapsresponseindicator: Dapsresponseindicator,
+}
+
+impl APerElement for DapsResponseInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dapsresponseindicator = Dapsresponseindicator::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dapsresponseindicator,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dapsresponseindicator.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DataForwardingResponseErabList
+pub struct DataForwardingResponseErabList(pub Vec<DataForwardingResponseErabListItem>);
+
+impl APerElement for DataForwardingResponseErabList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DataForwardingResponseErabListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DataForwardingResponseErabListItem
+pub struct DataForwardingResponseErabListItem {
+    pub e_rab_id: ERabId,
+    pub dl_forwarding_up_tnl_information: UpTransportLayerInformation,
+}
+
+impl APerElement for DataForwardingResponseErabListItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let e_rab_id = ERabId::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_forwarding_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            e_rab_id,
+            dl_forwarding_up_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.e_rab_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.dl_forwarding_up_tnl_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DelayCritical
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum DelayCritical {
+    DelayCritical,
+    NonDelayCritical,
+    _Extended,
+}
+
+impl APerElement for DelayCritical {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(DelayCritical::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DlCpSecurityInformation
+pub struct DlCpSecurityInformation {
+    pub dl_nas_mac: DlNasMac,
+}
+
+impl APerElement for DlCpSecurityInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_nas_mac = DlNasMac::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dl_nas_mac,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_nas_mac.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DlNasMac
+pub struct DlNasMac(pub BitString);
+
+impl APerElement for DlNasMac {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DlForwarding
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum DlForwarding {
+    DlForwardingProposed,
+    _Extended,
+}
+
+impl APerElement for DlForwarding {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(DlForwarding::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DlNguTnlInformationReused
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum DlNguTnlInformationReused {
+    True,
+    _Extended,
+}
+
+impl APerElement for DlNguTnlInformationReused {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(DlNguTnlInformationReused::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DirectForwardingPathAvailability
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum DirectForwardingPathAvailability {
+    DirectPathAvailable,
+    _Extended,
+}
+
+impl APerElement for DirectForwardingPathAvailability {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(DirectForwardingPathAvailability::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrbId
+pub struct DrbId(pub u8);
+
+impl APerElement for DrbId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(32),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsSubjectToStatusTransferList
+pub struct DrBsSubjectToStatusTransferList(pub Vec<DrBsSubjectToStatusTransferItem>);
+
+impl APerElement for DrBsSubjectToStatusTransferList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsSubjectToStatusTransferItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsSubjectToStatusTransferItem
+pub struct DrBsSubjectToStatusTransferItem {
+    pub drb_id: DrbId,
+    pub drb_status_ul: DrbStatusUl,
+    pub drb_status_dl: DrbStatusDl,
+}
+
+impl APerElement for DrBsSubjectToStatusTransferItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let drb_id = DrbId::from_aper(decoder, UNCONSTRAINED)?;
+        let drb_status_ul = DrbStatusUl::from_aper(decoder, UNCONSTRAINED)?;
+        let drb_status_dl = DrbStatusDl::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            drb_id,
+            drb_status_ul,
+            drb_status_dl,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.drb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.drb_status_ul.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.drb_status_dl.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DrbStatusDl
+pub enum DrbStatusDl {
+    DrbStatusDl12(DrbStatusDl12),
+    DrbStatusDl18(DrbStatusDl18),
+    _Extended,
+}
+
+impl APerElement for DrbStatusDl {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::DrbStatusDl12(DrbStatusDl12::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::DrbStatusDl18(DrbStatusDl18::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::DrbStatusDl12(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::DrbStatusDl18(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// DrbStatusDl12
+pub struct DrbStatusDl12 {
+    pub dl_count_value: CountValueForPdcpSn12,
+}
+
+impl APerElement for DrbStatusDl12 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_count_value = CountValueForPdcpSn12::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dl_count_value,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_count_value.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DrbStatusDl18
+pub struct DrbStatusDl18 {
+    pub dl_count_value: CountValueForPdcpSn18,
+}
+
+impl APerElement for DrbStatusDl18 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_count_value = CountValueForPdcpSn18::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dl_count_value,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_count_value.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DrbStatusUl
+pub enum DrbStatusUl {
+    DrbStatusUl12(DrbStatusUl12),
+    DrbStatusUl18(DrbStatusUl18),
+    _Extended,
+}
+
+impl APerElement for DrbStatusUl {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::DrbStatusUl12(DrbStatusUl12::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::DrbStatusUl18(DrbStatusUl18::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::DrbStatusUl12(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::DrbStatusUl18(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// DrbStatusUl12
+pub struct DrbStatusUl12 {
+    pub ul_count_value: CountValueForPdcpSn12,
+    pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
+}
+
+impl APerElement for DrbStatusUl12 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ul_count_value = CountValueForPdcpSn12::from_aper(decoder, UNCONSTRAINED)?;
+        let receive_status_of_ul_pdcp_sd_us = if optionals.is_set(0) {
+            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ul_count_value,
+            receive_status_of_ul_pdcp_sd_us,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.receive_status_of_ul_pdcp_sd_us.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ul_count_value.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.receive_status_of_ul_pdcp_sd_us {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// DrbStatusUl18
+pub struct DrbStatusUl18 {
+    pub ul_count_value: CountValueForPdcpSn18,
+    pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
+}
+
+impl APerElement for DrbStatusUl18 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ul_count_value = CountValueForPdcpSn18::from_aper(decoder, UNCONSTRAINED)?;
+        let receive_status_of_ul_pdcp_sd_us = if optionals.is_set(0) {
+            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ul_count_value,
+            receive_status_of_ul_pdcp_sd_us,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.receive_status_of_ul_pdcp_sd_us.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ul_count_value.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.receive_status_of_ul_pdcp_sd_us {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// DrBsToQosFlowsMappingList
+pub struct DrBsToQosFlowsMappingList(pub Vec<DrBsToQosFlowsMappingItem>);
+
+impl APerElement for DrBsToQosFlowsMappingList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsToQosFlowsMappingItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsToQosFlowsMappingItem
+pub struct DrBsToQosFlowsMappingItem {
+    pub drb_id: DrbId,
+    pub associated_qos_flow_list: AssociatedQosFlowList,
+}
+
+impl APerElement for DrBsToQosFlowsMappingItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let drb_id = DrbId::from_aper(decoder, UNCONSTRAINED)?;
+        let associated_qos_flow_list = AssociatedQosFlowList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            drb_id,
+            associated_qos_flow_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.drb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.associated_qos_flow_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Dynamic5qiDescriptor
+pub struct Dynamic5qiDescriptor {
+    pub priority_level_qos: PriorityLevelQos,
+    pub packet_delay_budget: PacketDelayBudget,
+    pub packet_error_rate: PacketErrorRate,
+    pub five_qi: Option<FiveQi>,
+    pub delay_critical: Option<DelayCritical>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: In,
+    pub case: Of,
+    pub gbr: Qos,
+    pub flow: AveragingWindow,
+    pub averaging_window: Optional,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: In,
+    pub case: Of,
+    pub gbr: Qos,
+    pub flow: MaximumDataBurstVolume,
+    pub maximum_data_burst_volume: Optional,
+}
+
+impl APerElement for Dynamic5qiDescriptor {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let priority_level_qos = PriorityLevelQos::from_aper(decoder, UNCONSTRAINED)?;
+        let packet_delay_budget = PacketDelayBudget::from_aper(decoder, UNCONSTRAINED)?;
+        let packet_error_rate = PacketErrorRate::from_aper(decoder, UNCONSTRAINED)?;
+        let five_qi = if optionals.is_set(0) {
+            Some(FiveQi::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let delay_critical = if optionals.is_set(0) {
+            Some(DelayCritical::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = In::from_aper(decoder, UNCONSTRAINED)?;
+        let case = Of::from_aper(decoder, UNCONSTRAINED)?;
+        let gbr = Qos::from_aper(decoder, UNCONSTRAINED)?;
+        let flow = AveragingWindow::from_aper(decoder, UNCONSTRAINED)?;
+        let averaging_window = Optional::from_aper(decoder, UNCONSTRAINED)?;
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = In::from_aper(decoder, UNCONSTRAINED)?;
+        let case = Of::from_aper(decoder, UNCONSTRAINED)?;
+        let gbr = Qos::from_aper(decoder, UNCONSTRAINED)?;
+        let flow = MaximumDataBurstVolume::from_aper(decoder, UNCONSTRAINED)?;
+        let maximum_data_burst_volume = Optional::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            priority_level_qos,
+            packet_delay_budget,
+            packet_error_rate,
+            five_qi,
+            delay_critical,
+            ,
+            above,
+            shall,
+            present,
+            case,
+            gbr,
+            flow,
+            averaging_window,
+            ,
+            above,
+            shall,
+            present,
+            case,
+            gbr,
+            flow,
+            maximum_data_burst_volume,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.five_qi.is_some());        optionals.set(1, self.delay_critical.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.priority_level_qos.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.packet_delay_budget.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.packet_error_rate.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.five_qi {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.delay_critical {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.case.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.gbr.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.flow.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.averaging_window.to_aper(UNCONSTRAINED)?);
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.case.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.gbr.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.flow.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.maximum_data_burst_volume.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EarlyStatusTransferTransparentContainer
+pub struct EarlyStatusTransferTransparentContainer {
+    pub procedure_stage: ProcedureStageChoice,
+}
+
+impl APerElement for EarlyStatusTransferTransparentContainer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let procedure_stage = ProcedureStageChoice::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            procedure_stage,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.procedure_stage.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// ProcedureStageChoice
+pub enum ProcedureStageChoice {
+    FirstDlCount(FirstDlCount),
+    _Extended,
+}
+
+impl APerElement for ProcedureStageChoice {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::FirstDlCount(FirstDlCount::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::FirstDlCount(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// FirstDlCount
+pub struct FirstDlCount {
+    pub dr_bs_subject_to_early_status_transfer: DrBsSubjectToEarlyStatusTransferList,
+}
+
+impl APerElement for FirstDlCount {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dr_bs_subject_to_early_status_transfer = DrBsSubjectToEarlyStatusTransferList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dr_bs_subject_to_early_status_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dr_bs_subject_to_early_status_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// DrBsSubjectToEarlyStatusTransferList
+pub struct DrBsSubjectToEarlyStatusTransferList(pub Vec<DrBsSubjectToEarlyStatusTransferItem>);
+
+impl APerElement for DrBsSubjectToEarlyStatusTransferList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsSubjectToEarlyStatusTransferItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsSubjectToEarlyStatusTransferItem
+pub struct DrBsSubjectToEarlyStatusTransferItem {
+    pub drb_id: DrbId,
+    pub first_dlcount: DrbStatusDl,
+}
+
+impl APerElement for DrBsSubjectToEarlyStatusTransferItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let drb_id = DrbId::from_aper(decoder, UNCONSTRAINED)?;
+        let first_dlcount = DrbStatusDl::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            drb_id,
+            first_dlcount,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.drb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.first_dlcount.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EdtSession
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum EdtSession {
+    True,
+    _Extended,
+}
+
+impl APerElement for EdtSession {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(EdtSession::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaId
+pub struct EmergencyAreaId(pub Vec<u8>);
+
+impl APerElement for EmergencyAreaId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdBroadcastEutra
+pub struct EmergencyAreaIdBroadcastEutra(pub Vec<EmergencyAreaIdBroadcastEutraItem>);
+
+impl APerElement for EmergencyAreaIdBroadcastEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EmergencyAreaIdBroadcastEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdBroadcastEutraItem
+pub struct EmergencyAreaIdBroadcastEutraItem {
+    pub emergency_area_id: EmergencyAreaId,
+    pub completed_cells_in_eai_eutra: CompletedCellsInEaiEutra,
+}
+
+impl APerElement for EmergencyAreaIdBroadcastEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let emergency_area_id = EmergencyAreaId::from_aper(decoder, UNCONSTRAINED)?;
+        let completed_cells_in_eai_eutra = CompletedCellsInEaiEutra::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            emergency_area_id,
+            completed_cells_in_eai_eutra,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.emergency_area_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.completed_cells_in_eai_eutra.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdBroadcastNr
+pub struct EmergencyAreaIdBroadcastNr(pub Vec<EmergencyAreaIdBroadcastNrItem>);
+
+impl APerElement for EmergencyAreaIdBroadcastNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EmergencyAreaIdBroadcastNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdBroadcastNrItem
+pub struct EmergencyAreaIdBroadcastNrItem {
+    pub emergency_area_id: EmergencyAreaId,
+    pub completed_cells_in_eai_nr: CompletedCellsInEaiNr,
+}
+
+impl APerElement for EmergencyAreaIdBroadcastNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let emergency_area_id = EmergencyAreaId::from_aper(decoder, UNCONSTRAINED)?;
+        let completed_cells_in_eai_nr = CompletedCellsInEaiNr::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            emergency_area_id,
+            completed_cells_in_eai_nr,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.emergency_area_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.completed_cells_in_eai_nr.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdCancelledEutra
+pub struct EmergencyAreaIdCancelledEutra(pub Vec<EmergencyAreaIdCancelledEutraItem>);
+
+impl APerElement for EmergencyAreaIdCancelledEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EmergencyAreaIdCancelledEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdCancelledEutraItem
+pub struct EmergencyAreaIdCancelledEutraItem {
+    pub emergency_area_id: EmergencyAreaId,
+    pub cancelled_cells_in_eai_eutra: CancelledCellsInEaiEutra,
+}
+
+impl APerElement for EmergencyAreaIdCancelledEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let emergency_area_id = EmergencyAreaId::from_aper(decoder, UNCONSTRAINED)?;
+        let cancelled_cells_in_eai_eutra = CancelledCellsInEaiEutra::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            emergency_area_id,
+            cancelled_cells_in_eai_eutra,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.emergency_area_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cancelled_cells_in_eai_eutra.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdCancelledNr
+pub struct EmergencyAreaIdCancelledNr(pub Vec<EmergencyAreaIdCancelledNrItem>);
+
+impl APerElement for EmergencyAreaIdCancelledNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EmergencyAreaIdCancelledNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdCancelledNrItem
+pub struct EmergencyAreaIdCancelledNrItem {
+    pub emergency_area_id: EmergencyAreaId,
+    pub cancelled_cells_in_eai_nr: CancelledCellsInEaiNr,
+}
+
+impl APerElement for EmergencyAreaIdCancelledNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let emergency_area_id = EmergencyAreaId::from_aper(decoder, UNCONSTRAINED)?;
+        let cancelled_cells_in_eai_nr = CancelledCellsInEaiNr::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            emergency_area_id,
+            cancelled_cells_in_eai_nr,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.emergency_area_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cancelled_cells_in_eai_nr.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdList
+pub struct EmergencyAreaIdList(pub Vec<EmergencyAreaId>);
+
+impl APerElement for EmergencyAreaIdList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EmergencyAreaId>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyAreaIdListForRestart
+pub struct EmergencyAreaIdListForRestart(pub Vec<EmergencyAreaId>);
+
+impl APerElement for EmergencyAreaIdListForRestart {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EmergencyAreaId>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyFallbackIndicator
+pub struct EmergencyFallbackIndicator {
+    pub emergency_fallback_request_indicator: EmergencyFallbackRequestIndicator,
+    pub emergency_service_target_cn: Option<EmergencyServiceTargetCn>,
+}
+
+impl APerElement for EmergencyFallbackIndicator {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let emergency_fallback_request_indicator = EmergencyFallbackRequestIndicator::from_aper(decoder, UNCONSTRAINED)?;
+        let emergency_service_target_cn = if optionals.is_set(0) {
+            Some(EmergencyServiceTargetCn::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            emergency_fallback_request_indicator,
+            emergency_service_target_cn,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.emergency_service_target_cn.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.emergency_fallback_request_indicator.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.emergency_service_target_cn {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// EmergencyFallbackRequestIndicator
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum EmergencyFallbackRequestIndicator {
+    EmergencyFallbackRequested,
+    _Extended,
+}
+
+impl APerElement for EmergencyFallbackRequestIndicator {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(EmergencyFallbackRequestIndicator::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EmergencyServiceTargetCn
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum EmergencyServiceTargetCn {
+    FiveGc,
+    Epc,
+    _Extended,
+}
+
+impl APerElement for EmergencyServiceTargetCn {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(EmergencyServiceTargetCn::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EnbId
+pub enum EnbId {
+    MacroEnbId(BitString),
+    HomeEnbId(BitString),
+    ShortMacroEnbId(BitString),
+    LongMacroEnbId(BitString),
+    _Extended,
+}
+
+impl APerElement for EnbId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::MacroEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::HomeEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::ShortMacroEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::LongMacroEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::MacroEnbId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::HomeEnbId(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::ShortMacroEnbId(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::LongMacroEnbId(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// EnhancedCoverageRestriction
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum EnhancedCoverageRestriction {
+    Restricted,
+    _Extended,
+}
+
+impl APerElement for EnhancedCoverageRestriction {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(EnhancedCoverageRestriction::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExtendedConnectedTime
+pub struct ExtendedConnectedTime(pub u8);
+
+impl APerElement for ExtendedConnectedTime {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EnDcsonConfigurationTransfer
+pub struct EnDcsonConfigurationTransfer(pub Vec<u8>);
+
+impl APerElement for EnDcsonConfigurationTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EndpointIpAddressAndPort
+pub struct EndpointIpAddressAndPort {
+    pub endpoint_ip_address: TransportLayerAddress,
+    pub port_number: PortNumber,
+}
+
+impl APerElement for EndpointIpAddressAndPort {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let endpoint_ip_address = TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?;
+        let port_number = PortNumber::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            endpoint_ip_address,
+            port_number,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.endpoint_ip_address.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.port_number.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EndIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum EndIndication {
+    NoFurtherData,
+    FurtherDataExists,
+    _Extended,
+}
+
+impl APerElement for EndIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(EndIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EquivalentPlmnS
+pub struct EquivalentPlmnS(pub Vec<PlmnIdentity>);
+
+impl APerElement for EquivalentPlmnS {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PlmnIdentity>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EpsTac
+pub struct EpsTac(pub Vec<u8>);
+
+impl APerElement for EpsTac {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EpsTai
+pub struct EpsTai {
+    pub plmn_identity: PlmnIdentity,
+    pub eps_tac: EpsTac,
+}
+
+impl APerElement for EpsTai {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let eps_tac = EpsTac::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            eps_tac,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.eps_tac.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// ERabId
+pub struct ERabId(pub u8);
+
+impl APerElement for ERabId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(15),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ERabInformationList
+pub struct ERabInformationList(pub Vec<ERabInformationItem>);
+
+impl APerElement for ERabInformationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ERabInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ERabInformationItem
+pub struct ERabInformationItem {
+    pub e_rab_id: ERabId,
+    pub dl_forwarding: Option<DlForwarding>,
+}
+
+impl APerElement for ERabInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let e_rab_id = ERabId::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_forwarding = if optionals.is_set(0) {
+            Some(DlForwarding::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            e_rab_id,
+            dl_forwarding,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.dl_forwarding.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.e_rab_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.dl_forwarding {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// EutraCellIdentity
+pub struct EutraCellIdentity(pub BitString);
+
+impl APerElement for EutraCellIdentity {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(28),
+            max: Some(28),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EutraCgi
+pub struct EutraCgi {
+    pub plmn_identity: PlmnIdentity,
+    pub eutra_cell_identity: EutraCellIdentity,
+}
+
+impl APerElement for EutraCgi {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let eutra_cell_identity = EutraCellIdentity::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            eutra_cell_identity,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.eutra_cell_identity.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// EutraCgiList
+pub struct EutraCgiList(pub Vec<EutraCgi>);
+
+impl APerElement for EutraCgiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EutraCgi>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EutraCgiListForWarning
+pub struct EutraCgiListForWarning(pub Vec<EutraCgi>);
+
+impl APerElement for EutraCgiListForWarning {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<EutraCgi>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EutrAencryptionAlgorithms
+pub struct EutrAencryptionAlgorithms(pub BitString);
+
+impl APerElement for EutrAencryptionAlgorithms {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EutrAintegrityProtectionAlgorithms
+pub struct EutrAintegrityProtectionAlgorithms(pub BitString);
+
+impl APerElement for EutrAintegrityProtectionAlgorithms {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EventType
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum EventType {
+    Direct,
+    ChangeOfServeCell,
+    UePresenceInAreaOfInterest,
+    StopChangeOfServeCell,
+    StopUePresenceInAreaOfInterest,
+    CancelLocationReportingForTheUe,
+    _Extended,
+}
+
+impl APerElement for EventType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(EventType::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExpectedActivityPeriod
+pub struct ExpectedActivityPeriod(pub u8);
+
+impl APerElement for ExpectedActivityPeriod {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(30),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExpectedHoInterval
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ExpectedHoInterval {
+    Sec15,
+    Sec30,
+    Sec60,
+    Sec90,
+    Sec120,
+    Sec180,
+    LongTime,
+    _Extended,
+}
+
+impl APerElement for ExpectedHoInterval {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ExpectedHoInterval::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExpectedIdlePeriod
+pub struct ExpectedIdlePeriod(pub u8);
+
+impl APerElement for ExpectedIdlePeriod {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(30),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExpectedUeActivityBehaviour
+pub struct ExpectedUeActivityBehaviour {
+    pub expected_activity_period: Option<ExpectedActivityPeriod>,
+    pub expected_idle_period: Option<ExpectedIdlePeriod>,
+    pub source_of_ue_activity_behaviour_information: Option<SourceOfUeActivityBehaviourInformation>,
+}
+
+impl APerElement for ExpectedUeActivityBehaviour {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let expected_activity_period = if optionals.is_set(0) {
+            Some(ExpectedActivityPeriod::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let expected_idle_period = if optionals.is_set(0) {
+            Some(ExpectedIdlePeriod::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let source_of_ue_activity_behaviour_information = if optionals.is_set(0) {
+            Some(SourceOfUeActivityBehaviourInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            expected_activity_period,
+            expected_idle_period,
+            source_of_ue_activity_behaviour_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.expected_activity_period.is_some());        optionals.set(1, self.expected_idle_period.is_some());        optionals.set(2, self.source_of_ue_activity_behaviour_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.expected_activity_period {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.expected_idle_period {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.source_of_ue_activity_behaviour_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// ExpectedUeBehaviour
+pub struct ExpectedUeBehaviour {
+    pub expected_ue_activity_behaviour: Option<ExpectedUeActivityBehaviour>,
+    pub expected_ho_interval: Option<ExpectedHoInterval>,
+    pub expected_ue_mobility: Option<ExpectedUeMobility>,
+    pub expected_ue_moving_trajectory: Option<ExpectedUeMovingTrajectory>,
+}
+
+impl APerElement for ExpectedUeBehaviour {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let expected_ue_activity_behaviour = if optionals.is_set(0) {
+            Some(ExpectedUeActivityBehaviour::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let expected_ho_interval = if optionals.is_set(0) {
+            Some(ExpectedHoInterval::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let expected_ue_mobility = if optionals.is_set(0) {
+            Some(ExpectedUeMobility::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let expected_ue_moving_trajectory = if optionals.is_set(0) {
+            Some(ExpectedUeMovingTrajectory::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            expected_ue_activity_behaviour,
+            expected_ho_interval,
+            expected_ue_mobility,
+            expected_ue_moving_trajectory,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(5);
+        optionals.set(0, self.expected_ue_activity_behaviour.is_some());        optionals.set(1, self.expected_ho_interval.is_some());        optionals.set(2, self.expected_ue_mobility.is_some());        optionals.set(3, self.expected_ue_moving_trajectory.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.expected_ue_activity_behaviour {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.expected_ho_interval {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.expected_ue_mobility {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.expected_ue_moving_trajectory {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// ExpectedUeMobility
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ExpectedUeMobility {
+    Stationary,
+    Mobile,
+    _Extended,
+}
+
+impl APerElement for ExpectedUeMobility {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ExpectedUeMobility::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExpectedUeMovingTrajectory
+pub struct ExpectedUeMovingTrajectory(pub Vec<ExpectedUeMovingTrajectoryItem>);
+
+impl APerElement for ExpectedUeMovingTrajectory {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ExpectedUeMovingTrajectoryItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExpectedUeMovingTrajectoryItem
+pub struct ExpectedUeMovingTrajectoryItem {
+    pub ngran_cgi: NgranCgi,
+    pub time_stayed_in_cell: Option<u16>,
+}
+
+impl APerElement for ExpectedUeMovingTrajectoryItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let time_stayed_in_cell = if optionals.is_set(0) {
+            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ngran_cgi,
+            time_stayed_in_cell,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.time_stayed_in_cell.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ngran_cgi.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.time_stayed_in_cell {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// ExtendedAmfName
+pub struct ExtendedAmfName {
+    pub amf_name_visible_string: Option<AmfNameVisibleString>,
+    pub amf_name_utf8_string: Option<AmfNameUtf8String>,
+}
+
+impl APerElement for ExtendedAmfName {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_name_visible_string = if optionals.is_set(0) {
+            Some(AmfNameVisibleString::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let amf_name_utf8_string = if optionals.is_set(0) {
+            Some(AmfNameUtf8String::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            amf_name_visible_string,
+            amf_name_utf8_string,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.amf_name_visible_string.is_some());        optionals.set(1, self.amf_name_utf8_string.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.amf_name_visible_string {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.amf_name_utf8_string {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// ExtendedPacketDelayBudget
+pub struct ExtendedPacketDelayBudget(pub u16);
+
+impl APerElement for ExtendedPacketDelayBudget {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(65535),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExtendedRanNodeName
+pub struct ExtendedRanNodeName {
+    pub ran_node_name_visible_string: Option<RanNodeNameVisibleString>,
+    pub ran_node_name_utf8_string: Option<RanNodeNameUtf8String>,
+}
+
+impl APerElement for ExtendedRanNodeName {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ran_node_name_visible_string = if optionals.is_set(0) {
+            Some(RanNodeNameVisibleString::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ran_node_name_utf8_string = if optionals.is_set(0) {
+            Some(RanNodeNameUtf8String::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ran_node_name_visible_string,
+            ran_node_name_utf8_string,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.ran_node_name_visible_string.is_some());        optionals.set(1, self.ran_node_name_utf8_string.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.ran_node_name_visible_string {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ran_node_name_utf8_string {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// ExtendedRatRestrictionInformation
+pub struct ExtendedRatRestrictionInformation {
+    pub primary_rat_restriction: BitString,
+    pub secondary_rat_restriction: BitString,
+}
+
+impl APerElement for ExtendedRatRestrictionInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let primary_rat_restriction = BitString::from_aper(decoder, UNCONSTRAINED)?;
+        let secondary_rat_restriction = BitString::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            primary_rat_restriction,
+            secondary_rat_restriction,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.primary_rat_restriction.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.secondary_rat_restriction.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// ExtendedRncId
+pub struct ExtendedRncId(pub u16);
+
+impl APerElement for ExtendedRncId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4096),
+            max: Some(4096),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExtendedSliceSupportList
+pub struct ExtendedSliceSupportList(pub Vec<SliceSupportItem>);
+
+impl APerElement for ExtendedSliceSupportList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SliceSupportItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ExtendedUeIdentityIndexValue
+pub struct ExtendedUeIdentityIndexValue(pub BitString);
+
+impl APerElement for ExtendedUeIdentityIndexValue {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// EventTrigger
+pub enum EventTrigger {
+    OutOfCoverage(OutOfCoverage),
+    EventL1LoggedMdtConfig(EventL1LoggedMdtConfig),
+    _Extended,
+}
+
+impl APerElement for EventTrigger {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::OutOfCoverage(OutOfCoverage::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::EventL1LoggedMdtConfig(EventL1LoggedMdtConfig::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::OutOfCoverage(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EventL1LoggedMdtConfig(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// EventL1LoggedMdtConfig
+pub struct EventL1LoggedMdtConfig {
+    pub l1_threshold: MeasurementThresholdL1LoggedMdt,
+    pub hysteresis: Hysteresis,
+    pub time_to_trigger: TimeToTrigger,
+}
+
+impl APerElement for EventL1LoggedMdtConfig {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let l1_threshold = MeasurementThresholdL1LoggedMdt::from_aper(decoder, UNCONSTRAINED)?;
+        let hysteresis = Hysteresis::from_aper(decoder, UNCONSTRAINED)?;
+        let time_to_trigger = TimeToTrigger::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            l1_threshold,
+            hysteresis,
+            time_to_trigger,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.l1_threshold.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.hysteresis.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.time_to_trigger.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// MeasurementThresholdL1LoggedMdt
+pub enum MeasurementThresholdL1LoggedMdt {
+    ThresholdRsrp(ThresholdRsrp),
+    ThresholdRsrq(ThresholdRsrq),
+    _Extended,
+}
+
+impl APerElement for MeasurementThresholdL1LoggedMdt {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::ThresholdRsrp(ThresholdRsrp::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::ThresholdRsrq(ThresholdRsrq::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::ThresholdRsrp(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::ThresholdRsrq(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// FailureIndication
+pub struct FailureIndication {
+    pub ue_rlf_report_container: UeRlfReportContainer,
+}
+
+impl APerElement for FailureIndication {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_rlf_report_container = UeRlfReportContainer::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ue_rlf_report_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ue_rlf_report_container.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// FiveGSTmsi
+pub struct FiveGSTmsi {
+    pub amf_set_id: AmfSetId,
+    pub amf_pointer: AmfPointer,
+    pub five_g_tmsi: FiveGTmsi,
+}
+
+impl APerElement for FiveGSTmsi {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_set_id = AmfSetId::from_aper(decoder, UNCONSTRAINED)?;
+        let amf_pointer = AmfPointer::from_aper(decoder, UNCONSTRAINED)?;
+        let five_g_tmsi = FiveGTmsi::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            amf_set_id,
+            amf_pointer,
+            five_g_tmsi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_set_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.amf_pointer.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.five_g_tmsi.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// FiveGTmsi
+pub struct FiveGTmsi(pub Vec<u8>);
+
+impl APerElement for FiveGTmsi {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// FiveQi
+pub struct FiveQi(pub u8);
+
+impl APerElement for FiveQi {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(255),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ForbiddenAreaInformation
+pub struct ForbiddenAreaInformation(pub Vec<ForbiddenAreaInformationItem>);
+
+impl APerElement for ForbiddenAreaInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ForbiddenAreaInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ForbiddenAreaInformationItem
+pub struct ForbiddenAreaInformationItem {
+    pub plmn_identity: PlmnIdentity,
+    pub forbidden_ta_cs: ForbiddenTaCs,
+}
+
+impl APerElement for ForbiddenAreaInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let forbidden_ta_cs = ForbiddenTaCs::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            forbidden_ta_cs,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.forbidden_ta_cs.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// ForbiddenTaCs
+pub struct ForbiddenTaCs(pub Vec<Tac>);
+
+impl APerElement for ForbiddenTaCs {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tac>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// FromEutranToNgran
+pub struct FromEutranToNgran {
+    pub source_enb_id: IntersystemSonEnbId,
+    pub target_ngran_node_id: IntersystemSonNgranNodeId,
+}
+
+impl APerElement for FromEutranToNgran {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let source_enb_id = IntersystemSonEnbId::from_aper(decoder, UNCONSTRAINED)?;
+        let target_ngran_node_id = IntersystemSonNgranNodeId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            source_enb_id,
+            target_ngran_node_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.source_enb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.target_ngran_node_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// FromNgranToEutran
+pub struct FromNgranToEutran {
+    pub source_ngran_node_id: IntersystemSonNgranNodeId,
+    pub target_enb_id: IntersystemSonEnbId,
+}
+
+impl APerElement for FromNgranToEutran {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let source_ngran_node_id = IntersystemSonNgranNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let target_enb_id = IntersystemSonEnbId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            source_ngran_node_id,
+            target_enb_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.source_ngran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.target_enb_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GbrQosInformation
+pub struct GbrQosInformation {
+    pub maximum_flow_bit_rate_dl: BitRate,
+    pub maximum_flow_bit_rate_ul: BitRate,
+    pub guaranteed_flow_bit_rate_dl: BitRate,
+    pub guaranteed_flow_bit_rate_ul: BitRate,
+    pub notification_control: Option<NotificationControl>,
+    pub maximum_packet_loss_rate_dl: Option<PacketLossRate>,
+    pub maximum_packet_loss_rate_ul: Option<PacketLossRate>,
+}
+
+impl APerElement for GbrQosInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let maximum_flow_bit_rate_dl = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let maximum_flow_bit_rate_ul = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let guaranteed_flow_bit_rate_dl = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let guaranteed_flow_bit_rate_ul = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let notification_control = if optionals.is_set(0) {
+            Some(NotificationControl::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let maximum_packet_loss_rate_dl = if optionals.is_set(0) {
+            Some(PacketLossRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let maximum_packet_loss_rate_ul = if optionals.is_set(0) {
+            Some(PacketLossRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            maximum_flow_bit_rate_dl,
+            maximum_flow_bit_rate_ul,
+            guaranteed_flow_bit_rate_dl,
+            guaranteed_flow_bit_rate_ul,
+            notification_control,
+            maximum_packet_loss_rate_dl,
+            maximum_packet_loss_rate_ul,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.notification_control.is_some());        optionals.set(1, self.maximum_packet_loss_rate_dl.is_some());        optionals.set(2, self.maximum_packet_loss_rate_ul.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.maximum_flow_bit_rate_dl.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.maximum_flow_bit_rate_ul.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.guaranteed_flow_bit_rate_dl.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.guaranteed_flow_bit_rate_ul.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.notification_control {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.maximum_packet_loss_rate_dl {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.maximum_packet_loss_rate_ul {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// GlobalCableId
+pub struct GlobalCableId(pub Vec<u8>);
+
+impl APerElement for GlobalCableId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GlobalEnbId
+pub struct GlobalEnbId {
+    pub plmn_identity: PlmnIdentity,
+    pub enb_id: EnbId,
+}
+
+impl APerElement for GlobalEnbId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let enb_id = EnbId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            enb_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.enb_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GlobalGnbId
+pub struct GlobalGnbId {
+    pub plmn_identity: PlmnIdentity,
+    pub gnb_id: GnbId,
+}
+
+impl APerElement for GlobalGnbId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let gnb_id = GnbId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            gnb_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.gnb_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GlobalN3IwfId
+pub struct GlobalN3IwfId {
+    pub plmn_identity: PlmnIdentity,
+    pub n3_iwf_id: N3IwfId,
+}
+
+impl APerElement for GlobalN3IwfId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let n3_iwf_id = N3IwfId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            n3_iwf_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.n3_iwf_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GlobalLineId
+pub struct GlobalLineId {
+    pub global_line_identity: GlobalLineIdentity,
+    pub line_type: Option<LineType>,
+}
+
+impl APerElement for GlobalLineId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_line_identity = GlobalLineIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let line_type = if optionals.is_set(0) {
+            Some(LineType::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            global_line_identity,
+            line_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.line_type.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_line_identity.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.line_type {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// GlobalLineIdentity
+pub struct GlobalLineIdentity(pub Vec<u8>);
+
+impl APerElement for GlobalLineIdentity {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GlobalNgEnbId
+pub struct GlobalNgEnbId {
+    pub plmn_identity: PlmnIdentity,
+    pub ng_enb_id: NgEnbId,
+}
+
+impl APerElement for GlobalNgEnbId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let ng_enb_id = NgEnbId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            ng_enb_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ng_enb_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GlobalRanNodeId
+pub enum GlobalRanNodeId {
+    GlobalGnbId(GlobalGnbId),
+    GlobalNgEnbId(GlobalNgEnbId),
+    GlobalN3IwfId(GlobalN3IwfId),
+    _Extended,
+}
+
+impl APerElement for GlobalRanNodeId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::GlobalGnbId(GlobalGnbId::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::GlobalNgEnbId(GlobalNgEnbId::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::GlobalN3IwfId(GlobalN3IwfId::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::GlobalGnbId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::GlobalNgEnbId(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::GlobalN3IwfId(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// GlobalTngfId
+pub struct GlobalTngfId {
+    pub plmn_identity: PlmnIdentity,
+    pub tngf_id: TngfId,
+}
+
+impl APerElement for GlobalTngfId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let tngf_id = TngfId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            tngf_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.tngf_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GlobalTwifId
+pub struct GlobalTwifId {
+    pub plmn_identity: PlmnIdentity,
+    pub twif_id: TwifId,
+}
+
+impl APerElement for GlobalTwifId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let twif_id = TwifId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            twif_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.twif_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GlobalWAgfId
+pub struct GlobalWAgfId {
+    pub plmn_identity: PlmnIdentity,
+    pub w_agf_id: WAgfId,
+}
+
+impl APerElement for GlobalWAgfId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let w_agf_id = WAgfId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            w_agf_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.w_agf_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GnbId
+pub enum GnbId {
+    GnbId(BitString),
+    _Extended,
+}
+
+impl APerElement for GnbId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::GnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::GnbId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// GtpTeid
+pub struct GtpTeid(pub Vec<u8>);
+
+impl APerElement for GtpTeid {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GtpTunnel
+pub struct GtpTunnel {
+    pub transport_layer_address: TransportLayerAddress,
+    pub gtp_teid: GtpTeid,
+}
+
+impl APerElement for GtpTunnel {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let transport_layer_address = TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?;
+        let gtp_teid = GtpTeid::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            transport_layer_address,
+            gtp_teid,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.transport_layer_address.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.gtp_teid.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Guami
+pub struct Guami {
+    pub plmn_identity: PlmnIdentity,
+    pub amf_region_id: AmfRegionId,
+    pub amf_set_id: AmfSetId,
+    pub amf_pointer: AmfPointer,
+}
+
+impl APerElement for Guami {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let amf_region_id = AmfRegionId::from_aper(decoder, UNCONSTRAINED)?;
+        let amf_set_id = AmfSetId::from_aper(decoder, UNCONSTRAINED)?;
+        let amf_pointer = AmfPointer::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            amf_region_id,
+            amf_set_id,
+            amf_pointer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.amf_region_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.amf_set_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.amf_pointer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GuamiType
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum GuamiType {
+    Native,
+    Mapped,
+    _Extended,
+}
+
+impl APerElement for GuamiType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(GuamiType::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// HandoverCommandTransfer
+pub struct HandoverCommandTransfer {
+    pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
+    pub qos_flow_to_be_forwarded_list: Option<QosFlowToBeForwardedList>,
+    pub data_forwarding_response_drb_list: Option<DataForwardingResponseDrbList>,
+}
+
+impl APerElement for HandoverCommandTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_forwarding_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_to_be_forwarded_list = if optionals.is_set(0) {
+            Some(QosFlowToBeForwardedList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let data_forwarding_response_drb_list = if optionals.is_set(0) {
+            Some(DataForwardingResponseDrbList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_forwarding_up_tnl_information,
+            qos_flow_to_be_forwarded_list,
+            data_forwarding_response_drb_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.dl_forwarding_up_tnl_information.is_some());        optionals.set(1, self.qos_flow_to_be_forwarded_list.is_some());        optionals.set(2, self.data_forwarding_response_drb_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.dl_forwarding_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flow_to_be_forwarded_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.data_forwarding_response_drb_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// HandoverFlag
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum HandoverFlag {
+    HandoverPreparation,
+    _Extended,
+}
+
+impl APerElement for HandoverFlag {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(HandoverFlag::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// HandoverPreparationUnsuccessfulTransfer
+pub struct HandoverPreparationUnsuccessfulTransfer {
+    pub cause: Cause,
+}
+
+impl APerElement for HandoverPreparationUnsuccessfulTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// HandoverRequestAcknowledgeTransfer
+pub struct HandoverRequestAcknowledgeTransfer {
+    pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
+    pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
+    pub security_result: Option<SecurityResult>,
+    pub qos_flow_setup_response_list: QosFlowListWithDataForwarding,
+    pub qos_flow_failed_to_setup_list: Option<QosFlowListWithCause>,
+    pub data_forwarding_response_drb_list: Option<DataForwardingResponseDrbList>,
+}
+
+impl APerElement for HandoverRequestAcknowledgeTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_forwarding_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let security_result = if optionals.is_set(0) {
+            Some(SecurityResult::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_setup_response_list = QosFlowListWithDataForwarding::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_flow_failed_to_setup_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let data_forwarding_response_drb_list = if optionals.is_set(0) {
+            Some(DataForwardingResponseDrbList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_ngu_up_tnl_information,
+            dl_forwarding_up_tnl_information,
+            security_result,
+            qos_flow_setup_response_list,
+            qos_flow_failed_to_setup_list,
+            data_forwarding_response_drb_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(5);
+        optionals.set(0, self.dl_forwarding_up_tnl_information.is_some());        optionals.set(1, self.security_result.is_some());        optionals.set(2, self.qos_flow_failed_to_setup_list.is_some());        optionals.set(3, self.data_forwarding_response_drb_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.dl_forwarding_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.security_result {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.qos_flow_setup_response_list.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.qos_flow_failed_to_setup_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.data_forwarding_response_drb_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// HandoverRequiredTransfer
+pub struct HandoverRequiredTransfer {
+    pub direct_forwarding_path_availability: Option<DirectForwardingPathAvailability>,
+}
+
+impl APerElement for HandoverRequiredTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let direct_forwarding_path_availability = if optionals.is_set(0) {
+            Some(DirectForwardingPathAvailability::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            direct_forwarding_path_availability,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.direct_forwarding_path_availability.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.direct_forwarding_path_availability {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// HandoverResourceAllocationUnsuccessfulTransfer
+pub struct HandoverResourceAllocationUnsuccessfulTransfer {
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for HandoverResourceAllocationUnsuccessfulTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+        let criticality_diagnostics = if optionals.is_set(0) {
+            Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.criticality_diagnostics.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.criticality_diagnostics {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// HandoverType
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum HandoverType {
+    Intra5gs,
+    FivegsToEps,
+    EpsTo5gs,
+    _Extended,
+}
+
+impl APerElement for HandoverType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(HandoverType::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// HfcNodeId
+pub struct HfcNodeId(pub Vec<u8>);
+
+impl APerElement for HfcNodeId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// HoReport
+pub struct HoReport {
+    pub handover_report_type: HandoverReportType,
+    pub handover_cause: Cause,
+    pub sourcecell_cgi: NgranCgi,
+    pub targetcell_cgi: NgranCgi,
+    pub reestablishmentcell_cgi: Option<NgranCgi>,
+    pub sourcecell_c_rnti: Option<BitString>,
+    pub targetcellin_e_utran: Option<EutraCgi>,
+    pub mobility_information: Option<MobilityInformation>,
+    pub ue_rlf_report_container: Option<UeRlfReportContainer>,
+}
+
+impl APerElement for HoReport {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(6),
+            max: Some(6),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let handover_report_type = HandoverReportType::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+        let sourcecell_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let targetcell_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let reestablishmentcell_cgi = if optionals.is_set(0) {
+            Some(NgranCgi::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let sourcecell_c_rnti = if optionals.is_set(0) {
+            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let targetcellin_e_utran = if optionals.is_set(0) {
+            Some(EutraCgi::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let mobility_information = if optionals.is_set(0) {
+            Some(MobilityInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ue_rlf_report_container = if optionals.is_set(0) {
+            Some(UeRlfReportContainer::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            handover_report_type,
+            handover_cause,
+            sourcecell_cgi,
+            targetcell_cgi,
+            reestablishmentcell_cgi,
+            sourcecell_c_rnti,
+            targetcellin_e_utran,
+            mobility_information,
+            ue_rlf_report_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(6);
+        optionals.set(0, self.reestablishmentcell_cgi.is_some());        optionals.set(1, self.sourcecell_c_rnti.is_some());        optionals.set(2, self.targetcellin_e_utran.is_some());        optionals.set(3, self.mobility_information.is_some());        optionals.set(4, self.ue_rlf_report_container.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.handover_report_type.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_cause.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.sourcecell_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.targetcell_cgi.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.reestablishmentcell_cgi {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.sourcecell_c_rnti {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.targetcellin_e_utran {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.mobility_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ue_rlf_report_container {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// Hysteresis
+pub struct Hysteresis(pub u8);
+
+impl APerElement for Hysteresis {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabAuthorized
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum IabAuthorized {
+    Authorized,
+    NotAuthorized,
+    _Extended,
+}
+
+impl APerElement for IabAuthorized {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(IabAuthorized::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabSupported
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum IabSupported {
+    True,
+    _Extended,
+}
+
+impl APerElement for IabSupported {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(IabSupported::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabNodeIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum IabNodeIndication {
+    True,
+    _Extended,
+}
+
+impl APerElement for IabNodeIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(IabNodeIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ImsVoiceSupportIndicator
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ImsVoiceSupportIndicator {
+    Supported,
+    NotSupported,
+    _Extended,
+}
+
+impl APerElement for ImsVoiceSupportIndicator {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ImsVoiceSupportIndicator::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IndexToRfsp
+pub struct IndexToRfsp(pub u8);
+
+impl APerElement for IndexToRfsp {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(256),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// InfoOnRecommendedCellsAndRanNodesForPaging
+pub struct InfoOnRecommendedCellsAndRanNodesForPaging {
+    pub recommended_cells_for_paging: RecommendedCellsForPaging,
+    pub recommend_ran_nodes_for_paging: RecommendedRanNodesForPaging,
+}
+
+impl APerElement for InfoOnRecommendedCellsAndRanNodesForPaging {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let recommended_cells_for_paging = RecommendedCellsForPaging::from_aper(decoder, UNCONSTRAINED)?;
+        let recommend_ran_nodes_for_paging = RecommendedRanNodesForPaging::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            recommended_cells_for_paging,
+            recommend_ran_nodes_for_paging,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.recommended_cells_for_paging.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.recommend_ran_nodes_for_paging.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// IntegrityProtectionIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum IntegrityProtectionIndication {
+    Required,
+    Preferred,
+    NotNeeded,
+    _Extended,
+}
+
+impl APerElement for IntegrityProtectionIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(IntegrityProtectionIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IntegrityProtectionResult
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum IntegrityProtectionResult {
+    Performed,
+    NotPerformed,
+    _Extended,
+}
+
+impl APerElement for IntegrityProtectionResult {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(IntegrityProtectionResult::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IntendedNumberOfPagingAttempts
+pub struct IntendedNumberOfPagingAttempts(pub u8);
+
+impl APerElement for IntendedNumberOfPagingAttempts {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// InterfacesToTrace
+pub struct InterfacesToTrace(pub BitString);
+
+impl APerElement for InterfacesToTrace {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ImmediateMdtNr
+pub struct ImmediateMdtNr {
+    pub measurements_to_activate: MeasurementsToActivate,
+    pub m1_configuration: Option<M1Configuration>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: Measurements,
+    pub to: Activate,
+    pub ie: Has,
+    pub the: First,
+    pub bit: Set,
+    pub to: 1,
+    pub m4_configuration: Option<M4Configuration>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: Measurements,
+    pub to: Activate,
+    pub ie: Has,
+    pub the: Third,
+    pub bit: Set,
+    pub to: 1,
+    pub m5_configuration: Option<M5Configuration>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: Measurements,
+    pub to: Activate,
+    pub ie: Has,
+    pub the: Fourth,
+    pub bit: Set,
+    pub to: 1,
+    pub m6_configuration: Option<M6Configuration>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: Measurements,
+    pub to: Activate,
+    pub ie: Has,
+    pub the: Fifth,
+    pub bit: Set,
+    pub to: 1,
+    pub m7_configuration: Option<M7Configuration>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: Measurements,
+    pub to: Activate,
+    pub ie: Has,
+    pub the: Sixth,
+    pub bit: Set,
+    pub to: 1,
+    pub bluetooth_measurement_configuration: Option<BluetoothMeasurementConfiguration>,
+    pub wlan_measurement_configuration: Option<WlanMeasurementConfiguration>,
+    pub mdt_location_info: Option<MdtLocationInfo>,
+    pub sensor_measurement_configuration: Option<SensorMeasurementConfiguration>,
+}
+
+impl APerElement for ImmediateMdtNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(10),
+            max: Some(10),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let measurements_to_activate = MeasurementsToActivate::from_aper(decoder, UNCONSTRAINED)?;
+        let m1_configuration = if optionals.is_set(0) {
+            Some(M1Configuration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Measurements::from_aper(decoder, UNCONSTRAINED)?;
+        let to = Activate::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Has::from_aper(decoder, UNCONSTRAINED)?;
+        let the = First::from_aper(decoder, UNCONSTRAINED)?;
+        let bit = Set::from_aper(decoder, UNCONSTRAINED)?;
+        let to = 1::from_aper(decoder, UNCONSTRAINED)?;
+        let m4_configuration = if optionals.is_set(0) {
+            Some(M4Configuration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Measurements::from_aper(decoder, UNCONSTRAINED)?;
+        let to = Activate::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Has::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Third::from_aper(decoder, UNCONSTRAINED)?;
+        let bit = Set::from_aper(decoder, UNCONSTRAINED)?;
+        let to = 1::from_aper(decoder, UNCONSTRAINED)?;
+        let m5_configuration = if optionals.is_set(0) {
+            Some(M5Configuration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Measurements::from_aper(decoder, UNCONSTRAINED)?;
+        let to = Activate::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Has::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Fourth::from_aper(decoder, UNCONSTRAINED)?;
+        let bit = Set::from_aper(decoder, UNCONSTRAINED)?;
+        let to = 1::from_aper(decoder, UNCONSTRAINED)?;
+        let m6_configuration = if optionals.is_set(0) {
+            Some(M6Configuration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Measurements::from_aper(decoder, UNCONSTRAINED)?;
+        let to = Activate::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Has::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Fifth::from_aper(decoder, UNCONSTRAINED)?;
+        let bit = Set::from_aper(decoder, UNCONSTRAINED)?;
+        let to = 1::from_aper(decoder, UNCONSTRAINED)?;
+        let m7_configuration = if optionals.is_set(0) {
+            Some(M7Configuration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Measurements::from_aper(decoder, UNCONSTRAINED)?;
+        let to = Activate::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Has::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Sixth::from_aper(decoder, UNCONSTRAINED)?;
+        let bit = Set::from_aper(decoder, UNCONSTRAINED)?;
+        let to = 1::from_aper(decoder, UNCONSTRAINED)?;
+        let bluetooth_measurement_configuration = if optionals.is_set(0) {
+            Some(BluetoothMeasurementConfiguration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let wlan_measurement_configuration = if optionals.is_set(0) {
+            Some(WlanMeasurementConfiguration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let mdt_location_info = if optionals.is_set(0) {
+            Some(MdtLocationInfo::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let sensor_measurement_configuration = if optionals.is_set(0) {
+            Some(SensorMeasurementConfiguration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            measurements_to_activate,
+            m1_configuration,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            to,
+            ie,
+            the,
+            bit,
+            to,
+            m4_configuration,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            to,
+            ie,
+            the,
+            bit,
+            to,
+            m5_configuration,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            to,
+            ie,
+            the,
+            bit,
+            to,
+            m6_configuration,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            to,
+            ie,
+            the,
+            bit,
+            to,
+            m7_configuration,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            to,
+            ie,
+            the,
+            bit,
+            to,
+            bluetooth_measurement_configuration,
+            wlan_measurement_configuration,
+            mdt_location_info,
+            sensor_measurement_configuration,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(10);
+        optionals.set(0, self.m1_configuration.is_some());        optionals.set(1, self.m4_configuration.is_some());        optionals.set(2, self.m5_configuration.is_some());        optionals.set(3, self.m6_configuration.is_some());        optionals.set(4, self.m7_configuration.is_some());        optionals.set(5, self.bluetooth_measurement_configuration.is_some());        optionals.set(6, self.wlan_measurement_configuration.is_some());        optionals.set(7, self.mdt_location_info.is_some());        optionals.set(8, self.sensor_measurement_configuration.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.measurements_to_activate.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m1_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.bit.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m4_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.bit.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m5_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.bit.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m6_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.bit.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m7_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.bit.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.to.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.bluetooth_measurement_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.wlan_measurement_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.mdt_location_info {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.sensor_measurement_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// InterSystemFailureIndication
+pub struct InterSystemFailureIndication {
+    pub ue_rlf_report_container: Option<UeRlfReportContainer>,
+}
+
+impl APerElement for InterSystemFailureIndication {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_rlf_report_container = if optionals.is_set(0) {
+            Some(UeRlfReportContainer::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ue_rlf_report_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.ue_rlf_report_container.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.ue_rlf_report_container {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// IntersystemSonConfigurationTransfer
+pub struct IntersystemSonConfigurationTransfer {
+    pub transfer_type: IntersystemSonTransferType,
+    pub intersystem_son_information: IntersystemSonInformation,
+}
+
+impl APerElement for IntersystemSonConfigurationTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let transfer_type = IntersystemSonTransferType::from_aper(decoder, UNCONSTRAINED)?;
+        let intersystem_son_information = IntersystemSonInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            transfer_type,
+            intersystem_son_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.transfer_type.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.intersystem_son_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// IntersystemSonTransferType
+pub enum IntersystemSonTransferType {
+    FromEutranToNgran(FromEutranToNgran),
+    FromNgranToEutran(FromNgranToEutran),
+    _Extended,
+}
+
+impl APerElement for IntersystemSonTransferType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::FromEutranToNgran(FromEutranToNgran::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::FromNgranToEutran(FromNgranToEutran::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::FromEutranToNgran(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::FromNgranToEutran(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// IntersystemSonEnbId
+pub struct IntersystemSonEnbId {
+    pub global_enb_id: GlobalEnbId,
+    pub selected_epstai: EpsTai,
+}
+
+impl APerElement for IntersystemSonEnbId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_enb_id = GlobalEnbId::from_aper(decoder, UNCONSTRAINED)?;
+        let selected_epstai = EpsTai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            global_enb_id,
+            selected_epstai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_enb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.selected_epstai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// IntersystemSonNgranNodeId
+pub struct IntersystemSonNgranNodeId {
+    pub global_ran_node_id: GlobalRanNodeId,
+    pub selected_tai: Tai,
+}
+
+impl APerElement for IntersystemSonNgranNodeId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_ran_node_id = GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let selected_tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            global_ran_node_id,
+            selected_tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.selected_tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// IntersystemSonInformation
+pub enum IntersystemSonInformation {
+    IntersystemSonInformationReport(IntersystemSonInformationReport),
+    _Extended,
+}
+
+impl APerElement for IntersystemSonInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::IntersystemSonInformationReport(IntersystemSonInformationReport::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::IntersystemSonInformationReport(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// IntersystemSonInformationReport
+pub enum IntersystemSonInformationReport {
+    HoReportInformation(InterSystemHoReport),
+    FailureIndicationInformation(InterSystemFailureIndication),
+    _Extended,
+}
+
+impl APerElement for IntersystemSonInformationReport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::HoReportInformation(InterSystemHoReport::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::FailureIndicationInformation(InterSystemFailureIndication::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::HoReportInformation(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::FailureIndicationInformation(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// InterSystemHoReport
+pub struct InterSystemHoReport {
+    pub handover_report_type: InterSystemHandoverReportType,
+}
+
+impl APerElement for InterSystemHoReport {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let handover_report_type = InterSystemHandoverReportType::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            handover_report_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.handover_report_type.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// InterSystemHandoverReportType
+pub enum InterSystemHandoverReportType {
+    TooearlyIntersystemHo(TooearlyIntersystemHo),
+    IntersystemUnnecessaryHo(IntersystemUnnecessaryHo),
+    _Extended,
+}
+
+impl APerElement for InterSystemHandoverReportType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::TooearlyIntersystemHo(TooearlyIntersystemHo::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::IntersystemUnnecessaryHo(IntersystemUnnecessaryHo::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::TooearlyIntersystemHo(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::IntersystemUnnecessaryHo(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// IntersystemUnnecessaryHo
+pub struct IntersystemUnnecessaryHo {
+    pub sourcecell_id: NgranCgi,
+    pub targetcell_id: EutraCgi,
+    pub early_iratho: EarlyIratho,
+    pub candidate_cell_list: CandidateCellList,
+}
+
+impl APerElement for IntersystemUnnecessaryHo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let sourcecell_id = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let targetcell_id = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let early_iratho = EarlyIratho::from_aper(decoder, UNCONSTRAINED)?;
+        let candidate_cell_list = CandidateCellList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            sourcecell_id,
+            targetcell_id,
+            early_iratho,
+            candidate_cell_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.sourcecell_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.targetcell_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.early_iratho.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.candidate_cell_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Lac
+pub struct Lac(pub Vec<u8>);
+
+impl APerElement for Lac {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Lai
+pub struct Lai {
+    pub plmn_identity: PlmnIdentity,
+    pub lac: Lac,
+}
+
+impl APerElement for Lai {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let lac = Lac::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            lac,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.lac.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// LastVisitedCellInformation
+pub enum LastVisitedCellInformation {
+    NgranCell(LastVisitedNgranCellInformation),
+    EutranCell(LastVisitedEutranCellInformation),
+    UtranCell(LastVisitedUtranCellInformation),
+    GeranCell(LastVisitedGeranCellInformation),
+    _Extended,
+}
+
+impl APerElement for LastVisitedCellInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::NgranCell(LastVisitedNgranCellInformation::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::EutranCell(LastVisitedEutranCellInformation::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::UtranCell(LastVisitedUtranCellInformation::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::GeranCell(LastVisitedGeranCellInformation::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::NgranCell(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EutranCell(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::UtranCell(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::GeranCell(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// LastVisitedCellItem
+pub struct LastVisitedCellItem {
+    pub last_visited_cell_information: LastVisitedCellInformation,
+}
+
+impl APerElement for LastVisitedCellItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let last_visited_cell_information = LastVisitedCellInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            last_visited_cell_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.last_visited_cell_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// LastVisitedEutranCellInformation
+pub struct LastVisitedEutranCellInformation(pub Vec<u8>);
+
+impl APerElement for LastVisitedEutranCellInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LastVisitedGeranCellInformation
+pub struct LastVisitedGeranCellInformation(pub Vec<u8>);
+
+impl APerElement for LastVisitedGeranCellInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LastVisitedNgranCellInformation
+pub struct LastVisitedNgranCellInformation {
+    pub global_cell_id: NgranCgi,
+    pub cell_type: CellType,
+    pub time_ue_stayed_in_cell: TimeUeStayedInCell,
+    pub time_ue_stayed_in_cell_enhanced_granularity: Option<TimeUeStayedInCellEnhancedGranularity>,
+    pub ho_cause_value: Option<Cause>,
+}
+
+impl APerElement for LastVisitedNgranCellInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_cell_id = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let cell_type = CellType::from_aper(decoder, UNCONSTRAINED)?;
+        let time_ue_stayed_in_cell = TimeUeStayedInCell::from_aper(decoder, UNCONSTRAINED)?;
+        let time_ue_stayed_in_cell_enhanced_granularity = if optionals.is_set(0) {
+            Some(TimeUeStayedInCellEnhancedGranularity::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ho_cause_value = if optionals.is_set(0) {
+            Some(Cause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            global_cell_id,
+            cell_type,
+            time_ue_stayed_in_cell,
+            time_ue_stayed_in_cell_enhanced_granularity,
+            ho_cause_value,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.time_ue_stayed_in_cell_enhanced_granularity.is_some());        optionals.set(1, self.ho_cause_value.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_cell_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cell_type.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.time_ue_stayed_in_cell.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.time_ue_stayed_in_cell_enhanced_granularity {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ho_cause_value {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// LastVisitedUtranCellInformation
+pub struct LastVisitedUtranCellInformation(pub Vec<u8>);
+
+impl APerElement for LastVisitedUtranCellInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LineType
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum LineType {
+    Dsl,
+    Pon,
+    _Extended,
+}
+
+impl APerElement for LineType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(LineType::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LocationReportingAdditionalInfo
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum LocationReportingAdditionalInfo {
+    IncludePsCell,
+    _Extended,
+}
+
+impl APerElement for LocationReportingAdditionalInfo {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(LocationReportingAdditionalInfo::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LocationReportingReferenceId
+pub struct LocationReportingReferenceId(pub u8);
+
+impl APerElement for LocationReportingReferenceId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(64),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LocationReportingRequestType
+pub struct LocationReportingRequestType {
+    pub event_type: EventType,
+    pub report_area: ReportArea,
+    pub area_of_interest_list: Option<AreaOfInterestList>,
+    pub location_reporting_reference_id_to_be_cancelled: Option<LocationReportingReferenceId>,
+}
+
+impl APerElement for LocationReportingRequestType {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let event_type = EventType::from_aper(decoder, UNCONSTRAINED)?;
+        let report_area = ReportArea::from_aper(decoder, UNCONSTRAINED)?;
+        let area_of_interest_list = if optionals.is_set(0) {
+            Some(AreaOfInterestList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let location_reporting_reference_id_to_be_cancelled = if optionals.is_set(0) {
+            Some(LocationReportingReferenceId::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            event_type,
+            report_area,
+            area_of_interest_list,
+            location_reporting_reference_id_to_be_cancelled,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.area_of_interest_list.is_some());        optionals.set(1, self.location_reporting_reference_id_to_be_cancelled.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.event_type.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.report_area.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.area_of_interest_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.location_reporting_reference_id_to_be_cancelled {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// LoggedMdtNr
+pub struct LoggedMdtNr {
+    pub logging_interval: LoggingInterval,
+    pub logging_duration: LoggingDuration,
+    pub logged_mdt_trigger: LoggedMdtTrigger,
+    pub bluetooth_measurement_configuration: Option<BluetoothMeasurementConfiguration>,
+    pub wlan_measurement_configuration: Option<WlanMeasurementConfiguration>,
+    pub sensor_measurement_configuration: Option<SensorMeasurementConfiguration>,
+    pub area_scope_of_neigh_cells_list: Option<AreaScopeOfNeighCellsList>,
+}
+
+impl APerElement for LoggedMdtNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let logging_interval = LoggingInterval::from_aper(decoder, UNCONSTRAINED)?;
+        let logging_duration = LoggingDuration::from_aper(decoder, UNCONSTRAINED)?;
+        let logged_mdt_trigger = LoggedMdtTrigger::from_aper(decoder, UNCONSTRAINED)?;
+        let bluetooth_measurement_configuration = if optionals.is_set(0) {
+            Some(BluetoothMeasurementConfiguration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let wlan_measurement_configuration = if optionals.is_set(0) {
+            Some(WlanMeasurementConfiguration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let sensor_measurement_configuration = if optionals.is_set(0) {
+            Some(SensorMeasurementConfiguration::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let area_scope_of_neigh_cells_list = if optionals.is_set(0) {
+            Some(AreaScopeOfNeighCellsList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            logging_interval,
+            logging_duration,
+            logged_mdt_trigger,
+            bluetooth_measurement_configuration,
+            wlan_measurement_configuration,
+            sensor_measurement_configuration,
+            area_scope_of_neigh_cells_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(5);
+        optionals.set(0, self.bluetooth_measurement_configuration.is_some());        optionals.set(1, self.wlan_measurement_configuration.is_some());        optionals.set(2, self.sensor_measurement_configuration.is_some());        optionals.set(3, self.area_scope_of_neigh_cells_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.logging_interval.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.logging_duration.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.logged_mdt_trigger.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.bluetooth_measurement_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.wlan_measurement_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.sensor_measurement_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.area_scope_of_neigh_cells_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// LoggingInterval
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum LoggingInterval {
+    Ms320,
+    Ms640,
+    Ms1280,
+    Ms2560,
+    Ms5120,
+    Ms10240,
+    Ms20480,
+    Ms30720,
+    Ms40960,
+    Ms61440,
+    Infinity,
+    _Extended,
+}
+
+impl APerElement for LoggingInterval {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(LoggingInterval::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LoggingDuration
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum LoggingDuration {
+    M10,
+    M20,
+    M40,
+    M60,
+    M90,
+    M120,
+    _Extended,
+}
+
+impl APerElement for LoggingDuration {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(LoggingDuration::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LinksToLog
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum LinksToLog {
+    Uplink,
+    Downlink,
+    BothUplinkAndDownlink,
+    _Extended,
+}
+
+impl APerElement for LinksToLog {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(LinksToLog::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LoggedMdtTrigger
+pub enum LoggedMdtTrigger {
+    Periodical,
+    EventTrigger(EventTrigger),
+    _Extended,
+}
+
+impl APerElement for LoggedMdtTrigger {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::Periodical),
+            1 => Ok(Self::EventTrigger(EventTrigger::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::Periodical => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?); }
+            Self::EventTrigger(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// LtemIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum LtemIndication {
+    LteM,
+    _Extended,
+}
+
+impl APerElement for LtemIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(LtemIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// LteueRlfReportContainer
+pub struct LteueRlfReportContainer(pub Vec<u8>);
+
+impl APerElement for LteueRlfReportContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Ltev2xServicesAuthorized
+pub struct Ltev2xServicesAuthorized {
+    pub vehicle_ue: Option<VehicleUe>,
+    pub pedestrian_ue: Option<PedestrianUe>,
+}
+
+impl APerElement for Ltev2xServicesAuthorized {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let vehicle_ue = if optionals.is_set(0) {
+            Some(VehicleUe::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let pedestrian_ue = if optionals.is_set(0) {
+            Some(PedestrianUe::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            vehicle_ue,
+            pedestrian_ue,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.vehicle_ue.is_some());        optionals.set(1, self.pedestrian_ue.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.vehicle_ue {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.pedestrian_ue {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// LteueSidelinkAggregateMaximumBitrate
+pub struct LteueSidelinkAggregateMaximumBitrate {
+    pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
+}
+
+impl APerElement for LteueSidelinkAggregateMaximumBitrate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_sidelink_aggregate_maximum_bit_rate = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ue_sidelink_aggregate_maximum_bit_rate,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ue_sidelink_aggregate_maximum_bit_rate.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// MaskedImeisv
+pub struct MaskedImeisv(pub BitString);
+
+impl APerElement for MaskedImeisv {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(64),
+            max: Some(64),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MaximumDataBurstVolume
+pub struct MaximumDataBurstVolume(pub u16);
+
+impl APerElement for MaximumDataBurstVolume {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(4095),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MessageIdentifier
+pub struct MessageIdentifier(pub BitString);
+
+impl APerElement for MessageIdentifier {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MaximumIntegrityProtectedDataRate
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum MaximumIntegrityProtectedDataRate {
+    Bitrate64kbs,
+    MaximumUeRate,
+    _Extended,
+}
+
+impl APerElement for MaximumIntegrityProtectedDataRate {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(MaximumIntegrityProtectedDataRate::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MicoModeIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum MicoModeIndication {
+    True,
+    _Extended,
+}
+
+impl APerElement for MicoModeIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(MicoModeIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MobilityInformation
+pub struct MobilityInformation(pub BitString);
+
+impl APerElement for MobilityInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MobilityRestrictionList
+pub struct MobilityRestrictionList {
+    pub serving_plmn: PlmnIdentity,
+    pub equivalent_plmn_s: Option<EquivalentPlmnS>,
+    pub rat_restrictions: Option<RatRestrictions>,
+    pub forbidden_area_information: Option<ForbiddenAreaInformation>,
+    pub service_area_information: Option<ServiceAreaInformation>,
+}
+
+impl APerElement for MobilityRestrictionList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let serving_plmn = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let equivalent_plmn_s = if optionals.is_set(0) {
+            Some(EquivalentPlmnS::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let rat_restrictions = if optionals.is_set(0) {
+            Some(RatRestrictions::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let forbidden_area_information = if optionals.is_set(0) {
+            Some(ForbiddenAreaInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let service_area_information = if optionals.is_set(0) {
+            Some(ServiceAreaInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            serving_plmn,
+            equivalent_plmn_s,
+            rat_restrictions,
+            forbidden_area_information,
+            service_area_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(5);
+        optionals.set(0, self.equivalent_plmn_s.is_some());        optionals.set(1, self.rat_restrictions.is_some());        optionals.set(2, self.forbidden_area_information.is_some());        optionals.set(3, self.service_area_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.serving_plmn.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.equivalent_plmn_s {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.rat_restrictions {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.forbidden_area_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.service_area_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// MdtPlmnList
+pub struct MdtPlmnList(pub Vec<PlmnIdentity>);
+
+impl APerElement for MdtPlmnList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PlmnIdentity>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MdtConfiguration
+pub struct MdtConfiguration {
+    pub mdt_config_nr: Option<MdtConfigurationNr>,
+    pub mdt_config_eutra: Option<MdtConfigurationEutra>,
+}
+
+impl APerElement for MdtConfiguration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let mdt_config_nr = if optionals.is_set(0) {
+            Some(MdtConfigurationNr::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let mdt_config_eutra = if optionals.is_set(0) {
+            Some(MdtConfigurationEutra::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            mdt_config_nr,
+            mdt_config_eutra,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.mdt_config_nr.is_some());        optionals.set(1, self.mdt_config_eutra.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.mdt_config_nr {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.mdt_config_eutra {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// MdtConfigurationNr
+pub struct MdtConfigurationNr {
+    pub mdt_activation: MdtActivation,
+    pub area_scope_of_mdt: AreaScopeOfMdtNr,
+    pub mdt_mode_nr: MdtModeNr,
+    pub signalling_based_mdt_plmn_list: Option<MdtPlmnList>,
+}
+
+impl APerElement for MdtConfigurationNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let mdt_activation = MdtActivation::from_aper(decoder, UNCONSTRAINED)?;
+        let area_scope_of_mdt = AreaScopeOfMdtNr::from_aper(decoder, UNCONSTRAINED)?;
+        let mdt_mode_nr = MdtModeNr::from_aper(decoder, UNCONSTRAINED)?;
+        let signalling_based_mdt_plmn_list = if optionals.is_set(0) {
+            Some(MdtPlmnList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            mdt_activation,
+            area_scope_of_mdt,
+            mdt_mode_nr,
+            signalling_based_mdt_plmn_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.signalling_based_mdt_plmn_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.mdt_activation.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.area_scope_of_mdt.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.mdt_mode_nr.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.signalling_based_mdt_plmn_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// MdtConfigurationEutra
+pub struct MdtConfigurationEutra {
+    pub mdt_activation: MdtActivation,
+    pub area_scope_of_mdt: AreaScopeOfMdtEutra,
+    pub mdt_mode: MdtModeEutra,
+    pub signalling_based_mdt_plmn_list: Option<MdtPlmnList>,
+}
+
+impl APerElement for MdtConfigurationEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let mdt_activation = MdtActivation::from_aper(decoder, UNCONSTRAINED)?;
+        let area_scope_of_mdt = AreaScopeOfMdtEutra::from_aper(decoder, UNCONSTRAINED)?;
+        let mdt_mode = MdtModeEutra::from_aper(decoder, UNCONSTRAINED)?;
+        let signalling_based_mdt_plmn_list = if optionals.is_set(0) {
+            Some(MdtPlmnList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            mdt_activation,
+            area_scope_of_mdt,
+            mdt_mode,
+            signalling_based_mdt_plmn_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.signalling_based_mdt_plmn_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.mdt_activation.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.area_scope_of_mdt.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.mdt_mode.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.signalling_based_mdt_plmn_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// MdtActivation
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum MdtActivation {
+    ImmediateMdtOnly,
+    LoggedMdtOnly,
+    ImmediateMdtAndTrace,
+    _Extended,
+}
+
+impl APerElement for MdtActivation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(MdtActivation::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MdtModeNr
+pub enum MdtModeNr {
+    ImmediateMdtNr(ImmediateMdtNr),
+    LoggedMdtNr(LoggedMdtNr),
+    _Extended,
+}
+
+impl APerElement for MdtModeNr {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::ImmediateMdtNr(ImmediateMdtNr::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::LoggedMdtNr(LoggedMdtNr::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::ImmediateMdtNr(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::LoggedMdtNr(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// MdtModeEutra
+pub struct MdtModeEutra(pub Vec<u8>);
+
+impl APerElement for MdtModeEutra {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MeasurementsToActivate
+pub struct MeasurementsToActivate(pub BitString);
+
+impl APerElement for MeasurementsToActivate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// M1Configuration
+pub struct M1Configuration {
+    pub m1reporting_trigger: M1ReportingTrigger,
+    pub m1threshold_event_a2: Option<M1ThresholdEventA2>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: M1,
+    pub reporting: Trigger,
+    pub ie: Is,
+    pub set: To,
+    pub a2event_triggered: Or,
+    pub a2event_triggered: Periodic,
+    pub m1periodic_reporting: Option<M1PeriodicReporting>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: M1,
+    pub reporting: Trigger,
+    pub ie: Is,
+    pub set: To,
+    pub periodic: Or,
+    pub a2event_triggered: Periodic,
+}
+
+impl APerElement for M1Configuration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let m1reporting_trigger = M1ReportingTrigger::from_aper(decoder, UNCONSTRAINED)?;
+        let m1threshold_event_a2 = if optionals.is_set(0) {
+            Some(M1ThresholdEventA2::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = M1::from_aper(decoder, UNCONSTRAINED)?;
+        let reporting = Trigger::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Is::from_aper(decoder, UNCONSTRAINED)?;
+        let set = To::from_aper(decoder, UNCONSTRAINED)?;
+        let a2event_triggered = Or::from_aper(decoder, UNCONSTRAINED)?;
+        let a2event_triggered = Periodic::from_aper(decoder, UNCONSTRAINED)?;
+        let m1periodic_reporting = if optionals.is_set(0) {
+            Some(M1PeriodicReporting::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = M1::from_aper(decoder, UNCONSTRAINED)?;
+        let reporting = Trigger::from_aper(decoder, UNCONSTRAINED)?;
+        let ie = Is::from_aper(decoder, UNCONSTRAINED)?;
+        let set = To::from_aper(decoder, UNCONSTRAINED)?;
+        let periodic = Or::from_aper(decoder, UNCONSTRAINED)?;
+        let a2event_triggered = Periodic::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            m1reporting_trigger,
+            m1threshold_event_a2,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            reporting,
+            ie,
+            set,
+            a2event_triggered,
+            a2event_triggered,
+            m1periodic_reporting,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            reporting,
+            ie,
+            set,
+            periodic,
+            a2event_triggered,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.m1threshold_event_a2.is_some());        optionals.set(1, self.m1periodic_reporting.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.m1reporting_trigger.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m1threshold_event_a2 {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.reporting.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.set.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.a2event_triggered.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.a2event_triggered.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.m1periodic_reporting {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.reporting.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.set.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.periodic.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.a2event_triggered.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M1ReportingTrigger
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum M1ReportingTrigger {
+    Periodic,
+    A2eventtriggered,
+    A2eventtriggeredPeriodic,
+    _Extended,
+}
+
+impl APerElement for M1ReportingTrigger {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(M1ReportingTrigger::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// M1ThresholdEventA2
+pub struct M1ThresholdEventA2 {
+    pub m1_threshold_type: M1ThresholdType,
+}
+
+impl APerElement for M1ThresholdEventA2 {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let m1_threshold_type = M1ThresholdType::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            m1_threshold_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.m1_threshold_type.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M1ThresholdType
+pub enum M1ThresholdType {
+    ThresholdRsrp(ThresholdRsrp),
+    ThresholdRsrq(ThresholdRsrq),
+    ThresholdSinr(ThresholdSinr),
+    _Extended,
+}
+
+impl APerElement for M1ThresholdType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::ThresholdRsrp(ThresholdRsrp::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::ThresholdRsrq(ThresholdRsrq::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::ThresholdSinr(ThresholdSinr::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::ThresholdRsrp(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::ThresholdRsrq(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::ThresholdSinr(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// M1PeriodicReporting
+pub struct M1PeriodicReporting {
+    pub report_interval: ReportIntervalMdt,
+    pub report_amount: ReportAmountMdt,
+}
+
+impl APerElement for M1PeriodicReporting {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let report_interval = ReportIntervalMdt::from_aper(decoder, UNCONSTRAINED)?;
+        let report_amount = ReportAmountMdt::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            report_interval,
+            report_amount,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.report_interval.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.report_amount.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M4Configuration
+pub struct M4Configuration {
+    pub m4period: M4period,
+    pub m4_links_to_log: LinksToLog,
+}
+
+impl APerElement for M4Configuration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let m4period = M4period::from_aper(decoder, UNCONSTRAINED)?;
+        let m4_links_to_log = LinksToLog::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            m4period,
+            m4_links_to_log,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.m4period.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.m4_links_to_log.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M4period
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum M4period {
+    Ms1024,
+    Ms2048,
+    Ms5120,
+    Ms10240,
+    Min1,
+    _Extended,
+}
+
+impl APerElement for M4period {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(M4period::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// M5Configuration
+pub struct M5Configuration {
+    pub m5period: M5period,
+    pub m5_links_to_log: LinksToLog,
+}
+
+impl APerElement for M5Configuration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let m5period = M5period::from_aper(decoder, UNCONSTRAINED)?;
+        let m5_links_to_log = LinksToLog::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            m5period,
+            m5_links_to_log,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.m5period.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.m5_links_to_log.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M5period
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum M5period {
+    Ms1024,
+    Ms2048,
+    Ms5120,
+    Ms10240,
+    Min1,
+    _Extended,
+}
+
+impl APerElement for M5period {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(M5period::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// M6Configuration
+pub struct M6Configuration {
+    pub m6report_interval: M6reportInterval,
+    pub m6_links_to_log: LinksToLog,
+}
+
+impl APerElement for M6Configuration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let m6report_interval = M6reportInterval::from_aper(decoder, UNCONSTRAINED)?;
+        let m6_links_to_log = LinksToLog::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            m6report_interval,
+            m6_links_to_log,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.m6report_interval.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.m6_links_to_log.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M6reportInterval
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum M6reportInterval {
+    Ms120,
+    Ms240,
+    Ms480,
+    Ms640,
+    Ms1024,
+    Ms2048,
+    Ms5120,
+    Ms10240,
+    Ms20480,
+    Ms40960,
+    Min1,
+    Min6,
+    Min12,
+    Min30,
+    _Extended,
+}
+
+impl APerElement for M6reportInterval {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(M6reportInterval::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// M7Configuration
+pub struct M7Configuration {
+    pub m7period: M7period,
+    pub m7_links_to_log: LinksToLog,
+}
+
+impl APerElement for M7Configuration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let m7period = M7period::from_aper(decoder, UNCONSTRAINED)?;
+        let m7_links_to_log = LinksToLog::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            m7period,
+            m7_links_to_log,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.m7period.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.m7_links_to_log.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// M7period
+pub struct M7period(pub u8);
+
+impl APerElement for M7period {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(60),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// MdtLocationInfo
+pub struct MdtLocationInfo {
+    pub mdt_location_information: MdtLocationInformation,
+}
+
+impl APerElement for MdtLocationInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let mdt_location_information = MdtLocationInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            mdt_location_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.mdt_location_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// MdtLocationInformation
+pub struct MdtLocationInformation(pub BitString);
+
+impl APerElement for MdtLocationInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// N3IwfId
+pub enum N3IwfId {
+    N3IwfId(BitString),
+    _Extended,
+}
+
+impl APerElement for N3IwfId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::N3IwfId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::N3IwfId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NasPdu
+pub struct NasPdu(pub Vec<u8>);
+
+impl APerElement for NasPdu {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NasSecurityParametersFromNgran
+pub struct NasSecurityParametersFromNgran(pub Vec<u8>);
+
+impl APerElement for NasSecurityParametersFromNgran {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NbIotDefaultPagingDrx
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NbIotDefaultPagingDrx {
+    Rf128,
+    Rf256,
+    Rf512,
+    Rf1024,
+    _Extended,
+}
+
+impl APerElement for NbIotDefaultPagingDrx {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NbIotDefaultPagingDrx::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NbIotPagingDrx
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NbIotPagingDrx {
+    Rf32,
+    Rf64,
+    Rf128,
+    Rf256,
+    Rf512,
+    Rf1024,
+    _Extended,
+}
+
+impl APerElement for NbIotPagingDrx {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NbIotPagingDrx::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NbIotPagingEDrxCycle
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NbIotPagingEDrxCycle {
+    Hf2,
+    Hf4,
+    Hf6,
+    Hf8,
+    Hf10,
+    Hf12,
+    Hf14,
+    Hf16,
+    Hf32,
+    Hf64,
+    Hf128,
+    Hf256,
+    Hf512,
+    Hf1024,
+    _Extended,
+}
+
+impl APerElement for NbIotPagingEDrxCycle {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NbIotPagingEDrxCycle::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NbIotPagingTimeWindow
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NbIotPagingTimeWindow {
+    S1,
+    S2,
+    S3,
+    S4,
+    S5,
+    S6,
+    S7,
+    S8,
+    S9,
+    S10,
+    S11,
+    S12,
+    S13,
+    S14,
+    S15,
+    S16,
+    _Extended,
+}
+
+impl APerElement for NbIotPagingTimeWindow {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NbIotPagingTimeWindow::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NbIotPagingEDrxInfo
+pub struct NbIotPagingEDrxInfo {
+    pub nb_iot_paging_e_drx_cycle: NbIotPagingEDrxCycle,
+    pub nb_iot_paging_time_window: Option<NbIotPagingTimeWindow>,
+}
+
+impl APerElement for NbIotPagingEDrxInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nb_iot_paging_e_drx_cycle = NbIotPagingEDrxCycle::from_aper(decoder, UNCONSTRAINED)?;
+        let nb_iot_paging_time_window = if optionals.is_set(0) {
+            Some(NbIotPagingTimeWindow::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            nb_iot_paging_e_drx_cycle,
+            nb_iot_paging_time_window,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.nb_iot_paging_time_window.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nb_iot_paging_e_drx_cycle.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.nb_iot_paging_time_window {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// NbIotUePriority
+pub struct NbIotUePriority(pub u8);
+
+impl APerElement for NbIotUePriority {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(255),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NetworkInstance
+pub struct NetworkInstance(pub u8);
+
+impl APerElement for NetworkInstance {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(256),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NewSecurityContextInd
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NewSecurityContextInd {
+    True,
+    _Extended,
+}
+
+impl APerElement for NewSecurityContextInd {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NewSecurityContextInd::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NextHopChainingCount
+pub struct NextHopChainingCount(pub u8);
+
+impl APerElement for NextHopChainingCount {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NextPagingAreaScope
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NextPagingAreaScope {
+    Same,
+    Changed,
+    _Extended,
+}
+
+impl APerElement for NextPagingAreaScope {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NextPagingAreaScope::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NgEnbId
+pub enum NgEnbId {
+    MacroNgEnbId(BitString),
+    ShortMacroNgEnbId(BitString),
+    LongMacroNgEnbId(BitString),
+    _Extended,
+}
+
+impl APerElement for NgEnbId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::MacroNgEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::ShortMacroNgEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::LongMacroNgEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::MacroNgEnbId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::ShortMacroNgEnbId(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::LongMacroNgEnbId(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NotifySourceNgranNode
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NotifySourceNgranNode {
+    NotifySource,
+    _Extended,
+}
+
+impl APerElement for NotifySourceNgranNode {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NotifySourceNgranNode::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NgranCgi
+pub enum NgranCgi {
+    NrCgi(NrCgi),
+    EutraCgi(EutraCgi),
+    _Extended,
+}
+
+impl APerElement for NgranCgi {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::NrCgi(NrCgi::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::EutraCgi(EutraCgi::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::NrCgi(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EutraCgi(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NgranTnlAssociationToRemoveList
+pub struct NgranTnlAssociationToRemoveList(pub Vec<NgranTnlAssociationToRemoveItem>);
+
+impl APerElement for NgranTnlAssociationToRemoveList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NgranTnlAssociationToRemoveItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NgranTnlAssociationToRemoveItem
+pub struct NgranTnlAssociationToRemoveItem {
+    pub tnl_association_transport_layer_address: CpTransportLayerInformation,
+    pub tnl_association_transport_layer_address_amf: Option<CpTransportLayerInformation>,
+}
+
+impl APerElement for NgranTnlAssociationToRemoveItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tnl_association_transport_layer_address = CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let tnl_association_transport_layer_address_amf = if optionals.is_set(0) {
+            Some(CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            tnl_association_transport_layer_address,
+            tnl_association_transport_layer_address_amf,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.tnl_association_transport_layer_address_amf.is_some());
+
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tnl_association_transport_layer_address.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.tnl_association_transport_layer_address_amf {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// NgranTraceId
+pub struct NgranTraceId(pub Vec<u8>);
+
+impl APerElement for NgranTraceId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Nid
+pub struct Nid(pub BitString);
+
+impl APerElement for Nid {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(44),
+            max: Some(44),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NonDynamic5qiDescriptor
+pub struct NonDynamic5qiDescriptor {
+    pub five_qi: FiveQi,
+    pub priority_level_qos: Option<PriorityLevelQos>,
+    pub averaging_window: Option<AveragingWindow>,
+    pub maximum_data_burst_volume: Option<MaximumDataBurstVolume>,
+}
+
+impl APerElement for NonDynamic5qiDescriptor {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let five_qi = FiveQi::from_aper(decoder, UNCONSTRAINED)?;
+        let priority_level_qos = if optionals.is_set(0) {
+            Some(PriorityLevelQos::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let averaging_window = if optionals.is_set(0) {
+            Some(AveragingWindow::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let maximum_data_burst_volume = if optionals.is_set(0) {
+            Some(MaximumDataBurstVolume::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            five_qi,
+            priority_level_qos,
+            averaging_window,
+            maximum_data_burst_volume,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.priority_level_qos.is_some());        optionals.set(1, self.averaging_window.is_some());        optionals.set(2, self.maximum_data_burst_volume.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.five_qi.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.priority_level_qos {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.averaging_window {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.maximum_data_burst_volume {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// NotAllowedTaCs
+pub struct NotAllowedTaCs(pub Vec<Tac>);
+
+impl APerElement for NotAllowedTaCs {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tac>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NotificationCause
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NotificationCause {
+    Fulfilled,
+    NotFulfilled,
+    _Extended,
+}
+
+impl APerElement for NotificationCause {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NotificationCause::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NotificationControl
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum NotificationControl {
+    NotificationRequested,
+    _Extended,
+}
+
+impl APerElement for NotificationControl {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(NotificationControl::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NpnAccessInformation
+pub enum NpnAccessInformation {
+    PniNpnAccessInformation(CellCagList),
+    _Extended,
+}
+
+impl APerElement for NpnAccessInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::PniNpnAccessInformation(CellCagList::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::PniNpnAccessInformation(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NpnMobilityInformation
+pub enum NpnMobilityInformation {
+    SnpnMobilityInformation(SnpnMobilityInformation),
+    PniNpnMobilityInformation(PniNpnMobilityInformation),
+    _Extended,
+}
+
+impl APerElement for NpnMobilityInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::SnpnMobilityInformation(SnpnMobilityInformation::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::PniNpnMobilityInformation(PniNpnMobilityInformation::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::SnpnMobilityInformation(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::PniNpnMobilityInformation(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NpnPagingAssistanceInformation
+pub enum NpnPagingAssistanceInformation {
+    PniNpnPagingAssistance(AllowedPniNpnList),
+    _Extended,
+}
+
+impl APerElement for NpnPagingAssistanceInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::PniNpnPagingAssistance(AllowedPniNpnList::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::PniNpnPagingAssistance(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NpnSupport
+pub enum NpnSupport {
+    Snpn(Nid),
+    _Extended,
+}
+
+impl APerElement for NpnSupport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::Snpn(Nid::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::Snpn(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// NrCellIdentity
+pub struct NrCellIdentity(pub BitString);
+
+impl APerElement for NrCellIdentity {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(36),
+            max: Some(36),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrCgi
+pub struct NrCgi {
+    pub plmn_identity: PlmnIdentity,
+    pub nr_cell_identity: NrCellIdentity,
+}
+
+impl APerElement for NrCgi {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let nr_cell_identity = NrCellIdentity::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            nr_cell_identity,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.nr_cell_identity.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// NrCgiList
+pub struct NrCgiList(pub Vec<NrCgi>);
+
+impl APerElement for NrCgiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NrCgi>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrCgiListForWarning
+pub struct NrCgiListForWarning(pub Vec<NrCgi>);
+
+impl APerElement for NrCgiListForWarning {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NrCgi>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NRencryptionAlgorithms
+pub struct NRencryptionAlgorithms(pub BitString);
+
+impl APerElement for NRencryptionAlgorithms {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NRintegrityProtectionAlgorithms
+pub struct NRintegrityProtectionAlgorithms(pub BitString);
+
+impl APerElement for NRintegrityProtectionAlgorithms {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrMobilityHistoryReport
+pub struct NrMobilityHistoryReport(pub Vec<u8>);
+
+impl APerElement for NrMobilityHistoryReport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrpPaPdu
+pub struct NrpPaPdu(pub Vec<u8>);
+
+impl APerElement for NrpPaPdu {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrueRlfReportContainer
+pub struct NrueRlfReportContainer(pub Vec<u8>);
+
+impl APerElement for NrueRlfReportContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NumberOfBroadcasts
+pub struct NumberOfBroadcasts(pub u16);
+
+impl APerElement for NumberOfBroadcasts {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NumberOfBroadcastsRequested
+pub struct NumberOfBroadcastsRequested(pub u16);
+
+impl APerElement for NumberOfBroadcastsRequested {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Nrarfcn
+pub struct Nrarfcn(pub u32);
+
+impl APerElement for Nrarfcn {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u32::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrFrequencyBand
+pub struct NrFrequencyBand(pub u16);
+
+impl APerElement for NrFrequencyBand {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1024),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrFrequencyBandList
+pub struct NrFrequencyBandList(pub Vec<NrFrequencyBandItem>);
+
+impl APerElement for NrFrequencyBandList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NrFrequencyBandItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrFrequencyBandItem
+pub struct NrFrequencyBandItem {
+    pub nr_frequency_band: NrFrequencyBand,
+}
+
+impl APerElement for NrFrequencyBandItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_frequency_band = NrFrequencyBand::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_frequency_band,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_frequency_band.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// NrFrequencyInfo
+pub struct NrFrequencyInfo {
+    pub nr_arfcn: Nrarfcn,
+    pub frequency_band_list: NrFrequencyBandList,
+}
+
+impl APerElement for NrFrequencyInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_arfcn = Nrarfcn::from_aper(decoder, UNCONSTRAINED)?;
+        let frequency_band_list = NrFrequencyBandList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            nr_arfcn,
+            frequency_band_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_arfcn.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.frequency_band_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// NrPci
+pub struct NrPci(pub u16);
+
+impl APerElement for NrPci {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(1007),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Nrv2xServicesAuthorized
+pub struct Nrv2xServicesAuthorized {
+    pub vehicle_ue: Option<VehicleUe>,
+    pub pedestrian_ue: Option<PedestrianUe>,
+}
+
+impl APerElement for Nrv2xServicesAuthorized {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let vehicle_ue = if optionals.is_set(0) {
+            Some(VehicleUe::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let pedestrian_ue = if optionals.is_set(0) {
+            Some(PedestrianUe::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            vehicle_ue,
+            pedestrian_ue,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.vehicle_ue.is_some());        optionals.set(1, self.pedestrian_ue.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.vehicle_ue {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.pedestrian_ue {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// VehicleUe
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum VehicleUe {
+    Authorized,
+    NotAuthorized,
+    _Extended,
+}
+
+impl APerElement for VehicleUe {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(VehicleUe::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PedestrianUe
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PedestrianUe {
+    Authorized,
+    NotAuthorized,
+    _Extended,
+}
+
+impl APerElement for PedestrianUe {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PedestrianUe::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NrueSidelinkAggregateMaximumBitrate
+pub struct NrueSidelinkAggregateMaximumBitrate {
+    pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
+}
+
+impl APerElement for NrueSidelinkAggregateMaximumBitrate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_sidelink_aggregate_maximum_bit_rate = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ue_sidelink_aggregate_maximum_bit_rate,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ue_sidelink_aggregate_maximum_bit_rate.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// OverloadAction
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum OverloadAction {
+    RejectNonEmergencyMoDt,
+    RejectRrcCrSignalling,
+    PermitEmergencySessionsAndMobileTerminatedServicesOnly,
+    PermitHighPrioritySessionsAndMobileTerminatedServicesOnly,
+    _Extended,
+}
+
+impl APerElement for OverloadAction {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(OverloadAction::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// OverloadResponse
+pub enum OverloadResponse {
+    OverloadAction(OverloadAction),
+    _Extended,
+}
+
+impl APerElement for OverloadResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::OverloadAction(OverloadAction::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::OverloadAction(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// OverloadStartNssaiList
+pub struct OverloadStartNssaiList(pub Vec<OverloadStartNssaiItem>);
+
+impl APerElement for OverloadStartNssaiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<OverloadStartNssaiItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// OverloadStartNssaiItem
+pub struct OverloadStartNssaiItem {
+    pub slice_overload_list: SliceOverloadList,
+    pub slice_overload_response: Option<OverloadResponse>,
+    pub slice_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication>,
+}
+
+impl APerElement for OverloadStartNssaiItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let slice_overload_list = SliceOverloadList::from_aper(decoder, UNCONSTRAINED)?;
+        let slice_overload_response = if optionals.is_set(0) {
+            Some(OverloadResponse::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let slice_traffic_load_reduction_indication = if optionals.is_set(0) {
+            Some(TrafficLoadReductionIndication::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            slice_overload_list,
+            slice_overload_response,
+            slice_traffic_load_reduction_indication,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.slice_overload_response.is_some());        optionals.set(1, self.slice_traffic_load_reduction_indication.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.slice_overload_list.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.slice_overload_response {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.slice_traffic_load_reduction_indication {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PacketDelayBudget
+pub struct PacketDelayBudget(pub u16);
+
+impl APerElement for PacketDelayBudget {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(1023),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PacketErrorRate
+pub struct PacketErrorRate {
+    pub per_scalar: u8,
+    pub per_exponent: u8,
+}
+
+impl APerElement for PacketErrorRate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let per_scalar = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let per_exponent = u8::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            per_scalar,
+            per_exponent,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.per_scalar.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.per_exponent.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PacketLossRate
+pub struct PacketLossRate(pub u16);
+
+impl APerElement for PacketLossRate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(1000),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingAssisDataforCEcapabUe
+pub struct PagingAssisDataforCEcapabUe {
+    pub eutra_cgi: EutraCgi,
+    pub coverage_enhancement_level: CoverageEnhancementLevel,
+}
+
+impl APerElement for PagingAssisDataforCEcapabUe {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let coverage_enhancement_level = CoverageEnhancementLevel::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            eutra_cgi,
+            coverage_enhancement_level,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.coverage_enhancement_level.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PagingAttemptInformation
+pub struct PagingAttemptInformation {
+    pub paging_attempt_count: PagingAttemptCount,
+    pub intended_number_of_paging_attempts: IntendedNumberOfPagingAttempts,
+    pub next_paging_area_scope: Option<NextPagingAreaScope>,
+}
+
+impl APerElement for PagingAttemptInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let paging_attempt_count = PagingAttemptCount::from_aper(decoder, UNCONSTRAINED)?;
+        let intended_number_of_paging_attempts = IntendedNumberOfPagingAttempts::from_aper(decoder, UNCONSTRAINED)?;
+        let next_paging_area_scope = if optionals.is_set(0) {
+            Some(NextPagingAreaScope::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            paging_attempt_count,
+            intended_number_of_paging_attempts,
+            next_paging_area_scope,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.next_paging_area_scope.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.paging_attempt_count.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.intended_number_of_paging_attempts.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.next_paging_area_scope {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PagingAttemptCount
+pub struct PagingAttemptCount(pub u8);
+
+impl APerElement for PagingAttemptCount {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingDrx
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PagingDrx {
+    V32,
+    V64,
+    V128,
+    V256,
+    _Extended,
+}
+
+impl APerElement for PagingDrx {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PagingDrx::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingOrigin
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PagingOrigin {
+    Non3gpp,
+    _Extended,
+}
+
+impl APerElement for PagingOrigin {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PagingOrigin::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingPriority
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PagingPriority {
+    Priolevel1,
+    Priolevel2,
+    Priolevel3,
+    Priolevel4,
+    Priolevel5,
+    Priolevel6,
+    Priolevel7,
+    Priolevel8,
+    _Extended,
+}
+
+impl APerElement for PagingPriority {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PagingPriority::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingeDrxInformation
+pub struct PagingeDrxInformation {
+    pub paging_e_drx_cycle: PagingEDrxCycle,
+    pub paging_time_window: Option<PagingTimeWindow>,
+}
+
+impl APerElement for PagingeDrxInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let paging_e_drx_cycle = PagingEDrxCycle::from_aper(decoder, UNCONSTRAINED)?;
+        let paging_time_window = if optionals.is_set(0) {
+            Some(PagingTimeWindow::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            paging_e_drx_cycle,
+            paging_time_window,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.paging_time_window.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.paging_e_drx_cycle.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.paging_time_window {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PagingEDrxCycle
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PagingEDrxCycle {
+    Hfhalf,
+    Hf1,
+    Hf2,
+    Hf4,
+    Hf6,
+    Hf8,
+    Hf10,
+    Hf12,
+    Hf14,
+    Hf16,
+    Hf32,
+    Hf64,
+    Hf128,
+    Hf256,
+    _Extended,
+}
+
+impl APerElement for PagingEDrxCycle {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PagingEDrxCycle::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingTimeWindow
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PagingTimeWindow {
+    S1,
+    S2,
+    S3,
+    S4,
+    S5,
+    S6,
+    S7,
+    S8,
+    S9,
+    S10,
+    S11,
+    S12,
+    S13,
+    S14,
+    S15,
+    S16,
+    _Extended,
+}
+
+impl APerElement for PagingTimeWindow {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PagingTimeWindow::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PagingProbabilityInformation
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PagingProbabilityInformation {
+    P00,
+    P05,
+    P10,
+    P15,
+    P20,
+    P25,
+    P30,
+    P35,
+    P40,
+    P45,
+    P50,
+    P55,
+    P60,
+    P65,
+    P70,
+    P75,
+    P80,
+    P85,
+    P90,
+    P95,
+    P100,
+    _Extended,
+}
+
+impl APerElement for PagingProbabilityInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PagingProbabilityInformation::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PathSwitchRequestAcknowledgeTransfer
+pub struct PathSwitchRequestAcknowledgeTransfer {
+    pub ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
+    pub security_indication: Option<SecurityIndication>,
+}
+
+impl APerElement for PathSwitchRequestAcknowledgeTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ul_ngu_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let security_indication = if optionals.is_set(0) {
+            Some(SecurityIndication::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ul_ngu_up_tnl_information,
+            security_indication,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.ul_ngu_up_tnl_information.is_some());        optionals.set(1, self.security_indication.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.ul_ngu_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.security_indication {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PathSwitchRequestSetupFailedTransfer
+pub struct PathSwitchRequestSetupFailedTransfer {
+    pub cause: Cause,
+}
+
+impl APerElement for PathSwitchRequestSetupFailedTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PathSwitchRequestTransfer
+pub struct PathSwitchRequestTransfer {
+    pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
+    pub dl_ngu_tnl_information_reused: Option<DlNguTnlInformationReused>,
+    pub user_plane_security_information: Option<UserPlaneSecurityInformation>,
+    pub qos_flow_accepted_list: QosFlowAcceptedList,
+}
+
+impl APerElement for PathSwitchRequestTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_ngu_tnl_information_reused = if optionals.is_set(0) {
+            Some(DlNguTnlInformationReused::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let user_plane_security_information = if optionals.is_set(0) {
+            Some(UserPlaneSecurityInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_accepted_list = QosFlowAcceptedList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dl_ngu_up_tnl_information,
+            dl_ngu_tnl_information_reused,
+            user_plane_security_information,
+            qos_flow_accepted_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.dl_ngu_tnl_information_reused.is_some());        optionals.set(1, self.user_plane_security_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.dl_ngu_tnl_information_reused {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.user_plane_security_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.qos_flow_accepted_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PathSwitchRequestUnsuccessfulTransfer
+pub struct PathSwitchRequestUnsuccessfulTransfer {
+    pub cause: Cause,
+}
+
+impl APerElement for PathSwitchRequestUnsuccessfulTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Pc5QosParameters
+pub struct Pc5QosParameters {
+    pub pc_5_qos_flow_list: Pc5QosFlowList,
+    pub pc_5_link_aggregate_bit_rates: Option<BitRate>,
+}
+
+impl APerElement for Pc5QosParameters {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pc_5_qos_flow_list = Pc5QosFlowList::from_aper(decoder, UNCONSTRAINED)?;
+        let pc_5_link_aggregate_bit_rates = if optionals.is_set(0) {
+            Some(BitRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pc_5_qos_flow_list,
+            pc_5_link_aggregate_bit_rates,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.pc_5_link_aggregate_bit_rates.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pc_5_qos_flow_list.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.pc_5_link_aggregate_bit_rates {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// Pc5QosFlowList
+pub struct Pc5QosFlowList(pub Vec<Pc5QosFlowItem>);
+
+impl APerElement for Pc5QosFlowList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Pc5QosFlowItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Pc5QosFlowItem
+pub struct Pc5QosFlowItem {
+    pub pqi: FiveQi,
+    pub pc_5_flow_bit_rates: Option<Pc5FlowBitRates>,
+    pub range: Option<Range>,
+}
+
+impl APerElement for Pc5QosFlowItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pqi = FiveQi::from_aper(decoder, UNCONSTRAINED)?;
+        let pc_5_flow_bit_rates = if optionals.is_set(0) {
+            Some(Pc5FlowBitRates::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let range = if optionals.is_set(0) {
+            Some(Range::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pqi,
+            pc_5_flow_bit_rates,
+            range,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.pc_5_flow_bit_rates.is_some());        optionals.set(1, self.range.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pqi.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.pc_5_flow_bit_rates {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.range {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// Pc5FlowBitRates
+pub struct Pc5FlowBitRates {
+    pub guaranteed_flow_bit_rate: BitRate,
+    pub maximum_flow_bit_rate: BitRate,
+}
+
+impl APerElement for Pc5FlowBitRates {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let guaranteed_flow_bit_rate = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let maximum_flow_bit_rate = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            guaranteed_flow_bit_rate,
+            maximum_flow_bit_rate,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.guaranteed_flow_bit_rate.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.maximum_flow_bit_rate.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PciListForMdt
+pub struct PciListForMdt(pub Vec<NrPci>);
+
+impl APerElement for PciListForMdt {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NrPci>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PrivacyIndicator
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PrivacyIndicator {
+    ImmediateMdt,
+    LoggedMdt,
+    _Extended,
+}
+
+impl APerElement for PrivacyIndicator {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PrivacyIndicator::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionAggregateMaximumBitRate
+pub struct PduSessionAggregateMaximumBitRate {
+    pub pdu_session_aggregate_maximum_bit_rate_dl: BitRate,
+    pub pdu_session_aggregate_maximum_bit_rate_ul: BitRate,
+}
+
+impl APerElement for PduSessionAggregateMaximumBitRate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_aggregate_maximum_bit_rate_dl = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_aggregate_maximum_bit_rate_ul = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_aggregate_maximum_bit_rate_dl,
+            pdu_session_aggregate_maximum_bit_rate_ul,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_aggregate_maximum_bit_rate_dl.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_aggregate_maximum_bit_rate_ul.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionId
+pub struct PduSessionId(pub u8);
+
+impl APerElement for PduSessionId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceAdmittedList
+pub struct PduSessionResourceAdmittedList(pub Vec<PduSessionResourceAdmittedItem>);
+
+impl APerElement for PduSessionResourceAdmittedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceAdmittedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceAdmittedItem
+pub struct PduSessionResourceAdmittedItem {
+    pub pdu_session_id: PduSessionId,
+    pub handover_request_acknowledge_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceAdmittedItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_request_acknowledge_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_request_acknowledge_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_request_acknowledge_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToModifyListModCfm
+pub struct PduSessionResourceFailedToModifyListModCfm(pub Vec<PduSessionResourceFailedToModifyItemModCfm>);
+
+impl APerElement for PduSessionResourceFailedToModifyListModCfm {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToModifyItemModCfm>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToModifyItemModCfm
+pub struct PduSessionResourceFailedToModifyItemModCfm {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_modify_indication_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToModifyItemModCfm {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_modify_indication_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_indication_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_modify_indication_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToModifyListModRes
+pub struct PduSessionResourceFailedToModifyListModRes(pub Vec<PduSessionResourceFailedToModifyItemModRes>);
+
+impl APerElement for PduSessionResourceFailedToModifyListModRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToModifyItemModRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToModifyItemModRes
+pub struct PduSessionResourceFailedToModifyItemModRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_modify_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToModifyItemModRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_modify_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_modify_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToResumeListResReq
+pub struct PduSessionResourceFailedToResumeListResReq(pub Vec<PduSessionResourceFailedToResumeItemResReq>);
+
+impl APerElement for PduSessionResourceFailedToResumeListResReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToResumeItemResReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToResumeItemResReq
+pub struct PduSessionResourceFailedToResumeItemResReq {
+    pub pdu_session_id: PduSessionId,
+    pub cause: Cause,
+}
+
+impl APerElement for PduSessionResourceFailedToResumeItemResReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToResumeListResRes
+pub struct PduSessionResourceFailedToResumeListResRes(pub Vec<PduSessionResourceFailedToResumeItemResRes>);
+
+impl APerElement for PduSessionResourceFailedToResumeListResRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToResumeItemResRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToResumeItemResRes
+pub struct PduSessionResourceFailedToResumeItemResRes {
+    pub pdu_session_id: PduSessionId,
+    pub cause: Cause,
+}
+
+impl APerElement for PduSessionResourceFailedToResumeItemResRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupListCxtFail
+pub struct PduSessionResourceFailedToSetupListCxtFail(pub Vec<PduSessionResourceFailedToSetupItemCxtFail>);
+
+impl APerElement for PduSessionResourceFailedToSetupListCxtFail {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToSetupItemCxtFail>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupItemCxtFail
+pub struct PduSessionResourceFailedToSetupItemCxtFail {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToSetupItemCxtFail {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupListCxtRes
+pub struct PduSessionResourceFailedToSetupListCxtRes(pub Vec<PduSessionResourceFailedToSetupItemCxtRes>);
+
+impl APerElement for PduSessionResourceFailedToSetupListCxtRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToSetupItemCxtRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupItemCxtRes
+pub struct PduSessionResourceFailedToSetupItemCxtRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToSetupItemCxtRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupListHoAck
+pub struct PduSessionResourceFailedToSetupListHoAck(pub Vec<PduSessionResourceFailedToSetupItemHoAck>);
+
+impl APerElement for PduSessionResourceFailedToSetupListHoAck {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToSetupItemHoAck>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupItemHoAck
+pub struct PduSessionResourceFailedToSetupItemHoAck {
+    pub pdu_session_id: PduSessionId,
+    pub handover_resource_allocation_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToSetupItemHoAck {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_resource_allocation_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_resource_allocation_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_resource_allocation_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupListPsReq
+pub struct PduSessionResourceFailedToSetupListPsReq(pub Vec<PduSessionResourceFailedToSetupItemPsReq>);
+
+impl APerElement for PduSessionResourceFailedToSetupListPsReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToSetupItemPsReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupItemPsReq
+pub struct PduSessionResourceFailedToSetupItemPsReq {
+    pub pdu_session_id: PduSessionId,
+    pub path_switch_request_setup_failed_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToSetupItemPsReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let path_switch_request_setup_failed_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_setup_failed_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.path_switch_request_setup_failed_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupListSuRes
+pub struct PduSessionResourceFailedToSetupListSuRes(pub Vec<PduSessionResourceFailedToSetupItemSuRes>);
+
+impl APerElement for PduSessionResourceFailedToSetupListSuRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceFailedToSetupItemSuRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceFailedToSetupItemSuRes
+pub struct PduSessionResourceFailedToSetupItemSuRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceFailedToSetupItemSuRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceHandoverList
+pub struct PduSessionResourceHandoverList(pub Vec<PduSessionResourceHandoverItem>);
+
+impl APerElement for PduSessionResourceHandoverList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceHandoverItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceHandoverItem
+pub struct PduSessionResourceHandoverItem {
+    pub pdu_session_id: PduSessionId,
+    pub handover_command_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceHandoverItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_command_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_command_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_command_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceInformationList
+pub struct PduSessionResourceInformationList(pub Vec<PduSessionResourceInformationItem>);
+
+impl APerElement for PduSessionResourceInformationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceInformationItem
+pub struct PduSessionResourceInformationItem {
+    pub pdu_session_id: PduSessionId,
+    pub qos_flow_information_list: QosFlowInformationList,
+    pub dr_bs_to_qos_flows_mapping_list: Option<DrBsToQosFlowsMappingList>,
+}
+
+impl APerElement for PduSessionResourceInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_flow_information_list = QosFlowInformationList::from_aper(decoder, UNCONSTRAINED)?;
+        let dr_bs_to_qos_flows_mapping_list = if optionals.is_set(0) {
+            Some(DrBsToQosFlowsMappingList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pdu_session_id,
+            qos_flow_information_list,
+            dr_bs_to_qos_flows_mapping_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.dr_bs_to_qos_flows_mapping_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.qos_flow_information_list.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.dr_bs_to_qos_flows_mapping_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceListCxtRelCpl
+pub struct PduSessionResourceListCxtRelCpl(pub Vec<PduSessionResourceItemCxtRelCpl>);
+
+impl APerElement for PduSessionResourceListCxtRelCpl {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceItemCxtRelCpl>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceItemCxtRelCpl
+pub struct PduSessionResourceItemCxtRelCpl {
+    pub pdu_session_id: PduSessionId,
+}
+
+impl APerElement for PduSessionResourceItemCxtRelCpl {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceListCxtRelReq
+pub struct PduSessionResourceListCxtRelReq(pub Vec<PduSessionResourceItemCxtRelReq>);
+
+impl APerElement for PduSessionResourceListCxtRelReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceItemCxtRelReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceItemCxtRelReq
+pub struct PduSessionResourceItemCxtRelReq {
+    pub pdu_session_id: PduSessionId,
+}
+
+impl APerElement for PduSessionResourceItemCxtRelReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceListHoRqd
+pub struct PduSessionResourceListHoRqd(pub Vec<PduSessionResourceItemHoRqd>);
+
+impl APerElement for PduSessionResourceListHoRqd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceItemHoRqd>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceItemHoRqd
+pub struct PduSessionResourceItemHoRqd {
+    pub pdu_session_id: PduSessionId,
+    pub handover_required_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceItemHoRqd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_required_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_required_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_required_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyConfirmTransfer
+pub struct PduSessionResourceModifyConfirmTransfer {
+    pub qos_flow_modify_confirm_list: QosFlowModifyConfirmList,
+    pub ulngu_up_tnl_information: UpTransportLayerInformation,
+    pub additional_ng_uuptnl_information: Option<UpTransportLayerInformationPairList>,
+    pub qos_flow_failed_to_modify_list: Option<QosFlowListWithCause>,
+}
+
+impl APerElement for PduSessionResourceModifyConfirmTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_modify_confirm_list = QosFlowModifyConfirmList::from_aper(decoder, UNCONSTRAINED)?;
+        let ulngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let additional_ng_uuptnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformationPairList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_failed_to_modify_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_modify_confirm_list,
+            ulngu_up_tnl_information,
+            additional_ng_uuptnl_information,
+            qos_flow_failed_to_modify_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.additional_ng_uuptnl_information.is_some());        optionals.set(1, self.qos_flow_failed_to_modify_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_modify_confirm_list.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ulngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.additional_ng_uuptnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flow_failed_to_modify_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyIndicationUnsuccessfulTransfer
+pub struct PduSessionResourceModifyIndicationUnsuccessfulTransfer {
+    pub cause: Cause,
+}
+
+impl APerElement for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyRequestTransfer - omitted
+
+// PduSessionResourceModifyResponseTransfer
+pub struct PduSessionResourceModifyResponseTransfer {
+    pub dl_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
+    pub ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
+    pub qos_flow_add_or_modify_response_list: Option<QosFlowAddOrModifyResponseList>,
+    pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
+    pub qos_flow_failed_to_add_or_modify_list: Option<QosFlowListWithCause>,
+}
+
+impl APerElement for PduSessionResourceModifyResponseTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(6),
+            max: Some(6),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_ngu_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ul_ngu_up_tnl_information = if optionals.is_set(0) {
+            Some(UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_add_or_modify_response_list = if optionals.is_set(0) {
+            Some(QosFlowAddOrModifyResponseList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let additional_dl_qos_flow_per_tnl_information = if optionals.is_set(0) {
+            Some(QosFlowPerTnlInformationList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_failed_to_add_or_modify_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_ngu_up_tnl_information,
+            ul_ngu_up_tnl_information,
+            qos_flow_add_or_modify_response_list,
+            additional_dl_qos_flow_per_tnl_information,
+            qos_flow_failed_to_add_or_modify_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(6);
+        optionals.set(0, self.dl_ngu_up_tnl_information.is_some());        optionals.set(1, self.ul_ngu_up_tnl_information.is_some());        optionals.set(2, self.qos_flow_add_or_modify_response_list.is_some());        optionals.set(3, self.additional_dl_qos_flow_per_tnl_information.is_some());        optionals.set(4, self.qos_flow_failed_to_add_or_modify_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.dl_ngu_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ul_ngu_up_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flow_add_or_modify_response_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.additional_dl_qos_flow_per_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flow_failed_to_add_or_modify_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyIndicationTransfer
+pub struct PduSessionResourceModifyIndicationTransfer {
+    pub dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation,
+    pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
+}
+
+impl APerElement for PduSessionResourceModifyIndicationTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_qos_flow_per_tnl_information = QosFlowPerTnlInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let additional_dl_qos_flow_per_tnl_information = if optionals.is_set(0) {
+            Some(QosFlowPerTnlInformationList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_qos_flow_per_tnl_information,
+            additional_dl_qos_flow_per_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.additional_dl_qos_flow_per_tnl_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_qos_flow_per_tnl_information.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.additional_dl_qos_flow_per_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyListModCfm
+pub struct PduSessionResourceModifyListModCfm(pub Vec<PduSessionResourceModifyItemModCfm>);
+
+impl APerElement for PduSessionResourceModifyListModCfm {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceModifyItemModCfm>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyItemModCfm
+pub struct PduSessionResourceModifyItemModCfm {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_modify_confirm_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceModifyItemModCfm {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_modify_confirm_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_confirm_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_modify_confirm_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyListModInd
+pub struct PduSessionResourceModifyListModInd(pub Vec<PduSessionResourceModifyItemModInd>);
+
+impl APerElement for PduSessionResourceModifyListModInd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceModifyItemModInd>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyItemModInd
+pub struct PduSessionResourceModifyItemModInd {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_modify_indication_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceModifyItemModInd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_modify_indication_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_indication_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_modify_indication_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyListModReq
+pub struct PduSessionResourceModifyListModReq(pub Vec<PduSessionResourceModifyItemModReq>);
+
+impl APerElement for PduSessionResourceModifyListModReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceModifyItemModReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyItemModReq
+pub struct PduSessionResourceModifyItemModReq {
+    pub pdu_session_id: PduSessionId,
+    pub nas_pdu: Option<NasPdu>,
+    pub pdu_session_resource_modify_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceModifyItemModReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let nas_pdu = if optionals.is_set(0) {
+            Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let pdu_session_resource_modify_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            nas_pdu,
+            pdu_session_resource_modify_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.nas_pdu.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.nas_pdu {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.pdu_session_resource_modify_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyListModRes
+pub struct PduSessionResourceModifyListModRes(pub Vec<PduSessionResourceModifyItemModRes>);
+
+impl APerElement for PduSessionResourceModifyListModRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceModifyItemModRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyItemModRes
+pub struct PduSessionResourceModifyItemModRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_modify_response_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceModifyItemModRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_modify_response_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_response_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_modify_response_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceModifyUnsuccessfulTransfer
+pub struct PduSessionResourceModifyUnsuccessfulTransfer {
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PduSessionResourceModifyUnsuccessfulTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+        let criticality_diagnostics = if optionals.is_set(0) {
+            Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.criticality_diagnostics.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.criticality_diagnostics {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceNotifyList
+pub struct PduSessionResourceNotifyList(pub Vec<PduSessionResourceNotifyItem>);
+
+impl APerElement for PduSessionResourceNotifyList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceNotifyItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceNotifyItem
+pub struct PduSessionResourceNotifyItem {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_notify_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceNotifyItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_notify_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_notify_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_notify_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceNotifyReleasedTransfer
+pub struct PduSessionResourceNotifyReleasedTransfer {
+    pub cause: Cause,
+}
+
+impl APerElement for PduSessionResourceNotifyReleasedTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceNotifyTransfer
+pub struct PduSessionResourceNotifyTransfer {
+    pub qos_flow_notify_list: Option<QosFlowNotifyList>,
+    pub qos_flow_released_list: Option<QosFlowListWithCause>,
+}
+
+impl APerElement for PduSessionResourceNotifyTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_notify_list = if optionals.is_set(0) {
+            Some(QosFlowNotifyList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_released_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_notify_list,
+            qos_flow_released_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.qos_flow_notify_list.is_some());        optionals.set(1, self.qos_flow_released_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.qos_flow_notify_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flow_released_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleaseCommandTransfer
+pub struct PduSessionResourceReleaseCommandTransfer {
+    pub cause: Cause,
+}
+
+impl APerElement for PduSessionResourceReleaseCommandTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedListNot
+pub struct PduSessionResourceReleasedListNot(pub Vec<PduSessionResourceReleasedItemNot>);
+
+impl APerElement for PduSessionResourceReleasedListNot {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceReleasedItemNot>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedItemNot
+pub struct PduSessionResourceReleasedItemNot {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_notify_released_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceReleasedItemNot {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_notify_released_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_notify_released_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_notify_released_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedListPsAck
+pub struct PduSessionResourceReleasedListPsAck(pub Vec<PduSessionResourceReleasedItemPsAck>);
+
+impl APerElement for PduSessionResourceReleasedListPsAck {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceReleasedItemPsAck>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedItemPsAck
+pub struct PduSessionResourceReleasedItemPsAck {
+    pub pdu_session_id: PduSessionId,
+    pub path_switch_request_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceReleasedItemPsAck {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let path_switch_request_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.path_switch_request_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedListPsFail
+pub struct PduSessionResourceReleasedListPsFail(pub Vec<PduSessionResourceReleasedItemPsFail>);
+
+impl APerElement for PduSessionResourceReleasedListPsFail {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceReleasedItemPsFail>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedItemPsFail
+pub struct PduSessionResourceReleasedItemPsFail {
+    pub pdu_session_id: PduSessionId,
+    pub path_switch_request_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceReleasedItemPsFail {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let path_switch_request_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.path_switch_request_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedListRelRes
+pub struct PduSessionResourceReleasedListRelRes(pub Vec<PduSessionResourceReleasedItemRelRes>);
+
+impl APerElement for PduSessionResourceReleasedListRelRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceReleasedItemRelRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleasedItemRelRes
+pub struct PduSessionResourceReleasedItemRelRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_release_response_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceReleasedItemRelRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_release_response_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_release_response_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_release_response_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceReleaseResponseTransfer - omitted
+
+// PduSessionResourceResumeListResReq
+pub struct PduSessionResourceResumeListResReq(pub Vec<PduSessionResourceResumeItemResReq>);
+
+impl APerElement for PduSessionResourceResumeListResReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceResumeItemResReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceResumeItemResReq
+pub struct PduSessionResourceResumeItemResReq {
+    pub pdu_session_id: PduSessionId,
+    pub ue_context_resume_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceResumeItemResReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_context_resume_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            ue_context_resume_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ue_context_resume_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceResumeListResRes
+pub struct PduSessionResourceResumeListResRes(pub Vec<PduSessionResourceResumeItemResRes>);
+
+impl APerElement for PduSessionResourceResumeListResRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceResumeItemResRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceResumeItemResRes
+pub struct PduSessionResourceResumeItemResRes {
+    pub pdu_session_id: PduSessionId,
+    pub ue_context_resume_response_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceResumeItemResRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_context_resume_response_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            ue_context_resume_response_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ue_context_resume_response_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSecondaryRatUsageList
+pub struct PduSessionResourceSecondaryRatUsageList(pub Vec<PduSessionResourceSecondaryRatUsageItem>);
+
+impl APerElement for PduSessionResourceSecondaryRatUsageList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSecondaryRatUsageItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSecondaryRatUsageItem
+pub struct PduSessionResourceSecondaryRatUsageItem {
+    pub pdu_session_id: PduSessionId,
+    pub secondary_rat_data_usage_report_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSecondaryRatUsageItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let secondary_rat_data_usage_report_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            secondary_rat_data_usage_report_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.secondary_rat_data_usage_report_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupListCxtReq
+pub struct PduSessionResourceSetupListCxtReq(pub Vec<PduSessionResourceSetupItemCxtReq>);
+
+impl APerElement for PduSessionResourceSetupListCxtReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSetupItemCxtReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupItemCxtReq
+pub struct PduSessionResourceSetupItemCxtReq {
+    pub pdu_session_id: PduSessionId,
+    pub nas_pdu: Option<NasPdu>,
+    pub s_nssai: SNssai,
+    pub pdu_session_resource_setup_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSetupItemCxtReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let nas_pdu = if optionals.is_set(0) {
+            Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let s_nssai = SNssai::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            nas_pdu,
+            s_nssai,
+            pdu_session_resource_setup_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.nas_pdu.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.nas_pdu {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupListCxtRes
+pub struct PduSessionResourceSetupListCxtRes(pub Vec<PduSessionResourceSetupItemCxtRes>);
+
+impl APerElement for PduSessionResourceSetupListCxtRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSetupItemCxtRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupItemCxtRes
+pub struct PduSessionResourceSetupItemCxtRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_setup_response_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSetupItemCxtRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_response_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_response_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_response_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupListHoReq
+pub struct PduSessionResourceSetupListHoReq(pub Vec<PduSessionResourceSetupItemHoReq>);
+
+impl APerElement for PduSessionResourceSetupListHoReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSetupItemHoReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupItemHoReq
+pub struct PduSessionResourceSetupItemHoReq {
+    pub pdu_session_id: PduSessionId,
+    pub s_nssai: SNssai,
+    pub handover_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSetupItemHoReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let s_nssai = SNssai::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            s_nssai,
+            handover_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupListSuReq
+pub struct PduSessionResourceSetupListSuReq(pub Vec<PduSessionResourceSetupItemSuReq>);
+
+impl APerElement for PduSessionResourceSetupListSuReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSetupItemSuReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupItemSuReq
+pub struct PduSessionResourceSetupItemSuReq {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_nas_pdu: Option<NasPdu>,
+    pub s_nssai: SNssai,
+    pub pdu_session_resource_setup_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSetupItemSuReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_nas_pdu = if optionals.is_set(0) {
+            Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let s_nssai = SNssai::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_nas_pdu,
+            s_nssai,
+            pdu_session_resource_setup_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.pdu_session_nas_pdu.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.pdu_session_nas_pdu {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupListSuRes
+pub struct PduSessionResourceSetupListSuRes(pub Vec<PduSessionResourceSetupItemSuRes>);
+
+impl APerElement for PduSessionResourceSetupListSuRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSetupItemSuRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupItemSuRes
+pub struct PduSessionResourceSetupItemSuRes {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_setup_response_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSetupItemSuRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_setup_response_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_response_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_setup_response_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupRequestTransfer - omitted
+
+// PduSessionResourceSetupResponseTransfer
+pub struct PduSessionResourceSetupResponseTransfer {
+    pub dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation,
+    pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
+    pub security_result: Option<SecurityResult>,
+    pub qos_flow_failed_to_setup_list: Option<QosFlowListWithCause>,
+}
+
+impl APerElement for PduSessionResourceSetupResponseTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dl_qos_flow_per_tnl_information = QosFlowPerTnlInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let additional_dl_qos_flow_per_tnl_information = if optionals.is_set(0) {
+            Some(QosFlowPerTnlInformationList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let security_result = if optionals.is_set(0) {
+            Some(SecurityResult::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flow_failed_to_setup_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_qos_flow_per_tnl_information,
+            additional_dl_qos_flow_per_tnl_information,
+            security_result,
+            qos_flow_failed_to_setup_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.additional_dl_qos_flow_per_tnl_information.is_some());        optionals.set(1, self.security_result.is_some());        optionals.set(2, self.qos_flow_failed_to_setup_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dl_qos_flow_per_tnl_information.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.additional_dl_qos_flow_per_tnl_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.security_result {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flow_failed_to_setup_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSetupUnsuccessfulTransfer
+pub struct PduSessionResourceSetupUnsuccessfulTransfer {
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PduSessionResourceSetupUnsuccessfulTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+        let criticality_diagnostics = if optionals.is_set(0) {
+            Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.criticality_diagnostics.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.criticality_diagnostics {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSuspendListSusReq
+pub struct PduSessionResourceSuspendListSusReq(pub Vec<PduSessionResourceSuspendItemSusReq>);
+
+impl APerElement for PduSessionResourceSuspendListSusReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSuspendItemSusReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSuspendItemSusReq
+pub struct PduSessionResourceSuspendItemSusReq {
+    pub pdu_session_id: PduSessionId,
+    pub ue_context_suspend_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSuspendItemSusReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_context_suspend_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            ue_context_suspend_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ue_context_suspend_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSwitchedList
+pub struct PduSessionResourceSwitchedList(pub Vec<PduSessionResourceSwitchedItem>);
+
+impl APerElement for PduSessionResourceSwitchedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceSwitchedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceSwitchedItem
+pub struct PduSessionResourceSwitchedItem {
+    pub pdu_session_id: PduSessionId,
+    pub path_switch_request_acknowledge_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceSwitchedItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let path_switch_request_acknowledge_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_acknowledge_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.path_switch_request_acknowledge_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceToBeSwitchedDlList
+pub struct PduSessionResourceToBeSwitchedDlList(pub Vec<PduSessionResourceToBeSwitchedDlItem>);
+
+impl APerElement for PduSessionResourceToBeSwitchedDlList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceToBeSwitchedDlItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceToBeSwitchedDlItem
+pub struct PduSessionResourceToBeSwitchedDlItem {
+    pub pdu_session_id: PduSessionId,
+    pub path_switch_request_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceToBeSwitchedDlItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let path_switch_request_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.path_switch_request_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceToReleaseListHoCmd
+pub struct PduSessionResourceToReleaseListHoCmd(pub Vec<PduSessionResourceToReleaseItemHoCmd>);
+
+impl APerElement for PduSessionResourceToReleaseListHoCmd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceToReleaseItemHoCmd>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceToReleaseItemHoCmd
+pub struct PduSessionResourceToReleaseItemHoCmd {
+    pub pdu_session_id: PduSessionId,
+    pub handover_preparation_unsuccessful_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceToReleaseItemHoCmd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let handover_preparation_unsuccessful_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_preparation_unsuccessful_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.handover_preparation_unsuccessful_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceToReleaseListRelCmd
+pub struct PduSessionResourceToReleaseListRelCmd(pub Vec<PduSessionResourceToReleaseItemRelCmd>);
+
+impl APerElement for PduSessionResourceToReleaseListRelCmd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PduSessionResourceToReleaseItemRelCmd>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionResourceToReleaseItemRelCmd
+pub struct PduSessionResourceToReleaseItemRelCmd {
+    pub pdu_session_id: PduSessionId,
+    pub pdu_session_resource_release_command_transfer: Vec<u8>,
+}
+
+impl APerElement for PduSessionResourceToReleaseItemRelCmd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_id = PduSessionId::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_release_command_transfer = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_release_command_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_resource_release_command_transfer.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PduSessionType
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PduSessionType {
+    Ipv4,
+    Ipv6,
+    Ipv4v6,
+    Ethernet,
+    Unstructured,
+    _Extended,
+}
+
+impl APerElement for PduSessionType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PduSessionType::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PduSessionUsageReport
+pub struct PduSessionUsageReport {
+    pub rat_type: RatType,
+    pub pdu_session_timed_report_list: VolumeTimedReportList,
+}
+
+impl APerElement for PduSessionUsageReport {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let rat_type = RatType::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_timed_report_list = VolumeTimedReportList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            rat_type,
+            pdu_session_timed_report_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.rat_type.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.pdu_session_timed_report_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Periodicity
+pub struct Periodicity(pub u32);
+
+impl APerElement for Periodicity {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(640000),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u32::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PeriodicRegistrationUpdateTimer
+pub struct PeriodicRegistrationUpdateTimer(pub BitString);
+
+impl APerElement for PeriodicRegistrationUpdateTimer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PlmnIdentity
+pub struct PlmnIdentity(pub Vec<u8>);
+
+impl APerElement for PlmnIdentity {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PlmnSupportList
+pub struct PlmnSupportList(pub Vec<PlmnSupportItem>);
+
+impl APerElement for PlmnSupportList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PlmnSupportItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PlmnSupportItem
+pub struct PlmnSupportItem {
+    pub plmn_identity: PlmnIdentity,
+    pub slice_support_list: SliceSupportList,
+}
+
+impl APerElement for PlmnSupportItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let slice_support_list = SliceSupportList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            slice_support_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.slice_support_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PniNpnMobilityInformation
+pub struct PniNpnMobilityInformation {
+    pub allowed_pni_npi_list: AllowedPniNpnList,
+}
+
+impl APerElement for PniNpnMobilityInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let allowed_pni_npi_list = AllowedPniNpnList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            allowed_pni_npi_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.allowed_pni_npi_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// PortNumber
+pub struct PortNumber(pub Vec<u8>);
+
+impl APerElement for PortNumber {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PreEmptionCapability
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PreEmptionCapability {
+    ShallNotTriggerPreEmption,
+    MayTriggerPreEmption,
+    _Extended,
+}
+
+impl APerElement for PreEmptionCapability {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PreEmptionCapability::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PreEmptionVulnerability
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum PreEmptionVulnerability {
+    NotPreEmptable,
+    PreEmptable,
+    _Extended,
+}
+
+impl APerElement for PreEmptionVulnerability {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(PreEmptionVulnerability::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PriorityLevelArp
+pub struct PriorityLevelArp(pub u8);
+
+impl APerElement for PriorityLevelArp {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PriorityLevelQos
+pub struct PriorityLevelQos(pub u8);
+
+impl APerElement for PriorityLevelQos {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(127),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PwsFailedCellIdList
+pub enum PwsFailedCellIdList {
+    EutraCgiPwsFailedList(EutraCgiList),
+    NrCgiPwsFailedList(NrCgiList),
+    _Extended,
+}
+
+impl APerElement for PwsFailedCellIdList {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::EutraCgiPwsFailedList(EutraCgiList::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::NrCgiPwsFailedList(NrCgiList::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::EutraCgiPwsFailedList(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::NrCgiPwsFailedList(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// QosCharacteristics
+pub enum QosCharacteristics {
+    NonDynamic5qi(NonDynamic5qiDescriptor),
+    Dynamic5qi(Dynamic5qiDescriptor),
+    _Extended,
+}
+
+impl APerElement for QosCharacteristics {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::NonDynamic5qi(NonDynamic5qiDescriptor::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::Dynamic5qi(Dynamic5qiDescriptor::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::NonDynamic5qi(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Dynamic5qi(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// QosFlowAcceptedList
+pub struct QosFlowAcceptedList(pub Vec<QosFlowAcceptedItem>);
+
+impl APerElement for QosFlowAcceptedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowAcceptedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowAcceptedItem
+pub struct QosFlowAcceptedItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+}
+
+impl APerElement for QosFlowAcceptedItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowAddOrModifyRequestList
+pub struct QosFlowAddOrModifyRequestList(pub Vec<QosFlowAddOrModifyRequestItem>);
+
+impl APerElement for QosFlowAddOrModifyRequestList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowAddOrModifyRequestItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowAddOrModifyRequestItem
+pub struct QosFlowAddOrModifyRequestItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub qos_flow_level_qos_parameters: Option<QosFlowLevelQosParameters>,
+    pub e_rab_id: Option<ERabId>,
+}
+
+impl APerElement for QosFlowAddOrModifyRequestItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_flow_level_qos_parameters = if optionals.is_set(0) {
+            Some(QosFlowLevelQosParameters::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let e_rab_id = if optionals.is_set(0) {
+            Some(ERabId::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            qos_flow_level_qos_parameters,
+            e_rab_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.qos_flow_level_qos_parameters.is_some());        optionals.set(1, self.e_rab_id.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.qos_flow_level_qos_parameters {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.e_rab_id {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosFlowAddOrModifyResponseList
+pub struct QosFlowAddOrModifyResponseList(pub Vec<QosFlowAddOrModifyResponseItem>);
+
+impl APerElement for QosFlowAddOrModifyResponseList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowAddOrModifyResponseItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowAddOrModifyResponseItem
+pub struct QosFlowAddOrModifyResponseItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+}
+
+impl APerElement for QosFlowAddOrModifyResponseItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowFeedbackList
+pub struct QosFlowFeedbackList(pub Vec<QosFlowFeedbackItem>);
+
+impl APerElement for QosFlowFeedbackList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowFeedbackItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowFeedbackItem
+pub struct QosFlowFeedbackItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub update_feedback: Option<UpdateFeedback>,
+    pub c_npacket_delay_budget_dl: Option<ExtendedPacketDelayBudget>,
+    pub c_npacket_delay_budget_ul: Option<ExtendedPacketDelayBudget>,
+}
+
+impl APerElement for QosFlowFeedbackItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let update_feedback = if optionals.is_set(0) {
+            Some(UpdateFeedback::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let c_npacket_delay_budget_dl = if optionals.is_set(0) {
+            Some(ExtendedPacketDelayBudget::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let c_npacket_delay_budget_ul = if optionals.is_set(0) {
+            Some(ExtendedPacketDelayBudget::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            update_feedback,
+            c_npacket_delay_budget_dl,
+            c_npacket_delay_budget_ul,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.update_feedback.is_some());        optionals.set(1, self.c_npacket_delay_budget_dl.is_some());        optionals.set(2, self.c_npacket_delay_budget_ul.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.update_feedback {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.c_npacket_delay_budget_dl {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.c_npacket_delay_budget_ul {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosFlowIdentifier
+pub struct QosFlowIdentifier(pub u8);
+
+impl APerElement for QosFlowIdentifier {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(63),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowInformationList
+pub struct QosFlowInformationList(pub Vec<QosFlowInformationItem>);
+
+impl APerElement for QosFlowInformationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowInformationItem
+pub struct QosFlowInformationItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub dl_forwarding: Option<DlForwarding>,
+}
+
+impl APerElement for QosFlowInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_forwarding = if optionals.is_set(0) {
+            Some(DlForwarding::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            dl_forwarding,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.dl_forwarding.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.dl_forwarding {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosFlowLevelQosParameters
+pub struct QosFlowLevelQosParameters {
+    pub qos_characteristics: QosCharacteristics,
+    pub allocation_and_retention_priority: AllocationAndRetentionPriority,
+    pub gbr_qos_information: Option<GbrQosInformation>,
+    pub reflective_qos_attribute: Option<ReflectiveQosAttribute>,
+    pub additional_qos_flow_information: Option<AdditionalQosFlowInformation>,
+}
+
+impl APerElement for QosFlowLevelQosParameters {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_characteristics = QosCharacteristics::from_aper(decoder, UNCONSTRAINED)?;
+        let allocation_and_retention_priority = AllocationAndRetentionPriority::from_aper(decoder, UNCONSTRAINED)?;
+        let gbr_qos_information = if optionals.is_set(0) {
+            Some(GbrQosInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let reflective_qos_attribute = if optionals.is_set(0) {
+            Some(ReflectiveQosAttribute::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let additional_qos_flow_information = if optionals.is_set(0) {
+            Some(AdditionalQosFlowInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_characteristics,
+            allocation_and_retention_priority,
+            gbr_qos_information,
+            reflective_qos_attribute,
+            additional_qos_flow_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.gbr_qos_information.is_some());        optionals.set(1, self.reflective_qos_attribute.is_some());        optionals.set(2, self.additional_qos_flow_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_characteristics.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.allocation_and_retention_priority.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.gbr_qos_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.reflective_qos_attribute {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.additional_qos_flow_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosMonitoringRequest
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum QosMonitoringRequest {
+    Ul,
+    Dl,
+    Both,
+    _Extended,
+}
+
+impl APerElement for QosMonitoringRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(QosMonitoringRequest::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosMonitoringReportingFrequency
+pub struct QosMonitoringReportingFrequency(pub u16);
+
+impl APerElement for QosMonitoringReportingFrequency {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1800),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowListWithCause
+pub struct QosFlowListWithCause(pub Vec<QosFlowWithCauseItem>);
+
+impl APerElement for QosFlowListWithCause {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowWithCauseItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowWithCauseItem
+pub struct QosFlowWithCauseItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub cause: Cause,
+}
+
+impl APerElement for QosFlowWithCauseItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowModifyConfirmList
+pub struct QosFlowModifyConfirmList(pub Vec<QosFlowModifyConfirmItem>);
+
+impl APerElement for QosFlowModifyConfirmList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowModifyConfirmItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowModifyConfirmItem
+pub struct QosFlowModifyConfirmItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+}
+
+impl APerElement for QosFlowModifyConfirmItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowNotifyList
+pub struct QosFlowNotifyList(pub Vec<QosFlowNotifyItem>);
+
+impl APerElement for QosFlowNotifyList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowNotifyItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowNotifyItem
+pub struct QosFlowNotifyItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub notification_cause: NotificationCause,
+}
+
+impl APerElement for QosFlowNotifyItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let notification_cause = NotificationCause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+            notification_cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.notification_cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowParametersList
+pub struct QosFlowParametersList(pub Vec<QosFlowParametersItem>);
+
+impl APerElement for QosFlowParametersList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowParametersItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowParametersItem
+pub struct QosFlowParametersItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub alternative_qos_para_set_list: Option<AlternativeQosParaSetList>,
+}
+
+impl APerElement for QosFlowParametersItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let alternative_qos_para_set_list = if optionals.is_set(0) {
+            Some(AlternativeQosParaSetList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            alternative_qos_para_set_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.alternative_qos_para_set_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.alternative_qos_para_set_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosFlowPerTnlInformation
+pub struct QosFlowPerTnlInformation {
+    pub up_transport_layer_information: UpTransportLayerInformation,
+    pub associated_qos_flow_list: AssociatedQosFlowList,
+}
+
+impl APerElement for QosFlowPerTnlInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let up_transport_layer_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let associated_qos_flow_list = AssociatedQosFlowList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            up_transport_layer_information,
+            associated_qos_flow_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.up_transport_layer_information.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.associated_qos_flow_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowPerTnlInformationList
+pub struct QosFlowPerTnlInformationList(pub Vec<QosFlowPerTnlInformationItem>);
+
+impl APerElement for QosFlowPerTnlInformationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowPerTnlInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowPerTnlInformationItem
+pub struct QosFlowPerTnlInformationItem {
+    pub qos_flow_per_tnl_information: QosFlowPerTnlInformation,
+}
+
+impl APerElement for QosFlowPerTnlInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_per_tnl_information = QosFlowPerTnlInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_per_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_per_tnl_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowSetupRequestList
+pub struct QosFlowSetupRequestList(pub Vec<QosFlowSetupRequestItem>);
+
+impl APerElement for QosFlowSetupRequestList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowSetupRequestItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowSetupRequestItem
+pub struct QosFlowSetupRequestItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub qos_flow_level_qos_parameters: QosFlowLevelQosParameters,
+    pub e_rab_id: Option<ERabId>,
+}
+
+impl APerElement for QosFlowSetupRequestItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_flow_level_qos_parameters = QosFlowLevelQosParameters::from_aper(decoder, UNCONSTRAINED)?;
+        let e_rab_id = if optionals.is_set(0) {
+            Some(ERabId::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            qos_flow_level_qos_parameters,
+            e_rab_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.e_rab_id.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.qos_flow_level_qos_parameters.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.e_rab_id {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosFlowListWithDataForwarding
+pub struct QosFlowListWithDataForwarding(pub Vec<QosFlowItemWithDataForwarding>);
+
+impl APerElement for QosFlowListWithDataForwarding {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowItemWithDataForwarding>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowItemWithDataForwarding
+pub struct QosFlowItemWithDataForwarding {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub data_forwarding_accepted: Option<DataForwardingAccepted>,
+}
+
+impl APerElement for QosFlowItemWithDataForwarding {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let data_forwarding_accepted = if optionals.is_set(0) {
+            Some(DataForwardingAccepted::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            data_forwarding_accepted,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.data_forwarding_accepted.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.data_forwarding_accepted {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// QosFlowToBeForwardedList
+pub struct QosFlowToBeForwardedList(pub Vec<QosFlowToBeForwardedItem>);
+
+impl APerElement for QosFlowToBeForwardedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowToBeForwardedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowToBeForwardedItem
+pub struct QosFlowToBeForwardedItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+}
+
+impl APerElement for QosFlowToBeForwardedItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// QosFlowsUsageReportList
+pub struct QosFlowsUsageReportList(pub Vec<QosFlowsUsageReportItem>);
+
+impl APerElement for QosFlowsUsageReportList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<QosFlowsUsageReportItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// QosFlowsUsageReportItem
+pub struct QosFlowsUsageReportItem {
+    pub qos_flow_identifier: QosFlowIdentifier,
+    pub rat_type: RatType1,
+    pub qos_flows_timed_report_list: VolumeTimedReportList,
+}
+
+impl APerElement for QosFlowsUsageReportItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_identifier = QosFlowIdentifier::from_aper(decoder, UNCONSTRAINED)?;
+        let rat_type = RatType1::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_flows_timed_report_list = VolumeTimedReportList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+            rat_type,
+            qos_flows_timed_report_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.rat_type.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.qos_flows_timed_report_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// Range
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum Range {
+    M50,
+    M80,
+    M180,
+    M200,
+    M350,
+    M400,
+    M500,
+    M700,
+    M1000,
+    _Extended,
+}
+
+impl APerElement for Range {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(Range::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RanNodeName
+pub struct RanNodeName(pub String);
+
+impl APerElement for RanNodeName {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(150),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RanNodeNameVisibleString
+pub struct RanNodeNameVisibleString(pub String);
+
+impl APerElement for RanNodeNameVisibleString {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(150),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RanNodeNameUtf8String
+pub struct RanNodeNameUtf8String(pub String);
+
+impl APerElement for RanNodeNameUtf8String {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(150),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RanPagingPriority
+pub struct RanPagingPriority(pub u8);
+
+impl APerElement for RanPagingPriority {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RanStatusTransferTransparentContainer
+pub struct RanStatusTransferTransparentContainer {
+    pub dr_bs_subject_to_status_transfer_list: DrBsSubjectToStatusTransferList,
+}
+
+impl APerElement for RanStatusTransferTransparentContainer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dr_bs_subject_to_status_transfer_list = DrBsSubjectToStatusTransferList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            dr_bs_subject_to_status_transfer_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.dr_bs_subject_to_status_transfer_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RanUeNgapId
+pub struct RanUeNgapId(pub u64);
+
+impl APerElement for RanUeNgapId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u64::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RatInformation
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum RatInformation {
+    Unlicensed,
+    NbIot,
+    _Extended,
+}
+
+impl APerElement for RatInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(RatInformation::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RatRestrictions
+pub struct RatRestrictions(pub Vec<RatRestrictionsItem>);
+
+impl APerElement for RatRestrictions {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<RatRestrictionsItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RatRestrictionsItem
+pub struct RatRestrictionsItem {
+    pub plmn_identity: PlmnIdentity,
+    pub rat_restriction_information: RatRestrictionInformation,
+}
+
+impl APerElement for RatRestrictionsItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let rat_restriction_information = RatRestrictionInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            rat_restriction_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.rat_restriction_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RatRestrictionInformation
+pub struct RatRestrictionInformation(pub BitString);
+
+impl APerElement for RatRestrictionInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RecommendedCellsForPaging
+pub struct RecommendedCellsForPaging {
+    pub recommended_cell_list: RecommendedCellList,
+}
+
+impl APerElement for RecommendedCellsForPaging {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let recommended_cell_list = RecommendedCellList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            recommended_cell_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.recommended_cell_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RecommendedCellList
+pub struct RecommendedCellList(pub Vec<RecommendedCellItem>);
+
+impl APerElement for RecommendedCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<RecommendedCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RecommendedCellItem
+pub struct RecommendedCellItem {
+    pub ngran_cgi: NgranCgi,
+    pub time_stayed_in_cell: Option<u16>,
+}
+
+impl APerElement for RecommendedCellItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let time_stayed_in_cell = if optionals.is_set(0) {
+            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ngran_cgi,
+            time_stayed_in_cell,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.time_stayed_in_cell.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ngran_cgi.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.time_stayed_in_cell {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// RecommendedRanNodesForPaging
+pub struct RecommendedRanNodesForPaging {
+    pub recommended_ran_node_list: RecommendedRanNodeList,
+}
+
+impl APerElement for RecommendedRanNodesForPaging {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let recommended_ran_node_list = RecommendedRanNodeList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            recommended_ran_node_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.recommended_ran_node_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RecommendedRanNodeList
+pub struct RecommendedRanNodeList(pub Vec<RecommendedRanNodeItem>);
+
+impl APerElement for RecommendedRanNodeList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<RecommendedRanNodeItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RecommendedRanNodeItem
+pub struct RecommendedRanNodeItem {
+    pub amf_paging_target: AmfPagingTarget,
+}
+
+impl APerElement for RecommendedRanNodeItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_paging_target = AmfPagingTarget::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            amf_paging_target,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_paging_target.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RedirectionVoiceFallback
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum RedirectionVoiceFallback {
+    Possible,
+    NotPossible,
+    _Extended,
+}
+
+impl APerElement for RedirectionVoiceFallback {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(RedirectionVoiceFallback::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RedundantPduSessionInformation
+pub struct RedundantPduSessionInformation {
+    pub rsn: Rsn,
+}
+
+impl APerElement for RedundantPduSessionInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let rsn = Rsn::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            rsn,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.rsn.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RedundantQosFlowIndicator
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum RedundantQosFlowIndicator {
+    True,
+    False,
+}
+
+impl APerElement for RedundantQosFlowIndicator {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ReflectiveQosAttribute
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ReflectiveQosAttribute {
+    SubjectTo,
+    _Extended,
+}
+
+impl APerElement for ReflectiveQosAttribute {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ReflectiveQosAttribute::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RelativeAmfCapacity
+pub struct RelativeAmfCapacity(pub u8);
+
+impl APerElement for RelativeAmfCapacity {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ReportArea
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ReportArea {
+    Cell,
+    _Extended,
+}
+
+impl APerElement for ReportArea {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ReportArea::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RepetitionPeriod
+pub struct RepetitionPeriod(pub u32);
+
+impl APerElement for RepetitionPeriod {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u32::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ResetAll
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ResetAll {
+    ResetAll,
+    _Extended,
+}
+
+impl APerElement for ResetAll {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ResetAll::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ReportAmountMdt
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ReportAmountMdt {
+    R1,
+    R2,
+    R4,
+    R8,
+    R16,
+    R32,
+    R64,
+    Rinfinity,
+}
+
+impl APerElement for ReportAmountMdt {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ReportIntervalMdt
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ReportIntervalMdt {
+    Ms120,
+    Ms240,
+    Ms480,
+    Ms640,
+    Ms1024,
+    Ms2048,
+    Ms5120,
+    Ms10240,
+    Min1,
+    Min6,
+    Min12,
+    Min30,
+    Min60,
+}
+
+impl APerElement for ReportIntervalMdt {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ResetType
+pub enum ResetType {
+    NgInterface(ResetAll),
+    PartOfNgInterface(UeAssociatedLogicalNgConnectionList),
+    _Extended,
+}
+
+impl APerElement for ResetType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::NgInterface(ResetAll::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::PartOfNgInterface(UeAssociatedLogicalNgConnectionList::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::NgInterface(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::PartOfNgInterface(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// RgLevelWirelineAccessCharacteristics
+pub struct RgLevelWirelineAccessCharacteristics(pub Vec<u8>);
+
+impl APerElement for RgLevelWirelineAccessCharacteristics {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RncId
+pub struct RncId(pub u16);
+
+impl APerElement for RncId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RoutingId
+pub struct RoutingId(pub Vec<u8>);
+
+impl APerElement for RoutingId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RrcContainer
+pub struct RrcContainer(pub Vec<u8>);
+
+impl APerElement for RrcContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RrcEstablishmentCause
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum RrcEstablishmentCause {
+    Emergency,
+    HighPriorityAccess,
+    MtAccess,
+    MoSignalling,
+    MoData,
+    MoVoiceCall,
+    MoVideoCall,
+    MoSms,
+    MpsPriorityAccess,
+    McsPriorityAccess,
+    _Extended,
+}
+
+impl APerElement for RrcEstablishmentCause {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(RrcEstablishmentCause::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RrcInactiveTransitionReportRequest
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum RrcInactiveTransitionReportRequest {
+    SubsequentStateTransitionReport,
+    SingleRrcConnectedStateReport,
+    CancelReport,
+    _Extended,
+}
+
+impl APerElement for RrcInactiveTransitionReportRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(RrcInactiveTransitionReportRequest::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RrcState
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum RrcState {
+    Inactive,
+    Connected,
+    _Extended,
+}
+
+impl APerElement for RrcState {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(RrcState::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Rsn
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum Rsn {
+    V1,
+    V2,
+    _Extended,
+}
+
+impl APerElement for Rsn {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(Rsn::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RimInformationTransfer
+pub struct RimInformationTransfer {
+    pub target_ran_node_id: TargetRanNodeId,
+    pub source_ran_node_id: SourceRanNodeId,
+    pub rim_information: RimInformation,
+}
+
+impl APerElement for RimInformationTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let target_ran_node_id = TargetRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let source_ran_node_id = SourceRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let rim_information = RimInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            target_ran_node_id,
+            source_ran_node_id,
+            rim_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.target_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.source_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.rim_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// RimInformation
+pub struct RimInformation {
+    pub target_gnb_set_id: GnbSetId,
+    pub rim_rs_detection: RimRsDetection,
+}
+
+impl APerElement for RimInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let target_gnb_set_id = GnbSetId::from_aper(decoder, UNCONSTRAINED)?;
+        let rim_rs_detection = RimRsDetection::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            target_gnb_set_id,
+            rim_rs_detection,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.target_gnb_set_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.rim_rs_detection.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// GnbSetId
+pub struct GnbSetId(pub BitString);
+
+impl APerElement for GnbSetId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(22),
+            max: Some(22),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ScheduledCommunicationTime
+pub struct ScheduledCommunicationTime {
+    pub dayof_week: Option<BitString>,
+    pub timeof_day_start: Option<u32>,
+    pub timeof_day_end: Option<u32>,
+}
+
+impl APerElement for ScheduledCommunicationTime {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let dayof_week = if optionals.is_set(0) {
+            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let timeof_day_start = if optionals.is_set(0) {
+            Some(u32::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let timeof_day_end = if optionals.is_set(0) {
+            Some(u32::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dayof_week,
+            timeof_day_start,
+            timeof_day_end,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.dayof_week.is_some());        optionals.set(1, self.timeof_day_start.is_some());        optionals.set(2, self.timeof_day_end.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.dayof_week {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.timeof_day_start {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.timeof_day_end {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SctpTlAs
+pub struct SctpTlAs(pub Vec<TransportLayerAddress>);
+
+impl APerElement for SctpTlAs {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TransportLayerAddress>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Sd
+pub struct Sd(pub Vec<u8>);
+
+impl APerElement for Sd {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SecondaryRatUsageInformation
+pub struct SecondaryRatUsageInformation {
+    pub pdu_session_usage_report: Option<PduSessionUsageReport>,
+    pub qos_flows_usage_report_list: Option<QosFlowsUsageReportList>,
+}
+
+impl APerElement for SecondaryRatUsageInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let pdu_session_usage_report = if optionals.is_set(0) {
+            Some(PduSessionUsageReport::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let qos_flows_usage_report_list = if optionals.is_set(0) {
+            Some(QosFlowsUsageReportList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pdu_session_usage_report,
+            qos_flows_usage_report_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.pdu_session_usage_report.is_some());        optionals.set(1, self.qos_flows_usage_report_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.pdu_session_usage_report {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.qos_flows_usage_report_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SecondaryRatDataUsageReportTransfer
+pub struct SecondaryRatDataUsageReportTransfer {
+    pub secondary_rat_usage_information: Option<SecondaryRatUsageInformation>,
+}
+
+impl APerElement for SecondaryRatDataUsageReportTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let secondary_rat_usage_information = if optionals.is_set(0) {
+            Some(SecondaryRatUsageInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            secondary_rat_usage_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.secondary_rat_usage_information.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.secondary_rat_usage_information {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SecurityContext
+pub struct SecurityContext {
+    pub next_hop_chaining_count: NextHopChainingCount,
+    pub next_hop_nh: SecurityKey,
+}
+
+impl APerElement for SecurityContext {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let next_hop_chaining_count = NextHopChainingCount::from_aper(decoder, UNCONSTRAINED)?;
+        let next_hop_nh = SecurityKey::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            next_hop_chaining_count,
+            next_hop_nh,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.next_hop_chaining_count.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.next_hop_nh.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SecurityIndication
+pub struct SecurityIndication {
+    pub integrity_protection_indication: IntegrityProtectionIndication,
+    pub confidentiality_protection_indication: ConfidentialityProtectionIndication,
+    pub maximum_integrity_protected_data_rate_ul: Option<MaximumIntegrityProtectedDataRate>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub integrity: Protection,
+    pub is: Required,
+    pub or: Preferred,
+}
+
+impl APerElement for SecurityIndication {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let integrity_protection_indication = IntegrityProtectionIndication::from_aper(decoder, UNCONSTRAINED)?;
+        let confidentiality_protection_indication = ConfidentialityProtectionIndication::from_aper(decoder, UNCONSTRAINED)?;
+        let maximum_integrity_protected_data_rate_ul = if optionals.is_set(0) {
+            Some(MaximumIntegrityProtectedDataRate::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let integrity = Protection::from_aper(decoder, UNCONSTRAINED)?;
+        let is = Required::from_aper(decoder, UNCONSTRAINED)?;
+        let or = Preferred::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            integrity_protection_indication,
+            confidentiality_protection_indication,
+            maximum_integrity_protected_data_rate_ul,
+            ,
+            above,
+            shall,
+            present,
+            integrity,
+            is,
+            or,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.maximum_integrity_protected_data_rate_ul.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.integrity_protection_indication.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.confidentiality_protection_indication.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.maximum_integrity_protected_data_rate_ul {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.integrity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.is.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.or.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SecurityKey
+pub struct SecurityKey(pub BitString);
+
+impl APerElement for SecurityKey {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(256),
+            max: Some(256),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SecurityResult
+pub struct SecurityResult {
+    pub integrity_protection_result: IntegrityProtectionResult,
+    pub confidentiality_protection_result: ConfidentialityProtectionResult,
+}
+
+impl APerElement for SecurityResult {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let integrity_protection_result = IntegrityProtectionResult::from_aper(decoder, UNCONSTRAINED)?;
+        let confidentiality_protection_result = ConfidentialityProtectionResult::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            integrity_protection_result,
+            confidentiality_protection_result,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.integrity_protection_result.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.confidentiality_protection_result.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SensorMeasurementConfiguration
+pub struct SensorMeasurementConfiguration {
+    pub sensor_meas_config: SensorMeasConfig,
+    pub sensor_meas_config_name_list: Option<SensorMeasConfigNameList>,
+}
+
+impl APerElement for SensorMeasurementConfiguration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let sensor_meas_config = SensorMeasConfig::from_aper(decoder, UNCONSTRAINED)?;
+        let sensor_meas_config_name_list = if optionals.is_set(0) {
+            Some(SensorMeasConfigNameList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            sensor_meas_config,
+            sensor_meas_config_name_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.sensor_meas_config_name_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.sensor_meas_config.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.sensor_meas_config_name_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SensorMeasConfigNameList
+pub struct SensorMeasConfigNameList(pub Vec<SensorMeasConfigNameItem>);
+
+impl APerElement for SensorMeasConfigNameList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SensorMeasConfigNameItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SensorMeasConfigNameItem
+pub struct SensorMeasConfigNameItem {
+    pub sensor_name_config: SensorNameConfig,
+}
+
+impl APerElement for SensorMeasConfigNameItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let sensor_name_config = SensorNameConfig::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            sensor_name_config,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.sensor_name_config.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SensorMeasConfig
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SensorMeasConfig {
+    Setup,
+    _Extended,
+}
+
+impl APerElement for SensorMeasConfig {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SensorMeasConfig::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SensorNameConfig
+pub enum SensorNameConfig {
+    UncompensatedBarometricConfig(UncompensatedBarometricConfig),
+    UeSpeedConfig(UeSpeedConfig),
+    UeOrientationConfig(UeOrientationConfig),
+    _Extended,
+}
+
+impl APerElement for SensorNameConfig {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::UncompensatedBarometricConfig(UncompensatedBarometricConfig::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::UeSpeedConfig(UeSpeedConfig::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::UeOrientationConfig(UeOrientationConfig::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::UncompensatedBarometricConfig(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::UeSpeedConfig(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::UeOrientationConfig(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// SerialNumber
+pub struct SerialNumber(pub BitString);
+
+impl APerElement for SerialNumber {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ServedGuamiList
+pub struct ServedGuamiList(pub Vec<ServedGuamiItem>);
+
+impl APerElement for ServedGuamiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ServedGuamiItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ServedGuamiItem
+pub struct ServedGuamiItem {
+    pub guami: Guami,
+    pub backup_amf_name: Option<AmfName>,
+}
+
+impl APerElement for ServedGuamiItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let guami = Guami::from_aper(decoder, UNCONSTRAINED)?;
+        let backup_amf_name = if optionals.is_set(0) {
+            Some(AmfName::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            guami,
+            backup_amf_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.backup_amf_name.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.guami.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.backup_amf_name {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// ServiceAreaInformation
+pub struct ServiceAreaInformation(pub Vec<ServiceAreaInformationItem>);
+
+impl APerElement for ServiceAreaInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ServiceAreaInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ServiceAreaInformationItem
+pub struct ServiceAreaInformationItem {
+    pub plmn_identity: PlmnIdentity,
+    pub allowed_ta_cs: Option<AllowedTaCs>,
+    pub not_allowed_ta_cs: Option<NotAllowedTaCs>,
+}
+
+impl APerElement for ServiceAreaInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let allowed_ta_cs = if optionals.is_set(0) {
+            Some(AllowedTaCs::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let not_allowed_ta_cs = if optionals.is_set(0) {
+            Some(NotAllowedTaCs::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            plmn_identity,
+            allowed_ta_cs,
+            not_allowed_ta_cs,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.allowed_ta_cs.is_some());        optionals.set(1, self.not_allowed_ta_cs.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.allowed_ta_cs {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.not_allowed_ta_cs {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SGnbUeX2apId
+pub struct SGnbUeX2apId(pub u64);
+
+impl APerElement for SGnbUeX2apId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u64::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SliceOverloadList
+pub struct SliceOverloadList(pub Vec<SliceOverloadItem>);
+
+impl APerElement for SliceOverloadList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SliceOverloadItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SliceOverloadItem
+pub struct SliceOverloadItem {
+    pub s_nssai: SNssai,
+}
+
+impl APerElement for SliceOverloadItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let s_nssai = SNssai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            s_nssai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SliceSupportList
+pub struct SliceSupportList(pub Vec<SliceSupportItem>);
+
+impl APerElement for SliceSupportList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SliceSupportItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SliceSupportItem
+pub struct SliceSupportItem {
+    pub s_nssai: SNssai,
+}
+
+impl APerElement for SliceSupportItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let s_nssai = SNssai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            s_nssai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SnpnMobilityInformation
+pub struct SnpnMobilityInformation {
+    pub serving_nid: Nid,
+}
+
+impl APerElement for SnpnMobilityInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let serving_nid = Nid::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            serving_nid,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.serving_nid.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SNssai
+pub struct SNssai {
+    pub sst: Sst,
+    pub sd: Option<Sd>,
+}
+
+impl APerElement for SNssai {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let sst = Sst::from_aper(decoder, UNCONSTRAINED)?;
+        let sd = if optionals.is_set(0) {
+            Some(Sd::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            sst,
+            sd,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.sd.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.sst.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.sd {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SonConfigurationTransfer
+pub struct SonConfigurationTransfer {
+    pub target_ran_node_id: TargetRanNodeId,
+    pub source_ran_node_id: SourceRanNodeId,
+    pub son_information: SonInformation,
+    pub xn_tnl_configuration_info: Option<XnTnlConfigurationInfo>,
+    pub : The,
+    pub above: Ie,
+    pub shall: Be,
+    pub present: If,
+    pub the: Son,
+    pub information: Ie,
+    pub contains: The,
+    pub son: Information,
+    pub request: Ie,
+    pub set: To,
+    pub xn: Tnl,
+    pub configuration: Info,
+}
+
+impl APerElement for SonConfigurationTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let target_ran_node_id = TargetRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let source_ran_node_id = SourceRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let son_information = SonInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let xn_tnl_configuration_info = if optionals.is_set(0) {
+            Some(XnTnlConfigurationInfo::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let  = The::from_aper(decoder, UNCONSTRAINED)?;
+        let above = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let shall = Be::from_aper(decoder, UNCONSTRAINED)?;
+        let present = If::from_aper(decoder, UNCONSTRAINED)?;
+        let the = Son::from_aper(decoder, UNCONSTRAINED)?;
+        let information = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let contains = The::from_aper(decoder, UNCONSTRAINED)?;
+        let son = Information::from_aper(decoder, UNCONSTRAINED)?;
+        let request = Ie::from_aper(decoder, UNCONSTRAINED)?;
+        let set = To::from_aper(decoder, UNCONSTRAINED)?;
+        let xn = Tnl::from_aper(decoder, UNCONSTRAINED)?;
+        let configuration = Info::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            target_ran_node_id,
+            source_ran_node_id,
+            son_information,
+            xn_tnl_configuration_info,
+            ,
+            above,
+            shall,
+            present,
+            the,
+            information,
+            contains,
+            son,
+            request,
+            set,
+            xn,
+            configuration,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.xn_tnl_configuration_info.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.target_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.source_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.son_information.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.xn_tnl_configuration_info {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self..to_aper(UNCONSTRAINED)?);
+        enc.append(&self.above.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.shall.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.present.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.the.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.information.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.contains.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.son.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.request.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.set.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.xn.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.configuration.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SonInformation
+pub enum SonInformation {
+    SonInformationRequest(SonInformationRequest),
+    SonInformationReply(SonInformationReply),
+    _Extended,
+}
+
+impl APerElement for SonInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::SonInformationRequest(SonInformationRequest::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::SonInformationReply(SonInformationReply::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::SonInformationRequest(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::SonInformationReply(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// SonInformationReply
+pub struct SonInformationReply {
+    pub xn_tnl_configuration_info: Option<XnTnlConfigurationInfo>,
+}
+
+impl APerElement for SonInformationReply {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let xn_tnl_configuration_info = if optionals.is_set(0) {
+            Some(XnTnlConfigurationInfo::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            xn_tnl_configuration_info,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.xn_tnl_configuration_info.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.xn_tnl_configuration_info {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SonInformationReport
+pub enum SonInformationReport {
+    FailureIndicationInformation(FailureIndication),
+    HoReportInformation(HoReport),
+    _Extended,
+}
+
+impl APerElement for SonInformationReport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::FailureIndicationInformation(FailureIndication::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::HoReportInformation(HoReport::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::FailureIndicationInformation(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::HoReportInformation(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// SonInformationRequest
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SonInformationRequest {
+    XnTnlConfigurationInfo,
+    _Extended,
+}
+
+impl APerElement for SonInformationRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SonInformationRequest::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SourceNgranNodeToTargetNgranNodeTransparentContainer
+pub struct SourceNgranNodeToTargetNgranNodeTransparentContainer {
+    pub rrc_container: RrcContainer,
+    pub pdu_session_resource_information_list: Option<PduSessionResourceInformationList>,
+    pub e_rab_information_list: Option<ERabInformationList>,
+    pub target_cell_id: NgranCgi,
+    pub index_to_rfsp: Option<IndexToRfsp>,
+    pub ue_history_information: UeHistoryInformation,
+}
+
+impl APerElement for SourceNgranNodeToTargetNgranNodeTransparentContainer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let rrc_container = RrcContainer::from_aper(decoder, UNCONSTRAINED)?;
+        let pdu_session_resource_information_list = if optionals.is_set(0) {
+            Some(PduSessionResourceInformationList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let e_rab_information_list = if optionals.is_set(0) {
+            Some(ERabInformationList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let target_cell_id = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let index_to_rfsp = if optionals.is_set(0) {
+            Some(IndexToRfsp::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ue_history_information = UeHistoryInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            rrc_container,
+            pdu_session_resource_information_list,
+            e_rab_information_list,
+            target_cell_id,
+            index_to_rfsp,
+            ue_history_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.pdu_session_resource_information_list.is_some());        optionals.set(1, self.e_rab_information_list.is_some());        optionals.set(2, self.index_to_rfsp.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.rrc_container.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.pdu_session_resource_information_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.e_rab_information_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.target_cell_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.index_to_rfsp {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        enc.append(&self.ue_history_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SourceOfUeActivityBehaviourInformation
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SourceOfUeActivityBehaviourInformation {
+    SubscriptionInformation,
+    Statistics,
+    _Extended,
+}
+
+impl APerElement for SourceOfUeActivityBehaviourInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SourceOfUeActivityBehaviourInformation::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SourceRanNodeId
+pub struct SourceRanNodeId {
+    pub global_ran_node_id: GlobalRanNodeId,
+    pub selected_tai: Tai,
+}
+
+impl APerElement for SourceRanNodeId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_ran_node_id = GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let selected_tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            global_ran_node_id,
+            selected_tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.selected_tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SourceToTargetTransparentContainer
+pub struct SourceToTargetTransparentContainer(pub Vec<u8>);
+
+impl APerElement for SourceToTargetTransparentContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SourceToTargetAmfInformationReroute
+pub struct SourceToTargetAmfInformationReroute {
+    pub configured_nssai: Option<ConfiguredNssai>,
+    pub rejected_nssa_iin_plmn: Option<RejectedNssaIinPlmn>,
+    pub rejected_nssa_iin_ta: Option<RejectedNssaIinTa>,
+}
+
+impl APerElement for SourceToTargetAmfInformationReroute {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let configured_nssai = if optionals.is_set(0) {
+            Some(ConfiguredNssai::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let rejected_nssa_iin_plmn = if optionals.is_set(0) {
+            Some(RejectedNssaIinPlmn::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let rejected_nssa_iin_ta = if optionals.is_set(0) {
+            Some(RejectedNssaIinTa::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            configured_nssai,
+            rejected_nssa_iin_plmn,
+            rejected_nssa_iin_ta,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.configured_nssai.is_some());        optionals.set(1, self.rejected_nssa_iin_plmn.is_some());        optionals.set(2, self.rejected_nssa_iin_ta.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.configured_nssai {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.rejected_nssa_iin_plmn {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.rejected_nssa_iin_ta {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// SrvccOperationPossible
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SrvccOperationPossible {
+    Possible,
+    NotPossible,
+    _Extended,
+}
+
+impl APerElement for SrvccOperationPossible {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SrvccOperationPossible::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ConfiguredNssai
+pub struct ConfiguredNssai(pub Vec<u8>);
+
+impl APerElement for ConfiguredNssai {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(128),
+            max: Some(128),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RejectedNssaIinPlmn
+pub struct RejectedNssaIinPlmn(pub Vec<u8>);
+
+impl APerElement for RejectedNssaIinPlmn {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(32),
+            max: Some(32),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// RejectedNssaIinTa
+pub struct RejectedNssaIinTa(pub Vec<u8>);
+
+impl APerElement for RejectedNssaIinTa {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(32),
+            max: Some(32),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Sst
+pub struct Sst(pub Vec<u8>);
+
+impl APerElement for Sst {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SupportedTaList
+pub struct SupportedTaList(pub Vec<SupportedTaItem>);
+
+impl APerElement for SupportedTaList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SupportedTaItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SupportedTaItem
+pub struct SupportedTaItem {
+    pub tac: Tac,
+    pub broadcast_plmn_list: BroadcastPlmnList,
+}
+
+impl APerElement for SupportedTaItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tac = Tac::from_aper(decoder, UNCONSTRAINED)?;
+        let broadcast_plmn_list = BroadcastPlmnList::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tac,
+            broadcast_plmn_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tac.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.broadcast_plmn_list.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// SuspendIndicator
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SuspendIndicator {
+    True,
+    _Extended,
+}
+
+impl APerElement for SuspendIndicator {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SuspendIndicator::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SuspendRequestIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SuspendRequestIndication {
+    SuspendRequested,
+    _Extended,
+}
+
+impl APerElement for SuspendRequestIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SuspendRequestIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SuspendResponseIndication
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum SuspendResponseIndication {
+    SuspendIndicated,
+    _Extended,
+}
+
+impl APerElement for SuspendResponseIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(SuspendResponseIndication::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Tac
+pub struct Tac(pub Vec<u8>);
+
+impl APerElement for Tac {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Tai
+pub struct Tai {
+    pub plmn_identity: PlmnIdentity,
+    pub tac: Tac,
+}
+
+impl APerElement for Tai {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let plmn_identity = PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?;
+        let tac = Tac::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            plmn_identity,
+            tac,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.tac.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiBroadcastEutra
+pub struct TaiBroadcastEutra(pub Vec<TaiBroadcastEutraItem>);
+
+impl APerElement for TaiBroadcastEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TaiBroadcastEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiBroadcastEutraItem
+pub struct TaiBroadcastEutraItem {
+    pub tai: Tai,
+    pub completed_cells_in_tai_eutra: CompletedCellsInTaiEutra,
+}
+
+impl APerElement for TaiBroadcastEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+        let completed_cells_in_tai_eutra = CompletedCellsInTaiEutra::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+            completed_cells_in_tai_eutra,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.completed_cells_in_tai_eutra.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiBroadcastNr
+pub struct TaiBroadcastNr(pub Vec<TaiBroadcastNrItem>);
+
+impl APerElement for TaiBroadcastNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TaiBroadcastNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiBroadcastNrItem
+pub struct TaiBroadcastNrItem {
+    pub tai: Tai,
+    pub completed_cells_in_tai_nr: CompletedCellsInTaiNr,
+}
+
+impl APerElement for TaiBroadcastNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+        let completed_cells_in_tai_nr = CompletedCellsInTaiNr::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+            completed_cells_in_tai_nr,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.completed_cells_in_tai_nr.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiCancelledEutra
+pub struct TaiCancelledEutra(pub Vec<TaiCancelledEutraItem>);
+
+impl APerElement for TaiCancelledEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TaiCancelledEutraItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiCancelledEutraItem
+pub struct TaiCancelledEutraItem {
+    pub tai: Tai,
+    pub cancelled_cells_in_tai_eutra: CancelledCellsInTaiEutra,
+}
+
+impl APerElement for TaiCancelledEutraItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+        let cancelled_cells_in_tai_eutra = CancelledCellsInTaiEutra::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+            cancelled_cells_in_tai_eutra,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cancelled_cells_in_tai_eutra.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiCancelledNr
+pub struct TaiCancelledNr(pub Vec<TaiCancelledNrItem>);
+
+impl APerElement for TaiCancelledNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TaiCancelledNrItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiCancelledNrItem
+pub struct TaiCancelledNrItem {
+    pub tai: Tai,
+    pub cancelled_cells_in_tai_nr: CancelledCellsInTaiNr,
+}
+
+impl APerElement for TaiCancelledNrItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+        let cancelled_cells_in_tai_nr = CancelledCellsInTaiNr::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+            cancelled_cells_in_tai_nr,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cancelled_cells_in_tai_nr.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiListForInactive
+pub struct TaiListForInactive(pub Vec<TaiListForInactiveItem>);
+
+impl APerElement for TaiListForInactive {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TaiListForInactiveItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiListForInactiveItem
+pub struct TaiListForInactiveItem {
+    pub tai: Tai,
+}
+
+impl APerElement for TaiListForInactiveItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiListForPaging
+pub struct TaiListForPaging(pub Vec<TaiListForPagingItem>);
+
+impl APerElement for TaiListForPaging {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TaiListForPagingItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiListForPagingItem
+pub struct TaiListForPagingItem {
+    pub tai: Tai,
+}
+
+impl APerElement for TaiListForPagingItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiListForRestart
+pub struct TaiListForRestart(pub Vec<Tai>);
+
+impl APerElement for TaiListForRestart {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tai>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiListForWarning
+pub struct TaiListForWarning(pub Vec<Tai>);
+
+impl APerElement for TaiListForWarning {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tai>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TargetEnbId
+pub struct TargetEnbId {
+    pub global_enb_id: GlobalNgEnbId,
+    pub selected_eps_tai: EpsTai,
+}
+
+impl APerElement for TargetEnbId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_enb_id = GlobalNgEnbId::from_aper(decoder, UNCONSTRAINED)?;
+        let selected_eps_tai = EpsTai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            global_enb_id,
+            selected_eps_tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_enb_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.selected_eps_tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TargetId
+pub enum TargetId {
+    TargetRanNodeId(TargetRanNodeId),
+    TargetEnbId(TargetEnbId),
+    _Extended,
+}
+
+impl APerElement for TargetId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::TargetRanNodeId(TargetRanNodeId::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::TargetEnbId(TargetEnbId::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::TargetRanNodeId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TargetEnbId(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// TargetNgranNodeToSourceNgranNodeTransparentContainer
+pub struct TargetNgranNodeToSourceNgranNodeTransparentContainer {
+    pub rrc_container: RrcContainer,
+}
+
+impl APerElement for TargetNgranNodeToSourceNgranNodeTransparentContainer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let rrc_container = RrcContainer::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            rrc_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.rrc_container.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TargetNgranNodeToSourceNgranNodeFailureTransparentContainer
+pub struct TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
+    pub cell_cag_information: CellCagInformation,
+}
+
+impl APerElement for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let cell_cag_information = CellCagInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            cell_cag_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.cell_cag_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TargetRanNodeId
+pub struct TargetRanNodeId {
+    pub global_ran_node_id: GlobalRanNodeId,
+    pub selected_tai: Tai,
+}
+
+impl APerElement for TargetRanNodeId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let global_ran_node_id = GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?;
+        let selected_tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            global_ran_node_id,
+            selected_tai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.global_ran_node_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.selected_tai.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TargetRncId
+pub struct TargetRncId {
+    pub lai: Lai,
+    pub rnc_id: RncId,
+    pub extended_rnc_id: Option<ExtendedRncId>,
+}
+
+impl APerElement for TargetRncId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let lai = Lai::from_aper(decoder, UNCONSTRAINED)?;
+        let rnc_id = RncId::from_aper(decoder, UNCONSTRAINED)?;
+        let extended_rnc_id = if optionals.is_set(0) {
+            Some(ExtendedRncId::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            lai,
+            rnc_id,
+            extended_rnc_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.extended_rnc_id.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.lai.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.rnc_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.extended_rnc_id {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// TargetToSourceTransparentContainer
+pub struct TargetToSourceTransparentContainer(pub Vec<u8>);
+
+impl APerElement for TargetToSourceTransparentContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TargettoSourceFailureTransparentContainer
+pub struct TargettoSourceFailureTransparentContainer(pub Vec<u8>);
+
+impl APerElement for TargettoSourceFailureTransparentContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TimerApproachForGuamiRemoval
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum TimerApproachForGuamiRemoval {
+    ApplyTimer,
+    _Extended,
+}
+
+impl APerElement for TimerApproachForGuamiRemoval {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(TimerApproachForGuamiRemoval::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TimeStamp
+pub struct TimeStamp(pub Vec<u8>);
+
+impl APerElement for TimeStamp {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TimeToWait
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum TimeToWait {
+    V1s,
+    V2s,
+    V5s,
+    V10s,
+    V20s,
+    V60s,
+    _Extended,
+}
+
+impl APerElement for TimeToWait {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(TimeToWait::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TimeUeStayedInCell
+pub struct TimeUeStayedInCell(pub u16);
+
+impl APerElement for TimeUeStayedInCell {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TimeUeStayedInCellEnhancedGranularity
+pub struct TimeUeStayedInCellEnhancedGranularity(pub u16);
+
+impl APerElement for TimeUeStayedInCellEnhancedGranularity {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TnapId
+pub struct TnapId(pub Vec<u8>);
+
+impl APerElement for TnapId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TngfId
+pub enum TngfId {
+    TngfId(BitString),
+    _Extended,
+}
+
+impl APerElement for TngfId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::TngfId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::TngfId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// TnlAddressWeightFactor
+pub struct TnlAddressWeightFactor(pub u8);
+
+impl APerElement for TnlAddressWeightFactor {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TnlAssociationList
+pub struct TnlAssociationList(pub Vec<TnlAssociationItem>);
+
+impl APerElement for TnlAssociationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TnlAssociationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TnlAssociationItem
+pub struct TnlAssociationItem {
+    pub tnl_association_address: CpTransportLayerInformation,
+    pub cause: Cause,
+}
+
+impl APerElement for TnlAssociationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tnl_association_address = CpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let cause = Cause::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tnl_association_address,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tnl_association_address.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TnlAssociationUsage
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum TnlAssociationUsage {
+    Ue,
+    NonUe,
+    Both,
+    _Extended,
+}
+
+impl APerElement for TnlAssociationUsage {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(TnlAssociationUsage::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TooearlyIntersystemHo
+pub struct TooearlyIntersystemHo {
+    pub sourcecell_id: EutraCgi,
+    pub failurecell_id: NgranCgi,
+    pub ue_rlf_report_container: Option<UeRlfReportContainer>,
+}
+
+impl APerElement for TooearlyIntersystemHo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let sourcecell_id = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let failurecell_id = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_rlf_report_container = if optionals.is_set(0) {
+            Some(UeRlfReportContainer::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            sourcecell_id,
+            failurecell_id,
+            ue_rlf_report_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.ue_rlf_report_container.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.sourcecell_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.failurecell_id.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.ue_rlf_report_container {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// TraceActivation
+pub struct TraceActivation {
+    pub ngran_trace_id: NgranTraceId,
+    pub interfaces_to_trace: InterfacesToTrace,
+    pub trace_depth: TraceDepth,
+    pub trace_collection_entity_ip_address: TransportLayerAddress,
+}
+
+impl APerElement for TraceActivation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ngran_trace_id = NgranTraceId::from_aper(decoder, UNCONSTRAINED)?;
+        let interfaces_to_trace = InterfacesToTrace::from_aper(decoder, UNCONSTRAINED)?;
+        let trace_depth = TraceDepth::from_aper(decoder, UNCONSTRAINED)?;
+        let trace_collection_entity_ip_address = TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ngran_trace_id,
+            interfaces_to_trace,
+            trace_depth,
+            trace_collection_entity_ip_address,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ngran_trace_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.interfaces_to_trace.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.trace_depth.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.trace_collection_entity_ip_address.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TraceDepth
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum TraceDepth {
+    Minimum,
+    Medium,
+    Maximum,
+    MinimumWithoutVendorSpecificExtension,
+    MediumWithoutVendorSpecificExtension,
+    MaximumWithoutVendorSpecificExtension,
+    _Extended,
+}
+
+impl APerElement for TraceDepth {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(TraceDepth::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TrafficLoadReductionIndication
+pub struct TrafficLoadReductionIndication(pub u8);
+
+impl APerElement for TrafficLoadReductionIndication {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TransportLayerAddress
+pub struct TransportLayerAddress(pub BitString);
+
+impl APerElement for TransportLayerAddress {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(160),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TypeOfError
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum TypeOfError {
+    NotUnderstood,
+    Missing,
+    _Extended,
+}
+
+impl APerElement for TypeOfError {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(TypeOfError::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaiBasedMdt
+pub struct TaiBasedMdt {
+    pub tai_listfor_mdt: TaiListforMdt,
+}
+
+impl APerElement for TaiBasedMdt {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tai_listfor_mdt = TaiListforMdt::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            tai_listfor_mdt,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tai_listfor_mdt.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaiListforMdt
+pub struct TaiListforMdt(pub Vec<Tai>);
+
+impl APerElement for TaiListforMdt {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tai>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TaBasedMdt
+pub struct TaBasedMdt {
+    pub ta_listfor_mdt: TaListforMdt,
+}
+
+impl APerElement for TaBasedMdt {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ta_listfor_mdt = TaListforMdt::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ta_listfor_mdt,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ta_listfor_mdt.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// TaListforMdt
+pub struct TaListforMdt(pub Vec<Tac>);
+
+impl APerElement for TaListforMdt {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<Tac>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ThresholdRsrp
+pub struct ThresholdRsrp(pub u8);
+
+impl APerElement for ThresholdRsrp {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ThresholdRsrq
+pub struct ThresholdRsrq(pub u8);
+
+impl APerElement for ThresholdRsrq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ThresholdSinr
+pub struct ThresholdSinr(pub u8);
+
+impl APerElement for ThresholdSinr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TimeToTrigger
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum TimeToTrigger {
+    Ms0,
+    Ms40,
+    Ms64,
+    Ms80,
+    Ms100,
+    Ms128,
+    Ms160,
+    Ms256,
+    Ms320,
+    Ms480,
+    Ms512,
+    Ms640,
+    Ms1024,
+    Ms1280,
+    Ms2560,
+    Ms5120,
+}
+
+impl APerElement for TimeToTrigger {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TwapId
+pub struct TwapId(pub Vec<u8>);
+
+impl APerElement for TwapId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TwifId
+pub enum TwifId {
+    TwifId(BitString),
+    _Extended,
+}
+
+impl APerElement for TwifId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::TwifId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::TwifId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// TscAssistanceInformation
+pub struct TscAssistanceInformation {
+    pub periodicity: Periodicity,
+    pub burst_arrival_time: Option<BurstArrivalTime>,
+}
+
+impl APerElement for TscAssistanceInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let periodicity = Periodicity::from_aper(decoder, UNCONSTRAINED)?;
+        let burst_arrival_time = if optionals.is_set(0) {
+            Some(BurstArrivalTime::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            periodicity,
+            burst_arrival_time,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.burst_arrival_time.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.periodicity.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.burst_arrival_time {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// TscTrafficCharacteristics
+pub struct TscTrafficCharacteristics {
+    pub tsc_assistance_information_dl: Option<TscAssistanceInformation>,
+    pub tsc_assistance_information_ul: Option<TscAssistanceInformation>,
+}
+
+impl APerElement for TscTrafficCharacteristics {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tsc_assistance_information_dl = if optionals.is_set(0) {
+            Some(TscAssistanceInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let tsc_assistance_information_ul = if optionals.is_set(0) {
+            Some(TscAssistanceInformation::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            tsc_assistance_information_dl,
+            tsc_assistance_information_ul,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.tsc_assistance_information_dl.is_some());        optionals.set(1, self.tsc_assistance_information_ul.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.tsc_assistance_information_dl {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.tsc_assistance_information_ul {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeAggregateMaximumBitRate
+pub struct UeAggregateMaximumBitRate {
+    pub ue_aggregate_maximum_bit_rate_dl: BitRate,
+    pub ue_aggregate_maximum_bit_rate_ul: BitRate,
+}
+
+impl APerElement for UeAggregateMaximumBitRate {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_aggregate_maximum_bit_rate_dl = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_aggregate_maximum_bit_rate_ul = BitRate::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ue_aggregate_maximum_bit_rate_dl,
+            ue_aggregate_maximum_bit_rate_ul,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ue_aggregate_maximum_bit_rate_dl.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ue_aggregate_maximum_bit_rate_ul.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UeAssociatedLogicalNgConnectionList
+pub struct UeAssociatedLogicalNgConnectionList(pub Vec<UeAssociatedLogicalNgConnectionItem>);
+
+impl APerElement for UeAssociatedLogicalNgConnectionList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UeAssociatedLogicalNgConnectionItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeAssociatedLogicalNgConnectionItem
+pub struct UeAssociatedLogicalNgConnectionItem {
+    pub amf_ue_ngap_id: Option<AmfUeNgapId>,
+    pub ran_ue_ngap_id: Option<RanUeNgapId>,
+}
+
+impl APerElement for UeAssociatedLogicalNgConnectionItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_ue_ngap_id = if optionals.is_set(0) {
+            Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ran_ue_ngap_id = if optionals.is_set(0) {
+            Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.amf_ue_ngap_id.is_some());        optionals.set(1, self.ran_ue_ngap_id.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.amf_ue_ngap_id {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ran_ue_ngap_id {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeCapabilityInfoRequest
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum UeCapabilityInfoRequest {
+    Requested,
+    _Extended,
+}
+
+impl APerElement for UeCapabilityInfoRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(UeCapabilityInfoRequest::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextRequest
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum UeContextRequest {
+    Requested,
+    _Extended,
+}
+
+impl APerElement for UeContextRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(UeContextRequest::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextResumeRequestTransfer
+pub struct UeContextResumeRequestTransfer {
+    pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
+}
+
+impl APerElement for UeContextResumeRequestTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_failed_to_resume_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_failed_to_resume_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.qos_flow_failed_to_resume_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.qos_flow_failed_to_resume_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeContextResumeResponseTransfer
+pub struct UeContextResumeResponseTransfer {
+    pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
+}
+
+impl APerElement for UeContextResumeResponseTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let qos_flow_failed_to_resume_list = if optionals.is_set(0) {
+            Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_failed_to_resume_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.qos_flow_failed_to_resume_list.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.qos_flow_failed_to_resume_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeContextSuspendRequestTransfer
+pub struct UeContextSuspendRequestTransfer {
+    pub suspend_indicator: Option<SuspendIndicator>,
+}
+
+impl APerElement for UeContextSuspendRequestTransfer {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let suspend_indicator = if optionals.is_set(0) {
+            Some(SuspendIndicator::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            suspend_indicator,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.suspend_indicator.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.suspend_indicator {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeDifferentiationInfo
+pub struct UeDifferentiationInfo {
+    pub periodic_communication_indicator: Option<PeriodicCommunicationIndicator>,
+    pub periodic_time: Option<u16>,
+    pub scheduled_communication_time: Option<ScheduledCommunicationTime>,
+    pub stationary_indication: Option<StationaryIndication>,
+    pub traffic_profile: Option<TrafficProfile>,
+    pub battery_indication: Option<BatteryIndication>,
+}
+
+impl APerElement for UeDifferentiationInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(7),
+            max: Some(7),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let periodic_communication_indicator = if optionals.is_set(0) {
+            Some(PeriodicCommunicationIndicator::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let periodic_time = if optionals.is_set(0) {
+            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let scheduled_communication_time = if optionals.is_set(0) {
+            Some(ScheduledCommunicationTime::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let stationary_indication = if optionals.is_set(0) {
+            Some(StationaryIndication::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let traffic_profile = if optionals.is_set(0) {
+            Some(TrafficProfile::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let battery_indication = if optionals.is_set(0) {
+            Some(BatteryIndication::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            periodic_communication_indicator,
+            periodic_time,
+            scheduled_communication_time,
+            stationary_indication,
+            traffic_profile,
+            battery_indication,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(7);
+        optionals.set(0, self.periodic_communication_indicator.is_some());        optionals.set(1, self.periodic_time.is_some());        optionals.set(2, self.scheduled_communication_time.is_some());        optionals.set(3, self.stationary_indication.is_some());        optionals.set(4, self.traffic_profile.is_some());        optionals.set(5, self.battery_indication.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.periodic_communication_indicator {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.periodic_time {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.scheduled_communication_time {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.stationary_indication {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.traffic_profile {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.battery_indication {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeHistoryInformation
+pub struct UeHistoryInformation(pub Vec<LastVisitedCellItem>);
+
+impl APerElement for UeHistoryInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<LastVisitedCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeHistoryInformationFromTheUe
+pub enum UeHistoryInformationFromTheUe {
+    Nr(NrMobilityHistoryReport),
+    _Extended,
+}
+
+impl APerElement for UeHistoryInformationFromTheUe {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::Nr(NrMobilityHistoryReport::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::Nr(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UeIdentityIndexValue
+pub enum UeIdentityIndexValue {
+    IndexLength10(BitString),
+    _Extended,
+}
+
+impl APerElement for UeIdentityIndexValue {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::IndexLength10(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::IndexLength10(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UeNgapIDs
+pub enum UeNgapIDs {
+    UeNgapIdPair(UeNgapIdPair),
+    AmfUeNgapId(AmfUeNgapId),
+    _Extended,
+}
+
+impl APerElement for UeNgapIDs {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::UeNgapIdPair(UeNgapIdPair::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::AmfUeNgapId(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::UeNgapIdPair(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::AmfUeNgapId(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UeNgapIdPair
+pub struct UeNgapIdPair {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+}
+
+impl APerElement for UeNgapIdPair {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let amf_ue_ngap_id = AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?;
+        let ran_ue_ngap_id = RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.amf_ue_ngap_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ran_ue_ngap_id.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UePagingIdentity
+pub enum UePagingIdentity {
+    FiveGSTmsi(FiveGSTmsi),
+    _Extended,
+}
+
+impl APerElement for UePagingIdentity {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::FiveGSTmsi(FiveGSTmsi::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::FiveGSTmsi(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UePresence
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum UePresence {
+    In,
+    Out,
+    Unknown,
+    _Extended,
+}
+
+impl APerElement for UePresence {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(UePresence::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UePresenceInAreaOfInterestList
+pub struct UePresenceInAreaOfInterestList(pub Vec<UePresenceInAreaOfInterestItem>);
+
+impl APerElement for UePresenceInAreaOfInterestList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UePresenceInAreaOfInterestItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UePresenceInAreaOfInterestItem
+pub struct UePresenceInAreaOfInterestItem {
+    pub location_reporting_reference_id: LocationReportingReferenceId,
+    pub ue_presence: UePresence,
+}
+
+impl APerElement for UePresenceInAreaOfInterestItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let location_reporting_reference_id = LocationReportingReferenceId::from_aper(decoder, UNCONSTRAINED)?;
+        let ue_presence = UePresence::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            location_reporting_reference_id,
+            ue_presence,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.location_reporting_reference_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ue_presence.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UeRadioCapability
+pub struct UeRadioCapability(pub Vec<u8>);
+
+impl APerElement for UeRadioCapability {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeRadioCapabilityForPaging
+pub struct UeRadioCapabilityForPaging {
+    pub ue_radio_capability_for_paging_of_nr: Option<UeRadioCapabilityForPagingOfNr>,
+    pub ue_radio_capability_for_paging_of_eutra: Option<UeRadioCapabilityForPagingOfEutra>,
+}
+
+impl APerElement for UeRadioCapabilityForPaging {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ue_radio_capability_for_paging_of_nr = if optionals.is_set(0) {
+            Some(UeRadioCapabilityForPagingOfNr::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let ue_radio_capability_for_paging_of_eutra = if optionals.is_set(0) {
+            Some(UeRadioCapabilityForPagingOfEutra::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ue_radio_capability_for_paging_of_nr,
+            ue_radio_capability_for_paging_of_eutra,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.ue_radio_capability_for_paging_of_nr.is_some());        optionals.set(1, self.ue_radio_capability_for_paging_of_eutra.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.ue_radio_capability_for_paging_of_nr {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.ue_radio_capability_for_paging_of_eutra {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UeRadioCapabilityForPagingOfNbIot
+pub struct UeRadioCapabilityForPagingOfNbIot(pub Vec<u8>);
+
+impl APerElement for UeRadioCapabilityForPagingOfNbIot {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeRadioCapabilityForPagingOfNr
+pub struct UeRadioCapabilityForPagingOfNr(pub Vec<u8>);
+
+impl APerElement for UeRadioCapabilityForPagingOfNr {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeRadioCapabilityForPagingOfEutra
+pub struct UeRadioCapabilityForPagingOfEutra(pub Vec<u8>);
+
+impl APerElement for UeRadioCapabilityForPagingOfEutra {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeRadioCapabilityId
+pub struct UeRadioCapabilityId(pub Vec<u8>);
+
+impl APerElement for UeRadioCapabilityId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeRetentionInformation
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum UeRetentionInformation {
+    UesRetained,
+    _Extended,
+}
+
+impl APerElement for UeRetentionInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(UeRetentionInformation::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeRlfReportContainer
+pub enum UeRlfReportContainer {
+    Nr(NrueRlfReportContainer),
+    Lte(LteueRlfReportContainer),
+    _Extended,
+}
+
+impl APerElement for UeRlfReportContainer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::Nr(NrueRlfReportContainer::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::Lte(LteueRlfReportContainer::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::Nr(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Lte(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UeSecurityCapabilities
+pub struct UeSecurityCapabilities {
+    pub n_rencryption_algorithms: NRencryptionAlgorithms,
+    pub n_rintegrity_protection_algorithms: NRintegrityProtectionAlgorithms,
+    pub eutr_aencryption_algorithms: EutrAencryptionAlgorithms,
+    pub eutr_aintegrity_protection_algorithms: EutrAintegrityProtectionAlgorithms,
+}
+
+impl APerElement for UeSecurityCapabilities {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let n_rencryption_algorithms = NRencryptionAlgorithms::from_aper(decoder, UNCONSTRAINED)?;
+        let n_rintegrity_protection_algorithms = NRintegrityProtectionAlgorithms::from_aper(decoder, UNCONSTRAINED)?;
+        let eutr_aencryption_algorithms = EutrAencryptionAlgorithms::from_aper(decoder, UNCONSTRAINED)?;
+        let eutr_aintegrity_protection_algorithms = EutrAintegrityProtectionAlgorithms::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            n_rencryption_algorithms,
+            n_rintegrity_protection_algorithms,
+            eutr_aencryption_algorithms,
+            eutr_aintegrity_protection_algorithms,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.n_rencryption_algorithms.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.n_rintegrity_protection_algorithms.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.eutr_aencryption_algorithms.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.eutr_aintegrity_protection_algorithms.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UeUpCIotSupport
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum UeUpCIotSupport {
+    Supported,
+    _Extended,
+}
+
+impl APerElement for UeUpCIotSupport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(UeUpCIotSupport::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UlCpSecurityInformation
+pub struct UlCpSecurityInformation {
+    pub ul_nas_mac: UlNasMac,
+    pub ul_nas_count: UlNasCount,
+}
+
+impl APerElement for UlCpSecurityInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ul_nas_mac = UlNasMac::from_aper(decoder, UNCONSTRAINED)?;
+        let ul_nas_count = UlNasCount::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ul_nas_mac,
+            ul_nas_count,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ul_nas_mac.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ul_nas_count.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UlNasMac
+pub struct UlNasMac(pub BitString);
+
+impl APerElement for UlNasMac {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(16),
+            max: Some(16),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UlNasCount
+pub struct UlNasCount(pub BitString);
+
+impl APerElement for UlNasCount {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(5),
+            max: Some(5),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UlNguUpTnlModifyList
+pub struct UlNguUpTnlModifyList(pub Vec<UlNguUpTnlModifyItem>);
+
+impl APerElement for UlNguUpTnlModifyList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UlNguUpTnlModifyItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UlNguUpTnlModifyItem
+pub struct UlNguUpTnlModifyItem {
+    pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
+    pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
+}
+
+impl APerElement for UlNguUpTnlModifyItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ul_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ul_ngu_up_tnl_information,
+            dl_ngu_up_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ul_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UnavailableGuamiList
+pub struct UnavailableGuamiList(pub Vec<UnavailableGuamiItem>);
+
+impl APerElement for UnavailableGuamiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UnavailableGuamiItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UnavailableGuamiItem
+pub struct UnavailableGuamiItem {
+    pub guami: Guami,
+    pub timer_approach_for_guami_removal: Option<TimerApproachForGuamiRemoval>,
+    pub backup_amf_name: Option<AmfName>,
+}
+
+impl APerElement for UnavailableGuamiItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let guami = Guami::from_aper(decoder, UNCONSTRAINED)?;
+        let timer_approach_for_guami_removal = if optionals.is_set(0) {
+            Some(TimerApproachForGuamiRemoval::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let backup_amf_name = if optionals.is_set(0) {
+            Some(AmfName::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            guami,
+            timer_approach_for_guami_removal,
+            backup_amf_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.timer_approach_for_guami_removal.is_some());        optionals.set(1, self.backup_amf_name.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.guami.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.timer_approach_for_guami_removal {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.backup_amf_name {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UlForwarding
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum UlForwarding {
+    UlForwardingProposed,
+    _Extended,
+}
+
+impl APerElement for UlForwarding {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(UlForwarding::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UpdateFeedback
+pub struct UpdateFeedback(pub BitString);
+
+impl APerElement for UpdateFeedback {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(8),
+            max: Some(8),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(BitString::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UpTransportLayerInformation
+pub enum UpTransportLayerInformation {
+    GtpTunnel(GtpTunnel),
+    _Extended,
+}
+
+impl APerElement for UpTransportLayerInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::GtpTunnel(GtpTunnel::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::GtpTunnel(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UpTransportLayerInformationList
+pub struct UpTransportLayerInformationList(pub Vec<UpTransportLayerInformationItem>);
+
+impl APerElement for UpTransportLayerInformationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UpTransportLayerInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UpTransportLayerInformationItem
+pub struct UpTransportLayerInformationItem {
+    pub ngu_up_tnl_information: UpTransportLayerInformation,
+}
+
+impl APerElement for UpTransportLayerInformationItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ngu_up_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UpTransportLayerInformationPairList
+pub struct UpTransportLayerInformationPairList(pub Vec<UpTransportLayerInformationPairItem>);
+
+impl APerElement for UpTransportLayerInformationPairList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UpTransportLayerInformationPairItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UpTransportLayerInformationPairItem
+pub struct UpTransportLayerInformationPairItem {
+    pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
+    pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
+}
+
+impl APerElement for UpTransportLayerInformationPairItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ul_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ul_ngu_up_tnl_information,
+            dl_ngu_up_tnl_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ul_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UriAddress
+pub struct UriAddress(pub String);
+
+impl APerElement for UriAddress {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UserLocationInformation
+pub enum UserLocationInformation {
+    UserLocationInformationEutra(UserLocationInformationEutra),
+    UserLocationInformationNr(UserLocationInformationNr),
+    UserLocationInformationN3Iwf(UserLocationInformationN3Iwf),
+    _Extended,
+}
+
+impl APerElement for UserLocationInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::UserLocationInformationEutra(UserLocationInformationEutra::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::UserLocationInformationNr(UserLocationInformationNr::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::UserLocationInformationN3Iwf(UserLocationInformationN3Iwf::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::UserLocationInformationEutra(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::UserLocationInformationNr(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::UserLocationInformationN3Iwf(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UserLocationInformationEutra
+pub struct UserLocationInformationEutra {
+    pub eutra_cgi: EutraCgi,
+    pub tai: Tai,
+    pub time_stamp: Option<TimeStamp>,
+}
+
+impl APerElement for UserLocationInformationEutra {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let eutra_cgi = EutraCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+        let time_stamp = if optionals.is_set(0) {
+            Some(TimeStamp::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            eutra_cgi,
+            tai,
+            time_stamp,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.time_stamp.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.time_stamp {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UserLocationInformationN3Iwf
+pub struct UserLocationInformationN3Iwf {
+    pub ip_address: TransportLayerAddress,
+    pub port_number: PortNumber,
+}
+
+impl APerElement for UserLocationInformationN3Iwf {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let ip_address = TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?;
+        let port_number = PortNumber::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            ip_address,
+            port_number,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.ip_address.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.port_number.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// UserLocationInformationTngf
+pub struct UserLocationInformationTngf {
+    pub tnap_id: TnapId,
+    pub ip_address: TransportLayerAddress,
+    pub port_number: Option<PortNumber>,
+}
+
+impl APerElement for UserLocationInformationTngf {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let tnap_id = TnapId::from_aper(decoder, UNCONSTRAINED)?;
+        let ip_address = TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?;
+        let port_number = if optionals.is_set(0) {
+            Some(PortNumber::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            tnap_id,
+            ip_address,
+            port_number,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.port_number.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.tnap_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ip_address.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.port_number {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UserLocationInformationTwif
+pub struct UserLocationInformationTwif {
+    pub twap_id: TwapId,
+    pub ip_address: TransportLayerAddress,
+    pub port_number: Option<PortNumber>,
+}
+
+impl APerElement for UserLocationInformationTwif {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let twap_id = TwapId::from_aper(decoder, UNCONSTRAINED)?;
+        let ip_address = TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?;
+        let port_number = if optionals.is_set(0) {
+            Some(PortNumber::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            twap_id,
+            ip_address,
+            port_number,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.port_number.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.twap_id.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.ip_address.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.port_number {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UserLocationInformationWAgf
+pub enum UserLocationInformationWAgf {
+    GlobalLineId(GlobalLineId),
+    HfcNodeId(HfcNodeId),
+    _Extended,
+}
+
+impl APerElement for UserLocationInformationWAgf {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::GlobalLineId(GlobalLineId::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::HfcNodeId(HfcNodeId::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::GlobalLineId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::HfcNodeId(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// UserLocationInformationNr
+pub struct UserLocationInformationNr {
+    pub nr_cgi: NrCgi,
+    pub tai: Tai,
+    pub time_stamp: Option<TimeStamp>,
+}
+
+impl APerElement for UserLocationInformationNr {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let nr_cgi = NrCgi::from_aper(decoder, UNCONSTRAINED)?;
+        let tai = Tai::from_aper(decoder, UNCONSTRAINED)?;
+        let time_stamp = if optionals.is_set(0) {
+            Some(TimeStamp::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            nr_cgi,
+            tai,
+            time_stamp,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(2);
+        optionals.set(0, self.time_stamp.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.time_stamp {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// UserPlaneSecurityInformation
+pub struct UserPlaneSecurityInformation {
+    pub security_result: SecurityResult,
+    pub security_indication: SecurityIndication,
+}
+
+impl APerElement for UserPlaneSecurityInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let security_result = SecurityResult::from_aper(decoder, UNCONSTRAINED)?;
+        let security_indication = SecurityIndication::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            security_result,
+            security_indication,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.security_result.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.security_indication.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// VolumeTimedReportList
+pub struct VolumeTimedReportList(pub Vec<VolumeTimedReportItem>);
+
+impl APerElement for VolumeTimedReportList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<VolumeTimedReportItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// VolumeTimedReportItem
+pub struct VolumeTimedReportItem {
+    pub start_time_stamp: Vec<u8>,
+    pub end_time_stamp: Vec<u8>,
+    pub usage_count_ul: u64,
+    pub usage_count_dl: u64,
+}
+
+impl APerElement for VolumeTimedReportItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let start_time_stamp = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+        let end_time_stamp = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+        let usage_count_ul = u64::from_aper(decoder, UNCONSTRAINED)?;
+        let usage_count_dl = u64::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            start_time_stamp,
+            end_time_stamp,
+            usage_count_ul,
+            usage_count_dl,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.start_time_stamp.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.end_time_stamp.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.usage_count_ul.to_aper(UNCONSTRAINED)?);
+        enc.append(&self.usage_count_dl.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// WAgfId
+pub enum WAgfId {
+    WAgfId(BitString),
+    _Extended,
+}
+
+impl APerElement for WAgfId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::WAgfId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::WAgfId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// WarningAreaCoordinates
+pub struct WarningAreaCoordinates(pub Vec<u8>);
+
+impl APerElement for WarningAreaCoordinates {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WarningAreaList
+pub enum WarningAreaList {
+    EutraCgiListForWarning(EutraCgiListForWarning),
+    NrCgiListForWarning(NrCgiListForWarning),
+    TaiListForWarning(TaiListForWarning),
+    EmergencyAreaIdList(EmergencyAreaIdList),
+    _Extended,
+}
+
+impl APerElement for WarningAreaList {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::EutraCgiListForWarning(EutraCgiListForWarning::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::NrCgiListForWarning(NrCgiListForWarning::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::TaiListForWarning(TaiListForWarning::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::EmergencyAreaIdList(EmergencyAreaIdList::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::EutraCgiListForWarning(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::NrCgiListForWarning(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::TaiListForWarning(x) => {
+                enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::EmergencyAreaIdList(x) => {
+                enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// WarningMessageContents
+pub struct WarningMessageContents(pub Vec<u8>);
+
+impl APerElement for WarningMessageContents {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WarningSecurityInfo
+pub struct WarningSecurityInfo(pub Vec<u8>);
+
+impl APerElement for WarningSecurityInfo {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(50),
+            max: Some(50),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WarningType
+pub struct WarningType(pub Vec<u8>);
+
+impl APerElement for WarningType {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(2),
+            max: Some(2),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WlanMeasurementConfiguration
+pub struct WlanMeasurementConfiguration {
+    pub wlan_meas_config: WlanMeasConfig,
+    pub wlan_meas_config_name_list: Option<WlanMeasConfigNameList>,
+    pub wlan_rssi: Option<WlanRssi>,
+    pub wlan_rtt: Option<WlanRtt>,
+}
+
+impl APerElement for WlanMeasurementConfiguration {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(4),
+            max: Some(4),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let wlan_meas_config = WlanMeasConfig::from_aper(decoder, UNCONSTRAINED)?;
+        let wlan_meas_config_name_list = if optionals.is_set(0) {
+            Some(WlanMeasConfigNameList::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let wlan_rssi = if optionals.is_set(0) {
+            Some(WlanRssi::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let wlan_rtt = if optionals.is_set(0) {
+            Some(WlanRtt::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            wlan_meas_config,
+            wlan_meas_config_name_list,
+            wlan_rssi,
+            wlan_rtt,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(4);
+        optionals.set(0, self.wlan_meas_config_name_list.is_some());        optionals.set(1, self.wlan_rssi.is_some());        optionals.set(2, self.wlan_rtt.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.wlan_meas_config.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.wlan_meas_config_name_list {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.wlan_rssi {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.wlan_rtt {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// WlanMeasConfigNameList
+pub struct WlanMeasConfigNameList(pub Vec<WlanMeasConfigNameItem>);
+
+impl APerElement for WlanMeasConfigNameList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<WlanMeasConfigNameItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WlanMeasConfigNameItem
+pub struct WlanMeasConfigNameItem {
+    pub wlan_name: WlanName,
+}
+
+impl APerElement for WlanMeasConfigNameItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let wlan_name = WlanName::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            wlan_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.wlan_name.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// WlanMeasConfig
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum WlanMeasConfig {
+    Setup,
+    _Extended,
+}
+
+impl APerElement for WlanMeasConfig {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(WlanMeasConfig::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WlanName
+pub struct WlanName(pub Vec<u8>);
+
+impl APerElement for WlanName {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<u8>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WusAssistanceInformation
+pub struct WusAssistanceInformation {
+    pub paging_probability_information: PagingProbabilityInformation,
+}
+
+impl APerElement for WusAssistanceInformation {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let paging_probability_information = PagingProbabilityInformation::from_aper(decoder, UNCONSTRAINED)?;
+
+        Ok(Self {
+            paging_probability_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(1);
+
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        enc.append(&self.paging_probability_information.to_aper(UNCONSTRAINED)?);
+
+        Ok(enc)
+    }
+}
+
+// XnExtTlAs
+pub struct XnExtTlAs(pub Vec<XnExtTlaItem>);
+
+impl APerElement for XnExtTlAs {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<XnExtTlaItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// XnExtTlaItem
+pub struct XnExtTlaItem {
+    pub i_psec_tla: Option<TransportLayerAddress>,
+    pub gtp_tl_as: Option<XnGtpTlAs>,
+}
+
+impl APerElement for XnExtTlaItem {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(3),
+            max: Some(3),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        let i_psec_tla = if optionals.is_set(0) {
+            Some(TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let gtp_tl_as = if optionals.is_set(0) {
+            Some(XnGtpTlAs::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            i_psec_tla,
+            gtp_tl_as,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.i_psec_tla.is_some());        optionals.set(1, self.gtp_tl_as.is_some());
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
+        if let Some(x) = self.i_psec_tla {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.gtp_tl_as {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+
+        Ok(enc)
+    }
+}
+
+// XnGtpTlAs
+pub struct XnGtpTlAs(pub Vec<TransportLayerAddress>);
+
+impl APerElement for XnGtpTlAs {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TransportLayerAddress>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
 // XnTlAs
 pub struct XnTlAs(pub Vec<TransportLayerAddress>);
 
@@ -21,7 +23578,7 @@ impl APerElement for XnTlAs {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(Vec<TransportLayerAddress>::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(Vec::<TransportLayerAddress>::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();

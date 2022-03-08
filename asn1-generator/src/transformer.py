@@ -48,6 +48,14 @@ class TypeTransformer(Transformer):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
+    def choicedef(self, tree):
+        tree.children[0] = pascal_case(tree.children[0])
+        return tree
+
+    def enumdef(self, tree):
+        tree.children[0] = pascal_case(tree.children[0])
+        return tree
+
     def struct(self, tree):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
@@ -116,7 +124,11 @@ class TypeTransformer(Transformer):
 
     def integer(self, tree):
         (lb, ub) = self.transform_bounds(tree)
-        range = ub-lb
+        try:
+            range = ub-lb
+        except:
+            print("Warning: unable to determine size - using u8")
+            range = 255
         if range < 256:
             t = "u8"
         elif range < 65536:

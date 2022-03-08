@@ -9,3 +9,197 @@ use asn1::aper::{
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;use super::ies::*;
 
+// PduSessionResourceSetupRequest - omitted
+
+// PduSessionResourceSetupResponse - omitted
+
+// PduSessionResourceReleaseCommand - omitted
+
+// PduSessionResourceReleaseResponse - omitted
+
+// PduSessionResourceModifyRequest - omitted
+
+// PduSessionResourceModifyResponse - omitted
+
+// PduSessionResourceNotify - omitted
+
+// PduSessionResourceModifyIndication - omitted
+
+// PduSessionResourceModifyConfirm - omitted
+
+// InitialContextSetupRequest - omitted
+
+// InitialContextSetupResponse - omitted
+
+// InitialContextSetupFailure - omitted
+
+// UeContextReleaseRequest - omitted
+
+// UeContextReleaseCommand - omitted
+
+// UeContextReleaseComplete - omitted
+
+// UeContextResumeRequest - omitted
+
+// UeContextResumeResponse - omitted
+
+// UeContextResumeFailure - omitted
+
+// UeContextSuspendRequest - omitted
+
+// UeContextSuspendResponse - omitted
+
+// UeContextSuspendFailure - omitted
+
+// UeContextModificationRequest - omitted
+
+// UeContextModificationResponse - omitted
+
+// UeContextModificationFailure - omitted
+
+// RrcInactiveTransitionReport - omitted
+
+// RetrieveUeInformation - omitted
+
+// UeInformationTransfer - omitted
+
+// RancpRelocationIndication - omitted
+
+// HandoverRequired - omitted
+
+// HandoverCommand - omitted
+
+// HandoverPreparationFailure - omitted
+
+// HandoverRequest - omitted
+
+// HandoverRequestAcknowledge - omitted
+
+// HandoverFailure - omitted
+
+// HandoverNotify - omitted
+
+// PathSwitchRequest - omitted
+
+// PathSwitchRequestAcknowledge - omitted
+
+// PathSwitchRequestFailure - omitted
+
+// HandoverCancel - omitted
+
+// HandoverCancelAcknowledge - omitted
+
+// HandoverSuccess - omitted
+
+// UplinkRanEarlyStatusTransfer - omitted
+
+// DownlinkRanEarlyStatusTransfer - omitted
+
+// UplinkRanStatusTransfer - omitted
+
+// DownlinkRanStatusTransfer - omitted
+
+// Paging - omitted
+
+// InitialUeMessage - omitted
+
+// DownlinkNasTransport - omitted
+
+// UplinkNasTransport - omitted
+
+// NasNonDeliveryIndication - omitted
+
+// RerouteNasRequest - omitted
+
+// NgSetupRequest - omitted
+
+// NgSetupResponse - omitted
+
+// NgSetupFailure - omitted
+
+// RanConfigurationUpdate - omitted
+
+// RanConfigurationUpdateAcknowledge - omitted
+
+// RanConfigurationUpdateFailure - omitted
+
+// AmfConfigurationUpdate - omitted
+
+// AmfConfigurationUpdateAcknowledge - omitted
+
+// AmfConfigurationUpdateFailure - omitted
+
+// AmfStatusIndication - omitted
+
+// NgReset - omitted
+
+// NgResetAcknowledge - omitted
+
+// ErrorIndication - omitted
+
+// OverloadStart - omitted
+
+// OverloadStop - omitted
+
+// UplinkRanConfigurationTransfer - omitted
+
+// DownlinkRanConfigurationTransfer - omitted
+
+// WriteReplaceWarningRequest - omitted
+
+// WriteReplaceWarningResponse - omitted
+
+// PwsCancelRequest - omitted
+
+// PwsCancelResponse - omitted
+
+// PwsRestartIndication - omitted
+
+// PwsFailureIndication - omitted
+
+// DownlinkUeAssociatedNrpPaTransport - omitted
+
+// UplinkUeAssociatedNrpPaTransport - omitted
+
+// DownlinkNonUeAssociatedNrpPaTransport - omitted
+
+// UplinkNonUeAssociatedNrpPaTransport - omitted
+
+// TraceStart - omitted
+
+// TraceFailureIndication - omitted
+
+// DeactivateTrace - omitted
+
+// CellTrafficTrace - omitted
+
+// LocationReportingControl - omitted
+
+// LocationReportingFailureIndication - omitted
+
+// LocationReport - omitted
+
+// UetnlaBindingReleaseRequest - omitted
+
+// UeRadioCapabilityInfoIndication - omitted
+
+// UeRadioCapabilityCheckRequest - omitted
+
+// UeRadioCapabilityCheckResponse - omitted
+
+// PrivateMessage - omitted
+
+// SecondaryRatDataUsageReport - omitted
+
+// UplinkRimInformationTransfer - omitted
+
+// DownlinkRimInformationTransfer - omitted
+
+// ConnectionEstablishmentIndication - omitted
+
+// UeRadioCapabilityIdMappingRequest - omitted
+
+// UeRadioCapabilityIdMappingResponse - omitted
+
+// AmfcpRelocationIndication - omitted
+

@@ -8,6 +8,120 @@ use asn1::aper::{
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
+// Criticality
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum Criticality {
+    Reject,
+    Ignore,
+    Notify,
+}
+
+impl APerElement for Criticality {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Presence
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum Presence {
+    Optional,
+    Conditional,
+    Mandatory,
+}
+
+impl APerElement for Presence {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PrivateIeId
+pub enum PrivateIeId {
+    Local(u16),
+    Global(Vec<u8>),
+}
+
+impl APerElement for PrivateIeId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::Local(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::Global(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::Local(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::Global(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+        }
+        Ok(enc)
+    }
+}
+
+
+// ProcedureCode
+pub struct ProcedureCode(pub u8);
+
+impl APerElement for ProcedureCode {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u8::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ProtocolExtensionId
+pub struct ProtocolExtensionId(pub u16);
+
+impl APerElement for ProtocolExtensionId {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(u16::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
 // ProtocolIeId
 pub struct ProtocolIeId(pub u16);
 

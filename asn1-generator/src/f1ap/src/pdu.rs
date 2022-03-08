@@ -9,6 +9,2138 @@ use asn1::aper::{
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;use super::ies::*;
 
+// Reset - omitted
+
+// ResetType
+pub enum ResetType {
+    F1Interface(ResetAll),
+    PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes),
+    _Extended,
+}
+
+impl APerElement for ResetType {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::F1Interface(ResetAll::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::F1Interface(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::PartOfF1Interface(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
+                enc.append(&x.to_aper(UNCONSTRAINED)?); }
+            Self::_Extended => Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+// ResetAll
+#[derive(Clone, Copy, FromPrimitive)]
+pub enum ResetAll {
+    ResetAll,
+    _Extended,
+}
+
+impl APerElement for ResetAll {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
+            return Ok(ResetAll::_Extended)
+        }
+        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeAssociatedLogicalF1ConnectionListRes
+pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItemRes>);
+
+impl APerElement for UeAssociatedLogicalF1ConnectionListRes {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UeAssociatedLogicalF1ConnectionItemRes>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ResetAcknowledge - omitted
+
+// UeAssociatedLogicalF1ConnectionListResAck
+pub struct UeAssociatedLogicalF1ConnectionListResAck(pub Vec<UeAssociatedLogicalF1ConnectionItemResAck>);
+
+impl APerElement for UeAssociatedLogicalF1ConnectionListResAck {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UeAssociatedLogicalF1ConnectionItemResAck>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ErrorIndication - omitted
+
+// F1SetupRequest - omitted
+
+// GnbDuServedCellsList
+pub struct GnbDuServedCellsList(pub Vec<GnbDuServedCellsItem>);
+
+impl APerElement for GnbDuServedCellsList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbDuServedCellsItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// F1SetupResponse - omitted
+
+// CellsToBeActivatedList
+pub struct CellsToBeActivatedList(pub Vec<CellsToBeActivatedListItem>);
+
+impl APerElement for CellsToBeActivatedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsToBeActivatedListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// F1SetupFailure - omitted
+
+// GnbDuConfigurationUpdate - omitted
+
+// ServedCellsToAddList
+pub struct ServedCellsToAddList(pub Vec<ServedCellsToAddItem>);
+
+impl APerElement for ServedCellsToAddList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ServedCellsToAddItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ServedCellsToModifyList
+pub struct ServedCellsToModifyList(pub Vec<ServedCellsToModifyItem>);
+
+impl APerElement for ServedCellsToModifyList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ServedCellsToModifyItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ServedCellsToDeleteList
+pub struct ServedCellsToDeleteList(pub Vec<ServedCellsToDeleteItem>);
+
+impl APerElement for ServedCellsToDeleteList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ServedCellsToDeleteItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellsStatusList
+pub struct CellsStatusList(pub Vec<CellsStatusItem>);
+
+impl APerElement for CellsStatusList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsStatusItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DedicatedSiDeliveryNeededUeList
+pub struct DedicatedSiDeliveryNeededUeList(pub Vec<DedicatedSiDeliveryNeededUeItem>);
+
+impl APerElement for DedicatedSiDeliveryNeededUeList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DedicatedSiDeliveryNeededUeItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbDuTnlAssociationToRemoveList
+pub struct GnbDuTnlAssociationToRemoveList(pub Vec<GnbDuTnlAssociationToRemoveItem>);
+
+impl APerElement for GnbDuTnlAssociationToRemoveList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbDuTnlAssociationToRemoveItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbDuConfigurationUpdateAcknowledge - omitted
+
+// GnbDuConfigurationUpdateFailure - omitted
+
+// GnbCuConfigurationUpdate - omitted
+
+// CellsToBeDeactivatedList
+pub struct CellsToBeDeactivatedList(pub Vec<CellsToBeDeactivatedListItem>);
+
+impl APerElement for CellsToBeDeactivatedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsToBeDeactivatedListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuTnlAssociationToAddList
+pub struct GnbCuTnlAssociationToAddList(pub Vec<GnbCuTnlAssociationToAddItem>);
+
+impl APerElement for GnbCuTnlAssociationToAddList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbCuTnlAssociationToAddItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuTnlAssociationToRemoveList
+pub struct GnbCuTnlAssociationToRemoveList(pub Vec<GnbCuTnlAssociationToRemoveItem>);
+
+impl APerElement for GnbCuTnlAssociationToRemoveList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbCuTnlAssociationToRemoveItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuTnlAssociationToUpdateList
+pub struct GnbCuTnlAssociationToUpdateList(pub Vec<GnbCuTnlAssociationToUpdateItem>);
+
+impl APerElement for GnbCuTnlAssociationToUpdateList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbCuTnlAssociationToUpdateItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// CellsToBeBarredList
+pub struct CellsToBeBarredList(pub Vec<CellsToBeBarredItem>);
+
+impl APerElement for CellsToBeBarredList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsToBeBarredItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// ProtectedEutraResourcesList
+pub struct ProtectedEutraResourcesList(pub Vec<ProtectedEutraResourcesItem>);
+
+impl APerElement for ProtectedEutraResourcesList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<ProtectedEutraResourcesItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NeighbourCellInformationList
+pub struct NeighbourCellInformationList(pub Vec<NeighbourCellInformationItem>);
+
+impl APerElement for NeighbourCellInformationList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NeighbourCellInformationItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuConfigurationUpdateAcknowledge - omitted
+
+// CellsFailedToBeActivatedList
+pub struct CellsFailedToBeActivatedList(pub Vec<CellsFailedToBeActivatedListItem>);
+
+impl APerElement for CellsFailedToBeActivatedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsFailedToBeActivatedListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuTnlAssociationSetupList
+pub struct GnbCuTnlAssociationSetupList(pub Vec<GnbCuTnlAssociationSetupItem>);
+
+impl APerElement for GnbCuTnlAssociationSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbCuTnlAssociationSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuTnlAssociationFailedToSetupList
+pub struct GnbCuTnlAssociationFailedToSetupList(pub Vec<GnbCuTnlAssociationFailedToSetupItem>);
+
+impl APerElement for GnbCuTnlAssociationFailedToSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<GnbCuTnlAssociationFailedToSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbCuConfigurationUpdateFailure - omitted
+
+// GnbDuResourceCoordinationRequest - omitted
+
+// GnbDuResourceCoordinationResponse - omitted
+
+// UeContextSetupRequest - omitted
+
+// CandidateSpCellList
+pub struct CandidateSpCellList(pub Vec<CandidateSpCellItem>);
+
+impl APerElement for CandidateSpCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CandidateSpCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SCellToBeSetupList
+pub struct SCellToBeSetupList(pub Vec<SCellToBeSetupItem>);
+
+impl APerElement for SCellToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SCellToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsToBeSetupList
+pub struct SrBsToBeSetupList(pub Vec<SrBsToBeSetupItem>);
+
+impl APerElement for SrBsToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsToBeSetupList
+pub struct DrBsToBeSetupList(pub Vec<DrBsToBeSetupItem>);
+
+impl APerElement for DrBsToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsToBeSetupList
+pub struct BhChannelsToBeSetupList(pub Vec<BhChannelsToBeSetupItem>);
+
+impl APerElement for BhChannelsToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsToBeSetupList
+pub struct SldrBsToBeSetupList(pub Vec<SldrBsToBeSetupItem>);
+
+impl APerElement for SldrBsToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextSetupResponse - omitted
+
+// DrBsSetupList
+pub struct DrBsSetupList(pub Vec<DrBsSetupItem>);
+
+impl APerElement for DrBsSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsFailedToBeSetupList
+pub struct SrBsFailedToBeSetupList(pub Vec<SrBsFailedToBeSetupItem>);
+
+impl APerElement for SrBsFailedToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsFailedToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsFailedToBeSetupList
+pub struct DrBsFailedToBeSetupList(pub Vec<DrBsFailedToBeSetupItem>);
+
+impl APerElement for DrBsFailedToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsFailedToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SCellFailedtoSetupList
+pub struct SCellFailedtoSetupList(pub Vec<SCellFailedtoSetupItem>);
+
+impl APerElement for SCellFailedtoSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SCellFailedtoSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsSetupList
+pub struct SrBsSetupList(pub Vec<SrBsSetupItem>);
+
+impl APerElement for SrBsSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsSetupList
+pub struct BhChannelsSetupList(pub Vec<BhChannelsSetupItem>);
+
+impl APerElement for BhChannelsSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsFailedToBeSetupList
+pub struct BhChannelsFailedToBeSetupList(pub Vec<BhChannelsFailedToBeSetupItem>);
+
+impl APerElement for BhChannelsFailedToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsFailedToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsSetupList
+pub struct SldrBsSetupList(pub Vec<SldrBsSetupItem>);
+
+impl APerElement for SldrBsSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsFailedToBeSetupList
+pub struct SldrBsFailedToBeSetupList(pub Vec<SldrBsFailedToBeSetupItem>);
+
+impl APerElement for SldrBsFailedToBeSetupList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsFailedToBeSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextSetupFailure - omitted
+
+// PotentialSpCellList
+pub struct PotentialSpCellList(pub Vec<PotentialSpCellItem>);
+
+impl APerElement for PotentialSpCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(0),
+            max: Some(0),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PotentialSpCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextReleaseRequest - omitted
+
+// UeContextReleaseCommand - omitted
+
+// UeContextReleaseComplete - omitted
+
+// UeContextModificationRequest - omitted
+
+// SCellToBeSetupModList
+pub struct SCellToBeSetupModList(pub Vec<SCellToBeSetupModItem>);
+
+impl APerElement for SCellToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SCellToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SCellToBeRemovedList
+pub struct SCellToBeRemovedList(pub Vec<SCellToBeRemovedItem>);
+
+impl APerElement for SCellToBeRemovedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SCellToBeRemovedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsToBeSetupModList
+pub struct SrBsToBeSetupModList(pub Vec<SrBsToBeSetupModItem>);
+
+impl APerElement for SrBsToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsToBeSetupModList
+pub struct DrBsToBeSetupModList(pub Vec<DrBsToBeSetupModItem>);
+
+impl APerElement for DrBsToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsToBeSetupModList
+pub struct BhChannelsToBeSetupModList(pub Vec<BhChannelsToBeSetupModItem>);
+
+impl APerElement for BhChannelsToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsToBeModifiedList
+pub struct DrBsToBeModifiedList(pub Vec<DrBsToBeModifiedItem>);
+
+impl APerElement for DrBsToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsToBeModifiedList
+pub struct BhChannelsToBeModifiedList(pub Vec<BhChannelsToBeModifiedItem>);
+
+impl APerElement for BhChannelsToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsToBeReleasedList
+pub struct SrBsToBeReleasedList(pub Vec<SrBsToBeReleasedItem>);
+
+impl APerElement for SrBsToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsToBeReleasedList
+pub struct DrBsToBeReleasedList(pub Vec<DrBsToBeReleasedItem>);
+
+impl APerElement for DrBsToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsToBeReleasedList
+pub struct BhChannelsToBeReleasedList(pub Vec<BhChannelsToBeReleasedItem>);
+
+impl APerElement for BhChannelsToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsToBeSetupModList
+pub struct SldrBsToBeSetupModList(pub Vec<SldrBsToBeSetupModItem>);
+
+impl APerElement for SldrBsToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsToBeModifiedList
+pub struct SldrBsToBeModifiedList(pub Vec<SldrBsToBeModifiedItem>);
+
+impl APerElement for SldrBsToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsToBeReleasedList
+pub struct SldrBsToBeReleasedList(pub Vec<SldrBsToBeReleasedItem>);
+
+impl APerElement for SldrBsToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextModificationResponse - omitted
+
+// DrBsSetupModList
+pub struct DrBsSetupModList(pub Vec<DrBsSetupModItem>);
+
+impl APerElement for DrBsSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsModifiedList
+pub struct DrBsModifiedList(pub Vec<DrBsModifiedItem>);
+
+impl APerElement for DrBsModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsSetupModList
+pub struct SrBsSetupModList(pub Vec<SrBsSetupModItem>);
+
+impl APerElement for SrBsSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsModifiedList
+pub struct SrBsModifiedList(pub Vec<SrBsModifiedItem>);
+
+impl APerElement for SrBsModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsFailedToBeModifiedList
+pub struct DrBsFailedToBeModifiedList(pub Vec<DrBsFailedToBeModifiedItem>);
+
+impl APerElement for DrBsFailedToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsFailedToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsFailedToBeSetupModList
+pub struct SrBsFailedToBeSetupModList(pub Vec<SrBsFailedToBeSetupModItem>);
+
+impl APerElement for SrBsFailedToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsFailedToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsFailedToBeSetupModList
+pub struct DrBsFailedToBeSetupModList(pub Vec<DrBsFailedToBeSetupModItem>);
+
+impl APerElement for DrBsFailedToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsFailedToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SCellFailedtoSetupModList
+pub struct SCellFailedtoSetupModList(pub Vec<SCellFailedtoSetupModItem>);
+
+impl APerElement for SCellFailedtoSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SCellFailedtoSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsSetupModList
+pub struct BhChannelsSetupModList(pub Vec<BhChannelsSetupModItem>);
+
+impl APerElement for BhChannelsSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsModifiedList
+pub struct BhChannelsModifiedList(pub Vec<BhChannelsModifiedItem>);
+
+impl APerElement for BhChannelsModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsFailedToBeModifiedList
+pub struct BhChannelsFailedToBeModifiedList(pub Vec<BhChannelsFailedToBeModifiedItem>);
+
+impl APerElement for BhChannelsFailedToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsFailedToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsFailedToBeSetupModList
+pub struct BhChannelsFailedToBeSetupModList(pub Vec<BhChannelsFailedToBeSetupModItem>);
+
+impl APerElement for BhChannelsFailedToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsFailedToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// AssociatedSCellList
+pub struct AssociatedSCellList(pub Vec<AssociatedSCellItem>);
+
+impl APerElement for AssociatedSCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<AssociatedSCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsSetupModList
+pub struct SldrBsSetupModList(pub Vec<SldrBsSetupModItem>);
+
+impl APerElement for SldrBsSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsModifiedList
+pub struct SldrBsModifiedList(pub Vec<SldrBsModifiedItem>);
+
+impl APerElement for SldrBsModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsFailedToBeModifiedList
+pub struct SldrBsFailedToBeModifiedList(pub Vec<SldrBsFailedToBeModifiedItem>);
+
+impl APerElement for SldrBsFailedToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsFailedToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsFailedToBeSetupModList
+pub struct SldrBsFailedToBeSetupModList(pub Vec<SldrBsFailedToBeSetupModItem>);
+
+impl APerElement for SldrBsFailedToBeSetupModList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsFailedToBeSetupModItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextModificationFailure - omitted
+
+// UeContextModificationRequired - omitted
+
+// DrBsRequiredToBeModifiedList
+pub struct DrBsRequiredToBeModifiedList(pub Vec<DrBsRequiredToBeModifiedItem>);
+
+impl APerElement for DrBsRequiredToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsRequiredToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// DrBsRequiredToBeReleasedList
+pub struct DrBsRequiredToBeReleasedList(pub Vec<DrBsRequiredToBeReleasedItem>);
+
+impl APerElement for DrBsRequiredToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsRequiredToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SrBsRequiredToBeReleasedList
+pub struct SrBsRequiredToBeReleasedList(pub Vec<SrBsRequiredToBeReleasedItem>);
+
+impl APerElement for SrBsRequiredToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SrBsRequiredToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhChannelsRequiredToBeReleasedList
+pub struct BhChannelsRequiredToBeReleasedList(pub Vec<BhChannelsRequiredToBeReleasedItem>);
+
+impl APerElement for BhChannelsRequiredToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhChannelsRequiredToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsRequiredToBeModifiedList
+pub struct SldrBsRequiredToBeModifiedList(pub Vec<SldrBsRequiredToBeModifiedItem>);
+
+impl APerElement for SldrBsRequiredToBeModifiedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsRequiredToBeModifiedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsRequiredToBeReleasedList
+pub struct SldrBsRequiredToBeReleasedList(pub Vec<SldrBsRequiredToBeReleasedItem>);
+
+impl APerElement for SldrBsRequiredToBeReleasedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsRequiredToBeReleasedItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextModificationConfirm - omitted
+
+// DrBsModifiedConfList
+pub struct DrBsModifiedConfList(pub Vec<DrBsModifiedConfItem>);
+
+impl APerElement for DrBsModifiedConfList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrBsModifiedConfItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// SldrBsModifiedConfList
+pub struct SldrBsModifiedConfList(pub Vec<SldrBsModifiedConfItem>);
+
+impl APerElement for SldrBsModifiedConfList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<SldrBsModifiedConfItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeContextModificationRefuse - omitted
+
+// WriteReplaceWarningRequest - omitted
+
+// CellsToBeBroadcastList
+pub struct CellsToBeBroadcastList(pub Vec<CellsToBeBroadcastListItem>);
+
+impl APerElement for CellsToBeBroadcastList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsToBeBroadcastListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// WriteReplaceWarningResponse - omitted
+
+// CellsBroadcastCompletedList
+pub struct CellsBroadcastCompletedList(pub Vec<CellsBroadcastCompletedListItem>);
+
+impl APerElement for CellsBroadcastCompletedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsBroadcastCompletedListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PwsCancelRequest - omitted
+
+// BroadcastToBeCancelledList
+pub struct BroadcastToBeCancelledList(pub Vec<BroadcastToBeCancelledListItem>);
+
+impl APerElement for BroadcastToBeCancelledList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BroadcastToBeCancelledListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PwsCancelResponse - omitted
+
+// CellsBroadcastCancelledList
+pub struct CellsBroadcastCancelledList(pub Vec<CellsBroadcastCancelledListItem>);
+
+impl APerElement for CellsBroadcastCancelledList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<CellsBroadcastCancelledListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UeInactivityNotification - omitted
+
+// DrbActivityList
+pub struct DrbActivityList(pub Vec<DrbActivityItem>);
+
+impl APerElement for DrbActivityList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrbActivityItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// InitialUlrrcMessageTransfer - omitted
+
+// DlrrcMessageTransfer - omitted
+
+// UlrrcMessageTransfer - omitted
+
+// PrivateMessage - omitted
+
+// SystemInformationDeliveryCommand - omitted
+
+// Paging - omitted
+
+// PagingCellList
+pub struct PagingCellList(pub Vec<PagingCellItem>);
+
+impl APerElement for PagingCellList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PagingCellItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// Notify - omitted
+
+// DrbNotifyList
+pub struct DrbNotifyList(pub Vec<DrbNotifyItem>);
+
+impl APerElement for DrbNotifyList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DrbNotifyItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// NetworkAccessRateReduction - omitted
+
+// PwsRestartIndication - omitted
+
+// NrCgiListForRestartList
+pub struct NrCgiListForRestartList(pub Vec<NrCgiListForRestartListItem>);
+
+impl APerElement for NrCgiListForRestartList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<NrCgiListForRestartListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// PwsFailureIndication - omitted
+
+// PwsFailedNrCgiList
+pub struct PwsFailedNrCgiList(pub Vec<PwsFailedNrCgiListItem>);
+
+impl APerElement for PwsFailedNrCgiList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<PwsFailedNrCgiListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// GnbDuStatusIndication - omitted
+
+// RrcDeliveryReport - omitted
+
+// F1RemovalRequest - omitted
+
+// F1RemovalResponse - omitted
+
+// F1RemovalFailure - omitted
+
+// TraceStart - omitted
+
+// DeactivateTrace - omitted
+
+// CellTrafficTrace - omitted
+
+// DucuRadioInformationTransfer - omitted
+
+// CuduRadioInformationTransfer - omitted
+
+// BapMappingConfiguration - omitted
+
+// BhRoutingInformationAddedList
+pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
+
+impl APerElement for BhRoutingInformationAddedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhRoutingInformationAddedListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BhRoutingInformationRemovedList
+pub struct BhRoutingInformationRemovedList(pub Vec<BhRoutingInformationRemovedListItem>);
+
+impl APerElement for BhRoutingInformationRemovedList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<BhRoutingInformationRemovedListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// BapMappingConfigurationAcknowledge - omitted
+
+// BapMappingConfigurationFailure - omitted
+
+// GnbDuResourceConfiguration - omitted
+
+// GnbDuResourceConfigurationAcknowledge - omitted
+
+// GnbDuResourceConfigurationFailure - omitted
+
+// IabtnlAddressRequest - omitted
+
+// IabTnlAddressesToRemoveList
+pub struct IabTnlAddressesToRemoveList(pub Vec<IabTnlAddressesToRemoveItem>);
+
+impl APerElement for IabTnlAddressesToRemoveList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<IabTnlAddressesToRemoveItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabtnlAddressResponse - omitted
+
+// IabAllocatedTnlAddressList
+pub struct IabAllocatedTnlAddressList(pub Vec<IabAllocatedTnlAddressListItem>);
+
+impl APerElement for IabAllocatedTnlAddressList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<IabAllocatedTnlAddressListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabtnlAddressFailure - omitted
+
+// IabupConfigurationUpdateRequest - omitted
+
+// UlUpTnlInformationToUpdateList
+pub struct UlUpTnlInformationToUpdateList(pub Vec<UlUpTnlInformationToUpdateListItem>);
+
+impl APerElement for UlUpTnlInformationToUpdateList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UlUpTnlInformationToUpdateListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// UlUpTnlAddressToUpdateList
+pub struct UlUpTnlAddressToUpdateList(pub Vec<UlUpTnlAddressToUpdateListItem>);
+
+impl APerElement for UlUpTnlAddressToUpdateList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<UlUpTnlAddressToUpdateListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabupConfigurationUpdateResponse - omitted
+
+// DlUpTnlAddressToUpdateList
+pub struct DlUpTnlAddressToUpdateList(pub Vec<DlUpTnlAddressToUpdateListItem>);
+
+impl APerElement for DlUpTnlAddressToUpdateList {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<DlUpTnlAddressToUpdateListItem>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// IabupConfigurationUpdateFailure - omitted
+
+// ResourceStatusRequest - omitted
+
+// ResourceStatusResponse - omitted
+
+// ResourceStatusFailure - omitted
+
+// ResourceStatusUpdate - omitted
+
+// AccessAndMobilityIndication - omitted
+
+// ReferenceTimeInformationReportingControl - omitted
+
+// ReferenceTimeInformationReport - omitted
+
+// AccessSuccess - omitted
+
+// PositioningAssistanceInformationControl - omitted
+
+// PositioningAssistanceInformationFeedback - omitted
+
+// PositioningMeasurementRequest - omitted
+
+// PositioningMeasurementResponse - omitted
+
+// PositioningMeasurementFailure - omitted
+
+// PositioningMeasurementReport - omitted
+
+// PositioningMeasurementAbort - omitted
+
+// PositioningMeasurementFailureIndication - omitted
+
+// PositioningMeasurementUpdate - omitted
+
+// TrpInformationRequest - omitted
+
+// TrpInformationTypeListTrpReq
+pub struct TrpInformationTypeListTrpReq(pub Vec<TrpInformationTypeItemTrpReq>);
+
+impl APerElement for TrpInformationTypeListTrpReq {
+    const CONSTRAINTS: Constraints = Constraints {
+        value: None,
+        size: Some(Constraint {
+            min: Some(1),
+            max: Some(1),
+        }),
+    };
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        Ok(Self(Vec::<TrpInformationTypeItemTrpReq>::from_aper(decoder, Self::CONSTRAINTS)?))
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
+        Ok(enc)
+    }
+}
+
+// TrpInformationResponse - omitted
+
 // TrpInformationListTrpResp
 pub struct TrpInformationListTrpResp(pub Vec<TrpInformationItemTrpResp>);
 
@@ -21,7 +2153,7 @@ impl APerElement for TrpInformationListTrpResp {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(Vec<TrpInformationItemTrpResp>::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(Vec::<TrpInformationItemTrpResp>::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -30,14 +2162,24 @@ impl APerElement for TrpInformationListTrpResp {
     }
 }
 
-// SRSType
-pub enum SRSType {
+// TrpInformationFailure - omitted
+
+// PositioningInformationRequest - omitted
+
+// PositioningInformationResponse - omitted
+
+// PositioningInformationFailure - omitted
+
+// PositioningActivationRequest - omitted
+
+// SrsType
+pub enum SrsType {
     SemipersistentSrs(SemipersistentSrs),
     AperiodicSrs(AperiodicSrs),
     _Extended,
 }
 
-impl APerElement for SRSType {
+impl APerElement for SrsType {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
@@ -152,6 +2294,26 @@ impl APerElement for AperiodicSrs {
         Ok(enc)
     }
 }
+
+// PositioningActivationResponse - omitted
+
+// PositioningActivationFailure - omitted
+
+// PositioningDeactivation - omitted
+
+// PositioningInformationUpdate - omitted
+
+// ECidMeasurementInitiationRequest - omitted
+
+// ECidMeasurementInitiationResponse - omitted
+
+// ECidMeasurementInitiationFailure - omitted
+
+// ECidMeasurementFailureIndication - omitted
+
+// ECidMeasurementReport - omitted
+
+// ECidMeasurementTerminationCommand - omitted
 
 // Aperiodic
 #[derive(Clone, Copy, FromPrimitive)]

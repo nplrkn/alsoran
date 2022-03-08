@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 from pickle import FALSE
 import unittest
 from lark.visitors import Interpreter
@@ -38,7 +39,7 @@ class StructFieldsFrom(Interpreter):
         if isinstance(typ, Tree):
             typ = typ.data
         self.fields_from += f"""\
-        let {name} = {typ}::from_aper(decoder, UNCONSTRAINED)?;
+        let {name} = {typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?;
 """
 
     def optional_field(self, tree):
@@ -50,7 +51,7 @@ class StructFieldsFrom(Interpreter):
 
         self.fields_from += f"""\
         let {name} = if optionals.is_set(0) {{
-            Some({typ}::from_aper(decoder, UNCONSTRAINED)?)
+            Some({typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?)
         }} else {{
             None
         }};
@@ -155,7 +156,7 @@ class ChoiceFieldsFrom(Interpreter):
 
         if typ != "Null":
             self.fields_from += f"""\
-            {self.field_index} => Ok(Self::{name}({typ}::from_aper(decoder, UNCONSTRAINED)?)),
+            {self.field_index} => Ok(Self::{name}({typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?)),
 """
         else:
             self.fields_from += f"""\
@@ -227,12 +228,12 @@ ENUM_EXTENSION_FROM = """
 class StructInterpreter(Interpreter):
 
     def __init__(self):
-        self.output = ""
+        #self.output = ""
         self.outfile = ""
         self.in_enum = False
 
-    def struct_start(self, s):
-        self.output += "pub struct " + s
+    # def struct_start(self, s):
+    #     self.output += "pub struct " + s
 
     def extended_items(self, tree):
         pass
@@ -258,7 +259,7 @@ impl APerElement for {name} {{
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{\
 {ENUM_EXTENSION_FROM.format(name=name) if field_interpreter.extensible else ""}
-        let v = {typ}::from_aper(decoder, Self::CONSTRAINTS)?;
+        let v = {typ.replace("Vec<","Vec::<")}::from_aper(decoder, Self::CONSTRAINTS)?;
         FromPrimitive::from_{typ}(v).ok_or(DecodeError::MalformedInt)
     }}
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
@@ -332,7 +333,7 @@ impl APerElement for {name} {{
     {BOUNDED_CONSTRAINTS.format(
         lb=lb, ub=ub) if lb is not None else UNCONSTRAINED_CONSTRAINTS}
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
-        Ok(Self({"Vec::<u8>" if inner == "Vec<u8>" else inner}::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self({inner.replace("Vec<","Vec::<")}::from_aper(decoder, Self::CONSTRAINTS)?))
     }}
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
         let mut enc = Encoding::new();
@@ -342,14 +343,15 @@ impl APerElement for {name} {{
 }}
 
 """
-        self.outfile = output
+        self.outfile += output
 
     def ie(self, tree):
-        name = snake_case(tree.children[0])
-        self.output += "  pub " + name + ": "
-        s = StructInterpreter()
-        self.output += s.get_type(tree) + ",\n"
-        assert(s.outfile == "")  # Can't handle inline enum here
+        pass
+        # name = snake_case(tree.children[0])
+        # self.output += "  pub " + name + ": "
+        # s = StructInterpreter()
+        # self.output += s.get_type(tree) + ",\n"
+        # assert(s.outfile == "")  # Can't handle inline enum here
 
     def struct(self, tree):
         fields = [
@@ -411,7 +413,7 @@ impl APerElement for {name} {{
     def comment(self, tree, comment=""):
         if comment != "":
             comment = " - " + comment
-        self.output += "// " + tree.children[0] + comment + "\n"
+        self.outfile += "// " + tree.children[0] + comment + "\n"
 
     def objectdef(self, tree):
         print("Warning - objectdef not implemented")
@@ -448,9 +450,9 @@ impl APerElement for {name} {{
     def extended_item(self, tree):
         assert(False)
 
-    def extension_marker(self, tree):
-        if self.in_enum:
-            self.output += "    _Extended,\n"
+    # def extension_marker(self, tree):
+    #     if self.in_enum:
+    #         self.output += "    _Extended,\n"
 
     # def field(self, tree):
     #     name = tree.children[0]
@@ -482,19 +484,21 @@ impl APerElement for {name} {{
     #     self.output = ""
 
 
-def generate(tree, constants=dict()):
+def generate(tree, constants=dict(), verbose=False):
     tree = transform(tree, constants)
-    # print(tree.pretty())
+    if verbose:
+        print(tree.pretty())
     visited = StructInterpreter()
     print("---- Generating ----")
     visited.visit(tree)
     return visited.outfile
 
 
-def generate_structs(input_file="f1ap/asn1/F1AP-PDU-Contents.asn", constants=dict()):
+def generate_structs(input_file="f1ap/asn1/F1AP-PDU-Contents.asn", constants=dict(), verbose=False):
     tree = parse_file(input_file)
-    # print(tree.pretty())
-    return generate(tree, constants)
+    if verbose:
+        print(tree.pretty())
+    return generate(tree, constants, print)
 
 
 class TestGenerator(unittest.TestCase):
@@ -816,5 +820,7 @@ impl APerElement for OutOfCoverage {
 
 
 if __name__ == '__main__':
-    # unittest.main()
-    unittest.main(failfast=True)
+    if len(sys.argv) == 2:
+        print(generate_structs(sys.argv[1], verbose=True))
+    else:
+        unittest.main(failfast=True)
