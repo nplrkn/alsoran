@@ -482,8 +482,8 @@ impl APerElement for {name} {{
     #     self.output = ""
 
 
-def generate(tree):
-    tree = transform(tree)
+def generate(tree, constants=dict()):
+    tree = transform(tree, constants)
     # print(tree.pretty())
     visited = StructInterpreter()
     print("---- Generating ----")
@@ -491,13 +491,10 @@ def generate(tree):
     return visited.outfile
 
 
-def generate_structs(input_file="f1ap/asn1/F1AP-PDU-Contents.asn"):
+def generate_structs(input_file="f1ap/asn1/F1AP-PDU-Contents.asn", constants=dict()):
     tree = parse_file(input_file)
     # print(tree.pretty())
-    return generate(tree)
-
-
-# print(generate_structs())
+    return generate(tree, constants)
 
 
 class TestGenerator(unittest.TestCase):

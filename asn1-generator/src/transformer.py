@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from lark.visitors import Transformer
+from lark.visitors import Transformer, Discard
 from case import pascal_case, snake_case
 from lark.lexer import Token
 from lark import Tree, v_args
@@ -10,9 +10,10 @@ from parser import parse_string, parse_file
 
 @v_args(tree=True)
 class TypeTransformer(Transformer):
-    def __init__(self):
+    def __init__(self, constants=dict()):
         self.extra_defs = []
-        self.name_dict = dict()  # TODO get rid of this global
+        self.name_dict = dict()
+        self.constants = constants
 
     def unique_type_name(self, name):
         name = pascal_case(name)
@@ -80,30 +81,47 @@ class TypeTransformer(Transformer):
         return Tree(
             "Vec<" + pascal_case(item) + ">", [tree.children[0], tree.children[1]])
 
-    def get_bounds(self, tree):
-        ub = 0
+    def transform_bounds(self, tree):
+        ub = 18446744073709551615
         lb = 0
-        if len(tree.children) > 1:
+        if len(tree.children) <= 1:
+            print("Warning: no bounds")
+        else:
             lb = tree.children[0]
+            try:
+                lb = int(lb)
+            except:
+                lb = self.constants.get(lb)
+                if lb is None:
+                    print("Error: unknown constant ", tree.children[0])
+
             ub = tree.children[1]
             if ub is None:
                 ub = lb
             else:
-                ub = ub
+                try:
+                    ub = int(ub)
+                except:
+                    ub = self.constants.get(ub)
+                    if ub is None:
+                        print("Error: unknown constant ", tree.children[1])
+
+            tree.children[0] = lb
+            tree.children[1] = ub
+
         return (lb, ub)
 
+    def namedvalues(self, tree):
+        return Discard
+
     def integer(self, tree):
-        (lb, ub) = self.get_bounds(tree)
-        try:
-            ub = int(ub) - int(lb)
-        except:
-            print("Warning: const bounds not implemented properly")
-            ub = 256
-        if ub < 256:
+        (lb, ub) = self.transform_bounds(tree)
+        range = ub-lb
+        if range < 256:
             t = "u8"
-        elif ub < 65536:
+        elif range < 65536:
             t = "u16"
-        elif ub < 4294967295:
+        elif range < 4294967295:
             t = "u32"
         else:
             t = "u64"
@@ -122,24 +140,37 @@ class TypeTransformer(Transformer):
         return Tree("bool", tree.children)
 
 
-def transform(mut_tree):
+def transform(mut_tree, constants):
     print("---- Transforming ----")
-    return TypeTransformer().transform(mut_tree)
+    return TypeTransformer(constants).transform(mut_tree)
 
 
 class TestGenerator(unittest.TestCase):
     maxDiff = None
 
-    def should_generate(self, input, expected):
+    def should_generate(self, input, expected, constants=dict()):
         output = ""
         tree = parse_string(input)
         try:
-            output = TypeTransformer().transform(tree).pretty()
+            output = TypeTransformer(constants).transform(tree).pretty()
             # print(output)
             self.assertEqual(output, expected)
         finally:
             if output != expected:
                 print(tree.pretty())
+
+    def test_discard_integer_named_values(self):
+        self.should_generate("""\
+        PriorityLevel ::= INTEGER { spare (0), highest (1), lowest (14), no-priority (15) } (0..15)
+""", """\
+document
+  None
+  tuple_struct
+    PriorityLevel
+    u8
+      0
+      15
+""")
 
     def test3(self):
         self.should_generate("""\
@@ -165,7 +196,7 @@ document
 
     def test2(self):
         input = """\
-MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
+MaximumDataBurstVolume::= INTEGER(-234..maxFoo, ..., 4096.. 2000000)
 """
         output = """\
 document
@@ -173,13 +204,13 @@ document
   tuple_struct
     MaximumDataBurstVolume
     u16
-      0
-      4095
+      -234
+      255
       extension_marker
       4096
       2000000
 """
-        self.should_generate(input, output)
+        self.should_generate(input, output, constants={"maxFoo": 255})
 
     def test1(self):
         input = """\

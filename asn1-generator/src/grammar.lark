@@ -8,7 +8,8 @@ NEWLINE: "\n"
 %ignore NEWLINE
 
 IDENTIFIER:       ("a".."z" | "A".."Z" | DIGIT | "-")+
-INTEGER:          "0" | "1-9"["0-9"] *
+_IDENTIFIER:       ("a".."z" | "A".."Z" | DIGIT | "-")+
+INTEGER:          "-"? "0" | "1".."9"("0".."9")*
 BOUND:            INTEGER | IDENTIFIER
 _optional:        "OPTIONAL" | "optional" | "conditional"
 extension_marker: "..." [","]
@@ -20,25 +21,28 @@ module:           IDENTIFIER
 _OID:             /{[^}]+}/
 _begin:           "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
 _IMPORTS:         /[^;]+;/
-_definitions:     (tuple_struct | struct | enumdef | choicedef | objectdef)+
+_definitions:     (tuple_struct | struct | enumdef | choicedef | constantdef | objectdef)+
 
 ?assign:          IDENTIFIER "::="
 tuple_struct:     assign _primitive
 struct:           assign sequence
 enumdef:          assign enumerated
 choicedef:        assign choice
-objectdef:        IDENTIFIER IDENTIFIER "::=" ies
+constantdef:      IDENTIFIER _IDENTIFIER "::=" INTEGER
+objectdef:        IDENTIFIER _identifier "::=" ies
 
 sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | container)
 sequence:         "SEQUENCE" "{" _fielditem* (extension_marker extended_items?)? "}"
 enumerated:       "ENUMERATED" "{" enum_item* (extension_marker extended_enum_items?)? "}"
 choice:           "CHOICE" "{" _choiceitem+ (extension_marker extended_choice_items?)? "}"
-integer:          "INTEGER" [ _namedvalues ] ["(" _ranges ")"]
+integer:          "INTEGER" namedvalues? ["(" _ranges ")"]
 string:           ("PrintableString" | "VisibleString" | "UTF8String") [_size]
 bits:             "BIT STRING" [_size]
 bytes:            ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
 boolean:          "BOOLEAN"
-_identifier:    IDENTIFIER
+_identifier:      IDENTIFIER
+_inttype:         IDENTIFIER
+_objecttype:      IDENTIFIER
 
 _primitive:     sequenceof
                 | integer
@@ -70,6 +74,6 @@ _ranges:          _rangeoptions+
 _rangeoptions:    _range["|" _range] * [","]
 _range:           extension_marker | (BOUND [".." BOUND])        
 
-_namedvalues:     _nestedbraces
+namedvalues:     _nestedbraces
 
 
