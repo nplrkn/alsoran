@@ -70,6 +70,8 @@ class StructFindOptionals(Interpreter):
         self.num_optionals += 1
 
     def extension_container(self, tree):
+        self.find_optionals += f"""\
+        optionals.set({self.num_optionals}, false); """
         self.num_optionals += 1
 
 

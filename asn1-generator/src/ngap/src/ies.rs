@@ -73,6 +73,7 @@ impl APerElement for AdditionalDluptnlInformationForHoItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.additional_dl_forwarding_uptnl_information.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -149,6 +150,7 @@ impl APerElement for AllocationAndRetentionPriority {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -228,6 +230,7 @@ impl APerElement for AllowedNssaiItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -292,6 +295,7 @@ impl APerElement for AllowedPniNpnItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -448,6 +452,7 @@ impl APerElement for AlternativeQosParaSetItem {
         optionals.set(1, self.guaranteed_flow_bit_rate_ul.is_some());
         optionals.set(2, self.packet_delay_budget.is_some());
         optionals.set(3, self.packet_error_rate.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -685,6 +690,7 @@ impl APerElement for AmfTnlAssociationSetupItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -755,6 +761,7 @@ impl APerElement for AmfTnlAssociationToAddItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.tnl_association_usage.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -818,6 +825,7 @@ impl APerElement for AmfTnlAssociationToRemoveItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -893,6 +901,7 @@ impl APerElement for AmfTnlAssociationToUpdateItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.tnl_association_usage.is_some());
         optionals.set(1, self.tnl_address_weight_factor.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -978,6 +987,7 @@ impl APerElement for AreaOfInterest {
         optionals.set(0, self.area_of_interest_tai_list.is_some());
         optionals.set(1, self.area_of_interest_cell_list.is_some());
         optionals.set(2, self.area_of_interest_ran_node_list.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1042,6 +1052,7 @@ impl APerElement for AreaOfInterestCellItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1104,6 +1115,7 @@ impl APerElement for AreaOfInterestItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1165,6 +1177,7 @@ impl APerElement for AreaOfInterestRanNodeItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1221,6 +1234,7 @@ impl APerElement for AreaOfInterestTaiItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1271,6 +1285,7 @@ impl APerElement for AssistanceDataForPaging {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.assistance_data_for_recommended_cells.is_some());
         optionals.set(1, self.paging_attempt_information.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1311,6 +1326,7 @@ impl APerElement for AssistanceDataForRecommendedCells {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1377,6 +1393,7 @@ impl APerElement for AssociatedQosFlowItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.qos_flow_mapping_indication.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1599,6 +1616,7 @@ impl APerElement for AreaScopeOfNeighCellsItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.pci_list_for_mdt.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1832,6 +1850,7 @@ impl APerElement for BroadcastPlmnItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1886,6 +1905,7 @@ impl APerElement for BluetoothMeasurementConfiguration {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.bluetooth_meas_config_name_list.is_some());
         optionals.set(1, self.bt_rssi.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -1948,6 +1968,7 @@ impl APerElement for BluetoothMeasConfigNameItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2114,6 +2135,7 @@ impl APerElement for CancelledCellsInEaiEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2176,6 +2198,7 @@ impl APerElement for CancelledCellsInEaiNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2238,6 +2261,7 @@ impl APerElement for CancelledCellsInTaiEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2300,6 +2324,7 @@ impl APerElement for CancelledCellsInTaiNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2357,6 +2382,7 @@ impl APerElement for CandidateCellItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2429,6 +2455,7 @@ impl APerElement for CandidateCellId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2466,6 +2493,7 @@ impl APerElement for CandidatePci {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2744,6 +2772,7 @@ impl APerElement for CellCagInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2822,6 +2851,7 @@ impl APerElement for CellIdBroadcastEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2878,6 +2908,7 @@ impl APerElement for CellIdBroadcastNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -2939,6 +2970,7 @@ impl APerElement for CellIdCancelledEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3001,6 +3033,7 @@ impl APerElement for CellIdCancelledNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3101,6 +3134,7 @@ impl APerElement for CellType {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3189,6 +3223,7 @@ impl APerElement for CnAssistedRanTuning {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.expected_ue_behaviour.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3252,6 +3287,7 @@ impl APerElement for CnTypeRestrictionsForEquivalentItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3348,6 +3384,7 @@ impl APerElement for CompletedCellsInEaiEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3404,6 +3441,7 @@ impl APerElement for CompletedCellsInEaiNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3460,6 +3498,7 @@ impl APerElement for CompletedCellsInTaiEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3516,6 +3555,7 @@ impl APerElement for CompletedCellsInTaiNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3680,6 +3720,7 @@ impl APerElement for CoreNetworkAssistanceInformationForInactive {
         optionals.set(0, self.ue_specific_drx.is_some());
         optionals.set(1, self.mico_mode_indication.is_some());
         optionals.set(2, self.expected_ue_behaviour.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3732,6 +3773,7 @@ impl APerElement for CountValueForPdcpSn12 {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3770,6 +3812,7 @@ impl APerElement for CountValueForPdcpSn18 {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3883,6 +3926,7 @@ impl APerElement for CriticalityDiagnostics {
         optionals.set(1, self.triggering_message.is_some());
         optionals.set(2, self.procedure_criticality.is_some());
         optionals.set(3, self.i_es_criticality_diagnostics.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3958,6 +4002,7 @@ impl APerElement for CriticalityDiagnosticsIeItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -3994,6 +4039,7 @@ impl APerElement for CellBasedMdtNr {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4049,6 +4095,7 @@ impl APerElement for CellBasedMdtEutra {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4222,6 +4269,7 @@ impl APerElement for DataForwardingResponseDrbItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.dl_forwarding_up_tnl_information.is_some());
         optionals.set(1, self.ul_forwarding_up_tnl_information.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4260,6 +4308,7 @@ impl APerElement for DapsRequestInfo {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4321,6 +4370,7 @@ impl APerElement for DapsResponseInfoItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4356,6 +4406,7 @@ impl APerElement for DapsResponseInfo {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4418,6 +4469,7 @@ impl APerElement for DataForwardingResponseErabListItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4480,6 +4532,7 @@ impl APerElement for DlCpSecurityInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4658,6 +4711,7 @@ impl APerElement for DrBsSubjectToStatusTransferItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4732,6 +4786,7 @@ impl APerElement for DrbStatusDl12 {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4764,6 +4819,7 @@ impl APerElement for DrbStatusDl18 {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4846,6 +4902,7 @@ impl APerElement for DrbStatusUl12 {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.receive_status_of_ul_pdcp_sd_us.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4891,6 +4948,7 @@ impl APerElement for DrbStatusUl18 {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.receive_status_of_ul_pdcp_sd_us.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -4955,6 +5013,7 @@ impl APerElement for DrBsToQosFlowsMappingItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5028,6 +5087,7 @@ impl APerElement for Dynamic5qiDescriptor {
         optionals.set(1, self.delay_critical.is_some());
         optionals.set(2, self.averaging_window.is_some());
         optionals.set(3, self.maximum_data_burst_volume.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5074,6 +5134,7 @@ impl APerElement for EarlyStatusTransferTransparentContainer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5140,6 +5201,7 @@ impl APerElement for FirstDlCount {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5204,6 +5266,7 @@ impl APerElement for DrBsSubjectToEarlyStatusTransferItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5312,6 +5375,7 @@ impl APerElement for EmergencyAreaIdBroadcastEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5374,6 +5438,7 @@ impl APerElement for EmergencyAreaIdBroadcastNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5437,6 +5502,7 @@ impl APerElement for EmergencyAreaIdCancelledEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5499,6 +5565,7 @@ impl APerElement for EmergencyAreaIdCancelledNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5591,6 +5658,7 @@ impl APerElement for EmergencyFallbackIndicator {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.emergency_service_target_cn.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5801,6 +5869,7 @@ impl APerElement for EndpointIpAddressAndPort {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.endpoint_ip_address.to_aper(UNCONSTRAINED)?);
@@ -5908,6 +5977,7 @@ impl APerElement for EpsTai {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5996,6 +6066,7 @@ impl APerElement for ERabInformationItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.dl_forwarding.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6057,6 +6128,7 @@ impl APerElement for EutraCgi {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6310,6 +6382,7 @@ impl APerElement for ExpectedUeActivityBehaviour {
             2,
             self.source_of_ue_activity_behaviour_information.is_some(),
         );
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6387,6 +6460,7 @@ impl APerElement for ExpectedUeBehaviour {
         optionals.set(1, self.expected_ho_interval.is_some());
         optionals.set(2, self.expected_ue_mobility.is_some());
         optionals.set(3, self.expected_ue_moving_trajectory.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6489,6 +6563,7 @@ impl APerElement for ExpectedUeMovingTrajectoryItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.time_stayed_in_cell.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6539,6 +6614,7 @@ impl APerElement for ExtendedAmfName {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.amf_name_visible_string.is_some());
         optionals.set(1, self.amf_name_utf8_string.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6612,6 +6688,7 @@ impl APerElement for ExtendedRanNodeName {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.ran_node_name_visible_string.is_some());
         optionals.set(1, self.ran_node_name_utf8_string.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6654,6 +6731,7 @@ impl APerElement for ExtendedRatRestrictionInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6800,6 +6878,7 @@ impl APerElement for EventL1LoggedMdtConfig {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6876,6 +6955,7 @@ impl APerElement for FailureIndication {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -6916,6 +6996,7 @@ impl APerElement for FiveGSTmsi {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7021,6 +7102,7 @@ impl APerElement for ForbiddenAreaInformationItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7079,6 +7161,7 @@ impl APerElement for FromEutranToNgran {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.source_enb_id.to_aper(UNCONSTRAINED)?);
@@ -7115,6 +7198,7 @@ impl APerElement for FromNgranToEutran {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.source_ngran_node_id.to_aper(UNCONSTRAINED)?);
@@ -7182,6 +7266,7 @@ impl APerElement for GbrQosInformation {
         optionals.set(0, self.notification_control.is_some());
         optionals.set(1, self.maximum_packet_loss_rate_dl.is_some());
         optionals.set(2, self.maximum_packet_loss_rate_ul.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7246,6 +7331,7 @@ impl APerElement for GlobalEnbId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7284,6 +7370,7 @@ impl APerElement for GlobalGnbId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7322,6 +7409,7 @@ impl APerElement for GlobalN3IwfId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7365,6 +7453,7 @@ impl APerElement for GlobalLineId {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.line_type.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7420,6 +7509,7 @@ impl APerElement for GlobalNgEnbId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7507,6 +7597,7 @@ impl APerElement for GlobalTngfId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7545,6 +7636,7 @@ impl APerElement for GlobalTwifId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7583,6 +7675,7 @@ impl APerElement for GlobalWAgfId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7670,6 +7763,7 @@ impl APerElement for GtpTunnel {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7714,6 +7808,7 @@ impl APerElement for Guami {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7803,6 +7898,7 @@ impl APerElement for HandoverCommandTransfer {
         optionals.set(0, self.dl_forwarding_up_tnl_information.is_some());
         optionals.set(1, self.qos_flow_to_be_forwarded_list.is_some());
         optionals.set(2, self.data_forwarding_response_drb_list.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7867,6 +7963,7 @@ impl APerElement for HandoverPreparationUnsuccessfulTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7944,6 +8041,7 @@ impl APerElement for HandoverRequestAcknowledgeTransfer {
         optionals.set(1, self.security_result.is_some());
         optionals.set(2, self.qos_flow_failed_to_setup_list.is_some());
         optionals.set(3, self.data_forwarding_response_drb_list.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -7999,6 +8097,7 @@ impl APerElement for HandoverRequiredTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.direct_forwarding_path_availability.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8043,6 +8142,7 @@ impl APerElement for HandoverResourceAllocationUnsuccessfulTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.criticality_diagnostics.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8170,6 +8270,7 @@ impl APerElement for HoReport {
         optionals.set(2, self.targetcellin_e_utran.is_some());
         optionals.set(3, self.mobility_information.is_some());
         optionals.set(4, self.ue_rlf_report_container.is_some());
+        optionals.set(5, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8367,6 +8468,7 @@ impl APerElement for InfoOnRecommendedCellsAndRanNodesForPaging {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8576,6 +8678,7 @@ impl APerElement for ImmediateMdtNr {
         optionals.set(6, self.wlan_measurement_configuration.is_some());
         optionals.set(7, self.mdt_location_info.is_some());
         optionals.set(8, self.sensor_measurement_configuration.is_some());
+        optionals.set(9, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8642,6 +8745,7 @@ impl APerElement for InterSystemFailureIndication {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.ue_rlf_report_container.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8682,6 +8786,7 @@ impl APerElement for IntersystemSonConfigurationTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8760,6 +8865,7 @@ impl APerElement for IntersystemSonEnbId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8798,6 +8904,7 @@ impl APerElement for IntersystemSonNgranNodeId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8903,6 +9010,7 @@ impl APerElement for InterSystemHoReport {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -8984,6 +9092,7 @@ impl APerElement for IntersystemUnnecessaryHo {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9042,6 +9151,7 @@ impl APerElement for Lai {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9135,6 +9245,7 @@ impl APerElement for LastVisitedCellItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9227,6 +9338,7 @@ impl APerElement for LastVisitedNgranCellInformation {
             self.time_ue_stayed_in_cell_enhanced_granularity.is_some(),
         );
         optionals.set(1, self.ho_cause_value.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9380,6 +9492,7 @@ impl APerElement for LocationReportingRequestType {
             self.location_reporting_reference_id_to_be_cancelled
                 .is_some(),
         );
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9471,6 +9584,7 @@ impl APerElement for LoggedMdtNr {
         optionals.set(1, self.wlan_measurement_configuration.is_some());
         optionals.set(2, self.sensor_measurement_configuration.is_some());
         optionals.set(3, self.area_scope_of_neigh_cells_list.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9696,6 +9810,7 @@ impl APerElement for Ltev2xServicesAuthorized {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.vehicle_ue.is_some());
         optionals.set(1, self.pedestrian_ue.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9735,6 +9850,7 @@ impl APerElement for LteueSidelinkAggregateMaximumBitrate {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -9938,6 +10054,7 @@ impl APerElement for MobilityRestrictionList {
         optionals.set(1, self.rat_restrictions.is_some());
         optionals.set(2, self.forbidden_area_information.is_some());
         optionals.set(3, self.service_area_information.is_some());
+        optionals.set(4, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10021,6 +10138,7 @@ impl APerElement for MdtConfiguration {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.mdt_config_nr.is_some());
         optionals.set(1, self.mdt_config_eutra.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10074,6 +10192,7 @@ impl APerElement for MdtConfigurationNr {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.signalling_based_mdt_plmn_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10127,6 +10246,7 @@ impl APerElement for MdtConfigurationEutra {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.signalling_based_mdt_plmn_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10284,6 +10404,7 @@ impl APerElement for M1Configuration {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.m1threshold_event_a2.is_some());
         optionals.set(1, self.m1periodic_reporting.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10348,6 +10469,7 @@ impl APerElement for M1ThresholdEventA2 {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10434,6 +10556,7 @@ impl APerElement for M1PeriodicReporting {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10472,6 +10595,7 @@ impl APerElement for M4Configuration {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10538,6 +10662,7 @@ impl APerElement for M5Configuration {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10604,6 +10729,7 @@ impl APerElement for M6Configuration {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10679,6 +10805,7 @@ impl APerElement for M7Configuration {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10735,6 +10862,7 @@ impl APerElement for MdtLocationInfo {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -10988,6 +11116,7 @@ impl APerElement for NbIotPagingEDrxInfo {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.nb_iot_paging_time_window.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -11282,6 +11411,7 @@ impl APerElement for NgranTnlAssociationToRemoveItem {
             0,
             self.tnl_association_transport_layer_address_amf.is_some(),
         );
+        optionals.set(1, false);
 
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(
@@ -11388,6 +11518,7 @@ impl APerElement for NonDynamic5qiDescriptor {
         optionals.set(0, self.priority_level_qos.is_some());
         optionals.set(1, self.averaging_window.is_some());
         optionals.set(2, self.maximum_data_burst_volume.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -11653,6 +11784,7 @@ impl APerElement for NrCgi {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -11923,6 +12055,7 @@ impl APerElement for NrFrequencyBandItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -11960,6 +12093,7 @@ impl APerElement for NrFrequencyInfo {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12029,6 +12163,7 @@ impl APerElement for Nrv2xServicesAuthorized {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.vehicle_ue.is_some());
         optionals.set(1, self.pedestrian_ue.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12118,6 +12253,7 @@ impl APerElement for NrueSidelinkAggregateMaximumBitrate {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12257,6 +12393,7 @@ impl APerElement for OverloadStartNssaiItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.slice_overload_response.is_some());
         optionals.set(1, self.slice_traffic_load_reduction_indication.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12321,6 +12458,7 @@ impl APerElement for PacketErrorRate {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12381,6 +12519,7 @@ impl APerElement for PagingAssisDataforCEcapabUe {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12428,6 +12567,7 @@ impl APerElement for PagingAttemptInformation {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.next_paging_area_scope.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12581,6 +12721,7 @@ impl APerElement for PagingeDrxInformation {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.paging_time_window.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12754,6 +12895,7 @@ impl APerElement for PathSwitchRequestAcknowledgeTransfer {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.ul_ngu_up_tnl_information.is_some());
         optionals.set(1, self.security_indication.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12791,6 +12933,7 @@ impl APerElement for PathSwitchRequestSetupFailedTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12851,6 +12994,7 @@ impl APerElement for PathSwitchRequestTransfer {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.dl_ngu_tnl_information_reused.is_some());
         optionals.set(1, self.user_plane_security_information.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12890,6 +13034,7 @@ impl APerElement for PathSwitchRequestUnsuccessfulTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -12932,6 +13077,7 @@ impl APerElement for Pc5QosParameters {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.pc_5_link_aggregate_bit_rates.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13009,6 +13155,7 @@ impl APerElement for Pc5QosFlowItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.pc_5_flow_bit_rates.is_some());
         optionals.set(1, self.range.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13052,6 +13199,7 @@ impl APerElement for Pc5FlowBitRates {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13136,6 +13284,7 @@ impl APerElement for PduSessionAggregateMaximumBitRate {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13227,6 +13376,7 @@ impl APerElement for PduSessionResourceAdmittedItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13298,6 +13448,7 @@ impl APerElement for PduSessionResourceFailedToModifyItemModCfm {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13369,6 +13520,7 @@ impl APerElement for PduSessionResourceFailedToModifyItemModRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13439,6 +13591,7 @@ impl APerElement for PduSessionResourceFailedToResumeItemResReq {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13505,6 +13658,7 @@ impl APerElement for PduSessionResourceFailedToResumeItemResRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13572,6 +13726,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemCxtFail {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13643,6 +13798,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemCxtRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13711,6 +13867,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemHoAck {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13779,6 +13936,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemPsReq {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13847,6 +14005,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemSuRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13913,6 +14072,7 @@ impl APerElement for PduSessionResourceHandoverItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -13986,6 +14146,7 @@ impl APerElement for PduSessionResourceInformationItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.dr_bs_to_qos_flows_mapping_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14046,6 +14207,7 @@ impl APerElement for PduSessionResourceItemCxtRelCpl {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14102,6 +14264,7 @@ impl APerElement for PduSessionResourceItemCxtRelReq {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14163,6 +14326,7 @@ impl APerElement for PduSessionResourceItemHoRqd {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14222,6 +14386,7 @@ impl APerElement for PduSessionResourceModifyConfirmTransfer {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.additional_ng_uuptnl_information.is_some());
         optionals.set(1, self.qos_flow_failed_to_modify_list.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14261,6 +14426,7 @@ impl APerElement for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14346,6 +14512,7 @@ impl APerElement for PduSessionResourceModifyResponseTransfer {
         optionals.set(2, self.qos_flow_add_or_modify_response_list.is_some());
         optionals.set(3, self.additional_dl_qos_flow_per_tnl_information.is_some());
         optionals.set(4, self.qos_flow_failed_to_add_or_modify_list.is_some());
+        optionals.set(5, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14406,6 +14573,7 @@ impl APerElement for PduSessionResourceModifyIndicationTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.additional_dl_qos_flow_per_tnl_information.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14475,6 +14643,7 @@ impl APerElement for PduSessionResourceModifyItemModCfm {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14542,6 +14711,7 @@ impl APerElement for PduSessionResourceModifyItemModInd {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14617,6 +14787,7 @@ impl APerElement for PduSessionResourceModifyItemModReq {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.nas_pdu.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14687,6 +14858,7 @@ impl APerElement for PduSessionResourceModifyItemModRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14734,6 +14906,7 @@ impl APerElement for PduSessionResourceModifyUnsuccessfulTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.criticality_diagnostics.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14798,6 +14971,7 @@ impl APerElement for PduSessionResourceNotifyItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14835,6 +15009,7 @@ impl APerElement for PduSessionResourceNotifyReleasedTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14882,6 +15057,7 @@ impl APerElement for PduSessionResourceNotifyTransfer {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.qos_flow_notify_list.is_some());
         optionals.set(1, self.qos_flow_released_list.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14919,6 +15095,7 @@ impl APerElement for PduSessionResourceReleaseCommandTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -14981,6 +15158,7 @@ impl APerElement for PduSessionResourceReleasedItemNot {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15048,6 +15226,7 @@ impl APerElement for PduSessionResourceReleasedItemPsAck {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15114,6 +15293,7 @@ impl APerElement for PduSessionResourceReleasedItemPsFail {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15180,6 +15360,7 @@ impl APerElement for PduSessionResourceReleasedItemRelRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15248,6 +15429,7 @@ impl APerElement for PduSessionResourceResumeItemResReq {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15314,6 +15496,7 @@ impl APerElement for PduSessionResourceResumeItemResRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15382,6 +15565,7 @@ impl APerElement for PduSessionResourceSecondaryRatUsageItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15460,6 +15644,7 @@ impl APerElement for PduSessionResourceSetupItemCxtReq {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.nas_pdu.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15531,6 +15716,7 @@ impl APerElement for PduSessionResourceSetupItemCxtRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15600,6 +15786,7 @@ impl APerElement for PduSessionResourceSetupItemHoReq {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15675,6 +15862,7 @@ impl APerElement for PduSessionResourceSetupItemSuReq {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.pdu_session_nas_pdu.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15746,6 +15934,7 @@ impl APerElement for PduSessionResourceSetupItemSuRes {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15815,6 +16004,7 @@ impl APerElement for PduSessionResourceSetupResponseTransfer {
         optionals.set(0, self.additional_dl_qos_flow_per_tnl_information.is_some());
         optionals.set(1, self.security_result.is_some());
         optionals.set(2, self.qos_flow_failed_to_setup_list.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15870,6 +16060,7 @@ impl APerElement for PduSessionResourceSetupUnsuccessfulTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.criticality_diagnostics.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -15934,6 +16125,7 @@ impl APerElement for PduSessionResourceSuspendItemSusReq {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16001,6 +16193,7 @@ impl APerElement for PduSessionResourceSwitchedItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16066,6 +16259,7 @@ impl APerElement for PduSessionResourceToBeSwitchedDlItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16128,6 +16322,7 @@ impl APerElement for PduSessionResourceToReleaseItemHoCmd {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16194,6 +16389,7 @@ impl APerElement for PduSessionResourceToReleaseItemRelCmd {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16265,6 +16461,7 @@ impl APerElement for PduSessionUsageReport {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16390,6 +16587,7 @@ impl APerElement for PlmnSupportItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16425,6 +16623,7 @@ impl APerElement for PniNpnMobilityInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16676,6 +16875,7 @@ impl APerElement for QosFlowAcceptedItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16753,6 +16953,7 @@ impl APerElement for QosFlowAddOrModifyRequestItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.qos_flow_level_qos_parameters.is_some());
         optionals.set(1, self.e_rab_id.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16817,6 +17018,7 @@ impl APerElement for QosFlowAddOrModifyResponseItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -16905,6 +17107,7 @@ impl APerElement for QosFlowFeedbackItem {
         optionals.set(0, self.update_feedback.is_some());
         optionals.set(1, self.c_npacket_delay_budget_dl.is_some());
         optionals.set(2, self.c_npacket_delay_budget_ul.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17001,6 +17204,7 @@ impl APerElement for QosFlowInformationItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.dl_forwarding.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17069,6 +17273,7 @@ impl APerElement for QosFlowLevelQosParameters {
         optionals.set(0, self.gbr_qos_information.is_some());
         optionals.set(1, self.reflective_qos_attribute.is_some());
         optionals.set(2, self.additional_qos_flow_information.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17191,6 +17396,7 @@ impl APerElement for QosFlowWithCauseItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17250,6 +17456,7 @@ impl APerElement for QosFlowModifyConfirmItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17311,6 +17518,7 @@ impl APerElement for QosFlowNotifyItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17381,6 +17589,7 @@ impl APerElement for QosFlowParametersItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.alternative_qos_para_set_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17422,6 +17631,7 @@ impl APerElement for QosFlowPerTnlInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17482,6 +17692,7 @@ impl APerElement for QosFlowPerTnlInformationItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17552,6 +17763,7 @@ impl APerElement for QosFlowSetupRequestItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.e_rab_id.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17622,6 +17834,7 @@ impl APerElement for QosFlowItemWithDataForwarding {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.data_forwarding_accepted.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17683,6 +17896,7 @@ impl APerElement for QosFlowToBeForwardedItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17747,6 +17961,7 @@ impl APerElement for QosFlowsUsageReportItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -17903,6 +18118,7 @@ impl APerElement for RanStatusTransferTransparentContainer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18015,6 +18231,7 @@ impl APerElement for RatRestrictionsItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18071,6 +18288,7 @@ impl APerElement for RecommendedCellsForPaging {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18137,6 +18355,7 @@ impl APerElement for RecommendedCellItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.time_stayed_in_cell.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18174,6 +18393,7 @@ impl APerElement for RecommendedRanNodesForPaging {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18230,6 +18450,7 @@ impl APerElement for RecommendedRanNodeItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18287,6 +18508,7 @@ impl APerElement for RedundantPduSessionInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18732,6 +18954,7 @@ impl APerElement for RimInformationTransfer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18771,6 +18994,7 @@ impl APerElement for RimInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18848,6 +19072,7 @@ impl APerElement for ScheduledCommunicationTime {
         optionals.set(0, self.dayof_week.is_some());
         optionals.set(1, self.timeof_day_start.is_some());
         optionals.set(2, self.timeof_day_end.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18948,6 +19173,7 @@ impl APerElement for SecondaryRatUsageInformation {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.pdu_session_usage_report.is_some());
         optionals.set(1, self.qos_flows_usage_report_list.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -18995,6 +19221,7 @@ impl APerElement for SecondaryRatDataUsageReportTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.secondary_rat_usage_information.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19034,6 +19261,7 @@ impl APerElement for SecurityContext {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19085,6 +19313,7 @@ impl APerElement for SecurityIndication {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.maximum_integrity_protected_data_rate_ul.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19157,6 +19386,7 @@ impl APerElement for SecurityResult {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19204,6 +19434,7 @@ impl APerElement for SensorMeasurementConfiguration {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.sensor_meas_config_name_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19263,6 +19494,7 @@ impl APerElement for SensorMeasConfigNameItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19422,6 +19654,7 @@ impl APerElement for ServedGuamiItem {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.backup_amf_name.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19499,6 +19732,7 @@ impl APerElement for ServiceAreaInformationItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.allowed_ta_cs.is_some());
         optionals.set(1, self.not_allowed_ta_cs.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19582,6 +19816,7 @@ impl APerElement for SliceOverloadItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19638,6 +19873,7 @@ impl APerElement for SliceSupportItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19670,6 +19906,7 @@ impl APerElement for SnpnMobilityInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19709,6 +19946,7 @@ impl APerElement for SNssai {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.sd.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19760,6 +19998,7 @@ impl APerElement for SonConfigurationTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.xn_tnl_configuration_info.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19843,6 +20082,7 @@ impl APerElement for SonInformationReply {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.xn_tnl_configuration_info.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -19975,6 +20215,7 @@ impl APerElement for SourceNgranNodeToTargetNgranNodeTransparentContainer {
         optionals.set(0, self.pdu_session_resource_information_list.is_some());
         optionals.set(1, self.e_rab_information_list.is_some());
         optionals.set(2, self.index_to_rfsp.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20048,6 +20289,7 @@ impl APerElement for SourceRanNodeId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20119,6 +20361,7 @@ impl APerElement for SourceToTargetAmfInformationReroute {
         optionals.set(0, self.configured_nssai.is_some());
         optionals.set(1, self.rejected_nssa_iin_plmn.is_some());
         optionals.set(2, self.rejected_nssa_iin_ta.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20297,6 +20540,7 @@ impl APerElement for SupportedTaItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20425,6 +20669,7 @@ impl APerElement for Tai {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20488,6 +20733,7 @@ impl APerElement for TaiBroadcastEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20550,6 +20796,7 @@ impl APerElement for TaiBroadcastNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20613,6 +20860,7 @@ impl APerElement for TaiCancelledEutraItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20675,6 +20923,7 @@ impl APerElement for TaiCancelledNrItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20732,6 +20981,7 @@ impl APerElement for TaiListForInactiveItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20788,6 +21038,7 @@ impl APerElement for TaiListForPagingItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20867,6 +21118,7 @@ impl APerElement for TargetEnbId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20940,6 +21192,7 @@ impl APerElement for TargetNgranNodeToSourceNgranNodeTransparentContainer {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -20974,6 +21227,7 @@ impl APerElement for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21011,6 +21265,7 @@ impl APerElement for TargetRanNodeId {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21057,6 +21312,7 @@ impl APerElement for TargetRncId {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.extended_rnc_id.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21333,6 +21589,7 @@ impl APerElement for TnlAssociationItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21405,6 +21662,7 @@ impl APerElement for TooearlyIntersystemHo {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.ue_rlf_report_container.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21453,6 +21711,7 @@ impl APerElement for TraceActivation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21588,6 +21847,7 @@ impl APerElement for TaiBasedMdt {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21641,6 +21901,7 @@ impl APerElement for TaBasedMdt {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21844,6 +22105,7 @@ impl APerElement for TscAssistanceInformation {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.burst_arrival_time.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21894,6 +22156,7 @@ impl APerElement for TscTrafficCharacteristics {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.tsc_assistance_information_dl.is_some());
         optionals.set(1, self.tsc_assistance_information_ul.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -21936,6 +22199,7 @@ impl APerElement for UeAggregateMaximumBitRate {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22016,6 +22280,7 @@ impl APerElement for UeAssociatedLogicalNgConnectionItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.amf_ue_ngap_id.is_some());
         optionals.set(1, self.ran_ue_ngap_id.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22108,6 +22373,7 @@ impl APerElement for UeContextResumeRequestTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.qos_flow_failed_to_resume_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22149,6 +22415,7 @@ impl APerElement for UeContextResumeResponseTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.qos_flow_failed_to_resume_list.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22188,6 +22455,7 @@ impl APerElement for UeContextSuspendRequestTransfer {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.suspend_indicator.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22275,6 +22543,7 @@ impl APerElement for UeDifferentiationInfo {
         optionals.set(3, self.stationary_indication.is_some());
         optionals.set(4, self.traffic_profile.is_some());
         optionals.set(5, self.battery_indication.is_some());
+        optionals.set(6, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22455,6 +22724,7 @@ impl APerElement for UeNgapIdPair {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22575,6 +22845,7 @@ impl APerElement for UePresenceInAreaOfInterestItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22648,6 +22919,7 @@ impl APerElement for UeRadioCapabilityForPaging {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.ue_radio_capability_for_paging_of_nr.is_some());
         optionals.set(1, self.ue_radio_capability_for_paging_of_eutra.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22823,6 +23095,7 @@ impl APerElement for UeSecurityCapabilities {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -22895,6 +23168,7 @@ impl APerElement for UlCpSecurityInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23001,6 +23275,7 @@ impl APerElement for UlNguUpTnlModifyItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23079,6 +23354,7 @@ impl APerElement for UnavailableGuamiItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.timer_approach_for_guami_removal.is_some());
         optionals.set(1, self.backup_amf_name.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23220,6 +23496,7 @@ impl APerElement for UpTransportLayerInformationItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23283,6 +23560,7 @@ impl APerElement for UpTransportLayerInformationPairItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23390,6 +23668,7 @@ impl APerElement for UserLocationInformationEutra {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.time_stamp.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23431,6 +23710,7 @@ impl APerElement for UserLocationInformationN3Iwf {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23477,6 +23757,7 @@ impl APerElement for UserLocationInformationTngf {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.port_number.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23526,6 +23807,7 @@ impl APerElement for UserLocationInformationTwif {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.port_number.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23615,6 +23897,7 @@ impl APerElement for UserLocationInformationNr {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.time_stamp.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23656,6 +23939,7 @@ impl APerElement for UserPlaneSecurityInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23724,6 +24008,7 @@ impl APerElement for VolumeTimedReportItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -23954,6 +24239,7 @@ impl APerElement for WlanMeasurementConfiguration {
         optionals.set(0, self.wlan_meas_config_name_list.is_some());
         optionals.set(1, self.wlan_rssi.is_some());
         optionals.set(2, self.wlan_rtt.is_some());
+        optionals.set(3, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -24019,6 +24305,7 @@ impl APerElement for WlanMeasConfigNameItem {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -24099,6 +24386,7 @@ impl APerElement for WusAssistanceInformation {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(1);
+        optionals.set(0, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -24170,6 +24458,7 @@ impl APerElement for XnExtTlaItem {
         let mut optionals = BitString::with_len(3);
         optionals.set(0, self.i_psec_tla.is_some());
         optionals.set(1, self.gtp_tl_as.is_some());
+        optionals.set(2, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -24265,6 +24554,7 @@ impl APerElement for XnTnlConfigurationInfo {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.xn_extended_transport_layer_addresses.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;

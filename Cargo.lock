@@ -101,7 +101,7 @@ checksum = "c5d78ce20460b82d3fa150275ed9d55e21064fc7951177baacf86a145c4a4b1f"
 [[package]]
 name = "asn1"
 version = "0.0.0"
-source = "git+https://github.com/nplrkn/asn1-per-tinker/?branch=constraint-public-fields#b6f4d5d3c733c479e8a477fd04a07baaf3314d48"
+source = "git+https://github.com/nplrkn/asn1-per-tinker/?branch=improved#8368b6a0a6bbc2f1719c26fc18d878ba6b5facc6"
 dependencies = [
  "byteorder",
 ]
