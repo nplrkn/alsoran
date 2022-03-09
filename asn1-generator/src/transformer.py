@@ -142,8 +142,14 @@ class TypeTransformer(Transformer):
     def bits(self, tree):
         return Tree("BitString", tree.children)
 
-    def string(self, tree):
-        return Tree("String", tree.children)
+    def printablestring(self, tree):
+        return Tree("PrintableString", tree.children)
+
+    def utf8string(self, tree):
+        return Tree("Utf8String", tree.children)
+
+    def visiblestring(self, tree):
+        return Tree("VisibleString", tree.children)
 
     def bytes(self, tree):
         return Tree("Vec<u8>", tree.children)
@@ -251,7 +257,7 @@ document
         WlanMeasConfig
       field
         um_are_you_sure
-        String
+        PrintableString
           1
           150
           extension_marker

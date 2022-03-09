@@ -470,7 +470,7 @@ impl APerElement for AlternativeQosParaSetItem {
 }
 
 // AmfName
-pub struct AmfName(pub String);
+pub struct AmfName(pub PrintableString);
 
 impl APerElement for AmfName {
     const CONSTRAINTS: Constraints = Constraints {
@@ -481,7 +481,10 @@ impl APerElement for AmfName {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(PrintableString::from_aper(
+            decoder,
+            Self::CONSTRAINTS,
+        )?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -491,7 +494,7 @@ impl APerElement for AmfName {
 }
 
 // AmfNameVisibleString
-pub struct AmfNameVisibleString(pub String);
+pub struct AmfNameVisibleString(pub VisibleString);
 
 impl APerElement for AmfNameVisibleString {
     const CONSTRAINTS: Constraints = Constraints {
@@ -502,7 +505,7 @@ impl APerElement for AmfNameVisibleString {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(VisibleString::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -512,7 +515,7 @@ impl APerElement for AmfNameVisibleString {
 }
 
 // AmfNameUtf8String
-pub struct AmfNameUtf8String(pub String);
+pub struct AmfNameUtf8String(pub Utf8String);
 
 impl APerElement for AmfNameUtf8String {
     const CONSTRAINTS: Constraints = Constraints {
@@ -523,7 +526,7 @@ impl APerElement for AmfNameUtf8String {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(Utf8String::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -17788,7 +17791,7 @@ impl APerElement for Range {
 }
 
 // RanNodeName
-pub struct RanNodeName(pub String);
+pub struct RanNodeName(pub PrintableString);
 
 impl APerElement for RanNodeName {
     const CONSTRAINTS: Constraints = Constraints {
@@ -17799,7 +17802,10 @@ impl APerElement for RanNodeName {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(PrintableString::from_aper(
+            decoder,
+            Self::CONSTRAINTS,
+        )?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -17809,7 +17815,7 @@ impl APerElement for RanNodeName {
 }
 
 // RanNodeNameVisibleString
-pub struct RanNodeNameVisibleString(pub String);
+pub struct RanNodeNameVisibleString(pub VisibleString);
 
 impl APerElement for RanNodeNameVisibleString {
     const CONSTRAINTS: Constraints = Constraints {
@@ -17820,7 +17826,7 @@ impl APerElement for RanNodeNameVisibleString {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(VisibleString::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -17830,7 +17836,7 @@ impl APerElement for RanNodeNameVisibleString {
 }
 
 // RanNodeNameUtf8String
-pub struct RanNodeNameUtf8String(pub String);
+pub struct RanNodeNameUtf8String(pub Utf8String);
 
 impl APerElement for RanNodeNameUtf8String {
     const CONSTRAINTS: Constraints = Constraints {
@@ -17841,7 +17847,7 @@ impl APerElement for RanNodeNameUtf8String {
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(Utf8String::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
@@ -23288,12 +23294,12 @@ impl APerElement for UpTransportLayerInformationPairItem {
 }
 
 // UriAddress
-pub struct UriAddress(pub String);
+pub struct UriAddress(pub VisibleString);
 
 impl APerElement for UriAddress {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
-        Ok(Self(String::from_aper(decoder, Self::CONSTRAINTS)?))
+        Ok(Self(VisibleString::from_aper(decoder, Self::CONSTRAINTS)?))
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();

@@ -39,7 +39,9 @@ sequence:         "SEQUENCE" _items{_fielditem}
 enumerated:       "ENUMERATED" _items{enum_item}
 choice:           "CHOICE" _items{_choiceitem}
 integer:          "INTEGER" namedvalues? ["(" _ranges ")"]
-string:           ("PrintableString" | "VisibleString" | "UTF8String") [_size]
+printablestring:  "PrintableString" [_size]
+visiblestring:    "VisibleString" [_size]
+utf8string:       "UTF8String" [_size]
 bits.2:           "BIT STRING" [_size]
 bytes.2:          ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
 boolean:          "BOOLEAN"
@@ -49,7 +51,9 @@ _objecttype:      IDENTIFIER
 
 _primitive:     sequenceof
                 | integer
-                | string 
+                | printablestring
+                | visiblestring
+                | utf8string
                 | bits 
                 | bytes
                 | boolean

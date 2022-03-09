@@ -7,6 +7,39 @@ use asn1::aper::{
 };
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+pub struct VisibleString(pub String);
+impl APerElement for VisibleString {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        unimplemented!()
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+pub struct Utf8String(pub String);
+impl APerElement for Utf8String {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        unimplemented!()
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+pub struct PrintableString(pub String);
+impl APerElement for PrintableString {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        unimplemented!()
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
 
 // Criticality
 #[derive(Clone, Copy, FromPrimitive)]
