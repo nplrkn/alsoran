@@ -31,14 +31,17 @@ choicedef:        assign choice
 constantdef:      IDENTIFIER _IDENTIFIER "::=" INTEGER
 objectdef:        IDENTIFIER _identifier "::=" ies
 
+_items{x}:        "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
+extended_items{x}: _comma_separated{x}
+
 sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | container)
-sequence:         "SEQUENCE" "{" _fielditem* (extension_marker extended_items?)? "}"
-enumerated:       "ENUMERATED" "{" enum_item* (extension_marker extended_enum_items?)? "}"
-choice:           "CHOICE" "{" _choiceitem+ (extension_marker extended_choice_items?)? "}"
+sequence:         "SEQUENCE" _items{_fielditem}
+enumerated:       "ENUMERATED" _items{enum_item}
+choice:           "CHOICE" _items{_choiceitem}
 integer:          "INTEGER" namedvalues? ["(" _ranges ")"]
 string:           ("PrintableString" | "VisibleString" | "UTF8String") [_size]
-bits:             "BIT STRING" [_size]
-bytes:            ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
+bits.2:           "BIT STRING" [_size]
+bytes.2:          ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
 boolean:          "BOOLEAN"
 _identifier:      IDENTIFIER
 _inttype:         IDENTIFIER
@@ -55,17 +58,16 @@ _primitive:     sequenceof
 ies:              "{" ie* [","] extension_marker? "}"
 ie:               "{" "ID" "id-"_identifier "CRITICALITY" ("reject" | "ignore") ("TYPE" | "EXTENSION") _fieldtype + "PRESENCE" (_optional | "mandatory") "}" ["|"]
 
+_comma_separated{x}: x ("," x)* ","?
 _choiceitem:     choicefield | extension_container
-choicefield:      _identifier _fieldtype ","?
+choicefield:      _identifier _fieldtype
 _fielditem:       optional_field | field | extension_container
-extended_items:   _fielditem+
-extended_choice_items: _choiceitem+
-enum_item:        _identifier ","?
+enum_item:        _identifier
 extended_enum_items: enum_item+ -> extended_items
 extension_container:  _identifier container "OPTIONAL"? ","?
 container:        _identifier "{" "{" _identifier "}" "}" 
-optional_field:   _identifier _fieldtype "OPTIONAL" ","?
-field.1:            _identifier _fieldtype ","?
+optional_field.2:   _identifier _fieldtype "OPTIONAL"
+field.1:           _identifier _fieldtype
 _fieldtype:       _primitive | enumerated | sequence
 _nestedbraces:    "{" (_nestedbraces|/[^\{\}]+/) * "}"
 

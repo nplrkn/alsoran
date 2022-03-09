@@ -229,7 +229,7 @@ document
 WLANMeasurementConfiguration ::= SEQUENCE {
 	wlanMeasConfig             	WLANMeasConfig,
     um-are-you-sure             PrintableString (SIZE (1..150, ...)),
-    someNum                     INTEGER (0..1099511627775)
+    someNum                     INTEGER (0..1099511627775),
 	foo                         SEQUENCE (SIZE (1..maxnoofSliceItems)) OF OverloadStartNSSAIItem,
 	wlan-rtt                   	ENUMERATED {thing1, ..., thing2} OPTIONAL,
 	n2    SEQUENCE {
@@ -299,6 +299,35 @@ document
           7
 """
         self.should_generate(input, output)
+
+    def test_optional_octet_string(self):
+        self.should_generate("""\
+Child-Node-Cells-List-Item ::= SEQUENCE {
+	cSI-RS-Configuration				OCTET STRING	OPTIONAL,
+-- Here is a random comment    --
+  	sR-Configuration					OCTET STRING	OPTIONAL,
+	pDCCH-ConfigSIB1					OCTET STRING	OPTIONAL,
+	sCS-Common							OCTET STRING	OPTIONAL,
+}           
+""", """\
+document
+  None
+  struct
+    ChildNodeCellsListItem
+    sequence
+      optional_field
+        csi_rs_configuration
+        Vec<u8>\tNone
+      optional_field
+        sr_configuration
+        Vec<u8>\tNone
+      optional_field
+        pdcch_config_sib1
+        Vec<u8>\tNone
+      optional_field
+        scs_common
+        Vec<u8>\tNone
+""")
 
 
 if __name__ == '__main__':

@@ -34,7 +34,7 @@ impl APerElement for AbortTransmission {
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
             Self::ReleaseAll => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -990,7 +990,7 @@ impl APerElement for BandwidthSrs {
             Self::Fr2(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -1889,7 +1889,7 @@ impl APerElement for BhQosInformation {
             Self::CpTrafficType(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -2451,7 +2451,7 @@ impl APerElement for Cause {
             Self::Misc(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -3304,14 +3304,10 @@ pub struct ChildNodeCellsListItem {
     pub iab_stc_info: Option<IabStcInfo>,
     pub rach_config_common: Option<RachConfigCommon>,
     pub rach_config_common_iab: Option<RachConfigCommonIab>,
-    pub csi_rs_configuration: Octet,
-    pub string: Optional,
-    pub sr_configuration: Octet,
-    pub string: Optional,
-    pub pdcch_config_sib1: Octet,
-    pub string: Optional,
-    pub scs_common: Octet,
-    pub string: Optional,
+    pub csi_rs_configuration: Option<Vec<u8>>,
+    pub sr_configuration: Option<Vec<u8>>,
+    pub pdcch_config_sib1: Option<Vec<u8>>,
+    pub scs_common: Option<Vec<u8>>,
     pub multiplexing_info: Option<MultiplexingInfo>,
 }
 
@@ -3319,8 +3315,8 @@ impl APerElement for ChildNodeCellsListItem {
     const CONSTRAINTS: Constraints = Constraints {
         value: None,
         size: Some(Constraint {
-            min: Some(6),
-            max: Some(6),
+            min: Some(10),
+            max: Some(10),
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
@@ -3347,14 +3343,26 @@ impl APerElement for ChildNodeCellsListItem {
         } else {
             None
         };
-        let csi_rs_configuration = Octet::from_aper(decoder, UNCONSTRAINED)?;
-        let string = Optional::from_aper(decoder, UNCONSTRAINED)?;
-        let sr_configuration = Octet::from_aper(decoder, UNCONSTRAINED)?;
-        let string = Optional::from_aper(decoder, UNCONSTRAINED)?;
-        let pdcch_config_sib1 = Octet::from_aper(decoder, UNCONSTRAINED)?;
-        let string = Optional::from_aper(decoder, UNCONSTRAINED)?;
-        let scs_common = Octet::from_aper(decoder, UNCONSTRAINED)?;
-        let string = Optional::from_aper(decoder, UNCONSTRAINED)?;
+        let csi_rs_configuration = if optionals.is_set(0) {
+            Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let sr_configuration = if optionals.is_set(0) {
+            Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let pdcch_config_sib1 = if optionals.is_set(0) {
+            Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
+        let scs_common = if optionals.is_set(0) {
+            Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
         let multiplexing_info = if optionals.is_set(0) {
             Some(MultiplexingInfo::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -3368,20 +3376,16 @@ impl APerElement for ChildNodeCellsListItem {
             rach_config_common,
             rach_config_common_iab,
             csi_rs_configuration,
-            string,
             sr_configuration,
-            string,
             pdcch_config_sib1,
-            string,
             scs_common,
-            string,
             multiplexing_info,
         })
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
-        let mut optionals = BitString::with_len(6);
-        optionals.set(0, self.iab_du_cell_resource_configuration_mode_info.is_some());        optionals.set(1, self.iab_stc_info.is_some());        optionals.set(2, self.rach_config_common.is_some());        optionals.set(3, self.rach_config_common_iab.is_some());        optionals.set(4, self.multiplexing_info.is_some());
+        let mut optionals = BitString::with_len(10);
+        optionals.set(0, self.iab_du_cell_resource_configuration_mode_info.is_some());        optionals.set(1, self.iab_stc_info.is_some());        optionals.set(2, self.rach_config_common.is_some());        optionals.set(3, self.rach_config_common_iab.is_some());        optionals.set(4, self.csi_rs_configuration.is_some());        optionals.set(5, self.sr_configuration.is_some());        optionals.set(6, self.pdcch_config_sib1.is_some());        optionals.set(7, self.scs_common.is_some());        optionals.set(8, self.multiplexing_info.is_some());
 
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.nrcgi.to_aper(UNCONSTRAINED)?);
@@ -3397,14 +3401,18 @@ impl APerElement for ChildNodeCellsListItem {
         if let Some(x) = self.rach_config_common_iab {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        enc.append(&self.csi_rs_configuration.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.string.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.sr_configuration.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.string.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.pdcch_config_sib1.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.string.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.scs_common.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.string.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.csi_rs_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.sr_configuration {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.pdcch_config_sib1 {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
+        if let Some(x) = self.scs_common {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
         if let Some(x) = self.multiplexing_info {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
@@ -3554,7 +3562,7 @@ impl APerElement for CnuePagingIdentity {
             Self::FiveGSTmsi(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -3825,7 +3833,7 @@ impl APerElement for CpTransportLayerAddress {
             Self::EndpointIpAddressAndPort(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -4040,7 +4048,7 @@ impl APerElement for CuduRadioInformationType {
             Self::Rim(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -4303,7 +4311,7 @@ impl APerElement for DlPrsMutingPattern {
             Self::ThirtyTwo(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -4412,7 +4420,7 @@ impl APerElement for DlPrsResourceSetArpLocation {
             Self::RelativeCartesianLocation(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -4483,7 +4491,7 @@ impl APerElement for DlPrsResourceArpLocation {
             Self::RelativeCartesianLocation(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -5578,7 +5586,7 @@ impl APerElement for DucuRadioInformationType {
             Self::Rim(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -5653,7 +5661,7 @@ impl APerElement for DufSlotConfigItem {
             Self::ImplicitFormat(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -5817,16 +5825,15 @@ impl APerElement for DuTxMtRx {
 pub struct DUtoCurrcInformation {
     pub cell_group_config: CellGroupConfig,
     pub meas_gap_config: Option<MeasGapConfig>,
-    pub requested_p_max_fr1: Octet,
-    pub string: Optional,
+    pub requested_p_max_fr1: Option<Vec<u8>>,
 }
 
 impl APerElement for DUtoCurrcInformation {
     const CONSTRAINTS: Constraints = Constraints {
         value: None,
         size: Some(Constraint {
-            min: Some(2),
-            max: Some(2),
+            min: Some(3),
+            max: Some(3),
         }),
     };
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
@@ -5838,20 +5845,22 @@ impl APerElement for DUtoCurrcInformation {
         } else {
             None
         };
-        let requested_p_max_fr1 = Octet::from_aper(decoder, UNCONSTRAINED)?;
-        let string = Optional::from_aper(decoder, UNCONSTRAINED)?;
+        let requested_p_max_fr1 = if optionals.is_set(0) {
+            Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)
+        } else {
+            None
+        };
 
         Ok(Self {
             cell_group_config,
             meas_gap_config,
             requested_p_max_fr1,
-            string,
         })
     }
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
-        let mut optionals = BitString::with_len(2);
-        optionals.set(0, self.meas_gap_config.is_some());
+        let mut optionals = BitString::with_len(3);
+        optionals.set(0, self.meas_gap_config.is_some());        optionals.set(1, self.requested_p_max_fr1.is_some());
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
@@ -5859,8 +5868,9 @@ impl APerElement for DUtoCurrcInformation {
         if let Some(x) = self.meas_gap_config {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        enc.append(&self.requested_p_max_fr1.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.string.to_aper(UNCONSTRAINED)?);
+        if let Some(x) = self.requested_p_max_fr1 {
+            enc.append(&x.to_aper(UNCONSTRAINED)?);
+        }
 
         Ok(enc)
     }
@@ -6300,7 +6310,7 @@ impl APerElement for ECidMeasuredResultsValue {
             Self::ValueAngleofArrivalNr(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -7200,7 +7210,7 @@ impl APerElement for EutraModeInfo {
             Self::Eutratdd(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -7642,7 +7652,7 @@ impl APerElement for FreqDomainLength {
             Self::L139(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -8813,7 +8823,7 @@ impl APerElement for GnbRxTxTimeDiffMeas {
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -9550,7 +9560,7 @@ impl APerElement for IabDuCellResourceConfigurationModeInfo {
             Self::Tdd(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -9657,7 +9667,7 @@ impl APerElement for IabiPv6RequestType {
             Self::IPv6Prefix(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -9695,7 +9705,7 @@ impl APerElement for IabtnlAddress {
             Self::IPv6Prefix(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -11496,7 +11506,7 @@ impl APerElement for MeasuredResultsValue {
             Self::GnbRxTxTimeDiff(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -12171,7 +12181,7 @@ impl APerElement for NpnBroadcastInformation {
             Self::PniNpnBroadcastInformation(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -12269,7 +12279,7 @@ impl APerElement for NpnSupportInfo {
             Self::SnpnInformation(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -12454,7 +12464,7 @@ impl APerElement for NrModeInfo {
             Self::Tdd(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -13144,7 +13154,7 @@ impl APerElement for PagingIdentity {
             Self::CnuePagingIdentity(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -13252,7 +13262,7 @@ impl APerElement for RelativePathDelay {
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -13319,7 +13329,7 @@ impl APerElement for PathlossReferenceSignal {
             Self::DlPrs(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -13373,7 +13383,7 @@ impl APerElement for Pc5QosCharacteristics {
             Self::DynamicPqi(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -14185,7 +14195,7 @@ impl APerElement for PosResourceSetType {
             Self::Aperiodic(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -15036,7 +15046,7 @@ impl APerElement for PrsResourceQclInfo {
             Self::QclSourcePrs(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -15420,7 +15430,7 @@ impl APerElement for QosCharacteristics {
             Self::Dynamic5qi(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -15552,7 +15562,7 @@ impl APerElement for QosInformation {
             Self::EutranQos(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -15916,7 +15926,7 @@ impl APerElement for RatFrequencyPriorityInformation {
             Self::Ngran(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -15999,7 +16009,7 @@ impl APerElement for ReferencePoint {
             Self::ReferencePointCoordinateHa(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -16068,7 +16078,7 @@ impl APerElement for ReferenceSignal {
             Self::DlPrs(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -16332,14 +16342,6 @@ impl APerElement for RequestedPdcchBlindDetectionScg {
 // RequestedSrsTransmissionCharacteristics
 pub struct RequestedSrsTransmissionCharacteristics {
     pub number_of_transmissions: Option<u16>,
-    pub : The,
-    pub ie: Shall,
-    pub be: Present,
-    pub if: The,
-    pub resource: Type,
-    pub ie: Is,
-    pub set: To,
-    pub periodic: ,
     pub resource_type: ResourceType1,
     pub bandwidth_srs: BandwidthSrs,
     pub srs_resource_set_list: Option<SrsResourceSetList>,
@@ -16362,14 +16364,6 @@ impl APerElement for RequestedSrsTransmissionCharacteristics {
         } else {
             None
         };
-        let  = The::from_aper(decoder, UNCONSTRAINED)?;
-        let ie = Shall::from_aper(decoder, UNCONSTRAINED)?;
-        let be = Present::from_aper(decoder, UNCONSTRAINED)?;
-        let if = The::from_aper(decoder, UNCONSTRAINED)?;
-        let resource = Type::from_aper(decoder, UNCONSTRAINED)?;
-        let ie = Is::from_aper(decoder, UNCONSTRAINED)?;
-        let set = To::from_aper(decoder, UNCONSTRAINED)?;
-        let periodic = ::from_aper(decoder, UNCONSTRAINED)?;
         let resource_type = ResourceType1::from_aper(decoder, UNCONSTRAINED)?;
         let bandwidth_srs = BandwidthSrs::from_aper(decoder, UNCONSTRAINED)?;
         let srs_resource_set_list = if optionals.is_set(0) {
@@ -16385,14 +16379,6 @@ impl APerElement for RequestedSrsTransmissionCharacteristics {
 
         Ok(Self {
             number_of_transmissions,
-            ,
-            ie,
-            be,
-            if,
-            resource,
-            ie,
-            set,
-            periodic,
             resource_type,
             bandwidth_srs,
             srs_resource_set_list,
@@ -16408,14 +16394,6 @@ impl APerElement for RequestedSrsTransmissionCharacteristics {
         if let Some(x) = self.number_of_transmissions {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        enc.append(&self..to_aper(UNCONSTRAINED)?);
-        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.be.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.if.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.resource.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.ie.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.set.to_aper(UNCONSTRAINED)?);
-        enc.append(&self.periodic.to_aper(UNCONSTRAINED)?);
         enc.append(&self.resource_type.to_aper(UNCONSTRAINED)?);
         enc.append(&self.bandwidth_srs.to_aper(UNCONSTRAINED)?);
         if let Some(x) = self.srs_resource_set_list {
@@ -16584,7 +16562,7 @@ impl APerElement for ResourceSetType {
             Self::Aperiodic(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -16793,7 +16771,7 @@ impl APerElement for ResourceType {
             Self::Aperiodic(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -16941,7 +16919,7 @@ impl APerElement for ResourceTypePos {
             Self::Aperiodic(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -19821,7 +19799,7 @@ impl APerElement for SpatialRelationPos {
             Self::PrsInformationPos(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -21012,7 +20990,7 @@ impl APerElement for SsbTransmissionBitmap {
             Self::LongBitmap(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -21301,7 +21279,7 @@ impl APerElement for SsbPositionsInBurst {
             Self::LongBitmap(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -21616,7 +21594,7 @@ impl APerElement for SymbolAllocInSlot {
             Self::BothDlAndUl(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -21965,7 +21943,7 @@ impl APerElement for TimeStampSlotIndex {
             Self::Scs120(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -22233,7 +22211,7 @@ impl APerElement for TrafficMappingInfo {
             Self::BaPlayerBhrlCchannelMappingInfo(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -22347,7 +22325,7 @@ impl APerElement for TransmissionComb {
             Self::N4(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -22385,7 +22363,7 @@ impl APerElement for TransmissionCombPos {
             Self::N8(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -22771,7 +22749,7 @@ impl APerElement for TrpInformationTypeResponseItem {
             Self::GeographicalCoordinates(x) => {
                 enc.append(&(7 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -22893,7 +22871,7 @@ impl APerElement for TrpMeasurementQualityItem {
             Self::AngleMeasurementQuality(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -22991,7 +22969,7 @@ impl APerElement for TrpPositionDefinitionType {
             Self::Referenced(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -23058,7 +23036,7 @@ impl APerElement for TrpPositionDirectAccuracy {
             Self::TrphAposition(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -23129,7 +23107,7 @@ impl APerElement for TrpReferencePointType {
             Self::TrpPositionRelativeCartesian(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -23485,7 +23463,7 @@ impl APerElement for UacCategoryType {
             Self::UacOperatorDefined(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -23719,7 +23697,7 @@ impl APerElement for UeIdentityIndexValue {
             Self::IndexLength10(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -23998,7 +23976,7 @@ impl APerElement for UlRtoaMeasurementItem {
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -24274,7 +24252,7 @@ impl APerElement for UpTransportLayerInformation {
             Self::GtpTunnel(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }

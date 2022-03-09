@@ -138,7 +138,7 @@ class ChoiceFieldsTo(Interpreter):
 
     def extension_container(self, tree):
         self.fields_to += f"""\
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
 """
         self.field_index += 1
 
@@ -785,7 +785,7 @@ impl APerElement for EventTrigger {
             Self::ShortMacroEnbId(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }

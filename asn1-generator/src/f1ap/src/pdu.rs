@@ -37,7 +37,7 @@ impl APerElement for ResetType {
             Self::PartOfF1Interface(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
@@ -2198,7 +2198,7 @@ impl APerElement for SrsType {
             Self::AperiodicSrs(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?);
                 enc.append(&x.to_aper(UNCONSTRAINED)?); }
-            Self::_Extended => Err(EncodeError::NotImplemented)
+            Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
     }
