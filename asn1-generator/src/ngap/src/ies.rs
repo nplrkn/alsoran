@@ -87,7 +87,7 @@ impl APerElement for AdditionalDluptnlInformationForHoItem {
                 .additional_qos_flow_setup_response_list
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.additional_dl_forwarding_uptnl_information {
+        if let Some(x) = &self.additional_dl_forwarding_uptnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -457,16 +457,16 @@ impl APerElement for AlternativeQosParaSetItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.alternative_qos_para_set_index.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.guaranteed_flow_bit_rate_dl {
+        if let Some(x) = &self.guaranteed_flow_bit_rate_dl {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.guaranteed_flow_bit_rate_ul {
+        if let Some(x) = &self.guaranteed_flow_bit_rate_ul {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.packet_delay_budget {
+        if let Some(x) = &self.packet_delay_budget {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.packet_error_rate {
+        if let Some(x) = &self.packet_error_rate {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -766,7 +766,7 @@ impl APerElement for AmfTnlAssociationToAddItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.amf_tnl_association_address.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.tnl_association_usage {
+        if let Some(x) = &self.tnl_association_usage {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.tnl_address_weight_factor.to_aper(UNCONSTRAINED)?);
@@ -906,10 +906,10 @@ impl APerElement for AmfTnlAssociationToUpdateItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.amf_tnl_association_address.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.tnl_association_usage {
+        if let Some(x) = &self.tnl_association_usage {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.tnl_address_weight_factor {
+        if let Some(x) = &self.tnl_address_weight_factor {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -991,13 +991,13 @@ impl APerElement for AreaOfInterest {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.area_of_interest_tai_list {
+        if let Some(x) = &self.area_of_interest_tai_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.area_of_interest_cell_list {
+        if let Some(x) = &self.area_of_interest_cell_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.area_of_interest_ran_node_list {
+        if let Some(x) = &self.area_of_interest_ran_node_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -1289,10 +1289,10 @@ impl APerElement for AssistanceDataForPaging {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.assistance_data_for_recommended_cells {
+        if let Some(x) = &self.assistance_data_for_recommended_cells {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.paging_attempt_information {
+        if let Some(x) = &self.paging_attempt_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -1398,7 +1398,7 @@ impl APerElement for AssociatedQosFlowItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.qos_flow_mapping_indication {
+        if let Some(x) = &self.qos_flow_mapping_indication {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -1621,7 +1621,7 @@ impl APerElement for AreaScopeOfNeighCellsItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.nr_frequency_info.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.pci_list_for_mdt {
+        if let Some(x) = &self.pci_list_for_mdt {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -1910,10 +1910,10 @@ impl APerElement for BluetoothMeasurementConfiguration {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.bluetooth_meas_config.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.bluetooth_meas_config_name_list {
+        if let Some(x) = &self.bluetooth_meas_config_name_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.bt_rssi {
+        if let Some(x) = &self.bt_rssi {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -3227,7 +3227,7 @@ impl APerElement for CnAssistedRanTuning {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.expected_ue_behaviour {
+        if let Some(x) = &self.expected_ue_behaviour {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -3725,7 +3725,7 @@ impl APerElement for CoreNetworkAssistanceInformationForInactive {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.ue_identity_index_value.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.ue_specific_drx {
+        if let Some(x) = &self.ue_specific_drx {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(
@@ -3733,11 +3733,11 @@ impl APerElement for CoreNetworkAssistanceInformationForInactive {
                 .periodic_registration_update_timer
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.mico_mode_indication {
+        if let Some(x) = &self.mico_mode_indication {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.tai_list_for_inactive.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.expected_ue_behaviour {
+        if let Some(x) = &self.expected_ue_behaviour {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -3930,16 +3930,16 @@ impl APerElement for CriticalityDiagnostics {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.procedure_code {
+        if let Some(x) = &self.procedure_code {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.triggering_message {
+        if let Some(x) = &self.triggering_message {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.procedure_criticality {
+        if let Some(x) = &self.procedure_criticality {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.i_es_criticality_diagnostics {
+        if let Some(x) = &self.i_es_criticality_diagnostics {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -4274,10 +4274,10 @@ impl APerElement for DataForwardingResponseDrbItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.drb_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.dl_forwarding_up_tnl_information {
+        if let Some(x) = &self.dl_forwarding_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ul_forwarding_up_tnl_information {
+        if let Some(x) = &self.ul_forwarding_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -4907,7 +4907,7 @@ impl APerElement for DrbStatusUl12 {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.ul_count_value.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.receive_status_of_ul_pdcp_sd_us {
+        if let Some(x) = &self.receive_status_of_ul_pdcp_sd_us {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -4953,7 +4953,7 @@ impl APerElement for DrbStatusUl18 {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.ul_count_value.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.receive_status_of_ul_pdcp_sd_us {
+        if let Some(x) = &self.receive_status_of_ul_pdcp_sd_us {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -5094,16 +5094,16 @@ impl APerElement for Dynamic5qiDescriptor {
         enc.append(&self.priority_level_qos.to_aper(UNCONSTRAINED)?);
         enc.append(&self.packet_delay_budget.to_aper(UNCONSTRAINED)?);
         enc.append(&self.packet_error_rate.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.five_qi {
+        if let Some(x) = &self.five_qi {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.delay_critical {
+        if let Some(x) = &self.delay_critical {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.averaging_window {
+        if let Some(x) = &self.averaging_window {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.maximum_data_burst_volume {
+        if let Some(x) = &self.maximum_data_burst_volume {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -5667,7 +5667,7 @@ impl APerElement for EmergencyFallbackIndicator {
                 .emergency_fallback_request_indicator
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.emergency_service_target_cn {
+        if let Some(x) = &self.emergency_service_target_cn {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -6071,7 +6071,7 @@ impl APerElement for ERabInformationItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.e_rab_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.dl_forwarding {
+        if let Some(x) = &self.dl_forwarding {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -6386,13 +6386,13 @@ impl APerElement for ExpectedUeActivityBehaviour {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.expected_activity_period {
+        if let Some(x) = &self.expected_activity_period {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.expected_idle_period {
+        if let Some(x) = &self.expected_idle_period {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.source_of_ue_activity_behaviour_information {
+        if let Some(x) = &self.source_of_ue_activity_behaviour_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -6464,16 +6464,16 @@ impl APerElement for ExpectedUeBehaviour {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.expected_ue_activity_behaviour {
+        if let Some(x) = &self.expected_ue_activity_behaviour {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.expected_ho_interval {
+        if let Some(x) = &self.expected_ho_interval {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.expected_ue_mobility {
+        if let Some(x) = &self.expected_ue_mobility {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.expected_ue_moving_trajectory {
+        if let Some(x) = &self.expected_ue_moving_trajectory {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -6568,7 +6568,7 @@ impl APerElement for ExpectedUeMovingTrajectoryItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.ngran_cgi.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.time_stayed_in_cell {
+        if let Some(x) = &self.time_stayed_in_cell {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -6618,10 +6618,10 @@ impl APerElement for ExtendedAmfName {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.amf_name_visible_string {
+        if let Some(x) = &self.amf_name_visible_string {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.amf_name_utf8_string {
+        if let Some(x) = &self.amf_name_utf8_string {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -6692,10 +6692,10 @@ impl APerElement for ExtendedRanNodeName {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.ran_node_name_visible_string {
+        if let Some(x) = &self.ran_node_name_visible_string {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ran_node_name_utf8_string {
+        if let Some(x) = &self.ran_node_name_utf8_string {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -7274,13 +7274,13 @@ impl APerElement for GbrQosInformation {
         enc.append(&self.maximum_flow_bit_rate_ul.to_aper(UNCONSTRAINED)?);
         enc.append(&self.guaranteed_flow_bit_rate_dl.to_aper(UNCONSTRAINED)?);
         enc.append(&self.guaranteed_flow_bit_rate_ul.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.notification_control {
+        if let Some(x) = &self.notification_control {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.maximum_packet_loss_rate_dl {
+        if let Some(x) = &self.maximum_packet_loss_rate_dl {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.maximum_packet_loss_rate_ul {
+        if let Some(x) = &self.maximum_packet_loss_rate_ul {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -7458,7 +7458,7 @@ impl APerElement for GlobalLineId {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.global_line_identity.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.line_type {
+        if let Some(x) = &self.line_type {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -7902,13 +7902,13 @@ impl APerElement for HandoverCommandTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.dl_forwarding_up_tnl_information {
+        if let Some(x) = &self.dl_forwarding_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flow_to_be_forwarded_list {
+        if let Some(x) = &self.qos_flow_to_be_forwarded_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.data_forwarding_response_drb_list {
+        if let Some(x) = &self.data_forwarding_response_drb_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -8046,17 +8046,17 @@ impl APerElement for HandoverRequestAcknowledgeTransfer {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.dl_forwarding_up_tnl_information {
+        if let Some(x) = &self.dl_forwarding_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.security_result {
+        if let Some(x) = &self.security_result {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.qos_flow_setup_response_list.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.qos_flow_failed_to_setup_list {
+        if let Some(x) = &self.qos_flow_failed_to_setup_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.data_forwarding_response_drb_list {
+        if let Some(x) = &self.data_forwarding_response_drb_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -8101,7 +8101,7 @@ impl APerElement for HandoverRequiredTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.direct_forwarding_path_availability {
+        if let Some(x) = &self.direct_forwarding_path_availability {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -8147,7 +8147,7 @@ impl APerElement for HandoverResourceAllocationUnsuccessfulTransfer {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.criticality_diagnostics {
+        if let Some(x) = &self.criticality_diagnostics {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -8278,19 +8278,19 @@ impl APerElement for HoReport {
         enc.append(&self.handover_cause.to_aper(UNCONSTRAINED)?);
         enc.append(&self.sourcecell_cgi.to_aper(UNCONSTRAINED)?);
         enc.append(&self.targetcell_cgi.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.reestablishmentcell_cgi {
+        if let Some(x) = &self.reestablishmentcell_cgi {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.sourcecell_c_rnti {
+        if let Some(x) = &self.sourcecell_c_rnti {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.targetcellin_e_utran {
+        if let Some(x) = &self.targetcellin_e_utran {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.mobility_information {
+        if let Some(x) = &self.mobility_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ue_rlf_report_container {
+        if let Some(x) = &self.ue_rlf_report_container {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -8683,31 +8683,31 @@ impl APerElement for ImmediateMdtNr {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.measurements_to_activate.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.m1_configuration {
+        if let Some(x) = &self.m1_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.m4_configuration {
+        if let Some(x) = &self.m4_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.m5_configuration {
+        if let Some(x) = &self.m5_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.m6_configuration {
+        if let Some(x) = &self.m6_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.m7_configuration {
+        if let Some(x) = &self.m7_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.bluetooth_measurement_configuration {
+        if let Some(x) = &self.bluetooth_measurement_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.wlan_measurement_configuration {
+        if let Some(x) = &self.wlan_measurement_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.mdt_location_info {
+        if let Some(x) = &self.mdt_location_info {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.sensor_measurement_configuration {
+        if let Some(x) = &self.sensor_measurement_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -8749,7 +8749,7 @@ impl APerElement for InterSystemFailureIndication {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.ue_rlf_report_container {
+        if let Some(x) = &self.ue_rlf_report_container {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -9345,10 +9345,10 @@ impl APerElement for LastVisitedNgranCellInformation {
         enc.append(&self.global_cell_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.cell_type.to_aper(UNCONSTRAINED)?);
         enc.append(&self.time_ue_stayed_in_cell.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.time_ue_stayed_in_cell_enhanced_granularity {
+        if let Some(x) = &self.time_ue_stayed_in_cell_enhanced_granularity {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ho_cause_value {
+        if let Some(x) = &self.ho_cause_value {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -9498,10 +9498,10 @@ impl APerElement for LocationReportingRequestType {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.event_type.to_aper(UNCONSTRAINED)?);
         enc.append(&self.report_area.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.area_of_interest_list {
+        if let Some(x) = &self.area_of_interest_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.location_reporting_reference_id_to_be_cancelled {
+        if let Some(x) = &self.location_reporting_reference_id_to_be_cancelled {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -9591,16 +9591,16 @@ impl APerElement for LoggedMdtNr {
         enc.append(&self.logging_interval.to_aper(UNCONSTRAINED)?);
         enc.append(&self.logging_duration.to_aper(UNCONSTRAINED)?);
         enc.append(&self.logged_mdt_trigger.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.bluetooth_measurement_configuration {
+        if let Some(x) = &self.bluetooth_measurement_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.wlan_measurement_configuration {
+        if let Some(x) = &self.wlan_measurement_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.sensor_measurement_configuration {
+        if let Some(x) = &self.sensor_measurement_configuration {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.area_scope_of_neigh_cells_list {
+        if let Some(x) = &self.area_scope_of_neigh_cells_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -9814,10 +9814,10 @@ impl APerElement for Ltev2xServicesAuthorized {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.vehicle_ue {
+        if let Some(x) = &self.vehicle_ue {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.pedestrian_ue {
+        if let Some(x) = &self.pedestrian_ue {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -10059,16 +10059,16 @@ impl APerElement for MobilityRestrictionList {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.serving_plmn.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.equivalent_plmn_s {
+        if let Some(x) = &self.equivalent_plmn_s {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.rat_restrictions {
+        if let Some(x) = &self.rat_restrictions {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.forbidden_area_information {
+        if let Some(x) = &self.forbidden_area_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.service_area_information {
+        if let Some(x) = &self.service_area_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -10142,10 +10142,10 @@ impl APerElement for MdtConfiguration {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.mdt_config_nr {
+        if let Some(x) = &self.mdt_config_nr {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.mdt_config_eutra {
+        if let Some(x) = &self.mdt_config_eutra {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -10199,7 +10199,7 @@ impl APerElement for MdtConfigurationNr {
         enc.append(&self.mdt_activation.to_aper(UNCONSTRAINED)?);
         enc.append(&self.area_scope_of_mdt.to_aper(UNCONSTRAINED)?);
         enc.append(&self.mdt_mode_nr.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.signalling_based_mdt_plmn_list {
+        if let Some(x) = &self.signalling_based_mdt_plmn_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -10253,7 +10253,7 @@ impl APerElement for MdtConfigurationEutra {
         enc.append(&self.mdt_activation.to_aper(UNCONSTRAINED)?);
         enc.append(&self.area_scope_of_mdt.to_aper(UNCONSTRAINED)?);
         enc.append(&self.mdt_mode.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.signalling_based_mdt_plmn_list {
+        if let Some(x) = &self.signalling_based_mdt_plmn_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -10409,10 +10409,10 @@ impl APerElement for M1Configuration {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.m1reporting_trigger.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.m1threshold_event_a2 {
+        if let Some(x) = &self.m1threshold_event_a2 {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.m1periodic_reporting {
+        if let Some(x) = &self.m1periodic_reporting {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -11121,7 +11121,7 @@ impl APerElement for NbIotPagingEDrxInfo {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.nb_iot_paging_e_drx_cycle.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.nb_iot_paging_time_window {
+        if let Some(x) = &self.nb_iot_paging_time_window {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -11419,7 +11419,7 @@ impl APerElement for NgranTnlAssociationToRemoveItem {
                 .tnl_association_transport_layer_address
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.tnl_association_transport_layer_address_amf {
+        if let Some(x) = &self.tnl_association_transport_layer_address_amf {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -11523,13 +11523,13 @@ impl APerElement for NonDynamic5qiDescriptor {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.five_qi.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.priority_level_qos {
+        if let Some(x) = &self.priority_level_qos {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.averaging_window {
+        if let Some(x) = &self.averaging_window {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.maximum_data_burst_volume {
+        if let Some(x) = &self.maximum_data_burst_volume {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -12167,10 +12167,10 @@ impl APerElement for Nrv2xServicesAuthorized {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.vehicle_ue {
+        if let Some(x) = &self.vehicle_ue {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.pedestrian_ue {
+        if let Some(x) = &self.pedestrian_ue {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -12398,10 +12398,10 @@ impl APerElement for OverloadStartNssaiItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.slice_overload_list.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.slice_overload_response {
+        if let Some(x) = &self.slice_overload_response {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.slice_traffic_load_reduction_indication {
+        if let Some(x) = &self.slice_traffic_load_reduction_indication {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -12577,7 +12577,7 @@ impl APerElement for PagingAttemptInformation {
                 .intended_number_of_paging_attempts
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.next_paging_area_scope {
+        if let Some(x) = &self.next_paging_area_scope {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -12726,7 +12726,7 @@ impl APerElement for PagingeDrxInformation {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.paging_e_drx_cycle.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.paging_time_window {
+        if let Some(x) = &self.paging_time_window {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -12899,10 +12899,10 @@ impl APerElement for PathSwitchRequestAcknowledgeTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.ul_ngu_up_tnl_information {
+        if let Some(x) = &self.ul_ngu_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.security_indication {
+        if let Some(x) = &self.security_indication {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -12999,10 +12999,10 @@ impl APerElement for PathSwitchRequestTransfer {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.dl_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.dl_ngu_tnl_information_reused {
+        if let Some(x) = &self.dl_ngu_tnl_information_reused {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.user_plane_security_information {
+        if let Some(x) = &self.user_plane_security_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.qos_flow_accepted_list.to_aper(UNCONSTRAINED)?);
@@ -13082,7 +13082,7 @@ impl APerElement for Pc5QosParameters {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.pc_5_qos_flow_list.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.pc_5_link_aggregate_bit_rates {
+        if let Some(x) = &self.pc_5_link_aggregate_bit_rates {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -13160,10 +13160,10 @@ impl APerElement for Pc5QosFlowItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.pqi.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.pc_5_flow_bit_rates {
+        if let Some(x) = &self.pc_5_flow_bit_rates {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.range {
+        if let Some(x) = &self.range {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -14152,7 +14152,7 @@ impl APerElement for PduSessionResourceInformationItem {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.qos_flow_information_list.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.dr_bs_to_qos_flows_mapping_list {
+        if let Some(x) = &self.dr_bs_to_qos_flows_mapping_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -14392,10 +14392,10 @@ impl APerElement for PduSessionResourceModifyConfirmTransfer {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_modify_confirm_list.to_aper(UNCONSTRAINED)?);
         enc.append(&self.ulngu_up_tnl_information.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.additional_ng_uuptnl_information {
+        if let Some(x) = &self.additional_ng_uuptnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flow_failed_to_modify_list {
+        if let Some(x) = &self.qos_flow_failed_to_modify_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -14516,19 +14516,19 @@ impl APerElement for PduSessionResourceModifyResponseTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.dl_ngu_up_tnl_information {
+        if let Some(x) = &self.dl_ngu_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ul_ngu_up_tnl_information {
+        if let Some(x) = &self.ul_ngu_up_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flow_add_or_modify_response_list {
+        if let Some(x) = &self.qos_flow_add_or_modify_response_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.additional_dl_qos_flow_per_tnl_information {
+        if let Some(x) = &self.additional_dl_qos_flow_per_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flow_failed_to_add_or_modify_list {
+        if let Some(x) = &self.qos_flow_failed_to_add_or_modify_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -14582,7 +14582,7 @@ impl APerElement for PduSessionResourceModifyIndicationTransfer {
                 .dl_qos_flow_per_tnl_information
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.additional_dl_qos_flow_per_tnl_information {
+        if let Some(x) = &self.additional_dl_qos_flow_per_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -14792,7 +14792,7 @@ impl APerElement for PduSessionResourceModifyItemModReq {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.nas_pdu {
+        if let Some(x) = &self.nas_pdu {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(
@@ -14911,7 +14911,7 @@ impl APerElement for PduSessionResourceModifyUnsuccessfulTransfer {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.criticality_diagnostics {
+        if let Some(x) = &self.criticality_diagnostics {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -15061,10 +15061,10 @@ impl APerElement for PduSessionResourceNotifyTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.qos_flow_notify_list {
+        if let Some(x) = &self.qos_flow_notify_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flow_released_list {
+        if let Some(x) = &self.qos_flow_released_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -15649,7 +15649,7 @@ impl APerElement for PduSessionResourceSetupItemCxtReq {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.nas_pdu {
+        if let Some(x) = &self.nas_pdu {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
@@ -15867,7 +15867,7 @@ impl APerElement for PduSessionResourceSetupItemSuReq {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.pdu_session_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.pdu_session_nas_pdu {
+        if let Some(x) = &self.pdu_session_nas_pdu {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.s_nssai.to_aper(UNCONSTRAINED)?);
@@ -16013,13 +16013,13 @@ impl APerElement for PduSessionResourceSetupResponseTransfer {
                 .dl_qos_flow_per_tnl_information
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.additional_dl_qos_flow_per_tnl_information {
+        if let Some(x) = &self.additional_dl_qos_flow_per_tnl_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.security_result {
+        if let Some(x) = &self.security_result {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flow_failed_to_setup_list {
+        if let Some(x) = &self.qos_flow_failed_to_setup_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -16065,7 +16065,7 @@ impl APerElement for PduSessionResourceSetupUnsuccessfulTransfer {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.cause.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.criticality_diagnostics {
+        if let Some(x) = &self.criticality_diagnostics {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -16958,10 +16958,10 @@ impl APerElement for QosFlowAddOrModifyRequestItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.qos_flow_level_qos_parameters {
+        if let Some(x) = &self.qos_flow_level_qos_parameters {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.e_rab_id {
+        if let Some(x) = &self.e_rab_id {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -17112,13 +17112,13 @@ impl APerElement for QosFlowFeedbackItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.update_feedback {
+        if let Some(x) = &self.update_feedback {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.c_npacket_delay_budget_dl {
+        if let Some(x) = &self.c_npacket_delay_budget_dl {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.c_npacket_delay_budget_ul {
+        if let Some(x) = &self.c_npacket_delay_budget_ul {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -17209,7 +17209,7 @@ impl APerElement for QosFlowInformationItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.dl_forwarding {
+        if let Some(x) = &self.dl_forwarding {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -17283,13 +17283,13 @@ impl APerElement for QosFlowLevelQosParameters {
                 .allocation_and_retention_priority
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.gbr_qos_information {
+        if let Some(x) = &self.gbr_qos_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.reflective_qos_attribute {
+        if let Some(x) = &self.reflective_qos_attribute {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.additional_qos_flow_information {
+        if let Some(x) = &self.additional_qos_flow_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -17594,7 +17594,7 @@ impl APerElement for QosFlowParametersItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.alternative_qos_para_set_list {
+        if let Some(x) = &self.alternative_qos_para_set_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -17769,7 +17769,7 @@ impl APerElement for QosFlowSetupRequestItem {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
         enc.append(&self.qos_flow_level_qos_parameters.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.e_rab_id {
+        if let Some(x) = &self.e_rab_id {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -17839,7 +17839,7 @@ impl APerElement for QosFlowItemWithDataForwarding {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.qos_flow_identifier.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.data_forwarding_accepted {
+        if let Some(x) = &self.data_forwarding_accepted {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -18360,7 +18360,7 @@ impl APerElement for RecommendedCellItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.ngran_cgi.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.time_stayed_in_cell {
+        if let Some(x) = &self.time_stayed_in_cell {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19076,13 +19076,13 @@ impl APerElement for ScheduledCommunicationTime {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.dayof_week {
+        if let Some(x) = &self.dayof_week {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.timeof_day_start {
+        if let Some(x) = &self.timeof_day_start {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.timeof_day_end {
+        if let Some(x) = &self.timeof_day_end {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19177,10 +19177,10 @@ impl APerElement for SecondaryRatUsageInformation {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.pdu_session_usage_report {
+        if let Some(x) = &self.pdu_session_usage_report {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.qos_flows_usage_report_list {
+        if let Some(x) = &self.qos_flows_usage_report_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19225,7 +19225,7 @@ impl APerElement for SecondaryRatDataUsageReportTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.secondary_rat_usage_information {
+        if let Some(x) = &self.secondary_rat_usage_information {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19327,7 +19327,7 @@ impl APerElement for SecurityIndication {
                 .confidentiality_protection_indication
                 .to_aper(UNCONSTRAINED)?,
         );
-        if let Some(x) = self.maximum_integrity_protected_data_rate_ul {
+        if let Some(x) = &self.maximum_integrity_protected_data_rate_ul {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19439,7 +19439,7 @@ impl APerElement for SensorMeasurementConfiguration {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.sensor_meas_config.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.sensor_meas_config_name_list {
+        if let Some(x) = &self.sensor_meas_config_name_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19659,7 +19659,7 @@ impl APerElement for ServedGuamiItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.guami.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.backup_amf_name {
+        if let Some(x) = &self.backup_amf_name {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19737,10 +19737,10 @@ impl APerElement for ServiceAreaInformationItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.plmn_identity.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.allowed_ta_cs {
+        if let Some(x) = &self.allowed_ta_cs {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.not_allowed_ta_cs {
+        if let Some(x) = &self.not_allowed_ta_cs {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -19951,7 +19951,7 @@ impl APerElement for SNssai {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.sst.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.sd {
+        if let Some(x) = &self.sd {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -20005,7 +20005,7 @@ impl APerElement for SonConfigurationTransfer {
         enc.append(&self.target_ran_node_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.source_ran_node_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.son_information.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.xn_tnl_configuration_info {
+        if let Some(x) = &self.xn_tnl_configuration_info {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -20086,7 +20086,7 @@ impl APerElement for SonInformationReply {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.xn_tnl_configuration_info {
+        if let Some(x) = &self.xn_tnl_configuration_info {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -20220,14 +20220,14 @@ impl APerElement for SourceNgranNodeToTargetNgranNodeTransparentContainer {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.rrc_container.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.pdu_session_resource_information_list {
+        if let Some(x) = &self.pdu_session_resource_information_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.e_rab_information_list {
+        if let Some(x) = &self.e_rab_information_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.target_cell_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.index_to_rfsp {
+        if let Some(x) = &self.index_to_rfsp {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
         enc.append(&self.ue_history_information.to_aper(UNCONSTRAINED)?);
@@ -20365,13 +20365,13 @@ impl APerElement for SourceToTargetAmfInformationReroute {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.configured_nssai {
+        if let Some(x) = &self.configured_nssai {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.rejected_nssa_iin_plmn {
+        if let Some(x) = &self.rejected_nssa_iin_plmn {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.rejected_nssa_iin_ta {
+        if let Some(x) = &self.rejected_nssa_iin_ta {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -21318,7 +21318,7 @@ impl APerElement for TargetRncId {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.lai.to_aper(UNCONSTRAINED)?);
         enc.append(&self.rnc_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.extended_rnc_id {
+        if let Some(x) = &self.extended_rnc_id {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -21668,7 +21668,7 @@ impl APerElement for TooearlyIntersystemHo {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.sourcecell_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.failurecell_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.ue_rlf_report_container {
+        if let Some(x) = &self.ue_rlf_report_container {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22110,7 +22110,7 @@ impl APerElement for TscAssistanceInformation {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.periodicity.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.burst_arrival_time {
+        if let Some(x) = &self.burst_arrival_time {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22160,10 +22160,10 @@ impl APerElement for TscTrafficCharacteristics {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.tsc_assistance_information_dl {
+        if let Some(x) = &self.tsc_assistance_information_dl {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.tsc_assistance_information_ul {
+        if let Some(x) = &self.tsc_assistance_information_ul {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22284,10 +22284,10 @@ impl APerElement for UeAssociatedLogicalNgConnectionItem {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.amf_ue_ngap_id {
+        if let Some(x) = &self.amf_ue_ngap_id {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ran_ue_ngap_id {
+        if let Some(x) = &self.ran_ue_ngap_id {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22377,7 +22377,7 @@ impl APerElement for UeContextResumeRequestTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.qos_flow_failed_to_resume_list {
+        if let Some(x) = &self.qos_flow_failed_to_resume_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22419,7 +22419,7 @@ impl APerElement for UeContextResumeResponseTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.qos_flow_failed_to_resume_list {
+        if let Some(x) = &self.qos_flow_failed_to_resume_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22459,7 +22459,7 @@ impl APerElement for UeContextSuspendRequestTransfer {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.suspend_indicator {
+        if let Some(x) = &self.suspend_indicator {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22547,22 +22547,22 @@ impl APerElement for UeDifferentiationInfo {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.periodic_communication_indicator {
+        if let Some(x) = &self.periodic_communication_indicator {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.periodic_time {
+        if let Some(x) = &self.periodic_time {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.scheduled_communication_time {
+        if let Some(x) = &self.scheduled_communication_time {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.stationary_indication {
+        if let Some(x) = &self.stationary_indication {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.traffic_profile {
+        if let Some(x) = &self.traffic_profile {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.battery_indication {
+        if let Some(x) = &self.battery_indication {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -22923,10 +22923,10 @@ impl APerElement for UeRadioCapabilityForPaging {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.ue_radio_capability_for_paging_of_nr {
+        if let Some(x) = &self.ue_radio_capability_for_paging_of_nr {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.ue_radio_capability_for_paging_of_eutra {
+        if let Some(x) = &self.ue_radio_capability_for_paging_of_eutra {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -23359,10 +23359,10 @@ impl APerElement for UnavailableGuamiItem {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.guami.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.timer_approach_for_guami_removal {
+        if let Some(x) = &self.timer_approach_for_guami_removal {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.backup_amf_name {
+        if let Some(x) = &self.backup_amf_name {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -23674,7 +23674,7 @@ impl APerElement for UserLocationInformationEutra {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.eutra_cgi.to_aper(UNCONSTRAINED)?);
         enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.time_stamp {
+        if let Some(x) = &self.time_stamp {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -23763,7 +23763,7 @@ impl APerElement for UserLocationInformationTngf {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.tnap_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.ip_address.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.port_number {
+        if let Some(x) = &self.port_number {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -23813,7 +23813,7 @@ impl APerElement for UserLocationInformationTwif {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.twap_id.to_aper(UNCONSTRAINED)?);
         enc.append(&self.ip_address.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.port_number {
+        if let Some(x) = &self.port_number {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -23903,7 +23903,7 @@ impl APerElement for UserLocationInformationNr {
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.nr_cgi.to_aper(UNCONSTRAINED)?);
         enc.append(&self.tai.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.time_stamp {
+        if let Some(x) = &self.time_stamp {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -24244,13 +24244,13 @@ impl APerElement for WlanMeasurementConfiguration {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.wlan_meas_config.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.wlan_meas_config_name_list {
+        if let Some(x) = &self.wlan_meas_config_name_list {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.wlan_rssi {
+        if let Some(x) = &self.wlan_rssi {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.wlan_rtt {
+        if let Some(x) = &self.wlan_rtt {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -24462,10 +24462,10 @@ impl APerElement for XnExtTlaItem {
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        if let Some(x) = self.i_psec_tla {
+        if let Some(x) = &self.i_psec_tla {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
-        if let Some(x) = self.gtp_tl_as {
+        if let Some(x) = &self.gtp_tl_as {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -24559,7 +24559,7 @@ impl APerElement for XnTnlConfigurationInfo {
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.xn_transport_layer_addresses.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.xn_extended_transport_layer_addresses {
+        if let Some(x) = &self.xn_extended_transport_layer_addresses {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 

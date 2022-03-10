@@ -66,12 +66,14 @@ class StructFindOptionals(Interpreter):
     def optional_field(self, tree):
         name = tree.children[0]
         self.find_optionals += f"""\
-        optionals.set({self.num_optionals}, self.{name}.is_some());"""
+        optionals.set({self.num_optionals}, self.{name}.is_some());
+"""
         self.num_optionals += 1
 
     def extension_container(self, tree):
         self.find_optionals += f"""\
-        optionals.set({self.num_optionals}, false); """
+        optionals.set({self.num_optionals}, false);
+"""
         self.num_optionals += 1
 
 
@@ -213,7 +215,7 @@ class StructFieldsTo(Interpreter):
     def optional_field(self, tree):
         name = tree.children[0]
         self.fields_to += f"""\
-        if let Some(x) = self.{name} {{
+        if let Some(x) = &self.{name} {{
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }}
 """
@@ -401,7 +403,7 @@ impl APerElement for {name} {{
         let mut enc = Encoding::new();
         {MUT_OPTIONALS.format(num_optionals=num_optionals)
                               if num_optionals > 0 else ""}
-{find_opt_interpreter.find_optionals if num_optionals > 0 else ""}
+{find_opt_interpreter.find_optionals if num_optionals > 0 else ""}\
 {EXTENSION_TO if field_interpreter.extensible else ""}
         {OPTIONALS_TO if num_optionals > 0 else ""}
 {fields_to_interpreter.fields_to}
@@ -591,11 +593,12 @@ impl APerElement for WlanMeasurementConfiguration {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.wlan_rtt.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.wlan_meas_config.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.wlan_rtt {
+        if let Some(x) = &self.wlan_rtt {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 

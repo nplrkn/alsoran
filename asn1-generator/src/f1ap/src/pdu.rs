@@ -2237,12 +2237,13 @@ impl APerElement for SemipersistentSrs {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
-        optionals.set(0, self.srs_spatial_relation.is_some());        optionals.set(1, false); 
+        optionals.set(0, self.srs_spatial_relation.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.srs_resource_set_id.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.srs_spatial_relation {
+        if let Some(x) = &self.srs_spatial_relation {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
@@ -2282,12 +2283,13 @@ impl APerElement for AperiodicSrs {
     fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
         let mut optionals = BitString::with_len(2);
-        optionals.set(0, self.srs_resource_trigger.is_some());        optionals.set(1, false); 
+        optionals.set(0, self.srs_resource_trigger.is_some());
+        optionals.set(1, false);
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
         enc.append(&self.aperiodic.to_aper(UNCONSTRAINED)?);
-        if let Some(x) = self.srs_resource_trigger {
+        if let Some(x) = &self.srs_resource_trigger {
             enc.append(&x.to_aper(UNCONSTRAINED)?);
         }
 
