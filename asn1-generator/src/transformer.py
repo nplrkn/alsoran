@@ -1,18 +1,42 @@
 #!/usr/bin/env python3
 
 import unittest
-from lark.visitors import Transformer, Discard
+from lark.visitors import Transformer, Visitor, Discard
 from case import pascal_case, snake_case
 from lark.lexer import Token
 from lark import Tree, v_args
 from parser import parse_string, parse_file
 
 
+class TypeNameFinder(Visitor):
+    def __init__(self):
+        self.name_dict = dict()
+
+    def add(self, orig_typename):
+        name = pascal_case(orig_typename)
+        print(f"{orig_typename} -> {name}")
+        # two top level types convert to same pascal case name
+        assert name not in self.name_dict
+        self.name_dict[name] = 0
+
+    def choicedef(self, tree):
+        self.add(tree.children[0])
+
+    def tuple_struct(self, tree):
+        self.add(tree.children[0])
+
+    def enumdef(self, tree):
+        self.add(tree.children[0])
+
+    def struct(self, tree):
+        self.add(tree.children[0])
+
+
 @v_args(tree=True)
 class TypeTransformer(Transformer):
-    def __init__(self, constants=dict()):
+    def __init__(self, constants=dict(), name_dict=dict()):
         self.extra_defs = []
-        self.name_dict = dict()
+        self.name_dict = name_dict
         self.constants = constants
 
     def unique_type_name(self, name):
@@ -159,8 +183,12 @@ class TypeTransformer(Transformer):
 
 
 def transform(mut_tree, constants):
+    print("---- Finding typenames ----")
+    t = TypeNameFinder()
+    t.visit(mut_tree)
+
     print("---- Transforming ----")
-    return TypeTransformer(constants).transform(mut_tree)
+    return TypeTransformer(constants, t.name_dict).transform(mut_tree)
 
 
 class TestGenerator(unittest.TestCase):
@@ -170,7 +198,7 @@ class TestGenerator(unittest.TestCase):
         output = ""
         tree = parse_string(input)
         try:
-            output = TypeTransformer(constants).transform(tree).pretty()
+            output = transform(tree, constants).pretty()
             # print(output)
             self.assertEqual(output, expected)
         finally:
@@ -333,6 +361,43 @@ document
       optional_field
         scs_common
         Vec<u8>\tNone
+""")
+
+    def test_inline_name_clash(self):
+        self.should_generate("""\
+ActiveULBWP ::= SEQUENCE {
+	subcarrierSpacing           ENUMERATED { kHz15, kHz30, kHz60, kHz120,... } ,
+}
+SubcarrierSpacing ::= ENUMERATED { kHz15, kHz30, kHz60, kHz120, kHz240, spare3, spare2, spare1, ... }
+""", """\
+document
+  None
+  struct
+    ActiveUlbwp
+    sequence
+      field
+        subcarrier_spacing
+        SubcarrierSpacing0
+  enumdef
+    SubcarrierSpacing
+    enumerated
+      enum_item\tKHz15
+      enum_item\tKHz30
+      enum_item\tKHz60
+      enum_item\tKHz120
+      enum_item\tKHz240
+      enum_item\tSpare3
+      enum_item\tSpare2
+      enum_item\tSpare1
+      extension_marker
+  enumdef
+    SubcarrierSpacing0
+    enumerated
+      enum_item\tKHz15
+      enum_item\tKHz30
+      enum_item\tKHz60
+      enum_item\tKHz120
+      extension_marker
 """)
 
 
