@@ -8,16 +8,25 @@ from lark import Tree, v_args
 from parser import parse_string, parse_file
 
 
+# Add a new type name and ensure it is unique
+def add_type_name(orig_typename, name_dict):
+    name = pascal_case(orig_typename)
+    existing = name_dict.get(name)
+    name_dict[name] = (existing or 0) + 1
+    if existing:
+        name = name + str(existing)
+    return name
+
+
 class TypeNameFinder(Visitor):
     def __init__(self):
         self.name_dict = dict()
+        self.convert = dict()
 
     def add(self, orig_typename):
-        name = pascal_case(orig_typename)
+        name = add_type_name(orig_typename, self.name_dict)
         print(f"{orig_typename} -> {name}")
-        # two top level types convert to same pascal case name
-        assert name not in self.name_dict
-        self.name_dict[name] = 0
+        self.convert[orig_typename] = name
 
     def choicedef(self, tree):
         self.add(tree.children[0])
@@ -34,16 +43,23 @@ class TypeNameFinder(Visitor):
 
 @v_args(tree=True)
 class TypeTransformer(Transformer):
-    def __init__(self, constants=dict(), name_dict=dict()):
+    def __init__(self, constants=dict(), name_dict=dict(), convert=dict()):
         self.extra_defs = []
         self.name_dict = name_dict
+        self.convert_dict = convert
         self.constants = constants
 
     def unique_type_name(self, name):
-        name = pascal_case(name)
-        existing = self.name_dict.get(name)
-        self.name_dict[name] = (existing or 0) + 1
-        return (name + str(existing)) if existing is not None else name
+        return add_type_name(name, self.name_dict)
+
+    def convert(self, orig):
+        if orig not in self.convert_dict:
+            print(
+                f"Warning: unknown type {orig} - guessing name as {pascal_case(orig)}")
+            name = pascal_case(orig)
+        else:
+            name = self.convert_dict[orig]
+        return name
 
     def document(self, tree):
         tree.children += self.extra_defs
@@ -69,26 +85,27 @@ class TypeTransformer(Transformer):
         return tree
 
     def tuple_struct(self, tree):
-        tree.children[0] = pascal_case(tree.children[0])
+        tree.children[0] = self.convert(tree.children[0])
         return tree
 
     def choicedef(self, tree):
-        tree.children[0] = pascal_case(tree.children[0])
+        tree.children[0] = self.convert(tree.children[0])
         return tree
 
     def enumdef(self, tree):
-        tree.children[0] = pascal_case(tree.children[0])
+        tree.children[0] = self.convert(tree.children[0])
         return tree
 
     def struct(self, tree):
-        tree.children[0] = pascal_case(tree.children[0])
+        tree.children[0] = self.convert(tree.children[0])
         return tree
 
     def transform_type(self, tree):
         orig_name = tree.children[0]
         typ = tree.children[1]
         if isinstance(typ, Token):
-            tree.children[1] = pascal_case(typ)
+            typename = tree.children[1].value
+            tree.children[1] = self.convert(typename)
         elif typ.data == 'enumerated':
             name = self.unique_type_name(orig_name)
             new_def = Tree('enumdef', [name, typ])
@@ -99,6 +116,8 @@ class TypeTransformer(Transformer):
             new_def = Tree('struct', [name, typ])
             self.extra_defs.append(new_def)
             tree.children[1] = name
+        elif typ.data == 'null':
+            tree.children[1] = 'null'
         else:
             pass
 
@@ -111,7 +130,7 @@ class TypeTransformer(Transformer):
             assert(item.data == "container")
             item = item.children[1].replace("IEs", "")
         return Tree(
-            "Vec<" + pascal_case(item) + ">", [tree.children[0], tree.children[1]])
+            "Vec<" + self.convert(item) + ">", [tree.children[0], tree.children[1]])
 
     def transform_bounds(self, tree):
         ub = 18446744073709551615
@@ -188,7 +207,7 @@ def transform(mut_tree, constants):
     t.visit(mut_tree)
 
     print("---- Transforming ----")
-    return TypeTransformer(constants, t.name_dict).transform(mut_tree)
+    return TypeTransformer(constants, t.name_dict, t.convert).transform(mut_tree)
 
 
 class TestGenerator(unittest.TestCase):
@@ -232,7 +251,7 @@ document
     choice
       choicefield
         BlahBla
-        Null
+        null
       choicefield
         ShortMacroEnbId
         BitString
@@ -342,7 +361,7 @@ Child-Node-Cells-List-Item ::= SEQUENCE {
   	sR-Configuration					OCTET STRING	OPTIONAL,
 	pDCCH-ConfigSIB1					OCTET STRING	OPTIONAL,
 	sCS-Common							OCTET STRING	OPTIONAL,
-}           
+}
 """, """\
 document
   None
@@ -377,7 +396,7 @@ document
     sequence
       field
         subcarrier_spacing
-        SubcarrierSpacing0
+        SubcarrierSpacing1
   enumdef
     SubcarrierSpacing
     enumerated
@@ -391,13 +410,51 @@ document
       enum_item\tSpare1
       extension_marker
   enumdef
-    SubcarrierSpacing0
+    SubcarrierSpacing1
     enumerated
       enum_item\tKHz15
       enum_item\tKHz30
       enum_item\tKHz60
       enum_item\tKHz120
       extension_marker
+""")
+
+    def test_clashing_type_names(self):
+        self.should_generate("""\
+Foo ::= INTEGER(1..16)
+SRSConfig ::= SEQUENCE {
+	a SRSResourceSet-List,
+	b SRSResourceSetList,
+}
+SRSResourceSet-List ::= SEQUENCE (SIZE (1..2)) OF Foo
+SRSResourceSetList ::= SEQUENCE (SIZE (1.. 3)) OF Foo
+""", """\
+document
+  None
+  tuple_struct
+    Foo
+    u8
+      1
+      16
+  struct
+    SrsConfig
+    sequence
+      field
+        a
+        SrsResourceSetList
+      field
+        b
+        SrsResourceSetList1
+  tuple_struct
+    SrsResourceSetList
+    Vec<Foo>
+      1
+      2
+  tuple_struct
+    SrsResourceSetList1
+    Vec<Foo>
+      1
+      3
 """)
 
 

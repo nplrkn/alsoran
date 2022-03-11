@@ -43,6 +43,7 @@ printablestring:  "PrintableString" [_size]
 visiblestring:    "VisibleString" [_size]
 utf8string:       "UTF8String" [_size]
 bits.2:           "BIT STRING" [_size]
+null:             "NULL"
 bytes.2:          ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
 boolean:          "BOOLEAN"
 _identifier:      IDENTIFIER
@@ -57,6 +58,7 @@ _primitive:     sequenceof
                 | bits 
                 | bytes
                 | boolean
+                | null
                 | _identifier
 
 ies:              "{" ie* [","] extension_marker? "}"

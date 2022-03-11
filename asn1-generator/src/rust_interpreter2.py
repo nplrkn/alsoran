@@ -107,7 +107,7 @@ class ChoiceFields(Interpreter):
         if isinstance(typ, Tree):
             typ = typ.data
         self.choice_fields += f"""\
-    {name}{"("+typ+")" if typ != "Null" else ""},
+    {name}{"("+typ+")" if typ != "null" else ""},
 """
 
     def extension_container(self, tree):
@@ -127,7 +127,7 @@ class ChoiceFieldsTo(Interpreter):
     def choicefield(self, tree):
         name = tree.children[0]
         typ = tree.children[1]
-        if typ != "Null":
+        if typ != "null":
             self.fields_to += f"""\
             Self::{name}(x) => {{
                 enc.append(&({self.field_index} as u8).to_aper(UNCONSTRAINED)?);
@@ -158,7 +158,7 @@ class ChoiceFieldsFrom(Interpreter):
         if isinstance(typ, Tree):
             typ = typ.data
 
-        if typ != "Null":
+        if typ != "null":
             self.fields_from += f"""\
             {self.field_index} => Ok(Self::{name}({typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?)),
 """
@@ -442,50 +442,11 @@ impl APerElement for {name} {{
         # self.struct_start(name)
         # self.field_block(tree.children[2])
 
-    # def field_block(self, tree):
-    #     self.output += " {\n"
-    #     self.visit(tree)
-    #     self.output += "}\n\n"
-    #     self.flush()
-
     def extension_container(self, tree):
         pass
 
     def extended_item(self, tree):
         assert(False)
-
-    # def extension_marker(self, tree):
-    #     if self.in_enum:
-    #         self.output += "    _Extended,\n"
-
-    # def field(self, tree):
-    #     name = tree.children[0]
-    #     typ = tree.children[1]
-    #     if typ is None:
-    #         # Enumerated
-    #         name = pascal_case(name)
-    #         self.output += "    " + name
-    #     else:
-    #         if self.in_enum:
-    #             # Choice
-    #             name = pascal_case(name)
-    #             self.output += "    " + name
-    #             if typ != "Null":
-    #                 self.output += "(" + typ + ")"
-    #         else:
-    #             # Sequence
-    #             name = snake_case(name)
-    #             self.output += "    pub " + name + ": " + typ
-    #     self.output += ",\n"
-
-    # def optional_field(self, tree):
-    #     assert (not self.in_enum)
-    #     self.field(tree, optional=True)
-
-    # def flush(self):
-    #     # print(self.output)
-    #     self.outfile += self.output
-    #     self.output = ""
 
 
 def generate(tree, constants=dict(), verbose=False):
