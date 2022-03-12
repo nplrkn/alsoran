@@ -22,6 +22,7 @@ class TypeNameFinder(Visitor):
     def __init__(self):
         self.name_dict = dict()
         self.convert = dict()
+        self.ie_dict = dict()
 
     def add(self, orig_typename):
         name = add_type_name(orig_typename, self.name_dict)
@@ -39,6 +40,43 @@ class TypeNameFinder(Visitor):
 
     def struct(self, tree):
         self.add(tree.children[0])
+
+    def protocol_ies(self, tree):
+        self.ie_dict[tree.children[0]] = tree.children[1]
+
+
+# Convert a structure like
+#    sequence
+#      ie_container      PDUSessionResourceSetupRequestIEs
+#      extension_marker
+#  protocol_ies
+#    PDUSessionResourceSetupRequestIEs
+#    ies
+#      ie
+#
+# into
+#
+#    ie_container_sequence
+#      ies
+#        ie
+#      extension_marker
+@v_args(tree=True)
+class IeContainerMerger(Transformer):
+    def __init__(self, ies=dict()):
+        self.ie_dict = ies
+
+    # def ie_container(self, tree):
+    #     tree.children[0] = self.ie_dict[tree.children[0]]
+    #     return tree
+
+    def sequence(self, tree):
+        if tree.children[0].data == "ie_container":
+            tree.children[0] = self.ie_dict[tree.children[0].children[0]]
+            tree.data = "ie_container_sequence"
+        return tree
+
+    def protocol_ies(self, tree):
+        return Discard
 
 
 @v_args(tree=True)
@@ -200,14 +238,27 @@ class TypeTransformer(Transformer):
     def boolean(self, tree):
         return Tree("bool", tree.children)
 
+    def ie(self, tree):
+        id = tree.children[0].value
+        tree.children[0] = snake_case(id.replace("id-", ""))
+        tree.children.insert(1, self.constants[id])
+        tree.children[3] = self.convert(tree.children[3])
+        return tree
+
+    def optional_ie(self, tree):
+        return self.ie(tree)
+
 
 def transform(mut_tree, constants):
     print("---- Finding typenames ----")
-    t = TypeNameFinder()
-    t.visit(mut_tree)
+    tnf = TypeNameFinder()
+    tnf.visit(mut_tree)
+
+    print("---- Merging IE containers ----")
+    mut_tree = IeContainerMerger(tnf.ie_dict).transform(mut_tree)
 
     print("---- Transforming ----")
-    return TypeTransformer(constants, t.name_dict, t.convert).transform(mut_tree)
+    return TypeTransformer(constants, tnf.name_dict, tnf.convert).transform(mut_tree)
 
 
 class TestGenerator(unittest.TestCase):
@@ -456,6 +507,39 @@ document
       1
       3
 """)
+
+    def test_pdu_contents(self):
+        self.should_generate("""\
+PDUSessionResourceSetupRequest ::= SEQUENCE {
+	protocolIEs		ProtocolIE-Container		{ {PDUSessionResourceSetupRequestIEs} },
+	...
+}
+
+PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
+	{ ID id-AMF-UE-NGAP-ID							CRITICALITY reject	TYPE AMF-UE-NGAP-ID								PRESENCE mandatory	}|
+	{ ID id-RANPagingPriority						CRITICALITY ignore	TYPE RANPagingPriority							PRESENCE optional		}|
+	...
+}
+""", """\
+document
+  None
+  struct
+    PduSessionResourceSetupRequest
+    ie_container_sequence
+      ies
+        ie
+          amf_ue_ngap_id
+          10
+          reject
+          AmfUeNgapId
+        optional_ie
+          ran_paging_priority
+          83
+          ignore
+          RanPagingPriority
+        extension_marker
+      extension_marker
+""", constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
 
 
 if __name__ == '__main__':
