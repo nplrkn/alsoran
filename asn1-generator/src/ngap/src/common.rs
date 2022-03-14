@@ -42,7 +42,7 @@ impl APerElement for PrintableString {
 
 
 // Criticality
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum Criticality {
     Reject,
     Ignore,
@@ -63,7 +63,7 @@ impl APerElement for Criticality {
 }
 
 // Presence
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum Presence {
     Optional,
     Conditional,
@@ -177,7 +177,7 @@ impl APerElement for ProtocolIeId {
 }
 
 // TriggeringMessage
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,

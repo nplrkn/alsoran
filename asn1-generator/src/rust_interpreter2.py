@@ -202,6 +202,60 @@ class StructFields(Interpreter):
 """
 
 
+class IeFields(Interpreter):
+    def __init__(self):
+        self.struct_fields = ""
+        self.extensible = False
+        self.mut_field_vars = ""
+        self.self_fields = ""
+        self.matches = ""
+        self.mandatory = ""
+
+    def extension_marker(self, tree):
+        self.extensible = True
+
+    def ie(self, tree):
+        name = tree.children[0]
+        id = tree.children[1]
+        typ = tree.children[3]
+        if isinstance(typ, Tree):
+            typ = typ.data
+        self.struct_fields += f"""\
+    pub {name}: {typ},
+"""
+        self.mut_field_vars += f"""\
+        let mut {name}: Option<{typ}> = None;
+"""
+        self.self_fields += f"            {name},\n"
+        self.matches += f"""\
+                {id} => {{
+                    {name} = Some({typ}::from_aper(decoder, UNCONSTRAINED)?);
+                }}
+"""
+        self.mandatory += f"""\
+        let {name} = {name}.ok_or(Err(DecodeError::InvalidChoice))?;
+"""
+
+    def optional_ie(self, tree):
+        name = tree.children[0]
+        id = tree.children[1]
+        typ = tree.children[3]
+        if isinstance(typ, Tree):
+            typ = typ.data
+        self.struct_fields += f"""\
+    pub {name}: Option<{typ}>,
+"""
+        self.mut_field_vars += f"""\
+        let mut {name}: Option<{typ}> = None;
+"""
+        self.self_fields += f"            {name},\n"
+        self.matches += f"""\
+                {id} => {{
+                    {name} = Some({typ}::from_aper(decoder, UNCONSTRAINED)?);
+                }}
+"""
+
+
 class StructFieldsTo(Interpreter):
     def __init__(self):
         self.fields_to = ""
@@ -221,6 +275,11 @@ class StructFieldsTo(Interpreter):
 """
 
 
+class IeFieldsTo(Interpreter):
+    def field(self, tree):
+        pass
+
+
 MUT_OPTIONALS = """let mut optionals = BitString::with_len({num_optionals});"""
 
 ENUM_EXTENSION_FROM = """
@@ -232,7 +291,7 @@ ENUM_EXTENSION_FROM = """
 class StructInterpreter(Interpreter):
 
     def __init__(self):
-        #self.output = ""
+        # self.output = ""
         self.outfile = ""
         self.in_enum = False
 
@@ -254,7 +313,7 @@ class StructInterpreter(Interpreter):
 
         self.outfile += f"""\
 // {orig_name}
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
@@ -357,7 +416,70 @@ impl APerElement for {name} {{
         # self.output += s.get_type(tree) + ",\n"
         # assert(s.outfile == "")  # Can't handle inline enum here
 
+    def pdu(self, tree):
+        orig_name = tree.children[0]
+        print(orig_name)
+        name = orig_name
+
+        field_interpreter = IeFields()
+        for i in [field_interpreter]:
+            i.visit(tree.children[1])
+
+        #   ProtocolIE-Container {NGAP-PROTOCOL-IES : IEsSetParam} ::=
+        # 	SEQUENCE (SIZE (0..maxProtocolIEs)) OF
+        # 	ProtocolIE-Field {{IEsSetParam}}
+
+        # ProtocolIE-Field {NGAP-PROTOCOL-IES : IEsSetParam} ::= SEQUENCE {
+        # 	id				NGAP-PROTOCOL-IES.&id				({IEsSetParam}),
+        # 	criticality		NGAP-PROTOCOL-IES.&criticality		({IEsSetParam}{@id}),
+        # 	value			NGAP-PROTOCOL-IES.&Value			({IEsSetParam}{@id})
+        # }
+
+        self.outfile += f"""\
+// {orig_name}
+pub struct {name} {{
+{field_interpreter.struct_fields}\
+}}
+
+impl APerElement for {name} {{
+    {UNCONSTRAINED_CONSTRAINTS}
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {{
+        {EXTENSION_FROM if field_interpreter.extensible else ""}
+        let len = decoder.decode_length()?;
+{field_interpreter.mut_field_vars}
+        for _ in 0..len {{
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {{
+{field_interpreter.matches}\
+                _ => {{
+                    if let Criticality::Reject = criticality {{
+                        return Err(DecodeError::InvalidChoice);
+                    }}
+                }}
+            }}
+        }}
+{field_interpreter.mandatory}\
+        Ok(Self {{
+{field_interpreter.self_fields}\
+        }})
+    }}
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {{
+        unimplemented!()
+    }}
+}}
+
+"""
+
     def struct(self, tree):
+        if tree.children[1].data == "ie_container_sequence":
+            self.pdu(tree)
+            return
+
+        orig_name = tree.children[0]
+        print(orig_name)
+        name = orig_name
+
         fields = [
             child for child in tree.children[1].children if child.data in ["field", "optional_field"]]
 
@@ -366,21 +488,18 @@ impl APerElement for {name} {{
             self.comment(tree, "omitted\n")
             return
 
-        orig_name = tree.children[0]
-        print(orig_name)
-        name = orig_name
         field_interpreter = StructFields()
-        field_interpreter.visit(tree.children[1])
-
         fields_from_interpreter = StructFieldsFrom()
-        fields_from_interpreter.visit(tree.children[1])
-
         find_opt_interpreter = StructFindOptionals()
-        find_opt_interpreter.visit(tree.children[1])
-        num_optionals = find_opt_interpreter.num_optionals
-
         fields_to_interpreter = StructFieldsTo()
-        fields_to_interpreter.visit(tree.children[1])
+
+        for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter, fields_to_interpreter]:
+            i.visit(tree.children[1])
+        # field_interpreter.visit(tree.children[1])
+        # fields_from_interpreter.visit(tree.children[1])
+        # find_opt_interpreter.visit(tree.children[1])
+        # fields_to_interpreter.visit(tree.children[1])
+        num_optionals = find_opt_interpreter.num_optionals
 
         self.outfile += f"""\
 // {orig_name}
@@ -469,11 +588,11 @@ def generate_structs(input_file="f1ap/asn1/F1AP-PDU-Contents.asn", constants=dic
 class TestGenerator(unittest.TestCase):
     maxDiff = None
 
-    def should_generate(self, input, expected):
+    def should_generate(self, input, expected, constants=dict()):
         output = ""
         tree = parse_string(input)
         try:
-            output = generate(tree)
+            output = generate(tree, constants, True)
             print(output)
             self.assertEqual(output, expected)
         finally:
@@ -486,7 +605,7 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
 """
         output = """\
 // TriggeringMessage
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -568,7 +687,7 @@ impl APerElement for WlanMeasurementConfiguration {
 }
 
 // WlanRtt
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum WlanRtt {
     Thing1,
     _Extended,
@@ -685,7 +804,7 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
 """
         output = """\
 // MaximumIntegrityProtectedDataRate
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
@@ -759,7 +878,7 @@ impl APerElement for EventTrigger {
 
 
 // OutOfCoverage
-#[derive(Clone, Copy, FromPrimitive)]
+# [derive(Clone, Copy, FromPrimitive)]
 pub enum OutOfCoverage {
     True,
     _Extended,
@@ -783,6 +902,63 @@ impl APerElement for OutOfCoverage {
 }
 
 """)
+
+    def test_pdu_contents(self):
+        self.should_generate("""\
+PDUSessionResourceSetupRequest ::= SEQUENCE {
+	protocolIEs		ProtocolIE-Container		{ {PDUSessionResourceSetupRequestIEs} },
+	...
+}
+
+PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
+	{ ID id-AMF-UE-NGAP-ID							CRITICALITY reject	TYPE AMF-UE-NGAP-ID								PRESENCE mandatory	}|
+	{ ID id-RANPagingPriority						CRITICALITY ignore	TYPE RANPagingPriority							PRESENCE optional		}|
+	...
+}
+""", """\
+// PduSessionResourceSetupRequest
+pub struct PduSessionResourceSetupRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_paging_priority: Option<RanPagingPriority>,
+}
+
+impl APerElement for PduSessionResourceSetupRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length()?;
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_paging_priority: Option<RanPagingPriority> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(RanPagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_paging_priority,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+""", constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
 
 
 if __name__ == '__main__':

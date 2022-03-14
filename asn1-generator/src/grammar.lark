@@ -64,7 +64,7 @@ _primitive:     sequenceof
                 | _identifier
 
 ies:              "{" (ie | optional_ie)* [","] extension_marker? "}"
-optional_ie:     _ie{"optional"} 
+optional_ie:     _ie{"optional"} | _ie{"conditional"}
 ie:              _ie{"mandatory"}
 _ie{p}:             "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _fieldtype+ "PRESENCE" p "}" ["|"]
 

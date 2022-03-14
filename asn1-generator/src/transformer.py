@@ -80,6 +80,13 @@ class IeContainerMerger(Transformer):
 
 
 @v_args(tree=True)
+class Remover(Transformer):
+    def objectdef(self, tree):
+        print("Removing objectdef ", tree.children[0])
+        return Discard
+
+
+@v_args(tree=True)
 class TypeTransformer(Transformer):
     def __init__(self, constants=dict(), name_dict=dict(), convert=dict()):
         self.extra_defs = []
@@ -138,24 +145,24 @@ class TypeTransformer(Transformer):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
-    def transform_type(self, tree):
+    def transform_type(self, tree, type_index=1):
         orig_name = tree.children[0]
-        typ = tree.children[1]
+        typ = tree.children[type_index]
         if isinstance(typ, Token):
-            typename = tree.children[1].value
-            tree.children[1] = self.convert(typename)
+            typename = tree.children[type_index].value
+            tree.children[type_index] = self.convert(typename)
         elif typ.data == 'enumerated':
             name = self.unique_type_name(orig_name)
             new_def = Tree('enumdef', [name, typ])
             self.extra_defs.append(new_def)
-            tree.children[1] = name
+            tree.children[type_index] = name
         elif typ.data == 'sequence':
             name = self.unique_type_name(orig_name)
             new_def = Tree('struct', [name, typ])
             self.extra_defs.append(new_def)
-            tree.children[1] = name
+            tree.children[type_index] = name
         elif typ.data == 'null':
-            tree.children[1] = 'null'
+            tree.children[type_index] = 'null'
         else:
             pass
 
@@ -242,7 +249,7 @@ class TypeTransformer(Transformer):
         id = tree.children[0].value
         tree.children[0] = snake_case(id.replace("id-", ""))
         tree.children.insert(1, self.constants[id])
-        tree.children[3] = self.convert(tree.children[3])
+        self.transform_type(tree, 3)
         return tree
 
     def optional_ie(self, tree):
@@ -250,15 +257,23 @@ class TypeTransformer(Transformer):
 
 
 def transform(mut_tree, constants):
-    print("---- Finding typenames ----")
-    tnf = TypeNameFinder()
-    tnf.visit(mut_tree)
+    try:
+        print("---- Removing ignored objectdefs ----")
+        mut_tree = Remover().transform(mut_tree)
 
-    print("---- Merging IE containers ----")
-    mut_tree = IeContainerMerger(tnf.ie_dict).transform(mut_tree)
+        print("---- Finding typenames ----")
+        tnf = TypeNameFinder()
+        tnf.visit(mut_tree)
 
-    print("---- Transforming ----")
-    return TypeTransformer(constants, tnf.name_dict, tnf.convert).transform(mut_tree)
+        print("---- Merging IE containers ----")
+        mut_tree = IeContainerMerger(tnf.ie_dict).transform(mut_tree)
+
+        print("---- Transforming ----")
+        return TypeTransformer(constants, tnf.name_dict, tnf.convert).transform(mut_tree)
+
+    except Exception as e:
+        print(mut_tree.pretty())
+        raise e
 
 
 class TestGenerator(unittest.TestCase):

@@ -7,199 +7,6320 @@ use asn1::aper::{
     UNCONSTRAINED,
 };
 use num_derive::FromPrimitive;
-use num_traits::FromPrimitive;use super::ies::*;
-
-// PduSessionResourceSetupRequest - omitted
-
-// PduSessionResourceSetupResponse - omitted
-
-// PduSessionResourceReleaseCommand - omitted
-
-// PduSessionResourceReleaseResponse - omitted
-
-// PduSessionResourceModifyRequest - omitted
-
-// PduSessionResourceModifyResponse - omitted
-
-// PduSessionResourceNotify - omitted
-
-// PduSessionResourceModifyIndication - omitted
-
-// PduSessionResourceModifyConfirm - omitted
-
-// InitialContextSetupRequest - omitted
-
-// InitialContextSetupResponse - omitted
-
-// InitialContextSetupFailure - omitted
-
-// UeContextReleaseRequest - omitted
-
-// UeContextReleaseCommand - omitted
-
-// UeContextReleaseComplete - omitted
-
-// UeContextResumeRequest - omitted
-
-// UeContextResumeResponse - omitted
-
-// UeContextResumeFailure - omitted
-
-// UeContextSuspendRequest - omitted
-
-// UeContextSuspendResponse - omitted
-
-// UeContextSuspendFailure - omitted
-
-// UeContextModificationRequest - omitted
-
-// UeContextModificationResponse - omitted
-
-// UeContextModificationFailure - omitted
-
-// RrcInactiveTransitionReport - omitted
-
-// RetrieveUeInformation - omitted
-
-// UeInformationTransfer - omitted
-
-// RancpRelocationIndication - omitted
-
-// HandoverRequired - omitted
-
-// HandoverCommand - omitted
-
-// HandoverPreparationFailure - omitted
-
-// HandoverRequest - omitted
-
-// HandoverRequestAcknowledge - omitted
-
-// HandoverFailure - omitted
-
-// HandoverNotify - omitted
-
-// PathSwitchRequest - omitted
-
-// PathSwitchRequestAcknowledge - omitted
-
-// PathSwitchRequestFailure - omitted
-
-// HandoverCancel - omitted
-
-// HandoverCancelAcknowledge - omitted
-
-// HandoverSuccess - omitted
-
-// UplinkRanEarlyStatusTransfer - omitted
-
-// DownlinkRanEarlyStatusTransfer - omitted
-
-// UplinkRanStatusTransfer - omitted
-
-// DownlinkRanStatusTransfer - omitted
-
-// Paging - omitted
-
-// InitialUeMessage - omitted
-
-// DownlinkNasTransport - omitted
-
-// UplinkNasTransport - omitted
-
-// NasNonDeliveryIndication - omitted
-
-// RerouteNasRequest - omitted
-
-// NgSetupRequest - omitted
-
-// NgSetupResponse - omitted
-
-// NgSetupFailure - omitted
-
-// RanConfigurationUpdate - omitted
-
-// RanConfigurationUpdateAcknowledge - omitted
-
-// RanConfigurationUpdateFailure - omitted
-
-// AmfConfigurationUpdate - omitted
-
-// AmfConfigurationUpdateAcknowledge - omitted
-
-// AmfConfigurationUpdateFailure - omitted
-
-// AmfStatusIndication - omitted
-
-// NgReset - omitted
-
-// NgResetAcknowledge - omitted
-
-// ErrorIndication - omitted
-
-// OverloadStart - omitted
-
-// OverloadStop - omitted
-
-// UplinkRanConfigurationTransfer - omitted
-
-// DownlinkRanConfigurationTransfer - omitted
-
-// WriteReplaceWarningRequest - omitted
-
-// WriteReplaceWarningResponse - omitted
-
-// PwsCancelRequest - omitted
-
-// PwsCancelResponse - omitted
-
-// PwsRestartIndication - omitted
-
-// PwsFailureIndication - omitted
-
-// DownlinkUeAssociatedNrpPaTransport - omitted
-
-// UplinkUeAssociatedNrpPaTransport - omitted
-
-// DownlinkNonUeAssociatedNrpPaTransport - omitted
-
-// UplinkNonUeAssociatedNrpPaTransport - omitted
-
-// TraceStart - omitted
-
-// TraceFailureIndication - omitted
-
-// DeactivateTrace - omitted
-
-// CellTrafficTrace - omitted
-
-// LocationReportingControl - omitted
-
-// LocationReportingFailureIndication - omitted
-
-// LocationReport - omitted
-
-// UetnlaBindingReleaseRequest - omitted
-
-// UeRadioCapabilityInfoIndication - omitted
-
-// UeRadioCapabilityCheckRequest - omitted
-
-// UeRadioCapabilityCheckResponse - omitted
+use num_traits::FromPrimitive;
+use crate::common::Criticality;
+
+use super::ies::*;
+
+// PduSessionResourceSetupRequest
+pub struct PduSessionResourceSetupRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ran_paging_priority: Option<RanPagingPriority>,
+    pub nas_pdu: Option<NasPdu>,
+    pub pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq,
+    pub ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate>,
+}
+
+impl APerElement for PduSessionResourceSetupRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ran_paging_priority: Option<RanPagingPriority> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut pdu_session_resource_setup_list_su_req: Option<PduSessionResourceSetupListSuReq> = None;
+        let mut ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(RanPagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                74 => {
+                    pdu_session_resource_setup_list_su_req = Some(PduSessionResourceSetupListSuReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                110 => {
+                    ue_aggregate_maximum_bit_rate = Some(UeAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_setup_list_su_req = pdu_session_resource_setup_list_su_req.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ran_paging_priority,
+            nas_pdu,
+            pdu_session_resource_setup_list_su_req,
+            ue_aggregate_maximum_bit_rate,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceSetupResponse
+pub struct PduSessionResourceSetupResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_setup_list_su_res: Option<PduSessionResourceSetupListSuRes>,
+    pub pdu_session_resource_failed_to_setup_list_su_res: Option<PduSessionResourceFailedToSetupListSuRes>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PduSessionResourceSetupResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_setup_list_su_res: Option<PduSessionResourceSetupListSuRes> = None;
+        let mut pdu_session_resource_failed_to_setup_list_su_res: Option<PduSessionResourceFailedToSetupListSuRes> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                75 => {
+                    pdu_session_resource_setup_list_su_res = Some(PduSessionResourceSetupListSuRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                58 => {
+                    pdu_session_resource_failed_to_setup_list_su_res = Some(PduSessionResourceFailedToSetupListSuRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_setup_list_su_res,
+            pdu_session_resource_failed_to_setup_list_su_res,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceReleaseCommand
+pub struct PduSessionResourceReleaseCommand {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ran_paging_priority: Option<RanPagingPriority>,
+    pub nas_pdu: Option<NasPdu>,
+    pub pdu_session_resource_to_release_list_rel_cmd: PduSessionResourceToReleaseListRelCmd,
+}
+
+impl APerElement for PduSessionResourceReleaseCommand {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ran_paging_priority: Option<RanPagingPriority> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut pdu_session_resource_to_release_list_rel_cmd: Option<PduSessionResourceToReleaseListRelCmd> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(RanPagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                79 => {
+                    pdu_session_resource_to_release_list_rel_cmd = Some(PduSessionResourceToReleaseListRelCmd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_to_release_list_rel_cmd = pdu_session_resource_to_release_list_rel_cmd.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ran_paging_priority,
+            nas_pdu,
+            pdu_session_resource_to_release_list_rel_cmd,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceReleaseResponse
+pub struct PduSessionResourceReleaseResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_released_list_rel_res: PduSessionResourceReleasedListRelRes,
+    pub user_location_information: Option<UserLocationInformation>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PduSessionResourceReleaseResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_released_list_rel_res: Option<PduSessionResourceReleasedListRelRes> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                70 => {
+                    pdu_session_resource_released_list_rel_res = Some(PduSessionResourceReleasedListRelRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_released_list_rel_res = pdu_session_resource_released_list_rel_res.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_released_list_rel_res,
+            user_location_information,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceModifyRequest
+pub struct PduSessionResourceModifyRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ran_paging_priority: Option<RanPagingPriority>,
+    pub pdu_session_resource_modify_list_mod_req: PduSessionResourceModifyListModReq,
+}
+
+impl APerElement for PduSessionResourceModifyRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ran_paging_priority: Option<RanPagingPriority> = None;
+        let mut pdu_session_resource_modify_list_mod_req: Option<PduSessionResourceModifyListModReq> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(RanPagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                64 => {
+                    pdu_session_resource_modify_list_mod_req = Some(PduSessionResourceModifyListModReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_modify_list_mod_req = pdu_session_resource_modify_list_mod_req.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ran_paging_priority,
+            pdu_session_resource_modify_list_mod_req,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceModifyResponse
+pub struct PduSessionResourceModifyResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_modify_list_mod_res: Option<PduSessionResourceModifyListModRes>,
+    pub pdu_session_resource_failed_to_modify_list_mod_res: Option<PduSessionResourceFailedToModifyListModRes>,
+    pub user_location_information: Option<UserLocationInformation>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PduSessionResourceModifyResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_modify_list_mod_res: Option<PduSessionResourceModifyListModRes> = None;
+        let mut pdu_session_resource_failed_to_modify_list_mod_res: Option<PduSessionResourceFailedToModifyListModRes> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                65 => {
+                    pdu_session_resource_modify_list_mod_res = Some(PduSessionResourceModifyListModRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                54 => {
+                    pdu_session_resource_failed_to_modify_list_mod_res = Some(PduSessionResourceFailedToModifyListModRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_modify_list_mod_res,
+            pdu_session_resource_failed_to_modify_list_mod_res,
+            user_location_information,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceNotify
+pub struct PduSessionResourceNotify {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_notify_list: Option<PduSessionResourceNotifyList>,
+    pub pdu_session_resource_released_list_not: Option<PduSessionResourceReleasedListNot>,
+    pub user_location_information: Option<UserLocationInformation>,
+}
+
+impl APerElement for PduSessionResourceNotify {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_notify_list: Option<PduSessionResourceNotifyList> = None;
+        let mut pdu_session_resource_released_list_not: Option<PduSessionResourceReleasedListNot> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                66 => {
+                    pdu_session_resource_notify_list = Some(PduSessionResourceNotifyList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                67 => {
+                    pdu_session_resource_released_list_not = Some(PduSessionResourceReleasedListNot::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_notify_list,
+            pdu_session_resource_released_list_not,
+            user_location_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceModifyIndication
+pub struct PduSessionResourceModifyIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_modify_list_mod_ind: PduSessionResourceModifyListModInd,
+    pub user_location_information: Option<UserLocationInformation>,
+}
+
+impl APerElement for PduSessionResourceModifyIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_modify_list_mod_ind: Option<PduSessionResourceModifyListModInd> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                63 => {
+                    pdu_session_resource_modify_list_mod_ind = Some(PduSessionResourceModifyListModInd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_modify_list_mod_ind = pdu_session_resource_modify_list_mod_ind.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_modify_list_mod_ind,
+            user_location_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PduSessionResourceModifyConfirm
+pub struct PduSessionResourceModifyConfirm {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_modify_list_mod_cfm: Option<PduSessionResourceModifyListModCfm>,
+    pub pdu_session_resource_failed_to_modify_list_mod_cfm: Option<PduSessionResourceFailedToModifyListModCfm>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PduSessionResourceModifyConfirm {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_modify_list_mod_cfm: Option<PduSessionResourceModifyListModCfm> = None;
+        let mut pdu_session_resource_failed_to_modify_list_mod_cfm: Option<PduSessionResourceFailedToModifyListModCfm> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                62 => {
+                    pdu_session_resource_modify_list_mod_cfm = Some(PduSessionResourceModifyListModCfm::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                131 => {
+                    pdu_session_resource_failed_to_modify_list_mod_cfm = Some(PduSessionResourceFailedToModifyListModCfm::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_modify_list_mod_cfm,
+            pdu_session_resource_failed_to_modify_list_mod_cfm,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// InitialContextSetupRequest
+pub struct InitialContextSetupRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub old_amf: Option<AmfName>,
+    pub ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate>,
+    pub core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive>,
+    pub guami: Guami,
+    pub pdu_session_resource_setup_list_cxt_req: Option<PduSessionResourceSetupListCxtReq>,
+    pub allowed_nssai: AllowedNssai,
+    pub ue_security_capabilities: UeSecurityCapabilities,
+    pub security_key: SecurityKey,
+    pub trace_activation: Option<TraceActivation>,
+    pub mobility_restriction_list: Option<MobilityRestrictionList>,
+    pub ue_radio_capability: Option<UeRadioCapability>,
+    pub index_to_rfsp: Option<IndexToRfsp>,
+    pub masked_imeisv: Option<MaskedImeisv>,
+    pub nas_pdu: Option<NasPdu>,
+    pub emergency_fallback_indicator: Option<EmergencyFallbackIndicator>,
+    pub rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest>,
+    pub ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging>,
+    pub redirection_voice_fallback: Option<RedirectionVoiceFallback>,
+    pub location_reporting_request_type: Option<LocationReportingRequestType>,
+    pub cn_assisted_ran_tuning: Option<CnAssistedRanTuning>,
+    pub srvcc_operation_possible: Option<SrvccOperationPossible>,
+    pub iab_authorized: Option<IabAuthorized>,
+    pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
+    pub extended_connected_time: Option<ExtendedConnectedTime>,
+    pub ue_differentiation_info: Option<UeDifferentiationInfo>,
+    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
+    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
+    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub pc5_qos_parameters: Option<Pc5QosParameters>,
+    pub c_emode_brestricted: Option<CEmodeBrestricted>,
+    pub ue_up_c_iot_support: Option<UeUpCIotSupport>,
+    pub rg_level_wireline_access_characteristics: Option<RgLevelWirelineAccessCharacteristics>,
+    pub management_based_mdt_plmn_list: Option<MdtPlmnList>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+}
+
+impl APerElement for InitialContextSetupRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut old_amf: Option<AmfName> = None;
+        let mut ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate> = None;
+        let mut core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive> = None;
+        let mut guami: Option<Guami> = None;
+        let mut pdu_session_resource_setup_list_cxt_req: Option<PduSessionResourceSetupListCxtReq> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut ue_security_capabilities: Option<UeSecurityCapabilities> = None;
+        let mut security_key: Option<SecurityKey> = None;
+        let mut trace_activation: Option<TraceActivation> = None;
+        let mut mobility_restriction_list: Option<MobilityRestrictionList> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut index_to_rfsp: Option<IndexToRfsp> = None;
+        let mut masked_imeisv: Option<MaskedImeisv> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut emergency_fallback_indicator: Option<EmergencyFallbackIndicator> = None;
+        let mut rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest> = None;
+        let mut ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging> = None;
+        let mut redirection_voice_fallback: Option<RedirectionVoiceFallback> = None;
+        let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
+        let mut cn_assisted_ran_tuning: Option<CnAssistedRanTuning> = None;
+        let mut srvcc_operation_possible: Option<SrvccOperationPossible> = None;
+        let mut iab_authorized: Option<IabAuthorized> = None;
+        let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
+        let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
+        let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
+        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
+        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate> = None;
+        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate> = None;
+        let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
+        let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
+        let mut ue_up_c_iot_support: Option<UeUpCIotSupport> = None;
+        let mut rg_level_wireline_access_characteristics: Option<RgLevelWirelineAccessCharacteristics> = None;
+        let mut management_based_mdt_plmn_list: Option<MdtPlmnList> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                48 => {
+                    old_amf = Some(AmfName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                110 => {
+                    ue_aggregate_maximum_bit_rate = Some(UeAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                18 => {
+                    core_network_assistance_information_for_inactive = Some(CoreNetworkAssistanceInformationForInactive::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                28 => {
+                    guami = Some(Guami::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                71 => {
+                    pdu_session_resource_setup_list_cxt_req = Some(PduSessionResourceSetupListCxtReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                119 => {
+                    ue_security_capabilities = Some(UeSecurityCapabilities::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                94 => {
+                    security_key = Some(SecurityKey::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                108 => {
+                    trace_activation = Some(TraceActivation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                36 => {
+                    mobility_restriction_list = Some(MobilityRestrictionList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                31 => {
+                    index_to_rfsp = Some(IndexToRfsp::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                34 => {
+                    masked_imeisv = Some(MaskedImeisv::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                24 => {
+                    emergency_fallback_indicator = Some(EmergencyFallbackIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                91 => {
+                    rrc_inactive_transition_report_request = Some(RrcInactiveTransitionReportRequest::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                118 => {
+                    ue_radio_capability_for_paging = Some(UeRadioCapabilityForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                146 => {
+                    redirection_voice_fallback = Some(RedirectionVoiceFallback::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                33 => {
+                    location_reporting_request_type = Some(LocationReportingRequestType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                165 => {
+                    cn_assisted_ran_tuning = Some(CnAssistedRanTuning::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                177 => {
+                    srvcc_operation_possible = Some(SrvccOperationPossible::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                199 => {
+                    iab_authorized = Some(IabAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                205 => {
+                    enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                206 => {
+                    extended_connected_time = Some(ExtendedConnectedTime::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                209 => {
+                    ue_differentiation_info = Some(UeDifferentiationInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                216 => {
+                    nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                215 => {
+                    ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                218 => {
+                    nrue_sidelink_aggregate_maximum_bitrate = Some(NrueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                217 => {
+                    lteue_sidelink_aggregate_maximum_bitrate = Some(LteueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                219 => {
+                    pc5_qos_parameters = Some(Pc5QosParameters::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                222 => {
+                    c_emode_brestricted = Some(CEmodeBrestricted::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                234 => {
+                    ue_up_c_iot_support = Some(UeUpCIotSupport::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                238 => {
+                    rg_level_wireline_access_characteristics = Some(RgLevelWirelineAccessCharacteristics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                254 => {
+                    management_based_mdt_plmn_list = Some(MdtPlmnList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let guami = guami.ok_or(Err(DecodeError::InvalidChoice))?;
+        let allowed_nssai = allowed_nssai.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ue_security_capabilities = ue_security_capabilities.ok_or(Err(DecodeError::InvalidChoice))?;
+        let security_key = security_key.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            old_amf,
+            ue_aggregate_maximum_bit_rate,
+            core_network_assistance_information_for_inactive,
+            guami,
+            pdu_session_resource_setup_list_cxt_req,
+            allowed_nssai,
+            ue_security_capabilities,
+            security_key,
+            trace_activation,
+            mobility_restriction_list,
+            ue_radio_capability,
+            index_to_rfsp,
+            masked_imeisv,
+            nas_pdu,
+            emergency_fallback_indicator,
+            rrc_inactive_transition_report_request,
+            ue_radio_capability_for_paging,
+            redirection_voice_fallback,
+            location_reporting_request_type,
+            cn_assisted_ran_tuning,
+            srvcc_operation_possible,
+            iab_authorized,
+            enhanced_coverage_restriction,
+            extended_connected_time,
+            ue_differentiation_info,
+            nrv2x_services_authorized,
+            ltev2x_services_authorized,
+            nrue_sidelink_aggregate_maximum_bitrate,
+            lteue_sidelink_aggregate_maximum_bitrate,
+            pc5_qos_parameters,
+            c_emode_brestricted,
+            ue_up_c_iot_support,
+            rg_level_wireline_access_characteristics,
+            management_based_mdt_plmn_list,
+            ue_radio_capability_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// InitialContextSetupResponse
+pub struct InitialContextSetupResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_setup_list_cxt_res: Option<PduSessionResourceSetupListCxtRes>,
+    pub pdu_session_resource_failed_to_setup_list_cxt_res: Option<PduSessionResourceFailedToSetupListCxtRes>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for InitialContextSetupResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_setup_list_cxt_res: Option<PduSessionResourceSetupListCxtRes> = None;
+        let mut pdu_session_resource_failed_to_setup_list_cxt_res: Option<PduSessionResourceFailedToSetupListCxtRes> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                72 => {
+                    pdu_session_resource_setup_list_cxt_res = Some(PduSessionResourceSetupListCxtRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                55 => {
+                    pdu_session_resource_failed_to_setup_list_cxt_res = Some(PduSessionResourceFailedToSetupListCxtRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_setup_list_cxt_res,
+            pdu_session_resource_failed_to_setup_list_cxt_res,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// InitialContextSetupFailure
+pub struct InitialContextSetupFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_failed_to_setup_list_cxt_fail: Option<PduSessionResourceFailedToSetupListCxtFail>,
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for InitialContextSetupFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_failed_to_setup_list_cxt_fail: Option<PduSessionResourceFailedToSetupListCxtFail> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                132 => {
+                    pdu_session_resource_failed_to_setup_list_cxt_fail = Some(PduSessionResourceFailedToSetupListCxtFail::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_failed_to_setup_list_cxt_fail,
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextReleaseRequest
+pub struct UeContextReleaseRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_list_cxt_rel_req: Option<PduSessionResourceListCxtRelReq>,
+    pub cause: Cause,
+}
+
+impl APerElement for UeContextReleaseRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_list_cxt_rel_req: Option<PduSessionResourceListCxtRelReq> = None;
+        let mut cause: Option<Cause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                133 => {
+                    pdu_session_resource_list_cxt_rel_req = Some(PduSessionResourceListCxtRelReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_list_cxt_rel_req,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextReleaseCommand
+pub struct UeContextReleaseCommand {
+    pub ue_ngap_i_ds: UeNgapIDs,
+    pub cause: Cause,
+}
+
+impl APerElement for UeContextReleaseCommand {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ue_ngap_i_ds: Option<UeNgapIDs> = None;
+        let mut cause: Option<Cause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                114 => {
+                    ue_ngap_i_ds = Some(UeNgapIDs::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ue_ngap_i_ds = ue_ngap_i_ds.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ue_ngap_i_ds,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextReleaseComplete
+pub struct UeContextReleaseComplete {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub user_location_information: Option<UserLocationInformation>,
+    pub info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging>,
+    pub pdu_session_resource_list_cxt_rel_cpl: Option<PduSessionResourceListCxtRelCpl>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+    pub paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe>,
+}
+
+impl APerElement for UeContextReleaseComplete {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging> = None;
+        let mut pdu_session_resource_list_cxt_rel_cpl: Option<PduSessionResourceListCxtRelCpl> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+        let mut paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                32 => {
+                    info_on_recommended_cells_and_ran_nodes_for_paging = Some(InfoOnRecommendedCellsAndRanNodesForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                60 => {
+                    pdu_session_resource_list_cxt_rel_cpl = Some(PduSessionResourceListCxtRelCpl::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                207 => {
+                    paging_assis_datafor_c_ecapab_ue = Some(PagingAssisDataforCEcapabUe::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            user_location_information,
+            info_on_recommended_cells_and_ran_nodes_for_paging,
+            pdu_session_resource_list_cxt_rel_cpl,
+            criticality_diagnostics,
+            paging_assis_datafor_c_ecapab_ue,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextResumeRequest
+pub struct UeContextResumeRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub rrc_resume_cause: RrcEstablishmentCause,
+    pub pdu_session_resource_resume_list_res_req: Option<PduSessionResourceResumeListResReq>,
+    pub pdu_session_resource_failed_to_resume_list_res_req: Option<PduSessionResourceFailedToResumeListResReq>,
+    pub suspend_request_indication: Option<SuspendRequestIndication>,
+    pub info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging>,
+    pub paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe>,
+}
+
+impl APerElement for UeContextResumeRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut rrc_resume_cause: Option<RrcEstablishmentCause> = None;
+        let mut pdu_session_resource_resume_list_res_req: Option<PduSessionResourceResumeListResReq> = None;
+        let mut pdu_session_resource_failed_to_resume_list_res_req: Option<PduSessionResourceFailedToResumeListResReq> = None;
+        let mut suspend_request_indication: Option<SuspendRequestIndication> = None;
+        let mut info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging> = None;
+        let mut paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                237 => {
+                    rrc_resume_cause = Some(RrcEstablishmentCause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                232 => {
+                    pdu_session_resource_resume_list_res_req = Some(PduSessionResourceResumeListResReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                229 => {
+                    pdu_session_resource_failed_to_resume_list_res_req = Some(PduSessionResourceFailedToResumeListResReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                235 => {
+                    suspend_request_indication = Some(SuspendRequestIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                32 => {
+                    info_on_recommended_cells_and_ran_nodes_for_paging = Some(InfoOnRecommendedCellsAndRanNodesForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                207 => {
+                    paging_assis_datafor_c_ecapab_ue = Some(PagingAssisDataforCEcapabUe::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let rrc_resume_cause = rrc_resume_cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            rrc_resume_cause,
+            pdu_session_resource_resume_list_res_req,
+            pdu_session_resource_failed_to_resume_list_res_req,
+            suspend_request_indication,
+            info_on_recommended_cells_and_ran_nodes_for_paging,
+            paging_assis_datafor_c_ecapab_ue,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextResumeResponse
+pub struct UeContextResumeResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_resume_list_res_res: Option<PduSessionResourceResumeListResRes>,
+    pub pdu_session_resource_failed_to_resume_list_res_res: Option<PduSessionResourceFailedToResumeListResRes>,
+    pub security_context: Option<SecurityContext>,
+    pub suspend_response_indication: Option<SuspendResponseIndication>,
+    pub extended_connected_time: Option<ExtendedConnectedTime>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeContextResumeResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_resume_list_res_res: Option<PduSessionResourceResumeListResRes> = None;
+        let mut pdu_session_resource_failed_to_resume_list_res_res: Option<PduSessionResourceFailedToResumeListResRes> = None;
+        let mut security_context: Option<SecurityContext> = None;
+        let mut suspend_response_indication: Option<SuspendResponseIndication> = None;
+        let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                233 => {
+                    pdu_session_resource_resume_list_res_res = Some(PduSessionResourceResumeListResRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                230 => {
+                    pdu_session_resource_failed_to_resume_list_res_res = Some(PduSessionResourceFailedToResumeListResRes::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                93 => {
+                    security_context = Some(SecurityContext::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                236 => {
+                    suspend_response_indication = Some(SuspendResponseIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                206 => {
+                    extended_connected_time = Some(ExtendedConnectedTime::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_resume_list_res_res,
+            pdu_session_resource_failed_to_resume_list_res_res,
+            security_context,
+            suspend_response_indication,
+            extended_connected_time,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextResumeFailure
+pub struct UeContextResumeFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeContextResumeFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextSuspendRequest
+pub struct UeContextSuspendRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging>,
+    pub paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe>,
+    pub pdu_session_resource_suspend_list_sus_req: Option<PduSessionResourceSuspendListSusReq>,
+}
+
+impl APerElement for UeContextSuspendRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging> = None;
+        let mut paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe> = None;
+        let mut pdu_session_resource_suspend_list_sus_req: Option<PduSessionResourceSuspendListSusReq> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                32 => {
+                    info_on_recommended_cells_and_ran_nodes_for_paging = Some(InfoOnRecommendedCellsAndRanNodesForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                207 => {
+                    paging_assis_datafor_c_ecapab_ue = Some(PagingAssisDataforCEcapabUe::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                231 => {
+                    pdu_session_resource_suspend_list_sus_req = Some(PduSessionResourceSuspendListSusReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            info_on_recommended_cells_and_ran_nodes_for_paging,
+            paging_assis_datafor_c_ecapab_ue,
+            pdu_session_resource_suspend_list_sus_req,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextSuspendResponse
+pub struct UeContextSuspendResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub security_context: Option<SecurityContext>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeContextSuspendResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut security_context: Option<SecurityContext> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                93 => {
+                    security_context = Some(SecurityContext::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            security_context,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextSuspendFailure
+pub struct UeContextSuspendFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeContextSuspendFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextModificationRequest
+pub struct UeContextModificationRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ran_paging_priority: Option<RanPagingPriority>,
+    pub security_key: Option<SecurityKey>,
+    pub index_to_rfsp: Option<IndexToRfsp>,
+    pub ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate>,
+    pub ue_security_capabilities: Option<UeSecurityCapabilities>,
+    pub core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive>,
+    pub emergency_fallback_indicator: Option<EmergencyFallbackIndicator>,
+    pub new_amf_ue_ngap_id: Option<AmfUeNgapId>,
+    pub rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest>,
+    pub new_guami: Option<Guami>,
+    pub cn_assisted_ran_tuning: Option<CnAssistedRanTuning>,
+    pub srvcc_operation_possible: Option<SrvccOperationPossible>,
+    pub iab_authorized: Option<IabAuthorized>,
+    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
+    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
+    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub pc5_qos_parameters: Option<Pc5QosParameters>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+    pub rg_level_wireline_access_characteristics: Option<RgLevelWirelineAccessCharacteristics>,
+}
+
+impl APerElement for UeContextModificationRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ran_paging_priority: Option<RanPagingPriority> = None;
+        let mut security_key: Option<SecurityKey> = None;
+        let mut index_to_rfsp: Option<IndexToRfsp> = None;
+        let mut ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate> = None;
+        let mut ue_security_capabilities: Option<UeSecurityCapabilities> = None;
+        let mut core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive> = None;
+        let mut emergency_fallback_indicator: Option<EmergencyFallbackIndicator> = None;
+        let mut new_amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest> = None;
+        let mut new_guami: Option<Guami> = None;
+        let mut cn_assisted_ran_tuning: Option<CnAssistedRanTuning> = None;
+        let mut srvcc_operation_possible: Option<SrvccOperationPossible> = None;
+        let mut iab_authorized: Option<IabAuthorized> = None;
+        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
+        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate> = None;
+        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate> = None;
+        let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+        let mut rg_level_wireline_access_characteristics: Option<RgLevelWirelineAccessCharacteristics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(RanPagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                94 => {
+                    security_key = Some(SecurityKey::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                31 => {
+                    index_to_rfsp = Some(IndexToRfsp::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                110 => {
+                    ue_aggregate_maximum_bit_rate = Some(UeAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                119 => {
+                    ue_security_capabilities = Some(UeSecurityCapabilities::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                18 => {
+                    core_network_assistance_information_for_inactive = Some(CoreNetworkAssistanceInformationForInactive::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                24 => {
+                    emergency_fallback_indicator = Some(EmergencyFallbackIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                40 => {
+                    new_amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                91 => {
+                    rrc_inactive_transition_report_request = Some(RrcInactiveTransitionReportRequest::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                162 => {
+                    new_guami = Some(Guami::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                165 => {
+                    cn_assisted_ran_tuning = Some(CnAssistedRanTuning::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                177 => {
+                    srvcc_operation_possible = Some(SrvccOperationPossible::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                199 => {
+                    iab_authorized = Some(IabAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                216 => {
+                    nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                215 => {
+                    ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                218 => {
+                    nrue_sidelink_aggregate_maximum_bitrate = Some(NrueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                217 => {
+                    lteue_sidelink_aggregate_maximum_bitrate = Some(LteueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                219 => {
+                    pc5_qos_parameters = Some(Pc5QosParameters::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                238 => {
+                    rg_level_wireline_access_characteristics = Some(RgLevelWirelineAccessCharacteristics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ran_paging_priority,
+            security_key,
+            index_to_rfsp,
+            ue_aggregate_maximum_bit_rate,
+            ue_security_capabilities,
+            core_network_assistance_information_for_inactive,
+            emergency_fallback_indicator,
+            new_amf_ue_ngap_id,
+            rrc_inactive_transition_report_request,
+            new_guami,
+            cn_assisted_ran_tuning,
+            srvcc_operation_possible,
+            iab_authorized,
+            nrv2x_services_authorized,
+            ltev2x_services_authorized,
+            nrue_sidelink_aggregate_maximum_bitrate,
+            lteue_sidelink_aggregate_maximum_bitrate,
+            pc5_qos_parameters,
+            ue_radio_capability_id,
+            rg_level_wireline_access_characteristics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextModificationResponse
+pub struct UeContextModificationResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub rrc_state: Option<RrcState>,
+    pub user_location_information: Option<UserLocationInformation>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeContextModificationResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut rrc_state: Option<RrcState> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                92 => {
+                    rrc_state = Some(RrcState::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            rrc_state,
+            user_location_information,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeContextModificationFailure
+pub struct UeContextModificationFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeContextModificationFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RrcInactiveTransitionReport
+pub struct RrcInactiveTransitionReport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub rrc_state: RrcState,
+    pub user_location_information: UserLocationInformation,
+}
+
+impl APerElement for RrcInactiveTransitionReport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut rrc_state: Option<RrcState> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                92 => {
+                    rrc_state = Some(RrcState::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let rrc_state = rrc_state.ok_or(Err(DecodeError::InvalidChoice))?;
+        let user_location_information = user_location_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            rrc_state,
+            user_location_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RetrieveUeInformation
+pub struct RetrieveUeInformation {
+    pub five_g_s_tmsi: FiveGSTmsi,
+}
+
+impl APerElement for RetrieveUeInformation {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                26 => {
+                    five_g_s_tmsi = Some(FiveGSTmsi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let five_g_s_tmsi = five_g_s_tmsi.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            five_g_s_tmsi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeInformationTransfer
+pub struct UeInformationTransfer {
+    pub five_g_s_tmsi: FiveGSTmsi,
+    pub nb_iot_ue_priority: Option<NbIotUePriority>,
+    pub ue_radio_capability: Option<UeRadioCapability>,
+    pub s_nssai: Option<SNssai>,
+    pub allowed_nssai: Option<AllowedNssai>,
+    pub ue_differentiation_info: Option<UeDifferentiationInfo>,
+}
+
+impl APerElement for UeInformationTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
+        let mut nb_iot_ue_priority: Option<NbIotUePriority> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut s_nssai: Option<SNssai> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                26 => {
+                    five_g_s_tmsi = Some(FiveGSTmsi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                210 => {
+                    nb_iot_ue_priority = Some(NbIotUePriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                148 => {
+                    s_nssai = Some(SNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                209 => {
+                    ue_differentiation_info = Some(UeDifferentiationInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let five_g_s_tmsi = five_g_s_tmsi.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            five_g_s_tmsi,
+            nb_iot_ue_priority,
+            ue_radio_capability,
+            s_nssai,
+            allowed_nssai,
+            ue_differentiation_info,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RancpRelocationIndication
+pub struct RancpRelocationIndication {
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub five_g_s_tmsi: FiveGSTmsi,
+    pub eutra_cgi: EutraCgi,
+    pub tai: Tai,
+    pub ul_cp_security_information: UlCpSecurityInformation,
+}
+
+impl APerElement for RancpRelocationIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
+        let mut eutra_cgi: Option<EutraCgi> = None;
+        let mut tai: Option<Tai> = None;
+        let mut ul_cp_security_information: Option<UlCpSecurityInformation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                26 => {
+                    five_g_s_tmsi = Some(FiveGSTmsi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                25 => {
+                    eutra_cgi = Some(EutraCgi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                213 => {
+                    tai = Some(Tai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                211 => {
+                    ul_cp_security_information = Some(UlCpSecurityInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let five_g_s_tmsi = five_g_s_tmsi.ok_or(Err(DecodeError::InvalidChoice))?;
+        let eutra_cgi = eutra_cgi.ok_or(Err(DecodeError::InvalidChoice))?;
+        let tai = tai.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ul_cp_security_information = ul_cp_security_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ran_ue_ngap_id,
+            five_g_s_tmsi,
+            eutra_cgi,
+            tai,
+            ul_cp_security_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverRequired
+pub struct HandoverRequired {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub handover_type: HandoverType,
+    pub cause: Cause,
+    pub target_id: TargetId,
+    pub direct_forwarding_path_availability: Option<DirectForwardingPathAvailability>,
+    pub pdu_session_resource_list_ho_rqd: PduSessionResourceListHoRqd,
+    pub source_to_target_transparent_container: SourceToTargetTransparentContainer,
+}
+
+impl APerElement for HandoverRequired {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut handover_type: Option<HandoverType> = None;
+        let mut cause: Option<Cause> = None;
+        let mut target_id: Option<TargetId> = None;
+        let mut direct_forwarding_path_availability: Option<DirectForwardingPathAvailability> = None;
+        let mut pdu_session_resource_list_ho_rqd: Option<PduSessionResourceListHoRqd> = None;
+        let mut source_to_target_transparent_container: Option<SourceToTargetTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                29 => {
+                    handover_type = Some(HandoverType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                105 => {
+                    target_id = Some(TargetId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                22 => {
+                    direct_forwarding_path_availability = Some(DirectForwardingPathAvailability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                61 => {
+                    pdu_session_resource_list_ho_rqd = Some(PduSessionResourceListHoRqd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                101 => {
+                    source_to_target_transparent_container = Some(SourceToTargetTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let handover_type = handover_type.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        let target_id = target_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_list_ho_rqd = pdu_session_resource_list_ho_rqd.ok_or(Err(DecodeError::InvalidChoice))?;
+        let source_to_target_transparent_container = source_to_target_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            handover_type,
+            cause,
+            target_id,
+            direct_forwarding_path_availability,
+            pdu_session_resource_list_ho_rqd,
+            source_to_target_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverCommand
+pub struct HandoverCommand {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub handover_type: HandoverType,
+    pub nas_security_parameters_from_ngran: Option<NasSecurityParametersFromNgran>,
+    pub pdu_session_resource_handover_list: Option<PduSessionResourceHandoverList>,
+    pub pdu_session_resource_to_release_list_ho_cmd: Option<PduSessionResourceToReleaseListHoCmd>,
+    pub target_to_source_transparent_container: TargetToSourceTransparentContainer,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for HandoverCommand {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut handover_type: Option<HandoverType> = None;
+        let mut nas_security_parameters_from_ngran: Option<NasSecurityParametersFromNgran> = None;
+        let mut pdu_session_resource_handover_list: Option<PduSessionResourceHandoverList> = None;
+        let mut pdu_session_resource_to_release_list_ho_cmd: Option<PduSessionResourceToReleaseListHoCmd> = None;
+        let mut target_to_source_transparent_container: Option<TargetToSourceTransparentContainer> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                29 => {
+                    handover_type = Some(HandoverType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                39 => {
+                    nas_security_parameters_from_ngran = Some(NasSecurityParametersFromNgran::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                59 => {
+                    pdu_session_resource_handover_list = Some(PduSessionResourceHandoverList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                78 => {
+                    pdu_session_resource_to_release_list_ho_cmd = Some(PduSessionResourceToReleaseListHoCmd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                106 => {
+                    target_to_source_transparent_container = Some(TargetToSourceTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let handover_type = handover_type.ok_or(Err(DecodeError::InvalidChoice))?;
+        let target_to_source_transparent_container = target_to_source_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            handover_type,
+            nas_security_parameters_from_ngran,
+            pdu_session_resource_handover_list,
+            pdu_session_resource_to_release_list_ho_cmd,
+            target_to_source_transparent_container,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverPreparationFailure
+pub struct HandoverPreparationFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+    pub targetto_source_failure_transparent_container: Option<TargettoSourceFailureTransparentContainer>,
+}
+
+impl APerElement for HandoverPreparationFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+        let mut targetto_source_failure_transparent_container: Option<TargettoSourceFailureTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                262 => {
+                    targetto_source_failure_transparent_container = Some(TargettoSourceFailureTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+            criticality_diagnostics,
+            targetto_source_failure_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverRequest
+pub struct HandoverRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub handover_type: HandoverType,
+    pub cause: Cause,
+    pub ue_aggregate_maximum_bit_rate: UeAggregateMaximumBitRate,
+    pub core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive>,
+    pub ue_security_capabilities: UeSecurityCapabilities,
+    pub security_context: SecurityContext,
+    pub new_security_context_ind: Option<NewSecurityContextInd>,
+    pub nasc: Option<NasPdu>,
+    pub pdu_session_resource_setup_list_ho_req: PduSessionResourceSetupListHoReq,
+    pub allowed_nssai: AllowedNssai,
+    pub trace_activation: Option<TraceActivation>,
+    pub masked_imeisv: Option<MaskedImeisv>,
+    pub source_to_target_transparent_container: SourceToTargetTransparentContainer,
+    pub mobility_restriction_list: Option<MobilityRestrictionList>,
+    pub location_reporting_request_type: Option<LocationReportingRequestType>,
+    pub rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest>,
+    pub guami: Guami,
+    pub redirection_voice_fallback: Option<RedirectionVoiceFallback>,
+    pub cn_assisted_ran_tuning: Option<CnAssistedRanTuning>,
+    pub srvcc_operation_possible: Option<SrvccOperationPossible>,
+    pub iab_authorized: Option<IabAuthorized>,
+    pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
+    pub ue_differentiation_info: Option<UeDifferentiationInfo>,
+    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
+    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
+    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub pc5_qos_parameters: Option<Pc5QosParameters>,
+    pub c_emode_brestricted: Option<CEmodeBrestricted>,
+    pub ue_up_c_iot_support: Option<UeUpCIotSupport>,
+    pub management_based_mdt_plmn_list: Option<MdtPlmnList>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+    pub extended_connected_time: Option<ExtendedConnectedTime>,
+}
+
+impl APerElement for HandoverRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut handover_type: Option<HandoverType> = None;
+        let mut cause: Option<Cause> = None;
+        let mut ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate> = None;
+        let mut core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive> = None;
+        let mut ue_security_capabilities: Option<UeSecurityCapabilities> = None;
+        let mut security_context: Option<SecurityContext> = None;
+        let mut new_security_context_ind: Option<NewSecurityContextInd> = None;
+        let mut nasc: Option<NasPdu> = None;
+        let mut pdu_session_resource_setup_list_ho_req: Option<PduSessionResourceSetupListHoReq> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut trace_activation: Option<TraceActivation> = None;
+        let mut masked_imeisv: Option<MaskedImeisv> = None;
+        let mut source_to_target_transparent_container: Option<SourceToTargetTransparentContainer> = None;
+        let mut mobility_restriction_list: Option<MobilityRestrictionList> = None;
+        let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
+        let mut rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest> = None;
+        let mut guami: Option<Guami> = None;
+        let mut redirection_voice_fallback: Option<RedirectionVoiceFallback> = None;
+        let mut cn_assisted_ran_tuning: Option<CnAssistedRanTuning> = None;
+        let mut srvcc_operation_possible: Option<SrvccOperationPossible> = None;
+        let mut iab_authorized: Option<IabAuthorized> = None;
+        let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
+        let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
+        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
+        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate> = None;
+        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate> = None;
+        let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
+        let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
+        let mut ue_up_c_iot_support: Option<UeUpCIotSupport> = None;
+        let mut management_based_mdt_plmn_list: Option<MdtPlmnList> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+        let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                29 => {
+                    handover_type = Some(HandoverType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                110 => {
+                    ue_aggregate_maximum_bit_rate = Some(UeAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                18 => {
+                    core_network_assistance_information_for_inactive = Some(CoreNetworkAssistanceInformationForInactive::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                119 => {
+                    ue_security_capabilities = Some(UeSecurityCapabilities::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                93 => {
+                    security_context = Some(SecurityContext::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                41 => {
+                    new_security_context_ind = Some(NewSecurityContextInd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                37 => {
+                    nasc = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                73 => {
+                    pdu_session_resource_setup_list_ho_req = Some(PduSessionResourceSetupListHoReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                108 => {
+                    trace_activation = Some(TraceActivation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                34 => {
+                    masked_imeisv = Some(MaskedImeisv::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                101 => {
+                    source_to_target_transparent_container = Some(SourceToTargetTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                36 => {
+                    mobility_restriction_list = Some(MobilityRestrictionList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                33 => {
+                    location_reporting_request_type = Some(LocationReportingRequestType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                91 => {
+                    rrc_inactive_transition_report_request = Some(RrcInactiveTransitionReportRequest::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                28 => {
+                    guami = Some(Guami::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                146 => {
+                    redirection_voice_fallback = Some(RedirectionVoiceFallback::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                165 => {
+                    cn_assisted_ran_tuning = Some(CnAssistedRanTuning::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                177 => {
+                    srvcc_operation_possible = Some(SrvccOperationPossible::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                199 => {
+                    iab_authorized = Some(IabAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                205 => {
+                    enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                209 => {
+                    ue_differentiation_info = Some(UeDifferentiationInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                216 => {
+                    nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                215 => {
+                    ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                218 => {
+                    nrue_sidelink_aggregate_maximum_bitrate = Some(NrueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                217 => {
+                    lteue_sidelink_aggregate_maximum_bitrate = Some(LteueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                219 => {
+                    pc5_qos_parameters = Some(Pc5QosParameters::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                222 => {
+                    c_emode_brestricted = Some(CEmodeBrestricted::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                234 => {
+                    ue_up_c_iot_support = Some(UeUpCIotSupport::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                254 => {
+                    management_based_mdt_plmn_list = Some(MdtPlmnList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                206 => {
+                    extended_connected_time = Some(ExtendedConnectedTime::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let handover_type = handover_type.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ue_aggregate_maximum_bit_rate = ue_aggregate_maximum_bit_rate.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ue_security_capabilities = ue_security_capabilities.ok_or(Err(DecodeError::InvalidChoice))?;
+        let security_context = security_context.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_setup_list_ho_req = pdu_session_resource_setup_list_ho_req.ok_or(Err(DecodeError::InvalidChoice))?;
+        let allowed_nssai = allowed_nssai.ok_or(Err(DecodeError::InvalidChoice))?;
+        let source_to_target_transparent_container = source_to_target_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        let guami = guami.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            handover_type,
+            cause,
+            ue_aggregate_maximum_bit_rate,
+            core_network_assistance_information_for_inactive,
+            ue_security_capabilities,
+            security_context,
+            new_security_context_ind,
+            nasc,
+            pdu_session_resource_setup_list_ho_req,
+            allowed_nssai,
+            trace_activation,
+            masked_imeisv,
+            source_to_target_transparent_container,
+            mobility_restriction_list,
+            location_reporting_request_type,
+            rrc_inactive_transition_report_request,
+            guami,
+            redirection_voice_fallback,
+            cn_assisted_ran_tuning,
+            srvcc_operation_possible,
+            iab_authorized,
+            enhanced_coverage_restriction,
+            ue_differentiation_info,
+            nrv2x_services_authorized,
+            ltev2x_services_authorized,
+            nrue_sidelink_aggregate_maximum_bitrate,
+            lteue_sidelink_aggregate_maximum_bitrate,
+            pc5_qos_parameters,
+            c_emode_brestricted,
+            ue_up_c_iot_support,
+            management_based_mdt_plmn_list,
+            ue_radio_capability_id,
+            extended_connected_time,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverRequestAcknowledge
+pub struct HandoverRequestAcknowledge {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_admitted_list: PduSessionResourceAdmittedList,
+    pub pdu_session_resource_failed_to_setup_list_ho_ack: Option<PduSessionResourceFailedToSetupListHoAck>,
+    pub target_to_source_transparent_container: TargetToSourceTransparentContainer,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for HandoverRequestAcknowledge {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_admitted_list: Option<PduSessionResourceAdmittedList> = None;
+        let mut pdu_session_resource_failed_to_setup_list_ho_ack: Option<PduSessionResourceFailedToSetupListHoAck> = None;
+        let mut target_to_source_transparent_container: Option<TargetToSourceTransparentContainer> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                53 => {
+                    pdu_session_resource_admitted_list = Some(PduSessionResourceAdmittedList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                56 => {
+                    pdu_session_resource_failed_to_setup_list_ho_ack = Some(PduSessionResourceFailedToSetupListHoAck::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                106 => {
+                    target_to_source_transparent_container = Some(TargetToSourceTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_admitted_list = pdu_session_resource_admitted_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        let target_to_source_transparent_container = target_to_source_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_admitted_list,
+            pdu_session_resource_failed_to_setup_list_ho_ack,
+            target_to_source_transparent_container,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverFailure
+pub struct HandoverFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub cause: Cause,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+    pub targetto_source_failure_transparent_container: Option<TargettoSourceFailureTransparentContainer>,
+}
+
+impl APerElement for HandoverFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+        let mut targetto_source_failure_transparent_container: Option<TargettoSourceFailureTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                262 => {
+                    targetto_source_failure_transparent_container = Some(TargettoSourceFailureTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            cause,
+            criticality_diagnostics,
+            targetto_source_failure_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverNotify
+pub struct HandoverNotify {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub user_location_information: UserLocationInformation,
+    pub notify_source_ngran_node: Option<NotifySourceNgranNode>,
+}
+
+impl APerElement for HandoverNotify {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut notify_source_ngran_node: Option<NotifySourceNgranNode> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                269 => {
+                    notify_source_ngran_node = Some(NotifySourceNgranNode::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let user_location_information = user_location_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            user_location_information,
+            notify_source_ngran_node,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PathSwitchRequest
+pub struct PathSwitchRequest {
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub source_amf_ue_ngap_id: AmfUeNgapId,
+    pub user_location_information: UserLocationInformation,
+    pub ue_security_capabilities: UeSecurityCapabilities,
+    pub pdu_session_resource_to_be_switched_dl_list: PduSessionResourceToBeSwitchedDlList,
+    pub pdu_session_resource_failed_to_setup_list_ps_req: Option<PduSessionResourceFailedToSetupListPsReq>,
+    pub rrc_resume_cause: Option<RrcEstablishmentCause>,
+}
+
+impl APerElement for PathSwitchRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut source_amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut ue_security_capabilities: Option<UeSecurityCapabilities> = None;
+        let mut pdu_session_resource_to_be_switched_dl_list: Option<PduSessionResourceToBeSwitchedDlList> = None;
+        let mut pdu_session_resource_failed_to_setup_list_ps_req: Option<PduSessionResourceFailedToSetupListPsReq> = None;
+        let mut rrc_resume_cause: Option<RrcEstablishmentCause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                100 => {
+                    source_amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                119 => {
+                    ue_security_capabilities = Some(UeSecurityCapabilities::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                76 => {
+                    pdu_session_resource_to_be_switched_dl_list = Some(PduSessionResourceToBeSwitchedDlList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                57 => {
+                    pdu_session_resource_failed_to_setup_list_ps_req = Some(PduSessionResourceFailedToSetupListPsReq::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                237 => {
+                    rrc_resume_cause = Some(RrcEstablishmentCause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let source_amf_ue_ngap_id = source_amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let user_location_information = user_location_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ue_security_capabilities = ue_security_capabilities.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_to_be_switched_dl_list = pdu_session_resource_to_be_switched_dl_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ran_ue_ngap_id,
+            source_amf_ue_ngap_id,
+            user_location_information,
+            ue_security_capabilities,
+            pdu_session_resource_to_be_switched_dl_list,
+            pdu_session_resource_failed_to_setup_list_ps_req,
+            rrc_resume_cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PathSwitchRequestAcknowledge
+pub struct PathSwitchRequestAcknowledge {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ue_security_capabilities: Option<UeSecurityCapabilities>,
+    pub security_context: SecurityContext,
+    pub new_security_context_ind: Option<NewSecurityContextInd>,
+    pub pdu_session_resource_switched_list: PduSessionResourceSwitchedList,
+    pub pdu_session_resource_released_list_ps_ack: Option<PduSessionResourceReleasedListPsAck>,
+    pub allowed_nssai: AllowedNssai,
+    pub core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive>,
+    pub rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+    pub redirection_voice_fallback: Option<RedirectionVoiceFallback>,
+    pub cn_assisted_ran_tuning: Option<CnAssistedRanTuning>,
+    pub srvcc_operation_possible: Option<SrvccOperationPossible>,
+    pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
+    pub extended_connected_time: Option<ExtendedConnectedTime>,
+    pub ue_differentiation_info: Option<UeDifferentiationInfo>,
+    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
+    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
+    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub pc5_qos_parameters: Option<Pc5QosParameters>,
+    pub c_emode_brestricted: Option<CEmodeBrestricted>,
+    pub ue_up_c_iot_support: Option<UeUpCIotSupport>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+}
+
+impl APerElement for PathSwitchRequestAcknowledge {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ue_security_capabilities: Option<UeSecurityCapabilities> = None;
+        let mut security_context: Option<SecurityContext> = None;
+        let mut new_security_context_ind: Option<NewSecurityContextInd> = None;
+        let mut pdu_session_resource_switched_list: Option<PduSessionResourceSwitchedList> = None;
+        let mut pdu_session_resource_released_list_ps_ack: Option<PduSessionResourceReleasedListPsAck> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut core_network_assistance_information_for_inactive: Option<CoreNetworkAssistanceInformationForInactive> = None;
+        let mut rrc_inactive_transition_report_request: Option<RrcInactiveTransitionReportRequest> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+        let mut redirection_voice_fallback: Option<RedirectionVoiceFallback> = None;
+        let mut cn_assisted_ran_tuning: Option<CnAssistedRanTuning> = None;
+        let mut srvcc_operation_possible: Option<SrvccOperationPossible> = None;
+        let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
+        let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
+        let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
+        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
+        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate> = None;
+        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate> = None;
+        let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
+        let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
+        let mut ue_up_c_iot_support: Option<UeUpCIotSupport> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                119 => {
+                    ue_security_capabilities = Some(UeSecurityCapabilities::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                93 => {
+                    security_context = Some(SecurityContext::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                41 => {
+                    new_security_context_ind = Some(NewSecurityContextInd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                77 => {
+                    pdu_session_resource_switched_list = Some(PduSessionResourceSwitchedList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                68 => {
+                    pdu_session_resource_released_list_ps_ack = Some(PduSessionResourceReleasedListPsAck::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                18 => {
+                    core_network_assistance_information_for_inactive = Some(CoreNetworkAssistanceInformationForInactive::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                91 => {
+                    rrc_inactive_transition_report_request = Some(RrcInactiveTransitionReportRequest::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                146 => {
+                    redirection_voice_fallback = Some(RedirectionVoiceFallback::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                165 => {
+                    cn_assisted_ran_tuning = Some(CnAssistedRanTuning::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                177 => {
+                    srvcc_operation_possible = Some(SrvccOperationPossible::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                205 => {
+                    enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                206 => {
+                    extended_connected_time = Some(ExtendedConnectedTime::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                209 => {
+                    ue_differentiation_info = Some(UeDifferentiationInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                216 => {
+                    nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                215 => {
+                    ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                218 => {
+                    nrue_sidelink_aggregate_maximum_bitrate = Some(NrueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                217 => {
+                    lteue_sidelink_aggregate_maximum_bitrate = Some(LteueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                219 => {
+                    pc5_qos_parameters = Some(Pc5QosParameters::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                222 => {
+                    c_emode_brestricted = Some(CEmodeBrestricted::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                234 => {
+                    ue_up_c_iot_support = Some(UeUpCIotSupport::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let security_context = security_context.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_switched_list = pdu_session_resource_switched_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        let allowed_nssai = allowed_nssai.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ue_security_capabilities,
+            security_context,
+            new_security_context_ind,
+            pdu_session_resource_switched_list,
+            pdu_session_resource_released_list_ps_ack,
+            allowed_nssai,
+            core_network_assistance_information_for_inactive,
+            rrc_inactive_transition_report_request,
+            criticality_diagnostics,
+            redirection_voice_fallback,
+            cn_assisted_ran_tuning,
+            srvcc_operation_possible,
+            enhanced_coverage_restriction,
+            extended_connected_time,
+            ue_differentiation_info,
+            nrv2x_services_authorized,
+            ltev2x_services_authorized,
+            nrue_sidelink_aggregate_maximum_bitrate,
+            lteue_sidelink_aggregate_maximum_bitrate,
+            pc5_qos_parameters,
+            c_emode_brestricted,
+            ue_up_c_iot_support,
+            ue_radio_capability_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PathSwitchRequestFailure
+pub struct PathSwitchRequestFailure {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_released_list_ps_fail: PduSessionResourceReleasedListPsFail,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PathSwitchRequestFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_released_list_ps_fail: Option<PduSessionResourceReleasedListPsFail> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                69 => {
+                    pdu_session_resource_released_list_ps_fail = Some(PduSessionResourceReleasedListPsFail::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_released_list_ps_fail = pdu_session_resource_released_list_ps_fail.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_released_list_ps_fail,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverCancel
+pub struct HandoverCancel {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub cause: Cause,
+}
+
+impl APerElement for HandoverCancel {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverCancelAcknowledge
+pub struct HandoverCancelAcknowledge {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for HandoverCancelAcknowledge {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// HandoverSuccess
+pub struct HandoverSuccess {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+}
+
+impl APerElement for HandoverSuccess {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UplinkRanEarlyStatusTransfer
+pub struct UplinkRanEarlyStatusTransfer {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub early_status_transfer_transparent_container: EarlyStatusTransferTransparentContainer,
+}
+
+impl APerElement for UplinkRanEarlyStatusTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut early_status_transfer_transparent_container: Option<EarlyStatusTransferTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                268 => {
+                    early_status_transfer_transparent_container = Some(EarlyStatusTransferTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let early_status_transfer_transparent_container = early_status_transfer_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            early_status_transfer_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DownlinkRanEarlyStatusTransfer
+pub struct DownlinkRanEarlyStatusTransfer {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub early_status_transfer_transparent_container: EarlyStatusTransferTransparentContainer,
+}
+
+impl APerElement for DownlinkRanEarlyStatusTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut early_status_transfer_transparent_container: Option<EarlyStatusTransferTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                268 => {
+                    early_status_transfer_transparent_container = Some(EarlyStatusTransferTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let early_status_transfer_transparent_container = early_status_transfer_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            early_status_transfer_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UplinkRanStatusTransfer
+pub struct UplinkRanStatusTransfer {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ran_status_transfer_transparent_container: RanStatusTransferTransparentContainer,
+}
+
+impl APerElement for UplinkRanStatusTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ran_status_transfer_transparent_container: Option<RanStatusTransferTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                84 => {
+                    ran_status_transfer_transparent_container = Some(RanStatusTransferTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_status_transfer_transparent_container = ran_status_transfer_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ran_status_transfer_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DownlinkRanStatusTransfer
+pub struct DownlinkRanStatusTransfer {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ran_status_transfer_transparent_container: RanStatusTransferTransparentContainer,
+}
+
+impl APerElement for DownlinkRanStatusTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ran_status_transfer_transparent_container: Option<RanStatusTransferTransparentContainer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                84 => {
+                    ran_status_transfer_transparent_container = Some(RanStatusTransferTransparentContainer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_status_transfer_transparent_container = ran_status_transfer_transparent_container.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ran_status_transfer_transparent_container,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// Paging
+pub struct Paging {
+    pub ue_paging_identity: UePagingIdentity,
+    pub paging_drx: Option<PagingDrx>,
+    pub tai_list_for_paging: TaiListForPaging,
+    pub paging_priority: Option<PagingPriority>,
+    pub ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging>,
+    pub paging_origin: Option<PagingOrigin>,
+    pub assistance_data_for_paging: Option<AssistanceDataForPaging>,
+    pub nb_iot_paging_e_drx_info: Option<NbIotPagingEDrxInfo>,
+    pub nb_iot_paging_drx: Option<NbIotPagingDrx>,
+    pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
+    pub wus_assistance_information: Option<WusAssistanceInformation>,
+    pub paginge_drx_information: Option<PagingeDrxInformation>,
+    pub c_emode_brestricted: Option<CEmodeBrestricted>,
+}
+
+impl APerElement for Paging {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ue_paging_identity: Option<UePagingIdentity> = None;
+        let mut paging_drx: Option<PagingDrx> = None;
+        let mut tai_list_for_paging: Option<TaiListForPaging> = None;
+        let mut paging_priority: Option<PagingPriority> = None;
+        let mut ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging> = None;
+        let mut paging_origin: Option<PagingOrigin> = None;
+        let mut assistance_data_for_paging: Option<AssistanceDataForPaging> = None;
+        let mut nb_iot_paging_e_drx_info: Option<NbIotPagingEDrxInfo> = None;
+        let mut nb_iot_paging_drx: Option<NbIotPagingDrx> = None;
+        let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
+        let mut wus_assistance_information: Option<WusAssistanceInformation> = None;
+        let mut paginge_drx_information: Option<PagingeDrxInformation> = None;
+        let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                115 => {
+                    ue_paging_identity = Some(UePagingIdentity::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                50 => {
+                    paging_drx = Some(PagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                103 => {
+                    tai_list_for_paging = Some(TaiListForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                52 => {
+                    paging_priority = Some(PagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                118 => {
+                    ue_radio_capability_for_paging = Some(UeRadioCapabilityForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                51 => {
+                    paging_origin = Some(PagingOrigin::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                11 => {
+                    assistance_data_for_paging = Some(AssistanceDataForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                203 => {
+                    nb_iot_paging_e_drx_info = Some(NbIotPagingEDrxInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                202 => {
+                    nb_iot_paging_drx = Some(NbIotPagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                205 => {
+                    enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                208 => {
+                    wus_assistance_information = Some(WusAssistanceInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                223 => {
+                    paginge_drx_information = Some(PagingeDrxInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                222 => {
+                    c_emode_brestricted = Some(CEmodeBrestricted::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ue_paging_identity = ue_paging_identity.ok_or(Err(DecodeError::InvalidChoice))?;
+        let tai_list_for_paging = tai_list_for_paging.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ue_paging_identity,
+            paging_drx,
+            tai_list_for_paging,
+            paging_priority,
+            ue_radio_capability_for_paging,
+            paging_origin,
+            assistance_data_for_paging,
+            nb_iot_paging_e_drx_info,
+            nb_iot_paging_drx,
+            enhanced_coverage_restriction,
+            wus_assistance_information,
+            paginge_drx_information,
+            c_emode_brestricted,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// InitialUeMessage
+pub struct InitialUeMessage {
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub nas_pdu: NasPdu,
+    pub user_location_information: UserLocationInformation,
+    pub rrc_establishment_cause: RrcEstablishmentCause,
+    pub five_g_s_tmsi: Option<FiveGSTmsi>,
+    pub amf_set_id: Option<AmfSetId>,
+    pub ue_context_request: Option<UeContextRequest>,
+    pub allowed_nssai: Option<AllowedNssai>,
+    pub source_to_target_amf_information_reroute: Option<SourceToTargetAmfInformationReroute>,
+    pub selected_plmn_identity: Option<PlmnIdentity>,
+    pub iab_node_indication: Option<IabNodeIndication>,
+    pub c_emode_b_support_indicator: Option<CEmodeBSupportIndicator>,
+    pub ltem_indication: Option<LtemIndication>,
+    pub edt_session: Option<EdtSession>,
+    pub authenticated_indication: Option<AuthenticatedIndication>,
+    pub npn_access_information: Option<NpnAccessInformation>,
+}
+
+impl APerElement for InitialUeMessage {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut rrc_establishment_cause: Option<RrcEstablishmentCause> = None;
+        let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
+        let mut amf_set_id: Option<AmfSetId> = None;
+        let mut ue_context_request: Option<UeContextRequest> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut source_to_target_amf_information_reroute: Option<SourceToTargetAmfInformationReroute> = None;
+        let mut selected_plmn_identity: Option<PlmnIdentity> = None;
+        let mut iab_node_indication: Option<IabNodeIndication> = None;
+        let mut c_emode_b_support_indicator: Option<CEmodeBSupportIndicator> = None;
+        let mut ltem_indication: Option<LtemIndication> = None;
+        let mut edt_session: Option<EdtSession> = None;
+        let mut authenticated_indication: Option<AuthenticatedIndication> = None;
+        let mut npn_access_information: Option<NpnAccessInformation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                90 => {
+                    rrc_establishment_cause = Some(RrcEstablishmentCause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                26 => {
+                    five_g_s_tmsi = Some(FiveGSTmsi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                3 => {
+                    amf_set_id = Some(AmfSetId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                112 => {
+                    ue_context_request = Some(UeContextRequest::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                171 => {
+                    source_to_target_amf_information_reroute = Some(SourceToTargetAmfInformationReroute::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                174 => {
+                    selected_plmn_identity = Some(PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                201 => {
+                    iab_node_indication = Some(IabNodeIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                224 => {
+                    c_emode_b_support_indicator = Some(CEmodeBSupportIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                225 => {
+                    ltem_indication = Some(LtemIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                227 => {
+                    edt_session = Some(EdtSession::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                245 => {
+                    authenticated_indication = Some(AuthenticatedIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                259 => {
+                    npn_access_information = Some(NpnAccessInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nas_pdu = nas_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        let user_location_information = user_location_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        let rrc_establishment_cause = rrc_establishment_cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ran_ue_ngap_id,
+            nas_pdu,
+            user_location_information,
+            rrc_establishment_cause,
+            five_g_s_tmsi,
+            amf_set_id,
+            ue_context_request,
+            allowed_nssai,
+            source_to_target_amf_information_reroute,
+            selected_plmn_identity,
+            iab_node_indication,
+            c_emode_b_support_indicator,
+            ltem_indication,
+            edt_session,
+            authenticated_indication,
+            npn_access_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DownlinkNasTransport
+pub struct DownlinkNasTransport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub old_amf: Option<AmfName>,
+    pub ran_paging_priority: Option<RanPagingPriority>,
+    pub nas_pdu: NasPdu,
+    pub mobility_restriction_list: Option<MobilityRestrictionList>,
+    pub index_to_rfsp: Option<IndexToRfsp>,
+    pub ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate>,
+    pub allowed_nssai: Option<AllowedNssai>,
+    pub srvcc_operation_possible: Option<SrvccOperationPossible>,
+    pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
+    pub extended_connected_time: Option<ExtendedConnectedTime>,
+    pub ue_differentiation_info: Option<UeDifferentiationInfo>,
+    pub c_emode_brestricted: Option<CEmodeBrestricted>,
+    pub ue_radio_capability: Option<UeRadioCapability>,
+    pub ue_capability_info_request: Option<UeCapabilityInfoRequest>,
+    pub end_indication: Option<EndIndication>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+}
+
+impl APerElement for DownlinkNasTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut old_amf: Option<AmfName> = None;
+        let mut ran_paging_priority: Option<RanPagingPriority> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut mobility_restriction_list: Option<MobilityRestrictionList> = None;
+        let mut index_to_rfsp: Option<IndexToRfsp> = None;
+        let mut ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut srvcc_operation_possible: Option<SrvccOperationPossible> = None;
+        let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
+        let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
+        let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
+        let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut ue_capability_info_request: Option<UeCapabilityInfoRequest> = None;
+        let mut end_indication: Option<EndIndication> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                48 => {
+                    old_amf = Some(AmfName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(RanPagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                36 => {
+                    mobility_restriction_list = Some(MobilityRestrictionList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                31 => {
+                    index_to_rfsp = Some(IndexToRfsp::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                110 => {
+                    ue_aggregate_maximum_bit_rate = Some(UeAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                177 => {
+                    srvcc_operation_possible = Some(SrvccOperationPossible::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                205 => {
+                    enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                206 => {
+                    extended_connected_time = Some(ExtendedConnectedTime::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                209 => {
+                    ue_differentiation_info = Some(UeDifferentiationInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                222 => {
+                    c_emode_brestricted = Some(CEmodeBrestricted::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                228 => {
+                    ue_capability_info_request = Some(UeCapabilityInfoRequest::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                226 => {
+                    end_indication = Some(EndIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nas_pdu = nas_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            old_amf,
+            ran_paging_priority,
+            nas_pdu,
+            mobility_restriction_list,
+            index_to_rfsp,
+            ue_aggregate_maximum_bit_rate,
+            allowed_nssai,
+            srvcc_operation_possible,
+            enhanced_coverage_restriction,
+            extended_connected_time,
+            ue_differentiation_info,
+            c_emode_brestricted,
+            ue_radio_capability,
+            ue_capability_info_request,
+            end_indication,
+            ue_radio_capability_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UplinkNasTransport
+pub struct UplinkNasTransport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub nas_pdu: NasPdu,
+    pub user_location_information: UserLocationInformation,
+    pub w_agf_identity_information: Option<Vec<u8>>,
+    pub tngf_identity_information: Option<Vec<u8>>,
+    pub twif_identity_information: Option<Vec<u8>>,
+}
+
+impl APerElement for UplinkNasTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut w_agf_identity_information: Option<Vec<u8>> = None;
+        let mut tngf_identity_information: Option<Vec<u8>> = None;
+        let mut twif_identity_information: Option<Vec<u8>> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                239 => {
+                    w_agf_identity_information = Some(Vec<u8>::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                246 => {
+                    tngf_identity_information = Some(Vec<u8>::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                247 => {
+                    twif_identity_information = Some(Vec<u8>::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nas_pdu = nas_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        let user_location_information = user_location_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            nas_pdu,
+            user_location_information,
+            w_agf_identity_information,
+            tngf_identity_information,
+            twif_identity_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// NasNonDeliveryIndication
+pub struct NasNonDeliveryIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub nas_pdu: NasPdu,
+    pub cause: Cause,
+}
+
+impl APerElement for NasNonDeliveryIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut nas_pdu: Option<NasPdu> = None;
+        let mut cause: Option<Cause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                38 => {
+                    nas_pdu = Some(NasPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nas_pdu = nas_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            nas_pdu,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RerouteNasRequest
+pub struct RerouteNasRequest {
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub amf_ue_ngap_id: Option<AmfUeNgapId>,
+    pub ngap_message: Vec<u8>,
+    pub amf_set_id: AmfSetId,
+    pub allowed_nssai: Option<AllowedNssai>,
+    pub source_to_target_amf_information_reroute: Option<SourceToTargetAmfInformationReroute>,
+}
+
+impl APerElement for RerouteNasRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ngap_message: Option<Vec<u8>> = None;
+        let mut amf_set_id: Option<AmfSetId> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut source_to_target_amf_information_reroute: Option<SourceToTargetAmfInformationReroute> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                42 => {
+                    ngap_message = Some(Vec<u8>::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                3 => {
+                    amf_set_id = Some(AmfSetId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                171 => {
+                    source_to_target_amf_information_reroute = Some(SourceToTargetAmfInformationReroute::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ngap_message = ngap_message.ok_or(Err(DecodeError::InvalidChoice))?;
+        let amf_set_id = amf_set_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ran_ue_ngap_id,
+            amf_ue_ngap_id,
+            ngap_message,
+            amf_set_id,
+            allowed_nssai,
+            source_to_target_amf_information_reroute,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// NgSetupRequest
+pub struct NgSetupRequest {
+    pub global_ran_node_id: GlobalRanNodeId,
+    pub ran_node_name: Option<RanNodeName>,
+    pub supported_ta_list: SupportedTaList,
+    pub default_paging_drx: PagingDrx,
+    pub ue_retention_information: Option<UeRetentionInformation>,
+    pub nb_iot_default_paging_drx: Option<NbIotDefaultPagingDrx>,
+    pub extended_ran_node_name: Option<ExtendedRanNodeName>,
+}
+
+impl APerElement for NgSetupRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
+        let mut ran_node_name: Option<RanNodeName> = None;
+        let mut supported_ta_list: Option<SupportedTaList> = None;
+        let mut default_paging_drx: Option<PagingDrx> = None;
+        let mut ue_retention_information: Option<UeRetentionInformation> = None;
+        let mut nb_iot_default_paging_drx: Option<NbIotDefaultPagingDrx> = None;
+        let mut extended_ran_node_name: Option<ExtendedRanNodeName> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                27 => {
+                    global_ran_node_id = Some(GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                82 => {
+                    ran_node_name = Some(RanNodeName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                102 => {
+                    supported_ta_list = Some(SupportedTaList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                21 => {
+                    default_paging_drx = Some(PagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                147 => {
+                    ue_retention_information = Some(UeRetentionInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                204 => {
+                    nb_iot_default_paging_drx = Some(NbIotDefaultPagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                273 => {
+                    extended_ran_node_name = Some(ExtendedRanNodeName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let global_ran_node_id = global_ran_node_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let supported_ta_list = supported_ta_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        let default_paging_drx = default_paging_drx.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            global_ran_node_id,
+            ran_node_name,
+            supported_ta_list,
+            default_paging_drx,
+            ue_retention_information,
+            nb_iot_default_paging_drx,
+            extended_ran_node_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// NgSetupResponse
+pub struct NgSetupResponse {
+    pub amf_name: AmfName,
+    pub served_guami_list: ServedGuamiList,
+    pub relative_amf_capacity: RelativeAmfCapacity,
+    pub plmn_support_list: PlmnSupportList,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+    pub ue_retention_information: Option<UeRetentionInformation>,
+    pub iab_supported: Option<IabSupported>,
+    pub extended_amf_name: Option<ExtendedAmfName>,
+}
+
+impl APerElement for NgSetupResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_name: Option<AmfName> = None;
+        let mut served_guami_list: Option<ServedGuamiList> = None;
+        let mut relative_amf_capacity: Option<RelativeAmfCapacity> = None;
+        let mut plmn_support_list: Option<PlmnSupportList> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+        let mut ue_retention_information: Option<UeRetentionInformation> = None;
+        let mut iab_supported: Option<IabSupported> = None;
+        let mut extended_amf_name: Option<ExtendedAmfName> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                1 => {
+                    amf_name = Some(AmfName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                96 => {
+                    served_guami_list = Some(ServedGuamiList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                86 => {
+                    relative_amf_capacity = Some(RelativeAmfCapacity::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                80 => {
+                    plmn_support_list = Some(PlmnSupportList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                147 => {
+                    ue_retention_information = Some(UeRetentionInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                200 => {
+                    iab_supported = Some(IabSupported::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                274 => {
+                    extended_amf_name = Some(ExtendedAmfName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_name = amf_name.ok_or(Err(DecodeError::InvalidChoice))?;
+        let served_guami_list = served_guami_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        let relative_amf_capacity = relative_amf_capacity.ok_or(Err(DecodeError::InvalidChoice))?;
+        let plmn_support_list = plmn_support_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_name,
+            served_guami_list,
+            relative_amf_capacity,
+            plmn_support_list,
+            criticality_diagnostics,
+            ue_retention_information,
+            iab_supported,
+            extended_amf_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// NgSetupFailure
+pub struct NgSetupFailure {
+    pub cause: Cause,
+    pub time_to_wait: Option<TimeToWait>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for NgSetupFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut cause: Option<Cause> = None;
+        let mut time_to_wait: Option<TimeToWait> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                107 => {
+                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            cause,
+            time_to_wait,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RanConfigurationUpdate
+pub struct RanConfigurationUpdate {
+    pub ran_node_name: Option<RanNodeName>,
+    pub supported_ta_list: Option<SupportedTaList>,
+    pub default_paging_drx: Option<PagingDrx>,
+    pub global_ran_node_id: Option<GlobalRanNodeId>,
+    pub ngran_tnl_association_to_remove_list: Option<NgranTnlAssociationToRemoveList>,
+    pub nb_iot_default_paging_drx: Option<NbIotDefaultPagingDrx>,
+    pub extended_ran_node_name: Option<ExtendedRanNodeName>,
+}
+
+impl APerElement for RanConfigurationUpdate {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ran_node_name: Option<RanNodeName> = None;
+        let mut supported_ta_list: Option<SupportedTaList> = None;
+        let mut default_paging_drx: Option<PagingDrx> = None;
+        let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
+        let mut ngran_tnl_association_to_remove_list: Option<NgranTnlAssociationToRemoveList> = None;
+        let mut nb_iot_default_paging_drx: Option<NbIotDefaultPagingDrx> = None;
+        let mut extended_ran_node_name: Option<ExtendedRanNodeName> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                82 => {
+                    ran_node_name = Some(RanNodeName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                102 => {
+                    supported_ta_list = Some(SupportedTaList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                21 => {
+                    default_paging_drx = Some(PagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                27 => {
+                    global_ran_node_id = Some(GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                167 => {
+                    ngran_tnl_association_to_remove_list = Some(NgranTnlAssociationToRemoveList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                204 => {
+                    nb_iot_default_paging_drx = Some(NbIotDefaultPagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                273 => {
+                    extended_ran_node_name = Some(ExtendedRanNodeName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            ran_node_name,
+            supported_ta_list,
+            default_paging_drx,
+            global_ran_node_id,
+            ngran_tnl_association_to_remove_list,
+            nb_iot_default_paging_drx,
+            extended_ran_node_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RanConfigurationUpdateAcknowledge
+pub struct RanConfigurationUpdateAcknowledge {
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for RanConfigurationUpdateAcknowledge {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// RanConfigurationUpdateFailure
+pub struct RanConfigurationUpdateFailure {
+    pub cause: Cause,
+    pub time_to_wait: Option<TimeToWait>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for RanConfigurationUpdateFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut cause: Option<Cause> = None;
+        let mut time_to_wait: Option<TimeToWait> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                107 => {
+                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            cause,
+            time_to_wait,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// AmfConfigurationUpdate
+pub struct AmfConfigurationUpdate {
+    pub amf_name: Option<AmfName>,
+    pub served_guami_list: Option<ServedGuamiList>,
+    pub relative_amf_capacity: Option<RelativeAmfCapacity>,
+    pub plmn_support_list: Option<PlmnSupportList>,
+    pub amf_tnl_association_to_add_list: Option<AmfTnlAssociationToAddList>,
+    pub amf_tnl_association_to_remove_list: Option<AmfTnlAssociationToRemoveList>,
+    pub amf_tnl_association_to_update_list: Option<AmfTnlAssociationToUpdateList>,
+    pub extended_amf_name: Option<ExtendedAmfName>,
+}
+
+impl APerElement for AmfConfigurationUpdate {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_name: Option<AmfName> = None;
+        let mut served_guami_list: Option<ServedGuamiList> = None;
+        let mut relative_amf_capacity: Option<RelativeAmfCapacity> = None;
+        let mut plmn_support_list: Option<PlmnSupportList> = None;
+        let mut amf_tnl_association_to_add_list: Option<AmfTnlAssociationToAddList> = None;
+        let mut amf_tnl_association_to_remove_list: Option<AmfTnlAssociationToRemoveList> = None;
+        let mut amf_tnl_association_to_update_list: Option<AmfTnlAssociationToUpdateList> = None;
+        let mut extended_amf_name: Option<ExtendedAmfName> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                1 => {
+                    amf_name = Some(AmfName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                96 => {
+                    served_guami_list = Some(ServedGuamiList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                86 => {
+                    relative_amf_capacity = Some(RelativeAmfCapacity::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                80 => {
+                    plmn_support_list = Some(PlmnSupportList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                6 => {
+                    amf_tnl_association_to_add_list = Some(AmfTnlAssociationToAddList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                7 => {
+                    amf_tnl_association_to_remove_list = Some(AmfTnlAssociationToRemoveList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                8 => {
+                    amf_tnl_association_to_update_list = Some(AmfTnlAssociationToUpdateList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                274 => {
+                    extended_amf_name = Some(ExtendedAmfName::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            amf_name,
+            served_guami_list,
+            relative_amf_capacity,
+            plmn_support_list,
+            amf_tnl_association_to_add_list,
+            amf_tnl_association_to_remove_list,
+            amf_tnl_association_to_update_list,
+            extended_amf_name,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// AmfConfigurationUpdateAcknowledge
+pub struct AmfConfigurationUpdateAcknowledge {
+    pub amf_tnl_association_setup_list: Option<AmfTnlAssociationSetupList>,
+    pub amf_tnl_association_failed_to_setup_list: Option<TnlAssociationList>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for AmfConfigurationUpdateAcknowledge {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_tnl_association_setup_list: Option<AmfTnlAssociationSetupList> = None;
+        let mut amf_tnl_association_failed_to_setup_list: Option<TnlAssociationList> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                5 => {
+                    amf_tnl_association_setup_list = Some(AmfTnlAssociationSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                4 => {
+                    amf_tnl_association_failed_to_setup_list = Some(TnlAssociationList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            amf_tnl_association_setup_list,
+            amf_tnl_association_failed_to_setup_list,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// AmfConfigurationUpdateFailure
+pub struct AmfConfigurationUpdateFailure {
+    pub cause: Cause,
+    pub time_to_wait: Option<TimeToWait>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for AmfConfigurationUpdateFailure {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut cause: Option<Cause> = None;
+        let mut time_to_wait: Option<TimeToWait> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                107 => {
+                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            cause,
+            time_to_wait,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// AmfStatusIndication
+pub struct AmfStatusIndication {
+    pub unavailable_guami_list: UnavailableGuamiList,
+}
+
+impl APerElement for AmfStatusIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut unavailable_guami_list: Option<UnavailableGuamiList> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                120 => {
+                    unavailable_guami_list = Some(UnavailableGuamiList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let unavailable_guami_list = unavailable_guami_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            unavailable_guami_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// NgReset
+pub struct NgReset {
+    pub cause: Cause,
+    pub reset_type: ResetType,
+}
+
+impl APerElement for NgReset {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut cause: Option<Cause> = None;
+        let mut reset_type: Option<ResetType> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                88 => {
+                    reset_type = Some(ResetType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        let reset_type = reset_type.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            cause,
+            reset_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// NgResetAcknowledge
+pub struct NgResetAcknowledge {
+    pub ue_associated_logical_ng_connection_list: Option<UeAssociatedLogicalNgConnectionList>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for NgResetAcknowledge {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ue_associated_logical_ng_connection_list: Option<UeAssociatedLogicalNgConnectionList> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                111 => {
+                    ue_associated_logical_ng_connection_list = Some(UeAssociatedLogicalNgConnectionList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            ue_associated_logical_ng_connection_list,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// ErrorIndication
+pub struct ErrorIndication {
+    pub amf_ue_ngap_id: Option<AmfUeNgapId>,
+    pub ran_ue_ngap_id: Option<RanUeNgapId>,
+    pub cause: Option<Cause>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+    pub five_g_s_tmsi: Option<FiveGSTmsi>,
+}
+
+impl APerElement for ErrorIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+        let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                26 => {
+                    five_g_s_tmsi = Some(FiveGSTmsi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+            criticality_diagnostics,
+            five_g_s_tmsi,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// OverloadStart
+pub struct OverloadStart {
+    pub amf_overload_response: Option<OverloadResponse>,
+    pub amf_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication>,
+    pub overload_start_nssai_list: Option<OverloadStartNssaiList>,
+}
+
+impl APerElement for OverloadStart {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_overload_response: Option<OverloadResponse> = None;
+        let mut amf_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication> = None;
+        let mut overload_start_nssai_list: Option<OverloadStartNssaiList> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                2 => {
+                    amf_overload_response = Some(OverloadResponse::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                9 => {
+                    amf_traffic_load_reduction_indication = Some(TrafficLoadReductionIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                49 => {
+                    overload_start_nssai_list = Some(OverloadStartNssaiList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            amf_overload_response,
+            amf_traffic_load_reduction_indication,
+            overload_start_nssai_list,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// OverloadStop
+pub struct OverloadStop {
+}
+
+impl APerElement for OverloadStop {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UplinkRanConfigurationTransfer
+pub struct UplinkRanConfigurationTransfer {
+    pub son_configuration_transfer_ul: Option<SonConfigurationTransfer>,
+    pub endc_son_configuration_transfer_ul: Option<EnDcsonConfigurationTransfer>,
+    pub intersystem_son_configuration_transfer_ul: Option<IntersystemSonConfigurationTransfer>,
+}
+
+impl APerElement for UplinkRanConfigurationTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut son_configuration_transfer_ul: Option<SonConfigurationTransfer> = None;
+        let mut endc_son_configuration_transfer_ul: Option<EnDcsonConfigurationTransfer> = None;
+        let mut intersystem_son_configuration_transfer_ul: Option<IntersystemSonConfigurationTransfer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                99 => {
+                    son_configuration_transfer_ul = Some(SonConfigurationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                158 => {
+                    endc_son_configuration_transfer_ul = Some(EnDcsonConfigurationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                251 => {
+                    intersystem_son_configuration_transfer_ul = Some(IntersystemSonConfigurationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            son_configuration_transfer_ul,
+            endc_son_configuration_transfer_ul,
+            intersystem_son_configuration_transfer_ul,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DownlinkRanConfigurationTransfer
+pub struct DownlinkRanConfigurationTransfer {
+    pub son_configuration_transfer_dl: Option<SonConfigurationTransfer>,
+    pub endc_son_configuration_transfer_dl: Option<EnDcsonConfigurationTransfer>,
+    pub intersystem_son_configuration_transfer_dl: Option<IntersystemSonConfigurationTransfer>,
+}
+
+impl APerElement for DownlinkRanConfigurationTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut son_configuration_transfer_dl: Option<SonConfigurationTransfer> = None;
+        let mut endc_son_configuration_transfer_dl: Option<EnDcsonConfigurationTransfer> = None;
+        let mut intersystem_son_configuration_transfer_dl: Option<IntersystemSonConfigurationTransfer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                98 => {
+                    son_configuration_transfer_dl = Some(SonConfigurationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                157 => {
+                    endc_son_configuration_transfer_dl = Some(EnDcsonConfigurationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                250 => {
+                    intersystem_son_configuration_transfer_dl = Some(IntersystemSonConfigurationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            son_configuration_transfer_dl,
+            endc_son_configuration_transfer_dl,
+            intersystem_son_configuration_transfer_dl,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// WriteReplaceWarningRequest
+pub struct WriteReplaceWarningRequest {
+    pub message_identifier: MessageIdentifier,
+    pub serial_number: SerialNumber,
+    pub warning_area_list: Option<WarningAreaList>,
+    pub repetition_period: RepetitionPeriod,
+    pub number_of_broadcasts_requested: NumberOfBroadcastsRequested,
+    pub warning_type: Option<WarningType>,
+    pub warning_security_info: Option<WarningSecurityInfo>,
+    pub data_coding_scheme: Option<DataCodingScheme>,
+    pub warning_message_contents: Option<WarningMessageContents>,
+    pub concurrent_warning_message_ind: Option<ConcurrentWarningMessageInd>,
+    pub warning_area_coordinates: Option<WarningAreaCoordinates>,
+}
+
+impl APerElement for WriteReplaceWarningRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut message_identifier: Option<MessageIdentifier> = None;
+        let mut serial_number: Option<SerialNumber> = None;
+        let mut warning_area_list: Option<WarningAreaList> = None;
+        let mut repetition_period: Option<RepetitionPeriod> = None;
+        let mut number_of_broadcasts_requested: Option<NumberOfBroadcastsRequested> = None;
+        let mut warning_type: Option<WarningType> = None;
+        let mut warning_security_info: Option<WarningSecurityInfo> = None;
+        let mut data_coding_scheme: Option<DataCodingScheme> = None;
+        let mut warning_message_contents: Option<WarningMessageContents> = None;
+        let mut concurrent_warning_message_ind: Option<ConcurrentWarningMessageInd> = None;
+        let mut warning_area_coordinates: Option<WarningAreaCoordinates> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                35 => {
+                    message_identifier = Some(MessageIdentifier::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                95 => {
+                    serial_number = Some(SerialNumber::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                122 => {
+                    warning_area_list = Some(WarningAreaList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                87 => {
+                    repetition_period = Some(RepetitionPeriod::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                47 => {
+                    number_of_broadcasts_requested = Some(NumberOfBroadcastsRequested::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                125 => {
+                    warning_type = Some(WarningType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                124 => {
+                    warning_security_info = Some(WarningSecurityInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                20 => {
+                    data_coding_scheme = Some(DataCodingScheme::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                123 => {
+                    warning_message_contents = Some(WarningMessageContents::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                17 => {
+                    concurrent_warning_message_ind = Some(ConcurrentWarningMessageInd::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                141 => {
+                    warning_area_coordinates = Some(WarningAreaCoordinates::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let message_identifier = message_identifier.ok_or(Err(DecodeError::InvalidChoice))?;
+        let serial_number = serial_number.ok_or(Err(DecodeError::InvalidChoice))?;
+        let repetition_period = repetition_period.ok_or(Err(DecodeError::InvalidChoice))?;
+        let number_of_broadcasts_requested = number_of_broadcasts_requested.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            message_identifier,
+            serial_number,
+            warning_area_list,
+            repetition_period,
+            number_of_broadcasts_requested,
+            warning_type,
+            warning_security_info,
+            data_coding_scheme,
+            warning_message_contents,
+            concurrent_warning_message_ind,
+            warning_area_coordinates,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// WriteReplaceWarningResponse
+pub struct WriteReplaceWarningResponse {
+    pub message_identifier: MessageIdentifier,
+    pub serial_number: SerialNumber,
+    pub broadcast_completed_area_list: Option<BroadcastCompletedAreaList>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for WriteReplaceWarningResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut message_identifier: Option<MessageIdentifier> = None;
+        let mut serial_number: Option<SerialNumber> = None;
+        let mut broadcast_completed_area_list: Option<BroadcastCompletedAreaList> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                35 => {
+                    message_identifier = Some(MessageIdentifier::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                95 => {
+                    serial_number = Some(SerialNumber::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                13 => {
+                    broadcast_completed_area_list = Some(BroadcastCompletedAreaList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let message_identifier = message_identifier.ok_or(Err(DecodeError::InvalidChoice))?;
+        let serial_number = serial_number.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            message_identifier,
+            serial_number,
+            broadcast_completed_area_list,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PwsCancelRequest
+pub struct PwsCancelRequest {
+    pub message_identifier: MessageIdentifier,
+    pub serial_number: SerialNumber,
+    pub warning_area_list: Option<WarningAreaList>,
+    pub cancel_all_warning_messages: Option<CancelAllWarningMessages>,
+}
+
+impl APerElement for PwsCancelRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut message_identifier: Option<MessageIdentifier> = None;
+        let mut serial_number: Option<SerialNumber> = None;
+        let mut warning_area_list: Option<WarningAreaList> = None;
+        let mut cancel_all_warning_messages: Option<CancelAllWarningMessages> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                35 => {
+                    message_identifier = Some(MessageIdentifier::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                95 => {
+                    serial_number = Some(SerialNumber::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                122 => {
+                    warning_area_list = Some(WarningAreaList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                14 => {
+                    cancel_all_warning_messages = Some(CancelAllWarningMessages::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let message_identifier = message_identifier.ok_or(Err(DecodeError::InvalidChoice))?;
+        let serial_number = serial_number.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            message_identifier,
+            serial_number,
+            warning_area_list,
+            cancel_all_warning_messages,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PwsCancelResponse
+pub struct PwsCancelResponse {
+    pub message_identifier: MessageIdentifier,
+    pub serial_number: SerialNumber,
+    pub broadcast_cancelled_area_list: Option<BroadcastCancelledAreaList>,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for PwsCancelResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut message_identifier: Option<MessageIdentifier> = None;
+        let mut serial_number: Option<SerialNumber> = None;
+        let mut broadcast_cancelled_area_list: Option<BroadcastCancelledAreaList> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                35 => {
+                    message_identifier = Some(MessageIdentifier::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                95 => {
+                    serial_number = Some(SerialNumber::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                12 => {
+                    broadcast_cancelled_area_list = Some(BroadcastCancelledAreaList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let message_identifier = message_identifier.ok_or(Err(DecodeError::InvalidChoice))?;
+        let serial_number = serial_number.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            message_identifier,
+            serial_number,
+            broadcast_cancelled_area_list,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PwsRestartIndication
+pub struct PwsRestartIndication {
+    pub cell_id_list_for_restart: CellIdListForRestart,
+    pub global_ran_node_id: GlobalRanNodeId,
+    pub tai_list_for_restart: TaiListForRestart,
+    pub emergency_area_id_list_for_restart: Option<EmergencyAreaIdListForRestart>,
+}
+
+impl APerElement for PwsRestartIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut cell_id_list_for_restart: Option<CellIdListForRestart> = None;
+        let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
+        let mut tai_list_for_restart: Option<TaiListForRestart> = None;
+        let mut emergency_area_id_list_for_restart: Option<EmergencyAreaIdListForRestart> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                16 => {
+                    cell_id_list_for_restart = Some(CellIdListForRestart::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                27 => {
+                    global_ran_node_id = Some(GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                104 => {
+                    tai_list_for_restart = Some(TaiListForRestart::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                23 => {
+                    emergency_area_id_list_for_restart = Some(EmergencyAreaIdListForRestart::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let cell_id_list_for_restart = cell_id_list_for_restart.ok_or(Err(DecodeError::InvalidChoice))?;
+        let global_ran_node_id = global_ran_node_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let tai_list_for_restart = tai_list_for_restart.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            cell_id_list_for_restart,
+            global_ran_node_id,
+            tai_list_for_restart,
+            emergency_area_id_list_for_restart,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// PwsFailureIndication
+pub struct PwsFailureIndication {
+    pub pws_failed_cell_id_list: PwsFailedCellIdList,
+    pub global_ran_node_id: GlobalRanNodeId,
+}
+
+impl APerElement for PwsFailureIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut pws_failed_cell_id_list: Option<PwsFailedCellIdList> = None;
+        let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                81 => {
+                    pws_failed_cell_id_list = Some(PwsFailedCellIdList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                27 => {
+                    global_ran_node_id = Some(GlobalRanNodeId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let pws_failed_cell_id_list = pws_failed_cell_id_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        let global_ran_node_id = global_ran_node_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            pws_failed_cell_id_list,
+            global_ran_node_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DownlinkUeAssociatedNrpPaTransport
+pub struct DownlinkUeAssociatedNrpPaTransport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub routing_id: RoutingId,
+    pub nrp_pa_pdu: NrpPaPdu,
+}
+
+impl APerElement for DownlinkUeAssociatedNrpPaTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut routing_id: Option<RoutingId> = None;
+        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                89 => {
+                    routing_id = Some(RoutingId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                46 => {
+                    nrp_pa_pdu = Some(NrpPaPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let routing_id = routing_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nrp_pa_pdu = nrp_pa_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            routing_id,
+            nrp_pa_pdu,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UplinkUeAssociatedNrpPaTransport
+pub struct UplinkUeAssociatedNrpPaTransport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub routing_id: RoutingId,
+    pub nrp_pa_pdu: NrpPaPdu,
+}
+
+impl APerElement for UplinkUeAssociatedNrpPaTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut routing_id: Option<RoutingId> = None;
+        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                89 => {
+                    routing_id = Some(RoutingId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                46 => {
+                    nrp_pa_pdu = Some(NrpPaPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let routing_id = routing_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nrp_pa_pdu = nrp_pa_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            routing_id,
+            nrp_pa_pdu,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DownlinkNonUeAssociatedNrpPaTransport
+pub struct DownlinkNonUeAssociatedNrpPaTransport {
+    pub routing_id: RoutingId,
+    pub nrp_pa_pdu: NrpPaPdu,
+}
+
+impl APerElement for DownlinkNonUeAssociatedNrpPaTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut routing_id: Option<RoutingId> = None;
+        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                89 => {
+                    routing_id = Some(RoutingId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                46 => {
+                    nrp_pa_pdu = Some(NrpPaPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let routing_id = routing_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nrp_pa_pdu = nrp_pa_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            routing_id,
+            nrp_pa_pdu,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UplinkNonUeAssociatedNrpPaTransport
+pub struct UplinkNonUeAssociatedNrpPaTransport {
+    pub routing_id: RoutingId,
+    pub nrp_pa_pdu: NrpPaPdu,
+}
+
+impl APerElement for UplinkNonUeAssociatedNrpPaTransport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut routing_id: Option<RoutingId> = None;
+        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                89 => {
+                    routing_id = Some(RoutingId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                46 => {
+                    nrp_pa_pdu = Some(NrpPaPdu::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let routing_id = routing_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let nrp_pa_pdu = nrp_pa_pdu.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            routing_id,
+            nrp_pa_pdu,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// TraceStart
+pub struct TraceStart {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub trace_activation: TraceActivation,
+}
+
+impl APerElement for TraceStart {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut trace_activation: Option<TraceActivation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                108 => {
+                    trace_activation = Some(TraceActivation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let trace_activation = trace_activation.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            trace_activation,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// TraceFailureIndication
+pub struct TraceFailureIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ngran_trace_id: NgranTraceId,
+    pub cause: Cause,
+}
+
+impl APerElement for TraceFailureIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ngran_trace_id: Option<NgranTraceId> = None;
+        let mut cause: Option<Cause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                44 => {
+                    ngran_trace_id = Some(NgranTraceId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ngran_trace_id = ngran_trace_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ngran_trace_id,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// DeactivateTrace
+pub struct DeactivateTrace {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ngran_trace_id: NgranTraceId,
+}
+
+impl APerElement for DeactivateTrace {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ngran_trace_id: Option<NgranTraceId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                44 => {
+                    ngran_trace_id = Some(NgranTraceId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ngran_trace_id = ngran_trace_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ngran_trace_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// CellTrafficTrace
+pub struct CellTrafficTrace {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ngran_trace_id: NgranTraceId,
+    pub ngran_cgi: NgranCgi,
+    pub trace_collection_entity_ip_address: TransportLayerAddress,
+    pub privacy_indicator: Option<PrivacyIndicator>,
+    pub trace_collection_entity_uri: Option<UriAddress>,
+}
+
+impl APerElement for CellTrafficTrace {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ngran_trace_id: Option<NgranTraceId> = None;
+        let mut ngran_cgi: Option<NgranCgi> = None;
+        let mut trace_collection_entity_ip_address: Option<TransportLayerAddress> = None;
+        let mut privacy_indicator: Option<PrivacyIndicator> = None;
+        let mut trace_collection_entity_uri: Option<UriAddress> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                44 => {
+                    ngran_trace_id = Some(NgranTraceId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                43 => {
+                    ngran_cgi = Some(NgranCgi::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                109 => {
+                    trace_collection_entity_ip_address = Some(TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                256 => {
+                    privacy_indicator = Some(PrivacyIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                257 => {
+                    trace_collection_entity_uri = Some(UriAddress::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ngran_trace_id = ngran_trace_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ngran_cgi = ngran_cgi.ok_or(Err(DecodeError::InvalidChoice))?;
+        let trace_collection_entity_ip_address = trace_collection_entity_ip_address.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ngran_trace_id,
+            ngran_cgi,
+            trace_collection_entity_ip_address,
+            privacy_indicator,
+            trace_collection_entity_uri,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// LocationReportingControl
+pub struct LocationReportingControl {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub location_reporting_request_type: LocationReportingRequestType,
+}
+
+impl APerElement for LocationReportingControl {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                33 => {
+                    location_reporting_request_type = Some(LocationReportingRequestType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let location_reporting_request_type = location_reporting_request_type.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            location_reporting_request_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// LocationReportingFailureIndication
+pub struct LocationReportingFailureIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub cause: Cause,
+}
+
+impl APerElement for LocationReportingFailureIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut cause: Option<Cause> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                15 => {
+                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let cause = cause.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            cause,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// LocationReport
+pub struct LocationReport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub user_location_information: UserLocationInformation,
+    pub ue_presence_in_area_of_interest_list: Option<UePresenceInAreaOfInterestList>,
+    pub location_reporting_request_type: LocationReportingRequestType,
+}
+
+impl APerElement for LocationReport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
+        let mut ue_presence_in_area_of_interest_list: Option<UePresenceInAreaOfInterestList> = None;
+        let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                116 => {
+                    ue_presence_in_area_of_interest_list = Some(UePresenceInAreaOfInterestList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                33 => {
+                    location_reporting_request_type = Some(LocationReportingRequestType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let user_location_information = user_location_information.ok_or(Err(DecodeError::InvalidChoice))?;
+        let location_reporting_request_type = location_reporting_request_type.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            user_location_information,
+            ue_presence_in_area_of_interest_list,
+            location_reporting_request_type,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UetnlaBindingReleaseRequest
+pub struct UetnlaBindingReleaseRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+}
+
+impl APerElement for UetnlaBindingReleaseRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeRadioCapabilityInfoIndication
+pub struct UeRadioCapabilityInfoIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ue_radio_capability: UeRadioCapability,
+    pub ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging>,
+    pub ue_radio_capability_eutra_format: Option<UeRadioCapability>,
+}
+
+impl APerElement for UeRadioCapabilityInfoIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut ue_radio_capability_for_paging: Option<UeRadioCapabilityForPaging> = None;
+        let mut ue_radio_capability_eutra_format: Option<UeRadioCapability> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                118 => {
+                    ue_radio_capability_for_paging = Some(UeRadioCapabilityForPaging::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                265 => {
+                    ue_radio_capability_eutra_format = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ue_radio_capability = ue_radio_capability.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ue_radio_capability,
+            ue_radio_capability_for_paging,
+            ue_radio_capability_eutra_format,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeRadioCapabilityCheckRequest
+pub struct UeRadioCapabilityCheckRequest {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ue_radio_capability: Option<UeRadioCapability>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+}
+
+impl APerElement for UeRadioCapabilityCheckRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ue_radio_capability,
+            ue_radio_capability_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeRadioCapabilityCheckResponse
+pub struct UeRadioCapabilityCheckResponse {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ims_voice_support_indicator: ImsVoiceSupportIndicator,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeRadioCapabilityCheckResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ims_voice_support_indicator: Option<ImsVoiceSupportIndicator> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                30 => {
+                    ims_voice_support_indicator = Some(ImsVoiceSupportIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ims_voice_support_indicator = ims_voice_support_indicator.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ims_voice_support_indicator,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
 
 // PrivateMessage - omitted
 
-// SecondaryRatDataUsageReport - omitted
+// SecondaryRatDataUsageReport
+pub struct SecondaryRatDataUsageReport {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub pdu_session_resource_secondary_rat_usage_list: PduSessionResourceSecondaryRatUsageList,
+    pub handover_flag: Option<HandoverFlag>,
+    pub user_location_information: Option<UserLocationInformation>,
+}
 
-// UplinkRimInformationTransfer - omitted
+impl APerElement for SecondaryRatDataUsageReport {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut pdu_session_resource_secondary_rat_usage_list: Option<PduSessionResourceSecondaryRatUsageList> = None;
+        let mut handover_flag: Option<HandoverFlag> = None;
+        let mut user_location_information: Option<UserLocationInformation> = None;
 
-// DownlinkRimInformationTransfer - omitted
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                142 => {
+                    pdu_session_resource_secondary_rat_usage_list = Some(PduSessionResourceSecondaryRatUsageList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                143 => {
+                    handover_flag = Some(HandoverFlag::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                121 => {
+                    user_location_information = Some(UserLocationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let pdu_session_resource_secondary_rat_usage_list = pdu_session_resource_secondary_rat_usage_list.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            pdu_session_resource_secondary_rat_usage_list,
+            handover_flag,
+            user_location_information,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
 
-// ConnectionEstablishmentIndication - omitted
+// UplinkRimInformationTransfer
+pub struct UplinkRimInformationTransfer {
+    pub rim_information_transfer: Option<RimInformationTransfer>,
+}
 
-// UeRadioCapabilityIdMappingRequest - omitted
+impl APerElement for UplinkRimInformationTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut rim_information_transfer: Option<RimInformationTransfer> = None;
 
-// UeRadioCapabilityIdMappingResponse - omitted
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                175 => {
+                    rim_information_transfer = Some(RimInformationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            rim_information_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
 
-// AmfcpRelocationIndication - omitted
+// DownlinkRimInformationTransfer
+pub struct DownlinkRimInformationTransfer {
+    pub rim_information_transfer: Option<RimInformationTransfer>,
+}
+
+impl APerElement for DownlinkRimInformationTransfer {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut rim_information_transfer: Option<RimInformationTransfer> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                175 => {
+                    rim_information_transfer = Some(RimInformationTransfer::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            rim_information_transfer,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// ConnectionEstablishmentIndication
+pub struct ConnectionEstablishmentIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub ue_radio_capability: Option<UeRadioCapability>,
+    pub end_indication: Option<EndIndication>,
+    pub s_nssai: Option<SNssai>,
+    pub allowed_nssai: Option<AllowedNssai>,
+    pub ue_differentiation_info: Option<UeDifferentiationInfo>,
+    pub dl_cp_security_information: Option<DlCpSecurityInformation>,
+    pub nb_iot_ue_priority: Option<NbIotUePriority>,
+    pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
+    pub c_emode_brestricted: Option<CEmodeBrestricted>,
+    pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
+}
+
+impl APerElement for ConnectionEstablishmentIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut end_indication: Option<EndIndication> = None;
+        let mut s_nssai: Option<SNssai> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+        let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
+        let mut dl_cp_security_information: Option<DlCpSecurityInformation> = None;
+        let mut nb_iot_ue_priority: Option<NbIotUePriority> = None;
+        let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
+        let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                226 => {
+                    end_indication = Some(EndIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                148 => {
+                    s_nssai = Some(SNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                209 => {
+                    ue_differentiation_info = Some(UeDifferentiationInfo::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                212 => {
+                    dl_cp_security_information = Some(DlCpSecurityInformation::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                210 => {
+                    nb_iot_ue_priority = Some(NbIotUePriority::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                205 => {
+                    enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                222 => {
+                    c_emode_brestricted = Some(CEmodeBrestricted::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            ue_radio_capability,
+            end_indication,
+            s_nssai,
+            allowed_nssai,
+            ue_differentiation_info,
+            dl_cp_security_information,
+            nb_iot_ue_priority,
+            enhanced_coverage_restriction,
+            c_emode_brestricted,
+            ue_radio_capability_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeRadioCapabilityIdMappingRequest
+pub struct UeRadioCapabilityIdMappingRequest {
+    pub ue_radio_capability_id: UeRadioCapabilityId,
+}
+
+impl APerElement for UeRadioCapabilityIdMappingRequest {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ue_radio_capability_id = ue_radio_capability_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ue_radio_capability_id,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// UeRadioCapabilityIdMappingResponse
+pub struct UeRadioCapabilityIdMappingResponse {
+    pub ue_radio_capability_id: UeRadioCapabilityId,
+    pub ue_radio_capability: UeRadioCapability,
+    pub criticality_diagnostics: Option<CriticalityDiagnostics>,
+}
+
+impl APerElement for UeRadioCapabilityIdMappingResponse {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
+        let mut ue_radio_capability: Option<UeRadioCapability> = None;
+        let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                264 => {
+                    ue_radio_capability_id = Some(UeRadioCapabilityId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                117 => {
+                    ue_radio_capability = Some(UeRadioCapability::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                19 => {
+                    criticality_diagnostics = Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ue_radio_capability_id = ue_radio_capability_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ue_radio_capability = ue_radio_capability.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            ue_radio_capability_id,
+            ue_radio_capability,
+            criticality_diagnostics,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
+
+// AmfcpRelocationIndication
+pub struct AmfcpRelocationIndication {
+    pub amf_ue_ngap_id: AmfUeNgapId,
+    pub ran_ue_ngap_id: RanUeNgapId,
+    pub s_nssai: Option<SNssai>,
+    pub allowed_nssai: Option<AllowedNssai>,
+}
+
+impl APerElement for AmfcpRelocationIndication {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
+        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        let len = decoder.decode_length();
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
+        let mut s_nssai: Option<SNssai> = None;
+        let mut allowed_nssai: Option<AllowedNssai> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                85 => {
+                    ran_ue_ngap_id = Some(RanUeNgapId::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                148 => {
+                    s_nssai = Some(SNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                0 => {
+                    allowed_nssai = Some(AllowedNssai::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        let ran_ue_ngap_id = ran_ue_ngap_id.ok_or(Err(DecodeError::InvalidChoice))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+            s_nssai,
+            allowed_nssai,
+        })
+    }
+    fn to_aper(&self, constraints: Constraints) -> Result<Encoding, EncodeError> {
+        unimplemented!()
+    }
+}
 
