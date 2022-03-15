@@ -7,10 +7,7 @@ use asn1::aper::{
     UNCONSTRAINED,
 };
 use num_derive::FromPrimitive;
-use num_traits::FromPrimitive;
-use crate::common::Criticality;
-
-use super::ies::*;
+use num_traits::FromPrimitive;use super::ies::*;
 
 // PduSessionResourceSetupRequest
 pub struct PduSessionResourceSetupRequest {
@@ -26,7 +23,7 @@ impl APerElement for PduSessionResourceSetupRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ran_paging_priority: Option<RanPagingPriority> = None;
@@ -93,7 +90,7 @@ impl APerElement for PduSessionResourceSetupResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_setup_list_su_res: Option<PduSessionResourceSetupListSuRes> = None;
@@ -154,7 +151,7 @@ impl APerElement for PduSessionResourceReleaseCommand {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ran_paging_priority: Option<RanPagingPriority> = None;
@@ -216,7 +213,7 @@ impl APerElement for PduSessionResourceReleaseResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_released_list_rel_res: Option<PduSessionResourceReleasedListRelRes> = None;
@@ -277,7 +274,7 @@ impl APerElement for PduSessionResourceModifyRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ran_paging_priority: Option<RanPagingPriority> = None;
@@ -335,7 +332,7 @@ impl APerElement for PduSessionResourceModifyResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_modify_list_mod_res: Option<PduSessionResourceModifyListModRes> = None;
@@ -401,7 +398,7 @@ impl APerElement for PduSessionResourceNotify {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_notify_list: Option<PduSessionResourceNotifyList> = None;
@@ -461,7 +458,7 @@ impl APerElement for PduSessionResourceModifyIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_modify_list_mod_ind: Option<PduSessionResourceModifyListModInd> = None;
@@ -518,7 +515,7 @@ impl APerElement for PduSessionResourceModifyConfirm {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_modify_list_mod_cfm: Option<PduSessionResourceModifyListModCfm> = None;
@@ -611,7 +608,7 @@ impl APerElement for InitialContextSetupRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut old_amf: Option<AmfName> = None;
@@ -836,7 +833,7 @@ impl APerElement for InitialContextSetupResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_setup_list_cxt_res: Option<PduSessionResourceSetupListCxtRes> = None;
@@ -897,7 +894,7 @@ impl APerElement for InitialContextSetupFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_failed_to_setup_list_cxt_fail: Option<PduSessionResourceFailedToSetupListCxtFail> = None;
@@ -958,7 +955,7 @@ impl APerElement for UeContextReleaseRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_list_cxt_rel_req: Option<PduSessionResourceListCxtRelReq> = None;
@@ -1012,7 +1009,7 @@ impl APerElement for UeContextReleaseCommand {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ue_ngap_i_ds: Option<UeNgapIDs> = None;
         let mut cause: Option<Cause> = None;
 
@@ -1060,7 +1057,7 @@ impl APerElement for UeContextReleaseComplete {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
@@ -1134,7 +1131,7 @@ impl APerElement for UeContextResumeRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut rrc_resume_cause: Option<RrcEstablishmentCause> = None;
@@ -1214,7 +1211,7 @@ impl APerElement for UeContextResumeResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_resume_list_res_res: Option<PduSessionResourceResumeListResRes> = None;
@@ -1289,7 +1286,7 @@ impl APerElement for UeContextResumeFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -1346,7 +1343,7 @@ impl APerElement for UeContextSuspendRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut info_on_recommended_cells_and_ran_nodes_for_paging: Option<InfoOnRecommendedCellsAndRanNodesForPaging> = None;
@@ -1406,7 +1403,7 @@ impl APerElement for UeContextSuspendResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut security_context: Option<SecurityContext> = None;
@@ -1461,7 +1458,7 @@ impl APerElement for UeContextSuspendFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -1535,7 +1532,7 @@ impl APerElement for UeContextModificationRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ran_paging_priority: Option<RanPagingPriority> = None;
@@ -1681,7 +1678,7 @@ impl APerElement for UeContextModificationResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut rrc_state: Option<RrcState> = None;
@@ -1741,7 +1738,7 @@ impl APerElement for UeContextModificationFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -1797,7 +1794,7 @@ impl APerElement for RrcInactiveTransitionReport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut rrc_state: Option<RrcState> = None;
@@ -1851,7 +1848,7 @@ impl APerElement for RetrieveUeInformation {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
 
         for _ in 0..len {
@@ -1892,7 +1889,7 @@ impl APerElement for UeInformationTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
         let mut nb_iot_ue_priority: Option<NbIotUePriority> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
@@ -1957,7 +1954,7 @@ impl APerElement for RancpRelocationIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut five_g_s_tmsi: Option<FiveGSTmsi> = None;
         let mut eutra_cgi: Option<EutraCgi> = None;
@@ -2024,7 +2021,7 @@ impl APerElement for HandoverRequired {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut handover_type: Option<HandoverType> = None;
@@ -2108,7 +2105,7 @@ impl APerElement for HandoverCommand {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut handover_type: Option<HandoverType> = None;
@@ -2186,7 +2183,7 @@ impl APerElement for HandoverPreparationFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -2277,7 +2274,7 @@ impl APerElement for HandoverRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut handover_type: Option<HandoverType> = None;
         let mut cause: Option<Cause> = None;
@@ -2492,7 +2489,7 @@ impl APerElement for HandoverRequestAcknowledge {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_admitted_list: Option<PduSessionResourceAdmittedList> = None;
@@ -2559,7 +2556,7 @@ impl APerElement for HandoverFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -2614,7 +2611,7 @@ impl APerElement for HandoverNotify {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
@@ -2673,7 +2670,7 @@ impl APerElement for PathSwitchRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut source_amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
@@ -2767,7 +2764,7 @@ impl APerElement for PathSwitchRequestAcknowledge {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ue_security_capabilities: Option<UeSecurityCapabilities> = None;
@@ -2930,7 +2927,7 @@ impl APerElement for PathSwitchRequestFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_released_list_ps_fail: Option<PduSessionResourceReleasedListPsFail> = None;
@@ -2985,7 +2982,7 @@ impl APerElement for HandoverCancel {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -3035,7 +3032,7 @@ impl APerElement for HandoverCancelAcknowledge {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -3083,7 +3080,7 @@ impl APerElement for HandoverSuccess {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
 
@@ -3127,7 +3124,7 @@ impl APerElement for UplinkRanEarlyStatusTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut early_status_transfer_transparent_container: Option<EarlyStatusTransferTransparentContainer> = None;
@@ -3177,7 +3174,7 @@ impl APerElement for DownlinkRanEarlyStatusTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut early_status_transfer_transparent_container: Option<EarlyStatusTransferTransparentContainer> = None;
@@ -3227,7 +3224,7 @@ impl APerElement for UplinkRanStatusTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ran_status_transfer_transparent_container: Option<RanStatusTransferTransparentContainer> = None;
@@ -3277,7 +3274,7 @@ impl APerElement for DownlinkRanStatusTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ran_status_transfer_transparent_container: Option<RanStatusTransferTransparentContainer> = None;
@@ -3337,7 +3334,7 @@ impl APerElement for Paging {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ue_paging_identity: Option<UePagingIdentity> = None;
         let mut paging_drx: Option<PagingDrx> = None;
         let mut tai_list_for_paging: Option<TaiListForPaging> = None;
@@ -3449,7 +3446,7 @@ impl APerElement for InitialUeMessage {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut nas_pdu: Option<NasPdu> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
@@ -3580,7 +3577,7 @@ impl APerElement for DownlinkNasTransport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut old_amf: Option<AmfName> = None;
@@ -3709,7 +3706,7 @@ impl APerElement for UplinkNasTransport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut nas_pdu: Option<NasPdu> = None;
@@ -3781,7 +3778,7 @@ impl APerElement for NasNonDeliveryIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut nas_pdu: Option<NasPdu> = None;
@@ -3840,7 +3837,7 @@ impl APerElement for RerouteNasRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ngap_message: Option<Vec<u8>> = None;
@@ -3909,7 +3906,7 @@ impl APerElement for NgSetupRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
         let mut ran_node_name: Option<RanNodeName> = None;
         let mut supported_ta_list: Option<SupportedTaList> = None;
@@ -3984,7 +3981,7 @@ impl APerElement for NgSetupResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_name: Option<AmfName> = None;
         let mut served_guami_list: Option<ServedGuamiList> = None;
         let mut relative_amf_capacity: Option<RelativeAmfCapacity> = None;
@@ -4060,7 +4057,7 @@ impl APerElement for NgSetupFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -4112,7 +4109,7 @@ impl APerElement for RanConfigurationUpdate {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ran_node_name: Option<RanNodeName> = None;
         let mut supported_ta_list: Option<SupportedTaList> = None;
         let mut default_paging_drx: Option<PagingDrx> = None;
@@ -4177,7 +4174,7 @@ impl APerElement for RanConfigurationUpdateAcknowledge {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
@@ -4214,7 +4211,7 @@ impl APerElement for RanConfigurationUpdateFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -4267,7 +4264,7 @@ impl APerElement for AmfConfigurationUpdate {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_name: Option<AmfName> = None;
         let mut served_guami_list: Option<ServedGuamiList> = None;
         let mut relative_amf_capacity: Option<RelativeAmfCapacity> = None;
@@ -4339,7 +4336,7 @@ impl APerElement for AmfConfigurationUpdateAcknowledge {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_tnl_association_setup_list: Option<AmfTnlAssociationSetupList> = None;
         let mut amf_tnl_association_failed_to_setup_list: Option<TnlAssociationList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -4386,7 +4383,7 @@ impl APerElement for AmfConfigurationUpdateFailure {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -4432,7 +4429,7 @@ impl APerElement for AmfStatusIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut unavailable_guami_list: Option<UnavailableGuamiList> = None;
 
         for _ in 0..len {
@@ -4469,7 +4466,7 @@ impl APerElement for NgReset {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut cause: Option<Cause> = None;
         let mut reset_type: Option<ResetType> = None;
 
@@ -4512,7 +4509,7 @@ impl APerElement for NgResetAcknowledge {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ue_associated_logical_ng_connection_list: Option<UeAssociatedLogicalNgConnectionList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
@@ -4556,7 +4553,7 @@ impl APerElement for ErrorIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -4613,7 +4610,7 @@ impl APerElement for OverloadStart {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_overload_response: Option<OverloadResponse> = None;
         let mut amf_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication> = None;
         let mut overload_start_nssai_list: Option<OverloadStartNssaiList> = None;
@@ -4657,7 +4654,7 @@ impl APerElement for OverloadStop {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
 
         for _ in 0..len {
             let id = u16::from_aper(decoder, UNCONSTRAINED)?;
@@ -4689,7 +4686,7 @@ impl APerElement for UplinkRanConfigurationTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut son_configuration_transfer_ul: Option<SonConfigurationTransfer> = None;
         let mut endc_son_configuration_transfer_ul: Option<EnDcsonConfigurationTransfer> = None;
         let mut intersystem_son_configuration_transfer_ul: Option<IntersystemSonConfigurationTransfer> = None;
@@ -4736,7 +4733,7 @@ impl APerElement for DownlinkRanConfigurationTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut son_configuration_transfer_dl: Option<SonConfigurationTransfer> = None;
         let mut endc_son_configuration_transfer_dl: Option<EnDcsonConfigurationTransfer> = None;
         let mut intersystem_son_configuration_transfer_dl: Option<IntersystemSonConfigurationTransfer> = None;
@@ -4791,7 +4788,7 @@ impl APerElement for WriteReplaceWarningRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut warning_area_list: Option<WarningAreaList> = None;
@@ -4883,7 +4880,7 @@ impl APerElement for WriteReplaceWarningResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut broadcast_completed_area_list: Option<BroadcastCompletedAreaList> = None;
@@ -4938,7 +4935,7 @@ impl APerElement for PwsCancelRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut warning_area_list: Option<WarningAreaList> = None;
@@ -4993,7 +4990,7 @@ impl APerElement for PwsCancelResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut message_identifier: Option<MessageIdentifier> = None;
         let mut serial_number: Option<SerialNumber> = None;
         let mut broadcast_cancelled_area_list: Option<BroadcastCancelledAreaList> = None;
@@ -5048,7 +5045,7 @@ impl APerElement for PwsRestartIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut cell_id_list_for_restart: Option<CellIdListForRestart> = None;
         let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
         let mut tai_list_for_restart: Option<TaiListForRestart> = None;
@@ -5102,7 +5099,7 @@ impl APerElement for PwsFailureIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut pws_failed_cell_id_list: Option<PwsFailedCellIdList> = None;
         let mut global_ran_node_id: Option<GlobalRanNodeId> = None;
 
@@ -5147,7 +5144,7 @@ impl APerElement for DownlinkUeAssociatedNrpPaTransport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut routing_id: Option<RoutingId> = None;
@@ -5204,7 +5201,7 @@ impl APerElement for UplinkUeAssociatedNrpPaTransport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut routing_id: Option<RoutingId> = None;
@@ -5259,7 +5256,7 @@ impl APerElement for DownlinkNonUeAssociatedNrpPaTransport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut routing_id: Option<RoutingId> = None;
         let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
 
@@ -5302,7 +5299,7 @@ impl APerElement for UplinkNonUeAssociatedNrpPaTransport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut routing_id: Option<RoutingId> = None;
         let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
 
@@ -5346,7 +5343,7 @@ impl APerElement for TraceStart {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut trace_activation: Option<TraceActivation> = None;
@@ -5397,7 +5394,7 @@ impl APerElement for TraceFailureIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ngran_trace_id: Option<NgranTraceId> = None;
@@ -5453,7 +5450,7 @@ impl APerElement for DeactivateTrace {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ngran_trace_id: Option<NgranTraceId> = None;
@@ -5507,7 +5504,7 @@ impl APerElement for CellTrafficTrace {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ngran_trace_id: Option<NgranTraceId> = None;
@@ -5579,7 +5576,7 @@ impl APerElement for LocationReportingControl {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut location_reporting_request_type: Option<LocationReportingRequestType> = None;
@@ -5629,7 +5626,7 @@ impl APerElement for LocationReportingFailureIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut cause: Option<Cause> = None;
@@ -5681,7 +5678,7 @@ impl APerElement for LocationReport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut user_location_information: Option<UserLocationInformation> = None;
@@ -5741,7 +5738,7 @@ impl APerElement for UetnlaBindingReleaseRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
 
@@ -5787,7 +5784,7 @@ impl APerElement for UeRadioCapabilityInfoIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
@@ -5848,7 +5845,7 @@ impl APerElement for UeRadioCapabilityCheckRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
@@ -5903,7 +5900,7 @@ impl APerElement for UeRadioCapabilityCheckResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ims_voice_support_indicator: Option<ImsVoiceSupportIndicator> = None;
@@ -5962,7 +5959,7 @@ impl APerElement for SecondaryRatDataUsageReport {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut pdu_session_resource_secondary_rat_usage_list: Option<PduSessionResourceSecondaryRatUsageList> = None;
@@ -6020,7 +6017,7 @@ impl APerElement for UplinkRimInformationTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut rim_information_transfer: Option<RimInformationTransfer> = None;
 
         for _ in 0..len {
@@ -6055,7 +6052,7 @@ impl APerElement for DownlinkRimInformationTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut rim_information_transfer: Option<RimInformationTransfer> = None;
 
         for _ in 0..len {
@@ -6101,7 +6098,7 @@ impl APerElement for ConnectionEstablishmentIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
@@ -6193,7 +6190,7 @@ impl APerElement for UeRadioCapabilityIdMappingRequest {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
 
         for _ in 0..len {
@@ -6231,7 +6228,7 @@ impl APerElement for UeRadioCapabilityIdMappingResponse {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
         let mut ue_radio_capability: Option<UeRadioCapability> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -6281,7 +6278,7 @@ impl APerElement for AmfcpRelocationIndication {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut s_nssai: Option<SNssai> = None;

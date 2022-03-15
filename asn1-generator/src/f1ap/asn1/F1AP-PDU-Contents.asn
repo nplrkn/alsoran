@@ -648,12 +648,12 @@ Reset ::= SEQUENCE {
 	...
 }
 
--- ResetIEs F1AP-PROTOCOL-IES ::= {
--- 	{ ID id-TransactionID				CRITICALITY reject	TYPE TransactionID				PRESENCE mandatory } ,
--- 	{ ID id-Cause						CRITICALITY ignore	TYPE Cause						PRESENCE mandatory } ,
--- 	{ ID id-ResetType					CRITICALITY reject	TYPE ResetType					PRESENCE mandatory } ,
--- 	...
--- }
+ResetIEs F1AP-PROTOCOL-IES ::= {
+	{ ID id-TransactionID				CRITICALITY reject	TYPE TransactionID				PRESENCE mandatory } ,
+	{ ID id-Cause						CRITICALITY ignore	TYPE Cause						PRESENCE mandatory } ,
+	{ ID id-ResetType					CRITICALITY reject	TYPE ResetType					PRESENCE mandatory } ,
+	...
+}
 
 ResetType ::= CHOICE {
 	f1-Interface					ResetAll,

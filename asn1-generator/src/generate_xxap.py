@@ -103,5 +103,5 @@ pub mod pdu;
     f.write(generate_structs(input_file_path(i), constants))
 
 
-generate("ngap")
 generate("f1ap")
+generate("ngap")

@@ -13812,7 +13812,7 @@ impl APerElement for PduSessionResourceModifyRequestTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate> = None;
         let mut ul_ngu_up_tnl_modify_list: Option<UlNguUpTnlModifyList> = None;
         let mut network_instance: Option<NetworkInstance> = None;
@@ -15278,7 +15278,7 @@ impl APerElement for PduSessionResourceSetupRequestTransfer {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let len = decoder.decode_length();
+        let len = decoder.decode_length()?;
         let mut pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate> = None;
         let mut ul_ngu_up_tnl_information: Option<UpTransportLayerInformation> = None;
         let mut additional_ul_ngu_up_tnl_information: Option<UpTransportLayerInformationList> = None;

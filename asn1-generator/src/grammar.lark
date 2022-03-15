@@ -66,7 +66,7 @@ _primitive:     sequenceof
 ies:              "{" (ie | optional_ie)* [","] extension_marker? "}"
 optional_ie:     _ie{"optional"} | _ie{"conditional"}
 ie:              _ie{"mandatory"}
-_ie{p}:             "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _fieldtype+ "PRESENCE" p "}" ["|"]
+_ie{p}:             "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _fieldtype+ "PRESENCE" p "}" ["|" | ","]
 
 _comma_separated{x}: x ("," x)* ","?
 _choiceitem:     choicefield | extension_container
