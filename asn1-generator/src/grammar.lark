@@ -11,16 +11,16 @@ IDENTIFIER:       ("a".."z" | "A".."Z" | DIGIT | "-")+
 _IDENTIFIER:       ("a".."z" | "A".."Z" | DIGIT | "-")+
 INTEGER:          "-"? "0" | "1".."9"("0".."9")*
 BOUND:            INTEGER | IDENTIFIER
-_optional:        "OPTIONAL" | "optional" | "conditional"
+_OID:             /{[^}]+}/
+_PROTOCOL_IES:    /\w+-PROTOCOL-IES/
+_IMPORTS:         /[^;]+;/
 extension_marker: "..." [","]
 
 // For testability, we make the parts before and after the definitions optional
 // This means we can just run small fragments through the grammar.
 document:         [module _OID _begin ["IMPORTS" _IMPORTS]] _definitions ["END"]
 module:           IDENTIFIER
-_OID:             /{[^}]+}/
 _begin:           "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
-_IMPORTS:         /[^;]+;/
 _definitions:     (tuple_struct | struct | enumdef | choicedef | constantdef | objectdef | protocol_ies)+
 
 ?assign:          IDENTIFIER "::="
@@ -30,7 +30,6 @@ enumdef:          assign enumerated
 choicedef:        assign choice
 constantdef:      IDENTIFIER _IDENTIFIER "::=" INTEGER
 objectdef.0:      IDENTIFIER _identifier "::=" ies
-_PROTOCOL_IES:    /\w+-PROTOCOL-IES/
 protocol_ies.1:   IDENTIFIER _PROTOCOL_IES "::=" ies
 
 _items{x}:        "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
@@ -72,7 +71,7 @@ _comma_separated{x}: x ("," x)* ","?
 _choiceitem:     choicefield | extension_container
 ie_container.1:     "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 choicefield:      _identifier _fieldtype
-_fielditem:       optional_field | field | extension_container  | ie_container
+_fielditem:       optional_field | field | extension_container | ie_container
 enum_item:        _identifier
 extended_enum_items: enum_item+ -> extended_items
 extension_container.0:  _identifier container "OPTIONAL"? ","?
