@@ -937,7 +937,24 @@ impl APerElement for PduSessionResourceSetupRequest {
         })
     }
     fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        unimplemented!()
+        let mut enc = Encoding::new();
+        let num_ies = [self.criticality_diagnostics.is_some()]
+            .iter()
+            .filter(|&x| *x)
+            .count();
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&encode_length(num_ies)?)?;
+        enc.append(&(5 as u16).to_aper(UNCONSTRAINED)?)?;
+        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&self.ue_radio_capability_id.to_aper(UNCONSTRAINED)?)?;
+        if let Some(x) = self.criticality_diagnostics {
+            enc.append(&(5 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+
+        Ok(enc)
     }
 }
 
