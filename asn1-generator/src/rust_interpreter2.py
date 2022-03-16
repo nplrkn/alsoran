@@ -213,6 +213,9 @@ class IeFields(Interpreter):
         self.self_fields = ""
         self.matches = ""
         self.mandatory = ""
+        self.mandatory_fields_to = ""
+        self.optionals_presence_list = ""
+        self.optional_fields_to = ""
 
     def extension_marker(self, tree):
         self.extensible = True
@@ -220,6 +223,7 @@ class IeFields(Interpreter):
     def ie(self, tree):
         name = tree.children[0]
         id = tree.children[1]
+        criticality = tree.children[2].capitalize()
         typ = tree.children[3]
         if isinstance(typ, Tree):
             typ = typ.data
@@ -238,10 +242,16 @@ class IeFields(Interpreter):
         self.mandatory += f"""\
         let {name} = {name}.ok_or(DecodeError::InvalidChoice)?;
 """
+        self.mandatory_fields_to += f"""\
+        enc.append(&({id} as u16).to_aper(UNCONSTRAINED)?)?;
+        enc.append(&Criticality::{criticality}.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&self.{name}.to_aper(UNCONSTRAINED)?)?;
+"""
 
     def optional_ie(self, tree):
         name = tree.children[0]
         id = tree.children[1]
+        criticality = tree.children[2].capitalize()
         typ = tree.children[3]
         if isinstance(typ, Tree):
             typ = typ.data
@@ -256,6 +266,15 @@ class IeFields(Interpreter):
                 {id} => {{
                     {name} = Some({typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?);
                 }}
+"""
+        self.optionals_presence_list += f"self.{name}.is_some(),"
+
+        self.optional_fields_to += f"""\
+        if let Some(x) = &self.{name} {{
+            enc.append(&({id} as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::{criticality}.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }}
 """
 
 
@@ -468,7 +487,17 @@ impl APerElement for {name} {{
         }})
     }}
     fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {{
-        unimplemented!()
+        let mut enc = Encoding::new();
+        let num_ies = [{field_interpreter.optionals_presence_list}]
+            .iter()
+            .filter(|&x| *x)
+            .count();
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&encode_length(num_ies)?)?;
+{field_interpreter.mandatory_fields_to}\
+{field_interpreter.optional_fields_to}
+        Ok(enc)
     }}
 }}
 
@@ -938,19 +967,19 @@ impl APerElement for PduSessionResourceSetupRequest {
     }
     fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
         let mut enc = Encoding::new();
-        let num_ies = [self.criticality_diagnostics.is_some()]
+        let num_ies = [self.ran_paging_priority.is_some(),]
             .iter()
             .filter(|&x| *x)
             .count();
 
         enc.append(&false.to_aper(UNCONSTRAINED)?)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(5 as u16).to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(10 as u16).to_aper(UNCONSTRAINED)?)?;
         enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ue_radio_capability_id.to_aper(UNCONSTRAINED)?)?;
-        if let Some(x) = self.criticality_diagnostics {
-            enc.append(&(5 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&self.amf_ue_ngap_id.to_aper(UNCONSTRAINED)?)?;
+        if let Some(x) = &self.ran_paging_priority {
+            enc.append(&(83 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
             enc.append(&x.to_aper(UNCONSTRAINED)?)?;
         }
 

@@ -14546,7 +14546,84 @@ impl APerElement for PduSessionResourceModifyRequestTransfer {
         })
     }
     fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        unimplemented!()
+        let mut enc = Encoding::new();
+        let num_ies = [
+            self.pdu_session_aggregate_maximum_bit_rate.is_some(),
+            self.ul_ngu_up_tnl_modify_list.is_some(),
+            self.network_instance.is_some(),
+            self.qos_flow_add_or_modify_request_list.is_some(),
+            self.qos_flow_to_release_list.is_some(),
+            self.additional_ul_ngu_up_tnl_information.is_some(),
+            self.common_network_instance.is_some(),
+            self.additional_redundant_ul_ngu_up_tnl_information
+                .is_some(),
+            self.redundant_common_network_instance.is_some(),
+            self.redundant_ul_ngu_up_tnl_information.is_some(),
+            self.security_indication.is_some(),
+        ]
+        .iter()
+        .filter(|&x| *x)
+        .count();
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&encode_length(num_ies)?)?;
+        if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
+            enc.append(&(130 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.ul_ngu_up_tnl_modify_list {
+            enc.append(&(140 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.network_instance {
+            enc.append(&(129 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.qos_flow_add_or_modify_request_list {
+            enc.append(&(135 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.qos_flow_to_release_list {
+            enc.append(&(137 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
+            enc.append(&(126 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.common_network_instance {
+            enc.append(&(166 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
+            enc.append(&(186 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.redundant_common_network_instance {
+            enc.append(&(190 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
+            enc.append(&(195 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.security_indication {
+            enc.append(&(138 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+
+        Ok(enc)
     }
 }
 
@@ -16202,7 +16279,93 @@ impl APerElement for PduSessionResourceSetupRequestTransfer {
         })
     }
     fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        unimplemented!()
+        let mut enc = Encoding::new();
+        let num_ies = [
+            self.pdu_session_aggregate_maximum_bit_rate.is_some(),
+            self.additional_ul_ngu_up_tnl_information.is_some(),
+            self.data_forwarding_not_possible.is_some(),
+            self.security_indication.is_some(),
+            self.network_instance.is_some(),
+            self.common_network_instance.is_some(),
+            self.direct_forwarding_path_availability.is_some(),
+            self.redundant_ul_ngu_up_tnl_information.is_some(),
+            self.additional_redundant_ul_ngu_up_tnl_information
+                .is_some(),
+            self.redundant_common_network_instance.is_some(),
+            self.redundant_pdu_session_information.is_some(),
+        ]
+        .iter()
+        .filter(|&x| *x)
+        .count();
+
+        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&encode_length(num_ies)?)?;
+        enc.append(&(139 as u16).to_aper(UNCONSTRAINED)?)?;
+        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&self.ul_ngu_up_tnl_information.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(134 as u16).to_aper(UNCONSTRAINED)?)?;
+        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&self.pdu_session_type.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&(136 as u16).to_aper(UNCONSTRAINED)?)?;
+        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+        enc.append(&self.qos_flow_setup_request_list.to_aper(UNCONSTRAINED)?)?;
+        if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
+            enc.append(&(130 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
+            enc.append(&(126 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.data_forwarding_not_possible {
+            enc.append(&(127 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.security_indication {
+            enc.append(&(138 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.network_instance {
+            enc.append(&(129 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.common_network_instance {
+            enc.append(&(166 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.direct_forwarding_path_availability {
+            enc.append(&(22 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
+            enc.append(&(195 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
+            enc.append(&(186 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.redundant_common_network_instance {
+            enc.append(&(190 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+        if let Some(x) = &self.redundant_pdu_session_information {
+            enc.append(&(197 as u16).to_aper(UNCONSTRAINED)?)?;
+            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
+            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+        }
+
+        Ok(enc)
     }
 }
 
