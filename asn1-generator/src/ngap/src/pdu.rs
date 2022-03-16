@@ -12,6 +12,7 @@ use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
 // PduSessionResourceSetupRequest
+#[derive(Clone)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -129,6 +130,7 @@ impl APerElement for PduSessionResourceSetupRequest {
 }
 
 // PduSessionResourceSetupResponse
+#[derive(Clone)]
 pub struct PduSessionResourceSetupResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -236,6 +238,7 @@ impl APerElement for PduSessionResourceSetupResponse {
 }
 
 // PduSessionResourceReleaseCommand
+#[derive(Clone)]
 pub struct PduSessionResourceReleaseCommand {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -336,6 +339,7 @@ impl APerElement for PduSessionResourceReleaseCommand {
 }
 
 // PduSessionResourceReleaseResponse
+#[derive(Clone)]
 pub struct PduSessionResourceReleaseResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -440,6 +444,7 @@ impl APerElement for PduSessionResourceReleaseResponse {
 }
 
 // PduSessionResourceModifyRequest
+#[derive(Clone)]
 pub struct PduSessionResourceModifyRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -529,6 +534,7 @@ impl APerElement for PduSessionResourceModifyRequest {
 }
 
 // PduSessionResourceModifyResponse
+#[derive(Clone)]
 pub struct PduSessionResourceModifyResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -650,6 +656,7 @@ impl APerElement for PduSessionResourceModifyResponse {
 }
 
 // PduSessionResourceNotify
+#[derive(Clone)]
 pub struct PduSessionResourceNotify {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -751,6 +758,7 @@ impl APerElement for PduSessionResourceNotify {
 }
 
 // PduSessionResourceModifyIndication
+#[derive(Clone)]
 pub struct PduSessionResourceModifyIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -840,6 +848,7 @@ impl APerElement for PduSessionResourceModifyIndication {
 }
 
 // PduSessionResourceModifyConfirm
+#[derive(Clone)]
 pub struct PduSessionResourceModifyConfirm {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -948,6 +957,7 @@ impl APerElement for PduSessionResourceModifyConfirm {
 }
 
 // InitialContextSetupRequest
+#[derive(Clone)]
 pub struct InitialContextSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1473,6 +1483,7 @@ impl APerElement for InitialContextSetupRequest {
 }
 
 // InitialContextSetupResponse
+#[derive(Clone)]
 pub struct InitialContextSetupResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1580,6 +1591,7 @@ impl APerElement for InitialContextSetupResponse {
 }
 
 // InitialContextSetupFailure
+#[derive(Clone)]
 pub struct InitialContextSetupFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1682,6 +1694,7 @@ impl APerElement for InitialContextSetupFailure {
 }
 
 // UeContextReleaseRequest
+#[derive(Clone)]
 pub struct UeContextReleaseRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1764,6 +1777,7 @@ impl APerElement for UeContextReleaseRequest {
 }
 
 // UeContextReleaseCommand
+#[derive(Clone)]
 pub struct UeContextReleaseCommand {
     pub ue_ngap_i_ds: UeNgapIDs,
     pub cause: Cause,
@@ -1819,6 +1833,7 @@ impl APerElement for UeContextReleaseCommand {
 }
 
 // UeContextReleaseComplete
+#[derive(Clone)]
 pub struct UeContextReleaseComplete {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1953,6 +1968,7 @@ impl APerElement for UeContextReleaseComplete {
 }
 
 // UeContextResumeRequest
+#[derive(Clone)]
 pub struct UeContextResumeRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2106,6 +2122,7 @@ impl APerElement for UeContextResumeRequest {
 }
 
 // UeContextResumeResponse
+#[derive(Clone)]
 pub struct UeContextResumeResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2254,6 +2271,7 @@ impl APerElement for UeContextResumeResponse {
 }
 
 // UeContextResumeFailure
+#[derive(Clone)]
 pub struct UeContextResumeFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2334,6 +2352,7 @@ impl APerElement for UeContextResumeFailure {
 }
 
 // UeContextSuspendRequest
+#[derive(Clone)]
 pub struct UeContextSuspendRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2443,6 +2462,7 @@ impl APerElement for UeContextSuspendRequest {
 }
 
 // UeContextSuspendResponse
+#[derive(Clone)]
 pub struct UeContextSuspendResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2527,6 +2547,7 @@ impl APerElement for UeContextSuspendResponse {
 }
 
 // UeContextSuspendFailure
+#[derive(Clone)]
 pub struct UeContextSuspendFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2607,6 +2628,7 @@ impl APerElement for UeContextSuspendFailure {
 }
 
 // UeContextModificationRequest
+#[derive(Clone)]
 pub struct UeContextModificationRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2942,6 +2964,7 @@ impl APerElement for UeContextModificationRequest {
 }
 
 // UeContextModificationResponse
+#[derive(Clone)]
 pub struct UeContextModificationResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3039,6 +3062,7 @@ impl APerElement for UeContextModificationResponse {
 }
 
 // UeContextModificationFailure
+#[derive(Clone)]
 pub struct UeContextModificationFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3119,6 +3143,7 @@ impl APerElement for UeContextModificationFailure {
 }
 
 // RrcInactiveTransitionReport
+#[derive(Clone)]
 pub struct RrcInactiveTransitionReport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3196,6 +3221,7 @@ impl APerElement for RrcInactiveTransitionReport {
 }
 
 // RetrieveUeInformation
+#[derive(Clone)]
 pub struct RetrieveUeInformation {
     pub five_g_s_tmsi: FiveGSTmsi,
 }
@@ -3239,6 +3265,7 @@ impl APerElement for RetrieveUeInformation {
 }
 
 // UeInformationTransfer
+#[derive(Clone)]
 pub struct UeInformationTransfer {
     pub five_g_s_tmsi: FiveGSTmsi,
     pub nb_iot_ue_priority: Option<NbIotUePriority>,
@@ -3350,6 +3377,7 @@ impl APerElement for UeInformationTransfer {
 }
 
 // RancpRelocationIndication
+#[derive(Clone)]
 pub struct RancpRelocationIndication {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub five_g_s_tmsi: FiveGSTmsi,
@@ -3437,6 +3465,7 @@ impl APerElement for RancpRelocationIndication {
 }
 
 // HandoverRequired
+#[derive(Clone)]
 pub struct HandoverRequired {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3574,6 +3603,7 @@ impl APerElement for HandoverRequired {
 }
 
 // HandoverCommand
+#[derive(Clone)]
 pub struct HandoverCommand {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3718,6 +3748,7 @@ impl APerElement for HandoverCommand {
 }
 
 // HandoverPreparationFailure
+#[derive(Clone)]
 pub struct HandoverPreparationFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3819,6 +3850,7 @@ impl APerElement for HandoverPreparationFailure {
 }
 
 // HandoverRequest
+#[derive(Clone)]
 pub struct HandoverRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub handover_type: HandoverType,
@@ -4304,6 +4336,7 @@ impl APerElement for HandoverRequest {
 }
 
 // HandoverRequestAcknowledge
+#[derive(Clone)]
 pub struct HandoverRequestAcknowledge {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -4431,6 +4464,7 @@ impl APerElement for HandoverRequestAcknowledge {
 }
 
 // HandoverFailure
+#[derive(Clone)]
 pub struct HandoverFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub cause: Cause,
@@ -4522,6 +4556,7 @@ impl APerElement for HandoverFailure {
 }
 
 // HandoverNotify
+#[derive(Clone)]
 pub struct HandoverNotify {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -4604,6 +4639,7 @@ impl APerElement for HandoverNotify {
 }
 
 // PathSwitchRequest
+#[derive(Clone)]
 pub struct PathSwitchRequest {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub source_amf_ue_ngap_id: AmfUeNgapId,
@@ -4739,6 +4775,7 @@ impl APerElement for PathSwitchRequest {
 }
 
 // PathSwitchRequestAcknowledge
+#[derive(Clone)]
 pub struct PathSwitchRequestAcknowledge {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5113,6 +5150,7 @@ impl APerElement for PathSwitchRequestAcknowledge {
 }
 
 // PathSwitchRequestFailure
+#[derive(Clone)]
 pub struct PathSwitchRequestFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5202,6 +5240,7 @@ impl APerElement for PathSwitchRequestFailure {
 }
 
 // HandoverCancel
+#[derive(Clone)]
 pub struct HandoverCancel {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5267,6 +5306,7 @@ impl APerElement for HandoverCancel {
 }
 
 // HandoverCancelAcknowledge
+#[derive(Clone)]
 pub struct HandoverCancelAcknowledge {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5337,6 +5377,7 @@ impl APerElement for HandoverCancelAcknowledge {
 }
 
 // HandoverSuccess
+#[derive(Clone)]
 pub struct HandoverSuccess {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5392,6 +5433,7 @@ impl APerElement for HandoverSuccess {
 }
 
 // UplinkRanEarlyStatusTransfer
+#[derive(Clone)]
 pub struct UplinkRanEarlyStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5466,6 +5508,7 @@ impl APerElement for UplinkRanEarlyStatusTransfer {
 }
 
 // DownlinkRanEarlyStatusTransfer
+#[derive(Clone)]
 pub struct DownlinkRanEarlyStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5540,6 +5583,7 @@ impl APerElement for DownlinkRanEarlyStatusTransfer {
 }
 
 // UplinkRanStatusTransfer
+#[derive(Clone)]
 pub struct UplinkRanStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5614,6 +5658,7 @@ impl APerElement for UplinkRanStatusTransfer {
 }
 
 // DownlinkRanStatusTransfer
+#[derive(Clone)]
 pub struct DownlinkRanStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -5688,6 +5733,7 @@ impl APerElement for DownlinkRanStatusTransfer {
 }
 
 // Paging
+#[derive(Clone)]
 pub struct Paging {
     pub ue_paging_identity: UePagingIdentity,
     pub paging_drx: Option<PagingDrx>,
@@ -5891,6 +5937,7 @@ impl APerElement for Paging {
 }
 
 // InitialUeMessage
+#[derive(Clone)]
 pub struct InitialUeMessage {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub nas_pdu: NasPdu,
@@ -6125,6 +6172,7 @@ impl APerElement for InitialUeMessage {
 }
 
 // DownlinkNasTransport
+#[derive(Clone)]
 pub struct DownlinkNasTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6389,6 +6437,7 @@ impl APerElement for DownlinkNasTransport {
 }
 
 // UplinkNasTransport
+#[derive(Clone)]
 pub struct UplinkNasTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6507,6 +6556,7 @@ impl APerElement for UplinkNasTransport {
 }
 
 // NasNonDeliveryIndication
+#[derive(Clone)]
 pub struct NasNonDeliveryIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6582,6 +6632,7 @@ impl APerElement for NasNonDeliveryIndication {
 }
 
 // RerouteNasRequest
+#[derive(Clone)]
 pub struct RerouteNasRequest {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
@@ -6691,6 +6742,7 @@ impl APerElement for RerouteNasRequest {
 }
 
 // NgSetupRequest
+#[derive(Clone)]
 pub struct NgSetupRequest {
     pub global_ran_node_id: GlobalRanNodeId,
     pub ran_node_name: Option<RanNodeName>,
@@ -6811,6 +6863,7 @@ impl APerElement for NgSetupRequest {
 }
 
 // NgSetupResponse
+#[derive(Clone)]
 pub struct NgSetupResponse {
     pub amf_name: AmfName,
     pub served_guami_list: ServedGuamiList,
@@ -6941,6 +6994,7 @@ impl APerElement for NgSetupResponse {
 }
 
 // NgSetupFailure
+#[derive(Clone)]
 pub struct NgSetupFailure {
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
@@ -7015,6 +7069,7 @@ impl APerElement for NgSetupFailure {
 }
 
 // RanConfigurationUpdate
+#[derive(Clone)]
 pub struct RanConfigurationUpdate {
     pub ran_node_name: Option<RanNodeName>,
     pub supported_ta_list: Option<SupportedTaList>,
@@ -7143,6 +7198,7 @@ impl APerElement for RanConfigurationUpdate {
 }
 
 // RanConfigurationUpdateAcknowledge
+#[derive(Clone)]
 pub struct RanConfigurationUpdateAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
@@ -7193,6 +7249,7 @@ impl APerElement for RanConfigurationUpdateAcknowledge {
 }
 
 // RanConfigurationUpdateFailure
+#[derive(Clone)]
 pub struct RanConfigurationUpdateFailure {
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
@@ -7267,6 +7324,7 @@ impl APerElement for RanConfigurationUpdateFailure {
 }
 
 // AmfConfigurationUpdate
+#[derive(Clone)]
 pub struct AmfConfigurationUpdate {
     pub amf_name: Option<AmfName>,
     pub served_guami_list: Option<ServedGuamiList>,
@@ -7410,6 +7468,7 @@ impl APerElement for AmfConfigurationUpdate {
 }
 
 // AmfConfigurationUpdateAcknowledge
+#[derive(Clone)]
 pub struct AmfConfigurationUpdateAcknowledge {
     pub amf_tnl_association_setup_list: Option<AmfTnlAssociationSetupList>,
     pub amf_tnl_association_failed_to_setup_list: Option<TnlAssociationList>,
@@ -7490,6 +7549,7 @@ impl APerElement for AmfConfigurationUpdateAcknowledge {
 }
 
 // AmfConfigurationUpdateFailure
+#[derive(Clone)]
 pub struct AmfConfigurationUpdateFailure {
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
@@ -7564,6 +7624,7 @@ impl APerElement for AmfConfigurationUpdateFailure {
 }
 
 // AmfStatusIndication
+#[derive(Clone)]
 pub struct AmfStatusIndication {
     pub unavailable_guami_list: UnavailableGuamiList,
 }
@@ -7610,6 +7671,7 @@ impl APerElement for AmfStatusIndication {
 }
 
 // NgReset
+#[derive(Clone)]
 pub struct NgReset {
     pub cause: Cause,
     pub reset_type: ResetType,
@@ -7662,6 +7724,7 @@ impl APerElement for NgReset {
 }
 
 // NgResetAcknowledge
+#[derive(Clone)]
 pub struct NgResetAcknowledge {
     pub ue_associated_logical_ng_connection_list: Option<UeAssociatedLogicalNgConnectionList>,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -7730,6 +7793,7 @@ impl APerElement for NgResetAcknowledge {
 }
 
 // ErrorIndication
+#[derive(Clone)]
 pub struct ErrorIndication {
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
     pub ran_ue_ngap_id: Option<RanUeNgapId>,
@@ -7830,6 +7894,7 @@ impl APerElement for ErrorIndication {
 }
 
 // OverloadStart
+#[derive(Clone)]
 pub struct OverloadStart {
     pub amf_overload_response: Option<OverloadResponse>,
     pub amf_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication>,
@@ -7910,6 +7975,7 @@ impl APerElement for OverloadStart {
 }
 
 // OverloadStop
+#[derive(Clone)]
 pub struct OverloadStop {}
 
 impl APerElement for OverloadStop {
@@ -7943,6 +8009,7 @@ impl APerElement for OverloadStop {
 }
 
 // UplinkRanConfigurationTransfer
+#[derive(Clone)]
 pub struct UplinkRanConfigurationTransfer {
     pub son_configuration_transfer_ul: Option<SonConfigurationTransfer>,
     pub endc_son_configuration_transfer_ul: Option<EnDcsonConfigurationTransfer>,
@@ -8025,6 +8092,7 @@ impl APerElement for UplinkRanConfigurationTransfer {
 }
 
 // DownlinkRanConfigurationTransfer
+#[derive(Clone)]
 pub struct DownlinkRanConfigurationTransfer {
     pub son_configuration_transfer_dl: Option<SonConfigurationTransfer>,
     pub endc_son_configuration_transfer_dl: Option<EnDcsonConfigurationTransfer>,
@@ -8107,6 +8175,7 @@ impl APerElement for DownlinkRanConfigurationTransfer {
 }
 
 // WriteReplaceWarningRequest
+#[derive(Clone)]
 pub struct WriteReplaceWarningRequest {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -8281,6 +8350,7 @@ impl APerElement for WriteReplaceWarningRequest {
 }
 
 // WriteReplaceWarningResponse
+#[derive(Clone)]
 pub struct WriteReplaceWarningResponse {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -8369,6 +8439,7 @@ impl APerElement for WriteReplaceWarningResponse {
 }
 
 // PwsCancelRequest
+#[derive(Clone)]
 pub struct PwsCancelRequest {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -8454,6 +8525,7 @@ impl APerElement for PwsCancelRequest {
 }
 
 // PwsCancelResponse
+#[derive(Clone)]
 pub struct PwsCancelResponse {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -8542,6 +8614,7 @@ impl APerElement for PwsCancelResponse {
 }
 
 // PwsRestartIndication
+#[derive(Clone)]
 pub struct PwsRestartIndication {
     pub cell_id_list_for_restart: CellIdListForRestart,
     pub global_ran_node_id: GlobalRanNodeId,
@@ -8626,6 +8699,7 @@ impl APerElement for PwsRestartIndication {
 }
 
 // PwsFailureIndication
+#[derive(Clone)]
 pub struct PwsFailureIndication {
     pub pws_failed_cell_id_list: PwsFailedCellIdList,
     pub global_ran_node_id: GlobalRanNodeId,
@@ -8682,6 +8756,7 @@ impl APerElement for PwsFailureIndication {
 }
 
 // DownlinkUeAssociatedNrpPaTransport
+#[derive(Clone)]
 pub struct DownlinkUeAssociatedNrpPaTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -8757,6 +8832,7 @@ impl APerElement for DownlinkUeAssociatedNrpPaTransport {
 }
 
 // UplinkUeAssociatedNrpPaTransport
+#[derive(Clone)]
 pub struct UplinkUeAssociatedNrpPaTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -8832,6 +8908,7 @@ impl APerElement for UplinkUeAssociatedNrpPaTransport {
 }
 
 // DownlinkNonUeAssociatedNrpPaTransport
+#[derive(Clone)]
 pub struct DownlinkNonUeAssociatedNrpPaTransport {
     pub routing_id: RoutingId,
     pub nrp_pa_pdu: NrpPaPdu,
@@ -8887,6 +8964,7 @@ impl APerElement for DownlinkNonUeAssociatedNrpPaTransport {
 }
 
 // UplinkNonUeAssociatedNrpPaTransport
+#[derive(Clone)]
 pub struct UplinkNonUeAssociatedNrpPaTransport {
     pub routing_id: RoutingId,
     pub nrp_pa_pdu: NrpPaPdu,
@@ -8942,6 +9020,7 @@ impl APerElement for UplinkNonUeAssociatedNrpPaTransport {
 }
 
 // TraceStart
+#[derive(Clone)]
 pub struct TraceStart {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9007,6 +9086,7 @@ impl APerElement for TraceStart {
 }
 
 // TraceFailureIndication
+#[derive(Clone)]
 pub struct TraceFailureIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9082,6 +9162,7 @@ impl APerElement for TraceFailureIndication {
 }
 
 // DeactivateTrace
+#[derive(Clone)]
 pub struct DeactivateTrace {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9147,6 +9228,7 @@ impl APerElement for DeactivateTrace {
 }
 
 // CellTrafficTrace
+#[derive(Clone)]
 pub struct CellTrafficTrace {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9267,6 +9349,7 @@ impl APerElement for CellTrafficTrace {
 }
 
 // LocationReportingControl
+#[derive(Clone)]
 pub struct LocationReportingControl {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9339,6 +9422,7 @@ impl APerElement for LocationReportingControl {
 }
 
 // LocationReportingFailureIndication
+#[derive(Clone)]
 pub struct LocationReportingFailureIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9404,6 +9488,7 @@ impl APerElement for LocationReportingFailureIndication {
 }
 
 // LocationReport
+#[derive(Clone)]
 pub struct LocationReport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9504,6 +9589,7 @@ impl APerElement for LocationReport {
 }
 
 // UetnlaBindingReleaseRequest
+#[derive(Clone)]
 pub struct UetnlaBindingReleaseRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9559,6 +9645,7 @@ impl APerElement for UetnlaBindingReleaseRequest {
 }
 
 // UeRadioCapabilityInfoIndication
+#[derive(Clone)]
 pub struct UeRadioCapabilityInfoIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9657,6 +9744,7 @@ impl APerElement for UeRadioCapabilityInfoIndication {
 }
 
 // UeRadioCapabilityCheckRequest
+#[derive(Clone)]
 pub struct UeRadioCapabilityCheckRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9742,6 +9830,7 @@ impl APerElement for UeRadioCapabilityCheckRequest {
 }
 
 // UeRadioCapabilityCheckResponse
+#[derive(Clone)]
 pub struct UeRadioCapabilityCheckResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9826,6 +9915,7 @@ impl APerElement for UeRadioCapabilityCheckResponse {
 // PrivateMessage - omitted
 
 // SecondaryRatDataUsageReport
+#[derive(Clone)]
 pub struct SecondaryRatDataUsageReport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -9929,6 +10019,7 @@ impl APerElement for SecondaryRatDataUsageReport {
 }
 
 // UplinkRimInformationTransfer
+#[derive(Clone)]
 pub struct UplinkRimInformationTransfer {
     pub rim_information_transfer: Option<RimInformationTransfer>,
 }
@@ -9979,6 +10070,7 @@ impl APerElement for UplinkRimInformationTransfer {
 }
 
 // DownlinkRimInformationTransfer
+#[derive(Clone)]
 pub struct DownlinkRimInformationTransfer {
     pub rim_information_transfer: Option<RimInformationTransfer>,
 }
@@ -10029,6 +10121,7 @@ impl APerElement for DownlinkRimInformationTransfer {
 }
 
 // ConnectionEstablishmentIndication
+#[derive(Clone)]
 pub struct ConnectionEstablishmentIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -10216,6 +10309,7 @@ impl APerElement for ConnectionEstablishmentIndication {
 }
 
 // UeRadioCapabilityIdMappingRequest
+#[derive(Clone)]
 pub struct UeRadioCapabilityIdMappingRequest {
     pub ue_radio_capability_id: UeRadioCapabilityId,
 }
@@ -10262,6 +10356,7 @@ impl APerElement for UeRadioCapabilityIdMappingRequest {
 }
 
 // UeRadioCapabilityIdMappingResponse
+#[derive(Clone)]
 pub struct UeRadioCapabilityIdMappingResponse {
     pub ue_radio_capability_id: UeRadioCapabilityId,
     pub ue_radio_capability: UeRadioCapability,
@@ -10334,6 +10429,7 @@ impl APerElement for UeRadioCapabilityIdMappingResponse {
 }
 
 // AmfcpRelocationIndication
+#[derive(Clone)]
 pub struct AmfcpRelocationIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,

@@ -18,6 +18,7 @@ use num_traits::FromPrimitive;"""
 USE_COMMON = "use super::common::*;\n"
 USE_IES = "use super::ies::*;"
 COMMON_STRING_DEFS = """
+#[derive(Clone)]
 pub struct VisibleString(pub String);
 impl APerElement for VisibleString {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
@@ -29,6 +30,7 @@ impl APerElement for VisibleString {
     }
 }
 
+#[derive(Clone)]
 pub struct Utf8String(pub String);
 impl APerElement for Utf8String {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
@@ -40,6 +42,7 @@ impl APerElement for Utf8String {
     }
 }
 
+#[derive(Clone)]
 pub struct PrintableString(pub String);
 impl APerElement for PrintableString {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;

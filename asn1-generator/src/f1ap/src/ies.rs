@@ -10,6 +10,7 @@ use num_derive::FromPrimitive;
 #[allow(unused_imports)]
 use num_traits::FromPrimitive;
 // AbortTransmission
+#[derive(Clone)]
 pub enum AbortTransmission {
     SrsResourceSetId(SrsResourceSetId),
     ReleaseAll,
@@ -46,6 +47,7 @@ impl APerElement for AbortTransmission {
 }
 
 // AccessPointPosition
+#[derive(Clone)]
 pub struct AccessPointPosition {
     pub latitude_sign: LatitudeSign,
     pub latitude: u32,
@@ -70,15 +72,63 @@ impl APerElement for AccessPointPosition {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let latitude_sign = LatitudeSign::from_aper(decoder, UNCONSTRAINED)?;
-        let latitude = u32::from_aper(decoder, UNCONSTRAINED)?;
-        let longitude = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let latitude = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(8388607))),
+            },
+        )?;
+        let longitude = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-8388608), Some(8388607))),
+            },
+        )?;
         let direction_of_altitude = DirectionOfAltitude::from_aper(decoder, UNCONSTRAINED)?;
-        let altitude = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let uncertainty_semi_major = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let uncertainty_semi_minor = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let orientation_of_major_axis = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let uncertainty_altitude = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let altitude = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(32767))),
+            },
+        )?;
+        let uncertainty_semi_major = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(127))),
+            },
+        )?;
+        let uncertainty_semi_minor = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(127))),
+            },
+        )?;
+        let orientation_of_major_axis = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(179))),
+            },
+        )?;
+        let uncertainty_altitude = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(127))),
+            },
+        )?;
+        let confidence = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
 
         Ok(Self {
             latitude_sign,
@@ -115,6 +165,7 @@ impl APerElement for AccessPointPosition {
 }
 
 // ActivatedCellsToBeUpdatedList
+#[derive(Clone)]
 pub struct ActivatedCellsToBeUpdatedList(pub Vec<ActivatedCellsToBeUpdatedListItem>);
 
 impl APerElement for ActivatedCellsToBeUpdatedList {
@@ -139,6 +190,7 @@ impl APerElement for ActivatedCellsToBeUpdatedList {
 }
 
 // ActivatedCellsToBeUpdatedListItem
+#[derive(Clone)]
 pub struct ActivatedCellsToBeUpdatedListItem {
     pub nrcgi: Nrcgi,
     pub iab_du_cell_resource_configuration_mode_info: IabDuCellResourceConfigurationModeInfo,
@@ -181,6 +233,7 @@ impl APerElement for ActivatedCellsToBeUpdatedListItem {
 }
 
 // ActiveUlbwp
+#[derive(Clone)]
 pub struct ActiveUlbwp {
     pub location_and_bandwidth: u16,
     pub subcarrier_spacing: SubcarrierSpacing1,
@@ -266,6 +319,7 @@ impl APerElement for AdditionalDuplicationIndication {
 }
 
 // AdditionalPathList
+#[derive(Clone)]
 pub struct AdditionalPathList(pub Vec<AdditionalPathItem>);
 
 impl APerElement for AdditionalPathList {
@@ -290,6 +344,7 @@ impl APerElement for AdditionalPathList {
 }
 
 // AdditionalPathItem
+#[derive(Clone)]
 pub struct AdditionalPathItem {
     pub relative_path_delay: RelativePathDelay,
     pub path_quality: Option<TrpMeasurementQuality>,
@@ -334,6 +389,7 @@ impl APerElement for AdditionalPathItem {
 }
 
 // AdditionalPdcpDuplicationTnlList
+#[derive(Clone)]
 pub struct AdditionalPdcpDuplicationTnlList(pub Vec<AdditionalPdcpDuplicationTnlItem>);
 
 impl APerElement for AdditionalPdcpDuplicationTnlList {
@@ -358,6 +414,7 @@ impl APerElement for AdditionalPdcpDuplicationTnlList {
 }
 
 // AdditionalPdcpDuplicationTnlItem
+#[derive(Clone)]
 pub struct AdditionalPdcpDuplicationTnlItem {
     pub additional_pdcp_duplication_uptnl_information: UpTransportLayerInformation,
 }
@@ -398,6 +455,7 @@ impl APerElement for AdditionalPdcpDuplicationTnlItem {
 }
 
 // AdditionalSibMessageList
+#[derive(Clone)]
 pub struct AdditionalSibMessageList(pub Vec<AdditionalSibMessageListItem>);
 
 impl APerElement for AdditionalSibMessageList {
@@ -422,6 +480,7 @@ impl APerElement for AdditionalSibMessageList {
 }
 
 // AdditionalSibMessageListItem
+#[derive(Clone)]
 pub struct AdditionalSibMessageListItem {
     pub additional_sib: Vec<u8>,
 }
@@ -453,6 +512,7 @@ impl APerElement for AdditionalSibMessageListItem {
 }
 
 // AdditionalRrmPriorityIndex
+#[derive(Clone)]
 pub struct AdditionalRrmPriorityIndex(pub BitString);
 
 impl APerElement for AdditionalRrmPriorityIndex {
@@ -474,6 +534,7 @@ impl APerElement for AdditionalRrmPriorityIndex {
 }
 
 // AggressorCellList
+#[derive(Clone)]
 pub struct AggressorCellList(pub Vec<AggressorCellListItem>);
 
 impl APerElement for AggressorCellList {
@@ -498,6 +559,7 @@ impl APerElement for AggressorCellList {
 }
 
 // AggressorCellListItem
+#[derive(Clone)]
 pub struct AggressorCellListItem {
     pub aggressor_cell_id: Nrcgi,
 }
@@ -529,6 +591,7 @@ impl APerElement for AggressorCellListItem {
 }
 
 // AggressorGnbSetId
+#[derive(Clone)]
 pub struct AggressorGnbSetId {
     pub aggressor_gnb_set_id: GnbSetId,
 }
@@ -562,6 +625,7 @@ impl APerElement for AggressorGnbSetId {
 }
 
 // AllocationAndRetentionPriority
+#[derive(Clone)]
 pub struct AllocationAndRetentionPriority {
     pub priority_level: PriorityLevel,
     pub pre_emption_capability: PreEmptionCapability,
@@ -605,6 +669,7 @@ impl APerElement for AllocationAndRetentionPriority {
 }
 
 // AlternativeQosParaSetList
+#[derive(Clone)]
 pub struct AlternativeQosParaSetList(pub Vec<AlternativeQosParaSetItem>);
 
 impl APerElement for AlternativeQosParaSetList {
@@ -629,6 +694,7 @@ impl APerElement for AlternativeQosParaSetList {
 }
 
 // AlternativeQosParaSetItem
+#[derive(Clone)]
 pub struct AlternativeQosParaSetItem {
     pub alternative_qos_para_set_index: QosParaSetIndex,
     pub guaranteed_flow_bit_rate_dl: Option<BitRate>,
@@ -708,6 +774,7 @@ impl APerElement for AlternativeQosParaSetItem {
 }
 
 // AngleMeasurementQuality
+#[derive(Clone)]
 pub struct AngleMeasurementQuality {
     pub azimuth_quality: u8,
     pub zenith_quality: Option<u8>,
@@ -724,9 +791,21 @@ impl APerElement for AngleMeasurementQuality {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let azimuth_quality = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let azimuth_quality = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
         let zenith_quality = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(255))),
+                },
+            )?)
         } else {
             None
         };
@@ -756,6 +835,7 @@ impl APerElement for AngleMeasurementQuality {
 }
 
 // AperiodicSrsResourceTriggerList
+#[derive(Clone)]
 pub struct AperiodicSrsResourceTriggerList(pub Vec<AperiodicSrsResourceTrigger>);
 
 impl APerElement for AperiodicSrsResourceTriggerList {
@@ -780,6 +860,7 @@ impl APerElement for AperiodicSrsResourceTriggerList {
 }
 
 // AperiodicSrsResourceTrigger
+#[derive(Clone)]
 pub struct AperiodicSrsResourceTrigger(pub u8);
 
 impl APerElement for AperiodicSrsResourceTrigger {
@@ -801,6 +882,7 @@ impl APerElement for AperiodicSrsResourceTrigger {
 }
 
 // AssociatedSCellItem
+#[derive(Clone)]
 pub struct AssociatedSCellItem {
     pub s_cell_id: Nrcgi,
 }
@@ -832,6 +914,7 @@ impl APerElement for AssociatedSCellItem {
 }
 
 // AvailablePlmnList
+#[derive(Clone)]
 pub struct AvailablePlmnList(pub Vec<AvailablePlmnListItem>);
 
 impl APerElement for AvailablePlmnList {
@@ -856,6 +939,7 @@ impl APerElement for AvailablePlmnList {
 }
 
 // AvailablePlmnListItem
+#[derive(Clone)]
 pub struct AvailablePlmnListItem {
     pub plmn_identity: PlmnIdentity,
 }
@@ -887,6 +971,7 @@ impl APerElement for AvailablePlmnListItem {
 }
 
 // AvailableSnpnIdList
+#[derive(Clone)]
 pub struct AvailableSnpnIdList(pub Vec<AvailableSnpnIdListItem>);
 
 impl APerElement for AvailableSnpnIdList {
@@ -911,6 +996,7 @@ impl APerElement for AvailableSnpnIdList {
 }
 
 // AvailableSnpnIdListItem
+#[derive(Clone)]
 pub struct AvailableSnpnIdListItem {
     pub plmn_identity: PlmnIdentity,
     pub available_nid_list: BroadcastNidList,
@@ -950,6 +1036,7 @@ impl APerElement for AvailableSnpnIdListItem {
 }
 
 // AveragingWindow
+#[derive(Clone)]
 pub struct AveragingWindow(pub u16);
 
 impl APerElement for AveragingWindow {
@@ -995,6 +1082,7 @@ impl APerElement for AreaScope {
 }
 
 // BandwidthSrs
+#[derive(Clone)]
 pub enum BandwidthSrs {
     Fr1(Fr1Bandwidth),
     Fr2(Fr2Bandwidth),
@@ -1029,6 +1117,7 @@ impl APerElement for BandwidthSrs {
 }
 
 // BapAddress
+#[derive(Clone)]
 pub struct BapAddress(pub BitString);
 
 impl APerElement for BapAddress {
@@ -1074,6 +1163,7 @@ impl APerElement for BapCtrlPduChannel {
 }
 
 // BaPlayerBhrlCchannelMappingInfo
+#[derive(Clone)]
 pub struct BaPlayerBhrlCchannelMappingInfo {
     pub ba_player_bhrl_cchannel_mapping_info_to_add: Option<BaPlayerBhrlCchannelMappingInfoList>,
     pub ba_player_bhrl_cchannel_mapping_info_to_remove: Option<MappingInformationtoRemove>,
@@ -1140,6 +1230,7 @@ impl APerElement for BaPlayerBhrlCchannelMappingInfo {
 }
 
 // BaPlayerBhrlCchannelMappingInfoList
+#[derive(Clone)]
 pub struct BaPlayerBhrlCchannelMappingInfoList(pub Vec<BaPlayerBhrlCchannelMappingInfoItem>);
 
 impl APerElement for BaPlayerBhrlCchannelMappingInfoList {
@@ -1164,6 +1255,7 @@ impl APerElement for BaPlayerBhrlCchannelMappingInfoList {
 }
 
 // BaPlayerBhrlCchannelMappingInfoItem
+#[derive(Clone)]
 pub struct BaPlayerBhrlCchannelMappingInfoItem {
     pub mapping_information_index: MappingInformationIndex,
     pub prior_hop_bap_address: Option<BapAddress>,
@@ -1243,6 +1335,7 @@ impl APerElement for BaPlayerBhrlCchannelMappingInfoItem {
 }
 
 // BapPathId
+#[derive(Clone)]
 pub struct BapPathId(pub BitString);
 
 impl APerElement for BapPathId {
@@ -1264,6 +1357,7 @@ impl APerElement for BapPathId {
 }
 
 // BapRoutingId
+#[derive(Clone)]
 pub struct BapRoutingId {
     pub bap_address: BapAddress,
     pub bap_path_id: BapPathId,
@@ -1301,6 +1395,7 @@ impl APerElement for BapRoutingId {
 }
 
 // BitRate
+#[derive(Clone)]
 pub struct BitRate(pub u64);
 
 impl APerElement for BitRate {
@@ -1346,6 +1441,7 @@ impl APerElement for BearerTypeChange {
 }
 
 // BhrlcChannelId
+#[derive(Clone)]
 pub struct BhrlcChannelId(pub BitString);
 
 impl APerElement for BhrlcChannelId {
@@ -1367,6 +1463,7 @@ impl APerElement for BhrlcChannelId {
 }
 
 // BhChannelsFailedToBeModifiedItem
+#[derive(Clone)]
 pub struct BhChannelsFailedToBeModifiedItem {
     pub bhrlc_channel_id: BhrlcChannelId,
     pub cause: Option<Cause>,
@@ -1411,6 +1508,7 @@ impl APerElement for BhChannelsFailedToBeModifiedItem {
 }
 
 // BhChannelsFailedToBeSetupItem
+#[derive(Clone)]
 pub struct BhChannelsFailedToBeSetupItem {
     pub bhrlc_channel_id: BhrlcChannelId,
     pub cause: Option<Cause>,
@@ -1455,6 +1553,7 @@ impl APerElement for BhChannelsFailedToBeSetupItem {
 }
 
 // BhChannelsFailedToBeSetupModItem
+#[derive(Clone)]
 pub struct BhChannelsFailedToBeSetupModItem {
     pub bhrlc_channel_id: BhrlcChannelId,
     pub cause: Option<Cause>,
@@ -1499,6 +1598,7 @@ impl APerElement for BhChannelsFailedToBeSetupModItem {
 }
 
 // BhChannelsModifiedItem
+#[derive(Clone)]
 pub struct BhChannelsModifiedItem {
     pub bhrlc_channel_id: BhrlcChannelId,
 }
@@ -1530,6 +1630,7 @@ impl APerElement for BhChannelsModifiedItem {
 }
 
 // BhChannelsRequiredToBeReleasedItem
+#[derive(Clone)]
 pub struct BhChannelsRequiredToBeReleasedItem {
     pub bhrlc_channel_id: BhrlcChannelId,
 }
@@ -1561,6 +1662,7 @@ impl APerElement for BhChannelsRequiredToBeReleasedItem {
 }
 
 // BhChannelsSetupItem
+#[derive(Clone)]
 pub struct BhChannelsSetupItem {
     pub bhrlc_channel_id: BhrlcChannelId,
 }
@@ -1592,6 +1694,7 @@ impl APerElement for BhChannelsSetupItem {
 }
 
 // BhChannelsSetupModItem
+#[derive(Clone)]
 pub struct BhChannelsSetupModItem {
     pub bhrlc_channel_id: BhrlcChannelId,
 }
@@ -1623,6 +1726,7 @@ impl APerElement for BhChannelsSetupModItem {
 }
 
 // BhChannelsToBeModifiedItem
+#[derive(Clone)]
 pub struct BhChannelsToBeModifiedItem {
     pub bhrlc_channel_id: BhrlcChannelId,
     pub bh_qos_information: BhQosInformation,
@@ -1693,6 +1797,7 @@ impl APerElement for BhChannelsToBeModifiedItem {
 }
 
 // BhChannelsToBeReleasedItem
+#[derive(Clone)]
 pub struct BhChannelsToBeReleasedItem {
     pub bhrlc_channel_id: BhrlcChannelId,
 }
@@ -1724,6 +1829,7 @@ impl APerElement for BhChannelsToBeReleasedItem {
 }
 
 // BhChannelsToBeSetupItem
+#[derive(Clone)]
 pub struct BhChannelsToBeSetupItem {
     pub bhrlc_channel_id: BhrlcChannelId,
     pub bh_qos_information: BhQosInformation,
@@ -1787,6 +1893,7 @@ impl APerElement for BhChannelsToBeSetupItem {
 }
 
 // BhChannelsToBeSetupModItem
+#[derive(Clone)]
 pub struct BhChannelsToBeSetupModItem {
     pub bhrlc_channel_id: BhrlcChannelId,
     pub bh_qos_information: BhQosInformation,
@@ -1850,6 +1957,7 @@ impl APerElement for BhChannelsToBeSetupModItem {
 }
 
 // BhInfo
+#[derive(Clone)]
 pub struct BhInfo {
     pub ba_prouting_id: Option<BapRoutingId>,
     pub egress_bhrlcch_list: Option<EgressBhrlcchList>,
@@ -1901,6 +2009,7 @@ impl APerElement for BhInfo {
 }
 
 // BhQosInformation
+#[derive(Clone)]
 pub enum BhQosInformation {
     BhrlcchQos(QosFlowLevelQosParameters),
     EutranBhrlcchQos(EutranQos),
@@ -1950,6 +2059,7 @@ impl APerElement for BhQosInformation {
 }
 
 // BhRoutingInformationAddedListItem
+#[derive(Clone)]
 pub struct BhRoutingInformationAddedListItem {
     pub bap_routing_id: BapRoutingId,
     pub next_hop_bap_address: BapAddress,
@@ -1987,6 +2097,7 @@ impl APerElement for BhRoutingInformationAddedListItem {
 }
 
 // BhRoutingInformationRemovedListItem
+#[derive(Clone)]
 pub struct BhRoutingInformationRemovedListItem {
     pub bap_routing_id: BapRoutingId,
 }
@@ -2018,6 +2129,7 @@ impl APerElement for BhRoutingInformationRemovedListItem {
 }
 
 // BPlmnIdInfoList
+#[derive(Clone)]
 pub struct BPlmnIdInfoList(pub Vec<BPlmnIdInfoItem>);
 
 impl APerElement for BPlmnIdInfoList {
@@ -2042,6 +2154,7 @@ impl APerElement for BPlmnIdInfoList {
 }
 
 // BPlmnIdInfoItem
+#[derive(Clone)]
 pub struct BPlmnIdInfoItem {
     pub plmn_identity_list: AvailablePlmnList,
     pub extended_plmn_identity_list: Option<ExtendedAvailablePlmnList>,
@@ -2117,6 +2230,7 @@ impl APerElement for BPlmnIdInfoItem {
 }
 
 // ServedPlmnSList
+#[derive(Clone)]
 pub struct ServedPlmnSList(pub Vec<ServedPlmnSItem>);
 
 impl APerElement for ServedPlmnSList {
@@ -2141,6 +2255,7 @@ impl APerElement for ServedPlmnSList {
 }
 
 // ServedPlmnSItem
+#[derive(Clone)]
 pub struct ServedPlmnSItem {
     pub plmn_identity: PlmnIdentity,
 }
@@ -2174,6 +2289,7 @@ impl APerElement for ServedPlmnSItem {
 }
 
 // BroadcastCagList
+#[derive(Clone)]
 pub struct BroadcastCagList(pub Vec<Cagid>);
 
 impl APerElement for BroadcastCagList {
@@ -2195,6 +2311,7 @@ impl APerElement for BroadcastCagList {
 }
 
 // BroadcastNidList
+#[derive(Clone)]
 pub struct BroadcastNidList(pub Vec<Nid>);
 
 impl APerElement for BroadcastNidList {
@@ -2216,6 +2333,7 @@ impl APerElement for BroadcastNidList {
 }
 
 // BroadcastSnpnIdList
+#[derive(Clone)]
 pub struct BroadcastSnpnIdList(pub Vec<BroadcastSnpnIdListItem>);
 
 impl APerElement for BroadcastSnpnIdList {
@@ -2240,6 +2358,7 @@ impl APerElement for BroadcastSnpnIdList {
 }
 
 // BroadcastSnpnIdListItem
+#[derive(Clone)]
 pub struct BroadcastSnpnIdListItem {
     pub plmn_identity: PlmnIdentity,
     pub broadcast_nid_list: BroadcastNidList,
@@ -2279,6 +2398,7 @@ impl APerElement for BroadcastSnpnIdListItem {
 }
 
 // BroadcastPniNpnIdList
+#[derive(Clone)]
 pub struct BroadcastPniNpnIdList(pub Vec<BroadcastPniNpnIdListItem>);
 
 impl APerElement for BroadcastPniNpnIdList {
@@ -2303,6 +2423,7 @@ impl APerElement for BroadcastPniNpnIdList {
 }
 
 // BroadcastPniNpnIdListItem
+#[derive(Clone)]
 pub struct BroadcastPniNpnIdListItem {
     pub plmn_identity: PlmnIdentity,
     pub broadcast_cag_list: BroadcastCagList,
@@ -2342,6 +2463,7 @@ impl APerElement for BroadcastPniNpnIdListItem {
 }
 
 // BurstArrivalTime
+#[derive(Clone)]
 pub struct BurstArrivalTime(pub Vec<u8>);
 
 impl APerElement for BurstArrivalTime {
@@ -2357,6 +2479,7 @@ impl APerElement for BurstArrivalTime {
 }
 
 // Cagid
+#[derive(Clone)]
 pub struct Cagid(pub BitString);
 
 impl APerElement for Cagid {
@@ -2402,6 +2525,7 @@ impl APerElement for CancelAllWarningMessagesIndicator {
 }
 
 // CandidateSpCellItem
+#[derive(Clone)]
 pub struct CandidateSpCellItem {
     pub candidate_sp_cell_id: Nrcgi,
 }
@@ -2437,6 +2561,7 @@ impl APerElement for CandidateSpCellItem {
 }
 
 // CapacityValue
+#[derive(Clone)]
 pub struct CapacityValue {
     pub capacity_value: u8,
     pub ssb_area_capacity_value_list: Option<SsbAreaCapacityValueList>,
@@ -2452,7 +2577,13 @@ impl APerElement for CapacityValue {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let capacity_value = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let capacity_value = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
         let ssb_area_capacity_value_list = if optionals.is_set(0) {
             Some(SsbAreaCapacityValueList::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -2481,6 +2612,7 @@ impl APerElement for CapacityValue {
 }
 
 // Cause
+#[derive(Clone)]
 pub enum Cause {
     RadioNetwork(CauseRadioNetwork),
     Transport(CauseTransport),
@@ -2653,6 +2785,7 @@ impl APerElement for CauseTransport {
 }
 
 // CellGroupConfig
+#[derive(Clone)]
 pub struct CellGroupConfig(pub Vec<u8>);
 
 impl APerElement for CellGroupConfig {
@@ -2668,6 +2801,7 @@ impl APerElement for CellGroupConfig {
 }
 
 // CellCapacityClassValue
+#[derive(Clone)]
 pub struct CellCapacityClassValue(pub u8);
 
 impl APerElement for CellCapacityClassValue {
@@ -2709,6 +2843,7 @@ impl APerElement for CellDirection {
 }
 
 // CellMeasurementResultList
+#[derive(Clone)]
 pub struct CellMeasurementResultList(pub Vec<CellMeasurementResultItem>);
 
 impl APerElement for CellMeasurementResultList {
@@ -2733,6 +2868,7 @@ impl APerElement for CellMeasurementResultList {
 }
 
 // CellMeasurementResultItem
+#[derive(Clone)]
 pub struct CellMeasurementResultItem {
     pub cell_id: Nrcgi,
     pub radio_resource_status: Option<RadioResourceStatus>,
@@ -2813,6 +2949,7 @@ impl APerElement for CellMeasurementResultItem {
 }
 
 // CellPortionId
+#[derive(Clone)]
 pub struct CellPortionId(pub u16);
 
 impl APerElement for CellPortionId {
@@ -2834,6 +2971,7 @@ impl APerElement for CellPortionId {
 }
 
 // CellsFailedToBeActivatedListItem
+#[derive(Clone)]
 pub struct CellsFailedToBeActivatedListItem {
     pub nrcgi: Nrcgi,
     pub cause: Cause,
@@ -2870,6 +3008,7 @@ impl APerElement for CellsFailedToBeActivatedListItem {
 }
 
 // CellsStatusItem
+#[derive(Clone)]
 pub struct CellsStatusItem {
     pub nrcgi: Nrcgi,
     pub service_status: ServiceStatus,
@@ -2909,6 +3048,7 @@ impl APerElement for CellsStatusItem {
 }
 
 // CellsToBeBroadcastItem
+#[derive(Clone)]
 pub struct CellsToBeBroadcastItem {
     pub nrcgi: Nrcgi,
 }
@@ -2942,6 +3082,7 @@ impl APerElement for CellsToBeBroadcastItem {
 }
 
 // CellsBroadcastCompletedItem
+#[derive(Clone)]
 pub struct CellsBroadcastCompletedItem {
     pub nrcgi: Nrcgi,
 }
@@ -2975,6 +3116,7 @@ impl APerElement for CellsBroadcastCompletedItem {
 }
 
 // BroadcastToBeCancelledItem
+#[derive(Clone)]
 pub struct BroadcastToBeCancelledItem {
     pub nrcgi: Nrcgi,
 }
@@ -3008,6 +3150,7 @@ impl APerElement for BroadcastToBeCancelledItem {
 }
 
 // CellsBroadcastCancelledItem
+#[derive(Clone)]
 pub struct CellsBroadcastCancelledItem {
     pub nrcgi: Nrcgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -3047,6 +3190,7 @@ impl APerElement for CellsBroadcastCancelledItem {
 }
 
 // CellsToBeActivatedListItem
+#[derive(Clone)]
 pub struct CellsToBeActivatedListItem {
     pub nrcgi: Nrcgi,
     pub nrpci: Option<Nrpci>,
@@ -3090,6 +3234,7 @@ impl APerElement for CellsToBeActivatedListItem {
 }
 
 // CellsToBeDeactivatedListItem
+#[derive(Clone)]
 pub struct CellsToBeDeactivatedListItem {
     pub nrcgi: Nrcgi,
 }
@@ -3123,6 +3268,7 @@ impl APerElement for CellsToBeDeactivatedListItem {
 }
 
 // CellsToBeBarredItem
+#[derive(Clone)]
 pub struct CellsToBeBarredItem {
     pub nrcgi: Nrcgi,
     pub cell_barred: CellBarred,
@@ -3209,6 +3355,7 @@ impl APerElement for CellSize {
 }
 
 // CellToReportList
+#[derive(Clone)]
 pub struct CellToReportList(pub Vec<CellToReportItem>);
 
 impl APerElement for CellToReportList {
@@ -3233,6 +3380,7 @@ impl APerElement for CellToReportList {
 }
 
 // CellToReportItem
+#[derive(Clone)]
 pub struct CellToReportItem {
     pub cell_id: Nrcgi,
     pub ssb_to_report_list: Option<SsbToReportList>,
@@ -3288,6 +3436,7 @@ impl APerElement for CellToReportItem {
 }
 
 // CellType
+#[derive(Clone)]
 pub struct CellType {
     pub cell_size: CellSize,
 }
@@ -3348,6 +3497,7 @@ impl APerElement for CellUlConfigured {
 }
 
 // ChildNodeCellsList
+#[derive(Clone)]
 pub struct ChildNodeCellsList(pub Vec<ChildNodeCellsListItem>);
 
 impl APerElement for ChildNodeCellsList {
@@ -3372,6 +3522,7 @@ impl APerElement for ChildNodeCellsList {
 }
 
 // ChildNodeCellsListItem
+#[derive(Clone)]
 pub struct ChildNodeCellsListItem {
     pub nrcgi: Nrcgi,
     pub iab_du_cell_resource_configuration_mode_info:
@@ -3511,6 +3662,7 @@ impl APerElement for ChildNodeCellsListItem {
 }
 
 // ChildNodesList
+#[derive(Clone)]
 pub struct ChildNodesList(pub Vec<ChildNodesListItem>);
 
 impl APerElement for ChildNodesList {
@@ -3535,6 +3687,7 @@ impl APerElement for ChildNodesList {
 }
 
 // ChildNodesListItem
+#[derive(Clone)]
 pub struct ChildNodesListItem {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3634,6 +3787,7 @@ impl APerElement for ChOtriggerIntraDu {
 }
 
 // CnuePagingIdentity
+#[derive(Clone)]
 pub enum CnuePagingIdentity {
     FiveGSTmsi(BitString),
     _Extended,
@@ -3645,7 +3799,10 @@ impl APerElement for CnuePagingIdentity {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::FiveGSTmsi(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(48), Some(48))),
+                },
             )?)),
             1 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -3656,7 +3813,10 @@ impl APerElement for CnuePagingIdentity {
         match self {
             Self::FiveGSTmsi(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(48), Some(48))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -3665,6 +3825,7 @@ impl APerElement for CnuePagingIdentity {
 }
 
 // CompositeAvailableCapacityGroup
+#[derive(Clone)]
 pub struct CompositeAvailableCapacityGroup {
     pub composite_available_capacity_downlink: CompositeAvailableCapacity,
     pub composite_available_capacity_uplink: CompositeAvailableCapacity,
@@ -3712,6 +3873,7 @@ impl APerElement for CompositeAvailableCapacityGroup {
 }
 
 // CompositeAvailableCapacity
+#[derive(Clone)]
 pub struct CompositeAvailableCapacity {
     pub cell_capacity_class_value: Option<CellCapacityClassValue>,
     pub capacity_value: CapacityValue,
@@ -3756,6 +3918,7 @@ impl APerElement for CompositeAvailableCapacity {
 }
 
 // ChoProbability
+#[derive(Clone)]
 pub struct ChoProbability(pub u8);
 
 impl APerElement for ChoProbability {
@@ -3777,6 +3940,7 @@ impl APerElement for ChoProbability {
 }
 
 // ConditionalInterDuMobilityInformation
+#[derive(Clone)]
 pub struct ConditionalInterDuMobilityInformation {
     pub cho_trigger: ChOtriggerInterDu,
     pub target_gnb_duuef1apid: Option<GnbDuUeF1apId>,
@@ -3823,6 +3987,7 @@ impl APerElement for ConditionalInterDuMobilityInformation {
 }
 
 // ConditionalIntraDuMobilityInformation
+#[derive(Clone)]
 pub struct ConditionalIntraDuMobilityInformation {
     pub cho_trigger: ChOtriggerIntraDu,
     pub target_cells_tocancel: Option<TargetCellList>,
@@ -3893,6 +4058,7 @@ impl APerElement for ConfiguredTacIndication {
 }
 
 // CoordinateId
+#[derive(Clone)]
 pub struct CoordinateId(pub u16);
 
 impl APerElement for CoordinateId {
@@ -3914,6 +4080,7 @@ impl APerElement for CoordinateId {
 }
 
 // CpTransportLayerAddress
+#[derive(Clone)]
 pub enum CpTransportLayerAddress {
     EndpointIpAddress(TransportLayerAddress),
     EndpointIpAddressAndPort(EndpointIpAddressAndPort),
@@ -3953,6 +4120,7 @@ impl APerElement for CpTransportLayerAddress {
 }
 
 // CpTrafficType
+#[derive(Clone)]
 pub struct CpTrafficType(pub u8);
 
 impl APerElement for CpTrafficType {
@@ -3974,6 +4142,7 @@ impl APerElement for CpTrafficType {
 }
 
 // CriticalityDiagnostics
+#[derive(Clone)]
 pub struct CriticalityDiagnostics {
     pub procedure_code: Option<ProcedureCode>,
     pub triggering_message: Option<TriggeringMessage>,
@@ -4063,6 +4232,7 @@ impl APerElement for CriticalityDiagnostics {
 }
 
 // CriticalityDiagnosticsIeList
+#[derive(Clone)]
 pub struct CriticalityDiagnosticsIeList(pub Vec<CriticalityDiagnosticsIeItem>);
 
 impl APerElement for CriticalityDiagnosticsIeList {
@@ -4087,6 +4257,7 @@ impl APerElement for CriticalityDiagnosticsIeList {
 }
 
 // CriticalityDiagnosticsIeItem
+#[derive(Clone)]
 pub struct CriticalityDiagnosticsIeItem {
     pub ie_criticality: Criticality,
     pub ie_id: ProtocolIeId,
@@ -4130,6 +4301,7 @@ impl APerElement for CriticalityDiagnosticsIeItem {
 }
 
 // CRnti
+#[derive(Clone)]
 pub struct CRnti(pub u16);
 
 impl APerElement for CRnti {
@@ -4151,6 +4323,7 @@ impl APerElement for CRnti {
 }
 
 // CuduRadioInformationType
+#[derive(Clone)]
 pub enum CuduRadioInformationType {
     Rim(CudurimInformation),
     _Extended,
@@ -4182,6 +4355,7 @@ impl APerElement for CuduRadioInformationType {
 }
 
 // CudurimInformation
+#[derive(Clone)]
 pub struct CudurimInformation {
     pub victim_gnb_set_id: GnbSetId,
     pub rimrs_detection_status: RimrsDetectionStatus,
@@ -4219,6 +4393,7 @@ impl APerElement for CudurimInformation {
 }
 
 // CUtoDurrcInformation
+#[derive(Clone)]
 pub struct CUtoDurrcInformation {
     pub cg_config_info: Option<CgConfigInfo>,
     pub ue_capability_rat_container_list: Option<UeCapabilityRatContainerList>,
@@ -4310,6 +4485,7 @@ impl APerElement for DcBasedDuplicationConfigured {
 }
 
 // DedicatedSiDeliveryNeededUeItem
+#[derive(Clone)]
 pub struct DedicatedSiDeliveryNeededUeItem {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub nrcgi: Nrcgi,
@@ -4349,6 +4525,7 @@ impl APerElement for DedicatedSiDeliveryNeededUeItem {
 }
 
 // DlPrs
+#[derive(Clone)]
 pub struct DlPrs {
     pub prsid: u8,
     pub dl_prs_resource_set_id: PrsResourceSetId,
@@ -4365,7 +4542,13 @@ impl APerElement for DlPrs {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let prsid = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let prsid = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
         let dl_prs_resource_set_id = PrsResourceSetId::from_aper(decoder, UNCONSTRAINED)?;
         let dl_prs_resource_id = if optionals.is_set(0) {
             Some(PrsResourceId::from_aper(decoder, UNCONSTRAINED)?)
@@ -4397,6 +4580,7 @@ impl APerElement for DlPrs {
 }
 
 // DlPrsMutingPattern
+#[derive(Clone)]
 pub enum DlPrsMutingPattern {
     Two(BitString),
     Four(BitString),
@@ -4411,14 +4595,47 @@ impl APerElement for DlPrsMutingPattern {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::Two(BitString::from_aper(decoder, UNCONSTRAINED)?)),
-            1 => Ok(Self::Four(BitString::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::Six(BitString::from_aper(decoder, UNCONSTRAINED)?)),
-            3 => Ok(Self::Eight(BitString::from_aper(decoder, UNCONSTRAINED)?)),
-            4 => Ok(Self::Sixteen(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::Two(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(2), Some(2))),
+                },
+            )?)),
+            1 => Ok(Self::Four(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(4), Some(4))),
+                },
+            )?)),
+            2 => Ok(Self::Six(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(6), Some(6))),
+                },
+            )?)),
+            3 => Ok(Self::Eight(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(8), Some(8))),
+                },
+            )?)),
+            4 => Ok(Self::Sixteen(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(16), Some(16))),
+                },
+            )?)),
             5 => Ok(Self::ThirtyTwo(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(32), Some(32))),
+                },
             )?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -4429,27 +4646,45 @@ impl APerElement for DlPrsMutingPattern {
         match self {
             Self::Two(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(2), Some(2))),
+                })?)?;
             }
             Self::Four(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(4), Some(4))),
+                })?)?;
             }
             Self::Six(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(6), Some(6))),
+                })?)?;
             }
             Self::Eight(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(8), Some(8))),
+                })?)?;
             }
             Self::Sixteen(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(16), Some(16))),
+                })?)?;
             }
             Self::ThirtyTwo(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(32), Some(32))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -4458,6 +4693,7 @@ impl APerElement for DlPrsMutingPattern {
 }
 
 // DlprsResourceCoordinates
+#[derive(Clone)]
 pub struct DlprsResourceCoordinates {
     pub listof_dl_prs_resource_set_arp: Vec<DlprsResourceSetArp>,
 }
@@ -4472,8 +4708,13 @@ impl APerElement for DlprsResourceCoordinates {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let listof_dl_prs_resource_set_arp =
-            Vec::<DlprsResourceSetArp>::from_aper(decoder, UNCONSTRAINED)?;
+        let listof_dl_prs_resource_set_arp = Vec::<DlprsResourceSetArp>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(maxnoofPRS - ResourceSets))),
+            },
+        )?;
 
         Ok(Self {
             listof_dl_prs_resource_set_arp,
@@ -4492,6 +4733,7 @@ impl APerElement for DlprsResourceCoordinates {
 }
 
 // DlprsResourceSetArp
+#[derive(Clone)]
 pub struct DlprsResourceSetArp {
     pub dl_prs_resource_set_id: PrsResourceSetId,
     pub dl_prs_resource_set_arp_location: DlPrsResourceSetArpLocation,
@@ -4511,8 +4753,13 @@ impl APerElement for DlprsResourceSetArp {
         let dl_prs_resource_set_id = PrsResourceSetId::from_aper(decoder, UNCONSTRAINED)?;
         let dl_prs_resource_set_arp_location =
             DlPrsResourceSetArpLocation::from_aper(decoder, UNCONSTRAINED)?;
-        let listof_dl_prs_resource_arp =
-            Vec::<DlprsResourceArp>::from_aper(decoder, UNCONSTRAINED)?;
+        let listof_dl_prs_resource_arp = Vec::<DlprsResourceArp>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(maxnoofPRS - ResourcesPerSet))),
+            },
+        )?;
 
         Ok(Self {
             dl_prs_resource_set_id,
@@ -4539,6 +4786,7 @@ impl APerElement for DlprsResourceSetArp {
 }
 
 // DlPrsResourceSetArpLocation
+#[derive(Clone)]
 pub enum DlPrsResourceSetArpLocation {
     RelativeGeodeticLocation(RelativeGeodeticLocation),
     RelativeCartesianLocation(RelativeCartesianLocation),
@@ -4577,6 +4825,7 @@ impl APerElement for DlPrsResourceSetArpLocation {
 }
 
 // DlprsResourceArp
+#[derive(Clone)]
 pub struct DlprsResourceArp {
     pub dl_prs_resource_id: PrsResourceId,
     pub dl_prs_resource_arp_location: DlPrsResourceArpLocation,
@@ -4615,6 +4864,7 @@ impl APerElement for DlprsResourceArp {
 }
 
 // DlPrsResourceArpLocation
+#[derive(Clone)]
 pub enum DlPrsResourceArpLocation {
     RelativeGeodeticLocation(RelativeGeodeticLocation),
     RelativeCartesianLocation(RelativeCartesianLocation),
@@ -4653,6 +4903,7 @@ impl APerElement for DlPrsResourceArpLocation {
 }
 
 // DlUpTnlAddressToUpdateListItem
+#[derive(Clone)]
 pub struct DlUpTnlAddressToUpdateListItem {
     pub old_ip_adress: TransportLayerAddress,
     pub new_ip_adress: TransportLayerAddress,
@@ -4692,6 +4943,7 @@ impl APerElement for DlUpTnlAddressToUpdateListItem {
 }
 
 // DluptnlInformationToBeSetupList
+#[derive(Clone)]
 pub struct DluptnlInformationToBeSetupList(pub Vec<DluptnlInformationToBeSetupItem>);
 
 impl APerElement for DluptnlInformationToBeSetupList {
@@ -4716,6 +4968,7 @@ impl APerElement for DluptnlInformationToBeSetupList {
 }
 
 // DluptnlInformationToBeSetupItem
+#[derive(Clone)]
 pub struct DluptnlInformationToBeSetupItem {
     pub dluptnl_information: UpTransportLayerInformation,
 }
@@ -4751,6 +5004,7 @@ impl APerElement for DluptnlInformationToBeSetupItem {
 }
 
 // DrbActivityItem
+#[derive(Clone)]
 pub struct DrbActivityItem {
     pub drbid: Drbid,
     pub drb_activity: Option<DrbActivity>,
@@ -4817,6 +5071,7 @@ impl APerElement for DrbActivity {
 }
 
 // Drbid
+#[derive(Clone)]
 pub struct Drbid(pub u8);
 
 impl APerElement for Drbid {
@@ -4838,6 +5093,7 @@ impl APerElement for Drbid {
 }
 
 // DrBsFailedToBeModifiedItem
+#[derive(Clone)]
 pub struct DrBsFailedToBeModifiedItem {
     pub drbid: Drbid,
     pub cause: Option<Cause>,
@@ -4881,6 +5137,7 @@ impl APerElement for DrBsFailedToBeModifiedItem {
 }
 
 // DrBsFailedToBeSetupItem
+#[derive(Clone)]
 pub struct DrBsFailedToBeSetupItem {
     pub drbid: Drbid,
     pub cause: Option<Cause>,
@@ -4924,6 +5181,7 @@ impl APerElement for DrBsFailedToBeSetupItem {
 }
 
 // DrBsFailedToBeSetupModItem
+#[derive(Clone)]
 pub struct DrBsFailedToBeSetupModItem {
     pub drbid: Drbid,
     pub cause: Option<Cause>,
@@ -4967,6 +5225,7 @@ impl APerElement for DrBsFailedToBeSetupModItem {
 }
 
 // DrbInformation
+#[derive(Clone)]
 pub struct DrbInformation {
     pub drb_qos: QosFlowLevelQosParameters,
     pub snssai: Snssai,
@@ -5019,6 +5278,7 @@ impl APerElement for DrbInformation {
 }
 
 // DrBsModifiedItem
+#[derive(Clone)]
 pub struct DrBsModifiedItem {
     pub drbid: Drbid,
     pub lcid: Option<Lcid>,
@@ -5074,6 +5334,7 @@ impl APerElement for DrBsModifiedItem {
 }
 
 // DrBsModifiedConfItem
+#[derive(Clone)]
 pub struct DrBsModifiedConfItem {
     pub drbid: Drbid,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
@@ -5118,6 +5379,7 @@ impl APerElement for DrBsModifiedConfItem {
 }
 
 // DrbNotifyItem
+#[derive(Clone)]
 pub struct DrbNotifyItem {
     pub drbid: Drbid,
     pub notification_cause: NotificationCause,
@@ -5157,6 +5419,7 @@ impl APerElement for DrbNotifyItem {
 }
 
 // DrBsRequiredToBeModifiedItem
+#[derive(Clone)]
 pub struct DrBsRequiredToBeModifiedItem {
     pub drbid: Drbid,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
@@ -5201,6 +5464,7 @@ impl APerElement for DrBsRequiredToBeModifiedItem {
 }
 
 // DrBsRequiredToBeReleasedItem
+#[derive(Clone)]
 pub struct DrBsRequiredToBeReleasedItem {
     pub drbid: Drbid,
 }
@@ -5234,6 +5498,7 @@ impl APerElement for DrBsRequiredToBeReleasedItem {
 }
 
 // DrBsSetupItem
+#[derive(Clone)]
 pub struct DrBsSetupItem {
     pub drbid: Drbid,
     pub lcid: Option<Lcid>,
@@ -5289,6 +5554,7 @@ impl APerElement for DrBsSetupItem {
 }
 
 // DrBsSetupModItem
+#[derive(Clone)]
 pub struct DrBsSetupModItem {
     pub drbid: Drbid,
     pub lcid: Option<Lcid>,
@@ -5344,6 +5610,7 @@ impl APerElement for DrBsSetupModItem {
 }
 
 // DrBsToBeModifiedItem
+#[derive(Clone)]
 pub struct DrBsToBeModifiedItem {
     pub drbid: Drbid,
     pub qos_information: Option<QosInformation>,
@@ -5410,6 +5677,7 @@ impl APerElement for DrBsToBeModifiedItem {
 }
 
 // DrBsToBeReleasedItem
+#[derive(Clone)]
 pub struct DrBsToBeReleasedItem {
     pub drbid: Drbid,
 }
@@ -5443,6 +5711,7 @@ impl APerElement for DrBsToBeReleasedItem {
 }
 
 // DrBsToBeSetupItem
+#[derive(Clone)]
 pub struct DrBsToBeSetupItem {
     pub drbid: Drbid,
     pub qos_information: QosInformation,
@@ -5517,6 +5786,7 @@ impl APerElement for DrBsToBeSetupItem {
 }
 
 // DrBsToBeSetupModItem
+#[derive(Clone)]
 pub struct DrBsToBeSetupModItem {
     pub drbid: Drbid,
     pub qos_information: QosInformation,
@@ -5591,6 +5861,7 @@ impl APerElement for DrBsToBeSetupModItem {
 }
 
 // DrxCycle
+#[derive(Clone)]
 pub struct DrxCycle {
     pub long_drx_cycle_length: LongDrxCycleLength,
     pub short_drx_cycle_length: Option<ShortDrxCycleLength>,
@@ -5648,6 +5919,7 @@ impl APerElement for DrxCycle {
 }
 
 // DrxConfig
+#[derive(Clone)]
 pub struct DrxConfig(pub Vec<u8>);
 
 impl APerElement for DrxConfig {
@@ -5687,6 +5959,7 @@ impl APerElement for DrxConfigurationIndicator {
 }
 
 // DrxLongCycleStartOffset
+#[derive(Clone)]
 pub struct DrxLongCycleStartOffset(pub u16);
 
 impl APerElement for DrxLongCycleStartOffset {
@@ -5708,6 +5981,7 @@ impl APerElement for DrxLongCycleStartOffset {
 }
 
 // DsInformationList
+#[derive(Clone)]
 pub struct DsInformationList(pub Vec<Dscp>);
 
 impl APerElement for DsInformationList {
@@ -5729,6 +6003,7 @@ impl APerElement for DsInformationList {
 }
 
 // Dscp
+#[derive(Clone)]
 pub struct Dscp(pub BitString);
 
 impl APerElement for Dscp {
@@ -5750,6 +6025,7 @@ impl APerElement for Dscp {
 }
 
 // DUtoCurrcContainer
+#[derive(Clone)]
 pub struct DUtoCurrcContainer(pub Vec<u8>);
 
 impl APerElement for DUtoCurrcContainer {
@@ -5765,6 +6041,7 @@ impl APerElement for DUtoCurrcContainer {
 }
 
 // DucuRadioInformationType
+#[derive(Clone)]
 pub enum DucuRadioInformationType {
     Rim(DucurimInformation),
     _Extended,
@@ -5796,6 +6073,7 @@ impl APerElement for DucuRadioInformationType {
 }
 
 // DucurimInformation
+#[derive(Clone)]
 pub struct DucurimInformation {
     pub victim_gnb_set_id: GnbSetId,
     pub rimrs_detection_status: RimrsDetectionStatus,
@@ -5837,6 +6115,7 @@ impl APerElement for DucurimInformation {
 }
 
 // DufSlotConfigItem
+#[derive(Clone)]
 pub enum DufSlotConfigItem {
     ExplicitFormat(ExplicitFormat),
     ImplicitFormat(ImplicitFormat),
@@ -5877,6 +6156,7 @@ impl APerElement for DufSlotConfigItem {
 }
 
 // DufSlotConfigList
+#[derive(Clone)]
 pub struct DufSlotConfigList(pub Vec<DufSlotConfigItem>);
 
 impl APerElement for DufSlotConfigList {
@@ -5901,6 +6181,7 @@ impl APerElement for DufSlotConfigList {
 }
 
 // DufSlotformatIndex
+#[derive(Clone)]
 pub struct DufSlotformatIndex(pub u8);
 
 impl APerElement for DufSlotformatIndex {
@@ -6033,6 +6314,7 @@ impl APerElement for DuTxMtRx {
 }
 
 // DUtoCurrcInformation
+#[derive(Clone)]
 pub struct DUtoCurrcInformation {
     pub cell_group_config: CellGroupConfig,
     pub meas_gap_config: Option<MeasGapConfig>,
@@ -6164,6 +6446,7 @@ impl APerElement for DuplicationState {
 }
 
 // Dynamic5qiDescriptor
+#[derive(Clone)]
 pub struct Dynamic5qiDescriptor {
     pub qos_priority_level: u8,
     pub packet_delay_budget: PacketDelayBudget,
@@ -6184,7 +6467,13 @@ impl APerElement for Dynamic5qiDescriptor {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let qos_priority_level = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let qos_priority_level = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(127))),
+            },
+        )?;
         let packet_delay_budget = PacketDelayBudget::from_aper(decoder, UNCONSTRAINED)?;
         let packet_error_rate = PacketErrorRate::from_aper(decoder, UNCONSTRAINED)?;
         let five_qi = if optionals.is_set(0) {
@@ -6249,6 +6538,7 @@ impl APerElement for Dynamic5qiDescriptor {
 }
 
 // DynamicPqiDescriptor
+#[derive(Clone)]
 pub struct DynamicPqiDescriptor {
     pub resource_type: Option<ResourceType1>,
     pub qos_priority_level: u8,
@@ -6323,6 +6613,7 @@ impl APerElement for DynamicPqiDescriptor {
 }
 
 // ECidMeasurementQuantities
+#[derive(Clone)]
 pub struct ECidMeasurementQuantities(pub Vec<ECidMeasurementQuantitiesItem>);
 
 impl APerElement for ECidMeasurementQuantities {
@@ -6347,6 +6638,7 @@ impl APerElement for ECidMeasurementQuantities {
 }
 
 // ECidMeasurementQuantitiesItem
+#[derive(Clone)]
 pub struct ECidMeasurementQuantitiesItem {
     pub e_ci_dmeasurement_quantities_value: ECidMeasurementQuantitiesValue,
 }
@@ -6410,6 +6702,7 @@ impl APerElement for ECidMeasurementQuantitiesValue {
 }
 
 // ECidMeasurementResult
+#[derive(Clone)]
 pub struct ECidMeasurementResult {
     pub geographical_coordinates: Option<GeographicalCoordinates>,
     pub measured_results_list: Option<ECidMeasuredResultsList>,
@@ -6461,6 +6754,7 @@ impl APerElement for ECidMeasurementResult {
 }
 
 // ECidMeasuredResultsList
+#[derive(Clone)]
 pub struct ECidMeasuredResultsList(pub Vec<ECidMeasuredResultsItem>);
 
 impl APerElement for ECidMeasuredResultsList {
@@ -6485,6 +6779,7 @@ impl APerElement for ECidMeasuredResultsList {
 }
 
 // ECidMeasuredResultsItem
+#[derive(Clone)]
 pub struct ECidMeasuredResultsItem {
     pub e_cid_measured_results_value: ECidMeasuredResultsValue,
 }
@@ -6519,6 +6814,7 @@ impl APerElement for ECidMeasuredResultsItem {
 }
 
 // ECidMeasuredResultsValue
+#[derive(Clone)]
 pub enum ECidMeasuredResultsValue {
     ValueAngleofArrivalNr(UlAoA),
     _Extended,
@@ -6575,6 +6871,7 @@ impl APerElement for ECidReportCharacteristics {
 }
 
 // EgressBhrlcchList
+#[derive(Clone)]
 pub struct EgressBhrlcchList(pub Vec<EgressBhrlcchItem>);
 
 impl APerElement for EgressBhrlcchList {
@@ -6599,6 +6896,7 @@ impl APerElement for EgressBhrlcchList {
 }
 
 // EgressBhrlcchItem
+#[derive(Clone)]
 pub struct EgressBhrlcchItem {
     pub next_hop_bap_address: BapAddress,
     pub bhrlc_channel_id: BhrlcChannelId,
@@ -6636,6 +6934,7 @@ impl APerElement for EgressBhrlcchItem {
 }
 
 // EndpointIpAddressAndPort
+#[derive(Clone)]
 pub struct EndpointIpAddressAndPort {
     pub endpoint_ip_address: TransportLayerAddress,
 }
@@ -6669,6 +6968,7 @@ impl APerElement for EndpointIpAddressAndPort {
 }
 
 // ExtendedAvailablePlmnList
+#[derive(Clone)]
 pub struct ExtendedAvailablePlmnList(pub Vec<ExtendedAvailablePlmnItem>);
 
 impl APerElement for ExtendedAvailablePlmnList {
@@ -6693,6 +6993,7 @@ impl APerElement for ExtendedAvailablePlmnList {
 }
 
 // ExtendedAvailablePlmnItem
+#[derive(Clone)]
 pub struct ExtendedAvailablePlmnItem {
     pub plmn_identity: PlmnIdentity,
 }
@@ -6724,6 +7025,7 @@ impl APerElement for ExtendedAvailablePlmnItem {
 }
 
 // ExplicitFormat
+#[derive(Clone)]
 pub struct ExplicitFormat {
     pub permutation: Permutation,
     pub noof_downlink_symbols: Option<NoofDownlinkSymbols>,
@@ -6779,6 +7081,7 @@ impl APerElement for ExplicitFormat {
 }
 
 // ExtendedServedPlmnSList
+#[derive(Clone)]
 pub struct ExtendedServedPlmnSList(pub Vec<ExtendedServedPlmnSItem>);
 
 impl APerElement for ExtendedServedPlmnSList {
@@ -6803,6 +7106,7 @@ impl APerElement for ExtendedServedPlmnSList {
 }
 
 // ExtendedServedPlmnSItem
+#[derive(Clone)]
 pub struct ExtendedServedPlmnSItem {
     pub plmn_identity: PlmnIdentity,
     pub tai_slice_support_list: Option<SliceSupportList>,
@@ -6849,6 +7153,7 @@ impl APerElement for ExtendedServedPlmnSItem {
 }
 
 // ExtendedSliceSupportList
+#[derive(Clone)]
 pub struct ExtendedSliceSupportList(pub Vec<SliceSupportItem>);
 
 impl APerElement for ExtendedSliceSupportList {
@@ -6873,6 +7178,7 @@ impl APerElement for ExtendedSliceSupportList {
 }
 
 // EutraCellsList
+#[derive(Clone)]
 pub struct EutraCellsList(pub Vec<EutraCellsListItem>);
 
 impl APerElement for EutraCellsList {
@@ -6897,6 +7203,7 @@ impl APerElement for EutraCellsList {
 }
 
 // EutraCellsListItem
+#[derive(Clone)]
 pub struct EutraCellsListItem {
     pub eutra_cell_id: EutraCellId,
     pub served_eutra_cells_information: ServedEutraCellsInformation,
@@ -6935,6 +7242,7 @@ impl APerElement for EutraCellsListItem {
 }
 
 // EutraCellId
+#[derive(Clone)]
 pub struct EutraCellId(pub BitString);
 
 impl APerElement for EutraCellId {
@@ -6956,6 +7264,7 @@ impl APerElement for EutraCellId {
 }
 
 // EutraCoexFddInfo
+#[derive(Clone)]
 pub struct EutraCoexFddInfo {
     pub ul_earfcn: Option<ExtendedEarfcn>,
     pub dl_earfcn: ExtendedEarfcn,
@@ -7021,6 +7330,7 @@ impl APerElement for EutraCoexFddInfo {
 }
 
 // EutraCoexModeInfo
+#[derive(Clone)]
 pub enum EutraCoexModeInfo {
     Fdd(EutraCoexFddInfo),
     Tdd(EutraCoexTddInfo),
@@ -7058,6 +7368,7 @@ impl APerElement for EutraCoexModeInfo {
 }
 
 // EutraCoexTddInfo
+#[derive(Clone)]
 pub struct EutraCoexTddInfo {
     pub earfcn: ExtendedEarfcn,
     pub transmission_bandwidth: EutraTransmissionBandwidth,
@@ -7155,6 +7466,7 @@ impl APerElement for EutraCyclicPrefixUl {
 }
 
 // EutraPrachConfiguration
+#[derive(Clone)]
 pub struct EutraPrachConfiguration {
     pub root_sequence_index: u16,
     pub zero_correlation_index: u8,
@@ -7174,12 +7486,36 @@ impl APerElement for EutraPrachConfiguration {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let root_sequence_index = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let zero_correlation_index = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let root_sequence_index = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(837))),
+            },
+        )?;
+        let zero_correlation_index = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(15))),
+            },
+        )?;
         let high_speed_flag = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let prach_freq_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let prach_freq_offset = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(94))),
+            },
+        )?;
         let prach_config_index = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(63))),
+                },
+            )?)
         } else {
             None
         };
@@ -7213,6 +7549,7 @@ impl APerElement for EutraPrachConfiguration {
 }
 
 // EutraSpecialSubframeInfo
+#[derive(Clone)]
 pub struct EutraSpecialSubframeInfo {
     pub special_subframe_patterns: EutraSpecialSubframePatterns,
     pub cyclic_prefix_dl: EutraCyclicPrefixDl,
@@ -7350,6 +7687,7 @@ impl APerElement for EutraTransmissionBandwidth {
 }
 
 // EutranQos
+#[derive(Clone)]
 pub struct EutranQos {
     pub qci: Qci,
     pub allocation_and_retention_priority: AllocationAndRetentionPriority,
@@ -7429,6 +7767,7 @@ impl APerElement for ExecuteDuplication {
 }
 
 // ExtendedEarfcn
+#[derive(Clone)]
 pub struct ExtendedEarfcn(pub u32);
 
 impl APerElement for ExtendedEarfcn {
@@ -7450,6 +7789,7 @@ impl APerElement for ExtendedEarfcn {
 }
 
 // EutraModeInfo
+#[derive(Clone)]
 pub enum EutraModeInfo {
     Eutrafdd(EutraFddInfo),
     Eutratdd(EutraTddInfo),
@@ -7490,6 +7830,7 @@ impl APerElement for EutraModeInfo {
 }
 
 // EutraNrCellResourceCoordinationReqContainer
+#[derive(Clone)]
 pub struct EutraNrCellResourceCoordinationReqContainer(pub Vec<u8>);
 
 impl APerElement for EutraNrCellResourceCoordinationReqContainer {
@@ -7505,6 +7846,7 @@ impl APerElement for EutraNrCellResourceCoordinationReqContainer {
 }
 
 // EutraNrCellResourceCoordinationReqAckContainer
+#[derive(Clone)]
 pub struct EutraNrCellResourceCoordinationReqAckContainer(pub Vec<u8>);
 
 impl APerElement for EutraNrCellResourceCoordinationReqAckContainer {
@@ -7520,6 +7862,7 @@ impl APerElement for EutraNrCellResourceCoordinationReqAckContainer {
 }
 
 // EutraFddInfo
+#[derive(Clone)]
 pub struct EutraFddInfo {
     pub ul_offset_to_point_a: OffsetToPointA,
     pub dl_offset_to_point_a: OffsetToPointA,
@@ -7559,6 +7902,7 @@ impl APerElement for EutraFddInfo {
 }
 
 // EutraTddInfo
+#[derive(Clone)]
 pub struct EutraTddInfo {
     pub offset_to_point_a: OffsetToPointA,
 }
@@ -7618,6 +7962,7 @@ impl APerElement for EventType {
 }
 
 // ExtendedPacketDelayBudget
+#[derive(Clone)]
 pub struct ExtendedPacketDelayBudget(pub u16);
 
 impl APerElement for ExtendedPacketDelayBudget {
@@ -7660,6 +8005,7 @@ impl APerElement for F1cPathNsa {
 }
 
 // F1cTransferPath
+#[derive(Clone)]
 pub struct F1cTransferPath {
     pub f1c_path_nsa: F1cPathNsa,
 }
@@ -7693,6 +8039,7 @@ impl APerElement for F1cTransferPath {
 }
 
 // FddInfo
+#[derive(Clone)]
 pub struct FddInfo {
     pub ul_nr_freq_info: NrFreqInfo,
     pub dl_nr_freq_info: NrFreqInfo,
@@ -7740,6 +8087,7 @@ impl APerElement for FddInfo {
 }
 
 // FlowsMappedToDrbList
+#[derive(Clone)]
 pub struct FlowsMappedToDrbList(pub Vec<FlowsMappedToDrbItem>);
 
 impl APerElement for FlowsMappedToDrbList {
@@ -7764,6 +8112,7 @@ impl APerElement for FlowsMappedToDrbList {
 }
 
 // FlowsMappedToDrbItem
+#[derive(Clone)]
 pub struct FlowsMappedToDrbItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_level_qos_parameters: QosFlowLevelQosParameters,
@@ -7859,6 +8208,7 @@ impl APerElement for Fr2Bandwidth {
 }
 
 // FreqBandNrItem
+#[derive(Clone)]
 pub struct FreqBandNrItem {
     pub freq_band_indicator_nr: u16,
     pub supported_sul_band_list: Vec<SupportedSulFreqBandItem>,
@@ -7876,8 +8226,13 @@ impl APerElement for FreqBandNrItem {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let freq_band_indicator_nr = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let supported_sul_band_list =
-            Vec::<SupportedSulFreqBandItem>::from_aper(decoder, UNCONSTRAINED)?;
+        let supported_sul_band_list = Vec::<SupportedSulFreqBandItem>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(maxnoofNrCellBands))),
+            },
+        )?;
 
         Ok(Self {
             freq_band_indicator_nr,
@@ -7899,6 +8254,7 @@ impl APerElement for FreqBandNrItem {
 }
 
 // FreqDomainLength
+#[derive(Clone)]
 pub enum FreqDomainLength {
     L839(L839Info),
     L139(L139Info),
@@ -7982,6 +8338,7 @@ impl APerElement for FullConfiguration {
 }
 
 // FlowsMappedToSldrbList
+#[derive(Clone)]
 pub struct FlowsMappedToSldrbList(pub Vec<FlowsMappedToSldrbItem>);
 
 impl APerElement for FlowsMappedToSldrbList {
@@ -8006,6 +8363,7 @@ impl APerElement for FlowsMappedToSldrbList {
 }
 
 // FlowsMappedToSldrbItem
+#[derive(Clone)]
 pub struct FlowsMappedToSldrbItem {
     pub pc_5_qos_flow_identifier: Pc5QosFlowIdentifier,
 }
@@ -8041,6 +8399,7 @@ impl APerElement for FlowsMappedToSldrbItem {
 }
 
 // GbrQosInformation
+#[derive(Clone)]
 pub struct GbrQosInformation {
     pub e_rab_maximum_bitrate_dl: BitRate,
     pub e_rab_maximum_bitrate_ul: BitRate,
@@ -8088,6 +8447,7 @@ impl APerElement for GbrQosInformation {
 }
 
 // GbrQosFlowInformation
+#[derive(Clone)]
 pub struct GbrQosFlowInformation {
     pub max_flow_bit_rate_downlink: BitRate,
     pub max_flow_bit_rate_uplink: BitRate,
@@ -8165,6 +8525,7 @@ impl APerElement for GbrQosFlowInformation {
 }
 
 // CgConfig
+#[derive(Clone)]
 pub struct CgConfig(pub Vec<u8>);
 
 impl APerElement for CgConfig {
@@ -8180,6 +8541,7 @@ impl APerElement for CgConfig {
 }
 
 // GeographicalCoordinates
+#[derive(Clone)]
 pub struct GeographicalCoordinates {
     pub trp_position_definition_type: TrpPositionDefinitionType,
     pub dlprs_resource_coordinates: Option<DlprsResourceCoordinates>,
@@ -8225,6 +8587,7 @@ impl APerElement for GeographicalCoordinates {
 }
 
 // GnbCuMeasurementId
+#[derive(Clone)]
 pub struct GnbCuMeasurementId(pub u16);
 
 impl APerElement for GnbCuMeasurementId {
@@ -8246,6 +8609,7 @@ impl APerElement for GnbCuMeasurementId {
 }
 
 // GnbDuMeasurementId
+#[derive(Clone)]
 pub struct GnbDuMeasurementId(pub u16);
 
 impl APerElement for GnbDuMeasurementId {
@@ -8267,6 +8631,7 @@ impl APerElement for GnbDuMeasurementId {
 }
 
 // GnbCuSystemInformation
+#[derive(Clone)]
 pub struct GnbCuSystemInformation {
     pub sibtypetobeupdatedlist: Vec<SibtypetobeupdatedListItem>,
 }
@@ -8282,8 +8647,13 @@ impl APerElement for GnbCuSystemInformation {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let sibtypetobeupdatedlist =
-            Vec::<SibtypetobeupdatedListItem>::from_aper(decoder, UNCONSTRAINED)?;
+        let sibtypetobeupdatedlist = Vec::<SibtypetobeupdatedListItem>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(maxnoofSIBTypes))),
+            },
+        )?;
 
         Ok(Self {
             sibtypetobeupdatedlist,
@@ -8303,6 +8673,7 @@ impl APerElement for GnbCuSystemInformation {
 }
 
 // GnbCuTnlAssociationSetupItem
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationSetupItem {
     pub tnl_association_transport_layer_address: CpTransportLayerAddress,
 }
@@ -8341,6 +8712,7 @@ impl APerElement for GnbCuTnlAssociationSetupItem {
 }
 
 // GnbCuTnlAssociationFailedToSetupItem
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationFailedToSetupItem {
     pub tnl_association_transport_layer_address: CpTransportLayerAddress,
     pub cause: Cause,
@@ -8383,6 +8755,7 @@ impl APerElement for GnbCuTnlAssociationFailedToSetupItem {
 }
 
 // GnbCuTnlAssociationToAddItem
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationToAddItem {
     pub tnl_association_transport_layer_address: CpTransportLayerAddress,
     pub tnl_association_usage: TnlAssociationUsage,
@@ -8425,6 +8798,7 @@ impl APerElement for GnbCuTnlAssociationToAddItem {
 }
 
 // GnbCuTnlAssociationToRemoveItem
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationToRemoveItem {
     pub tnl_association_transport_layer_address: CpTransportLayerAddress,
 }
@@ -8463,6 +8837,7 @@ impl APerElement for GnbCuTnlAssociationToRemoveItem {
 }
 
 // GnbCuTnlAssociationToUpdateItem
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationToUpdateItem {
     pub tnl_association_transport_layer_address: CpTransportLayerAddress,
     pub tnl_association_usage: Option<TnlAssociationUsage>,
@@ -8512,6 +8887,7 @@ impl APerElement for GnbCuTnlAssociationToUpdateItem {
 }
 
 // GnbCuUeF1apId
+#[derive(Clone)]
 pub struct GnbCuUeF1apId(pub u64);
 
 impl APerElement for GnbCuUeF1apId {
@@ -8533,6 +8909,7 @@ impl APerElement for GnbCuUeF1apId {
 }
 
 // GnbDuCellResourceConfiguration
+#[derive(Clone)]
 pub struct GnbDuCellResourceConfiguration {
     pub subcarrier_spacing: SubcarrierSpacing,
     pub duf_transmission_periodicity: Option<DufTransmissionPeriodicity>,
@@ -8607,6 +8984,7 @@ impl APerElement for GnbDuCellResourceConfiguration {
 }
 
 // GnbDuUeF1apId
+#[derive(Clone)]
 pub struct GnbDuUeF1apId(pub u64);
 
 impl APerElement for GnbDuUeF1apId {
@@ -8628,6 +9006,7 @@ impl APerElement for GnbDuUeF1apId {
 }
 
 // GnbDuId
+#[derive(Clone)]
 pub struct GnbDuId(pub u64);
 
 impl APerElement for GnbDuId {
@@ -8649,6 +9028,7 @@ impl APerElement for GnbDuId {
 }
 
 // GnbCuName
+#[derive(Clone)]
 pub struct GnbCuName(pub PrintableString);
 
 impl APerElement for GnbCuName {
@@ -8673,6 +9053,7 @@ impl APerElement for GnbCuName {
 }
 
 // GnbDuName
+#[derive(Clone)]
 pub struct GnbDuName(pub PrintableString);
 
 impl APerElement for GnbDuName {
@@ -8697,6 +9078,7 @@ impl APerElement for GnbDuName {
 }
 
 // ExtendedGnbCuName
+#[derive(Clone)]
 pub struct ExtendedGnbCuName {
     pub gnb_cu_name_visible_string: Option<GnbCuNameVisibleString>,
     pub gnb_cu_name_utf8_string: Option<GnbCuNameUtf8String>,
@@ -8750,6 +9132,7 @@ impl APerElement for ExtendedGnbCuName {
 }
 
 // GnbCuNameVisibleString
+#[derive(Clone)]
 pub struct GnbCuNameVisibleString(pub VisibleString);
 
 impl APerElement for GnbCuNameVisibleString {
@@ -8771,6 +9154,7 @@ impl APerElement for GnbCuNameVisibleString {
 }
 
 // GnbCuNameUtf8String
+#[derive(Clone)]
 pub struct GnbCuNameUtf8String(pub Utf8String);
 
 impl APerElement for GnbCuNameUtf8String {
@@ -8792,6 +9176,7 @@ impl APerElement for GnbCuNameUtf8String {
 }
 
 // ExtendedGnbDuName
+#[derive(Clone)]
 pub struct ExtendedGnbDuName {
     pub gnb_du_name_visible_string: Option<GnbDuNameVisibleString>,
     pub gnb_du_name_utf8_string: Option<GnbDuNameUtf8String>,
@@ -8845,6 +9230,7 @@ impl APerElement for ExtendedGnbDuName {
 }
 
 // GnbDuNameVisibleString
+#[derive(Clone)]
 pub struct GnbDuNameVisibleString(pub VisibleString);
 
 impl APerElement for GnbDuNameVisibleString {
@@ -8866,6 +9252,7 @@ impl APerElement for GnbDuNameVisibleString {
 }
 
 // GnbDuNameUtf8String
+#[derive(Clone)]
 pub struct GnbDuNameUtf8String(pub Utf8String);
 
 impl APerElement for GnbDuNameUtf8String {
@@ -8887,6 +9274,7 @@ impl APerElement for GnbDuNameUtf8String {
 }
 
 // GnbDuServedCellsItem
+#[derive(Clone)]
 pub struct GnbDuServedCellsItem {
     pub served_cell_information: ServedCellInformation,
     pub gnb_du_system_information: Option<GnbDuSystemInformation>,
@@ -8933,6 +9321,7 @@ impl APerElement for GnbDuServedCellsItem {
 }
 
 // GnbDuSystemInformation
+#[derive(Clone)]
 pub struct GnbDuSystemInformation {
     pub mib_message: MibMessage,
     pub sib1_message: Sib1Message,
@@ -9016,6 +9405,7 @@ impl APerElement for GnbDuOverloadInformation {
 }
 
 // GnbDuTnlAssociationToRemoveItem
+#[derive(Clone)]
 pub struct GnbDuTnlAssociationToRemoveItem {
     pub tnl_association_transport_layer_address: CpTransportLayerAddress,
     pub tnl_association_transport_layer_address_gnb_cu: Option<CpTransportLayerAddress>,
@@ -9069,6 +9459,7 @@ impl APerElement for GnbDuTnlAssociationToRemoveItem {
 }
 
 // GnbRxTxTimeDiff
+#[derive(Clone)]
 pub struct GnbRxTxTimeDiff {
     pub rx_tx_time_diff: GnbRxTxTimeDiffMeas,
     pub additional_path_list: Option<AdditionalPathList>,
@@ -9113,6 +9504,7 @@ impl APerElement for GnbRxTxTimeDiff {
 }
 
 // GnbRxTxTimeDiffMeas
+#[derive(Clone)]
 pub enum GnbRxTxTimeDiffMeas {
     K0(u32),
     K1(u32),
@@ -9127,12 +9519,48 @@ impl APerElement for GnbRxTxTimeDiffMeas {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::K0(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            1 => Ok(Self::K1(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::K2(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            3 => Ok(Self::K3(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            4 => Ok(Self::K4(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            5 => Ok(Self::K5(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::K0(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1970049))),
+                },
+            )?)),
+            1 => Ok(Self::K1(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(985025))),
+                },
+            )?)),
+            2 => Ok(Self::K2(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(492513))),
+                },
+            )?)),
+            3 => Ok(Self::K3(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(246257))),
+                },
+            )?)),
+            4 => Ok(Self::K4(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(123129))),
+                },
+            )?)),
+            5 => Ok(Self::K5(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(61565))),
+                },
+            )?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -9142,27 +9570,45 @@ impl APerElement for GnbRxTxTimeDiffMeas {
         match self {
             Self::K0(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1970049))),
+                })?)?;
             }
             Self::K1(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(985025))),
+                })?)?;
             }
             Self::K2(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(492513))),
+                })?)?;
             }
             Self::K3(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(246257))),
+                })?)?;
             }
             Self::K4(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(123129))),
+                })?)?;
             }
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(61565))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -9171,6 +9617,7 @@ impl APerElement for GnbRxTxTimeDiffMeas {
 }
 
 // GnbSetId
+#[derive(Clone)]
 pub struct GnbSetId(pub BitString);
 
 impl APerElement for GnbSetId {
@@ -9192,6 +9639,7 @@ impl APerElement for GnbSetId {
 }
 
 // GtpTeid
+#[derive(Clone)]
 pub struct GtpTeid(pub Vec<u8>);
 
 impl APerElement for GtpTeid {
@@ -9213,6 +9661,7 @@ impl APerElement for GtpTeid {
 }
 
 // GtptlAs
+#[derive(Clone)]
 pub struct GtptlAs(pub Vec<GtptlaItem>);
 
 impl APerElement for GtptlAs {
@@ -9237,6 +9686,7 @@ impl APerElement for GtptlAs {
 }
 
 // GtptlaItem
+#[derive(Clone)]
 pub struct GtptlaItem {
     pub gtp_transport_layer_address: TransportLayerAddress,
 }
@@ -9270,6 +9720,7 @@ impl APerElement for GtptlaItem {
 }
 
 // GtpTunnel
+#[derive(Clone)]
 pub struct GtpTunnel {
     pub transport_layer_address: TransportLayerAddress,
     pub gtp_teid: GtpTeid,
@@ -9309,6 +9760,7 @@ impl APerElement for GtpTunnel {
 }
 
 // HandoverPreparationInformation
+#[derive(Clone)]
 pub struct HandoverPreparationInformation(pub Vec<u8>);
 
 impl APerElement for HandoverPreparationInformation {
@@ -9324,6 +9776,7 @@ impl APerElement for HandoverPreparationInformation {
 }
 
 // HardwareLoadIndicator
+#[derive(Clone)]
 pub struct HardwareLoadIndicator {
     pub dl_hardware_load_indicator: u8,
     pub ul_hardware_load_indicator: u8,
@@ -9363,6 +9816,7 @@ impl APerElement for HardwareLoadIndicator {
 }
 
 // HsnaSlotConfigList
+#[derive(Clone)]
 pub struct HsnaSlotConfigList(pub Vec<HsnaSlotConfigItem>);
 
 impl APerElement for HsnaSlotConfigList {
@@ -9387,6 +9841,7 @@ impl APerElement for HsnaSlotConfigList {
 }
 
 // HsnaSlotConfigItem
+#[derive(Clone)]
 pub struct HsnaSlotConfigItem {
     pub hsna_downlink: Option<HsnaDownlink>,
     pub hsna_uplink: Option<HsnaUplink>,
@@ -9572,6 +10027,7 @@ impl APerElement for IabBarred {
 }
 
 // IabInfoIabDonorCu
+#[derive(Clone)]
 pub struct IabInfoIabDonorCu {
     pub iab_stc_info: Option<IabStcInfo>,
 }
@@ -9610,6 +10066,7 @@ impl APerElement for IabInfoIabDonorCu {
 }
 
 // IabInfoIabDu
+#[derive(Clone)]
 pub struct IabInfoIabDu {
     pub multiplexing_info: Option<MultiplexingInfo>,
     pub iab_stc_info: Option<IabStcInfo>,
@@ -9661,6 +10118,7 @@ impl APerElement for IabInfoIabDu {
 }
 
 // IabMtCellList
+#[derive(Clone)]
 pub struct IabMtCellList(pub Vec<IabMtCellListItem>);
 
 impl APerElement for IabMtCellList {
@@ -9685,6 +10143,7 @@ impl APerElement for IabMtCellList {
 }
 
 // IabMtCellListItem
+#[derive(Clone)]
 pub struct IabMtCellListItem {
     pub nr_cell_identity: NrCellIdentity,
     pub du_rx_mt_rx: DuRxMtRx,
@@ -9734,6 +10193,7 @@ impl APerElement for IabMtCellListItem {
 }
 
 // IabStcInfo
+#[derive(Clone)]
 pub struct IabStcInfo {
     pub iab_stc_info_list: IabStcInfoList,
 }
@@ -9765,6 +10225,7 @@ impl APerElement for IabStcInfo {
 }
 
 // IabStcInfoList
+#[derive(Clone)]
 pub struct IabStcInfoList(pub Vec<IabStcInfoItem>);
 
 impl APerElement for IabStcInfoList {
@@ -9789,6 +10250,7 @@ impl APerElement for IabStcInfoList {
 }
 
 // IabStcInfoItem
+#[derive(Clone)]
 pub struct IabStcInfoItem {
     pub ssb_freq_info: SsbFreqInfo,
     pub ssb_subcarrier_spacing: SsbSubcarrierSpacing,
@@ -9840,6 +10302,7 @@ impl APerElement for IabStcInfoItem {
 }
 
 // IabAllocatedTnlAddressItem
+#[derive(Clone)]
 pub struct IabAllocatedTnlAddressItem {
     pub iabtnl_address: IabtnlAddress,
     pub iabtnl_address_usage: Option<IabtnlAddressUsage>,
@@ -9884,6 +10347,7 @@ impl APerElement for IabAllocatedTnlAddressItem {
 }
 
 // IabDuCellResourceConfigurationModeInfo
+#[derive(Clone)]
 pub enum IabDuCellResourceConfigurationModeInfo {
     Fdd(IabDuCellResourceConfigurationFddInfo),
     Tdd(IabDuCellResourceConfigurationTddInfo),
@@ -9924,6 +10388,7 @@ impl APerElement for IabDuCellResourceConfigurationModeInfo {
 }
 
 // IabDuCellResourceConfigurationFddInfo
+#[derive(Clone)]
 pub struct IabDuCellResourceConfigurationFddInfo {
     pub gnb_du_cell_resource_configuration_fdd_ul: GnbDuCellResourceConfiguration,
     pub gnb_du_cell_resource_configuration_fdd_dl: GnbDuCellResourceConfiguration,
@@ -9973,6 +10438,7 @@ impl APerElement for IabDuCellResourceConfigurationFddInfo {
 }
 
 // IabDuCellResourceConfigurationTddInfo
+#[derive(Clone)]
 pub struct IabDuCellResourceConfigurationTddInfo {
     pub gnb_du_cell_resourc_configuration_tdd: GnbDuCellResourceConfiguration,
 }
@@ -10013,6 +10479,7 @@ impl APerElement for IabDuCellResourceConfigurationTddInfo {
 }
 
 // IabiPv6RequestType
+#[derive(Clone)]
 pub enum IabiPv6RequestType {
     IPv6Address(IabtnlAddressesRequested),
     IPv6Prefix(IabtnlAddressesRequested),
@@ -10053,6 +10520,7 @@ impl APerElement for IabiPv6RequestType {
 }
 
 // IabtnlAddress
+#[derive(Clone)]
 pub enum IabtnlAddress {
     IPv4Address(BitString),
     IPv6Address(BitString),
@@ -10066,15 +10534,24 @@ impl APerElement for IabtnlAddress {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::IPv4Address(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(32), Some(32))),
+                },
             )?)),
             1 => Ok(Self::IPv6Address(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(128), Some(128))),
+                },
             )?)),
             2 => Ok(Self::IPv6Prefix(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(64), Some(64))),
+                },
             )?)),
             3 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -10085,15 +10562,24 @@ impl APerElement for IabtnlAddress {
         match self {
             Self::IPv4Address(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(32), Some(32))),
+                })?)?;
             }
             Self::IPv6Address(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(128), Some(128))),
+                })?)?;
             }
             Self::IPv6Prefix(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(64), Some(64))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -10102,6 +10588,7 @@ impl APerElement for IabtnlAddress {
 }
 
 // IabtnlAddressesRequested
+#[derive(Clone)]
 pub struct IabtnlAddressesRequested {
     pub tnl_addresses_or_prefixes_requested_all_traffic: Option<u8>,
     pub tnl_addresses_or_prefixes_requested_f1_c: Option<u8>,
@@ -10120,22 +10607,46 @@ impl APerElement for IabtnlAddressesRequested {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let tnl_addresses_or_prefixes_requested_all_traffic = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(256))),
+                },
+            )?)
         } else {
             None
         };
         let tnl_addresses_or_prefixes_requested_f1_c = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(256))),
+                },
+            )?)
         } else {
             None
         };
         let tnl_addresses_or_prefixes_requested_f1_u = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(256))),
+                },
+            )?)
         } else {
             None
         };
         let tnl_addresses_or_prefixes_requested_no_nf1 = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(256))),
+                },
+            )?)
         } else {
             None
         };
@@ -10179,6 +10690,7 @@ impl APerElement for IabtnlAddressesRequested {
 }
 
 // IabTnlAddressesToRemoveItem
+#[derive(Clone)]
 pub struct IabTnlAddressesToRemoveItem {
     pub iabtnl_address: IabtnlAddress,
 }
@@ -10236,6 +10748,7 @@ impl APerElement for IabtnlAddressUsage {
 }
 
 // IaBv4AddressesRequested
+#[derive(Clone)]
 pub struct IaBv4AddressesRequested {
     pub ia_bv_4_addresses_requested: IabtnlAddressesRequested,
 }
@@ -10270,6 +10783,7 @@ impl APerElement for IaBv4AddressesRequested {
 }
 
 // ImplicitFormat
+#[derive(Clone)]
 pub struct ImplicitFormat {
     pub duf_slotformat_index: DufSlotformatIndex,
 }
@@ -10399,6 +10913,7 @@ impl APerElement for InactivityMonitoringResponse {
 }
 
 // InterfacesToTrace
+#[derive(Clone)]
 pub struct InterfacesToTrace(pub BitString);
 
 impl APerElement for InterfacesToTrace {
@@ -10420,6 +10935,7 @@ impl APerElement for InterfacesToTrace {
 }
 
 // IntendedTddDlUlConfig
+#[derive(Clone)]
 pub struct IntendedTddDlUlConfig {
     pub nrscs: Nrscs1,
     pub nrcp: Nrcp,
@@ -10465,6 +10981,7 @@ impl APerElement for IntendedTddDlUlConfig {
 }
 
 // IpHeaderInformation
+#[derive(Clone)]
 pub struct IpHeaderInformation {
     pub destination_iabtnl_address: IabtnlAddress,
     pub ds_information_list: Option<DsInformationList>,
@@ -10489,7 +11006,13 @@ impl APerElement for IpHeaderInformation {
             None
         };
         let i_pv_6_flow_label = if optionals.is_set(0) {
-            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+            Some(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(20), Some(20))),
+                },
+            )?)
         } else {
             None
         };
@@ -10522,6 +11045,7 @@ impl APerElement for IpHeaderInformation {
 }
 
 // IPtolayer2TrafficMappingInfo
+#[derive(Clone)]
 pub struct IPtolayer2TrafficMappingInfo {
     pub i_ptolayer_2_traffic_mapping_info_to_add: Option<IPtolayer2TrafficMappingInfoList>,
     pub i_ptolayer_2_traffic_mapping_info_to_remove: Option<MappingInformationtoRemove>,
@@ -10584,6 +11108,7 @@ impl APerElement for IPtolayer2TrafficMappingInfo {
 }
 
 // IPtolayer2TrafficMappingInfoList
+#[derive(Clone)]
 pub struct IPtolayer2TrafficMappingInfoList(pub Vec<IPtolayer2TrafficMappingInfoItem>);
 
 impl APerElement for IPtolayer2TrafficMappingInfoList {
@@ -10608,6 +11133,7 @@ impl APerElement for IPtolayer2TrafficMappingInfoList {
 }
 
 // IPtolayer2TrafficMappingInfoItem
+#[derive(Clone)]
 pub struct IPtolayer2TrafficMappingInfoItem {
     pub mapping_information_index: MappingInformationIndex,
     pub ip_header_information: IpHeaderInformation,
@@ -10651,6 +11177,7 @@ impl APerElement for IPtolayer2TrafficMappingInfoItem {
 }
 
 // L139Info
+#[derive(Clone)]
 pub struct L139Info {
     pub msg_1scs: Msg1scs,
     pub root_sequence_index: Option<u8>,
@@ -10669,7 +11196,13 @@ impl APerElement for L139Info {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let msg_1scs = Msg1scs::from_aper(decoder, UNCONSTRAINED)?;
         let root_sequence_index = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(137))),
+                },
+            )?)
         } else {
             None
         };
@@ -10697,6 +11230,7 @@ impl APerElement for L139Info {
 }
 
 // L839Info
+#[derive(Clone)]
 pub struct L839Info {
     pub root_sequence_index: u16,
     pub restricted_set_config: RestrictedSetConfig,
@@ -10713,7 +11247,13 @@ impl APerElement for L839Info {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let root_sequence_index = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let root_sequence_index = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(837))),
+            },
+        )?;
         let restricted_set_config = RestrictedSetConfig::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -10736,6 +11276,7 @@ impl APerElement for L839Info {
 }
 
 // Lcid
+#[derive(Clone)]
 pub struct Lcid(pub u8);
 
 impl APerElement for Lcid {
@@ -10757,6 +11298,7 @@ impl APerElement for Lcid {
 }
 
 // LcsToGcsTranslationAoA
+#[derive(Clone)]
 pub struct LcsToGcsTranslationAoA {
     pub alpha: u16,
     pub beta: u16,
@@ -10774,9 +11316,27 @@ impl APerElement for LcsToGcsTranslationAoA {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let alpha = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let beta = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let gamma = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let alpha = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3599))),
+            },
+        )?;
+        let beta = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3599))),
+            },
+        )?;
+        let gamma = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3599))),
+            },
+        )?;
 
         Ok(Self { alpha, beta, gamma })
     }
@@ -10796,6 +11356,7 @@ impl APerElement for LcsToGcsTranslationAoA {
 }
 
 // LcStoGcsTranslationList
+#[derive(Clone)]
 pub struct LcStoGcsTranslationList(pub Vec<LcStoGcsTranslation>);
 
 impl APerElement for LcStoGcsTranslationList {
@@ -10820,6 +11381,7 @@ impl APerElement for LcStoGcsTranslationList {
 }
 
 // LcStoGcsTranslation
+#[derive(Clone)]
 pub struct LcStoGcsTranslation {
     pub alpha: u16,
     pub alpha_fine: Option<u8>,
@@ -10839,21 +11401,57 @@ impl APerElement for LcStoGcsTranslation {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let alpha = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let alpha = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(359))),
+            },
+        )?;
         let alpha_fine = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(9))),
+                },
+            )?)
         } else {
             None
         };
-        let beta = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let beta = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(359))),
+            },
+        )?;
         let beta_fine = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(9))),
+                },
+            )?)
         } else {
             None
         };
-        let gamma = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let gamma = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(359))),
+            },
+        )?;
         let gamma_fine = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(9))),
+                },
+            )?)
         } else {
             None
         };
@@ -10894,6 +11492,7 @@ impl APerElement for LcStoGcsTranslation {
 }
 
 // LmfMeasurementId
+#[derive(Clone)]
 pub struct LmfMeasurementId(pub u16);
 
 impl APerElement for LmfMeasurementId {
@@ -10915,6 +11514,7 @@ impl APerElement for LmfMeasurementId {
 }
 
 // LmfUeMeasurementId
+#[derive(Clone)]
 pub struct LmfUeMeasurementId(pub u8);
 
 impl APerElement for LmfUeMeasurementId {
@@ -10936,6 +11536,7 @@ impl APerElement for LmfUeMeasurementId {
 }
 
 // LocationUncertainty
+#[derive(Clone)]
 pub struct LocationUncertainty {
     pub horizontal_uncertainty: u8,
     pub horizontal_confidence: u8,
@@ -10953,10 +11554,34 @@ impl APerElement for LocationUncertainty {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let horizontal_uncertainty = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let horizontal_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let vertical_uncertainty = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let vertical_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let horizontal_uncertainty = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
+        let horizontal_confidence = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let vertical_uncertainty = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
+        let vertical_confidence = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
 
         Ok(Self {
             horizontal_uncertainty,
@@ -11049,6 +11674,7 @@ impl APerElement for LowerLayerPresenceStatusChange {
 }
 
 // LteueSidelinkAggregateMaximumBitrate
+#[derive(Clone)]
 pub struct LteueSidelinkAggregateMaximumBitrate {
     pub uelte_sidelink_aggregate_maximum_bitrate: BitRate,
 }
@@ -11086,6 +11712,7 @@ impl APerElement for LteueSidelinkAggregateMaximumBitrate {
 }
 
 // Ltev2xServicesAuthorized
+#[derive(Clone)]
 pub struct Ltev2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
@@ -11137,6 +11764,7 @@ impl APerElement for Ltev2xServicesAuthorized {
 }
 
 // MappingInformationIndex
+#[derive(Clone)]
 pub struct MappingInformationIndex(pub BitString);
 
 impl APerElement for MappingInformationIndex {
@@ -11158,6 +11786,7 @@ impl APerElement for MappingInformationIndex {
 }
 
 // MappingInformationtoRemove
+#[derive(Clone)]
 pub struct MappingInformationtoRemove(pub Vec<MappingInformationIndex>);
 
 impl APerElement for MappingInformationtoRemove {
@@ -11182,6 +11811,7 @@ impl APerElement for MappingInformationtoRemove {
 }
 
 // MaskedImeisv
+#[derive(Clone)]
 pub struct MaskedImeisv(pub BitString);
 
 impl APerElement for MaskedImeisv {
@@ -11203,6 +11833,7 @@ impl APerElement for MaskedImeisv {
 }
 
 // MaxDataBurstVolume
+#[derive(Clone)]
 pub struct MaxDataBurstVolume(pub u16);
 
 impl APerElement for MaxDataBurstVolume {
@@ -11224,6 +11855,7 @@ impl APerElement for MaxDataBurstVolume {
 }
 
 // MaxPacketLossRate
+#[derive(Clone)]
 pub struct MaxPacketLossRate(pub u16);
 
 impl APerElement for MaxPacketLossRate {
@@ -11245,6 +11877,7 @@ impl APerElement for MaxPacketLossRate {
 }
 
 // MibMessage
+#[derive(Clone)]
 pub struct MibMessage(pub Vec<u8>);
 
 impl APerElement for MibMessage {
@@ -11260,6 +11893,7 @@ impl APerElement for MibMessage {
 }
 
 // MeasConfig
+#[derive(Clone)]
 pub struct MeasConfig(pub Vec<u8>);
 
 impl APerElement for MeasConfig {
@@ -11275,6 +11909,7 @@ impl APerElement for MeasConfig {
 }
 
 // MeasGapConfig
+#[derive(Clone)]
 pub struct MeasGapConfig(pub Vec<u8>);
 
 impl APerElement for MeasGapConfig {
@@ -11290,6 +11925,7 @@ impl APerElement for MeasGapConfig {
 }
 
 // MeasGapSharingConfig
+#[derive(Clone)]
 pub struct MeasGapSharingConfig(pub Vec<u8>);
 
 impl APerElement for MeasGapSharingConfig {
@@ -11329,6 +11965,7 @@ impl APerElement for MeasurementBeamInfoRequest {
 }
 
 // MeasurementBeamInfo
+#[derive(Clone)]
 pub struct MeasurementBeamInfo {
     pub prs_resource_id: Option<PrsResourceId>,
     pub prs_resource_set_id: Option<PrsResourceSetId>,
@@ -11391,6 +12028,7 @@ impl APerElement for MeasurementBeamInfo {
 }
 
 // MeasurementTimingConfiguration
+#[derive(Clone)]
 pub struct MeasurementTimingConfiguration(pub Vec<u8>);
 
 impl APerElement for MeasurementTimingConfiguration {
@@ -11406,6 +12044,7 @@ impl APerElement for MeasurementTimingConfiguration {
 }
 
 // MessageIdentifier
+#[derive(Clone)]
 pub struct MessageIdentifier(pub BitString);
 
 impl APerElement for MessageIdentifier {
@@ -11427,6 +12066,7 @@ impl APerElement for MessageIdentifier {
 }
 
 // MultiplexingInfo
+#[derive(Clone)]
 pub struct MultiplexingInfo {
     pub iab_mt_cell_list: IabMtCellList,
 }
@@ -11482,6 +12122,7 @@ impl APerElement for M2Configuration {
 }
 
 // M5Configuration
+#[derive(Clone)]
 pub struct M5Configuration {
     pub m5period: M5period,
     pub m5_links_to_log: M5LinksToLog,
@@ -11575,6 +12216,7 @@ impl APerElement for M5LinksToLog {
 }
 
 // M6Configuration
+#[derive(Clone)]
 pub struct M6Configuration {
     pub m6report_interval: M6reportInterval,
     pub m6_links_to_log: M6LinksToLog,
@@ -11676,6 +12318,7 @@ impl APerElement for M6LinksToLog {
 }
 
 // M7Configuration
+#[derive(Clone)]
 pub struct M7Configuration {
     pub m7period: M7period,
     pub m7_links_to_log: M7LinksToLog,
@@ -11715,6 +12358,7 @@ impl APerElement for M7Configuration {
 }
 
 // M7period
+#[derive(Clone)]
 pub struct M7period(pub u8);
 
 impl APerElement for M7period {
@@ -11785,6 +12429,7 @@ impl APerElement for MdtActivation {
 }
 
 // MdtConfiguration
+#[derive(Clone)]
 pub struct MdtConfiguration {
     pub mdt_activation: MdtActivation,
     pub measurements_to_activate: MeasurementsToActivate,
@@ -11868,6 +12513,7 @@ impl APerElement for MdtConfiguration {
 }
 
 // MdtPlmnList
+#[derive(Clone)]
 pub struct MdtPlmnList(pub Vec<PlmnIdentity>);
 
 impl APerElement for MdtPlmnList {
@@ -11892,6 +12538,7 @@ impl APerElement for MdtPlmnList {
 }
 
 // MeasuredResultsValue
+#[derive(Clone)]
 pub enum MeasuredResultsValue {
     UlAngleOfArrival(UlAoA),
     UlSrsRsrp(UlSrsRsrp),
@@ -11950,6 +12597,7 @@ impl APerElement for MeasuredResultsValue {
 }
 
 // MeasurementsToActivate
+#[derive(Clone)]
 pub struct MeasurementsToActivate(pub BitString);
 
 impl APerElement for MeasurementsToActivate {
@@ -11995,6 +12643,7 @@ impl APerElement for NeedforGap {
 }
 
 // NeighbourCellInformationItem
+#[derive(Clone)]
 pub struct NeighbourCellInformationItem {
     pub nrcgi: Nrcgi,
     pub intended_tdd_dl_ul_config: Option<IntendedTddDlUlConfig>,
@@ -12039,6 +12688,7 @@ impl APerElement for NeighbourCellInformationItem {
 }
 
 // NgranAllocationAndRetentionPriority
+#[derive(Clone)]
 pub struct NgranAllocationAndRetentionPriority {
     pub priority_level: PriorityLevel,
     pub pre_emption_capability: PreEmptionCapability,
@@ -12080,6 +12730,7 @@ impl APerElement for NgranAllocationAndRetentionPriority {
 }
 
 // NgranHighAccuracyAccessPointPosition
+#[derive(Clone)]
 pub struct NgranHighAccuracyAccessPointPosition {
     pub latitude: u64,
     pub longitude: u64,
@@ -12102,15 +12753,69 @@ impl APerElement for NgranHighAccuracyAccessPointPosition {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let latitude = u64::from_aper(decoder, UNCONSTRAINED)?;
-        let longitude = u64::from_aper(decoder, UNCONSTRAINED)?;
-        let altitude = u32::from_aper(decoder, UNCONSTRAINED)?;
-        let uncertainty_semi_major = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let uncertainty_semi_minor = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let orientation_of_major_axis = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let horizontal_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let uncertainty_altitude = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let vertical_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let latitude = u64::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-2147483648), Some(2147483647))),
+            },
+        )?;
+        let longitude = u64::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-2147483648), Some(2147483647))),
+            },
+        )?;
+        let altitude = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-64000), Some(1280000))),
+            },
+        )?;
+        let uncertainty_semi_major = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
+        let uncertainty_semi_minor = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
+        let orientation_of_major_axis = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(179))),
+            },
+        )?;
+        let horizontal_confidence = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let uncertainty_altitude = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
+        let vertical_confidence = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
 
         Ok(Self {
             latitude,
@@ -12145,6 +12850,7 @@ impl APerElement for NgranHighAccuracyAccessPointPosition {
 }
 
 // Nid
+#[derive(Clone)]
 pub struct Nid(pub BitString);
 
 impl APerElement for Nid {
@@ -12166,6 +12872,7 @@ impl APerElement for Nid {
 }
 
 // NrCgiListForRestartItem
+#[derive(Clone)]
 pub struct NrCgiListForRestartItem {
     pub nrcgi: Nrcgi,
 }
@@ -12199,6 +12906,7 @@ impl APerElement for NrCgiListForRestartItem {
 }
 
 // NrPrsBeamInformation
+#[derive(Clone)]
 pub struct NrPrsBeamInformation {
     pub nr_prs_beam_information_list: NrPrsBeamInformationList,
     pub lc_sto_gcs_translation_list: Option<LcStoGcsTranslationList>,
@@ -12244,6 +12952,7 @@ impl APerElement for NrPrsBeamInformation {
 }
 
 // NrPrsBeamInformationList
+#[derive(Clone)]
 pub struct NrPrsBeamInformationList(pub Vec<NrPrsBeamInformationItem>);
 
 impl APerElement for NrPrsBeamInformationList {
@@ -12268,6 +12977,7 @@ impl APerElement for NrPrsBeamInformationList {
 }
 
 // NrPrsBeamInformationItem
+#[derive(Clone)]
 pub struct NrPrsBeamInformationItem {
     pub prs_resource_set_id: PrsResourceSetId,
     pub prs_angle_list: PrsAngleList,
@@ -12305,6 +13015,7 @@ impl APerElement for NrPrsBeamInformationItem {
 }
 
 // NonDynamic5qiDescriptor
+#[derive(Clone)]
 pub struct NonDynamic5qiDescriptor {
     pub five_qi: u8,
     pub qos_priority_level: Option<u8>,
@@ -12324,7 +13035,13 @@ impl APerElement for NonDynamic5qiDescriptor {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let five_qi = u8::from_aper(decoder, UNCONSTRAINED)?;
         let qos_priority_level = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(127))),
+                },
+            )?)
         } else {
             None
         };
@@ -12371,6 +13088,7 @@ impl APerElement for NonDynamic5qiDescriptor {
 }
 
 // NonDynamicPqiDescriptor
+#[derive(Clone)]
 pub struct NonDynamicPqiDescriptor {
     pub five_qi: u8,
     pub qos_priority_level: Option<u8>,
@@ -12464,6 +13182,7 @@ impl APerElement for NonUpTrafficType {
 }
 
 // NoofDownlinkSymbols
+#[derive(Clone)]
 pub struct NoofDownlinkSymbols(pub u8);
 
 impl APerElement for NoofDownlinkSymbols {
@@ -12485,6 +13204,7 @@ impl APerElement for NoofDownlinkSymbols {
 }
 
 // NoofUplinkSymbols
+#[derive(Clone)]
 pub struct NoofUplinkSymbols(pub u8);
 
 impl APerElement for NoofUplinkSymbols {
@@ -12556,6 +13276,7 @@ impl APerElement for NotificationControl {
 }
 
 // NotificationInformation
+#[derive(Clone)]
 pub struct NotificationInformation {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -12595,6 +13316,7 @@ impl APerElement for NotificationInformation {
 }
 
 // NpnBroadcastInformation
+#[derive(Clone)]
 pub enum NpnBroadcastInformation {
     SnpnBroadcastInformation(NpnBroadcastInformationSnpn),
     PniNpnBroadcastInformation(NpnBroadcastInformationPniNpn),
@@ -12633,6 +13355,7 @@ impl APerElement for NpnBroadcastInformation {
 }
 
 // NpnBroadcastInformationSnpn
+#[derive(Clone)]
 pub struct NpnBroadcastInformationSnpn {
     pub broadcast_snpnid_list: BroadcastSnpnIdList,
 }
@@ -12668,6 +13391,7 @@ impl APerElement for NpnBroadcastInformationSnpn {
 }
 
 // NpnBroadcastInformationPniNpn
+#[derive(Clone)]
 pub struct NpnBroadcastInformationPniNpn {
     pub broadcast_pni_npn_id_information: BroadcastPniNpnIdList,
 }
@@ -12708,6 +13432,7 @@ impl APerElement for NpnBroadcastInformationPniNpn {
 }
 
 // NpnSupportInfo
+#[derive(Clone)]
 pub enum NpnSupportInfo {
     SnpnInformation(Nid),
     _Extended,
@@ -12739,6 +13464,7 @@ impl APerElement for NpnSupportInfo {
 }
 
 // NrCarrierList
+#[derive(Clone)]
 pub struct NrCarrierList(pub Vec<NrCarrierItem>);
 
 impl APerElement for NrCarrierList {
@@ -12763,6 +13489,7 @@ impl APerElement for NrCarrierList {
 }
 
 // NrCarrierItem
+#[derive(Clone)]
 pub struct NrCarrierItem {
     pub carrier_scs: Nrscs,
     pub offset_to_carrier: u16,
@@ -12806,6 +13533,7 @@ impl APerElement for NrCarrierItem {
 }
 
 // NrFreqInfo
+#[derive(Clone)]
 pub struct NrFreqInfo {
     pub nrarfcn: u32,
     pub sul_information: Option<SulInformation>,
@@ -12823,13 +13551,25 @@ impl APerElement for NrFreqInfo {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let nrarfcn = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3279165))),
+            },
+        )?;
         let sul_information = if optionals.is_set(0) {
             Some(SulInformation::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
-        let freq_band_list_nr = Vec::<FreqBandNrItem>::from_aper(decoder, UNCONSTRAINED)?;
+        let freq_band_list_nr = Vec::<FreqBandNrItem>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(maxnoofNrCellBands))),
+            },
+        )?;
 
         Ok(Self {
             nrarfcn,
@@ -12856,6 +13596,7 @@ impl APerElement for NrFreqInfo {
 }
 
 // Nrcgi
+#[derive(Clone)]
 pub struct Nrcgi {
     pub plmn_identity: PlmnIdentity,
     pub nr_cell_identity: NrCellIdentity,
@@ -12895,6 +13636,7 @@ impl APerElement for Nrcgi {
 }
 
 // NrModeInfo
+#[derive(Clone)]
 pub enum NrModeInfo {
     Fdd(FddInfo),
     Tdd(TddInfo),
@@ -12929,6 +13671,7 @@ impl APerElement for NrModeInfo {
 }
 
 // NrprachConfig
+#[derive(Clone)]
 pub struct NrprachConfig {
     pub ul_prach_config_list: Option<NrprachConfigList>,
     pub sul_prach_config_list: Option<NrprachConfigList>,
@@ -12982,6 +13725,7 @@ impl APerElement for NrprachConfig {
 }
 
 // NrCellIdentity
+#[derive(Clone)]
 pub struct NrCellIdentity(pub BitString);
 
 impl APerElement for NrCellIdentity {
@@ -13055,6 +13799,7 @@ impl APerElement for Nrnrb {
 }
 
 // Nrpci
+#[derive(Clone)]
 pub struct Nrpci(pub u16);
 
 impl APerElement for Nrpci {
@@ -13076,6 +13821,7 @@ impl APerElement for Nrpci {
 }
 
 // NrprachConfigList
+#[derive(Clone)]
 pub struct NrprachConfigList(pub Vec<NrprachConfigItem>);
 
 impl APerElement for NrprachConfigList {
@@ -13100,6 +13846,7 @@ impl APerElement for NrprachConfigList {
 }
 
 // NrprachConfigItem
+#[derive(Clone)]
 pub struct NrprachConfigItem {
     pub nrscs: Nrscs,
     pub prach_freq_startfrom_carrier: u16,
@@ -13127,7 +13874,13 @@ impl APerElement for NrprachConfigItem {
         let parch_config_index = u8::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_per_rach_occasion = SsbPerRachOccasion::from_aper(decoder, UNCONSTRAINED)?;
         let freq_domain_length = FreqDomainLength::from_aper(decoder, UNCONSTRAINED)?;
-        let zero_correl_zone_config = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let zero_correl_zone_config = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(15))),
+            },
+        )?;
 
         Ok(Self {
             nrscs,
@@ -13186,6 +13939,7 @@ impl APerElement for Nrscs {
 }
 
 // NrueRlfReportContainer
+#[derive(Clone)]
 pub struct NrueRlfReportContainer(pub Vec<u8>);
 
 impl APerElement for NrueRlfReportContainer {
@@ -13201,6 +13955,7 @@ impl APerElement for NrueRlfReportContainer {
 }
 
 // NumberofActiveUEs
+#[derive(Clone)]
 pub struct NumberofActiveUEs(pub u32);
 
 impl APerElement for NumberofActiveUEs {
@@ -13222,6 +13977,7 @@ impl APerElement for NumberofActiveUEs {
 }
 
 // NumberOfBroadcasts
+#[derive(Clone)]
 pub struct NumberOfBroadcasts(pub u16);
 
 impl APerElement for NumberOfBroadcasts {
@@ -13243,6 +13999,7 @@ impl APerElement for NumberOfBroadcasts {
 }
 
 // NumberofBroadcastRequest
+#[derive(Clone)]
 pub struct NumberofBroadcastRequest(pub u16);
 
 impl APerElement for NumberofBroadcastRequest {
@@ -13264,6 +14021,7 @@ impl APerElement for NumberofBroadcastRequest {
 }
 
 // NumDlulSymbols
+#[derive(Clone)]
 pub struct NumDlulSymbols {
     pub num_dl_symbols: u8,
     pub num_ul_symbols: u8,
@@ -13301,6 +14059,7 @@ impl APerElement for NumDlulSymbols {
 }
 
 // Nrv2xServicesAuthorized
+#[derive(Clone)]
 pub struct Nrv2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
@@ -13352,6 +14111,7 @@ impl APerElement for Nrv2xServicesAuthorized {
 }
 
 // NrueSidelinkAggregateMaximumBitrate
+#[derive(Clone)]
 pub struct NrueSidelinkAggregateMaximumBitrate {
     pub uenr_sidelink_aggregate_maximum_bitrate: BitRate,
 }
@@ -13389,6 +14149,7 @@ impl APerElement for NrueSidelinkAggregateMaximumBitrate {
 }
 
 // NzpCsiRsResourceId
+#[derive(Clone)]
 pub struct NzpCsiRsResourceId(pub u8);
 
 impl APerElement for NzpCsiRsResourceId {
@@ -13410,6 +14171,7 @@ impl APerElement for NzpCsiRsResourceId {
 }
 
 // OffsetToPointA
+#[derive(Clone)]
 pub struct OffsetToPointA(pub u16);
 
 impl APerElement for OffsetToPointA {
@@ -13431,6 +14193,7 @@ impl APerElement for OffsetToPointA {
 }
 
 // PacketDelayBudget
+#[derive(Clone)]
 pub struct PacketDelayBudget(pub u16);
 
 impl APerElement for PacketDelayBudget {
@@ -13452,6 +14215,7 @@ impl APerElement for PacketDelayBudget {
 }
 
 // PacketErrorRate
+#[derive(Clone)]
 pub struct PacketErrorRate {
     pub per_scalar: PerScalar,
     pub per_exponent: PerExponent,
@@ -13491,6 +14255,7 @@ impl APerElement for PacketErrorRate {
 }
 
 // PerScalar
+#[derive(Clone)]
 pub struct PerScalar(pub u8);
 
 impl APerElement for PerScalar {
@@ -13512,6 +14277,7 @@ impl APerElement for PerScalar {
 }
 
 // PerExponent
+#[derive(Clone)]
 pub struct PerExponent(pub u8);
 
 impl APerElement for PerExponent {
@@ -13533,6 +14299,7 @@ impl APerElement for PerExponent {
 }
 
 // PagingCellItem
+#[derive(Clone)]
 pub struct PagingCellItem {
     pub nrcgi: Nrcgi,
 }
@@ -13591,6 +14358,7 @@ impl APerElement for PagingDrx {
 }
 
 // PagingIdentity
+#[derive(Clone)]
 pub enum PagingIdentity {
     RanuePagingIdentity(RanuePagingIdentity),
     CnuePagingIdentity(CnuePagingIdentity),
@@ -13686,6 +14454,7 @@ impl APerElement for PagingPriority {
 }
 
 // RelativePathDelay
+#[derive(Clone)]
 pub enum RelativePathDelay {
     K0(u16),
     K1(u16),
@@ -13700,12 +14469,48 @@ impl APerElement for RelativePathDelay {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::K0(u16::from_aper(decoder, UNCONSTRAINED)?)),
-            1 => Ok(Self::K1(u16::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::K2(u16::from_aper(decoder, UNCONSTRAINED)?)),
-            3 => Ok(Self::K3(u16::from_aper(decoder, UNCONSTRAINED)?)),
-            4 => Ok(Self::K4(u16::from_aper(decoder, UNCONSTRAINED)?)),
-            5 => Ok(Self::K5(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::K0(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(16351))),
+                },
+            )?)),
+            1 => Ok(Self::K1(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(8176))),
+                },
+            )?)),
+            2 => Ok(Self::K2(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(4088))),
+                },
+            )?)),
+            3 => Ok(Self::K3(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(2044))),
+                },
+            )?)),
+            4 => Ok(Self::K4(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1022))),
+                },
+            )?)),
+            5 => Ok(Self::K5(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(511))),
+                },
+            )?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -13715,27 +14520,45 @@ impl APerElement for RelativePathDelay {
         match self {
             Self::K0(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(16351))),
+                })?)?;
             }
             Self::K1(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(8176))),
+                })?)?;
             }
             Self::K2(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(4088))),
+                })?)?;
             }
             Self::K3(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(2044))),
+                })?)?;
             }
             Self::K4(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1022))),
+                })?)?;
             }
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(511))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -13744,6 +14567,7 @@ impl APerElement for RelativePathDelay {
 }
 
 // PathlossReferenceInfo
+#[derive(Clone)]
 pub struct PathlossReferenceInfo {
     pub pathloss_reference_signal: PathlossReferenceSignal,
 }
@@ -13777,6 +14601,7 @@ impl APerElement for PathlossReferenceInfo {
 }
 
 // PathlossReferenceSignal
+#[derive(Clone)]
 pub enum PathlossReferenceSignal {
     Ssb(Ssb),
     DlPrs(DlPrs),
@@ -13811,6 +14636,7 @@ impl APerElement for PathlossReferenceSignal {
 }
 
 // Pc5QosFlowIdentifier
+#[derive(Clone)]
 pub struct Pc5QosFlowIdentifier(pub u16);
 
 impl APerElement for Pc5QosFlowIdentifier {
@@ -13832,6 +14658,7 @@ impl APerElement for Pc5QosFlowIdentifier {
 }
 
 // Pc5QosCharacteristics
+#[derive(Clone)]
 pub enum Pc5QosCharacteristics {
     NonDynamicPqi(NonDynamicPqiDescriptor),
     DynamicPqi(DynamicPqiDescriptor),
@@ -13872,6 +14699,7 @@ impl APerElement for Pc5QosCharacteristics {
 }
 
 // Pc5QosParameters
+#[derive(Clone)]
 pub struct Pc5QosParameters {
     pub pc5_qos_characteristics: Pc5QosCharacteristics,
     pub pc5_qos_flow_bit_rates: Option<Pc5FlowBitRates>,
@@ -13918,6 +14746,7 @@ impl APerElement for Pc5QosParameters {
 }
 
 // Pc5FlowBitRates
+#[derive(Clone)]
 pub struct Pc5FlowBitRates {
     pub guaranteed_flow_bit_rate: BitRate,
     pub maximum_flow_bit_rate: BitRate,
@@ -13957,6 +14786,7 @@ impl APerElement for Pc5FlowBitRates {
 }
 
 // PdcchBlindDetectionScg
+#[derive(Clone)]
 pub struct PdcchBlindDetectionScg(pub Vec<u8>);
 
 impl APerElement for PdcchBlindDetectionScg {
@@ -13972,6 +14802,7 @@ impl APerElement for PdcchBlindDetectionScg {
 }
 
 // PdcpSn
+#[derive(Clone)]
 pub struct PdcpSn(pub u16);
 
 impl APerElement for PdcpSn {
@@ -14018,6 +14849,7 @@ impl APerElement for PdcpsnLength {
 }
 
 // PduSessionId
+#[derive(Clone)]
 pub struct PduSessionId(pub u8);
 
 impl APerElement for PduSessionId {
@@ -14039,6 +14871,7 @@ impl APerElement for PduSessionId {
 }
 
 // ReportingPeriodicityValue
+#[derive(Clone)]
 pub struct ReportingPeriodicityValue(pub u16);
 
 impl APerElement for ReportingPeriodicityValue {
@@ -14060,6 +14893,7 @@ impl APerElement for ReportingPeriodicityValue {
 }
 
 // Periodicity
+#[derive(Clone)]
 pub struct Periodicity(pub u32);
 
 impl APerElement for Periodicity {
@@ -14129,6 +14963,7 @@ impl APerElement for PeriodicitySrs {
 }
 
 // PeriodicityList
+#[derive(Clone)]
 pub struct PeriodicityList(pub Vec<PeriodicityListItem>);
 
 impl APerElement for PeriodicityList {
@@ -14153,6 +14988,7 @@ impl APerElement for PeriodicityList {
 }
 
 // PeriodicityListItem
+#[derive(Clone)]
 pub struct PeriodicityListItem {
     pub periodicity_srs: PeriodicitySrs,
 }
@@ -14209,6 +15045,7 @@ impl APerElement for Permutation {
 }
 
 // PhInfoMcg
+#[derive(Clone)]
 pub struct PhInfoMcg(pub Vec<u8>);
 
 impl APerElement for PhInfoMcg {
@@ -14224,6 +15061,7 @@ impl APerElement for PhInfoMcg {
 }
 
 // PhInfoScg
+#[derive(Clone)]
 pub struct PhInfoScg(pub Vec<u8>);
 
 impl APerElement for PhInfoScg {
@@ -14239,6 +15077,7 @@ impl APerElement for PhInfoScg {
 }
 
 // PlmnIdentity
+#[derive(Clone)]
 pub struct PlmnIdentity(pub Vec<u8>);
 
 impl APerElement for PlmnIdentity {
@@ -14260,6 +15099,7 @@ impl APerElement for PlmnIdentity {
 }
 
 // PortNumber
+#[derive(Clone)]
 pub struct PortNumber(pub BitString);
 
 impl APerElement for PortNumber {
@@ -14281,6 +15121,7 @@ impl APerElement for PortNumber {
 }
 
 // PosAssistanceInformation
+#[derive(Clone)]
 pub struct PosAssistanceInformation(pub Vec<u8>);
 
 impl APerElement for PosAssistanceInformation {
@@ -14296,6 +15137,7 @@ impl APerElement for PosAssistanceInformation {
 }
 
 // PosAssistanceInformationFailureList
+#[derive(Clone)]
 pub struct PosAssistanceInformationFailureList(pub Vec<u8>);
 
 impl APerElement for PosAssistanceInformationFailureList {
@@ -14336,6 +15178,7 @@ impl APerElement for PosBroadcast {
 }
 
 // PositioningBroadcastCells
+#[derive(Clone)]
 pub struct PositioningBroadcastCells(pub Vec<Nrcgi>);
 
 impl APerElement for PositioningBroadcastCells {
@@ -14392,6 +15235,7 @@ impl APerElement for MeasurementPeriodicity {
 }
 
 // PosMeasurementQuantities
+#[derive(Clone)]
 pub struct PosMeasurementQuantities(pub Vec<PosMeasurementQuantitiesItem>);
 
 impl APerElement for PosMeasurementQuantities {
@@ -14416,6 +15260,7 @@ impl APerElement for PosMeasurementQuantities {
 }
 
 // PosMeasurementQuantitiesItem
+#[derive(Clone)]
 pub struct PosMeasurementQuantitiesItem {
     pub pos_measurement_type: PosMeasurementType,
     pub timing_reporting_granularity_factor: Option<u8>,
@@ -14433,7 +15278,13 @@ impl APerElement for PosMeasurementQuantitiesItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let pos_measurement_type = PosMeasurementType::from_aper(decoder, UNCONSTRAINED)?;
         let timing_reporting_granularity_factor = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(5))),
+                },
+            )?)
         } else {
             None
         };
@@ -14460,6 +15311,7 @@ impl APerElement for PosMeasurementQuantitiesItem {
 }
 
 // PosMeasurementResult
+#[derive(Clone)]
 pub struct PosMeasurementResult(pub Vec<PosMeasurementResultItem>);
 
 impl APerElement for PosMeasurementResult {
@@ -14484,6 +15336,7 @@ impl APerElement for PosMeasurementResult {
 }
 
 // PosMeasurementResultItem
+#[derive(Clone)]
 pub struct PosMeasurementResultItem {
     pub measured_results_value: MeasuredResultsValue,
     pub time_stamp: TimeStamp,
@@ -14543,6 +15396,7 @@ impl APerElement for PosMeasurementResultItem {
 }
 
 // PosMeasurementResultList
+#[derive(Clone)]
 pub struct PosMeasurementResultList(pub Vec<PosMeasurementResultListItem>);
 
 impl APerElement for PosMeasurementResultList {
@@ -14567,6 +15421,7 @@ impl APerElement for PosMeasurementResultList {
 }
 
 // PosMeasurementResultListItem
+#[derive(Clone)]
 pub struct PosMeasurementResultListItem {
     pub pos_measurement_result: PosMeasurementResult,
     pub trpid: Trpid,
@@ -14656,6 +15511,7 @@ impl APerElement for PosReportCharacteristics {
 }
 
 // PosResourceSetType
+#[derive(Clone)]
 pub enum PosResourceSetType {
     Periodic(PosResourceSetTypePr),
     SemiPersistent(PosResourceSetTypeSp),
@@ -14705,6 +15561,7 @@ impl APerElement for PosResourceSetType {
 }
 
 // PosResourceSetTypePr
+#[derive(Clone)]
 pub struct PosResourceSetTypePr {
     pub posperiodic_set: PosperiodicSet,
 }
@@ -14736,6 +15593,7 @@ impl APerElement for PosResourceSetTypePr {
 }
 
 // PosResourceSetTypeSp
+#[derive(Clone)]
 pub struct PosResourceSetTypeSp {
     pub possemi_persistent_set: PossemiPersistentSet,
 }
@@ -14769,6 +15627,7 @@ impl APerElement for PosResourceSetTypeSp {
 }
 
 // PosResourceSetTypeAp
+#[derive(Clone)]
 pub struct PosResourceSetTypeAp {
     pub srs_resource_trigger_list: u8,
 }
@@ -14783,7 +15642,13 @@ impl APerElement for PosResourceSetTypeAp {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let srs_resource_trigger_list = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let srs_resource_trigger_list = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(3))),
+            },
+        )?;
 
         Ok(Self {
             srs_resource_trigger_list,
@@ -14802,6 +15667,7 @@ impl APerElement for PosResourceSetTypeAp {
 }
 
 // PosSrsResourceIdList
+#[derive(Clone)]
 pub struct PosSrsResourceIdList(pub Vec<SrsPosResourceId>);
 
 impl APerElement for PosSrsResourceIdList {
@@ -14826,6 +15692,7 @@ impl APerElement for PosSrsResourceIdList {
 }
 
 // PosSrsResourceItem
+#[derive(Clone)]
 pub struct PosSrsResourceItem {
     pub srs_pos_resource_id: SrsPosResourceId,
     pub transmission_comb_pos: TransmissionCombPos,
@@ -14851,13 +15718,37 @@ impl APerElement for PosSrsResourceItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let srs_pos_resource_id = SrsPosResourceId::from_aper(decoder, UNCONSTRAINED)?;
         let transmission_comb_pos = TransmissionCombPos::from_aper(decoder, UNCONSTRAINED)?;
-        let start_position = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let start_position = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(13))),
+            },
+        )?;
         let nrof_symbols = NrofSymbols::from_aper(decoder, UNCONSTRAINED)?;
-        let freq_domain_shift = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let c_srs = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let freq_domain_shift = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(268))),
+            },
+        )?;
+        let c_srs = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(63))),
+            },
+        )?;
         let group_or_sequence_hopping = GroupOrSequenceHopping::from_aper(decoder, UNCONSTRAINED)?;
         let resource_type_pos = ResourceTypePos::from_aper(decoder, UNCONSTRAINED)?;
-        let sequence_id = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let sequence_id = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(65535))),
+            },
+        )?;
         let spatial_relation_pos = if optionals.is_set(0) {
             Some(SpatialRelationPos::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -14902,6 +15793,7 @@ impl APerElement for PosSrsResourceItem {
 }
 
 // PosSrsResourceList
+#[derive(Clone)]
 pub struct PosSrsResourceList(pub Vec<PosSrsResourceItem>);
 
 impl APerElement for PosSrsResourceList {
@@ -14926,6 +15818,7 @@ impl APerElement for PosSrsResourceList {
 }
 
 // PosSrsResourceSetItem
+#[derive(Clone)]
 pub struct PosSrsResourceSetItem {
     pub possrs_resource_set_id: u8,
     pub poss_rs_resource_id_list: PosSrsResourceIdList,
@@ -14942,7 +15835,13 @@ impl APerElement for PosSrsResourceSetItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let possrs_resource_set_id = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let possrs_resource_set_id = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(15))),
+            },
+        )?;
         let poss_rs_resource_id_list = PosSrsResourceIdList::from_aper(decoder, UNCONSTRAINED)?;
         let posresource_set_type = PosResourceSetType::from_aper(decoder, UNCONSTRAINED)?;
 
@@ -14967,6 +15866,7 @@ impl APerElement for PosSrsResourceSetItem {
 }
 
 // PosSrsResourceSetList
+#[derive(Clone)]
 pub struct PosSrsResourceSetList(pub Vec<PosSrsResourceSetItem>);
 
 impl APerElement for PosSrsResourceSetList {
@@ -15056,6 +15956,7 @@ impl APerElement for PreEmptionVulnerability {
 }
 
 // PriorityLevel
+#[derive(Clone)]
 pub struct PriorityLevel(pub u8);
 
 impl APerElement for PriorityLevel {
@@ -15077,6 +15978,7 @@ impl APerElement for PriorityLevel {
 }
 
 // ProtectedEutraResourceIndication
+#[derive(Clone)]
 pub struct ProtectedEutraResourceIndication(pub Vec<u8>);
 
 impl APerElement for ProtectedEutraResourceIndication {
@@ -15092,6 +15994,7 @@ impl APerElement for ProtectedEutraResourceIndication {
 }
 
 // ProtectedEutraResourcesItem
+#[derive(Clone)]
 pub struct ProtectedEutraResourcesItem {
     pub spectrum_sharing_group_id: SpectrumSharingGroupId,
     pub eutra_cells_list: EutraCellsList,
@@ -15129,6 +16032,7 @@ impl APerElement for ProtectedEutraResourcesItem {
 }
 
 // PrsConfiguration
+#[derive(Clone)]
 pub struct PrsConfiguration {
     pub prs_resource_set_list: PrsResourceSetList,
 }
@@ -15162,6 +16066,7 @@ impl APerElement for PrsConfiguration {
 }
 
 // PrsInformationPos
+#[derive(Clone)]
 pub struct PrsInformationPos {
     pub prs_id_pos: u8,
     pub prs_resource_set_id_pos: u8,
@@ -15178,10 +16083,28 @@ impl APerElement for PrsInformationPos {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let prs_id_pos = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let prs_resource_set_id_pos = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let prs_id_pos = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(255))),
+            },
+        )?;
+        let prs_resource_set_id_pos = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(7))),
+            },
+        )?;
         let prs_resource_id_pos = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(63))),
+                },
+            )?)
         } else {
             None
         };
@@ -15210,6 +16133,7 @@ impl APerElement for PrsInformationPos {
 }
 
 // PotentialSpCellItem
+#[derive(Clone)]
 pub struct PotentialSpCellItem {
     pub potential_sp_cell_id: Nrcgi,
 }
@@ -15245,6 +16169,7 @@ impl APerElement for PotentialSpCellItem {
 }
 
 // PrsAngleList
+#[derive(Clone)]
 pub struct PrsAngleList(pub Vec<PrsAngleItem>);
 
 impl APerElement for PrsAngleList {
@@ -15269,6 +16194,7 @@ impl APerElement for PrsAngleList {
 }
 
 // PrsAngleItem
+#[derive(Clone)]
 pub struct PrsAngleItem {
     pub nr_prs_azimuth: u16,
     pub nr_prs_azimuth_fine: u8,
@@ -15286,10 +16212,34 @@ impl APerElement for PrsAngleItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let nr_prs_azimuth = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let nr_prs_azimuth_fine = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let nr_prs_elevation = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let nr_prs_elevation_fine = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let nr_prs_azimuth = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(359))),
+            },
+        )?;
+        let nr_prs_azimuth_fine = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(9))),
+            },
+        )?;
+        let nr_prs_elevation = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(180))),
+            },
+        )?;
+        let nr_prs_elevation_fine = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(9))),
+            },
+        )?;
 
         Ok(Self {
             nr_prs_azimuth,
@@ -15314,6 +16264,7 @@ impl APerElement for PrsAngleItem {
 }
 
 // PrsMuting
+#[derive(Clone)]
 pub struct PrsMuting {
     pub prs_muting_option_1: PrsMutingOption1,
     pub prs_muting_option_2: PrsMutingOption2,
@@ -15351,6 +16302,7 @@ impl APerElement for PrsMuting {
 }
 
 // PrsMutingOption1
+#[derive(Clone)]
 pub struct PrsMutingOption1 {
     pub muting_pattern: DlPrsMutingPattern,
     pub muting_bit_repetition_factor: MutingBitRepetitionFactor,
@@ -15389,6 +16341,7 @@ impl APerElement for PrsMutingOption1 {
 }
 
 // PrsMutingOption2
+#[derive(Clone)]
 pub struct PrsMutingOption2 {
     pub muting_pattern: DlPrsMutingPattern,
 }
@@ -15420,6 +16373,7 @@ impl APerElement for PrsMutingOption2 {
 }
 
 // PrsResourceId
+#[derive(Clone)]
 pub struct PrsResourceId(pub u8);
 
 impl APerElement for PrsResourceId {
@@ -15441,6 +16395,7 @@ impl APerElement for PrsResourceId {
 }
 
 // PrsResourceList
+#[derive(Clone)]
 pub struct PrsResourceList(pub Vec<PrsResourceItem>);
 
 impl APerElement for PrsResourceList {
@@ -15465,6 +16420,7 @@ impl APerElement for PrsResourceList {
 }
 
 // PrsResourceItem
+#[derive(Clone)]
 pub struct PrsResourceItem {
     pub prs_resource_id: PrsResourceId,
     pub sequence_id: u16,
@@ -15485,10 +16441,28 @@ impl APerElement for PrsResourceItem {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let prs_resource_id = PrsResourceId::from_aper(decoder, UNCONSTRAINED)?;
-        let sequence_id = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let sequence_id = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(4095))),
+            },
+        )?;
         let re_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let resource_slot_offset = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let resource_symbol_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let resource_slot_offset = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(511))),
+            },
+        )?;
+        let resource_symbol_offset = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(12))),
+            },
+        )?;
         let qcl_info = if optionals.is_set(0) {
             Some(PrsResourceQclInfo::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -15525,6 +16499,7 @@ impl APerElement for PrsResourceItem {
 }
 
 // PrsResourceQclInfo
+#[derive(Clone)]
 pub enum PrsResourceQclInfo {
     QclSourceSsb(PrsResourceQclSourceSsb),
     QclSourcePrs(PrsResourceQclSourcePrs),
@@ -15565,6 +16540,7 @@ impl APerElement for PrsResourceQclInfo {
 }
 
 // PrsResourceQclSourceSsb
+#[derive(Clone)]
 pub struct PrsResourceQclSourceSsb {
     pub pci_nr: u16,
     pub ssb_index: Option<SsbIndex>,
@@ -15581,7 +16557,13 @@ impl APerElement for PrsResourceQclSourceSsb {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let pci_nr = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let pci_nr = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(1007))),
+            },
+        )?;
         let ssb_index = if optionals.is_set(0) {
             Some(SsbIndex::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -15608,6 +16590,7 @@ impl APerElement for PrsResourceQclSourceSsb {
 }
 
 // PrsResourceQclSourcePrs
+#[derive(Clone)]
 pub struct PrsResourceQclSourcePrs {
     pub qcl_source_prs_resource_set_id: PrsResourceSetId,
     pub qcl_source_prs_resource_id: Option<PrsResourceId>,
@@ -15652,6 +16635,7 @@ impl APerElement for PrsResourceQclSourcePrs {
 }
 
 // PrsResourceSetId
+#[derive(Clone)]
 pub struct PrsResourceSetId(pub u8);
 
 impl APerElement for PrsResourceSetId {
@@ -15673,6 +16657,7 @@ impl APerElement for PrsResourceSetId {
 }
 
 // PrsResourceSetList
+#[derive(Clone)]
 pub struct PrsResourceSetList(pub Vec<PrsResourceSetItem>);
 
 impl APerElement for PrsResourceSetList {
@@ -15697,6 +16682,7 @@ impl APerElement for PrsResourceSetList {
 }
 
 // PrsResourceSetItem
+#[derive(Clone)]
 pub struct PrsResourceSetItem {
     pub prs_resource_set_id: PrsResourceSetId,
     pub subcarrier_spacing: SubcarrierSpacing2,
@@ -15727,9 +16713,27 @@ impl APerElement for PrsResourceSetItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let prs_resource_set_id = PrsResourceSetId::from_aper(decoder, UNCONSTRAINED)?;
         let subcarrier_spacing = SubcarrierSpacing2::from_aper(decoder, UNCONSTRAINED)?;
-        let pr_sbandwidth = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let start_prb = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let point_a = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let pr_sbandwidth = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(63))),
+            },
+        )?;
+        let start_prb = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(2176))),
+            },
+        )?;
+        let point_a = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3279165))),
+            },
+        )?;
         let comb_size = CombSize::from_aper(decoder, UNCONSTRAINED)?;
         let cp_type = CpType::from_aper(decoder, UNCONSTRAINED)?;
         let resource_set_periodicity = ResourceSetPeriodicity::from_aper(decoder, UNCONSTRAINED)?;
@@ -15743,7 +16747,13 @@ impl APerElement for PrsResourceSetItem {
         } else {
             None
         };
-        let prs_resource_transmit_power = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let prs_resource_transmit_power = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-60), Some(50))),
+            },
+        )?;
         let prs_resource_list = PrsResourceList::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -15794,6 +16804,7 @@ impl APerElement for PrsResourceSetItem {
 }
 
 // PwsFailedNrCgiItem
+#[derive(Clone)]
 pub struct PwsFailedNrCgiItem {
     pub nrcgi: Nrcgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -15833,6 +16844,7 @@ impl APerElement for PwsFailedNrCgiItem {
 }
 
 // PwsSystemInformation
+#[derive(Clone)]
 pub struct PwsSystemInformation {
     pub si_btype: SibTypePws,
     pub si_bmessage: Vec<u8>,
@@ -15897,6 +16909,7 @@ impl APerElement for PrivacyIndicator {
 }
 
 // Qci
+#[derive(Clone)]
 pub struct Qci(pub u8);
 
 impl APerElement for Qci {
@@ -15918,6 +16931,7 @@ impl APerElement for Qci {
 }
 
 // QosCharacteristics
+#[derive(Clone)]
 pub enum QosCharacteristics {
     NonDynamic5qi(NonDynamic5qiDescriptor),
     Dynamic5qi(Dynamic5qiDescriptor),
@@ -15958,6 +16972,7 @@ impl APerElement for QosCharacteristics {
 }
 
 // QosFlowIdentifier
+#[derive(Clone)]
 pub struct QosFlowIdentifier(pub u8);
 
 impl APerElement for QosFlowIdentifier {
@@ -15979,6 +16994,7 @@ impl APerElement for QosFlowIdentifier {
 }
 
 // QosFlowLevelQosParameters
+#[derive(Clone)]
 pub struct QosFlowLevelQosParameters {
     pub qos_characteristics: QosCharacteristics,
     pub ngran_allocation_retention_priority: NgranAllocationAndRetentionPriority,
@@ -16068,6 +17084,7 @@ impl APerElement for QosFlowMappingIndication {
 }
 
 // QosInformation
+#[derive(Clone)]
 pub enum QosInformation {
     EutranQos(EutranQos),
     _Extended,
@@ -16125,6 +17142,7 @@ impl APerElement for QosMonitoringRequest {
 }
 
 // QosParaSetIndex
+#[derive(Clone)]
 pub struct QosParaSetIndex(pub u8);
 
 impl APerElement for QosParaSetIndex {
@@ -16146,6 +17164,7 @@ impl APerElement for QosParaSetIndex {
 }
 
 // QosParaSetNotifyIndex
+#[derive(Clone)]
 pub struct QosParaSetNotifyIndex(pub u8);
 
 impl APerElement for QosParaSetNotifyIndex {
@@ -16167,6 +17186,7 @@ impl APerElement for QosParaSetNotifyIndex {
 }
 
 // RachConfigCommon
+#[derive(Clone)]
 pub struct RachConfigCommon(pub Vec<u8>);
 
 impl APerElement for RachConfigCommon {
@@ -16182,6 +17202,7 @@ impl APerElement for RachConfigCommon {
 }
 
 // RachConfigCommonIab
+#[derive(Clone)]
 pub struct RachConfigCommonIab(pub Vec<u8>);
 
 impl APerElement for RachConfigCommonIab {
@@ -16197,6 +17218,7 @@ impl APerElement for RachConfigCommonIab {
 }
 
 // RachReportContainer
+#[derive(Clone)]
 pub struct RachReportContainer(pub Vec<u8>);
 
 impl APerElement for RachReportContainer {
@@ -16212,6 +17234,7 @@ impl APerElement for RachReportContainer {
 }
 
 // RachReportInformationList
+#[derive(Clone)]
 pub struct RachReportInformationList(pub Vec<RachReportInformationItem>);
 
 impl APerElement for RachReportInformationList {
@@ -16236,6 +17259,7 @@ impl APerElement for RachReportInformationList {
 }
 
 // RachReportInformationItem
+#[derive(Clone)]
 pub struct RachReportInformationItem {
     pub rach_report_container: RachReportContainer,
     pub ue_assitant_identifier: Option<GnbDuUeF1apId>,
@@ -16282,6 +17306,7 @@ impl APerElement for RachReportInformationItem {
 }
 
 // RadioResourceStatus
+#[derive(Clone)]
 pub struct RadioResourceStatus {
     pub ssb_area_radio_resource_status_list: SsbAreaRadioResourceStatusList,
 }
@@ -16320,6 +17345,7 @@ impl APerElement for RadioResourceStatus {
 }
 
 // Ranac
+#[derive(Clone)]
 pub struct Ranac(pub u8);
 
 impl APerElement for Ranac {
@@ -16341,6 +17367,7 @@ impl APerElement for Ranac {
 }
 
 // RanMeasurementId
+#[derive(Clone)]
 pub struct RanMeasurementId(pub u16);
 
 impl APerElement for RanMeasurementId {
@@ -16362,6 +17389,7 @@ impl APerElement for RanMeasurementId {
 }
 
 // RanUeMeasurementId
+#[derive(Clone)]
 pub struct RanUeMeasurementId(pub u8);
 
 impl APerElement for RanUeMeasurementId {
@@ -16383,6 +17411,7 @@ impl APerElement for RanUeMeasurementId {
 }
 
 // Ranueid
+#[derive(Clone)]
 pub struct Ranueid(pub Vec<u8>);
 
 impl APerElement for Ranueid {
@@ -16404,6 +17433,7 @@ impl APerElement for Ranueid {
 }
 
 // RanuePagingIdentity
+#[derive(Clone)]
 pub struct RanuePagingIdentity {
     pub irnti: BitString,
 }
@@ -16418,7 +17448,13 @@ impl APerElement for RanuePagingIdentity {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let irnti = BitString::from_aper(decoder, UNCONSTRAINED)?;
+        let irnti = BitString::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(40), Some(40))),
+            },
+        )?;
 
         Ok(Self { irnti })
     }
@@ -16435,6 +17471,7 @@ impl APerElement for RanuePagingIdentity {
 }
 
 // RatFrequencyPriorityInformation
+#[derive(Clone)]
 pub enum RatFrequencyPriorityInformation {
     Endc(SubscriberProfileIDforRfp),
     Ngran(RatFrequencySelectionPriority),
@@ -16475,6 +17512,7 @@ impl APerElement for RatFrequencyPriorityInformation {
 }
 
 // RatFrequencySelectionPriority
+#[derive(Clone)]
 pub struct RatFrequencySelectionPriority(pub u8);
 
 impl APerElement for RatFrequencySelectionPriority {
@@ -16520,6 +17558,7 @@ impl APerElement for ReestablishmentIndication {
 }
 
 // ReferencePoint
+#[derive(Clone)]
 pub enum ReferencePoint {
     CoordinateId(CoordinateId),
     ReferencePointCoordinate(AccessPointPosition),
@@ -16567,6 +17606,7 @@ impl APerElement for ReferencePoint {
 }
 
 // ReferenceSfn
+#[derive(Clone)]
 pub struct ReferenceSfn(pub u16);
 
 impl APerElement for ReferenceSfn {
@@ -16588,6 +17628,7 @@ impl APerElement for ReferenceSfn {
 }
 
 // ReferenceSignal
+#[derive(Clone)]
 pub enum ReferenceSignal {
     NzpCsiRs(NzpCsiRsResourceId),
     Ssb(Ssb),
@@ -16646,6 +17687,7 @@ impl APerElement for ReferenceSignal {
 }
 
 // RelativeCartesianLocation
+#[derive(Clone)]
 pub struct RelativeCartesianLocation {
     pub xy_zunit: XyZunit,
     pub xvalue: u32,
@@ -16665,9 +17707,27 @@ impl APerElement for RelativeCartesianLocation {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let xy_zunit = XyZunit::from_aper(decoder, UNCONSTRAINED)?;
-        let xvalue = u32::from_aper(decoder, UNCONSTRAINED)?;
-        let yvalue = u32::from_aper(decoder, UNCONSTRAINED)?;
-        let zvalue = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let xvalue = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-65536), Some(65535))),
+            },
+        )?;
+        let yvalue = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-65536), Some(65535))),
+            },
+        )?;
+        let zvalue = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-32768), Some(32767))),
+            },
+        )?;
         let location_uncertainty = LocationUncertainty::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -16695,6 +17755,7 @@ impl APerElement for RelativeCartesianLocation {
 }
 
 // RelativeGeodeticLocation
+#[derive(Clone)]
 pub struct RelativeGeodeticLocation {
     pub milli_arc_second_units: MilliArcSecondUnits,
     pub height_units: HeightUnits,
@@ -16716,9 +17777,27 @@ impl APerElement for RelativeGeodeticLocation {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let milli_arc_second_units = MilliArcSecondUnits::from_aper(decoder, UNCONSTRAINED)?;
         let height_units = HeightUnits::from_aper(decoder, UNCONSTRAINED)?;
-        let delta_latitude = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let delta_longitude = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let delta_height = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let delta_latitude = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-1024), Some(1023))),
+            },
+        )?;
+        let delta_longitude = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-1024), Some(1023))),
+            },
+        )?;
+        let delta_height = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-1024), Some(1023))),
+            },
+        )?;
         let location_uncertainty = LocationUncertainty::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -16748,6 +17827,7 @@ impl APerElement for RelativeGeodeticLocation {
 }
 
 // ReferenceTime
+#[derive(Clone)]
 pub struct ReferenceTime(pub Vec<u8>);
 
 impl APerElement for ReferenceTime {
@@ -16789,6 +17869,7 @@ impl APerElement for RegistrationRequest {
 }
 
 // ReportCharacteristics
+#[derive(Clone)]
 pub struct ReportCharacteristics(pub BitString);
 
 impl APerElement for ReportCharacteristics {
@@ -16838,6 +17919,7 @@ impl APerElement for ReportingPeriodicity {
 }
 
 // RequestedBandCombinationIndex
+#[derive(Clone)]
 pub struct RequestedBandCombinationIndex(pub Vec<u8>);
 
 impl APerElement for RequestedBandCombinationIndex {
@@ -16853,6 +17935,7 @@ impl APerElement for RequestedBandCombinationIndex {
 }
 
 // RequestedFeatureSetEntryIndex
+#[derive(Clone)]
 pub struct RequestedFeatureSetEntryIndex(pub Vec<u8>);
 
 impl APerElement for RequestedFeatureSetEntryIndex {
@@ -16868,6 +17951,7 @@ impl APerElement for RequestedFeatureSetEntryIndex {
 }
 
 // RequestedPMaxFr2
+#[derive(Clone)]
 pub struct RequestedPMaxFr2(pub Vec<u8>);
 
 impl APerElement for RequestedPMaxFr2 {
@@ -16883,6 +17967,7 @@ impl APerElement for RequestedPMaxFr2 {
 }
 
 // RequestedPdcchBlindDetectionScg
+#[derive(Clone)]
 pub struct RequestedPdcchBlindDetectionScg(pub Vec<u8>);
 
 impl APerElement for RequestedPdcchBlindDetectionScg {
@@ -16898,6 +17983,7 @@ impl APerElement for RequestedPdcchBlindDetectionScg {
 }
 
 // RequestedSrsTransmissionCharacteristics
+#[derive(Clone)]
 pub struct RequestedSrsTransmissionCharacteristics {
     pub number_of_transmissions: Option<u16>,
     pub resource_type: ResourceType2,
@@ -16993,6 +18079,7 @@ impl APerElement for RequestType {
 }
 
 // ResourceCoordinationEutraCellInfo
+#[derive(Clone)]
 pub struct ResourceCoordinationEutraCellInfo {
     pub eutra_mode_info: EutraCoexModeInfo,
     pub eutra_prach_configuration: EutraPrachConfiguration,
@@ -17032,6 +18119,7 @@ impl APerElement for ResourceCoordinationEutraCellInfo {
 }
 
 // ResourceCoordinationTransferInformation
+#[derive(Clone)]
 pub struct ResourceCoordinationTransferInformation {
     pub m_enb_cell_id: EutraCellId,
     pub resource_coordination_eutra_cell_info: Option<ResourceCoordinationEutraCellInfo>,
@@ -17081,6 +18169,7 @@ impl APerElement for ResourceCoordinationTransferInformation {
 }
 
 // ResourceCoordinationTransferContainer
+#[derive(Clone)]
 pub struct ResourceCoordinationTransferContainer(pub Vec<u8>);
 
 impl APerElement for ResourceCoordinationTransferContainer {
@@ -17096,6 +18185,7 @@ impl APerElement for ResourceCoordinationTransferContainer {
 }
 
 // ResourceSetType
+#[derive(Clone)]
 pub enum ResourceSetType {
     Periodic(ResourceSetTypePeriodic),
     SemiPersistent(ResourceSetTypeSemiPersistent),
@@ -17144,6 +18234,7 @@ impl APerElement for ResourceSetType {
 }
 
 // ResourceSetTypePeriodic
+#[derive(Clone)]
 pub struct ResourceSetTypePeriodic {
     pub periodic_set: PeriodicSet,
 }
@@ -17175,6 +18266,7 @@ impl APerElement for ResourceSetTypePeriodic {
 }
 
 // ResourceSetTypeSemiPersistent
+#[derive(Clone)]
 pub struct ResourceSetTypeSemiPersistent {
     pub semi_persistent_set: SemiPersistentSet,
 }
@@ -17208,6 +18300,7 @@ impl APerElement for ResourceSetTypeSemiPersistent {
 }
 
 // ResourceSetTypeAperiodic
+#[derive(Clone)]
 pub struct ResourceSetTypeAperiodic {
     pub srs_resource_trigger_list: u8,
     pub slotoffset: u8,
@@ -17223,8 +18316,20 @@ impl APerElement for ResourceSetTypeAperiodic {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let srs_resource_trigger_list = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let slotoffset = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let srs_resource_trigger_list = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(3))),
+            },
+        )?;
+        let slotoffset = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(32))),
+            },
+        )?;
 
         Ok(Self {
             srs_resource_trigger_list,
@@ -17245,6 +18350,7 @@ impl APerElement for ResourceSetTypeAperiodic {
 }
 
 // RepetitionPeriod
+#[derive(Clone)]
 pub struct RepetitionPeriod(pub u32);
 
 impl APerElement for RepetitionPeriod {
@@ -17266,6 +18372,7 @@ impl APerElement for RepetitionPeriod {
 }
 
 // ReportingRequestType
+#[derive(Clone)]
 pub struct ReportingRequestType {
     pub event_type: EventType,
     pub reporting_periodicity_value: Option<ReportingPeriodicityValue>,
@@ -17313,6 +18420,7 @@ impl APerElement for ReportingRequestType {
 }
 
 // ResourceType
+#[derive(Clone)]
 pub enum ResourceType {
     Periodic(ResourceTypePeriodic),
     SemiPersistent(ResourceTypeSemiPersistent),
@@ -17362,6 +18470,7 @@ impl APerElement for ResourceType {
 }
 
 // ResourceTypePeriodic
+#[derive(Clone)]
 pub struct ResourceTypePeriodic {
     pub periodicity: Periodicity1,
     pub offset: u16,
@@ -17399,6 +18508,7 @@ impl APerElement for ResourceTypePeriodic {
 }
 
 // ResourceTypeSemiPersistent
+#[derive(Clone)]
 pub struct ResourceTypeSemiPersistent {
     pub periodicity: Periodicity2,
     pub offset: u16,
@@ -17436,6 +18546,7 @@ impl APerElement for ResourceTypeSemiPersistent {
 }
 
 // ResourceTypeAperiodic
+#[derive(Clone)]
 pub struct ResourceTypeAperiodic {
     pub aperiodic_resource_type: AperiodicResourceType,
 }
@@ -17469,6 +18580,7 @@ impl APerElement for ResourceTypeAperiodic {
 }
 
 // ResourceTypePos
+#[derive(Clone)]
 pub enum ResourceTypePos {
     Periodic(ResourceTypePeriodicPos),
     SemiPersistent(ResourceTypeSemiPersistentPos),
@@ -17517,6 +18629,7 @@ impl APerElement for ResourceTypePos {
 }
 
 // ResourceTypePeriodicPos
+#[derive(Clone)]
 pub struct ResourceTypePeriodicPos {
     pub periodicity: Periodicity3,
     pub offset: u32,
@@ -17554,6 +18667,7 @@ impl APerElement for ResourceTypePeriodicPos {
 }
 
 // ResourceTypeSemiPersistentPos
+#[derive(Clone)]
 pub struct ResourceTypeSemiPersistentPos {
     pub periodicity: Periodicity4,
     pub offset: u32,
@@ -17591,6 +18705,7 @@ impl APerElement for ResourceTypeSemiPersistentPos {
 }
 
 // ResourceTypeAperiodicPos
+#[derive(Clone)]
 pub struct ResourceTypeAperiodicPos {
     pub slot_offset: u8,
 }
@@ -17605,7 +18720,13 @@ impl APerElement for ResourceTypeAperiodicPos {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let slot_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let slot_offset = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(32))),
+            },
+        )?;
 
         Ok(Self { slot_offset })
     }
@@ -17622,6 +18743,7 @@ impl APerElement for ResourceTypeAperiodicPos {
 }
 
 // RlcDuplicationInformation
+#[derive(Clone)]
 pub struct RlcDuplicationInformation {
     pub rlc_duplication_state_list: RlcDuplicationStateList,
     pub primary_path_indication: Option<PrimaryPathIndication>,
@@ -17667,6 +18789,7 @@ impl APerElement for RlcDuplicationInformation {
 }
 
 // RlcDuplicationStateList
+#[derive(Clone)]
 pub struct RlcDuplicationStateList(pub Vec<RlcDuplicationStateItem>);
 
 impl APerElement for RlcDuplicationStateList {
@@ -17691,6 +18814,7 @@ impl APerElement for RlcDuplicationStateList {
 }
 
 // RlcDuplicationStateItem
+#[derive(Clone)]
 pub struct RlcDuplicationStateItem {
     pub duplication_state: DuplicationState,
 }
@@ -17724,6 +18848,7 @@ impl APerElement for RlcDuplicationStateItem {
 }
 
 // RlcFailureIndication
+#[derive(Clone)]
 pub struct RlcFailureIndication {
     pub assocated_lcid: Lcid,
 }
@@ -17782,6 +18907,7 @@ impl APerElement for RlcMode {
 }
 
 // RlcStatus
+#[derive(Clone)]
 pub struct RlcStatus {
     pub reestablishment_indication: ReestablishmentIndication,
 }
@@ -17818,6 +18944,7 @@ impl APerElement for RlcStatus {
 }
 
 // RlfReportInformationList
+#[derive(Clone)]
 pub struct RlfReportInformationList(pub Vec<RlfReportInformationItem>);
 
 impl APerElement for RlfReportInformationList {
@@ -17842,6 +18969,7 @@ impl APerElement for RlfReportInformationList {
 }
 
 // RlfReportInformationItem
+#[derive(Clone)]
 pub struct RlfReportInformationItem {
     pub nrue_rlf_report_container: NrueRlfReportContainer,
     pub ue_assitant_identifier: Option<GnbDuUeF1apId>,
@@ -17913,6 +19041,7 @@ impl APerElement for RimrsDetectionStatus {
 }
 
 // RrcContainer
+#[derive(Clone)]
 pub struct RrcContainer(pub Vec<u8>);
 
 impl APerElement for RrcContainer {
@@ -17928,6 +19057,7 @@ impl APerElement for RrcContainer {
 }
 
 // RrcContainerRrcSetupComplete
+#[derive(Clone)]
 pub struct RrcContainerRrcSetupComplete(pub Vec<u8>);
 
 impl APerElement for RrcContainerRrcSetupComplete {
@@ -17943,6 +19073,7 @@ impl APerElement for RrcContainerRrcSetupComplete {
 }
 
 // RrcDeliveryStatus
+#[derive(Clone)]
 pub struct RrcDeliveryStatus {
     pub delivery_status: PdcpSn,
     pub triggering_message: PdcpSn,
@@ -18028,6 +19159,7 @@ impl APerElement for RrcReconfigurationCompleteIndicator {
 }
 
 // RrcVersion
+#[derive(Clone)]
 pub struct RrcVersion {
     pub latest_rrc_version: BitString,
 }
@@ -18042,7 +19174,13 @@ impl APerElement for RrcVersion {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let latest_rrc_version = BitString::from_aper(decoder, UNCONSTRAINED)?;
+        let latest_rrc_version = BitString::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(3), Some(3))),
+            },
+        )?;
 
         Ok(Self { latest_rrc_version })
     }
@@ -18059,6 +19197,7 @@ impl APerElement for RrcVersion {
 }
 
 // RoutingId
+#[derive(Clone)]
 pub struct RoutingId(pub Vec<u8>);
 
 impl APerElement for RoutingId {
@@ -18074,6 +19213,7 @@ impl APerElement for RoutingId {
 }
 
 // SCellFailedtoSetupItem
+#[derive(Clone)]
 pub struct SCellFailedtoSetupItem {
     pub s_cell_id: Nrcgi,
     pub cause: Option<Cause>,
@@ -18117,6 +19257,7 @@ impl APerElement for SCellFailedtoSetupItem {
 }
 
 // SCellFailedtoSetupModItem
+#[derive(Clone)]
 pub struct SCellFailedtoSetupModItem {
     pub s_cell_id: Nrcgi,
     pub cause: Option<Cause>,
@@ -18160,6 +19301,7 @@ impl APerElement for SCellFailedtoSetupModItem {
 }
 
 // SCellToBeRemovedItem
+#[derive(Clone)]
 pub struct SCellToBeRemovedItem {
     pub s_cell_id: Nrcgi,
 }
@@ -18193,6 +19335,7 @@ impl APerElement for SCellToBeRemovedItem {
 }
 
 // SCellToBeSetupItem
+#[derive(Clone)]
 pub struct SCellToBeSetupItem {
     pub s_cell_id: Nrcgi,
     pub s_cell_index: SCellIndex,
@@ -18243,6 +19386,7 @@ impl APerElement for SCellToBeSetupItem {
 }
 
 // SCellToBeSetupModItem
+#[derive(Clone)]
 pub struct SCellToBeSetupModItem {
     pub s_cell_id: Nrcgi,
     pub s_cell_index: SCellIndex,
@@ -18293,6 +19437,7 @@ impl APerElement for SCellToBeSetupModItem {
 }
 
 // SCellIndex
+#[derive(Clone)]
 pub struct SCellIndex(pub u8);
 
 impl APerElement for SCellIndex {
@@ -18338,6 +19483,7 @@ impl APerElement for ScgIndicator {
 }
 
 // ScsSpecificCarrier
+#[derive(Clone)]
 pub struct ScsSpecificCarrier {
     pub offset_to_carrier: u16,
     pub subcarrier_spacing: SubcarrierSpacing3,
@@ -18379,6 +19525,7 @@ impl APerElement for ScsSpecificCarrier {
 }
 
 // SearchWindowInformation
+#[derive(Clone)]
 pub struct SearchWindowInformation {
     pub expected_propagation_delay: u16,
     pub delay_uncertainty: u8,
@@ -18416,6 +19563,7 @@ impl APerElement for SearchWindowInformation {
 }
 
 // SerialNumber
+#[derive(Clone)]
 pub struct SerialNumber(pub BitString);
 
 impl APerElement for SerialNumber {
@@ -18437,6 +19585,7 @@ impl APerElement for SerialNumber {
 }
 
 // SibTypePws
+#[derive(Clone)]
 pub struct SibTypePws(pub u8);
 
 impl APerElement for SibTypePws {
@@ -18458,6 +19607,7 @@ impl APerElement for SibTypePws {
 }
 
 // SelectedBandCombinationIndex
+#[derive(Clone)]
 pub struct SelectedBandCombinationIndex(pub Vec<u8>);
 
 impl APerElement for SelectedBandCombinationIndex {
@@ -18473,6 +19623,7 @@ impl APerElement for SelectedBandCombinationIndex {
 }
 
 // SelectedFeatureSetEntryIndex
+#[derive(Clone)]
 pub struct SelectedFeatureSetEntryIndex(pub Vec<u8>);
 
 impl APerElement for SelectedFeatureSetEntryIndex {
@@ -18488,6 +19639,7 @@ impl APerElement for SelectedFeatureSetEntryIndex {
 }
 
 // CgConfigInfo
+#[derive(Clone)]
 pub struct CgConfigInfo(pub Vec<u8>);
 
 impl APerElement for CgConfigInfo {
@@ -18503,6 +19655,7 @@ impl APerElement for CgConfigInfo {
 }
 
 // ServCellIndex
+#[derive(Clone)]
 pub struct ServCellIndex(pub u8);
 
 impl APerElement for ServCellIndex {
@@ -18524,6 +19677,7 @@ impl APerElement for ServCellIndex {
 }
 
 // ServingCellMo
+#[derive(Clone)]
 pub struct ServingCellMo(pub u8);
 
 impl APerElement for ServingCellMo {
@@ -18545,6 +19699,7 @@ impl APerElement for ServingCellMo {
 }
 
 // ServedCellInformation
+#[derive(Clone)]
 pub struct ServedCellInformation {
     pub nrcgi: Nrcgi,
     pub nrpci: Nrpci,
@@ -18622,6 +19777,7 @@ impl APerElement for ServedCellInformation {
 }
 
 // SfnOffset
+#[derive(Clone)]
 pub struct SfnOffset {
     pub sfn_time_offset: BitString,
 }
@@ -18637,7 +19793,13 @@ impl APerElement for SfnOffset {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let sfn_time_offset = BitString::from_aper(decoder, UNCONSTRAINED)?;
+        let sfn_time_offset = BitString::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(24), Some(24))),
+            },
+        )?;
 
         Ok(Self { sfn_time_offset })
     }
@@ -18655,6 +19817,7 @@ impl APerElement for SfnOffset {
 }
 
 // ServedCellsToAddItem
+#[derive(Clone)]
 pub struct ServedCellsToAddItem {
     pub served_cell_information: ServedCellInformation,
     pub gnb_du_system_information: Option<GnbDuSystemInformation>,
@@ -18701,6 +19864,7 @@ impl APerElement for ServedCellsToAddItem {
 }
 
 // ServedCellsToDeleteItem
+#[derive(Clone)]
 pub struct ServedCellsToDeleteItem {
     pub old_nrcgi: Nrcgi,
 }
@@ -18734,6 +19898,7 @@ impl APerElement for ServedCellsToDeleteItem {
 }
 
 // ServedCellsToModifyItem
+#[derive(Clone)]
 pub struct ServedCellsToModifyItem {
     pub old_nrcgi: Nrcgi,
     pub served_cell_information: ServedCellInformation,
@@ -18784,6 +19949,7 @@ impl APerElement for ServedCellsToModifyItem {
 }
 
 // ServedEutraCellsInformation
+#[derive(Clone)]
 pub struct ServedEutraCellsInformation {
     pub eutra_mode_info: EutraModeInfo,
     pub protected_eutra_resource_indication: ProtectedEutraResourceIndication,
@@ -18853,6 +20019,7 @@ impl APerElement for ServiceState {
 }
 
 // ServiceStatus
+#[derive(Clone)]
 pub struct ServiceStatus {
     pub service_state: ServiceState,
     pub switching_off_ongoing: Option<SwitchingOffOngoing>,
@@ -18899,6 +20066,7 @@ impl APerElement for ServiceStatus {
 }
 
 // RelativeTime1900
+#[derive(Clone)]
 pub struct RelativeTime1900(pub BitString);
 
 impl APerElement for RelativeTime1900 {
@@ -18966,6 +20134,7 @@ impl APerElement for ShortDrxCycleLength {
 }
 
 // ShortDrxCycleTimer
+#[derive(Clone)]
 pub struct ShortDrxCycleTimer(pub u8);
 
 impl APerElement for ShortDrxCycleTimer {
@@ -18987,6 +20156,7 @@ impl APerElement for ShortDrxCycleTimer {
 }
 
 // Sib1Message
+#[derive(Clone)]
 pub struct Sib1Message(pub Vec<u8>);
 
 impl APerElement for Sib1Message {
@@ -19002,6 +20172,7 @@ impl APerElement for Sib1Message {
 }
 
 // Sib10Message
+#[derive(Clone)]
 pub struct Sib10Message(pub Vec<u8>);
 
 impl APerElement for Sib10Message {
@@ -19017,6 +20188,7 @@ impl APerElement for Sib10Message {
 }
 
 // Sib12Message
+#[derive(Clone)]
 pub struct Sib12Message(pub Vec<u8>);
 
 impl APerElement for Sib12Message {
@@ -19032,6 +20204,7 @@ impl APerElement for Sib12Message {
 }
 
 // Sib13Message
+#[derive(Clone)]
 pub struct Sib13Message(pub Vec<u8>);
 
 impl APerElement for Sib13Message {
@@ -19047,6 +20220,7 @@ impl APerElement for Sib13Message {
 }
 
 // Sib14Message
+#[derive(Clone)]
 pub struct Sib14Message(pub Vec<u8>);
 
 impl APerElement for Sib14Message {
@@ -19062,6 +20236,7 @@ impl APerElement for Sib14Message {
 }
 
 // SItype
+#[derive(Clone)]
 pub struct SItype(pub u8);
 
 impl APerElement for SItype {
@@ -19083,6 +20258,7 @@ impl APerElement for SItype {
 }
 
 // SItypeList
+#[derive(Clone)]
 pub struct SItypeList(pub Vec<SItypeItem>);
 
 impl APerElement for SItypeList {
@@ -19107,6 +20283,7 @@ impl APerElement for SItypeList {
 }
 
 // SItypeItem
+#[derive(Clone)]
 pub struct SItypeItem {
     pub s_itype: SItype,
 }
@@ -19138,6 +20315,7 @@ impl APerElement for SItypeItem {
 }
 
 // SibtypetobeupdatedListItem
+#[derive(Clone)]
 pub struct SibtypetobeupdatedListItem {
     pub si_btype: u8,
     pub si_bmessage: Vec<u8>,
@@ -19181,6 +20359,7 @@ impl APerElement for SibtypetobeupdatedListItem {
 }
 
 // Sldrbid
+#[derive(Clone)]
 pub struct Sldrbid(pub u16);
 
 impl APerElement for Sldrbid {
@@ -19202,6 +20381,7 @@ impl APerElement for Sldrbid {
 }
 
 // SldrbInformation
+#[derive(Clone)]
 pub struct SldrbInformation {
     pub sldrb_qos: Pc5QosParameters,
     pub flows_mapped_to_sldrb_list: FlowsMappedToSldrbList,
@@ -19233,6 +20413,7 @@ impl APerElement for SldrbInformation {
 }
 
 // SldrBsFailedToBeModifiedItem
+#[derive(Clone)]
 pub struct SldrBsFailedToBeModifiedItem {
     pub sldrbid: Sldrbid,
     pub cause: Option<Cause>,
@@ -19274,6 +20455,7 @@ impl APerElement for SldrBsFailedToBeModifiedItem {
 }
 
 // SldrBsFailedToBeSetupItem
+#[derive(Clone)]
 pub struct SldrBsFailedToBeSetupItem {
     pub sldrbid: Sldrbid,
     pub cause: Option<Cause>,
@@ -19315,6 +20497,7 @@ impl APerElement for SldrBsFailedToBeSetupItem {
 }
 
 // SldrBsFailedToBeSetupModItem
+#[derive(Clone)]
 pub struct SldrBsFailedToBeSetupModItem {
     pub sldrbid: Sldrbid,
     pub cause: Option<Cause>,
@@ -19356,6 +20539,7 @@ impl APerElement for SldrBsFailedToBeSetupModItem {
 }
 
 // SldrBsModifiedItem
+#[derive(Clone)]
 pub struct SldrBsModifiedItem {
     pub sldrbid: Sldrbid,
 }
@@ -19387,6 +20571,7 @@ impl APerElement for SldrBsModifiedItem {
 }
 
 // SldrBsModifiedConfItem
+#[derive(Clone)]
 pub struct SldrBsModifiedConfItem {
     pub sldrbid: Sldrbid,
 }
@@ -19418,6 +20603,7 @@ impl APerElement for SldrBsModifiedConfItem {
 }
 
 // SldrBsRequiredToBeModifiedItem
+#[derive(Clone)]
 pub struct SldrBsRequiredToBeModifiedItem {
     pub sldrbid: Sldrbid,
 }
@@ -19449,6 +20635,7 @@ impl APerElement for SldrBsRequiredToBeModifiedItem {
 }
 
 // SldrBsRequiredToBeReleasedItem
+#[derive(Clone)]
 pub struct SldrBsRequiredToBeReleasedItem {
     pub sldrbid: Sldrbid,
 }
@@ -19480,6 +20667,7 @@ impl APerElement for SldrBsRequiredToBeReleasedItem {
 }
 
 // SldrBsSetupItem
+#[derive(Clone)]
 pub struct SldrBsSetupItem {
     pub sldrbid: Sldrbid,
 }
@@ -19511,6 +20699,7 @@ impl APerElement for SldrBsSetupItem {
 }
 
 // SldrBsSetupModItem
+#[derive(Clone)]
 pub struct SldrBsSetupModItem {
     pub sldrbid: Sldrbid,
 }
@@ -19542,6 +20731,7 @@ impl APerElement for SldrBsSetupModItem {
 }
 
 // SldrBsToBeModifiedItem
+#[derive(Clone)]
 pub struct SldrBsToBeModifiedItem {
     pub sldrbid: Sldrbid,
     pub sldrb_information: Option<SldrbInformation>,
@@ -19597,6 +20787,7 @@ impl APerElement for SldrBsToBeModifiedItem {
 }
 
 // SldrBsToBeReleasedItem
+#[derive(Clone)]
 pub struct SldrBsToBeReleasedItem {
     pub sldrbid: Sldrbid,
 }
@@ -19628,6 +20819,7 @@ impl APerElement for SldrBsToBeReleasedItem {
 }
 
 // SldrBsToBeSetupItem
+#[derive(Clone)]
 pub struct SldrBsToBeSetupItem {
     pub sldrbid: Sldrbid,
     pub sldrb_information: SldrbInformation,
@@ -19669,6 +20861,7 @@ impl APerElement for SldrBsToBeSetupItem {
 }
 
 // SldrBsToBeSetupModItem
+#[derive(Clone)]
 pub struct SldrBsToBeSetupModItem {
     pub sldrbid: Sldrbid,
     pub sldrb_information: SldrbInformation,
@@ -19717,6 +20910,7 @@ impl APerElement for SldrBsToBeSetupModItem {
 }
 
 // SlPhyMacRlcConfig
+#[derive(Clone)]
 pub struct SlPhyMacRlcConfig(pub Vec<u8>);
 
 impl APerElement for SlPhyMacRlcConfig {
@@ -19732,6 +20926,7 @@ impl APerElement for SlPhyMacRlcConfig {
 }
 
 // SlConfigDedicatedEutraInfo
+#[derive(Clone)]
 pub struct SlConfigDedicatedEutraInfo(pub Vec<u8>);
 
 impl APerElement for SlConfigDedicatedEutraInfo {
@@ -19747,6 +20942,7 @@ impl APerElement for SlConfigDedicatedEutraInfo {
 }
 
 // SliceAvailableCapacity
+#[derive(Clone)]
 pub struct SliceAvailableCapacity {
     pub slice_available_capacity_list: SliceAvailableCapacityList,
 }
@@ -19781,6 +20977,7 @@ impl APerElement for SliceAvailableCapacity {
 }
 
 // SliceAvailableCapacityList
+#[derive(Clone)]
 pub struct SliceAvailableCapacityList(pub Vec<SliceAvailableCapacityItem>);
 
 impl APerElement for SliceAvailableCapacityList {
@@ -19805,6 +21002,7 @@ impl APerElement for SliceAvailableCapacityList {
 }
 
 // SliceAvailableCapacityItem
+#[derive(Clone)]
 pub struct SliceAvailableCapacityItem {
     pub plmn_identity: PlmnIdentity,
     pub snssai_available_capacity_list: SnssaiAvailableCapacityList,
@@ -19843,6 +21041,7 @@ impl APerElement for SliceAvailableCapacityItem {
 }
 
 // SnssaiAvailableCapacityList
+#[derive(Clone)]
 pub struct SnssaiAvailableCapacityList(pub Vec<SnssaiAvailableCapacityItem>);
 
 impl APerElement for SnssaiAvailableCapacityList {
@@ -19867,6 +21066,7 @@ impl APerElement for SnssaiAvailableCapacityList {
 }
 
 // SnssaiAvailableCapacityItem
+#[derive(Clone)]
 pub struct SnssaiAvailableCapacityItem {
     pub snssai: Snssai,
     pub slice_available_capacity_value_downlink: Option<u8>,
@@ -19885,12 +21085,24 @@ impl APerElement for SnssaiAvailableCapacityItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let snssai = Snssai::from_aper(decoder, UNCONSTRAINED)?;
         let slice_available_capacity_value_downlink = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(100))),
+                },
+            )?)
         } else {
             None
         };
         let slice_available_capacity_value_uplink = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(100))),
+                },
+            )?)
         } else {
             None
         };
@@ -19922,6 +21134,7 @@ impl APerElement for SnssaiAvailableCapacityItem {
 }
 
 // SliceSupportList
+#[derive(Clone)]
 pub struct SliceSupportList(pub Vec<SliceSupportItem>);
 
 impl APerElement for SliceSupportList {
@@ -19946,6 +21159,7 @@ impl APerElement for SliceSupportList {
 }
 
 // SliceSupportItem
+#[derive(Clone)]
 pub struct SliceSupportItem {
     pub snssai: Snssai,
 }
@@ -19977,6 +21191,7 @@ impl APerElement for SliceSupportItem {
 }
 
 // SliceToReportList
+#[derive(Clone)]
 pub struct SliceToReportList(pub Vec<SliceToReportItem>);
 
 impl APerElement for SliceToReportList {
@@ -20001,6 +21216,7 @@ impl APerElement for SliceToReportList {
 }
 
 // SliceToReportItem
+#[derive(Clone)]
 pub struct SliceToReportItem {
     pub plmn_identity: PlmnIdentity,
     pub snssa_ilist: SnssaiList,
@@ -20038,6 +21254,7 @@ impl APerElement for SliceToReportItem {
 }
 
 // SlotNumber
+#[derive(Clone)]
 pub struct SlotNumber(pub u8);
 
 impl APerElement for SlotNumber {
@@ -20059,6 +21276,7 @@ impl APerElement for SlotNumber {
 }
 
 // SnssaiList
+#[derive(Clone)]
 pub struct SnssaiList(pub Vec<SnssaiItem>);
 
 impl APerElement for SnssaiList {
@@ -20083,6 +21301,7 @@ impl APerElement for SnssaiList {
 }
 
 // SnssaiItem
+#[derive(Clone)]
 pub struct SnssaiItem {
     pub snssai: Snssai,
 }
@@ -20114,6 +21333,7 @@ impl APerElement for SnssaiItem {
 }
 
 // SlotConfigurationList
+#[derive(Clone)]
 pub struct SlotConfigurationList(pub Vec<SlotConfigurationItem>);
 
 impl APerElement for SlotConfigurationList {
@@ -20138,6 +21358,7 @@ impl APerElement for SlotConfigurationList {
 }
 
 // SlotConfigurationItem
+#[derive(Clone)]
 pub struct SlotConfigurationItem {
     pub slot_index: u16,
     pub symbol_alloc_in_slot: SymbolAllocInSlot,
@@ -20175,6 +21396,7 @@ impl APerElement for SlotConfigurationItem {
 }
 
 // Snssai
+#[derive(Clone)]
 pub struct Snssai {
     pub sst: Vec<u8>,
     pub sd: Option<Vec<u8>>,
@@ -20190,9 +21412,21 @@ impl APerElement for Snssai {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let sst = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
+        let sst = Vec::<u8>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(1), Some(1))),
+            },
+        )?;
         let sd = if optionals.is_set(0) {
-            Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)
+            Some(Vec::<u8>::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(3), Some(3))),
+                },
+            )?)
         } else {
             None
         };
@@ -20216,6 +21450,7 @@ impl APerElement for Snssai {
 }
 
 // SpatialDirectionInformation
+#[derive(Clone)]
 pub struct SpatialDirectionInformation {
     pub nr_prs_beam_information: NrPrsBeamInformation,
 }
@@ -20249,6 +21484,7 @@ impl APerElement for SpatialDirectionInformation {
 }
 
 // SpatialRelationInfo
+#[derive(Clone)]
 pub struct SpatialRelationInfo {
     pub spatial_relationfor_resource_id: SpatialRelationforResourceId,
 }
@@ -20287,6 +21523,7 @@ impl APerElement for SpatialRelationInfo {
 }
 
 // SpatialRelationforResourceId
+#[derive(Clone)]
 pub struct SpatialRelationforResourceId(pub Vec<SpatialRelationforResourceIdItem>);
 
 impl APerElement for SpatialRelationforResourceId {
@@ -20311,6 +21548,7 @@ impl APerElement for SpatialRelationforResourceId {
 }
 
 // SpatialRelationforResourceIdItem
+#[derive(Clone)]
 pub struct SpatialRelationforResourceIdItem {
     pub reference_signal: ReferenceSignal,
 }
@@ -20342,6 +21580,7 @@ impl APerElement for SpatialRelationforResourceIdItem {
 }
 
 // SpatialRelationPos
+#[derive(Clone)]
 pub enum SpatialRelationPos {
     SsbPos(Ssb),
     PrsInformationPos(PrsInformationPos),
@@ -20379,6 +21618,7 @@ impl APerElement for SpatialRelationPos {
 }
 
 // SpectrumSharingGroupId
+#[derive(Clone)]
 pub struct SpectrumSharingGroupId(pub u8);
 
 impl APerElement for SpectrumSharingGroupId {
@@ -20400,6 +21640,7 @@ impl APerElement for SpectrumSharingGroupId {
 }
 
 // Srbid
+#[derive(Clone)]
 pub struct Srbid(pub u8);
 
 impl APerElement for Srbid {
@@ -20421,6 +21662,7 @@ impl APerElement for Srbid {
 }
 
 // SrBsFailedToBeSetupItem
+#[derive(Clone)]
 pub struct SrBsFailedToBeSetupItem {
     pub srbid: Srbid,
     pub cause: Option<Cause>,
@@ -20464,6 +21706,7 @@ impl APerElement for SrBsFailedToBeSetupItem {
 }
 
 // SrBsFailedToBeSetupModItem
+#[derive(Clone)]
 pub struct SrBsFailedToBeSetupModItem {
     pub srbid: Srbid,
     pub cause: Option<Cause>,
@@ -20507,6 +21750,7 @@ impl APerElement for SrBsFailedToBeSetupModItem {
 }
 
 // SrBsModifiedItem
+#[derive(Clone)]
 pub struct SrBsModifiedItem {
     pub srbid: Srbid,
     pub lcid: Lcid,
@@ -20543,6 +21787,7 @@ impl APerElement for SrBsModifiedItem {
 }
 
 // SrBsRequiredToBeReleasedItem
+#[derive(Clone)]
 pub struct SrBsRequiredToBeReleasedItem {
     pub srbid: Srbid,
 }
@@ -20576,6 +21821,7 @@ impl APerElement for SrBsRequiredToBeReleasedItem {
 }
 
 // SrBsSetupItem
+#[derive(Clone)]
 pub struct SrBsSetupItem {
     pub srbid: Srbid,
     pub lcid: Lcid,
@@ -20612,6 +21858,7 @@ impl APerElement for SrBsSetupItem {
 }
 
 // SrBsSetupModItem
+#[derive(Clone)]
 pub struct SrBsSetupModItem {
     pub srbid: Srbid,
     pub lcid: Lcid,
@@ -20648,6 +21895,7 @@ impl APerElement for SrBsSetupModItem {
 }
 
 // SrBsToBeReleasedItem
+#[derive(Clone)]
 pub struct SrBsToBeReleasedItem {
     pub srbid: Srbid,
 }
@@ -20681,6 +21929,7 @@ impl APerElement for SrBsToBeReleasedItem {
 }
 
 // SrBsToBeSetupItem
+#[derive(Clone)]
 pub struct SrBsToBeSetupItem {
     pub srbid: Srbid,
     pub duplication_indication: Option<DuplicationIndication>,
@@ -20727,6 +21976,7 @@ impl APerElement for SrBsToBeSetupItem {
 }
 
 // SrBsToBeSetupModItem
+#[derive(Clone)]
 pub struct SrBsToBeSetupModItem {
     pub srbid: Srbid,
     pub duplication_indication: Option<DuplicationIndication>,
@@ -20773,6 +22023,7 @@ impl APerElement for SrBsToBeSetupModItem {
 }
 
 // SrsCarrierList
+#[derive(Clone)]
 pub struct SrsCarrierList(pub Vec<SrsCarrierListItem>);
 
 impl APerElement for SrsCarrierList {
@@ -20797,6 +22048,7 @@ impl APerElement for SrsCarrierList {
 }
 
 // SrsCarrierListItem
+#[derive(Clone)]
 pub struct SrsCarrierListItem {
     pub point_a: u32,
     pub uplink_channel_bw_per_scs_list: UplinkChannelBwPerScsList,
@@ -20814,7 +22066,13 @@ impl APerElement for SrsCarrierListItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let point_a = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let point_a = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3279165))),
+            },
+        )?;
         let uplink_channel_bw_per_scs_list =
             UplinkChannelBwPerScsList::from_aper(decoder, UNCONSTRAINED)?;
         let active_ulbwp = ActiveUlbwp::from_aper(decoder, UNCONSTRAINED)?;
@@ -20850,6 +22108,7 @@ impl APerElement for SrsCarrierListItem {
 }
 
 // SrsConfig
+#[derive(Clone)]
 pub struct SrsConfig {
     pub srs_resource_list: Option<SrsResourceList>,
     pub pos_srs_resource_list: Option<PosSrsResourceList>,
@@ -20923,6 +22182,7 @@ impl APerElement for SrsConfig {
 }
 
 // SrsConfiguration
+#[derive(Clone)]
 pub struct SrsConfiguration {
     pub srs_carrier_list: SrsCarrierList,
 }
@@ -20954,6 +22214,7 @@ impl APerElement for SrsConfiguration {
 }
 
 // SrsFrequency
+#[derive(Clone)]
 pub struct SrsFrequency(pub u32);
 
 impl APerElement for SrsFrequency {
@@ -20975,6 +22236,7 @@ impl APerElement for SrsFrequency {
 }
 
 // SrsPosResourceId
+#[derive(Clone)]
 pub struct SrsPosResourceId(pub u8);
 
 impl APerElement for SrsPosResourceId {
@@ -20996,6 +22258,7 @@ impl APerElement for SrsPosResourceId {
 }
 
 // SrsResource
+#[derive(Clone)]
 pub struct SrsResource {
     pub srs_resource_id: SrsResourceId,
     pub nrof_srs_ports: NrofSrsPorts,
@@ -21026,17 +22289,59 @@ impl APerElement for SrsResource {
         let srs_resource_id = SrsResourceId::from_aper(decoder, UNCONSTRAINED)?;
         let nrof_srs_ports = NrofSrsPorts::from_aper(decoder, UNCONSTRAINED)?;
         let transmission_comb = TransmissionComb::from_aper(decoder, UNCONSTRAINED)?;
-        let start_position = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let start_position = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(13))),
+            },
+        )?;
         let nrof_symbols = NrofSymbols1::from_aper(decoder, UNCONSTRAINED)?;
         let repetition_factor = RepetitionFactor::from_aper(decoder, UNCONSTRAINED)?;
-        let freq_domain_position = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let freq_domain_shift = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let c_srs = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let b_srs = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let b_hop = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let freq_domain_position = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(67))),
+            },
+        )?;
+        let freq_domain_shift = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(268))),
+            },
+        )?;
+        let c_srs = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(63))),
+            },
+        )?;
+        let b_srs = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3))),
+            },
+        )?;
+        let b_hop = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3))),
+            },
+        )?;
         let group_or_sequence_hopping = GroupOrSequenceHopping1::from_aper(decoder, UNCONSTRAINED)?;
         let resource_type = ResourceType::from_aper(decoder, UNCONSTRAINED)?;
-        let sequence_id = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let sequence_id = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(1023))),
+            },
+        )?;
 
         Ok(Self {
             srs_resource_id,
@@ -21081,6 +22386,7 @@ impl APerElement for SrsResource {
 }
 
 // SrsResourceId
+#[derive(Clone)]
 pub struct SrsResourceId(pub u8);
 
 impl APerElement for SrsResourceId {
@@ -21102,6 +22408,7 @@ impl APerElement for SrsResourceId {
 }
 
 // SrsResourceIdList
+#[derive(Clone)]
 pub struct SrsResourceIdList(pub Vec<SrsResourceId>);
 
 impl APerElement for SrsResourceIdList {
@@ -21126,6 +22433,7 @@ impl APerElement for SrsResourceIdList {
 }
 
 // SrsResourceList
+#[derive(Clone)]
 pub struct SrsResourceList(pub Vec<SrsResource>);
 
 impl APerElement for SrsResourceList {
@@ -21150,6 +22458,7 @@ impl APerElement for SrsResourceList {
 }
 
 // SrsResourceSet
+#[derive(Clone)]
 pub struct SrsResourceSet {
     pub srs_resource_set_id: SrsResourceSetId,
     pub srs_resource_id_list: SrsResourceIdList,
@@ -21191,6 +22500,7 @@ impl APerElement for SrsResourceSet {
 }
 
 // SrsResourceSetId
+#[derive(Clone)]
 pub struct SrsResourceSetId(pub u8);
 
 impl APerElement for SrsResourceSetId {
@@ -21212,6 +22522,7 @@ impl APerElement for SrsResourceSetId {
 }
 
 // SrsResourceSetList
+#[derive(Clone)]
 pub struct SrsResourceSetList(pub Vec<SrsResourceSetItem>);
 
 impl APerElement for SrsResourceSetList {
@@ -21236,6 +22547,7 @@ impl APerElement for SrsResourceSetList {
 }
 
 // SrsResourceSetItem
+#[derive(Clone)]
 pub struct SrsResourceSetItem {
     pub num_sr_sresourcesperset: Option<u8>,
     pub periodicity_list: Option<PeriodicityList>,
@@ -21309,6 +22621,7 @@ impl APerElement for SrsResourceSetItem {
 }
 
 // SrsResourceSetList1
+#[derive(Clone)]
 pub struct SrsResourceSetList1(pub Vec<SrsResourceSet>);
 
 impl APerElement for SrsResourceSetList1 {
@@ -21333,6 +22646,7 @@ impl APerElement for SrsResourceSetList1 {
 }
 
 // SrsResourceTrigger
+#[derive(Clone)]
 pub struct SrsResourceTrigger {
     pub aperiodic_srs_resource_trigger_list: AperiodicSrsResourceTriggerList,
 }
@@ -21371,6 +22685,7 @@ impl APerElement for SrsResourceTrigger {
 }
 
 // Ssb
+#[derive(Clone)]
 pub struct Ssb {
     pub pci_nr: Nrpci,
     pub ssb_index: Option<SsbIndex>,
@@ -21412,6 +22727,7 @@ impl APerElement for Ssb {
 }
 
 // SsbFreqInfo
+#[derive(Clone)]
 pub struct SsbFreqInfo(pub u32);
 
 impl APerElement for SsbFreqInfo {
@@ -21433,6 +22749,7 @@ impl APerElement for SsbFreqInfo {
 }
 
 // SsbIndex
+#[derive(Clone)]
 pub struct SsbIndex(pub u8);
 
 impl APerElement for SsbIndex {
@@ -21514,6 +22831,7 @@ impl APerElement for SsbTransmissionPeriodicity {
 }
 
 // SsbTransmissionTimingOffset
+#[derive(Clone)]
 pub struct SsbTransmissionTimingOffset(pub u8);
 
 impl APerElement for SsbTransmissionTimingOffset {
@@ -21535,6 +22853,7 @@ impl APerElement for SsbTransmissionTimingOffset {
 }
 
 // SsbTransmissionBitmap
+#[derive(Clone)]
 pub enum SsbTransmissionBitmap {
     ShortBitmap(BitString),
     MediumBitmap(BitString),
@@ -21548,15 +22867,24 @@ impl APerElement for SsbTransmissionBitmap {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::ShortBitmap(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(4), Some(4))),
+                },
             )?)),
             1 => Ok(Self::MediumBitmap(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(8), Some(8))),
+                },
             )?)),
             2 => Ok(Self::LongBitmap(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(64), Some(64))),
+                },
             )?)),
             3 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -21567,15 +22895,24 @@ impl APerElement for SsbTransmissionBitmap {
         match self {
             Self::ShortBitmap(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(4), Some(4))),
+                })?)?;
             }
             Self::MediumBitmap(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(8), Some(8))),
+                })?)?;
             }
             Self::LongBitmap(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(64), Some(64))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -21584,6 +22921,7 @@ impl APerElement for SsbTransmissionBitmap {
 }
 
 // SsbAreaCapacityValueList
+#[derive(Clone)]
 pub struct SsbAreaCapacityValueList(pub Vec<SsbAreaCapacityValueItem>);
 
 impl APerElement for SsbAreaCapacityValueList {
@@ -21608,6 +22946,7 @@ impl APerElement for SsbAreaCapacityValueList {
 }
 
 // SsbAreaCapacityValueItem
+#[derive(Clone)]
 pub struct SsbAreaCapacityValueItem {
     pub ssb_index: u8,
     pub ssb_area_capacity_value: u8,
@@ -21623,8 +22962,20 @@ impl APerElement for SsbAreaCapacityValueItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_index = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_capacity_value = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_index = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(63))),
+            },
+        )?;
+        let ssb_area_capacity_value = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
 
         Ok(Self {
             ssb_index,
@@ -21645,6 +22996,7 @@ impl APerElement for SsbAreaCapacityValueItem {
 }
 
 // SsbAreaRadioResourceStatusList
+#[derive(Clone)]
 pub struct SsbAreaRadioResourceStatusList(pub Vec<SsbAreaRadioResourceStatusItem>);
 
 impl APerElement for SsbAreaRadioResourceStatusList {
@@ -21669,6 +23021,7 @@ impl APerElement for SsbAreaRadioResourceStatusList {
 }
 
 // SsbAreaRadioResourceStatusItem
+#[derive(Clone)]
 pub struct SsbAreaRadioResourceStatusItem {
     pub ssb_index: u8,
     pub ssb_area_dlgbrpr_busage: u8,
@@ -21691,20 +23044,74 @@ impl APerElement for SsbAreaRadioResourceStatusItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_index = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_dlgbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_ulgbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_d_lnon_gbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_u_lnon_gbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_dl_total_pr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_area_ul_total_pr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_index = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(63))),
+            },
+        )?;
+        let ssb_area_dlgbrpr_busage = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let ssb_area_ulgbrpr_busage = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let ssb_area_d_lnon_gbrpr_busage = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let ssb_area_u_lnon_gbrpr_busage = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let ssb_area_dl_total_pr_busage = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
+        let ssb_area_ul_total_pr_busage = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(100))),
+            },
+        )?;
         let d_lscheduling_pdcchcc_eusage = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(100))),
+                },
+            )?)
         } else {
             None
         };
         let u_lscheduling_pdcchcc_eusage = if optionals.is_set(0) {
-            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(100))),
+                },
+            )?)
         } else {
             None
         };
@@ -21748,6 +23155,7 @@ impl APerElement for SsbAreaRadioResourceStatusItem {
 }
 
 // SsbInformation
+#[derive(Clone)]
 pub struct SsbInformation {
     pub ssb_information_list: SsbInformationList,
 }
@@ -21781,6 +23189,7 @@ impl APerElement for SsbInformation {
 }
 
 // SsbInformationList
+#[derive(Clone)]
 pub struct SsbInformationList(pub Vec<SsbInformationItem>);
 
 impl APerElement for SsbInformationList {
@@ -21805,6 +23214,7 @@ impl APerElement for SsbInformationList {
 }
 
 // SsbInformationItem
+#[derive(Clone)]
 pub struct SsbInformationItem {
     pub ssb_configuration: SsbTfConfiguration,
     pub pci_nr: Nrpci,
@@ -21842,6 +23252,7 @@ impl APerElement for SsbInformationItem {
 }
 
 // SsbPositionsInBurst
+#[derive(Clone)]
 pub enum SsbPositionsInBurst {
     ShortBitmap(BitString),
     MediumBitmap(BitString),
@@ -21855,15 +23266,24 @@ impl APerElement for SsbPositionsInBurst {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::ShortBitmap(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(4), Some(4))),
+                },
             )?)),
             1 => Ok(Self::MediumBitmap(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(8), Some(8))),
+                },
             )?)),
             2 => Ok(Self::LongBitmap(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(64), Some(64))),
+                },
             )?)),
             3 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -21874,15 +23294,24 @@ impl APerElement for SsbPositionsInBurst {
         match self {
             Self::ShortBitmap(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(4), Some(4))),
+                })?)?;
             }
             Self::MediumBitmap(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(8), Some(8))),
+                })?)?;
             }
             Self::LongBitmap(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(64), Some(64))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -21891,6 +23320,7 @@ impl APerElement for SsbPositionsInBurst {
 }
 
 // SsbTfConfiguration
+#[derive(Clone)]
 pub struct SsbTfConfiguration {
     pub ssb_frequency: u32,
     pub ssb_subcarrier_spacing: SsbSubcarrierSpacing1,
@@ -21912,12 +23342,36 @@ impl APerElement for SsbTfConfiguration {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_frequency = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_frequency = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3279165))),
+            },
+        )?;
         let ssb_subcarrier_spacing = SsbSubcarrierSpacing1::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_transmit_power = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_transmit_power = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(-60), Some(50))),
+            },
+        )?;
         let ssb_periodicity = SsbPeriodicity::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_half_frame_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_sfn_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_half_frame_offset = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(1))),
+            },
+        )?;
+        let ssb_sfn_offset = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(15))),
+            },
+        )?;
         let ssb_position_in_burst = if optionals.is_set(0) {
             Some(SsbPositionsInBurst::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -21966,6 +23420,7 @@ impl APerElement for SsbTfConfiguration {
 }
 
 // SsbToReportList
+#[derive(Clone)]
 pub struct SsbToReportList(pub Vec<SsbToReportItem>);
 
 impl APerElement for SsbToReportList {
@@ -21990,6 +23445,7 @@ impl APerElement for SsbToReportList {
 }
 
 // SsbToReportItem
+#[derive(Clone)]
 pub struct SsbToReportItem {
     pub ssb_index: u8,
 }
@@ -22004,7 +23460,13 @@ impl APerElement for SsbToReportItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_index = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_index = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(63))),
+            },
+        )?;
 
         Ok(Self { ssb_index })
     }
@@ -22021,6 +23483,7 @@ impl APerElement for SsbToReportItem {
 }
 
 // SulInformation
+#[derive(Clone)]
 pub struct SulInformation {
     pub sul_nrarfcn: u32,
     pub sul_transmission_bandwidth: TransmissionBandwidth,
@@ -22037,7 +23500,13 @@ impl APerElement for SulInformation {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let sul_nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let sul_nrarfcn = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3279165))),
+            },
+        )?;
         let sul_transmission_bandwidth = TransmissionBandwidth::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -22091,6 +23560,7 @@ impl APerElement for SubcarrierSpacing {
 }
 
 // SubscriberProfileIDforRfp
+#[derive(Clone)]
 pub struct SubscriberProfileIDforRfp(pub u8);
 
 impl APerElement for SubscriberProfileIDforRfp {
@@ -22136,6 +23606,7 @@ impl APerElement for SulAccessIndication {
 }
 
 // SupportedSulFreqBandItem
+#[derive(Clone)]
 pub struct SupportedSulFreqBandItem {
     pub freq_band_indicator_nr: u16,
 }
@@ -22171,6 +23642,7 @@ impl APerElement for SupportedSulFreqBandItem {
 }
 
 // SymbolAllocInSlot
+#[derive(Clone)]
 pub enum SymbolAllocInSlot {
     AllDl,
     AllUl,
@@ -22212,6 +23684,7 @@ impl APerElement for SymbolAllocInSlot {
 }
 
 // SystemFrameNumber
+#[derive(Clone)]
 pub struct SystemFrameNumber(pub u16);
 
 impl APerElement for SystemFrameNumber {
@@ -22233,6 +23706,7 @@ impl APerElement for SystemFrameNumber {
 }
 
 // SystemInformationAreaId
+#[derive(Clone)]
 pub struct SystemInformationAreaId(pub BitString);
 
 impl APerElement for SystemInformationAreaId {
@@ -22254,6 +23728,7 @@ impl APerElement for SystemInformationAreaId {
 }
 
 // FiveGsTac
+#[derive(Clone)]
 pub struct FiveGsTac(pub Vec<u8>);
 
 impl APerElement for FiveGsTac {
@@ -22275,6 +23750,7 @@ impl APerElement for FiveGsTac {
 }
 
 // ConfiguredEpsTac
+#[derive(Clone)]
 pub struct ConfiguredEpsTac(pub Vec<u8>);
 
 impl APerElement for ConfiguredEpsTac {
@@ -22296,6 +23772,7 @@ impl APerElement for ConfiguredEpsTac {
 }
 
 // TargetCellList
+#[derive(Clone)]
 pub struct TargetCellList(pub Vec<TargetCellListItem>);
 
 impl APerElement for TargetCellList {
@@ -22320,6 +23797,7 @@ impl APerElement for TargetCellList {
 }
 
 // TargetCellListItem
+#[derive(Clone)]
 pub struct TargetCellListItem {
     pub target_cell: Nrcgi,
 }
@@ -22351,6 +23829,7 @@ impl APerElement for TargetCellListItem {
 }
 
 // TddInfo
+#[derive(Clone)]
 pub struct TddInfo {
     pub nr_freq_info: NrFreqInfo,
     pub transmission_bandwidth: TransmissionBandwidth,
@@ -22390,6 +23869,7 @@ impl APerElement for TddInfo {
 }
 
 // TddUlDlConfigCommonNr
+#[derive(Clone)]
 pub struct TddUlDlConfigCommonNr(pub Vec<u8>);
 
 impl APerElement for TddUlDlConfigCommonNr {
@@ -22405,6 +23885,7 @@ impl APerElement for TddUlDlConfigCommonNr {
 }
 
 // TimeReferenceInformation
+#[derive(Clone)]
 pub struct TimeReferenceInformation {
     pub reference_time: ReferenceTime,
     pub reference_sfn: ReferenceSfn,
@@ -22469,6 +23950,7 @@ impl APerElement for TimeInformationType {
 }
 
 // TimeStamp
+#[derive(Clone)]
 pub struct TimeStamp {
     pub system_frame_number: SystemFrameNumber,
     pub slot_index: TimeStampSlotIndex,
@@ -22517,6 +23999,7 @@ impl APerElement for TimeStamp {
 }
 
 // TimeStampSlotIndex
+#[derive(Clone)]
 pub enum TimeStampSlotIndex {
     Scs15(u8),
     Scs30(u8),
@@ -22529,10 +24012,34 @@ impl APerElement for TimeStampSlotIndex {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::Scs15(u8::from_aper(decoder, UNCONSTRAINED)?)),
-            1 => Ok(Self::Scs30(u8::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::Scs60(u8::from_aper(decoder, UNCONSTRAINED)?)),
-            3 => Ok(Self::Scs120(u8::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::Scs15(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(9))),
+                },
+            )?)),
+            1 => Ok(Self::Scs30(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(19))),
+                },
+            )?)),
+            2 => Ok(Self::Scs60(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(39))),
+                },
+            )?)),
+            3 => Ok(Self::Scs120(u8::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(79))),
+                },
+            )?)),
             4 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -22542,19 +24049,31 @@ impl APerElement for TimeStampSlotIndex {
         match self {
             Self::Scs15(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(9))),
+                })?)?;
             }
             Self::Scs30(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(19))),
+                })?)?;
             }
             Self::Scs60(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(39))),
+                })?)?;
             }
             Self::Scs120(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(79))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -22592,6 +24111,7 @@ impl APerElement for TimeToWait {
 }
 
 // TimingMeasurementQuality
+#[derive(Clone)]
 pub struct TimingMeasurementQuality {
     pub measurement_quality: u8,
     pub resolution: Resolution1,
@@ -22607,7 +24127,13 @@ impl APerElement for TimingMeasurementQuality {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let measurement_quality = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let measurement_quality = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(31))),
+            },
+        )?;
         let resolution = Resolution1::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -22655,6 +24181,7 @@ impl APerElement for TnlAssociationUsage {
 }
 
 // TnlCapacityIndicator
+#[derive(Clone)]
 pub struct TnlCapacityIndicator {
     pub dltnl_offered_capacity: u32,
     pub dltnl_available_capacity: u8,
@@ -22700,6 +24227,7 @@ impl APerElement for TnlCapacityIndicator {
 }
 
 // TraceActivation
+#[derive(Clone)]
 pub struct TraceActivation {
     pub trace_id: TraceId,
     pub interfaces_to_trace: InterfacesToTrace,
@@ -22779,6 +24307,7 @@ impl APerElement for TraceDepth {
 }
 
 // TraceId
+#[derive(Clone)]
 pub struct TraceId(pub Vec<u8>);
 
 impl APerElement for TraceId {
@@ -22800,6 +24329,7 @@ impl APerElement for TraceId {
 }
 
 // TrafficMappingInfo
+#[derive(Clone)]
 pub enum TrafficMappingInfo {
     IPtolayer2TrafficMappingInfo(IPtolayer2TrafficMappingInfo),
     BaPlayerBhrlCchannelMappingInfo(BaPlayerBhrlCchannelMappingInfo),
@@ -22838,6 +24368,7 @@ impl APerElement for TrafficMappingInfo {
 }
 
 // TransportLayerAddress
+#[derive(Clone)]
 pub struct TransportLayerAddress(pub BitString);
 
 impl APerElement for TransportLayerAddress {
@@ -22859,6 +24390,7 @@ impl APerElement for TransportLayerAddress {
 }
 
 // TransactionId
+#[derive(Clone)]
 pub struct TransactionId(pub u8);
 
 impl APerElement for TransactionId {
@@ -22880,6 +24412,7 @@ impl APerElement for TransactionId {
 }
 
 // TransmissionBandwidth
+#[derive(Clone)]
 pub struct TransmissionBandwidth {
     pub nrscs: Nrscs,
     pub nrnrb: Nrnrb,
@@ -22916,6 +24449,7 @@ impl APerElement for TransmissionBandwidth {
 }
 
 // TransmissionComb
+#[derive(Clone)]
 pub enum TransmissionComb {
     N2(N2),
     N4(N4),
@@ -22950,6 +24484,7 @@ impl APerElement for TransmissionComb {
 }
 
 // TransmissionCombPos
+#[derive(Clone)]
 pub enum TransmissionCombPos {
     N2(N21),
     N4(N41),
@@ -23014,6 +24549,7 @@ impl APerElement for TransmissionStopIndicator {
 }
 
 // TransportUpLayerAddressInfoToAddList
+#[derive(Clone)]
 pub struct TransportUpLayerAddressInfoToAddList(pub Vec<TransportUpLayerAddressInfoToAddItem>);
 
 impl APerElement for TransportUpLayerAddressInfoToAddList {
@@ -23037,6 +24573,7 @@ impl APerElement for TransportUpLayerAddressInfoToAddList {
 }
 
 // TransportUpLayerAddressInfoToAddItem
+#[derive(Clone)]
 pub struct TransportUpLayerAddressInfoToAddItem {
     pub ip_sec_transport_layer_address: TransportLayerAddress,
     pub gtp_transport_layer_address_to_add: Option<GtptlAs>,
@@ -23082,6 +24619,7 @@ impl APerElement for TransportUpLayerAddressInfoToAddItem {
 }
 
 // TransportUpLayerAddressInfoToRemoveList
+#[derive(Clone)]
 pub struct TransportUpLayerAddressInfoToRemoveList(
     pub Vec<TransportUpLayerAddressInfoToRemoveItem>,
 );
@@ -23107,6 +24645,7 @@ impl APerElement for TransportUpLayerAddressInfoToRemoveList {
 }
 
 // TransportUpLayerAddressInfoToRemoveItem
+#[derive(Clone)]
 pub struct TransportUpLayerAddressInfoToRemoveItem {
     pub ip_sec_transport_layer_address: TransportLayerAddress,
     pub gtp_transport_layer_address_to_remove: Option<GtptlAs>,
@@ -23176,6 +24715,7 @@ impl APerElement for TransmissionActionIndicator {
 }
 
 // Trpid
+#[derive(Clone)]
 pub struct Trpid(pub u16);
 
 impl APerElement for Trpid {
@@ -23197,6 +24737,7 @@ impl APerElement for Trpid {
 }
 
 // TrpInformation
+#[derive(Clone)]
 pub struct TrpInformation {
     pub trpid: Trpid,
     pub trp_information_type_response_list: TrpInformationTypeResponseList,
@@ -23239,6 +24780,7 @@ impl APerElement for TrpInformation {
 }
 
 // TrpInformationItem
+#[derive(Clone)]
 pub struct TrpInformationItem {
     pub trp_information: TrpInformation,
 }
@@ -23301,6 +24843,7 @@ impl APerElement for TrpInformationTypeItem {
 }
 
 // TrpInformationTypeResponseList
+#[derive(Clone)]
 pub struct TrpInformationTypeResponseList(pub Vec<TrpInformationTypeResponseItem>);
 
 impl APerElement for TrpInformationTypeResponseList {
@@ -23325,6 +24868,7 @@ impl APerElement for TrpInformationTypeResponseList {
 }
 
 // TrpInformationTypeResponseItem
+#[derive(Clone)]
 pub enum TrpInformationTypeResponseItem {
     PciNr(Nrpci),
     NgRanCgi(Nrcgi),
@@ -23343,7 +24887,13 @@ impl APerElement for TrpInformationTypeResponseItem {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::PciNr(Nrpci::from_aper(decoder, UNCONSTRAINED)?)),
             1 => Ok(Self::NgRanCgi(Nrcgi::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::Nrarfcn(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::Nrarfcn(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(3279165))),
+                },
+            )?)),
             3 => Ok(Self::PrsConfiguration(PrsConfiguration::from_aper(
                 decoder,
                 UNCONSTRAINED,
@@ -23379,7 +24929,10 @@ impl APerElement for TrpInformationTypeResponseItem {
             }
             Self::Nrarfcn(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(3279165))),
+                })?)?;
             }
             Self::PrsConfiguration(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
@@ -23408,6 +24961,7 @@ impl APerElement for TrpInformationTypeResponseItem {
 }
 
 // TrpList
+#[derive(Clone)]
 pub struct TrpList(pub Vec<TrpListItem>);
 
 impl APerElement for TrpList {
@@ -23432,6 +24986,7 @@ impl APerElement for TrpList {
 }
 
 // TrpListItem
+#[derive(Clone)]
 pub struct TrpListItem {
     pub trpid: Trpid,
 }
@@ -23463,6 +25018,7 @@ impl APerElement for TrpListItem {
 }
 
 // TrpMeasurementQuality
+#[derive(Clone)]
 pub struct TrpMeasurementQuality {
     pub tr_pmeasurement_quality_item: TrpMeasurementQualityItem,
 }
@@ -23497,6 +25053,7 @@ impl APerElement for TrpMeasurementQuality {
 }
 
 // TrpMeasurementQualityItem
+#[derive(Clone)]
 pub enum TrpMeasurementQualityItem {
     TimingMeasurementQuality(TimingMeasurementQuality),
     AngleMeasurementQuality(AngleMeasurementQuality),
@@ -23535,6 +25092,7 @@ impl APerElement for TrpMeasurementQualityItem {
 }
 
 // TrpMeasurementRequestList
+#[derive(Clone)]
 pub struct TrpMeasurementRequestList(pub Vec<TrpMeasurementRequestItem>);
 
 impl APerElement for TrpMeasurementRequestList {
@@ -23559,6 +25117,7 @@ impl APerElement for TrpMeasurementRequestList {
 }
 
 // TrpMeasurementRequestItem
+#[derive(Clone)]
 pub struct TrpMeasurementRequestItem {
     pub trpid: Trpid,
     pub search_window_information: Option<SearchWindowInformation>,
@@ -23603,6 +25162,7 @@ impl APerElement for TrpMeasurementRequestItem {
 }
 
 // TrpPositionDefinitionType
+#[derive(Clone)]
 pub enum TrpPositionDefinitionType {
     Direct(TrpPositionDirect),
     Referenced(TrpPositionReferenced),
@@ -23643,6 +25203,7 @@ impl APerElement for TrpPositionDefinitionType {
 }
 
 // TrpPositionDirect
+#[derive(Clone)]
 pub struct TrpPositionDirect {
     pub accuracy: TrpPositionDirectAccuracy,
 }
@@ -23674,6 +25235,7 @@ impl APerElement for TrpPositionDirect {
 }
 
 // TrpPositionDirectAccuracy
+#[derive(Clone)]
 pub enum TrpPositionDirectAccuracy {
     TrpPosition(AccessPointPosition),
     TrphAposition(NgranHighAccuracyAccessPointPosition),
@@ -23713,6 +25275,7 @@ impl APerElement for TrpPositionDirectAccuracy {
 }
 
 // TrpPositionReferenced
+#[derive(Clone)]
 pub struct TrpPositionReferenced {
     pub reference_point: ReferencePoint,
     pub reference_point_type: TrpReferencePointType,
@@ -23750,6 +25313,7 @@ impl APerElement for TrpPositionReferenced {
 }
 
 // TrpReferencePointType
+#[derive(Clone)]
 pub enum TrpReferencePointType {
     TrpPositionRelativeGeodetic(RelativeGeodeticLocation),
     TrpPositionRelativeCartesian(RelativeCartesianLocation),
@@ -23813,6 +25377,7 @@ impl APerElement for TypeOfError {
 }
 
 // TransportLayerAddressInfo
+#[derive(Clone)]
 pub struct TransportLayerAddressInfo {
     pub transport_up_layer_address_info_to_add_list: Option<TransportUpLayerAddressInfoToAddList>,
     pub transport_up_layer_address_info_to_remove_list:
@@ -23878,6 +25443,7 @@ impl APerElement for TransportLayerAddressInfo {
 }
 
 // TscAssistanceInformation
+#[derive(Clone)]
 pub struct TscAssistanceInformation {
     pub periodicity: Periodicity,
     pub burst_arrival_time: Option<BurstArrivalTime>,
@@ -23924,6 +25490,7 @@ impl APerElement for TscAssistanceInformation {
 }
 
 // TscTrafficCharacteristics
+#[derive(Clone)]
 pub struct TscTrafficCharacteristics {
     pub tsc_assistance_information_dl: Option<TscAssistanceInformation>,
     pub tsc_assistance_information_ul: Option<TscAssistanceInformation>,
@@ -23977,6 +25544,7 @@ impl APerElement for TscTrafficCharacteristics {
 }
 
 // UacAssistanceInfo
+#[derive(Clone)]
 pub struct UacAssistanceInfo {
     pub uac_plmn_list: UacPlmnList,
 }
@@ -24008,6 +25576,7 @@ impl APerElement for UacAssistanceInfo {
 }
 
 // UacPlmnList
+#[derive(Clone)]
 pub struct UacPlmnList(pub Vec<UacPlmnItem>);
 
 impl APerElement for UacPlmnList {
@@ -24032,6 +25601,7 @@ impl APerElement for UacPlmnList {
 }
 
 // UacPlmnItem
+#[derive(Clone)]
 pub struct UacPlmnItem {
     pub plmn_identity: PlmnIdentity,
     pub uac_type_list: UacTypeList,
@@ -24069,6 +25639,7 @@ impl APerElement for UacPlmnItem {
 }
 
 // UacTypeList
+#[derive(Clone)]
 pub struct UacTypeList(pub Vec<UacTypeItem>);
 
 impl APerElement for UacTypeList {
@@ -24093,6 +25664,7 @@ impl APerElement for UacTypeList {
 }
 
 // UacTypeItem
+#[derive(Clone)]
 pub struct UacTypeItem {
     pub uac_reduction_indication: UacReductionIndication,
     pub uac_category_type: UacCategoryType,
@@ -24130,6 +25702,7 @@ impl APerElement for UacTypeItem {
 }
 
 // UacCategoryType
+#[derive(Clone)]
 pub enum UacCategoryType {
     UaCstandardized(UacAction),
     UacOperatorDefined(UacOperatorDefined),
@@ -24170,6 +25743,7 @@ impl APerElement for UacCategoryType {
 }
 
 // UacOperatorDefined
+#[derive(Clone)]
 pub struct UacOperatorDefined {
     pub access_category: u8,
     pub access_identity: BitString,
@@ -24186,7 +25760,13 @@ impl APerElement for UacOperatorDefined {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let access_category = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let access_identity = BitString::from_aper(decoder, UNCONSTRAINED)?;
+        let access_identity = BitString::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(7), Some(7))),
+            },
+        )?;
 
         Ok(Self {
             access_category,
@@ -24234,6 +25814,7 @@ impl APerElement for UacAction {
 }
 
 // UacReductionIndication
+#[derive(Clone)]
 pub struct UacReductionIndication(pub u8);
 
 impl APerElement for UacReductionIndication {
@@ -24255,6 +25836,7 @@ impl APerElement for UacReductionIndication {
 }
 
 // UeAssociatedLogicalF1ConnectionItem
+#[derive(Clone)]
 pub struct UeAssociatedLogicalF1ConnectionItem {
     pub gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
@@ -24308,6 +25890,7 @@ impl APerElement for UeAssociatedLogicalF1ConnectionItem {
 }
 
 // UeAssistanceInformation
+#[derive(Clone)]
 pub struct UeAssistanceInformation(pub Vec<u8>);
 
 impl APerElement for UeAssistanceInformation {
@@ -24323,6 +25906,7 @@ impl APerElement for UeAssistanceInformation {
 }
 
 // UeAssistanceInformationEutra
+#[derive(Clone)]
 pub struct UeAssistanceInformationEutra(pub Vec<u8>);
 
 impl APerElement for UeAssistanceInformationEutra {
@@ -24338,6 +25922,7 @@ impl APerElement for UeAssistanceInformationEutra {
 }
 
 // UeCapabilityRatContainerList
+#[derive(Clone)]
 pub struct UeCapabilityRatContainerList(pub Vec<u8>);
 
 impl APerElement for UeCapabilityRatContainerList {
@@ -24377,6 +25962,7 @@ impl APerElement for UeContextNotRetrievable {
 }
 
 // UeIdentityIndexValue
+#[derive(Clone)]
 pub enum UeIdentityIndexValue {
     IndexLength10(BitString),
     _Extended,
@@ -24388,7 +25974,10 @@ impl APerElement for UeIdentityIndexValue {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::IndexLength10(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(10), Some(10))),
+                },
             )?)),
             1 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -24399,7 +25988,10 @@ impl APerElement for UeIdentityIndexValue {
         match self {
             Self::IndexLength10(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(10), Some(10))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -24408,6 +26000,7 @@ impl APerElement for UeIdentityIndexValue {
 }
 
 // UlAoA
+#[derive(Clone)]
 pub struct UlAoA {
     pub azimuth_ao_a: u16,
     pub zenith_ao_a: Option<u16>,
@@ -24424,9 +26017,21 @@ impl APerElement for UlAoA {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let azimuth_ao_a = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let azimuth_ao_a = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3599))),
+            },
+        )?;
         let zenith_ao_a = if optionals.is_set(0) {
-            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1799))),
+                },
+            )?)
         } else {
             None
         };
@@ -24463,6 +26068,7 @@ impl APerElement for UlAoA {
 }
 
 // UlBhNonUpTrafficMapping
+#[derive(Clone)]
 pub struct UlBhNonUpTrafficMapping {
     pub ul_bh_non_up_traffic_mapping_list: UlBhNonUpTrafficMappingList,
 }
@@ -24501,6 +26107,7 @@ impl APerElement for UlBhNonUpTrafficMapping {
 }
 
 // UlBhNonUpTrafficMappingList
+#[derive(Clone)]
 pub struct UlBhNonUpTrafficMappingList(pub Vec<UlBhNonUpTrafficMappingItem>);
 
 impl APerElement for UlBhNonUpTrafficMappingList {
@@ -24525,6 +26132,7 @@ impl APerElement for UlBhNonUpTrafficMappingList {
 }
 
 // UlBhNonUpTrafficMappingItem
+#[derive(Clone)]
 pub struct UlBhNonUpTrafficMappingItem {
     pub non_up_traffic_type: NonUpTrafficType,
     pub bh_info: BhInfo,
@@ -24562,6 +26170,7 @@ impl APerElement for UlBhNonUpTrafficMappingItem {
 }
 
 // UlConfiguration
+#[derive(Clone)]
 pub struct UlConfiguration {
     pub ulue_configuration: UlueConfiguration,
 }
@@ -24595,6 +26204,7 @@ impl APerElement for UlConfiguration {
 }
 
 // UlRtoaMeasurement
+#[derive(Clone)]
 pub struct UlRtoaMeasurement {
     pub ul_rtoa_measurement_item: UlRtoaMeasurementItem,
     pub additional_path_list: Option<AdditionalPathList>,
@@ -24639,6 +26249,7 @@ impl APerElement for UlRtoaMeasurement {
 }
 
 // UlRtoaMeasurementItem
+#[derive(Clone)]
 pub enum UlRtoaMeasurementItem {
     K0(u32),
     K1(u32),
@@ -24653,12 +26264,48 @@ impl APerElement for UlRtoaMeasurementItem {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::K0(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            1 => Ok(Self::K1(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::K2(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            3 => Ok(Self::K3(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            4 => Ok(Self::K4(u32::from_aper(decoder, UNCONSTRAINED)?)),
-            5 => Ok(Self::K5(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::K0(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1970049))),
+                },
+            )?)),
+            1 => Ok(Self::K1(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(985025))),
+                },
+            )?)),
+            2 => Ok(Self::K2(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(492513))),
+                },
+            )?)),
+            3 => Ok(Self::K3(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(246257))),
+                },
+            )?)),
+            4 => Ok(Self::K4(u32::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(123129))),
+                },
+            )?)),
+            5 => Ok(Self::K5(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(61565))),
+                },
+            )?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -24668,27 +26315,45 @@ impl APerElement for UlRtoaMeasurementItem {
         match self {
             Self::K0(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(1970049))),
+                })?)?;
             }
             Self::K1(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(985025))),
+                })?)?;
             }
             Self::K2(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(492513))),
+                })?)?;
             }
             Self::K3(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(246257))),
+                })?)?;
             }
             Self::K4(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(123129))),
+                })?)?;
             }
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(61565))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -24697,6 +26362,7 @@ impl APerElement for UlRtoaMeasurementItem {
 }
 
 // UlSrsRsrp
+#[derive(Clone)]
 pub struct UlSrsRsrp(pub u8);
 
 impl APerElement for UlSrsRsrp {
@@ -24744,6 +26410,7 @@ impl APerElement for UlueConfiguration {
 }
 
 // UlUpTnlInformationToUpdateListItem
+#[derive(Clone)]
 pub struct UlUpTnlInformationToUpdateListItem {
     pub uluptnl_information: UpTransportLayerInformation,
     pub new_uluptnl_information: Option<UpTransportLayerInformation>,
@@ -24797,6 +26464,7 @@ impl APerElement for UlUpTnlInformationToUpdateListItem {
 }
 
 // UlUpTnlAddressToUpdateListItem
+#[derive(Clone)]
 pub struct UlUpTnlAddressToUpdateListItem {
     pub old_ip_adress: TransportLayerAddress,
     pub new_ip_adress: TransportLayerAddress,
@@ -24836,6 +26504,7 @@ impl APerElement for UlUpTnlAddressToUpdateListItem {
 }
 
 // UluptnlInformationToBeSetupList
+#[derive(Clone)]
 pub struct UluptnlInformationToBeSetupList(pub Vec<UluptnlInformationToBeSetupItem>);
 
 impl APerElement for UluptnlInformationToBeSetupList {
@@ -24860,6 +26529,7 @@ impl APerElement for UluptnlInformationToBeSetupList {
 }
 
 // UluptnlInformationToBeSetupItem
+#[derive(Clone)]
 pub struct UluptnlInformationToBeSetupItem {
     pub uluptnl_information: UpTransportLayerInformation,
 }
@@ -24895,6 +26565,7 @@ impl APerElement for UluptnlInformationToBeSetupItem {
 }
 
 // Uncertainty
+#[derive(Clone)]
 pub struct Uncertainty(pub u16);
 
 impl APerElement for Uncertainty {
@@ -24916,6 +26587,7 @@ impl APerElement for Uncertainty {
 }
 
 // UplinkChannelBwPerScsList
+#[derive(Clone)]
 pub struct UplinkChannelBwPerScsList(pub Vec<ScsSpecificCarrier>);
 
 impl APerElement for UplinkChannelBwPerScsList {
@@ -24940,6 +26612,7 @@ impl APerElement for UplinkChannelBwPerScsList {
 }
 
 // UplinkTxDirectCurrentListInformation
+#[derive(Clone)]
 pub struct UplinkTxDirectCurrentListInformation(pub Vec<u8>);
 
 impl APerElement for UplinkTxDirectCurrentListInformation {
@@ -24955,6 +26628,7 @@ impl APerElement for UplinkTxDirectCurrentListInformation {
 }
 
 // UpTransportLayerInformation
+#[derive(Clone)]
 pub enum UpTransportLayerInformation {
     GtpTunnel(GtpTunnel),
     _Extended,
@@ -24986,6 +26660,7 @@ impl APerElement for UpTransportLayerInformation {
 }
 
 // UriAddress
+#[derive(Clone)]
 pub struct UriAddress(pub VisibleString);
 
 impl APerElement for UriAddress {
@@ -25001,6 +26676,7 @@ impl APerElement for UriAddress {
 }
 
 // VictimGnbSetId
+#[derive(Clone)]
 pub struct VictimGnbSetId {
     pub victim_gnb_set_id: GnbSetId,
 }
@@ -26381,6 +28057,7 @@ impl APerElement for Resolution1 {
 }
 
 // N2
+#[derive(Clone)]
 pub struct N2 {
     pub comb_offset_n_2: u8,
     pub cyclic_shift_n_2: u8,
@@ -26389,8 +28066,20 @@ pub struct N2 {
 impl APerElement for N2 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let cyclic_shift_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let comb_offset_n_2 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(1))),
+            },
+        )?;
+        let cyclic_shift_n_2 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(7))),
+            },
+        )?;
 
         Ok(Self {
             comb_offset_n_2,
@@ -26408,6 +28097,7 @@ impl APerElement for N2 {
 }
 
 // N4
+#[derive(Clone)]
 pub struct N4 {
     pub comb_offset_n_4: u8,
     pub cyclic_shift_n_4: u8,
@@ -26416,8 +28106,20 @@ pub struct N4 {
 impl APerElement for N4 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let cyclic_shift_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let comb_offset_n_4 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3))),
+            },
+        )?;
+        let cyclic_shift_n_4 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(11))),
+            },
+        )?;
 
         Ok(Self {
             comb_offset_n_4,
@@ -26435,6 +28137,7 @@ impl APerElement for N4 {
 }
 
 // N21
+#[derive(Clone)]
 pub struct N21 {
     pub comb_offset_n_2: u8,
     pub cyclic_shift_n_2: u8,
@@ -26443,8 +28146,20 @@ pub struct N21 {
 impl APerElement for N21 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let cyclic_shift_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let comb_offset_n_2 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(1))),
+            },
+        )?;
+        let cyclic_shift_n_2 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(7))),
+            },
+        )?;
 
         Ok(Self {
             comb_offset_n_2,
@@ -26462,6 +28177,7 @@ impl APerElement for N21 {
 }
 
 // N41
+#[derive(Clone)]
 pub struct N41 {
     pub comb_offset_n_4: u8,
     pub cyclic_shift_n_4: u8,
@@ -26470,8 +28186,20 @@ pub struct N41 {
 impl APerElement for N41 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let cyclic_shift_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let comb_offset_n_4 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3))),
+            },
+        )?;
+        let cyclic_shift_n_4 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(11))),
+            },
+        )?;
 
         Ok(Self {
             comb_offset_n_4,
@@ -26489,6 +28217,7 @@ impl APerElement for N41 {
 }
 
 // N8
+#[derive(Clone)]
 pub struct N8 {
     pub comb_offset_n_8: u8,
     pub cyclic_shift_n_8: u8,
@@ -26497,8 +28226,20 @@ pub struct N8 {
 impl APerElement for N8 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_8 = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let cyclic_shift_n_8 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let comb_offset_n_8 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(7))),
+            },
+        )?;
+        let cyclic_shift_n_8 = u8::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(5))),
+            },
+        )?;
 
         Ok(Self {
             comb_offset_n_8,

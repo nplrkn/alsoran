@@ -7,6 +7,7 @@ use asn1::aper::*;
 use num_derive::FromPrimitive;
 #[allow(unused_imports)]
 use num_traits::FromPrimitive;
+#[derive(Clone)]
 pub struct VisibleString(pub String);
 impl APerElement for VisibleString {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
@@ -18,6 +19,7 @@ impl APerElement for VisibleString {
     }
 }
 
+#[derive(Clone)]
 pub struct Utf8String(pub String);
 impl APerElement for Utf8String {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
@@ -29,6 +31,7 @@ impl APerElement for Utf8String {
     }
 }
 
+#[derive(Clone)]
 pub struct PrintableString(pub String);
 impl APerElement for PrintableString {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
@@ -84,6 +87,7 @@ impl APerElement for Presence {
 }
 
 // PrivateIeId
+#[derive(Clone)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
@@ -93,7 +97,7 @@ impl APerElement for PrivateIeId {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::Local(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::Local(u16::from_aper(decoder, Constraints { value: None, size: Some(Constraint::new(Some(0), Some(65535))) })?)),
             1 => Ok(Self::Global(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)),
             _ => Err(DecodeError::InvalidChoice)
         }
@@ -103,7 +107,7 @@ impl APerElement for PrivateIeId {
         match self {
             Self::Local(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?; }
+                enc.append(&x.to_aper(Constraints { value: None, size: Some(Constraint::new(Some(0), Some(65535))) })?)?; }
             Self::Global(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
                 enc.append(&x.to_aper(UNCONSTRAINED)?)?; }
@@ -114,6 +118,7 @@ impl APerElement for PrivateIeId {
 
 
 // ProcedureCode
+#[derive(Clone)]
 pub struct ProcedureCode(pub u8);
 
 impl APerElement for ProcedureCode {
@@ -135,6 +140,7 @@ impl APerElement for ProcedureCode {
 }
 
 // ProtocolExtensionId
+#[derive(Clone)]
 pub struct ProtocolExtensionId(pub u16);
 
 impl APerElement for ProtocolExtensionId {
@@ -156,6 +162,7 @@ impl APerElement for ProtocolExtensionId {
 }
 
 // ProtocolIeId
+#[derive(Clone)]
 pub struct ProtocolIeId(pub u16);
 
 impl APerElement for ProtocolIeId {

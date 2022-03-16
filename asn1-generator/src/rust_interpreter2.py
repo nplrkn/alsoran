@@ -28,6 +28,19 @@ BOUNDED_CONSTRAINTS = \
 UNCONSTRAINED_CONSTRAINTS = """const CONSTRAINTS: Constraints = UNCONSTRAINED;"""
 
 
+def type_and_constraints(typ):
+    constraints = "UNCONSTRAINED"
+
+    if isinstance(typ, Tree):
+        if len(typ.children) == 2:
+            lb = typ.children[0]
+            ub = typ.children[1]
+            constraints = f"Constraints {{ value: None, size: Some(Constraint::new(Some({lb}), Some({ub}))) }}"
+        typ = typ.data
+
+    return (typ, constraints)
+
+
 class StructFieldsFrom(Interpreter):
     def __init__(self):
         self.fields_from = ""
@@ -36,23 +49,19 @@ class StructFieldsFrom(Interpreter):
     def field(self, tree):
         name = tree.children[0]
         self.self_fields += f"            {name},\n"
-        typ = tree.children[1]
-        if isinstance(typ, Tree):
-            typ = typ.data
+        (typ, constraints) = type_and_constraints(tree.children[1])
         self.fields_from += f"""\
-        let {name} = {typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?;
+        let {name} = {typ.replace("Vec<","Vec::<")}::from_aper(decoder, {constraints})?;
 """
 
     def optional_field(self, tree):
         name = tree.children[0]
         self.self_fields += f"            {name},\n"
-        typ = tree.children[1]
-        if isinstance(typ, Tree):
-            typ = typ.data
+        (typ, constraints) = type_and_constraints(tree.children[1])
 
         self.fields_from += f"""\
         let {name} = if optionals.is_set(0) {{
-            Some({typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?)
+            Some({typ.replace("Vec<","Vec::<")}::from_aper(decoder, {constraints})?)
         }} else {{
             None
         }};
@@ -107,6 +116,7 @@ class ChoiceFields(Interpreter):
     def choicefield(self, tree):
         name = tree.children[0]
         typ = tree.children[1]
+
         if isinstance(typ, Tree):
             typ = typ.data
         self.choice_fields += f"""\
@@ -129,12 +139,13 @@ class ChoiceFieldsTo(Interpreter):
 
     def choicefield(self, tree):
         name = tree.children[0]
-        typ = tree.children[1]
+        (typ, constraints) = type_and_constraints(tree.children[1])
+
         if typ != "null":
             self.fields_to += f"""\
             Self::{name}(x) => {{
                 enc.append(&({self.field_index} as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?; }}
+                enc.append(&x.to_aper({constraints})?)?; }}
 """
         else:
             self.fields_to += f"""\
@@ -157,13 +168,11 @@ class ChoiceFieldsFrom(Interpreter):
 
     def choicefield(self, tree):
         name = tree.children[0]
-        typ = tree.children[1]
-        if isinstance(typ, Tree):
-            typ = typ.data
+        (typ, constraints) = type_and_constraints(tree.children[1])
 
         if typ != "null":
             self.fields_from += f"""\
-            {self.field_index} => Ok(Self::{name}({typ.replace("Vec<","Vec::<")}::from_aper(decoder, UNCONSTRAINED)?)),
+            {self.field_index} => Ok(Self::{name}({typ.replace("Vec<","Vec::<")}::from_aper(decoder, {constraints})?)),
 """
         else:
             self.fields_from += f"""\
@@ -317,9 +326,6 @@ class StructInterpreter(Interpreter):
         self.outfile = ""
         self.in_enum = False
 
-    # def struct_start(self, s):
-    #     self.output += "pub struct " + s
-
     def extended_items(self, tree):
         pass
 
@@ -372,6 +378,7 @@ impl APerElement for {name} {{
 
         self.outfile += f"""\
 // {orig_name}
+#[derive(Clone)]
 pub enum {name} {{
 {field_interpreter.choice_fields}\
 }}
@@ -412,6 +419,7 @@ impl APerElement for {name} {{
 
         output = f"""\
 // {orig_name}
+#[derive(Clone)]
 pub struct {name}(pub {inner});
 
 impl APerElement for {name} {{
@@ -459,6 +467,7 @@ impl APerElement for {name} {{
 
         self.outfile += f"""\
 // {orig_name}
+#[derive(Clone)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -535,6 +544,7 @@ impl APerElement for {name} {{
 
         self.outfile += f"""\
 // {orig_name}
+#[derive(Clone)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -653,6 +663,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
 """
         output = """\
 // WlanMeasurementConfiguration
+#[derive(Clone)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_rtt: Option<WlanRtt>,
@@ -731,6 +742,7 @@ LTEUERLFReportContainer::= OCTET STRING
 """
         output = """\
 // LteueRlfReportContainer
+#[derive(Clone)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
 
 impl APerElement for LteueRlfReportContainer {
@@ -754,6 +766,7 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
 """
         output = """\
 // MaximumDataBurstVolume
+#[derive(Clone)]
 pub struct MaximumDataBurstVolume(pub u16);
 
 impl APerElement for MaximumDataBurstVolume {
@@ -783,6 +796,7 @@ MobilityInformation ::= BIT STRING(SIZE(16))
 """
         output = """\
 // MobilityInformation
+#[derive(Clone)]
 pub struct MobilityInformation(pub BitString);
 
 impl APerElement for MobilityInformation {
@@ -853,6 +867,7 @@ EventTrigger ::= CHOICE {
 }
 """, """\
 // EventTrigger
+#[derive(Clone)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig,
@@ -866,7 +881,7 @@ impl APerElement for EventTrigger {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::OutOfCoverage(OutOfCoverage::from_aper(decoder, UNCONSTRAINED)?)),
             1 => Ok(Self::EventL1LoggedMdtConfig),
-            2 => Ok(Self::ShortMacroEnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::ShortMacroEnbId(BitString::from_aper(decoder, Constraints { value: None, size: Some(Constraint::new(Some(18), Some(18))) })?)),
             3 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice)
         }
@@ -881,7 +896,7 @@ impl APerElement for EventTrigger {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?; }
             Self::ShortMacroEnbId(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?; }
+                enc.append(&x.to_aper(Constraints { value: None, size: Some(Constraint::new(Some(18), Some(18))) })?)?; }
             Self::_Extended => return Err(EncodeError::NotImplemented)
         }
         Ok(enc)
@@ -929,6 +944,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 }
 """, """\
 // PduSessionResourceSetupRequest
+#[derive(Clone)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_paging_priority: Option<Vec<u8>>,
@@ -988,6 +1004,84 @@ impl APerElement for PduSessionResourceSetupRequest {
 }
 
 """, constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
+
+    def test_bit_string(self):
+        self.should_generate("""\
+GNB-ID ::= CHOICE {
+	gNB-ID		BIT STRING (SIZE (22..32)),
+	choice-Extensions		ProtocolIE-SingleContainer { {GNB-ID-ExtIEs } }
+}
+""", """\
+// GnbId
+#[derive(Clone)]
+pub enum GnbId {
+    GnbId(BitString),
+    _Extended,
+}
+
+impl APerElement for GnbId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::GnbId(BitString::from_aper(decoder, Constraints { value: None, size: Some(Constraint::new(Some(22), Some(32))) })?)),
+            1 => Err(DecodeError::NotImplemented),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::GnbId(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints { value: None, size: Some(Constraint::new(Some(22), Some(32))) })?)?; }
+            Self::_Extended => return Err(EncodeError::NotImplemented)
+        }
+        Ok(enc)
+    }
+}
+
+
+""")
+
+    def test_bug(self):
+        self.should_generate("""\
+PrivateIE-ID	::= CHOICE {
+	local				INTEGER (0..65535),
+	global				OBJECT IDENTIFIER
+}
+""", """\
+// PrivateIeId
+#[derive(Clone)]
+pub enum PrivateIeId {
+    Local(u16),
+    Global(Vec<u8>),
+}
+
+impl APerElement for PrivateIeId {
+    const CONSTRAINTS: Constraints = UNCONSTRAINED;
+    fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
+        match u8::from_aper(decoder, UNCONSTRAINED)? {
+            0 => Ok(Self::Local(u16::from_aper(decoder, Constraints { value: None, size: Some(Constraint::new(Some(0), Some(65535))) })?)),
+            1 => Ok(Self::Global(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)),
+            _ => Err(DecodeError::InvalidChoice)
+        }
+    }
+    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
+        let mut enc = Encoding::new();
+        match self {
+            Self::Local(x) => {
+                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints { value: None, size: Some(Constraint::new(Some(0), Some(65535))) })?)?; }
+            Self::Global(x) => {
+                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?; }
+        }
+        Ok(enc)
+    }
+}
+
+
+""")
 
 
 if __name__ == '__main__':

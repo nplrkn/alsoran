@@ -3,3 +3,5 @@
 pub mod common;
 pub mod ies;
 pub mod pdu;
+#[cfg(test)]
+mod test;

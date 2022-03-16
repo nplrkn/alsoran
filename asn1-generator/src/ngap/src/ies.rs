@@ -10,6 +10,7 @@ use num_derive::FromPrimitive;
 #[allow(unused_imports)]
 use num_traits::FromPrimitive;
 // AdditionalDluptnlInformationForHoList
+#[derive(Clone)]
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
 
 impl APerElement for AdditionalDluptnlInformationForHoList {
@@ -33,6 +34,7 @@ impl APerElement for AdditionalDluptnlInformationForHoList {
 }
 
 // AdditionalDluptnlInformationForHoItem
+#[derive(Clone)]
 pub struct AdditionalDluptnlInformationForHoItem {
     pub additional_dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub additional_qos_flow_setup_response_list: QosFlowListWithDataForwarding,
@@ -120,6 +122,7 @@ impl APerElement for AdditionalQosFlowInformation {
 }
 
 // AllocationAndRetentionPriority
+#[derive(Clone)]
 pub struct AllocationAndRetentionPriority {
     pub priority_level_arp: PriorityLevelArp,
     pub pre_emption_capability: PreEmptionCapability,
@@ -163,6 +166,7 @@ impl APerElement for AllocationAndRetentionPriority {
 }
 
 // AllowedCagListPerPlmn
+#[derive(Clone)]
 pub struct AllowedCagListPerPlmn(pub Vec<CagId>);
 
 impl APerElement for AllowedCagListPerPlmn {
@@ -184,6 +188,7 @@ impl APerElement for AllowedCagListPerPlmn {
 }
 
 // AllowedNssai
+#[derive(Clone)]
 pub struct AllowedNssai(pub Vec<AllowedNssaiItem>);
 
 impl APerElement for AllowedNssai {
@@ -208,6 +213,7 @@ impl APerElement for AllowedNssai {
 }
 
 // AllowedNssaiItem
+#[derive(Clone)]
 pub struct AllowedNssaiItem {
     pub s_nssai: SNssai,
 }
@@ -241,6 +247,7 @@ impl APerElement for AllowedNssaiItem {
 }
 
 // AllowedPniNpnList
+#[derive(Clone)]
 pub struct AllowedPniNpnList(pub Vec<AllowedPniNpnItem>);
 
 impl APerElement for AllowedPniNpnList {
@@ -265,6 +272,7 @@ impl APerElement for AllowedPniNpnList {
 }
 
 // AllowedPniNpnItem
+#[derive(Clone)]
 pub struct AllowedPniNpnItem {
     pub plmn_identity: PlmnIdentity,
     pub pni_npn_restricted: PniNpnRestricted,
@@ -308,6 +316,7 @@ impl APerElement for AllowedPniNpnItem {
 }
 
 // AllowedTaCs
+#[derive(Clone)]
 pub struct AllowedTaCs(pub Vec<Tac>);
 
 impl APerElement for AllowedTaCs {
@@ -329,6 +338,7 @@ impl APerElement for AllowedTaCs {
 }
 
 // AlternativeQosParaSetIndex
+#[derive(Clone)]
 pub struct AlternativeQosParaSetIndex(pub u8);
 
 impl APerElement for AlternativeQosParaSetIndex {
@@ -350,6 +360,7 @@ impl APerElement for AlternativeQosParaSetIndex {
 }
 
 // AlternativeQosParaSetNotifyIndex
+#[derive(Clone)]
 pub struct AlternativeQosParaSetNotifyIndex(pub u8);
 
 impl APerElement for AlternativeQosParaSetNotifyIndex {
@@ -371,6 +382,7 @@ impl APerElement for AlternativeQosParaSetNotifyIndex {
 }
 
 // AlternativeQosParaSetList
+#[derive(Clone)]
 pub struct AlternativeQosParaSetList(pub Vec<AlternativeQosParaSetItem>);
 
 impl APerElement for AlternativeQosParaSetList {
@@ -395,6 +407,7 @@ impl APerElement for AlternativeQosParaSetList {
 }
 
 // AlternativeQosParaSetItem
+#[derive(Clone)]
 pub struct AlternativeQosParaSetItem {
     pub alternative_qos_para_set_index: AlternativeQosParaSetIndex,
     pub guaranteed_flow_bit_rate_dl: Option<BitRate>,
@@ -475,6 +488,7 @@ impl APerElement for AlternativeQosParaSetItem {
 }
 
 // AmfName
+#[derive(Clone)]
 pub struct AmfName(pub PrintableString);
 
 impl APerElement for AmfName {
@@ -499,6 +513,7 @@ impl APerElement for AmfName {
 }
 
 // AmfNameVisibleString
+#[derive(Clone)]
 pub struct AmfNameVisibleString(pub VisibleString);
 
 impl APerElement for AmfNameVisibleString {
@@ -520,6 +535,7 @@ impl APerElement for AmfNameVisibleString {
 }
 
 // AmfNameUtf8String
+#[derive(Clone)]
 pub struct AmfNameUtf8String(pub Utf8String);
 
 impl APerElement for AmfNameUtf8String {
@@ -541,6 +557,7 @@ impl APerElement for AmfNameUtf8String {
 }
 
 // AmfPagingTarget
+#[derive(Clone)]
 pub enum AmfPagingTarget {
     GlobalRanNodeId(GlobalRanNodeId),
     Tai(Tai),
@@ -578,6 +595,7 @@ impl APerElement for AmfPagingTarget {
 }
 
 // AmfPointer
+#[derive(Clone)]
 pub struct AmfPointer(pub BitString);
 
 impl APerElement for AmfPointer {
@@ -599,6 +617,7 @@ impl APerElement for AmfPointer {
 }
 
 // AmfRegionId
+#[derive(Clone)]
 pub struct AmfRegionId(pub BitString);
 
 impl APerElement for AmfRegionId {
@@ -620,6 +639,7 @@ impl APerElement for AmfRegionId {
 }
 
 // AmfSetId
+#[derive(Clone)]
 pub struct AmfSetId(pub BitString);
 
 impl APerElement for AmfSetId {
@@ -641,6 +661,7 @@ impl APerElement for AmfSetId {
 }
 
 // AmfTnlAssociationSetupList
+#[derive(Clone)]
 pub struct AmfTnlAssociationSetupList(pub Vec<AmfTnlAssociationSetupItem>);
 
 impl APerElement for AmfTnlAssociationSetupList {
@@ -665,6 +686,7 @@ impl APerElement for AmfTnlAssociationSetupList {
 }
 
 // AmfTnlAssociationSetupItem
+#[derive(Clone)]
 pub struct AmfTnlAssociationSetupItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
 }
@@ -701,6 +723,7 @@ impl APerElement for AmfTnlAssociationSetupItem {
 }
 
 // AmfTnlAssociationToAddList
+#[derive(Clone)]
 pub struct AmfTnlAssociationToAddList(pub Vec<AmfTnlAssociationToAddItem>);
 
 impl APerElement for AmfTnlAssociationToAddList {
@@ -725,6 +748,7 @@ impl APerElement for AmfTnlAssociationToAddList {
 }
 
 // AmfTnlAssociationToAddItem
+#[derive(Clone)]
 pub struct AmfTnlAssociationToAddItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
     pub tnl_association_usage: Option<TnlAssociationUsage>,
@@ -776,6 +800,7 @@ impl APerElement for AmfTnlAssociationToAddItem {
 }
 
 // AmfTnlAssociationToRemoveList
+#[derive(Clone)]
 pub struct AmfTnlAssociationToRemoveList(pub Vec<AmfTnlAssociationToRemoveItem>);
 
 impl APerElement for AmfTnlAssociationToRemoveList {
@@ -800,6 +825,7 @@ impl APerElement for AmfTnlAssociationToRemoveList {
 }
 
 // AmfTnlAssociationToRemoveItem
+#[derive(Clone)]
 pub struct AmfTnlAssociationToRemoveItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
 }
@@ -836,6 +862,7 @@ impl APerElement for AmfTnlAssociationToRemoveItem {
 }
 
 // AmfTnlAssociationToUpdateList
+#[derive(Clone)]
 pub struct AmfTnlAssociationToUpdateList(pub Vec<AmfTnlAssociationToUpdateItem>);
 
 impl APerElement for AmfTnlAssociationToUpdateList {
@@ -860,6 +887,7 @@ impl APerElement for AmfTnlAssociationToUpdateList {
 }
 
 // AmfTnlAssociationToUpdateItem
+#[derive(Clone)]
 pub struct AmfTnlAssociationToUpdateItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
     pub tnl_association_usage: Option<TnlAssociationUsage>,
@@ -918,6 +946,7 @@ impl APerElement for AmfTnlAssociationToUpdateItem {
 }
 
 // AmfUeNgapId
+#[derive(Clone)]
 pub struct AmfUeNgapId(pub u64);
 
 impl APerElement for AmfUeNgapId {
@@ -939,6 +968,7 @@ impl APerElement for AmfUeNgapId {
 }
 
 // AreaOfInterest
+#[derive(Clone)]
 pub struct AreaOfInterest {
     pub area_of_interest_tai_list: Option<AreaOfInterestTaiList>,
     pub area_of_interest_cell_list: Option<AreaOfInterestCellList>,
@@ -1006,6 +1036,7 @@ impl APerElement for AreaOfInterest {
 }
 
 // AreaOfInterestCellList
+#[derive(Clone)]
 pub struct AreaOfInterestCellList(pub Vec<AreaOfInterestCellItem>);
 
 impl APerElement for AreaOfInterestCellList {
@@ -1030,6 +1061,7 @@ impl APerElement for AreaOfInterestCellList {
 }
 
 // AreaOfInterestCellItem
+#[derive(Clone)]
 pub struct AreaOfInterestCellItem {
     pub ngran_cgi: NgranCgi,
 }
@@ -1063,6 +1095,7 @@ impl APerElement for AreaOfInterestCellItem {
 }
 
 // AreaOfInterestList
+#[derive(Clone)]
 pub struct AreaOfInterestList(pub Vec<AreaOfInterestItem>);
 
 impl APerElement for AreaOfInterestList {
@@ -1087,6 +1120,7 @@ impl APerElement for AreaOfInterestList {
 }
 
 // AreaOfInterestItem
+#[derive(Clone)]
 pub struct AreaOfInterestItem {
     pub area_of_interest: AreaOfInterest,
     pub location_reporting_reference_id: LocationReportingReferenceId,
@@ -1131,6 +1165,7 @@ impl APerElement for AreaOfInterestItem {
 }
 
 // AreaOfInterestRanNodeList
+#[derive(Clone)]
 pub struct AreaOfInterestRanNodeList(pub Vec<AreaOfInterestRanNodeItem>);
 
 impl APerElement for AreaOfInterestRanNodeList {
@@ -1155,6 +1190,7 @@ impl APerElement for AreaOfInterestRanNodeList {
 }
 
 // AreaOfInterestRanNodeItem
+#[derive(Clone)]
 pub struct AreaOfInterestRanNodeItem {
     pub global_ran_node_id: GlobalRanNodeId,
 }
@@ -1188,6 +1224,7 @@ impl APerElement for AreaOfInterestRanNodeItem {
 }
 
 // AreaOfInterestTaiList
+#[derive(Clone)]
 pub struct AreaOfInterestTaiList(pub Vec<AreaOfInterestTaiItem>);
 
 impl APerElement for AreaOfInterestTaiList {
@@ -1212,6 +1249,7 @@ impl APerElement for AreaOfInterestTaiList {
 }
 
 // AreaOfInterestTaiItem
+#[derive(Clone)]
 pub struct AreaOfInterestTaiItem {
     pub tai: Tai,
 }
@@ -1245,6 +1283,7 @@ impl APerElement for AreaOfInterestTaiItem {
 }
 
 // AssistanceDataForPaging
+#[derive(Clone)]
 pub struct AssistanceDataForPaging {
     pub assistance_data_for_recommended_cells: Option<AssistanceDataForRecommendedCells>,
     pub paging_attempt_information: Option<PagingAttemptInformation>,
@@ -1301,6 +1340,7 @@ impl APerElement for AssistanceDataForPaging {
 }
 
 // AssistanceDataForRecommendedCells
+#[derive(Clone)]
 pub struct AssistanceDataForRecommendedCells {
     pub recommended_cells_for_paging: RecommendedCellsForPaging,
 }
@@ -1337,6 +1377,7 @@ impl APerElement for AssistanceDataForRecommendedCells {
 }
 
 // AssociatedQosFlowList
+#[derive(Clone)]
 pub struct AssociatedQosFlowList(pub Vec<AssociatedQosFlowItem>);
 
 impl APerElement for AssociatedQosFlowList {
@@ -1361,6 +1402,7 @@ impl APerElement for AssociatedQosFlowList {
 }
 
 // AssociatedQosFlowItem
+#[derive(Clone)]
 pub struct AssociatedQosFlowItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_mapping_indication: Option<QosFlowMappingIndication>,
@@ -1431,6 +1473,7 @@ impl APerElement for AuthenticatedIndication {
 }
 
 // AveragingWindow
+#[derive(Clone)]
 pub struct AveragingWindow(pub u16);
 
 impl APerElement for AveragingWindow {
@@ -1452,6 +1495,7 @@ impl APerElement for AveragingWindow {
 }
 
 // AreaScopeOfMdtNr
+#[derive(Clone)]
 pub enum AreaScopeOfMdtNr {
     CellBased(CellBasedMdtNr),
     TaBased(TaBasedMdt),
@@ -1506,6 +1550,7 @@ impl APerElement for AreaScopeOfMdtNr {
 }
 
 // AreaScopeOfMdtEutra
+#[derive(Clone)]
 pub enum AreaScopeOfMdtEutra {
     CellBased(CellBasedMdtEutra),
     TaBased(TaBasedMdt),
@@ -1560,6 +1605,7 @@ impl APerElement for AreaScopeOfMdtEutra {
 }
 
 // AreaScopeOfNeighCellsList
+#[derive(Clone)]
 pub struct AreaScopeOfNeighCellsList(pub Vec<AreaScopeOfNeighCellsItem>);
 
 impl APerElement for AreaScopeOfNeighCellsList {
@@ -1584,6 +1630,7 @@ impl APerElement for AreaScopeOfNeighCellsList {
 }
 
 // AreaScopeOfNeighCellsItem
+#[derive(Clone)]
 pub struct AreaScopeOfNeighCellsItem {
     pub nr_frequency_info: NrFrequencyInfo,
     pub pci_list_for_mdt: Option<PciListForMdt>,
@@ -1630,6 +1677,7 @@ impl APerElement for AreaScopeOfNeighCellsItem {
 }
 
 // BitRate
+#[derive(Clone)]
 pub struct BitRate(pub u64);
 
 impl APerElement for BitRate {
@@ -1651,6 +1699,7 @@ impl APerElement for BitRate {
 }
 
 // BroadcastCancelledAreaList
+#[derive(Clone)]
 pub enum BroadcastCancelledAreaList {
     CellIdCancelledEutra(CellIdCancelledEutra),
     TaiCancelledEutra(TaiCancelledEutra),
@@ -1725,6 +1774,7 @@ impl APerElement for BroadcastCancelledAreaList {
 }
 
 // BroadcastCompletedAreaList
+#[derive(Clone)]
 pub enum BroadcastCompletedAreaList {
     CellIdBroadcastEutra(CellIdBroadcastEutra),
     TaiBroadcastEutra(TaiBroadcastEutra),
@@ -1799,6 +1849,7 @@ impl APerElement for BroadcastCompletedAreaList {
 }
 
 // BroadcastPlmnList
+#[derive(Clone)]
 pub struct BroadcastPlmnList(pub Vec<BroadcastPlmnItem>);
 
 impl APerElement for BroadcastPlmnList {
@@ -1823,6 +1874,7 @@ impl APerElement for BroadcastPlmnList {
 }
 
 // BroadcastPlmnItem
+#[derive(Clone)]
 pub struct BroadcastPlmnItem {
     pub plmn_identity: PlmnIdentity,
     pub tai_slice_support_list: SliceSupportList,
@@ -1862,6 +1914,7 @@ impl APerElement for BroadcastPlmnItem {
 }
 
 // BluetoothMeasurementConfiguration
+#[derive(Clone)]
 pub struct BluetoothMeasurementConfiguration {
     pub bluetooth_meas_config: BluetoothMeasConfig,
     pub bluetooth_meas_config_name_list: Option<BluetoothMeasConfigNameList>,
@@ -1922,6 +1975,7 @@ impl APerElement for BluetoothMeasurementConfiguration {
 }
 
 // BluetoothMeasConfigNameList
+#[derive(Clone)]
 pub struct BluetoothMeasConfigNameList(pub Vec<BluetoothMeasConfigNameItem>);
 
 impl APerElement for BluetoothMeasConfigNameList {
@@ -1946,6 +2000,7 @@ impl APerElement for BluetoothMeasConfigNameList {
 }
 
 // BluetoothMeasConfigNameItem
+#[derive(Clone)]
 pub struct BluetoothMeasConfigNameItem {
     pub bluetooth_name: BluetoothName,
 }
@@ -2003,6 +2058,7 @@ impl APerElement for BluetoothMeasConfig {
 }
 
 // BluetoothName
+#[derive(Clone)]
 pub struct BluetoothName(pub Vec<u8>);
 
 impl APerElement for BluetoothName {
@@ -2024,6 +2080,7 @@ impl APerElement for BluetoothName {
 }
 
 // BurstArrivalTime
+#[derive(Clone)]
 pub struct BurstArrivalTime(pub Vec<u8>);
 
 impl APerElement for BurstArrivalTime {
@@ -2039,6 +2096,7 @@ impl APerElement for BurstArrivalTime {
 }
 
 // CagId
+#[derive(Clone)]
 pub struct CagId(pub BitString);
 
 impl APerElement for CagId {
@@ -2084,6 +2142,7 @@ impl APerElement for CancelAllWarningMessages {
 }
 
 // CancelledCellsInEaiEutra
+#[derive(Clone)]
 pub struct CancelledCellsInEaiEutra(pub Vec<CancelledCellsInEaiEutraItem>);
 
 impl APerElement for CancelledCellsInEaiEutra {
@@ -2108,6 +2167,7 @@ impl APerElement for CancelledCellsInEaiEutra {
 }
 
 // CancelledCellsInEaiEutraItem
+#[derive(Clone)]
 pub struct CancelledCellsInEaiEutraItem {
     pub eutra_cgi: EutraCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -2147,6 +2207,7 @@ impl APerElement for CancelledCellsInEaiEutraItem {
 }
 
 // CancelledCellsInEaiNr
+#[derive(Clone)]
 pub struct CancelledCellsInEaiNr(pub Vec<CancelledCellsInEaiNrItem>);
 
 impl APerElement for CancelledCellsInEaiNr {
@@ -2171,6 +2232,7 @@ impl APerElement for CancelledCellsInEaiNr {
 }
 
 // CancelledCellsInEaiNrItem
+#[derive(Clone)]
 pub struct CancelledCellsInEaiNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -2210,6 +2272,7 @@ impl APerElement for CancelledCellsInEaiNrItem {
 }
 
 // CancelledCellsInTaiEutra
+#[derive(Clone)]
 pub struct CancelledCellsInTaiEutra(pub Vec<CancelledCellsInTaiEutraItem>);
 
 impl APerElement for CancelledCellsInTaiEutra {
@@ -2234,6 +2297,7 @@ impl APerElement for CancelledCellsInTaiEutra {
 }
 
 // CancelledCellsInTaiEutraItem
+#[derive(Clone)]
 pub struct CancelledCellsInTaiEutraItem {
     pub eutra_cgi: EutraCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -2273,6 +2337,7 @@ impl APerElement for CancelledCellsInTaiEutraItem {
 }
 
 // CancelledCellsInTaiNr
+#[derive(Clone)]
 pub struct CancelledCellsInTaiNr(pub Vec<CancelledCellsInTaiNrItem>);
 
 impl APerElement for CancelledCellsInTaiNr {
@@ -2297,6 +2362,7 @@ impl APerElement for CancelledCellsInTaiNr {
 }
 
 // CancelledCellsInTaiNrItem
+#[derive(Clone)]
 pub struct CancelledCellsInTaiNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -2336,6 +2402,7 @@ impl APerElement for CancelledCellsInTaiNrItem {
 }
 
 // CandidateCellList
+#[derive(Clone)]
 pub struct CandidateCellList(pub Vec<CandidateCellItem>);
 
 impl APerElement for CandidateCellList {
@@ -2360,6 +2427,7 @@ impl APerElement for CandidateCellList {
 }
 
 // CandidateCellItem
+#[derive(Clone)]
 pub struct CandidateCellItem {
     pub candidate_cell: CandidateCell,
 }
@@ -2393,6 +2461,7 @@ impl APerElement for CandidateCellItem {
 }
 
 // CandidateCell
+#[derive(Clone)]
 pub enum CandidateCell {
     CandidateCgi(CandidateCellId),
     CandidatePci(CandidatePci),
@@ -2433,6 +2502,7 @@ impl APerElement for CandidateCell {
 }
 
 // CandidateCellId
+#[derive(Clone)]
 pub struct CandidateCellId {
     pub candidate_cell_id: NrCgi,
 }
@@ -2466,6 +2536,7 @@ impl APerElement for CandidateCellId {
 }
 
 // CandidatePci
+#[derive(Clone)]
 pub struct CandidatePci {
     pub candidate_pci: u16,
     pub candidate_nrarfcn: u32,
@@ -2483,7 +2554,13 @@ impl APerElement for CandidatePci {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let candidate_pci = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let candidate_nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let candidate_nrarfcn = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(3279165))),
+            },
+        )?;
 
         Ok(Self {
             candidate_pci,
@@ -2505,6 +2582,7 @@ impl APerElement for CandidatePci {
 }
 
 // Cause
+#[derive(Clone)]
 pub enum Cause {
     RadioNetwork(CauseRadioNetwork),
     Transport(CauseTransport),
@@ -2745,6 +2823,7 @@ impl APerElement for CauseTransport {
 }
 
 // CellCagInformation
+#[derive(Clone)]
 pub struct CellCagInformation {
     pub ngran_cgi: NgranCgi,
     pub cell_cag_list: CellCagList,
@@ -2784,6 +2863,7 @@ impl APerElement for CellCagInformation {
 }
 
 // CellCagList
+#[derive(Clone)]
 pub struct CellCagList(pub Vec<CagId>);
 
 impl APerElement for CellCagList {
@@ -2805,6 +2885,7 @@ impl APerElement for CellCagList {
 }
 
 // CellIdBroadcastEutra
+#[derive(Clone)]
 pub struct CellIdBroadcastEutra(pub Vec<CellIdBroadcastEutraItem>);
 
 impl APerElement for CellIdBroadcastEutra {
@@ -2829,6 +2910,7 @@ impl APerElement for CellIdBroadcastEutra {
 }
 
 // CellIdBroadcastEutraItem
+#[derive(Clone)]
 pub struct CellIdBroadcastEutraItem {
     pub eutra_cgi: EutraCgi,
 }
@@ -2862,6 +2944,7 @@ impl APerElement for CellIdBroadcastEutraItem {
 }
 
 // CellIdBroadcastNr
+#[derive(Clone)]
 pub struct CellIdBroadcastNr(pub Vec<CellIdBroadcastNrItem>);
 
 impl APerElement for CellIdBroadcastNr {
@@ -2886,6 +2969,7 @@ impl APerElement for CellIdBroadcastNr {
 }
 
 // CellIdBroadcastNrItem
+#[derive(Clone)]
 pub struct CellIdBroadcastNrItem {
     pub nr_cgi: NrCgi,
 }
@@ -2919,6 +3003,7 @@ impl APerElement for CellIdBroadcastNrItem {
 }
 
 // CellIdCancelledEutra
+#[derive(Clone)]
 pub struct CellIdCancelledEutra(pub Vec<CellIdCancelledEutraItem>);
 
 impl APerElement for CellIdCancelledEutra {
@@ -2943,6 +3028,7 @@ impl APerElement for CellIdCancelledEutra {
 }
 
 // CellIdCancelledEutraItem
+#[derive(Clone)]
 pub struct CellIdCancelledEutraItem {
     pub eutra_cgi: EutraCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -2982,6 +3068,7 @@ impl APerElement for CellIdCancelledEutraItem {
 }
 
 // CellIdCancelledNr
+#[derive(Clone)]
 pub struct CellIdCancelledNr(pub Vec<CellIdCancelledNrItem>);
 
 impl APerElement for CellIdCancelledNr {
@@ -3006,6 +3093,7 @@ impl APerElement for CellIdCancelledNr {
 }
 
 // CellIdCancelledNrItem
+#[derive(Clone)]
 pub struct CellIdCancelledNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -3045,6 +3133,7 @@ impl APerElement for CellIdCancelledNrItem {
 }
 
 // CellIdListForRestart
+#[derive(Clone)]
 pub enum CellIdListForRestart {
     EutraCgiListforRestart(EutraCgiList),
     NrCgiListforRestart(NrCgiList),
@@ -3112,6 +3201,7 @@ impl APerElement for CellSize {
 }
 
 // CellType
+#[derive(Clone)]
 pub struct CellType {
     pub cell_size: CellSize,
 }
@@ -3194,6 +3284,7 @@ impl APerElement for CEmodeBrestricted {
 }
 
 // CnAssistedRanTuning
+#[derive(Clone)]
 pub struct CnAssistedRanTuning {
     pub expected_ue_behaviour: Option<ExpectedUeBehaviour>,
 }
@@ -3236,6 +3327,7 @@ impl APerElement for CnAssistedRanTuning {
 }
 
 // CnTypeRestrictionsForEquivalent
+#[derive(Clone)]
 pub struct CnTypeRestrictionsForEquivalent(pub Vec<CnTypeRestrictionsForEquivalentItem>);
 
 impl APerElement for CnTypeRestrictionsForEquivalent {
@@ -3260,6 +3352,7 @@ impl APerElement for CnTypeRestrictionsForEquivalent {
 }
 
 // CnTypeRestrictionsForEquivalentItem
+#[derive(Clone)]
 pub struct CnTypeRestrictionsForEquivalentItem {
     pub plmn_identity: PlmnIdentity,
     pub cn_type: CnType,
@@ -3323,6 +3416,7 @@ impl APerElement for CnTypeRestrictionsForServing {
 }
 
 // CommonNetworkInstance
+#[derive(Clone)]
 pub struct CommonNetworkInstance(pub Vec<u8>);
 
 impl APerElement for CommonNetworkInstance {
@@ -3338,6 +3432,7 @@ impl APerElement for CommonNetworkInstance {
 }
 
 // CompletedCellsInEaiEutra
+#[derive(Clone)]
 pub struct CompletedCellsInEaiEutra(pub Vec<CompletedCellsInEaiEutraItem>);
 
 impl APerElement for CompletedCellsInEaiEutra {
@@ -3362,6 +3457,7 @@ impl APerElement for CompletedCellsInEaiEutra {
 }
 
 // CompletedCellsInEaiEutraItem
+#[derive(Clone)]
 pub struct CompletedCellsInEaiEutraItem {
     pub eutra_cgi: EutraCgi,
 }
@@ -3395,6 +3491,7 @@ impl APerElement for CompletedCellsInEaiEutraItem {
 }
 
 // CompletedCellsInEaiNr
+#[derive(Clone)]
 pub struct CompletedCellsInEaiNr(pub Vec<CompletedCellsInEaiNrItem>);
 
 impl APerElement for CompletedCellsInEaiNr {
@@ -3419,6 +3516,7 @@ impl APerElement for CompletedCellsInEaiNr {
 }
 
 // CompletedCellsInEaiNrItem
+#[derive(Clone)]
 pub struct CompletedCellsInEaiNrItem {
     pub nr_cgi: NrCgi,
 }
@@ -3452,6 +3550,7 @@ impl APerElement for CompletedCellsInEaiNrItem {
 }
 
 // CompletedCellsInTaiEutra
+#[derive(Clone)]
 pub struct CompletedCellsInTaiEutra(pub Vec<CompletedCellsInTaiEutraItem>);
 
 impl APerElement for CompletedCellsInTaiEutra {
@@ -3476,6 +3575,7 @@ impl APerElement for CompletedCellsInTaiEutra {
 }
 
 // CompletedCellsInTaiEutraItem
+#[derive(Clone)]
 pub struct CompletedCellsInTaiEutraItem {
     pub eutra_cgi: EutraCgi,
 }
@@ -3509,6 +3609,7 @@ impl APerElement for CompletedCellsInTaiEutraItem {
 }
 
 // CompletedCellsInTaiNr
+#[derive(Clone)]
 pub struct CompletedCellsInTaiNr(pub Vec<CompletedCellsInTaiNrItem>);
 
 impl APerElement for CompletedCellsInTaiNr {
@@ -3533,6 +3634,7 @@ impl APerElement for CompletedCellsInTaiNr {
 }
 
 // CompletedCellsInTaiNrItem
+#[derive(Clone)]
 pub struct CompletedCellsInTaiNrItem {
     pub nr_cgi: NrCgi,
 }
@@ -3665,6 +3767,7 @@ impl APerElement for ConfiguredTacIndication {
 }
 
 // CoreNetworkAssistanceInformationForInactive
+#[derive(Clone)]
 pub struct CoreNetworkAssistanceInformationForInactive {
     pub ue_identity_index_value: UeIdentityIndexValue,
     pub ue_specific_drx: Option<PagingDrx>,
@@ -3746,6 +3849,7 @@ impl APerElement for CoreNetworkAssistanceInformationForInactive {
 }
 
 // CountValueForPdcpSn12
+#[derive(Clone)]
 pub struct CountValueForPdcpSn12 {
     pub pdcp_sn12: u16,
     pub hfn_pdcp_sn12: u32,
@@ -3762,8 +3866,20 @@ impl APerElement for CountValueForPdcpSn12 {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let pdcp_sn12 = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let hfn_pdcp_sn12 = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let pdcp_sn12 = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(4095))),
+            },
+        )?;
+        let hfn_pdcp_sn12 = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(1048575))),
+            },
+        )?;
 
         Ok(Self {
             pdcp_sn12,
@@ -3785,6 +3901,7 @@ impl APerElement for CountValueForPdcpSn12 {
 }
 
 // CountValueForPdcpSn18
+#[derive(Clone)]
 pub struct CountValueForPdcpSn18 {
     pub pdcp_sn18: u32,
     pub hfn_pdcp_sn18: u16,
@@ -3801,8 +3918,20 @@ impl APerElement for CountValueForPdcpSn18 {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let pdcp_sn18 = u32::from_aper(decoder, UNCONSTRAINED)?;
-        let hfn_pdcp_sn18 = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let pdcp_sn18 = u32::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(262143))),
+            },
+        )?;
+        let hfn_pdcp_sn18 = u16::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(16383))),
+            },
+        )?;
 
         Ok(Self {
             pdcp_sn18,
@@ -3824,6 +3953,7 @@ impl APerElement for CountValueForPdcpSn18 {
 }
 
 // CoverageEnhancementLevel
+#[derive(Clone)]
 pub struct CoverageEnhancementLevel(pub Vec<u8>);
 
 impl APerElement for CoverageEnhancementLevel {
@@ -3839,6 +3969,7 @@ impl APerElement for CoverageEnhancementLevel {
 }
 
 // CpTransportLayerInformation
+#[derive(Clone)]
 pub enum CpTransportLayerInformation {
     EndpointIpAddress(TransportLayerAddress),
     _Extended,
@@ -3870,6 +4001,7 @@ impl APerElement for CpTransportLayerInformation {
 }
 
 // CriticalityDiagnostics
+#[derive(Clone)]
 pub struct CriticalityDiagnostics {
     pub procedure_code: Option<ProcedureCode>,
     pub triggering_message: Option<TriggeringMessage>,
@@ -3948,6 +4080,7 @@ impl APerElement for CriticalityDiagnostics {
 }
 
 // CriticalityDiagnosticsIeList
+#[derive(Clone)]
 pub struct CriticalityDiagnosticsIeList(pub Vec<CriticalityDiagnosticsIeItem>);
 
 impl APerElement for CriticalityDiagnosticsIeList {
@@ -3972,6 +4105,7 @@ impl APerElement for CriticalityDiagnosticsIeList {
 }
 
 // CriticalityDiagnosticsIeItem
+#[derive(Clone)]
 pub struct CriticalityDiagnosticsIeItem {
     pub ie_criticality: Criticality,
     pub ie_id: ProtocolIeId,
@@ -4015,6 +4149,7 @@ impl APerElement for CriticalityDiagnosticsIeItem {
 }
 
 // CellBasedMdtNr
+#[derive(Clone)]
 pub struct CellBasedMdtNr {
     pub cell_id_listfor_mdt: CellIdListforMdtNr,
 }
@@ -4050,6 +4185,7 @@ impl APerElement for CellBasedMdtNr {
 }
 
 // CellIdListforMdtNr
+#[derive(Clone)]
 pub struct CellIdListforMdtNr(pub Vec<NrCgi>);
 
 impl APerElement for CellIdListforMdtNr {
@@ -4071,6 +4207,7 @@ impl APerElement for CellIdListforMdtNr {
 }
 
 // CellBasedMdtEutra
+#[derive(Clone)]
 pub struct CellBasedMdtEutra {
     pub cell_id_listfor_mdt: CellIdListforMdtEutra,
 }
@@ -4106,6 +4243,7 @@ impl APerElement for CellBasedMdtEutra {
 }
 
 // CellIdListforMdtEutra
+#[derive(Clone)]
 pub struct CellIdListforMdtEutra(pub Vec<EutraCgi>);
 
 impl APerElement for CellIdListforMdtEutra {
@@ -4130,6 +4268,7 @@ impl APerElement for CellIdListforMdtEutra {
 }
 
 // DataCodingScheme
+#[derive(Clone)]
 pub struct DataCodingScheme(pub BitString);
 
 impl APerElement for DataCodingScheme {
@@ -4199,6 +4338,7 @@ impl APerElement for DataForwardingNotPossible {
 }
 
 // DataForwardingResponseDrbList
+#[derive(Clone)]
 pub struct DataForwardingResponseDrbList(pub Vec<DataForwardingResponseDrbItem>);
 
 impl APerElement for DataForwardingResponseDrbList {
@@ -4223,6 +4363,7 @@ impl APerElement for DataForwardingResponseDrbList {
 }
 
 // DataForwardingResponseDrbItem
+#[derive(Clone)]
 pub struct DataForwardingResponseDrbItem {
     pub drb_id: DrbId,
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
@@ -4286,6 +4427,7 @@ impl APerElement for DataForwardingResponseDrbItem {
 }
 
 // DapsRequestInfo
+#[derive(Clone)]
 pub struct DapsRequestInfo {
     pub daps_indicator: DapsIndicator,
 }
@@ -4319,6 +4461,7 @@ impl APerElement for DapsRequestInfo {
 }
 
 // DapsResponseInfoList
+#[derive(Clone)]
 pub struct DapsResponseInfoList(pub Vec<DapsResponseInfoItem>);
 
 impl APerElement for DapsResponseInfoList {
@@ -4343,6 +4486,7 @@ impl APerElement for DapsResponseInfoList {
 }
 
 // DapsResponseInfoItem
+#[derive(Clone)]
 pub struct DapsResponseInfoItem {
     pub drb_id: DrbId,
     pub daps_response_info: DapsResponseInfo,
@@ -4382,6 +4526,7 @@ impl APerElement for DapsResponseInfoItem {
 }
 
 // DapsResponseInfo
+#[derive(Clone)]
 pub struct DapsResponseInfo {
     pub dapsresponseindicator: Dapsresponseindicator,
 }
@@ -4417,6 +4562,7 @@ impl APerElement for DapsResponseInfo {
 }
 
 // DataForwardingResponseErabList
+#[derive(Clone)]
 pub struct DataForwardingResponseErabList(pub Vec<DataForwardingResponseErabListItem>);
 
 impl APerElement for DataForwardingResponseErabList {
@@ -4441,6 +4587,7 @@ impl APerElement for DataForwardingResponseErabList {
 }
 
 // DataForwardingResponseErabListItem
+#[derive(Clone)]
 pub struct DataForwardingResponseErabListItem {
     pub e_rab_id: ERabId,
     pub dl_forwarding_up_tnl_information: UpTransportLayerInformation,
@@ -4510,6 +4657,7 @@ impl APerElement for DelayCritical {
 }
 
 // DlCpSecurityInformation
+#[derive(Clone)]
 pub struct DlCpSecurityInformation {
     pub dl_nas_mac: DlNasMac,
 }
@@ -4543,6 +4691,7 @@ impl APerElement for DlCpSecurityInformation {
 }
 
 // DlNasMac
+#[derive(Clone)]
 pub struct DlNasMac(pub BitString);
 
 impl APerElement for DlNasMac {
@@ -4636,6 +4785,7 @@ impl APerElement for DirectForwardingPathAvailability {
 }
 
 // DrbId
+#[derive(Clone)]
 pub struct DrbId(pub u8);
 
 impl APerElement for DrbId {
@@ -4657,6 +4807,7 @@ impl APerElement for DrbId {
 }
 
 // DrBsSubjectToStatusTransferList
+#[derive(Clone)]
 pub struct DrBsSubjectToStatusTransferList(pub Vec<DrBsSubjectToStatusTransferItem>);
 
 impl APerElement for DrBsSubjectToStatusTransferList {
@@ -4681,6 +4832,7 @@ impl APerElement for DrBsSubjectToStatusTransferList {
 }
 
 // DrBsSubjectToStatusTransferItem
+#[derive(Clone)]
 pub struct DrBsSubjectToStatusTransferItem {
     pub drb_id: DrbId,
     pub drb_status_ul: DrbStatusUl,
@@ -4724,6 +4876,7 @@ impl APerElement for DrBsSubjectToStatusTransferItem {
 }
 
 // DrbStatusDl
+#[derive(Clone)]
 pub enum DrbStatusDl {
     DrbStatusDl12(DrbStatusDl12),
     DrbStatusDl18(DrbStatusDl18),
@@ -4764,6 +4917,7 @@ impl APerElement for DrbStatusDl {
 }
 
 // DrbStatusDl12
+#[derive(Clone)]
 pub struct DrbStatusDl12 {
     pub dl_count_value: CountValueForPdcpSn12,
 }
@@ -4797,6 +4951,7 @@ impl APerElement for DrbStatusDl12 {
 }
 
 // DrbStatusDl18
+#[derive(Clone)]
 pub struct DrbStatusDl18 {
     pub dl_count_value: CountValueForPdcpSn18,
 }
@@ -4830,6 +4985,7 @@ impl APerElement for DrbStatusDl18 {
 }
 
 // DrbStatusUl
+#[derive(Clone)]
 pub enum DrbStatusUl {
     DrbStatusUl12(DrbStatusUl12),
     DrbStatusUl18(DrbStatusUl18),
@@ -4870,6 +5026,7 @@ impl APerElement for DrbStatusUl {
 }
 
 // DrbStatusUl12
+#[derive(Clone)]
 pub struct DrbStatusUl12 {
     pub ul_count_value: CountValueForPdcpSn12,
     pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
@@ -4888,7 +5045,13 @@ impl APerElement for DrbStatusUl12 {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let ul_count_value = CountValueForPdcpSn12::from_aper(decoder, UNCONSTRAINED)?;
         let receive_status_of_ul_pdcp_sd_us = if optionals.is_set(0) {
-            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+            Some(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(2048))),
+                },
+            )?)
         } else {
             None
         };
@@ -4916,6 +5079,7 @@ impl APerElement for DrbStatusUl12 {
 }
 
 // DrbStatusUl18
+#[derive(Clone)]
 pub struct DrbStatusUl18 {
     pub ul_count_value: CountValueForPdcpSn18,
     pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
@@ -4934,7 +5098,13 @@ impl APerElement for DrbStatusUl18 {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let ul_count_value = CountValueForPdcpSn18::from_aper(decoder, UNCONSTRAINED)?;
         let receive_status_of_ul_pdcp_sd_us = if optionals.is_set(0) {
-            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+            Some(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(1), Some(131072))),
+                },
+            )?)
         } else {
             None
         };
@@ -4962,6 +5132,7 @@ impl APerElement for DrbStatusUl18 {
 }
 
 // DrBsToQosFlowsMappingList
+#[derive(Clone)]
 pub struct DrBsToQosFlowsMappingList(pub Vec<DrBsToQosFlowsMappingItem>);
 
 impl APerElement for DrBsToQosFlowsMappingList {
@@ -4986,6 +5157,7 @@ impl APerElement for DrBsToQosFlowsMappingList {
 }
 
 // DrBsToQosFlowsMappingItem
+#[derive(Clone)]
 pub struct DrBsToQosFlowsMappingItem {
     pub drb_id: DrbId,
     pub associated_qos_flow_list: AssociatedQosFlowList,
@@ -5025,6 +5197,7 @@ impl APerElement for DrBsToQosFlowsMappingItem {
 }
 
 // Dynamic5qiDescriptor
+#[derive(Clone)]
 pub struct Dynamic5qiDescriptor {
     pub priority_level_qos: PriorityLevelQos,
     pub packet_delay_budget: PacketDelayBudget,
@@ -5112,6 +5285,7 @@ impl APerElement for Dynamic5qiDescriptor {
 }
 
 // EarlyStatusTransferTransparentContainer
+#[derive(Clone)]
 pub struct EarlyStatusTransferTransparentContainer {
     pub procedure_stage: ProcedureStageChoice,
 }
@@ -5145,6 +5319,7 @@ impl APerElement for EarlyStatusTransferTransparentContainer {
 }
 
 // ProcedureStageChoice
+#[derive(Clone)]
 pub enum ProcedureStageChoice {
     FirstDlCount(FirstDlCount),
     _Extended,
@@ -5176,6 +5351,7 @@ impl APerElement for ProcedureStageChoice {
 }
 
 // FirstDlCount
+#[derive(Clone)]
 pub struct FirstDlCount {
     pub dr_bs_subject_to_early_status_transfer: DrBsSubjectToEarlyStatusTransferList,
 }
@@ -5216,6 +5392,7 @@ impl APerElement for FirstDlCount {
 }
 
 // DrBsSubjectToEarlyStatusTransferList
+#[derive(Clone)]
 pub struct DrBsSubjectToEarlyStatusTransferList(pub Vec<DrBsSubjectToEarlyStatusTransferItem>);
 
 impl APerElement for DrBsSubjectToEarlyStatusTransferList {
@@ -5239,6 +5416,7 @@ impl APerElement for DrBsSubjectToEarlyStatusTransferList {
 }
 
 // DrBsSubjectToEarlyStatusTransferItem
+#[derive(Clone)]
 pub struct DrBsSubjectToEarlyStatusTransferItem {
     pub drb_id: DrbId,
     pub first_dlcount: DrbStatusDl,
@@ -5302,6 +5480,7 @@ impl APerElement for EdtSession {
 }
 
 // EmergencyAreaId
+#[derive(Clone)]
 pub struct EmergencyAreaId(pub Vec<u8>);
 
 impl APerElement for EmergencyAreaId {
@@ -5323,6 +5502,7 @@ impl APerElement for EmergencyAreaId {
 }
 
 // EmergencyAreaIdBroadcastEutra
+#[derive(Clone)]
 pub struct EmergencyAreaIdBroadcastEutra(pub Vec<EmergencyAreaIdBroadcastEutraItem>);
 
 impl APerElement for EmergencyAreaIdBroadcastEutra {
@@ -5347,6 +5527,7 @@ impl APerElement for EmergencyAreaIdBroadcastEutra {
 }
 
 // EmergencyAreaIdBroadcastEutraItem
+#[derive(Clone)]
 pub struct EmergencyAreaIdBroadcastEutraItem {
     pub emergency_area_id: EmergencyAreaId,
     pub completed_cells_in_eai_eutra: CompletedCellsInEaiEutra,
@@ -5387,6 +5568,7 @@ impl APerElement for EmergencyAreaIdBroadcastEutraItem {
 }
 
 // EmergencyAreaIdBroadcastNr
+#[derive(Clone)]
 pub struct EmergencyAreaIdBroadcastNr(pub Vec<EmergencyAreaIdBroadcastNrItem>);
 
 impl APerElement for EmergencyAreaIdBroadcastNr {
@@ -5411,6 +5593,7 @@ impl APerElement for EmergencyAreaIdBroadcastNr {
 }
 
 // EmergencyAreaIdBroadcastNrItem
+#[derive(Clone)]
 pub struct EmergencyAreaIdBroadcastNrItem {
     pub emergency_area_id: EmergencyAreaId,
     pub completed_cells_in_eai_nr: CompletedCellsInEaiNr,
@@ -5450,6 +5633,7 @@ impl APerElement for EmergencyAreaIdBroadcastNrItem {
 }
 
 // EmergencyAreaIdCancelledEutra
+#[derive(Clone)]
 pub struct EmergencyAreaIdCancelledEutra(pub Vec<EmergencyAreaIdCancelledEutraItem>);
 
 impl APerElement for EmergencyAreaIdCancelledEutra {
@@ -5474,6 +5658,7 @@ impl APerElement for EmergencyAreaIdCancelledEutra {
 }
 
 // EmergencyAreaIdCancelledEutraItem
+#[derive(Clone)]
 pub struct EmergencyAreaIdCancelledEutraItem {
     pub emergency_area_id: EmergencyAreaId,
     pub cancelled_cells_in_eai_eutra: CancelledCellsInEaiEutra,
@@ -5514,6 +5699,7 @@ impl APerElement for EmergencyAreaIdCancelledEutraItem {
 }
 
 // EmergencyAreaIdCancelledNr
+#[derive(Clone)]
 pub struct EmergencyAreaIdCancelledNr(pub Vec<EmergencyAreaIdCancelledNrItem>);
 
 impl APerElement for EmergencyAreaIdCancelledNr {
@@ -5538,6 +5724,7 @@ impl APerElement for EmergencyAreaIdCancelledNr {
 }
 
 // EmergencyAreaIdCancelledNrItem
+#[derive(Clone)]
 pub struct EmergencyAreaIdCancelledNrItem {
     pub emergency_area_id: EmergencyAreaId,
     pub cancelled_cells_in_eai_nr: CancelledCellsInEaiNr,
@@ -5577,6 +5764,7 @@ impl APerElement for EmergencyAreaIdCancelledNrItem {
 }
 
 // EmergencyAreaIdList
+#[derive(Clone)]
 pub struct EmergencyAreaIdList(pub Vec<EmergencyAreaId>);
 
 impl APerElement for EmergencyAreaIdList {
@@ -5601,6 +5789,7 @@ impl APerElement for EmergencyAreaIdList {
 }
 
 // EmergencyAreaIdListForRestart
+#[derive(Clone)]
 pub struct EmergencyAreaIdListForRestart(pub Vec<EmergencyAreaId>);
 
 impl APerElement for EmergencyAreaIdListForRestart {
@@ -5625,6 +5814,7 @@ impl APerElement for EmergencyAreaIdListForRestart {
 }
 
 // EmergencyFallbackIndicator
+#[derive(Clone)]
 pub struct EmergencyFallbackIndicator {
     pub emergency_fallback_request_indicator: EmergencyFallbackRequestIndicator,
     pub emergency_service_target_cn: Option<EmergencyServiceTargetCn>,
@@ -5725,6 +5915,7 @@ impl APerElement for EmergencyServiceTargetCn {
 }
 
 // EnbId
+#[derive(Clone)]
 pub enum EnbId {
     MacroEnbId(BitString),
     HomeEnbId(BitString),
@@ -5739,19 +5930,31 @@ impl APerElement for EnbId {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::MacroEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(20), Some(20))),
+                },
             )?)),
             1 => Ok(Self::HomeEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(28), Some(28))),
+                },
             )?)),
             2 => Ok(Self::ShortMacroEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(18), Some(18))),
+                },
             )?)),
             3 => Ok(Self::LongMacroEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(21), Some(21))),
+                },
             )?)),
             4 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -5762,19 +5965,31 @@ impl APerElement for EnbId {
         match self {
             Self::MacroEnbId(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(20), Some(20))),
+                })?)?;
             }
             Self::HomeEnbId(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(28), Some(28))),
+                })?)?;
             }
             Self::ShortMacroEnbId(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(18), Some(18))),
+                })?)?;
             }
             Self::LongMacroEnbId(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(21), Some(21))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -5807,6 +6022,7 @@ impl APerElement for EnhancedCoverageRestriction {
 }
 
 // ExtendedConnectedTime
+#[derive(Clone)]
 pub struct ExtendedConnectedTime(pub u8);
 
 impl APerElement for ExtendedConnectedTime {
@@ -5828,6 +6044,7 @@ impl APerElement for ExtendedConnectedTime {
 }
 
 // EnDcsonConfigurationTransfer
+#[derive(Clone)]
 pub struct EnDcsonConfigurationTransfer(pub Vec<u8>);
 
 impl APerElement for EnDcsonConfigurationTransfer {
@@ -5843,6 +6060,7 @@ impl APerElement for EnDcsonConfigurationTransfer {
 }
 
 // EndpointIpAddressAndPort
+#[derive(Clone)]
 pub struct EndpointIpAddressAndPort {
     pub endpoint_ip_address: TransportLayerAddress,
     pub port_number: PortNumber,
@@ -5905,6 +6123,7 @@ impl APerElement for EndIndication {
 }
 
 // EquivalentPlmnS
+#[derive(Clone)]
 pub struct EquivalentPlmnS(pub Vec<PlmnIdentity>);
 
 impl APerElement for EquivalentPlmnS {
@@ -5929,6 +6148,7 @@ impl APerElement for EquivalentPlmnS {
 }
 
 // EpsTac
+#[derive(Clone)]
 pub struct EpsTac(pub Vec<u8>);
 
 impl APerElement for EpsTac {
@@ -5950,6 +6170,7 @@ impl APerElement for EpsTac {
 }
 
 // EpsTai
+#[derive(Clone)]
 pub struct EpsTai {
     pub plmn_identity: PlmnIdentity,
     pub eps_tac: EpsTac,
@@ -5989,6 +6210,7 @@ impl APerElement for EpsTai {
 }
 
 // ERabId
+#[derive(Clone)]
 pub struct ERabId(pub u8);
 
 impl APerElement for ERabId {
@@ -6010,6 +6232,7 @@ impl APerElement for ERabId {
 }
 
 // ERabInformationList
+#[derive(Clone)]
 pub struct ERabInformationList(pub Vec<ERabInformationItem>);
 
 impl APerElement for ERabInformationList {
@@ -6034,6 +6257,7 @@ impl APerElement for ERabInformationList {
 }
 
 // ERabInformationItem
+#[derive(Clone)]
 pub struct ERabInformationItem {
     pub e_rab_id: ERabId,
     pub dl_forwarding: Option<DlForwarding>,
@@ -6080,6 +6304,7 @@ impl APerElement for ERabInformationItem {
 }
 
 // EutraCellIdentity
+#[derive(Clone)]
 pub struct EutraCellIdentity(pub BitString);
 
 impl APerElement for EutraCellIdentity {
@@ -6101,6 +6326,7 @@ impl APerElement for EutraCellIdentity {
 }
 
 // EutraCgi
+#[derive(Clone)]
 pub struct EutraCgi {
     pub plmn_identity: PlmnIdentity,
     pub eutra_cell_identity: EutraCellIdentity,
@@ -6140,6 +6366,7 @@ impl APerElement for EutraCgi {
 }
 
 // EutraCgiList
+#[derive(Clone)]
 pub struct EutraCgiList(pub Vec<EutraCgi>);
 
 impl APerElement for EutraCgiList {
@@ -6164,6 +6391,7 @@ impl APerElement for EutraCgiList {
 }
 
 // EutraCgiListForWarning
+#[derive(Clone)]
 pub struct EutraCgiListForWarning(pub Vec<EutraCgi>);
 
 impl APerElement for EutraCgiListForWarning {
@@ -6188,6 +6416,7 @@ impl APerElement for EutraCgiListForWarning {
 }
 
 // EutrAencryptionAlgorithms
+#[derive(Clone)]
 pub struct EutrAencryptionAlgorithms(pub BitString);
 
 impl APerElement for EutrAencryptionAlgorithms {
@@ -6209,6 +6438,7 @@ impl APerElement for EutrAencryptionAlgorithms {
 }
 
 // EutrAintegrityProtectionAlgorithms
+#[derive(Clone)]
 pub struct EutrAintegrityProtectionAlgorithms(pub BitString);
 
 impl APerElement for EutrAintegrityProtectionAlgorithms {
@@ -6259,6 +6489,7 @@ impl APerElement for EventType {
 }
 
 // ExpectedActivityPeriod
+#[derive(Clone)]
 pub struct ExpectedActivityPeriod(pub u8);
 
 impl APerElement for ExpectedActivityPeriod {
@@ -6310,6 +6541,7 @@ impl APerElement for ExpectedHoInterval {
 }
 
 // ExpectedIdlePeriod
+#[derive(Clone)]
 pub struct ExpectedIdlePeriod(pub u8);
 
 impl APerElement for ExpectedIdlePeriod {
@@ -6331,6 +6563,7 @@ impl APerElement for ExpectedIdlePeriod {
 }
 
 // ExpectedUeActivityBehaviour
+#[derive(Clone)]
 pub struct ExpectedUeActivityBehaviour {
     pub expected_activity_period: Option<ExpectedActivityPeriod>,
     pub expected_idle_period: Option<ExpectedIdlePeriod>,
@@ -6401,6 +6634,7 @@ impl APerElement for ExpectedUeActivityBehaviour {
 }
 
 // ExpectedUeBehaviour
+#[derive(Clone)]
 pub struct ExpectedUeBehaviour {
     pub expected_ue_activity_behaviour: Option<ExpectedUeActivityBehaviour>,
     pub expected_ho_interval: Option<ExpectedHoInterval>,
@@ -6507,6 +6741,7 @@ impl APerElement for ExpectedUeMobility {
 }
 
 // ExpectedUeMovingTrajectory
+#[derive(Clone)]
 pub struct ExpectedUeMovingTrajectory(pub Vec<ExpectedUeMovingTrajectoryItem>);
 
 impl APerElement for ExpectedUeMovingTrajectory {
@@ -6531,6 +6766,7 @@ impl APerElement for ExpectedUeMovingTrajectory {
 }
 
 // ExpectedUeMovingTrajectoryItem
+#[derive(Clone)]
 pub struct ExpectedUeMovingTrajectoryItem {
     pub ngran_cgi: NgranCgi,
     pub time_stayed_in_cell: Option<u16>,
@@ -6549,7 +6785,13 @@ impl APerElement for ExpectedUeMovingTrajectoryItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
         let time_stayed_in_cell = if optionals.is_set(0) {
-            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(4095))),
+                },
+            )?)
         } else {
             None
         };
@@ -6577,6 +6819,7 @@ impl APerElement for ExpectedUeMovingTrajectoryItem {
 }
 
 // ExtendedAmfName
+#[derive(Clone)]
 pub struct ExtendedAmfName {
     pub amf_name_visible_string: Option<AmfNameVisibleString>,
     pub amf_name_utf8_string: Option<AmfNameUtf8String>,
@@ -6630,6 +6873,7 @@ impl APerElement for ExtendedAmfName {
 }
 
 // ExtendedPacketDelayBudget
+#[derive(Clone)]
 pub struct ExtendedPacketDelayBudget(pub u16);
 
 impl APerElement for ExtendedPacketDelayBudget {
@@ -6651,6 +6895,7 @@ impl APerElement for ExtendedPacketDelayBudget {
 }
 
 // ExtendedRanNodeName
+#[derive(Clone)]
 pub struct ExtendedRanNodeName {
     pub ran_node_name_visible_string: Option<RanNodeNameVisibleString>,
     pub ran_node_name_utf8_string: Option<RanNodeNameUtf8String>,
@@ -6704,6 +6949,7 @@ impl APerElement for ExtendedRanNodeName {
 }
 
 // ExtendedRatRestrictionInformation
+#[derive(Clone)]
 pub struct ExtendedRatRestrictionInformation {
     pub primary_rat_restriction: BitString,
     pub secondary_rat_restriction: BitString,
@@ -6743,6 +6989,7 @@ impl APerElement for ExtendedRatRestrictionInformation {
 }
 
 // ExtendedRncId
+#[derive(Clone)]
 pub struct ExtendedRncId(pub u16);
 
 impl APerElement for ExtendedRncId {
@@ -6764,6 +7011,7 @@ impl APerElement for ExtendedRncId {
 }
 
 // ExtendedSliceSupportList
+#[derive(Clone)]
 pub struct ExtendedSliceSupportList(pub Vec<SliceSupportItem>);
 
 impl APerElement for ExtendedSliceSupportList {
@@ -6788,6 +7036,7 @@ impl APerElement for ExtendedSliceSupportList {
 }
 
 // ExtendedUeIdentityIndexValue
+#[derive(Clone)]
 pub struct ExtendedUeIdentityIndexValue(pub BitString);
 
 impl APerElement for ExtendedUeIdentityIndexValue {
@@ -6809,6 +7058,7 @@ impl APerElement for ExtendedUeIdentityIndexValue {
 }
 
 // EventTrigger
+#[derive(Clone)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig(EventL1LoggedMdtConfig),
@@ -6848,6 +7098,7 @@ impl APerElement for EventTrigger {
 }
 
 // EventL1LoggedMdtConfig
+#[derive(Clone)]
 pub struct EventL1LoggedMdtConfig {
     pub l1_threshold: MeasurementThresholdL1LoggedMdt,
     pub hysteresis: Hysteresis,
@@ -6891,6 +7142,7 @@ impl APerElement for EventL1LoggedMdtConfig {
 }
 
 // MeasurementThresholdL1LoggedMdt
+#[derive(Clone)]
 pub enum MeasurementThresholdL1LoggedMdt {
     ThresholdRsrp(ThresholdRsrp),
     ThresholdRsrq(ThresholdRsrq),
@@ -6931,6 +7183,7 @@ impl APerElement for MeasurementThresholdL1LoggedMdt {
 }
 
 // FailureIndication
+#[derive(Clone)]
 pub struct FailureIndication {
     pub ue_rlf_report_container: UeRlfReportContainer,
 }
@@ -6966,6 +7219,7 @@ impl APerElement for FailureIndication {
 }
 
 // FiveGSTmsi
+#[derive(Clone)]
 pub struct FiveGSTmsi {
     pub amf_set_id: AmfSetId,
     pub amf_pointer: AmfPointer,
@@ -7009,6 +7263,7 @@ impl APerElement for FiveGSTmsi {
 }
 
 // FiveGTmsi
+#[derive(Clone)]
 pub struct FiveGTmsi(pub Vec<u8>);
 
 impl APerElement for FiveGTmsi {
@@ -7030,6 +7285,7 @@ impl APerElement for FiveGTmsi {
 }
 
 // FiveQi
+#[derive(Clone)]
 pub struct FiveQi(pub u8);
 
 impl APerElement for FiveQi {
@@ -7051,6 +7307,7 @@ impl APerElement for FiveQi {
 }
 
 // ForbiddenAreaInformation
+#[derive(Clone)]
 pub struct ForbiddenAreaInformation(pub Vec<ForbiddenAreaInformationItem>);
 
 impl APerElement for ForbiddenAreaInformation {
@@ -7075,6 +7332,7 @@ impl APerElement for ForbiddenAreaInformation {
 }
 
 // ForbiddenAreaInformationItem
+#[derive(Clone)]
 pub struct ForbiddenAreaInformationItem {
     pub plmn_identity: PlmnIdentity,
     pub forbidden_ta_cs: ForbiddenTaCs,
@@ -7114,6 +7372,7 @@ impl APerElement for ForbiddenAreaInformationItem {
 }
 
 // ForbiddenTaCs
+#[derive(Clone)]
 pub struct ForbiddenTaCs(pub Vec<Tac>);
 
 impl APerElement for ForbiddenTaCs {
@@ -7135,6 +7394,7 @@ impl APerElement for ForbiddenTaCs {
 }
 
 // FromEutranToNgran
+#[derive(Clone)]
 pub struct FromEutranToNgran {
     pub source_enb_id: IntersystemSonEnbId,
     pub target_ngran_node_id: IntersystemSonNgranNodeId,
@@ -7172,6 +7432,7 @@ impl APerElement for FromEutranToNgran {
 }
 
 // FromNgranToEutran
+#[derive(Clone)]
 pub struct FromNgranToEutran {
     pub source_ngran_node_id: IntersystemSonNgranNodeId,
     pub target_enb_id: IntersystemSonEnbId,
@@ -7209,6 +7470,7 @@ impl APerElement for FromNgranToEutran {
 }
 
 // GbrQosInformation
+#[derive(Clone)]
 pub struct GbrQosInformation {
     pub maximum_flow_bit_rate_dl: BitRate,
     pub maximum_flow_bit_rate_ul: BitRate,
@@ -7289,6 +7551,7 @@ impl APerElement for GbrQosInformation {
 }
 
 // GlobalCableId
+#[derive(Clone)]
 pub struct GlobalCableId(pub Vec<u8>);
 
 impl APerElement for GlobalCableId {
@@ -7304,6 +7567,7 @@ impl APerElement for GlobalCableId {
 }
 
 // GlobalEnbId
+#[derive(Clone)]
 pub struct GlobalEnbId {
     pub plmn_identity: PlmnIdentity,
     pub enb_id: EnbId,
@@ -7343,6 +7607,7 @@ impl APerElement for GlobalEnbId {
 }
 
 // GlobalGnbId
+#[derive(Clone)]
 pub struct GlobalGnbId {
     pub plmn_identity: PlmnIdentity,
     pub gnb_id: GnbId,
@@ -7382,6 +7647,7 @@ impl APerElement for GlobalGnbId {
 }
 
 // GlobalN3IwfId
+#[derive(Clone)]
 pub struct GlobalN3IwfId {
     pub plmn_identity: PlmnIdentity,
     pub n3_iwf_id: N3IwfId,
@@ -7421,6 +7687,7 @@ impl APerElement for GlobalN3IwfId {
 }
 
 // GlobalLineId
+#[derive(Clone)]
 pub struct GlobalLineId {
     pub global_line_identity: GlobalLineIdentity,
     pub line_type: Option<LineType>,
@@ -7467,6 +7734,7 @@ impl APerElement for GlobalLineId {
 }
 
 // GlobalLineIdentity
+#[derive(Clone)]
 pub struct GlobalLineIdentity(pub Vec<u8>);
 
 impl APerElement for GlobalLineIdentity {
@@ -7482,6 +7750,7 @@ impl APerElement for GlobalLineIdentity {
 }
 
 // GlobalNgEnbId
+#[derive(Clone)]
 pub struct GlobalNgEnbId {
     pub plmn_identity: PlmnIdentity,
     pub ng_enb_id: NgEnbId,
@@ -7521,6 +7790,7 @@ impl APerElement for GlobalNgEnbId {
 }
 
 // GlobalRanNodeId
+#[derive(Clone)]
 pub enum GlobalRanNodeId {
     GlobalGnbId(GlobalGnbId),
     GlobalNgEnbId(GlobalNgEnbId),
@@ -7570,6 +7840,7 @@ impl APerElement for GlobalRanNodeId {
 }
 
 // GlobalTngfId
+#[derive(Clone)]
 pub struct GlobalTngfId {
     pub plmn_identity: PlmnIdentity,
     pub tngf_id: TngfId,
@@ -7609,6 +7880,7 @@ impl APerElement for GlobalTngfId {
 }
 
 // GlobalTwifId
+#[derive(Clone)]
 pub struct GlobalTwifId {
     pub plmn_identity: PlmnIdentity,
     pub twif_id: TwifId,
@@ -7648,6 +7920,7 @@ impl APerElement for GlobalTwifId {
 }
 
 // GlobalWAgfId
+#[derive(Clone)]
 pub struct GlobalWAgfId {
     pub plmn_identity: PlmnIdentity,
     pub w_agf_id: WAgfId,
@@ -7687,6 +7960,7 @@ impl APerElement for GlobalWAgfId {
 }
 
 // GnbId
+#[derive(Clone)]
 pub enum GnbId {
     GnbId(BitString),
     _Extended,
@@ -7696,7 +7970,13 @@ impl APerElement for GnbId {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::GnbId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::GnbId(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(22), Some(32))),
+                },
+            )?)),
             1 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -7706,7 +7986,10 @@ impl APerElement for GnbId {
         match self {
             Self::GnbId(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(22), Some(32))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -7715,6 +7998,7 @@ impl APerElement for GnbId {
 }
 
 // GtpTeid
+#[derive(Clone)]
 pub struct GtpTeid(pub Vec<u8>);
 
 impl APerElement for GtpTeid {
@@ -7736,6 +8020,7 @@ impl APerElement for GtpTeid {
 }
 
 // GtpTunnel
+#[derive(Clone)]
 pub struct GtpTunnel {
     pub transport_layer_address: TransportLayerAddress,
     pub gtp_teid: GtpTeid,
@@ -7775,6 +8060,7 @@ impl APerElement for GtpTunnel {
 }
 
 // Guami
+#[derive(Clone)]
 pub struct Guami {
     pub plmn_identity: PlmnIdentity,
     pub amf_region_id: AmfRegionId,
@@ -7847,6 +8133,7 @@ impl APerElement for GuamiType {
 }
 
 // HandoverCommandTransfer
+#[derive(Clone)]
 pub struct HandoverCommandTransfer {
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
     pub qos_flow_to_be_forwarded_list: Option<QosFlowToBeForwardedList>,
@@ -7941,6 +8228,7 @@ impl APerElement for HandoverFlag {
 }
 
 // HandoverPreparationUnsuccessfulTransfer
+#[derive(Clone)]
 pub struct HandoverPreparationUnsuccessfulTransfer {
     pub cause: Cause,
 }
@@ -7974,6 +8262,7 @@ impl APerElement for HandoverPreparationUnsuccessfulTransfer {
 }
 
 // HandoverRequestAcknowledgeTransfer
+#[derive(Clone)]
 pub struct HandoverRequestAcknowledgeTransfer {
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
@@ -8065,6 +8354,7 @@ impl APerElement for HandoverRequestAcknowledgeTransfer {
 }
 
 // HandoverRequiredTransfer
+#[derive(Clone)]
 pub struct HandoverRequiredTransfer {
     pub direct_forwarding_path_availability: Option<DirectForwardingPathAvailability>,
 }
@@ -8110,6 +8400,7 @@ impl APerElement for HandoverRequiredTransfer {
 }
 
 // HandoverResourceAllocationUnsuccessfulTransfer
+#[derive(Clone)]
 pub struct HandoverResourceAllocationUnsuccessfulTransfer {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -8182,6 +8473,7 @@ impl APerElement for HandoverType {
 }
 
 // HfcNodeId
+#[derive(Clone)]
 pub struct HfcNodeId(pub Vec<u8>);
 
 impl APerElement for HfcNodeId {
@@ -8197,6 +8489,7 @@ impl APerElement for HfcNodeId {
 }
 
 // HoReport
+#[derive(Clone)]
 pub struct HoReport {
     pub handover_report_type: HandoverReportType,
     pub handover_cause: Cause,
@@ -8230,7 +8523,13 @@ impl APerElement for HoReport {
             None
         };
         let sourcecell_c_rnti = if optionals.is_set(0) {
-            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+            Some(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(16), Some(16))),
+                },
+            )?)
         } else {
             None
         };
@@ -8299,6 +8598,7 @@ impl APerElement for HoReport {
 }
 
 // Hysteresis
+#[derive(Clone)]
 pub struct Hysteresis(pub u8);
 
 impl APerElement for Hysteresis {
@@ -8418,6 +8718,7 @@ impl APerElement for ImsVoiceSupportIndicator {
 }
 
 // IndexToRfsp
+#[derive(Clone)]
 pub struct IndexToRfsp(pub u8);
 
 impl APerElement for IndexToRfsp {
@@ -8439,6 +8740,7 @@ impl APerElement for IndexToRfsp {
 }
 
 // InfoOnRecommendedCellsAndRanNodesForPaging
+#[derive(Clone)]
 pub struct InfoOnRecommendedCellsAndRanNodesForPaging {
     pub recommended_cells_for_paging: RecommendedCellsForPaging,
     pub recommend_ran_nodes_for_paging: RecommendedRanNodesForPaging,
@@ -8531,6 +8833,7 @@ impl APerElement for IntegrityProtectionResult {
 }
 
 // IntendedNumberOfPagingAttempts
+#[derive(Clone)]
 pub struct IntendedNumberOfPagingAttempts(pub u8);
 
 impl APerElement for IntendedNumberOfPagingAttempts {
@@ -8552,6 +8855,7 @@ impl APerElement for IntendedNumberOfPagingAttempts {
 }
 
 // InterfacesToTrace
+#[derive(Clone)]
 pub struct InterfacesToTrace(pub BitString);
 
 impl APerElement for InterfacesToTrace {
@@ -8573,6 +8877,7 @@ impl APerElement for InterfacesToTrace {
 }
 
 // ImmediateMdtNr
+#[derive(Clone)]
 pub struct ImmediateMdtNr {
     pub measurements_to_activate: MeasurementsToActivate,
     pub m1_configuration: Option<M1Configuration>,
@@ -8716,6 +9021,7 @@ impl APerElement for ImmediateMdtNr {
 }
 
 // InterSystemFailureIndication
+#[derive(Clone)]
 pub struct InterSystemFailureIndication {
     pub ue_rlf_report_container: Option<UeRlfReportContainer>,
 }
@@ -8758,6 +9064,7 @@ impl APerElement for InterSystemFailureIndication {
 }
 
 // IntersystemSonConfigurationTransfer
+#[derive(Clone)]
 pub struct IntersystemSonConfigurationTransfer {
     pub transfer_type: IntersystemSonTransferType,
     pub intersystem_son_information: IntersystemSonInformation,
@@ -8798,6 +9105,7 @@ impl APerElement for IntersystemSonConfigurationTransfer {
 }
 
 // IntersystemSonTransferType
+#[derive(Clone)]
 pub enum IntersystemSonTransferType {
     FromEutranToNgran(FromEutranToNgran),
     FromNgranToEutran(FromNgranToEutran),
@@ -8838,6 +9146,7 @@ impl APerElement for IntersystemSonTransferType {
 }
 
 // IntersystemSonEnbId
+#[derive(Clone)]
 pub struct IntersystemSonEnbId {
     pub global_enb_id: GlobalEnbId,
     pub selected_epstai: EpsTai,
@@ -8877,6 +9186,7 @@ impl APerElement for IntersystemSonEnbId {
 }
 
 // IntersystemSonNgranNodeId
+#[derive(Clone)]
 pub struct IntersystemSonNgranNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
@@ -8916,6 +9226,7 @@ impl APerElement for IntersystemSonNgranNodeId {
 }
 
 // IntersystemSonInformation
+#[derive(Clone)]
 pub enum IntersystemSonInformation {
     IntersystemSonInformationReport(IntersystemSonInformationReport),
     _Extended,
@@ -8946,6 +9257,7 @@ impl APerElement for IntersystemSonInformation {
 }
 
 // IntersystemSonInformationReport
+#[derive(Clone)]
 pub enum IntersystemSonInformationReport {
     HoReportInformation(InterSystemHoReport),
     FailureIndicationInformation(InterSystemFailureIndication),
@@ -8985,6 +9297,7 @@ impl APerElement for IntersystemSonInformationReport {
 }
 
 // InterSystemHoReport
+#[derive(Clone)]
 pub struct InterSystemHoReport {
     pub handover_report_type: InterSystemHandoverReportType,
 }
@@ -9021,6 +9334,7 @@ impl APerElement for InterSystemHoReport {
 }
 
 // InterSystemHandoverReportType
+#[derive(Clone)]
 pub enum InterSystemHandoverReportType {
     TooearlyIntersystemHo(TooearlyIntersystemHo),
     IntersystemUnnecessaryHo(IntersystemUnnecessaryHo),
@@ -9059,6 +9373,7 @@ impl APerElement for InterSystemHandoverReportType {
 }
 
 // IntersystemUnnecessaryHo
+#[derive(Clone)]
 pub struct IntersystemUnnecessaryHo {
     pub sourcecell_id: NgranCgi,
     pub targetcell_id: EutraCgi,
@@ -9106,6 +9421,7 @@ impl APerElement for IntersystemUnnecessaryHo {
 }
 
 // Lac
+#[derive(Clone)]
 pub struct Lac(pub Vec<u8>);
 
 impl APerElement for Lac {
@@ -9127,6 +9443,7 @@ impl APerElement for Lac {
 }
 
 // Lai
+#[derive(Clone)]
 pub struct Lai {
     pub plmn_identity: PlmnIdentity,
     pub lac: Lac,
@@ -9163,6 +9480,7 @@ impl APerElement for Lai {
 }
 
 // LastVisitedCellInformation
+#[derive(Clone)]
 pub enum LastVisitedCellInformation {
     NgranCell(LastVisitedNgranCellInformation),
     EutranCell(LastVisitedEutranCellInformation),
@@ -9220,6 +9538,7 @@ impl APerElement for LastVisitedCellInformation {
 }
 
 // LastVisitedCellItem
+#[derive(Clone)]
 pub struct LastVisitedCellItem {
     pub last_visited_cell_information: LastVisitedCellInformation,
 }
@@ -9256,6 +9575,7 @@ impl APerElement for LastVisitedCellItem {
 }
 
 // LastVisitedEutranCellInformation
+#[derive(Clone)]
 pub struct LastVisitedEutranCellInformation(pub Vec<u8>);
 
 impl APerElement for LastVisitedEutranCellInformation {
@@ -9271,6 +9591,7 @@ impl APerElement for LastVisitedEutranCellInformation {
 }
 
 // LastVisitedGeranCellInformation
+#[derive(Clone)]
 pub struct LastVisitedGeranCellInformation(pub Vec<u8>);
 
 impl APerElement for LastVisitedGeranCellInformation {
@@ -9286,6 +9607,7 @@ impl APerElement for LastVisitedGeranCellInformation {
 }
 
 // LastVisitedNgranCellInformation
+#[derive(Clone)]
 pub struct LastVisitedNgranCellInformation {
     pub global_cell_id: NgranCgi,
     pub cell_type: CellType,
@@ -9357,6 +9679,7 @@ impl APerElement for LastVisitedNgranCellInformation {
 }
 
 // LastVisitedUtranCellInformation
+#[derive(Clone)]
 pub struct LastVisitedUtranCellInformation(pub Vec<u8>);
 
 impl APerElement for LastVisitedUtranCellInformation {
@@ -9421,6 +9744,7 @@ impl APerElement for LocationReportingAdditionalInfo {
 }
 
 // LocationReportingReferenceId
+#[derive(Clone)]
 pub struct LocationReportingReferenceId(pub u8);
 
 impl APerElement for LocationReportingReferenceId {
@@ -9442,6 +9766,7 @@ impl APerElement for LocationReportingReferenceId {
 }
 
 // LocationReportingRequestType
+#[derive(Clone)]
 pub struct LocationReportingRequestType {
     pub event_type: EventType,
     pub report_area: ReportArea,
@@ -9510,6 +9835,7 @@ impl APerElement for LocationReportingRequestType {
 }
 
 // LoggedMdtNr
+#[derive(Clone)]
 pub struct LoggedMdtNr {
     pub logging_interval: LoggingInterval,
     pub logging_duration: LoggingDuration,
@@ -9698,6 +10024,7 @@ impl APerElement for LinksToLog {
 }
 
 // LoggedMdtTrigger
+#[derive(Clone)]
 pub enum LoggedMdtTrigger {
     Periodical,
     EventTrigger(EventTrigger),
@@ -9758,6 +10085,7 @@ impl APerElement for LtemIndication {
 }
 
 // LteueRlfReportContainer
+#[derive(Clone)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
 
 impl APerElement for LteueRlfReportContainer {
@@ -9773,6 +10101,7 @@ impl APerElement for LteueRlfReportContainer {
 }
 
 // Ltev2xServicesAuthorized
+#[derive(Clone)]
 pub struct Ltev2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
@@ -9826,6 +10155,7 @@ impl APerElement for Ltev2xServicesAuthorized {
 }
 
 // LteueSidelinkAggregateMaximumBitrate
+#[derive(Clone)]
 pub struct LteueSidelinkAggregateMaximumBitrate {
     pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
 }
@@ -9865,6 +10195,7 @@ impl APerElement for LteueSidelinkAggregateMaximumBitrate {
 }
 
 // MaskedImeisv
+#[derive(Clone)]
 pub struct MaskedImeisv(pub BitString);
 
 impl APerElement for MaskedImeisv {
@@ -9886,6 +10217,7 @@ impl APerElement for MaskedImeisv {
 }
 
 // MaximumDataBurstVolume
+#[derive(Clone)]
 pub struct MaximumDataBurstVolume(pub u16);
 
 impl APerElement for MaximumDataBurstVolume {
@@ -9907,6 +10239,7 @@ impl APerElement for MaximumDataBurstVolume {
 }
 
 // MessageIdentifier
+#[derive(Clone)]
 pub struct MessageIdentifier(pub BitString);
 
 impl APerElement for MessageIdentifier {
@@ -9977,6 +10310,7 @@ impl APerElement for MicoModeIndication {
 }
 
 // MobilityInformation
+#[derive(Clone)]
 pub struct MobilityInformation(pub BitString);
 
 impl APerElement for MobilityInformation {
@@ -9998,6 +10332,7 @@ impl APerElement for MobilityInformation {
 }
 
 // MobilityRestrictionList
+#[derive(Clone)]
 pub struct MobilityRestrictionList {
     pub serving_plmn: PlmnIdentity,
     pub equivalent_plmn_s: Option<EquivalentPlmnS>,
@@ -10077,6 +10412,7 @@ impl APerElement for MobilityRestrictionList {
 }
 
 // MdtPlmnList
+#[derive(Clone)]
 pub struct MdtPlmnList(pub Vec<PlmnIdentity>);
 
 impl APerElement for MdtPlmnList {
@@ -10101,6 +10437,7 @@ impl APerElement for MdtPlmnList {
 }
 
 // MdtConfiguration
+#[derive(Clone)]
 pub struct MdtConfiguration {
     pub mdt_config_nr: Option<MdtConfigurationNr>,
     pub mdt_config_eutra: Option<MdtConfigurationEutra>,
@@ -10154,6 +10491,7 @@ impl APerElement for MdtConfiguration {
 }
 
 // MdtConfigurationNr
+#[derive(Clone)]
 pub struct MdtConfigurationNr {
     pub mdt_activation: MdtActivation,
     pub area_scope_of_mdt: AreaScopeOfMdtNr,
@@ -10208,6 +10546,7 @@ impl APerElement for MdtConfigurationNr {
 }
 
 // MdtConfigurationEutra
+#[derive(Clone)]
 pub struct MdtConfigurationEutra {
     pub mdt_activation: MdtActivation,
     pub area_scope_of_mdt: AreaScopeOfMdtEutra,
@@ -10288,6 +10627,7 @@ impl APerElement for MdtActivation {
 }
 
 // MdtModeNr
+#[derive(Clone)]
 pub enum MdtModeNr {
     ImmediateMdtNr(ImmediateMdtNr),
     LoggedMdtNr(LoggedMdtNr),
@@ -10328,6 +10668,7 @@ impl APerElement for MdtModeNr {
 }
 
 // MdtModeEutra
+#[derive(Clone)]
 pub struct MdtModeEutra(pub Vec<u8>);
 
 impl APerElement for MdtModeEutra {
@@ -10343,6 +10684,7 @@ impl APerElement for MdtModeEutra {
 }
 
 // MeasurementsToActivate
+#[derive(Clone)]
 pub struct MeasurementsToActivate(pub BitString);
 
 impl APerElement for MeasurementsToActivate {
@@ -10364,6 +10706,7 @@ impl APerElement for MeasurementsToActivate {
 }
 
 // M1Configuration
+#[derive(Clone)]
 pub struct M1Configuration {
     pub m1reporting_trigger: M1ReportingTrigger,
     pub m1threshold_event_a2: Option<M1ThresholdEventA2>,
@@ -10447,6 +10790,7 @@ impl APerElement for M1ReportingTrigger {
 }
 
 // M1ThresholdEventA2
+#[derive(Clone)]
 pub struct M1ThresholdEventA2 {
     pub m1_threshold_type: M1ThresholdType,
 }
@@ -10480,6 +10824,7 @@ impl APerElement for M1ThresholdEventA2 {
 }
 
 // M1ThresholdType
+#[derive(Clone)]
 pub enum M1ThresholdType {
     ThresholdRsrp(ThresholdRsrp),
     ThresholdRsrq(ThresholdRsrq),
@@ -10529,6 +10874,7 @@ impl APerElement for M1ThresholdType {
 }
 
 // M1PeriodicReporting
+#[derive(Clone)]
 pub struct M1PeriodicReporting {
     pub report_interval: ReportIntervalMdt,
     pub report_amount: ReportAmountMdt,
@@ -10568,6 +10914,7 @@ impl APerElement for M1PeriodicReporting {
 }
 
 // M4Configuration
+#[derive(Clone)]
 pub struct M4Configuration {
     pub m4period: M4period,
     pub m4_links_to_log: LinksToLog,
@@ -10635,6 +10982,7 @@ impl APerElement for M4period {
 }
 
 // M5Configuration
+#[derive(Clone)]
 pub struct M5Configuration {
     pub m5period: M5period,
     pub m5_links_to_log: LinksToLog,
@@ -10702,6 +11050,7 @@ impl APerElement for M5period {
 }
 
 // M6Configuration
+#[derive(Clone)]
 pub struct M6Configuration {
     pub m6report_interval: M6reportInterval,
     pub m6_links_to_log: LinksToLog,
@@ -10778,6 +11127,7 @@ impl APerElement for M6reportInterval {
 }
 
 // M7Configuration
+#[derive(Clone)]
 pub struct M7Configuration {
     pub m7period: M7period,
     pub m7_links_to_log: LinksToLog,
@@ -10817,6 +11167,7 @@ impl APerElement for M7Configuration {
 }
 
 // M7period
+#[derive(Clone)]
 pub struct M7period(pub u8);
 
 impl APerElement for M7period {
@@ -10838,6 +11189,7 @@ impl APerElement for M7period {
 }
 
 // MdtLocationInfo
+#[derive(Clone)]
 pub struct MdtLocationInfo {
     pub mdt_location_information: MdtLocationInformation,
 }
@@ -10873,6 +11225,7 @@ impl APerElement for MdtLocationInfo {
 }
 
 // MdtLocationInformation
+#[derive(Clone)]
 pub struct MdtLocationInformation(pub BitString);
 
 impl APerElement for MdtLocationInformation {
@@ -10894,6 +11247,7 @@ impl APerElement for MdtLocationInformation {
 }
 
 // N3IwfId
+#[derive(Clone)]
 pub enum N3IwfId {
     N3IwfId(BitString),
     _Extended,
@@ -10903,7 +11257,13 @@ impl APerElement for N3IwfId {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::N3IwfId(BitString::from_aper(decoder, UNCONSTRAINED)?)),
+            0 => Ok(Self::N3IwfId(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(16), Some(16))),
+                },
+            )?)),
             1 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -10913,7 +11273,10 @@ impl APerElement for N3IwfId {
         match self {
             Self::N3IwfId(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(16), Some(16))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -10922,6 +11285,7 @@ impl APerElement for N3IwfId {
 }
 
 // NasPdu
+#[derive(Clone)]
 pub struct NasPdu(pub Vec<u8>);
 
 impl APerElement for NasPdu {
@@ -10937,6 +11301,7 @@ impl APerElement for NasPdu {
 }
 
 // NasSecurityParametersFromNgran
+#[derive(Clone)]
 pub struct NasSecurityParametersFromNgran(pub Vec<u8>);
 
 impl APerElement for NasSecurityParametersFromNgran {
@@ -11084,6 +11449,7 @@ impl APerElement for NbIotPagingTimeWindow {
 }
 
 // NbIotPagingEDrxInfo
+#[derive(Clone)]
 pub struct NbIotPagingEDrxInfo {
     pub nb_iot_paging_e_drx_cycle: NbIotPagingEDrxCycle,
     pub nb_iot_paging_time_window: Option<NbIotPagingTimeWindow>,
@@ -11130,6 +11496,7 @@ impl APerElement for NbIotPagingEDrxInfo {
 }
 
 // NbIotUePriority
+#[derive(Clone)]
 pub struct NbIotUePriority(pub u8);
 
 impl APerElement for NbIotUePriority {
@@ -11151,6 +11518,7 @@ impl APerElement for NbIotUePriority {
 }
 
 // NetworkInstance
+#[derive(Clone)]
 pub struct NetworkInstance(pub u8);
 
 impl APerElement for NetworkInstance {
@@ -11196,6 +11564,7 @@ impl APerElement for NewSecurityContextInd {
 }
 
 // NextHopChainingCount
+#[derive(Clone)]
 pub struct NextHopChainingCount(pub u8);
 
 impl APerElement for NextHopChainingCount {
@@ -11242,6 +11611,7 @@ impl APerElement for NextPagingAreaScope {
 }
 
 // NgEnbId
+#[derive(Clone)]
 pub enum NgEnbId {
     MacroNgEnbId(BitString),
     ShortMacroNgEnbId(BitString),
@@ -11255,15 +11625,24 @@ impl APerElement for NgEnbId {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::MacroNgEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(20), Some(20))),
+                },
             )?)),
             1 => Ok(Self::ShortMacroNgEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(18), Some(18))),
+                },
             )?)),
             2 => Ok(Self::LongMacroNgEnbId(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(21), Some(21))),
+                },
             )?)),
             3 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -11274,15 +11653,24 @@ impl APerElement for NgEnbId {
         match self {
             Self::MacroNgEnbId(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(20), Some(20))),
+                })?)?;
             }
             Self::ShortMacroNgEnbId(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(18), Some(18))),
+                })?)?;
             }
             Self::LongMacroNgEnbId(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(21), Some(21))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -11315,6 +11703,7 @@ impl APerElement for NotifySourceNgranNode {
 }
 
 // NgranCgi
+#[derive(Clone)]
 pub enum NgranCgi {
     NrCgi(NrCgi),
     EutraCgi(EutraCgi),
@@ -11349,6 +11738,7 @@ impl APerElement for NgranCgi {
 }
 
 // NgranTnlAssociationToRemoveList
+#[derive(Clone)]
 pub struct NgranTnlAssociationToRemoveList(pub Vec<NgranTnlAssociationToRemoveItem>);
 
 impl APerElement for NgranTnlAssociationToRemoveList {
@@ -11373,6 +11763,7 @@ impl APerElement for NgranTnlAssociationToRemoveList {
 }
 
 // NgranTnlAssociationToRemoveItem
+#[derive(Clone)]
 pub struct NgranTnlAssociationToRemoveItem {
     pub tnl_association_transport_layer_address: CpTransportLayerInformation,
     pub tnl_association_transport_layer_address_amf: Option<CpTransportLayerInformation>,
@@ -11428,6 +11819,7 @@ impl APerElement for NgranTnlAssociationToRemoveItem {
 }
 
 // NgranTraceId
+#[derive(Clone)]
 pub struct NgranTraceId(pub Vec<u8>);
 
 impl APerElement for NgranTraceId {
@@ -11449,6 +11841,7 @@ impl APerElement for NgranTraceId {
 }
 
 // Nid
+#[derive(Clone)]
 pub struct Nid(pub BitString);
 
 impl APerElement for Nid {
@@ -11470,6 +11863,7 @@ impl APerElement for Nid {
 }
 
 // NonDynamic5qiDescriptor
+#[derive(Clone)]
 pub struct NonDynamic5qiDescriptor {
     pub five_qi: FiveQi,
     pub priority_level_qos: Option<PriorityLevelQos>,
@@ -11538,6 +11932,7 @@ impl APerElement for NonDynamic5qiDescriptor {
 }
 
 // NotAllowedTaCs
+#[derive(Clone)]
 pub struct NotAllowedTaCs(pub Vec<Tac>);
 
 impl APerElement for NotAllowedTaCs {
@@ -11608,6 +12003,7 @@ impl APerElement for NotificationControl {
 }
 
 // NpnAccessInformation
+#[derive(Clone)]
 pub enum NpnAccessInformation {
     PniNpnAccessInformation(CellCagList),
     _Extended,
@@ -11639,6 +12035,7 @@ impl APerElement for NpnAccessInformation {
 }
 
 // NpnMobilityInformation
+#[derive(Clone)]
 pub enum NpnMobilityInformation {
     SnpnMobilityInformation(SnpnMobilityInformation),
     PniNpnMobilityInformation(PniNpnMobilityInformation),
@@ -11677,6 +12074,7 @@ impl APerElement for NpnMobilityInformation {
 }
 
 // NpnPagingAssistanceInformation
+#[derive(Clone)]
 pub enum NpnPagingAssistanceInformation {
     PniNpnPagingAssistance(AllowedPniNpnList),
     _Extended,
@@ -11708,6 +12106,7 @@ impl APerElement for NpnPagingAssistanceInformation {
 }
 
 // NpnSupport
+#[derive(Clone)]
 pub enum NpnSupport {
     Snpn(Nid),
     _Extended,
@@ -11736,6 +12135,7 @@ impl APerElement for NpnSupport {
 }
 
 // NrCellIdentity
+#[derive(Clone)]
 pub struct NrCellIdentity(pub BitString);
 
 impl APerElement for NrCellIdentity {
@@ -11757,6 +12157,7 @@ impl APerElement for NrCellIdentity {
 }
 
 // NrCgi
+#[derive(Clone)]
 pub struct NrCgi {
     pub plmn_identity: PlmnIdentity,
     pub nr_cell_identity: NrCellIdentity,
@@ -11796,6 +12197,7 @@ impl APerElement for NrCgi {
 }
 
 // NrCgiList
+#[derive(Clone)]
 pub struct NrCgiList(pub Vec<NrCgi>);
 
 impl APerElement for NrCgiList {
@@ -11817,6 +12219,7 @@ impl APerElement for NrCgiList {
 }
 
 // NrCgiListForWarning
+#[derive(Clone)]
 pub struct NrCgiListForWarning(pub Vec<NrCgi>);
 
 impl APerElement for NrCgiListForWarning {
@@ -11838,6 +12241,7 @@ impl APerElement for NrCgiListForWarning {
 }
 
 // NRencryptionAlgorithms
+#[derive(Clone)]
 pub struct NRencryptionAlgorithms(pub BitString);
 
 impl APerElement for NRencryptionAlgorithms {
@@ -11859,6 +12263,7 @@ impl APerElement for NRencryptionAlgorithms {
 }
 
 // NRintegrityProtectionAlgorithms
+#[derive(Clone)]
 pub struct NRintegrityProtectionAlgorithms(pub BitString);
 
 impl APerElement for NRintegrityProtectionAlgorithms {
@@ -11880,6 +12285,7 @@ impl APerElement for NRintegrityProtectionAlgorithms {
 }
 
 // NrMobilityHistoryReport
+#[derive(Clone)]
 pub struct NrMobilityHistoryReport(pub Vec<u8>);
 
 impl APerElement for NrMobilityHistoryReport {
@@ -11895,6 +12301,7 @@ impl APerElement for NrMobilityHistoryReport {
 }
 
 // NrpPaPdu
+#[derive(Clone)]
 pub struct NrpPaPdu(pub Vec<u8>);
 
 impl APerElement for NrpPaPdu {
@@ -11910,6 +12317,7 @@ impl APerElement for NrpPaPdu {
 }
 
 // NrueRlfReportContainer
+#[derive(Clone)]
 pub struct NrueRlfReportContainer(pub Vec<u8>);
 
 impl APerElement for NrueRlfReportContainer {
@@ -11925,6 +12333,7 @@ impl APerElement for NrueRlfReportContainer {
 }
 
 // NumberOfBroadcasts
+#[derive(Clone)]
 pub struct NumberOfBroadcasts(pub u16);
 
 impl APerElement for NumberOfBroadcasts {
@@ -11946,6 +12355,7 @@ impl APerElement for NumberOfBroadcasts {
 }
 
 // NumberOfBroadcastsRequested
+#[derive(Clone)]
 pub struct NumberOfBroadcastsRequested(pub u16);
 
 impl APerElement for NumberOfBroadcastsRequested {
@@ -11967,6 +12377,7 @@ impl APerElement for NumberOfBroadcastsRequested {
 }
 
 // Nrarfcn
+#[derive(Clone)]
 pub struct Nrarfcn(pub u32);
 
 impl APerElement for Nrarfcn {
@@ -11988,6 +12399,7 @@ impl APerElement for Nrarfcn {
 }
 
 // NrFrequencyBand
+#[derive(Clone)]
 pub struct NrFrequencyBand(pub u16);
 
 impl APerElement for NrFrequencyBand {
@@ -12009,6 +12421,7 @@ impl APerElement for NrFrequencyBand {
 }
 
 // NrFrequencyBandList
+#[derive(Clone)]
 pub struct NrFrequencyBandList(pub Vec<NrFrequencyBandItem>);
 
 impl APerElement for NrFrequencyBandList {
@@ -12033,6 +12446,7 @@ impl APerElement for NrFrequencyBandList {
 }
 
 // NrFrequencyBandItem
+#[derive(Clone)]
 pub struct NrFrequencyBandItem {
     pub nr_frequency_band: NrFrequencyBand,
 }
@@ -12066,6 +12480,7 @@ impl APerElement for NrFrequencyBandItem {
 }
 
 // NrFrequencyInfo
+#[derive(Clone)]
 pub struct NrFrequencyInfo {
     pub nr_arfcn: Nrarfcn,
     pub frequency_band_list: NrFrequencyBandList,
@@ -12105,6 +12520,7 @@ impl APerElement for NrFrequencyInfo {
 }
 
 // NrPci
+#[derive(Clone)]
 pub struct NrPci(pub u16);
 
 impl APerElement for NrPci {
@@ -12126,6 +12542,7 @@ impl APerElement for NrPci {
 }
 
 // Nrv2xServicesAuthorized
+#[derive(Clone)]
 pub struct Nrv2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
@@ -12229,6 +12646,7 @@ impl APerElement for PedestrianUe {
 }
 
 // NrueSidelinkAggregateMaximumBitrate
+#[derive(Clone)]
 pub struct NrueSidelinkAggregateMaximumBitrate {
     pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
 }
@@ -12295,6 +12713,7 @@ impl APerElement for OverloadAction {
 }
 
 // OverloadResponse
+#[derive(Clone)]
 pub enum OverloadResponse {
     OverloadAction(OverloadAction),
     _Extended,
@@ -12326,6 +12745,7 @@ impl APerElement for OverloadResponse {
 }
 
 // OverloadStartNssaiList
+#[derive(Clone)]
 pub struct OverloadStartNssaiList(pub Vec<OverloadStartNssaiItem>);
 
 impl APerElement for OverloadStartNssaiList {
@@ -12350,6 +12770,7 @@ impl APerElement for OverloadStartNssaiList {
 }
 
 // OverloadStartNssaiItem
+#[derive(Clone)]
 pub struct OverloadStartNssaiItem {
     pub slice_overload_list: SliceOverloadList,
     pub slice_overload_response: Option<OverloadResponse>,
@@ -12410,6 +12831,7 @@ impl APerElement for OverloadStartNssaiItem {
 }
 
 // PacketDelayBudget
+#[derive(Clone)]
 pub struct PacketDelayBudget(pub u16);
 
 impl APerElement for PacketDelayBudget {
@@ -12431,6 +12853,7 @@ impl APerElement for PacketDelayBudget {
 }
 
 // PacketErrorRate
+#[derive(Clone)]
 pub struct PacketErrorRate {
     pub per_scalar: u8,
     pub per_exponent: u8,
@@ -12470,6 +12893,7 @@ impl APerElement for PacketErrorRate {
 }
 
 // PacketLossRate
+#[derive(Clone)]
 pub struct PacketLossRate(pub u16);
 
 impl APerElement for PacketLossRate {
@@ -12491,6 +12915,7 @@ impl APerElement for PacketLossRate {
 }
 
 // PagingAssisDataforCEcapabUe
+#[derive(Clone)]
 pub struct PagingAssisDataforCEcapabUe {
     pub eutra_cgi: EutraCgi,
     pub coverage_enhancement_level: CoverageEnhancementLevel,
@@ -12531,6 +12956,7 @@ impl APerElement for PagingAssisDataforCEcapabUe {
 }
 
 // PagingAttemptInformation
+#[derive(Clone)]
 pub struct PagingAttemptInformation {
     pub paging_attempt_count: PagingAttemptCount,
     pub intended_number_of_paging_attempts: IntendedNumberOfPagingAttempts,
@@ -12586,6 +13012,7 @@ impl APerElement for PagingAttemptInformation {
 }
 
 // PagingAttemptCount
+#[derive(Clone)]
 pub struct PagingAttemptCount(pub u8);
 
 impl APerElement for PagingAttemptCount {
@@ -12689,6 +13116,7 @@ impl APerElement for PagingPriority {
 }
 
 // PagingeDrxInformation
+#[derive(Clone)]
 pub struct PagingeDrxInformation {
     pub paging_e_drx_cycle: PagingEDrxCycle,
     pub paging_time_window: Option<PagingTimeWindow>,
@@ -12855,6 +13283,7 @@ impl APerElement for PagingProbabilityInformation {
 }
 
 // PathSwitchRequestAcknowledgeTransfer
+#[derive(Clone)]
 pub struct PathSwitchRequestAcknowledgeTransfer {
     pub ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
     pub security_indication: Option<SecurityIndication>,
@@ -12911,6 +13340,7 @@ impl APerElement for PathSwitchRequestAcknowledgeTransfer {
 }
 
 // PathSwitchRequestSetupFailedTransfer
+#[derive(Clone)]
 pub struct PathSwitchRequestSetupFailedTransfer {
     pub cause: Cause,
 }
@@ -12944,6 +13374,7 @@ impl APerElement for PathSwitchRequestSetupFailedTransfer {
 }
 
 // PathSwitchRequestTransfer
+#[derive(Clone)]
 pub struct PathSwitchRequestTransfer {
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_ngu_tnl_information_reused: Option<DlNguTnlInformationReused>,
@@ -13012,6 +13443,7 @@ impl APerElement for PathSwitchRequestTransfer {
 }
 
 // PathSwitchRequestUnsuccessfulTransfer
+#[derive(Clone)]
 pub struct PathSwitchRequestUnsuccessfulTransfer {
     pub cause: Cause,
 }
@@ -13045,6 +13477,7 @@ impl APerElement for PathSwitchRequestUnsuccessfulTransfer {
 }
 
 // Pc5QosParameters
+#[derive(Clone)]
 pub struct Pc5QosParameters {
     pub pc_5_qos_flow_list: Pc5QosFlowList,
     pub pc_5_link_aggregate_bit_rates: Option<BitRate>,
@@ -13091,6 +13524,7 @@ impl APerElement for Pc5QosParameters {
 }
 
 // Pc5QosFlowList
+#[derive(Clone)]
 pub struct Pc5QosFlowList(pub Vec<Pc5QosFlowItem>);
 
 impl APerElement for Pc5QosFlowList {
@@ -13115,6 +13549,7 @@ impl APerElement for Pc5QosFlowList {
 }
 
 // Pc5QosFlowItem
+#[derive(Clone)]
 pub struct Pc5QosFlowItem {
     pub pqi: FiveQi,
     pub pc_5_flow_bit_rates: Option<Pc5FlowBitRates>,
@@ -13172,6 +13607,7 @@ impl APerElement for Pc5QosFlowItem {
 }
 
 // Pc5FlowBitRates
+#[derive(Clone)]
 pub struct Pc5FlowBitRates {
     pub guaranteed_flow_bit_rate: BitRate,
     pub maximum_flow_bit_rate: BitRate,
@@ -13211,6 +13647,7 @@ impl APerElement for Pc5FlowBitRates {
 }
 
 // PciListForMdt
+#[derive(Clone)]
 pub struct PciListForMdt(pub Vec<NrPci>);
 
 impl APerElement for PciListForMdt {
@@ -13257,6 +13694,7 @@ impl APerElement for PrivacyIndicator {
 }
 
 // PduSessionAggregateMaximumBitRate
+#[derive(Clone)]
 pub struct PduSessionAggregateMaximumBitRate {
     pub pdu_session_aggregate_maximum_bit_rate_dl: BitRate,
     pub pdu_session_aggregate_maximum_bit_rate_ul: BitRate,
@@ -13304,6 +13742,7 @@ impl APerElement for PduSessionAggregateMaximumBitRate {
 }
 
 // PduSessionId
+#[derive(Clone)]
 pub struct PduSessionId(pub u8);
 
 impl APerElement for PduSessionId {
@@ -13325,6 +13764,7 @@ impl APerElement for PduSessionId {
 }
 
 // PduSessionResourceAdmittedList
+#[derive(Clone)]
 pub struct PduSessionResourceAdmittedList(pub Vec<PduSessionResourceAdmittedItem>);
 
 impl APerElement for PduSessionResourceAdmittedList {
@@ -13349,6 +13789,7 @@ impl APerElement for PduSessionResourceAdmittedList {
 }
 
 // PduSessionResourceAdmittedItem
+#[derive(Clone)]
 pub struct PduSessionResourceAdmittedItem {
     pub pdu_session_id: PduSessionId,
     pub handover_request_acknowledge_transfer: Vec<u8>,
@@ -13392,6 +13833,7 @@ impl APerElement for PduSessionResourceAdmittedItem {
 }
 
 // PduSessionResourceFailedToModifyListModCfm
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToModifyListModCfm(
     pub Vec<PduSessionResourceFailedToModifyItemModCfm>,
 );
@@ -13420,6 +13862,7 @@ impl APerElement for PduSessionResourceFailedToModifyListModCfm {
 }
 
 // PduSessionResourceFailedToModifyItemModCfm
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToModifyItemModCfm {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_indication_unsuccessful_transfer: Vec<u8>,
@@ -13464,6 +13907,7 @@ impl APerElement for PduSessionResourceFailedToModifyItemModCfm {
 }
 
 // PduSessionResourceFailedToModifyListModRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToModifyListModRes(
     pub Vec<PduSessionResourceFailedToModifyItemModRes>,
 );
@@ -13492,6 +13936,7 @@ impl APerElement for PduSessionResourceFailedToModifyListModRes {
 }
 
 // PduSessionResourceFailedToModifyItemModRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToModifyItemModRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_unsuccessful_transfer: Vec<u8>,
@@ -13536,6 +13981,7 @@ impl APerElement for PduSessionResourceFailedToModifyItemModRes {
 }
 
 // PduSessionResourceFailedToResumeListResReq
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToResumeListResReq(
     pub Vec<PduSessionResourceFailedToResumeItemResReq>,
 );
@@ -13564,6 +14010,7 @@ impl APerElement for PduSessionResourceFailedToResumeListResReq {
 }
 
 // PduSessionResourceFailedToResumeItemResReq
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToResumeItemResReq {
     pub pdu_session_id: PduSessionId,
     pub cause: Cause,
@@ -13603,6 +14050,7 @@ impl APerElement for PduSessionResourceFailedToResumeItemResReq {
 }
 
 // PduSessionResourceFailedToResumeListResRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToResumeListResRes(
     pub Vec<PduSessionResourceFailedToResumeItemResRes>,
 );
@@ -13631,6 +14079,7 @@ impl APerElement for PduSessionResourceFailedToResumeListResRes {
 }
 
 // PduSessionResourceFailedToResumeItemResRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToResumeItemResRes {
     pub pdu_session_id: PduSessionId,
     pub cause: Cause,
@@ -13670,6 +14119,7 @@ impl APerElement for PduSessionResourceFailedToResumeItemResRes {
 }
 
 // PduSessionResourceFailedToSetupListCxtFail
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListCxtFail(
     pub Vec<PduSessionResourceFailedToSetupItemCxtFail>,
 );
@@ -13698,6 +14148,7 @@ impl APerElement for PduSessionResourceFailedToSetupListCxtFail {
 }
 
 // PduSessionResourceFailedToSetupItemCxtFail
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupItemCxtFail {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
@@ -13742,6 +14193,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemCxtFail {
 }
 
 // PduSessionResourceFailedToSetupListCxtRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListCxtRes(
     pub Vec<PduSessionResourceFailedToSetupItemCxtRes>,
 );
@@ -13770,6 +14222,7 @@ impl APerElement for PduSessionResourceFailedToSetupListCxtRes {
 }
 
 // PduSessionResourceFailedToSetupItemCxtRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupItemCxtRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
@@ -13814,6 +14267,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemCxtRes {
 }
 
 // PduSessionResourceFailedToSetupListHoAck
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListHoAck(
     pub Vec<PduSessionResourceFailedToSetupItemHoAck>,
 );
@@ -13839,6 +14293,7 @@ impl APerElement for PduSessionResourceFailedToSetupListHoAck {
 }
 
 // PduSessionResourceFailedToSetupItemHoAck
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupItemHoAck {
     pub pdu_session_id: PduSessionId,
     pub handover_resource_allocation_unsuccessful_transfer: Vec<u8>,
@@ -13883,6 +14338,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemHoAck {
 }
 
 // PduSessionResourceFailedToSetupListPsReq
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListPsReq(
     pub Vec<PduSessionResourceFailedToSetupItemPsReq>,
 );
@@ -13908,6 +14364,7 @@ impl APerElement for PduSessionResourceFailedToSetupListPsReq {
 }
 
 // PduSessionResourceFailedToSetupItemPsReq
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupItemPsReq {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_setup_failed_transfer: Vec<u8>,
@@ -13952,6 +14409,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemPsReq {
 }
 
 // PduSessionResourceFailedToSetupListSuRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListSuRes(
     pub Vec<PduSessionResourceFailedToSetupItemSuRes>,
 );
@@ -13977,6 +14435,7 @@ impl APerElement for PduSessionResourceFailedToSetupListSuRes {
 }
 
 // PduSessionResourceFailedToSetupItemSuRes
+#[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupItemSuRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
@@ -14021,6 +14480,7 @@ impl APerElement for PduSessionResourceFailedToSetupItemSuRes {
 }
 
 // PduSessionResourceHandoverList
+#[derive(Clone)]
 pub struct PduSessionResourceHandoverList(pub Vec<PduSessionResourceHandoverItem>);
 
 impl APerElement for PduSessionResourceHandoverList {
@@ -14045,6 +14505,7 @@ impl APerElement for PduSessionResourceHandoverList {
 }
 
 // PduSessionResourceHandoverItem
+#[derive(Clone)]
 pub struct PduSessionResourceHandoverItem {
     pub pdu_session_id: PduSessionId,
     pub handover_command_transfer: Vec<u8>,
@@ -14084,6 +14545,7 @@ impl APerElement for PduSessionResourceHandoverItem {
 }
 
 // PduSessionResourceInformationList
+#[derive(Clone)]
 pub struct PduSessionResourceInformationList(pub Vec<PduSessionResourceInformationItem>);
 
 impl APerElement for PduSessionResourceInformationList {
@@ -14108,6 +14570,7 @@ impl APerElement for PduSessionResourceInformationList {
 }
 
 // PduSessionResourceInformationItem
+#[derive(Clone)]
 pub struct PduSessionResourceInformationItem {
     pub pdu_session_id: PduSessionId,
     pub qos_flow_information_list: QosFlowInformationList,
@@ -14161,6 +14624,7 @@ impl APerElement for PduSessionResourceInformationItem {
 }
 
 // PduSessionResourceListCxtRelCpl
+#[derive(Clone)]
 pub struct PduSessionResourceListCxtRelCpl(pub Vec<PduSessionResourceItemCxtRelCpl>);
 
 impl APerElement for PduSessionResourceListCxtRelCpl {
@@ -14185,6 +14649,7 @@ impl APerElement for PduSessionResourceListCxtRelCpl {
 }
 
 // PduSessionResourceItemCxtRelCpl
+#[derive(Clone)]
 pub struct PduSessionResourceItemCxtRelCpl {
     pub pdu_session_id: PduSessionId,
 }
@@ -14218,6 +14683,7 @@ impl APerElement for PduSessionResourceItemCxtRelCpl {
 }
 
 // PduSessionResourceListCxtRelReq
+#[derive(Clone)]
 pub struct PduSessionResourceListCxtRelReq(pub Vec<PduSessionResourceItemCxtRelReq>);
 
 impl APerElement for PduSessionResourceListCxtRelReq {
@@ -14242,6 +14708,7 @@ impl APerElement for PduSessionResourceListCxtRelReq {
 }
 
 // PduSessionResourceItemCxtRelReq
+#[derive(Clone)]
 pub struct PduSessionResourceItemCxtRelReq {
     pub pdu_session_id: PduSessionId,
 }
@@ -14275,6 +14742,7 @@ impl APerElement for PduSessionResourceItemCxtRelReq {
 }
 
 // PduSessionResourceListHoRqd
+#[derive(Clone)]
 pub struct PduSessionResourceListHoRqd(pub Vec<PduSessionResourceItemHoRqd>);
 
 impl APerElement for PduSessionResourceListHoRqd {
@@ -14299,6 +14767,7 @@ impl APerElement for PduSessionResourceListHoRqd {
 }
 
 // PduSessionResourceItemHoRqd
+#[derive(Clone)]
 pub struct PduSessionResourceItemHoRqd {
     pub pdu_session_id: PduSessionId,
     pub handover_required_transfer: Vec<u8>,
@@ -14338,6 +14807,7 @@ impl APerElement for PduSessionResourceItemHoRqd {
 }
 
 // PduSessionResourceModifyConfirmTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceModifyConfirmTransfer {
     pub qos_flow_modify_confirm_list: QosFlowModifyConfirmList,
     pub ulngu_up_tnl_information: UpTransportLayerInformation,
@@ -14404,6 +14874,7 @@ impl APerElement for PduSessionResourceModifyConfirmTransfer {
 }
 
 // PduSessionResourceModifyIndicationUnsuccessfulTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceModifyIndicationUnsuccessfulTransfer {
     pub cause: Cause,
 }
@@ -14437,6 +14908,7 @@ impl APerElement for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
 }
 
 // PduSessionResourceModifyRequestTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceModifyRequestTransfer {
     pub pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate>,
     pub ul_ngu_up_tnl_modify_list: Option<UlNguUpTnlModifyList>,
@@ -14628,6 +15100,7 @@ impl APerElement for PduSessionResourceModifyRequestTransfer {
 }
 
 // PduSessionResourceModifyResponseTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceModifyResponseTransfer {
     pub dl_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
     pub ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
@@ -14726,6 +15199,7 @@ impl APerElement for PduSessionResourceModifyResponseTransfer {
 }
 
 // PduSessionResourceModifyIndicationTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceModifyIndicationTransfer {
     pub dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation,
     pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
@@ -14780,6 +15254,7 @@ impl APerElement for PduSessionResourceModifyIndicationTransfer {
 }
 
 // PduSessionResourceModifyListModCfm
+#[derive(Clone)]
 pub struct PduSessionResourceModifyListModCfm(pub Vec<PduSessionResourceModifyItemModCfm>);
 
 impl APerElement for PduSessionResourceModifyListModCfm {
@@ -14804,6 +15279,7 @@ impl APerElement for PduSessionResourceModifyListModCfm {
 }
 
 // PduSessionResourceModifyItemModCfm
+#[derive(Clone)]
 pub struct PduSessionResourceModifyItemModCfm {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_confirm_transfer: Vec<u8>,
@@ -14848,6 +15324,7 @@ impl APerElement for PduSessionResourceModifyItemModCfm {
 }
 
 // PduSessionResourceModifyListModInd
+#[derive(Clone)]
 pub struct PduSessionResourceModifyListModInd(pub Vec<PduSessionResourceModifyItemModInd>);
 
 impl APerElement for PduSessionResourceModifyListModInd {
@@ -14872,6 +15349,7 @@ impl APerElement for PduSessionResourceModifyListModInd {
 }
 
 // PduSessionResourceModifyItemModInd
+#[derive(Clone)]
 pub struct PduSessionResourceModifyItemModInd {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_indication_transfer: Vec<u8>,
@@ -14916,6 +15394,7 @@ impl APerElement for PduSessionResourceModifyItemModInd {
 }
 
 // PduSessionResourceModifyListModReq
+#[derive(Clone)]
 pub struct PduSessionResourceModifyListModReq(pub Vec<PduSessionResourceModifyItemModReq>);
 
 impl APerElement for PduSessionResourceModifyListModReq {
@@ -14940,6 +15419,7 @@ impl APerElement for PduSessionResourceModifyListModReq {
 }
 
 // PduSessionResourceModifyItemModReq
+#[derive(Clone)]
 pub struct PduSessionResourceModifyItemModReq {
     pub pdu_session_id: PduSessionId,
     pub nas_pdu: Option<NasPdu>,
@@ -14995,6 +15475,7 @@ impl APerElement for PduSessionResourceModifyItemModReq {
 }
 
 // PduSessionResourceModifyListModRes
+#[derive(Clone)]
 pub struct PduSessionResourceModifyListModRes(pub Vec<PduSessionResourceModifyItemModRes>);
 
 impl APerElement for PduSessionResourceModifyListModRes {
@@ -15019,6 +15500,7 @@ impl APerElement for PduSessionResourceModifyListModRes {
 }
 
 // PduSessionResourceModifyItemModRes
+#[derive(Clone)]
 pub struct PduSessionResourceModifyItemModRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_response_transfer: Vec<u8>,
@@ -15063,6 +15545,7 @@ impl APerElement for PduSessionResourceModifyItemModRes {
 }
 
 // PduSessionResourceModifyUnsuccessfulTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceModifyUnsuccessfulTransfer {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -15109,6 +15592,7 @@ impl APerElement for PduSessionResourceModifyUnsuccessfulTransfer {
 }
 
 // PduSessionResourceNotifyList
+#[derive(Clone)]
 pub struct PduSessionResourceNotifyList(pub Vec<PduSessionResourceNotifyItem>);
 
 impl APerElement for PduSessionResourceNotifyList {
@@ -15133,6 +15617,7 @@ impl APerElement for PduSessionResourceNotifyList {
 }
 
 // PduSessionResourceNotifyItem
+#[derive(Clone)]
 pub struct PduSessionResourceNotifyItem {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_notify_transfer: Vec<u8>,
@@ -15176,6 +15661,7 @@ impl APerElement for PduSessionResourceNotifyItem {
 }
 
 // PduSessionResourceNotifyReleasedTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceNotifyReleasedTransfer {
     pub cause: Cause,
 }
@@ -15209,6 +15695,7 @@ impl APerElement for PduSessionResourceNotifyReleasedTransfer {
 }
 
 // PduSessionResourceNotifyTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceNotifyTransfer {
     pub qos_flow_notify_list: Option<QosFlowNotifyList>,
     pub qos_flow_released_list: Option<QosFlowListWithCause>,
@@ -15262,6 +15749,7 @@ impl APerElement for PduSessionResourceNotifyTransfer {
 }
 
 // PduSessionResourceReleaseCommandTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceReleaseCommandTransfer {
     pub cause: Cause,
 }
@@ -15295,6 +15783,7 @@ impl APerElement for PduSessionResourceReleaseCommandTransfer {
 }
 
 // PduSessionResourceReleasedListNot
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedListNot(pub Vec<PduSessionResourceReleasedItemNot>);
 
 impl APerElement for PduSessionResourceReleasedListNot {
@@ -15319,6 +15808,7 @@ impl APerElement for PduSessionResourceReleasedListNot {
 }
 
 // PduSessionResourceReleasedItemNot
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedItemNot {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_notify_released_transfer: Vec<u8>,
@@ -15363,6 +15853,7 @@ impl APerElement for PduSessionResourceReleasedItemNot {
 }
 
 // PduSessionResourceReleasedListPsAck
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedListPsAck(pub Vec<PduSessionResourceReleasedItemPsAck>);
 
 impl APerElement for PduSessionResourceReleasedListPsAck {
@@ -15387,6 +15878,7 @@ impl APerElement for PduSessionResourceReleasedListPsAck {
 }
 
 // PduSessionResourceReleasedItemPsAck
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedItemPsAck {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_unsuccessful_transfer: Vec<u8>,
@@ -15431,6 +15923,7 @@ impl APerElement for PduSessionResourceReleasedItemPsAck {
 }
 
 // PduSessionResourceReleasedListPsFail
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedListPsFail(pub Vec<PduSessionResourceReleasedItemPsFail>);
 
 impl APerElement for PduSessionResourceReleasedListPsFail {
@@ -15454,6 +15947,7 @@ impl APerElement for PduSessionResourceReleasedListPsFail {
 }
 
 // PduSessionResourceReleasedItemPsFail
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedItemPsFail {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_unsuccessful_transfer: Vec<u8>,
@@ -15498,6 +15992,7 @@ impl APerElement for PduSessionResourceReleasedItemPsFail {
 }
 
 // PduSessionResourceReleasedListRelRes
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedListRelRes(pub Vec<PduSessionResourceReleasedItemRelRes>);
 
 impl APerElement for PduSessionResourceReleasedListRelRes {
@@ -15521,6 +16016,7 @@ impl APerElement for PduSessionResourceReleasedListRelRes {
 }
 
 // PduSessionResourceReleasedItemRelRes
+#[derive(Clone)]
 pub struct PduSessionResourceReleasedItemRelRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_release_response_transfer: Vec<u8>,
@@ -15567,6 +16063,7 @@ impl APerElement for PduSessionResourceReleasedItemRelRes {
 // PduSessionResourceReleaseResponseTransfer - omitted
 
 // PduSessionResourceResumeListResReq
+#[derive(Clone)]
 pub struct PduSessionResourceResumeListResReq(pub Vec<PduSessionResourceResumeItemResReq>);
 
 impl APerElement for PduSessionResourceResumeListResReq {
@@ -15591,6 +16088,7 @@ impl APerElement for PduSessionResourceResumeListResReq {
 }
 
 // PduSessionResourceResumeItemResReq
+#[derive(Clone)]
 pub struct PduSessionResourceResumeItemResReq {
     pub pdu_session_id: PduSessionId,
     pub ue_context_resume_request_transfer: Vec<u8>,
@@ -15634,6 +16132,7 @@ impl APerElement for PduSessionResourceResumeItemResReq {
 }
 
 // PduSessionResourceResumeListResRes
+#[derive(Clone)]
 pub struct PduSessionResourceResumeListResRes(pub Vec<PduSessionResourceResumeItemResRes>);
 
 impl APerElement for PduSessionResourceResumeListResRes {
@@ -15658,6 +16157,7 @@ impl APerElement for PduSessionResourceResumeListResRes {
 }
 
 // PduSessionResourceResumeItemResRes
+#[derive(Clone)]
 pub struct PduSessionResourceResumeItemResRes {
     pub pdu_session_id: PduSessionId,
     pub ue_context_resume_response_transfer: Vec<u8>,
@@ -15701,6 +16201,7 @@ impl APerElement for PduSessionResourceResumeItemResRes {
 }
 
 // PduSessionResourceSecondaryRatUsageList
+#[derive(Clone)]
 pub struct PduSessionResourceSecondaryRatUsageList(
     pub Vec<PduSessionResourceSecondaryRatUsageItem>,
 );
@@ -15726,6 +16227,7 @@ impl APerElement for PduSessionResourceSecondaryRatUsageList {
 }
 
 // PduSessionResourceSecondaryRatUsageItem
+#[derive(Clone)]
 pub struct PduSessionResourceSecondaryRatUsageItem {
     pub pdu_session_id: PduSessionId,
     pub secondary_rat_data_usage_report_transfer: Vec<u8>,
@@ -15770,6 +16272,7 @@ impl APerElement for PduSessionResourceSecondaryRatUsageItem {
 }
 
 // PduSessionResourceSetupListCxtReq
+#[derive(Clone)]
 pub struct PduSessionResourceSetupListCxtReq(pub Vec<PduSessionResourceSetupItemCxtReq>);
 
 impl APerElement for PduSessionResourceSetupListCxtReq {
@@ -15794,6 +16297,7 @@ impl APerElement for PduSessionResourceSetupListCxtReq {
 }
 
 // PduSessionResourceSetupItemCxtReq
+#[derive(Clone)]
 pub struct PduSessionResourceSetupItemCxtReq {
     pub pdu_session_id: PduSessionId,
     pub nas_pdu: Option<NasPdu>,
@@ -15853,6 +16357,7 @@ impl APerElement for PduSessionResourceSetupItemCxtReq {
 }
 
 // PduSessionResourceSetupListCxtRes
+#[derive(Clone)]
 pub struct PduSessionResourceSetupListCxtRes(pub Vec<PduSessionResourceSetupItemCxtRes>);
 
 impl APerElement for PduSessionResourceSetupListCxtRes {
@@ -15877,6 +16382,7 @@ impl APerElement for PduSessionResourceSetupListCxtRes {
 }
 
 // PduSessionResourceSetupItemCxtRes
+#[derive(Clone)]
 pub struct PduSessionResourceSetupItemCxtRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_response_transfer: Vec<u8>,
@@ -15921,6 +16427,7 @@ impl APerElement for PduSessionResourceSetupItemCxtRes {
 }
 
 // PduSessionResourceSetupListHoReq
+#[derive(Clone)]
 pub struct PduSessionResourceSetupListHoReq(pub Vec<PduSessionResourceSetupItemHoReq>);
 
 impl APerElement for PduSessionResourceSetupListHoReq {
@@ -15945,6 +16452,7 @@ impl APerElement for PduSessionResourceSetupListHoReq {
 }
 
 // PduSessionResourceSetupItemHoReq
+#[derive(Clone)]
 pub struct PduSessionResourceSetupItemHoReq {
     pub pdu_session_id: PduSessionId,
     pub s_nssai: SNssai,
@@ -15988,6 +16496,7 @@ impl APerElement for PduSessionResourceSetupItemHoReq {
 }
 
 // PduSessionResourceSetupListSuReq
+#[derive(Clone)]
 pub struct PduSessionResourceSetupListSuReq(pub Vec<PduSessionResourceSetupItemSuReq>);
 
 impl APerElement for PduSessionResourceSetupListSuReq {
@@ -16012,6 +16521,7 @@ impl APerElement for PduSessionResourceSetupListSuReq {
 }
 
 // PduSessionResourceSetupItemSuReq
+#[derive(Clone)]
 pub struct PduSessionResourceSetupItemSuReq {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_nas_pdu: Option<NasPdu>,
@@ -16071,6 +16581,7 @@ impl APerElement for PduSessionResourceSetupItemSuReq {
 }
 
 // PduSessionResourceSetupListSuRes
+#[derive(Clone)]
 pub struct PduSessionResourceSetupListSuRes(pub Vec<PduSessionResourceSetupItemSuRes>);
 
 impl APerElement for PduSessionResourceSetupListSuRes {
@@ -16095,6 +16606,7 @@ impl APerElement for PduSessionResourceSetupListSuRes {
 }
 
 // PduSessionResourceSetupItemSuRes
+#[derive(Clone)]
 pub struct PduSessionResourceSetupItemSuRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_response_transfer: Vec<u8>,
@@ -16139,6 +16651,7 @@ impl APerElement for PduSessionResourceSetupItemSuRes {
 }
 
 // PduSessionResourceSetupRequestTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceSetupRequestTransfer {
     pub pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate>,
     pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
@@ -16370,6 +16883,7 @@ impl APerElement for PduSessionResourceSetupRequestTransfer {
 }
 
 // PduSessionResourceSetupResponseTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceSetupResponseTransfer {
     pub dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation,
     pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
@@ -16446,6 +16960,7 @@ impl APerElement for PduSessionResourceSetupResponseTransfer {
 }
 
 // PduSessionResourceSetupUnsuccessfulTransfer
+#[derive(Clone)]
 pub struct PduSessionResourceSetupUnsuccessfulTransfer {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -16492,6 +17007,7 @@ impl APerElement for PduSessionResourceSetupUnsuccessfulTransfer {
 }
 
 // PduSessionResourceSuspendListSusReq
+#[derive(Clone)]
 pub struct PduSessionResourceSuspendListSusReq(pub Vec<PduSessionResourceSuspendItemSusReq>);
 
 impl APerElement for PduSessionResourceSuspendListSusReq {
@@ -16516,6 +17032,7 @@ impl APerElement for PduSessionResourceSuspendListSusReq {
 }
 
 // PduSessionResourceSuspendItemSusReq
+#[derive(Clone)]
 pub struct PduSessionResourceSuspendItemSusReq {
     pub pdu_session_id: PduSessionId,
     pub ue_context_suspend_request_transfer: Vec<u8>,
@@ -16559,6 +17076,7 @@ impl APerElement for PduSessionResourceSuspendItemSusReq {
 }
 
 // PduSessionResourceSwitchedList
+#[derive(Clone)]
 pub struct PduSessionResourceSwitchedList(pub Vec<PduSessionResourceSwitchedItem>);
 
 impl APerElement for PduSessionResourceSwitchedList {
@@ -16583,6 +17101,7 @@ impl APerElement for PduSessionResourceSwitchedList {
 }
 
 // PduSessionResourceSwitchedItem
+#[derive(Clone)]
 pub struct PduSessionResourceSwitchedItem {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_acknowledge_transfer: Vec<u8>,
@@ -16627,6 +17146,7 @@ impl APerElement for PduSessionResourceSwitchedItem {
 }
 
 // PduSessionResourceToBeSwitchedDlList
+#[derive(Clone)]
 pub struct PduSessionResourceToBeSwitchedDlList(pub Vec<PduSessionResourceToBeSwitchedDlItem>);
 
 impl APerElement for PduSessionResourceToBeSwitchedDlList {
@@ -16650,6 +17170,7 @@ impl APerElement for PduSessionResourceToBeSwitchedDlList {
 }
 
 // PduSessionResourceToBeSwitchedDlItem
+#[derive(Clone)]
 pub struct PduSessionResourceToBeSwitchedDlItem {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_transfer: Vec<u8>,
@@ -16689,6 +17210,7 @@ impl APerElement for PduSessionResourceToBeSwitchedDlItem {
 }
 
 // PduSessionResourceToReleaseListHoCmd
+#[derive(Clone)]
 pub struct PduSessionResourceToReleaseListHoCmd(pub Vec<PduSessionResourceToReleaseItemHoCmd>);
 
 impl APerElement for PduSessionResourceToReleaseListHoCmd {
@@ -16712,6 +17234,7 @@ impl APerElement for PduSessionResourceToReleaseListHoCmd {
 }
 
 // PduSessionResourceToReleaseItemHoCmd
+#[derive(Clone)]
 pub struct PduSessionResourceToReleaseItemHoCmd {
     pub pdu_session_id: PduSessionId,
     pub handover_preparation_unsuccessful_transfer: Vec<u8>,
@@ -16756,6 +17279,7 @@ impl APerElement for PduSessionResourceToReleaseItemHoCmd {
 }
 
 // PduSessionResourceToReleaseListRelCmd
+#[derive(Clone)]
 pub struct PduSessionResourceToReleaseListRelCmd(pub Vec<PduSessionResourceToReleaseItemRelCmd>);
 
 impl APerElement for PduSessionResourceToReleaseListRelCmd {
@@ -16779,6 +17303,7 @@ impl APerElement for PduSessionResourceToReleaseListRelCmd {
 }
 
 // PduSessionResourceToReleaseItemRelCmd
+#[derive(Clone)]
 pub struct PduSessionResourceToReleaseItemRelCmd {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_release_command_transfer: Vec<u8>,
@@ -16851,6 +17376,7 @@ impl APerElement for PduSessionType {
 }
 
 // PduSessionUsageReport
+#[derive(Clone)]
 pub struct PduSessionUsageReport {
     pub rat_type: RatType,
     pub pdu_session_timed_report_list: VolumeTimedReportList,
@@ -16891,6 +17417,7 @@ impl APerElement for PduSessionUsageReport {
 }
 
 // Periodicity
+#[derive(Clone)]
 pub struct Periodicity(pub u32);
 
 impl APerElement for Periodicity {
@@ -16912,6 +17439,7 @@ impl APerElement for Periodicity {
 }
 
 // PeriodicRegistrationUpdateTimer
+#[derive(Clone)]
 pub struct PeriodicRegistrationUpdateTimer(pub BitString);
 
 impl APerElement for PeriodicRegistrationUpdateTimer {
@@ -16933,6 +17461,7 @@ impl APerElement for PeriodicRegistrationUpdateTimer {
 }
 
 // PlmnIdentity
+#[derive(Clone)]
 pub struct PlmnIdentity(pub Vec<u8>);
 
 impl APerElement for PlmnIdentity {
@@ -16954,6 +17483,7 @@ impl APerElement for PlmnIdentity {
 }
 
 // PlmnSupportList
+#[derive(Clone)]
 pub struct PlmnSupportList(pub Vec<PlmnSupportItem>);
 
 impl APerElement for PlmnSupportList {
@@ -16978,6 +17508,7 @@ impl APerElement for PlmnSupportList {
 }
 
 // PlmnSupportItem
+#[derive(Clone)]
 pub struct PlmnSupportItem {
     pub plmn_identity: PlmnIdentity,
     pub slice_support_list: SliceSupportList,
@@ -17017,6 +17548,7 @@ impl APerElement for PlmnSupportItem {
 }
 
 // PniNpnMobilityInformation
+#[derive(Clone)]
 pub struct PniNpnMobilityInformation {
     pub allowed_pni_npi_list: AllowedPniNpnList,
 }
@@ -17052,6 +17584,7 @@ impl APerElement for PniNpnMobilityInformation {
 }
 
 // PortNumber
+#[derive(Clone)]
 pub struct PortNumber(pub Vec<u8>);
 
 impl APerElement for PortNumber {
@@ -17123,6 +17656,7 @@ impl APerElement for PreEmptionVulnerability {
 }
 
 // PriorityLevelArp
+#[derive(Clone)]
 pub struct PriorityLevelArp(pub u8);
 
 impl APerElement for PriorityLevelArp {
@@ -17144,6 +17678,7 @@ impl APerElement for PriorityLevelArp {
 }
 
 // PriorityLevelQos
+#[derive(Clone)]
 pub struct PriorityLevelQos(pub u8);
 
 impl APerElement for PriorityLevelQos {
@@ -17165,6 +17700,7 @@ impl APerElement for PriorityLevelQos {
 }
 
 // PwsFailedCellIdList
+#[derive(Clone)]
 pub enum PwsFailedCellIdList {
     EutraCgiPwsFailedList(EutraCgiList),
     NrCgiPwsFailedList(NrCgiList),
@@ -17205,6 +17741,7 @@ impl APerElement for PwsFailedCellIdList {
 }
 
 // QosCharacteristics
+#[derive(Clone)]
 pub enum QosCharacteristics {
     NonDynamic5qi(NonDynamic5qiDescriptor),
     Dynamic5qi(Dynamic5qiDescriptor),
@@ -17245,6 +17782,7 @@ impl APerElement for QosCharacteristics {
 }
 
 // QosFlowAcceptedList
+#[derive(Clone)]
 pub struct QosFlowAcceptedList(pub Vec<QosFlowAcceptedItem>);
 
 impl APerElement for QosFlowAcceptedList {
@@ -17269,6 +17807,7 @@ impl APerElement for QosFlowAcceptedList {
 }
 
 // QosFlowAcceptedItem
+#[derive(Clone)]
 pub struct QosFlowAcceptedItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -17304,6 +17843,7 @@ impl APerElement for QosFlowAcceptedItem {
 }
 
 // QosFlowAddOrModifyRequestList
+#[derive(Clone)]
 pub struct QosFlowAddOrModifyRequestList(pub Vec<QosFlowAddOrModifyRequestItem>);
 
 impl APerElement for QosFlowAddOrModifyRequestList {
@@ -17328,6 +17868,7 @@ impl APerElement for QosFlowAddOrModifyRequestList {
 }
 
 // QosFlowAddOrModifyRequestItem
+#[derive(Clone)]
 pub struct QosFlowAddOrModifyRequestItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_level_qos_parameters: Option<QosFlowLevelQosParameters>,
@@ -17388,6 +17929,7 @@ impl APerElement for QosFlowAddOrModifyRequestItem {
 }
 
 // QosFlowAddOrModifyResponseList
+#[derive(Clone)]
 pub struct QosFlowAddOrModifyResponseList(pub Vec<QosFlowAddOrModifyResponseItem>);
 
 impl APerElement for QosFlowAddOrModifyResponseList {
@@ -17412,6 +17954,7 @@ impl APerElement for QosFlowAddOrModifyResponseList {
 }
 
 // QosFlowAddOrModifyResponseItem
+#[derive(Clone)]
 pub struct QosFlowAddOrModifyResponseItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -17447,6 +17990,7 @@ impl APerElement for QosFlowAddOrModifyResponseItem {
 }
 
 // QosFlowFeedbackList
+#[derive(Clone)]
 pub struct QosFlowFeedbackList(pub Vec<QosFlowFeedbackItem>);
 
 impl APerElement for QosFlowFeedbackList {
@@ -17471,6 +18015,7 @@ impl APerElement for QosFlowFeedbackList {
 }
 
 // QosFlowFeedbackItem
+#[derive(Clone)]
 pub struct QosFlowFeedbackItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub update_feedback: Option<UpdateFeedback>,
@@ -17545,6 +18090,7 @@ impl APerElement for QosFlowFeedbackItem {
 }
 
 // QosFlowIdentifier
+#[derive(Clone)]
 pub struct QosFlowIdentifier(pub u8);
 
 impl APerElement for QosFlowIdentifier {
@@ -17566,6 +18112,7 @@ impl APerElement for QosFlowIdentifier {
 }
 
 // QosFlowInformationList
+#[derive(Clone)]
 pub struct QosFlowInformationList(pub Vec<QosFlowInformationItem>);
 
 impl APerElement for QosFlowInformationList {
@@ -17590,6 +18137,7 @@ impl APerElement for QosFlowInformationList {
 }
 
 // QosFlowInformationItem
+#[derive(Clone)]
 pub struct QosFlowInformationItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub dl_forwarding: Option<DlForwarding>,
@@ -17636,6 +18184,7 @@ impl APerElement for QosFlowInformationItem {
 }
 
 // QosFlowLevelQosParameters
+#[derive(Clone)]
 pub struct QosFlowLevelQosParameters {
     pub qos_characteristics: QosCharacteristics,
     pub allocation_and_retention_priority: AllocationAndRetentionPriority,
@@ -17742,6 +18291,7 @@ impl APerElement for QosMonitoringRequest {
 }
 
 // QosMonitoringReportingFrequency
+#[derive(Clone)]
 pub struct QosMonitoringReportingFrequency(pub u16);
 
 impl APerElement for QosMonitoringReportingFrequency {
@@ -17763,6 +18313,7 @@ impl APerElement for QosMonitoringReportingFrequency {
 }
 
 // QosFlowListWithCause
+#[derive(Clone)]
 pub struct QosFlowListWithCause(pub Vec<QosFlowWithCauseItem>);
 
 impl APerElement for QosFlowListWithCause {
@@ -17787,6 +18338,7 @@ impl APerElement for QosFlowListWithCause {
 }
 
 // QosFlowWithCauseItem
+#[derive(Clone)]
 pub struct QosFlowWithCauseItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub cause: Cause,
@@ -17826,6 +18378,7 @@ impl APerElement for QosFlowWithCauseItem {
 }
 
 // QosFlowModifyConfirmList
+#[derive(Clone)]
 pub struct QosFlowModifyConfirmList(pub Vec<QosFlowModifyConfirmItem>);
 
 impl APerElement for QosFlowModifyConfirmList {
@@ -17850,6 +18403,7 @@ impl APerElement for QosFlowModifyConfirmList {
 }
 
 // QosFlowModifyConfirmItem
+#[derive(Clone)]
 pub struct QosFlowModifyConfirmItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -17885,6 +18439,7 @@ impl APerElement for QosFlowModifyConfirmItem {
 }
 
 // QosFlowNotifyList
+#[derive(Clone)]
 pub struct QosFlowNotifyList(pub Vec<QosFlowNotifyItem>);
 
 impl APerElement for QosFlowNotifyList {
@@ -17909,6 +18464,7 @@ impl APerElement for QosFlowNotifyList {
 }
 
 // QosFlowNotifyItem
+#[derive(Clone)]
 pub struct QosFlowNotifyItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub notification_cause: NotificationCause,
@@ -17948,6 +18504,7 @@ impl APerElement for QosFlowNotifyItem {
 }
 
 // QosFlowParametersList
+#[derive(Clone)]
 pub struct QosFlowParametersList(pub Vec<QosFlowParametersItem>);
 
 impl APerElement for QosFlowParametersList {
@@ -17972,6 +18529,7 @@ impl APerElement for QosFlowParametersList {
 }
 
 // QosFlowParametersItem
+#[derive(Clone)]
 pub struct QosFlowParametersItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub alternative_qos_para_set_list: Option<AlternativeQosParaSetList>,
@@ -18021,6 +18579,7 @@ impl APerElement for QosFlowParametersItem {
 }
 
 // QosFlowPerTnlInformation
+#[derive(Clone)]
 pub struct QosFlowPerTnlInformation {
     pub up_transport_layer_information: UpTransportLayerInformation,
     pub associated_qos_flow_list: AssociatedQosFlowList,
@@ -18061,6 +18620,7 @@ impl APerElement for QosFlowPerTnlInformation {
 }
 
 // QosFlowPerTnlInformationList
+#[derive(Clone)]
 pub struct QosFlowPerTnlInformationList(pub Vec<QosFlowPerTnlInformationItem>);
 
 impl APerElement for QosFlowPerTnlInformationList {
@@ -18085,6 +18645,7 @@ impl APerElement for QosFlowPerTnlInformationList {
 }
 
 // QosFlowPerTnlInformationItem
+#[derive(Clone)]
 pub struct QosFlowPerTnlInformationItem {
     pub qos_flow_per_tnl_information: QosFlowPerTnlInformation,
 }
@@ -18121,6 +18682,7 @@ impl APerElement for QosFlowPerTnlInformationItem {
 }
 
 // QosFlowSetupRequestList
+#[derive(Clone)]
 pub struct QosFlowSetupRequestList(pub Vec<QosFlowSetupRequestItem>);
 
 impl APerElement for QosFlowSetupRequestList {
@@ -18145,6 +18707,7 @@ impl APerElement for QosFlowSetupRequestList {
 }
 
 // QosFlowSetupRequestItem
+#[derive(Clone)]
 pub struct QosFlowSetupRequestItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_level_qos_parameters: QosFlowLevelQosParameters,
@@ -18196,6 +18759,7 @@ impl APerElement for QosFlowSetupRequestItem {
 }
 
 // QosFlowListWithDataForwarding
+#[derive(Clone)]
 pub struct QosFlowListWithDataForwarding(pub Vec<QosFlowItemWithDataForwarding>);
 
 impl APerElement for QosFlowListWithDataForwarding {
@@ -18220,6 +18784,7 @@ impl APerElement for QosFlowListWithDataForwarding {
 }
 
 // QosFlowItemWithDataForwarding
+#[derive(Clone)]
 pub struct QosFlowItemWithDataForwarding {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub data_forwarding_accepted: Option<DataForwardingAccepted>,
@@ -18266,6 +18831,7 @@ impl APerElement for QosFlowItemWithDataForwarding {
 }
 
 // QosFlowToBeForwardedList
+#[derive(Clone)]
 pub struct QosFlowToBeForwardedList(pub Vec<QosFlowToBeForwardedItem>);
 
 impl APerElement for QosFlowToBeForwardedList {
@@ -18290,6 +18856,7 @@ impl APerElement for QosFlowToBeForwardedList {
 }
 
 // QosFlowToBeForwardedItem
+#[derive(Clone)]
 pub struct QosFlowToBeForwardedItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -18325,6 +18892,7 @@ impl APerElement for QosFlowToBeForwardedItem {
 }
 
 // QosFlowsUsageReportList
+#[derive(Clone)]
 pub struct QosFlowsUsageReportList(pub Vec<QosFlowsUsageReportItem>);
 
 impl APerElement for QosFlowsUsageReportList {
@@ -18349,6 +18917,7 @@ impl APerElement for QosFlowsUsageReportList {
 }
 
 // QosFlowsUsageReportItem
+#[derive(Clone)]
 pub struct QosFlowsUsageReportItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub rat_type: RatType1,
@@ -18424,6 +18993,7 @@ impl APerElement for Range {
 }
 
 // RanNodeName
+#[derive(Clone)]
 pub struct RanNodeName(pub PrintableString);
 
 impl APerElement for RanNodeName {
@@ -18448,6 +19018,7 @@ impl APerElement for RanNodeName {
 }
 
 // RanNodeNameVisibleString
+#[derive(Clone)]
 pub struct RanNodeNameVisibleString(pub VisibleString);
 
 impl APerElement for RanNodeNameVisibleString {
@@ -18469,6 +19040,7 @@ impl APerElement for RanNodeNameVisibleString {
 }
 
 // RanNodeNameUtf8String
+#[derive(Clone)]
 pub struct RanNodeNameUtf8String(pub Utf8String);
 
 impl APerElement for RanNodeNameUtf8String {
@@ -18490,6 +19062,7 @@ impl APerElement for RanNodeNameUtf8String {
 }
 
 // RanPagingPriority
+#[derive(Clone)]
 pub struct RanPagingPriority(pub u8);
 
 impl APerElement for RanPagingPriority {
@@ -18511,6 +19084,7 @@ impl APerElement for RanPagingPriority {
 }
 
 // RanStatusTransferTransparentContainer
+#[derive(Clone)]
 pub struct RanStatusTransferTransparentContainer {
     pub dr_bs_subject_to_status_transfer_list: DrBsSubjectToStatusTransferList,
 }
@@ -18551,6 +19125,7 @@ impl APerElement for RanStatusTransferTransparentContainer {
 }
 
 // RanUeNgapId
+#[derive(Clone)]
 pub struct RanUeNgapId(pub u64);
 
 impl APerElement for RanUeNgapId {
@@ -18597,6 +19172,7 @@ impl APerElement for RatInformation {
 }
 
 // RatRestrictions
+#[derive(Clone)]
 pub struct RatRestrictions(pub Vec<RatRestrictionsItem>);
 
 impl APerElement for RatRestrictions {
@@ -18621,6 +19197,7 @@ impl APerElement for RatRestrictions {
 }
 
 // RatRestrictionsItem
+#[derive(Clone)]
 pub struct RatRestrictionsItem {
     pub plmn_identity: PlmnIdentity,
     pub rat_restriction_information: RatRestrictionInformation,
@@ -18661,6 +19238,7 @@ impl APerElement for RatRestrictionsItem {
 }
 
 // RatRestrictionInformation
+#[derive(Clone)]
 pub struct RatRestrictionInformation(pub BitString);
 
 impl APerElement for RatRestrictionInformation {
@@ -18682,6 +19260,7 @@ impl APerElement for RatRestrictionInformation {
 }
 
 // RecommendedCellsForPaging
+#[derive(Clone)]
 pub struct RecommendedCellsForPaging {
     pub recommended_cell_list: RecommendedCellList,
 }
@@ -18717,6 +19296,7 @@ impl APerElement for RecommendedCellsForPaging {
 }
 
 // RecommendedCellList
+#[derive(Clone)]
 pub struct RecommendedCellList(pub Vec<RecommendedCellItem>);
 
 impl APerElement for RecommendedCellList {
@@ -18741,6 +19321,7 @@ impl APerElement for RecommendedCellList {
 }
 
 // RecommendedCellItem
+#[derive(Clone)]
 pub struct RecommendedCellItem {
     pub ngran_cgi: NgranCgi,
     pub time_stayed_in_cell: Option<u16>,
@@ -18759,7 +19340,13 @@ impl APerElement for RecommendedCellItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
         let time_stayed_in_cell = if optionals.is_set(0) {
-            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
+            Some(u16::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(0), Some(4095))),
+                },
+            )?)
         } else {
             None
         };
@@ -18787,6 +19374,7 @@ impl APerElement for RecommendedCellItem {
 }
 
 // RecommendedRanNodesForPaging
+#[derive(Clone)]
 pub struct RecommendedRanNodesForPaging {
     pub recommended_ran_node_list: RecommendedRanNodeList,
 }
@@ -18822,6 +19410,7 @@ impl APerElement for RecommendedRanNodesForPaging {
 }
 
 // RecommendedRanNodeList
+#[derive(Clone)]
 pub struct RecommendedRanNodeList(pub Vec<RecommendedRanNodeItem>);
 
 impl APerElement for RecommendedRanNodeList {
@@ -18846,6 +19435,7 @@ impl APerElement for RecommendedRanNodeList {
 }
 
 // RecommendedRanNodeItem
+#[derive(Clone)]
 pub struct RecommendedRanNodeItem {
     pub amf_paging_target: AmfPagingTarget,
 }
@@ -18904,6 +19494,7 @@ impl APerElement for RedirectionVoiceFallback {
 }
 
 // RedundantPduSessionInformation
+#[derive(Clone)]
 pub struct RedundantPduSessionInformation {
     pub rsn: Rsn,
 }
@@ -18981,6 +19572,7 @@ impl APerElement for ReflectiveQosAttribute {
 }
 
 // RelativeAmfCapacity
+#[derive(Clone)]
 pub struct RelativeAmfCapacity(pub u8);
 
 impl APerElement for RelativeAmfCapacity {
@@ -19026,6 +19618,7 @@ impl APerElement for ReportArea {
 }
 
 // RepetitionPeriod
+#[derive(Clone)]
 pub struct RepetitionPeriod(pub u32);
 
 impl APerElement for RepetitionPeriod {
@@ -19128,6 +19721,7 @@ impl APerElement for ReportIntervalMdt {
 }
 
 // ResetType
+#[derive(Clone)]
 pub enum ResetType {
     NgInterface(ResetAll),
     PartOfNgInterface(UeAssociatedLogicalNgConnectionList),
@@ -19167,6 +19761,7 @@ impl APerElement for ResetType {
 }
 
 // RgLevelWirelineAccessCharacteristics
+#[derive(Clone)]
 pub struct RgLevelWirelineAccessCharacteristics(pub Vec<u8>);
 
 impl APerElement for RgLevelWirelineAccessCharacteristics {
@@ -19182,6 +19777,7 @@ impl APerElement for RgLevelWirelineAccessCharacteristics {
 }
 
 // RncId
+#[derive(Clone)]
 pub struct RncId(pub u16);
 
 impl APerElement for RncId {
@@ -19203,6 +19799,7 @@ impl APerElement for RncId {
 }
 
 // RoutingId
+#[derive(Clone)]
 pub struct RoutingId(pub Vec<u8>);
 
 impl APerElement for RoutingId {
@@ -19218,6 +19815,7 @@ impl APerElement for RoutingId {
 }
 
 // RrcContainer
+#[derive(Clone)]
 pub struct RrcContainer(pub Vec<u8>);
 
 impl APerElement for RrcContainer {
@@ -19342,6 +19940,7 @@ impl APerElement for Rsn {
 }
 
 // RimInformationTransfer
+#[derive(Clone)]
 pub struct RimInformationTransfer {
     pub target_ran_node_id: TargetRanNodeId,
     pub source_ran_node_id: SourceRanNodeId,
@@ -19385,6 +19984,7 @@ impl APerElement for RimInformationTransfer {
 }
 
 // RimInformation
+#[derive(Clone)]
 pub struct RimInformation {
     pub target_gnb_set_id: GnbSetId,
     pub rim_rs_detection: RimRsDetection,
@@ -19424,6 +20024,7 @@ impl APerElement for RimInformation {
 }
 
 // GnbSetId
+#[derive(Clone)]
 pub struct GnbSetId(pub BitString);
 
 impl APerElement for GnbSetId {
@@ -19445,6 +20046,7 @@ impl APerElement for GnbSetId {
 }
 
 // ScheduledCommunicationTime
+#[derive(Clone)]
 pub struct ScheduledCommunicationTime {
     pub dayof_week: Option<BitString>,
     pub timeof_day_start: Option<u32>,
@@ -19463,7 +20065,13 @@ impl APerElement for ScheduledCommunicationTime {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let dayof_week = if optionals.is_set(0) {
-            Some(BitString::from_aper(decoder, UNCONSTRAINED)?)
+            Some(BitString::from_aper(
+                decoder,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(7), Some(7))),
+                },
+            )?)
         } else {
             None
         };
@@ -19509,6 +20117,7 @@ impl APerElement for ScheduledCommunicationTime {
 }
 
 // SctpTlAs
+#[derive(Clone)]
 pub struct SctpTlAs(pub Vec<TransportLayerAddress>);
 
 impl APerElement for SctpTlAs {
@@ -19533,6 +20142,7 @@ impl APerElement for SctpTlAs {
 }
 
 // Sd
+#[derive(Clone)]
 pub struct Sd(pub Vec<u8>);
 
 impl APerElement for Sd {
@@ -19554,6 +20164,7 @@ impl APerElement for Sd {
 }
 
 // SecondaryRatUsageInformation
+#[derive(Clone)]
 pub struct SecondaryRatUsageInformation {
     pub pdu_session_usage_report: Option<PduSessionUsageReport>,
     pub qos_flows_usage_report_list: Option<QosFlowsUsageReportList>,
@@ -19607,6 +20218,7 @@ impl APerElement for SecondaryRatUsageInformation {
 }
 
 // SecondaryRatDataUsageReportTransfer
+#[derive(Clone)]
 pub struct SecondaryRatDataUsageReportTransfer {
     pub secondary_rat_usage_information: Option<SecondaryRatUsageInformation>,
 }
@@ -19652,6 +20264,7 @@ impl APerElement for SecondaryRatDataUsageReportTransfer {
 }
 
 // SecurityContext
+#[derive(Clone)]
 pub struct SecurityContext {
     pub next_hop_chaining_count: NextHopChainingCount,
     pub next_hop_nh: SecurityKey,
@@ -19691,6 +20304,7 @@ impl APerElement for SecurityContext {
 }
 
 // SecurityIndication
+#[derive(Clone)]
 pub struct SecurityIndication {
     pub integrity_protection_indication: IntegrityProtectionIndication,
     pub confidentiality_protection_indication: ConfidentialityProtectionIndication,
@@ -19754,6 +20368,7 @@ impl APerElement for SecurityIndication {
 }
 
 // SecurityKey
+#[derive(Clone)]
 pub struct SecurityKey(pub BitString);
 
 impl APerElement for SecurityKey {
@@ -19775,6 +20390,7 @@ impl APerElement for SecurityKey {
 }
 
 // SecurityResult
+#[derive(Clone)]
 pub struct SecurityResult {
     pub integrity_protection_result: IntegrityProtectionResult,
     pub confidentiality_protection_result: ConfidentialityProtectionResult,
@@ -19820,6 +20436,7 @@ impl APerElement for SecurityResult {
 }
 
 // SensorMeasurementConfiguration
+#[derive(Clone)]
 pub struct SensorMeasurementConfiguration {
     pub sensor_meas_config: SensorMeasConfig,
     pub sensor_meas_config_name_list: Option<SensorMeasConfigNameList>,
@@ -19866,6 +20483,7 @@ impl APerElement for SensorMeasurementConfiguration {
 }
 
 // SensorMeasConfigNameList
+#[derive(Clone)]
 pub struct SensorMeasConfigNameList(pub Vec<SensorMeasConfigNameItem>);
 
 impl APerElement for SensorMeasConfigNameList {
@@ -19890,6 +20508,7 @@ impl APerElement for SensorMeasConfigNameList {
 }
 
 // SensorMeasConfigNameItem
+#[derive(Clone)]
 pub struct SensorMeasConfigNameItem {
     pub sensor_name_config: SensorNameConfig,
 }
@@ -19947,6 +20566,7 @@ impl APerElement for SensorMeasConfig {
 }
 
 // SensorNameConfig
+#[derive(Clone)]
 pub enum SensorNameConfig {
     UncompensatedBarometricConfig(UncompensatedBarometricConfig),
     UeSpeedConfig(UeSpeedConfig),
@@ -19995,6 +20615,7 @@ impl APerElement for SensorNameConfig {
 }
 
 // SerialNumber
+#[derive(Clone)]
 pub struct SerialNumber(pub BitString);
 
 impl APerElement for SerialNumber {
@@ -20016,6 +20637,7 @@ impl APerElement for SerialNumber {
 }
 
 // ServedGuamiList
+#[derive(Clone)]
 pub struct ServedGuamiList(pub Vec<ServedGuamiItem>);
 
 impl APerElement for ServedGuamiList {
@@ -20040,6 +20662,7 @@ impl APerElement for ServedGuamiList {
 }
 
 // ServedGuamiItem
+#[derive(Clone)]
 pub struct ServedGuamiItem {
     pub guami: Guami,
     pub backup_amf_name: Option<AmfName>,
@@ -20086,6 +20709,7 @@ impl APerElement for ServedGuamiItem {
 }
 
 // ServiceAreaInformation
+#[derive(Clone)]
 pub struct ServiceAreaInformation(pub Vec<ServiceAreaInformationItem>);
 
 impl APerElement for ServiceAreaInformation {
@@ -20110,6 +20734,7 @@ impl APerElement for ServiceAreaInformation {
 }
 
 // ServiceAreaInformationItem
+#[derive(Clone)]
 pub struct ServiceAreaInformationItem {
     pub plmn_identity: PlmnIdentity,
     pub allowed_ta_cs: Option<AllowedTaCs>,
@@ -20167,6 +20792,7 @@ impl APerElement for ServiceAreaInformationItem {
 }
 
 // SGnbUeX2apId
+#[derive(Clone)]
 pub struct SGnbUeX2apId(pub u64);
 
 impl APerElement for SGnbUeX2apId {
@@ -20188,6 +20814,7 @@ impl APerElement for SGnbUeX2apId {
 }
 
 // SliceOverloadList
+#[derive(Clone)]
 pub struct SliceOverloadList(pub Vec<SliceOverloadItem>);
 
 impl APerElement for SliceOverloadList {
@@ -20212,6 +20839,7 @@ impl APerElement for SliceOverloadList {
 }
 
 // SliceOverloadItem
+#[derive(Clone)]
 pub struct SliceOverloadItem {
     pub s_nssai: SNssai,
 }
@@ -20245,6 +20873,7 @@ impl APerElement for SliceOverloadItem {
 }
 
 // SliceSupportList
+#[derive(Clone)]
 pub struct SliceSupportList(pub Vec<SliceSupportItem>);
 
 impl APerElement for SliceSupportList {
@@ -20269,6 +20898,7 @@ impl APerElement for SliceSupportList {
 }
 
 // SliceSupportItem
+#[derive(Clone)]
 pub struct SliceSupportItem {
     pub s_nssai: SNssai,
 }
@@ -20302,6 +20932,7 @@ impl APerElement for SliceSupportItem {
 }
 
 // SnpnMobilityInformation
+#[derive(Clone)]
 pub struct SnpnMobilityInformation {
     pub serving_nid: Nid,
 }
@@ -20335,6 +20966,7 @@ impl APerElement for SnpnMobilityInformation {
 }
 
 // SNssai
+#[derive(Clone)]
 pub struct SNssai {
     pub sst: Sst,
     pub sd: Option<Sd>,
@@ -20378,6 +21010,7 @@ impl APerElement for SNssai {
 }
 
 // SonConfigurationTransfer
+#[derive(Clone)]
 pub struct SonConfigurationTransfer {
     pub target_ran_node_id: TargetRanNodeId,
     pub source_ran_node_id: SourceRanNodeId,
@@ -20432,6 +21065,7 @@ impl APerElement for SonConfigurationTransfer {
 }
 
 // SonInformation
+#[derive(Clone)]
 pub enum SonInformation {
     SonInformationRequest(SonInformationRequest),
     SonInformationReply(SonInformationReply),
@@ -20471,6 +21105,7 @@ impl APerElement for SonInformation {
 }
 
 // SonInformationReply
+#[derive(Clone)]
 pub struct SonInformationReply {
     pub xn_tnl_configuration_info: Option<XnTnlConfigurationInfo>,
 }
@@ -20513,6 +21148,7 @@ impl APerElement for SonInformationReply {
 }
 
 // SonInformationReport
+#[derive(Clone)]
 pub enum SonInformationReport {
     FailureIndicationInformation(FailureIndication),
     HoReportInformation(HoReport),
@@ -20576,6 +21212,7 @@ impl APerElement for SonInformationRequest {
 }
 
 // SourceNgranNodeToTargetNgranNodeTransparentContainer
+#[derive(Clone)]
 pub struct SourceNgranNodeToTargetNgranNodeTransparentContainer {
     pub rrc_container: RrcContainer,
     pub pdu_session_resource_information_list: Option<PduSessionResourceInformationList>,
@@ -20680,6 +21317,7 @@ impl APerElement for SourceOfUeActivityBehaviourInformation {
 }
 
 // SourceRanNodeId
+#[derive(Clone)]
 pub struct SourceRanNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
@@ -20719,6 +21357,7 @@ impl APerElement for SourceRanNodeId {
 }
 
 // SourceToTargetTransparentContainer
+#[derive(Clone)]
 pub struct SourceToTargetTransparentContainer(pub Vec<u8>);
 
 impl APerElement for SourceToTargetTransparentContainer {
@@ -20734,6 +21373,7 @@ impl APerElement for SourceToTargetTransparentContainer {
 }
 
 // SourceToTargetAmfInformationReroute
+#[derive(Clone)]
 pub struct SourceToTargetAmfInformationReroute {
     pub configured_nssai: Option<ConfiguredNssai>,
     pub rejected_nssa_iin_plmn: Option<RejectedNssaIinPlmn>,
@@ -20823,6 +21463,7 @@ impl APerElement for SrvccOperationPossible {
 }
 
 // ConfiguredNssai
+#[derive(Clone)]
 pub struct ConfiguredNssai(pub Vec<u8>);
 
 impl APerElement for ConfiguredNssai {
@@ -20844,6 +21485,7 @@ impl APerElement for ConfiguredNssai {
 }
 
 // RejectedNssaIinPlmn
+#[derive(Clone)]
 pub struct RejectedNssaIinPlmn(pub Vec<u8>);
 
 impl APerElement for RejectedNssaIinPlmn {
@@ -20865,6 +21507,7 @@ impl APerElement for RejectedNssaIinPlmn {
 }
 
 // RejectedNssaIinTa
+#[derive(Clone)]
 pub struct RejectedNssaIinTa(pub Vec<u8>);
 
 impl APerElement for RejectedNssaIinTa {
@@ -20886,6 +21529,7 @@ impl APerElement for RejectedNssaIinTa {
 }
 
 // Sst
+#[derive(Clone)]
 pub struct Sst(pub Vec<u8>);
 
 impl APerElement for Sst {
@@ -20907,6 +21551,7 @@ impl APerElement for Sst {
 }
 
 // SupportedTaList
+#[derive(Clone)]
 pub struct SupportedTaList(pub Vec<SupportedTaItem>);
 
 impl APerElement for SupportedTaList {
@@ -20931,6 +21576,7 @@ impl APerElement for SupportedTaList {
 }
 
 // SupportedTaItem
+#[derive(Clone)]
 pub struct SupportedTaItem {
     pub tac: Tac,
     pub broadcast_plmn_list: BroadcastPlmnList,
@@ -21042,6 +21688,7 @@ impl APerElement for SuspendResponseIndication {
 }
 
 // Tac
+#[derive(Clone)]
 pub struct Tac(pub Vec<u8>);
 
 impl APerElement for Tac {
@@ -21063,6 +21710,7 @@ impl APerElement for Tac {
 }
 
 // Tai
+#[derive(Clone)]
 pub struct Tai {
     pub plmn_identity: PlmnIdentity,
     pub tac: Tac,
@@ -21099,6 +21747,7 @@ impl APerElement for Tai {
 }
 
 // TaiBroadcastEutra
+#[derive(Clone)]
 pub struct TaiBroadcastEutra(pub Vec<TaiBroadcastEutraItem>);
 
 impl APerElement for TaiBroadcastEutra {
@@ -21123,6 +21772,7 @@ impl APerElement for TaiBroadcastEutra {
 }
 
 // TaiBroadcastEutraItem
+#[derive(Clone)]
 pub struct TaiBroadcastEutraItem {
     pub tai: Tai,
     pub completed_cells_in_tai_eutra: CompletedCellsInTaiEutra,
@@ -21163,6 +21813,7 @@ impl APerElement for TaiBroadcastEutraItem {
 }
 
 // TaiBroadcastNr
+#[derive(Clone)]
 pub struct TaiBroadcastNr(pub Vec<TaiBroadcastNrItem>);
 
 impl APerElement for TaiBroadcastNr {
@@ -21187,6 +21838,7 @@ impl APerElement for TaiBroadcastNr {
 }
 
 // TaiBroadcastNrItem
+#[derive(Clone)]
 pub struct TaiBroadcastNrItem {
     pub tai: Tai,
     pub completed_cells_in_tai_nr: CompletedCellsInTaiNr,
@@ -21226,6 +21878,7 @@ impl APerElement for TaiBroadcastNrItem {
 }
 
 // TaiCancelledEutra
+#[derive(Clone)]
 pub struct TaiCancelledEutra(pub Vec<TaiCancelledEutraItem>);
 
 impl APerElement for TaiCancelledEutra {
@@ -21250,6 +21903,7 @@ impl APerElement for TaiCancelledEutra {
 }
 
 // TaiCancelledEutraItem
+#[derive(Clone)]
 pub struct TaiCancelledEutraItem {
     pub tai: Tai,
     pub cancelled_cells_in_tai_eutra: CancelledCellsInTaiEutra,
@@ -21290,6 +21944,7 @@ impl APerElement for TaiCancelledEutraItem {
 }
 
 // TaiCancelledNr
+#[derive(Clone)]
 pub struct TaiCancelledNr(pub Vec<TaiCancelledNrItem>);
 
 impl APerElement for TaiCancelledNr {
@@ -21314,6 +21969,7 @@ impl APerElement for TaiCancelledNr {
 }
 
 // TaiCancelledNrItem
+#[derive(Clone)]
 pub struct TaiCancelledNrItem {
     pub tai: Tai,
     pub cancelled_cells_in_tai_nr: CancelledCellsInTaiNr,
@@ -21353,6 +22009,7 @@ impl APerElement for TaiCancelledNrItem {
 }
 
 // TaiListForInactive
+#[derive(Clone)]
 pub struct TaiListForInactive(pub Vec<TaiListForInactiveItem>);
 
 impl APerElement for TaiListForInactive {
@@ -21377,6 +22034,7 @@ impl APerElement for TaiListForInactive {
 }
 
 // TaiListForInactiveItem
+#[derive(Clone)]
 pub struct TaiListForInactiveItem {
     pub tai: Tai,
 }
@@ -21410,6 +22068,7 @@ impl APerElement for TaiListForInactiveItem {
 }
 
 // TaiListForPaging
+#[derive(Clone)]
 pub struct TaiListForPaging(pub Vec<TaiListForPagingItem>);
 
 impl APerElement for TaiListForPaging {
@@ -21434,6 +22093,7 @@ impl APerElement for TaiListForPaging {
 }
 
 // TaiListForPagingItem
+#[derive(Clone)]
 pub struct TaiListForPagingItem {
     pub tai: Tai,
 }
@@ -21467,6 +22127,7 @@ impl APerElement for TaiListForPagingItem {
 }
 
 // TaiListForRestart
+#[derive(Clone)]
 pub struct TaiListForRestart(pub Vec<Tai>);
 
 impl APerElement for TaiListForRestart {
@@ -21488,6 +22149,7 @@ impl APerElement for TaiListForRestart {
 }
 
 // TaiListForWarning
+#[derive(Clone)]
 pub struct TaiListForWarning(pub Vec<Tai>);
 
 impl APerElement for TaiListForWarning {
@@ -21509,6 +22171,7 @@ impl APerElement for TaiListForWarning {
 }
 
 // TargetEnbId
+#[derive(Clone)]
 pub struct TargetEnbId {
     pub global_enb_id: GlobalNgEnbId,
     pub selected_eps_tai: EpsTai,
@@ -21548,6 +22211,7 @@ impl APerElement for TargetEnbId {
 }
 
 // TargetId
+#[derive(Clone)]
 pub enum TargetId {
     TargetRanNodeId(TargetRanNodeId),
     TargetEnbId(TargetEnbId),
@@ -21588,6 +22252,7 @@ impl APerElement for TargetId {
 }
 
 // TargetNgranNodeToSourceNgranNodeTransparentContainer
+#[derive(Clone)]
 pub struct TargetNgranNodeToSourceNgranNodeTransparentContainer {
     pub rrc_container: RrcContainer,
 }
@@ -21621,6 +22286,7 @@ impl APerElement for TargetNgranNodeToSourceNgranNodeTransparentContainer {
 }
 
 // TargetNgranNodeToSourceNgranNodeFailureTransparentContainer
+#[derive(Clone)]
 pub struct TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
     pub cell_cag_information: CellCagInformation,
 }
@@ -21656,6 +22322,7 @@ impl APerElement for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer
 }
 
 // TargetRanNodeId
+#[derive(Clone)]
 pub struct TargetRanNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
@@ -21695,6 +22362,7 @@ impl APerElement for TargetRanNodeId {
 }
 
 // TargetRncId
+#[derive(Clone)]
 pub struct TargetRncId {
     pub lai: Lai,
     pub rnc_id: RncId,
@@ -21745,6 +22413,7 @@ impl APerElement for TargetRncId {
 }
 
 // TargetToSourceTransparentContainer
+#[derive(Clone)]
 pub struct TargetToSourceTransparentContainer(pub Vec<u8>);
 
 impl APerElement for TargetToSourceTransparentContainer {
@@ -21760,6 +22429,7 @@ impl APerElement for TargetToSourceTransparentContainer {
 }
 
 // TargettoSourceFailureTransparentContainer
+#[derive(Clone)]
 pub struct TargettoSourceFailureTransparentContainer(pub Vec<u8>);
 
 impl APerElement for TargettoSourceFailureTransparentContainer {
@@ -21799,6 +22469,7 @@ impl APerElement for TimerApproachForGuamiRemoval {
 }
 
 // TimeStamp
+#[derive(Clone)]
 pub struct TimeStamp(pub Vec<u8>);
 
 impl APerElement for TimeStamp {
@@ -21849,6 +22520,7 @@ impl APerElement for TimeToWait {
 }
 
 // TimeUeStayedInCell
+#[derive(Clone)]
 pub struct TimeUeStayedInCell(pub u16);
 
 impl APerElement for TimeUeStayedInCell {
@@ -21870,6 +22542,7 @@ impl APerElement for TimeUeStayedInCell {
 }
 
 // TimeUeStayedInCellEnhancedGranularity
+#[derive(Clone)]
 pub struct TimeUeStayedInCellEnhancedGranularity(pub u16);
 
 impl APerElement for TimeUeStayedInCellEnhancedGranularity {
@@ -21891,6 +22564,7 @@ impl APerElement for TimeUeStayedInCellEnhancedGranularity {
 }
 
 // TnapId
+#[derive(Clone)]
 pub struct TnapId(pub Vec<u8>);
 
 impl APerElement for TnapId {
@@ -21906,6 +22580,7 @@ impl APerElement for TnapId {
 }
 
 // TngfId
+#[derive(Clone)]
 pub enum TngfId {
     TngfId(BitString),
     _Extended,
@@ -21934,6 +22609,7 @@ impl APerElement for TngfId {
 }
 
 // TnlAddressWeightFactor
+#[derive(Clone)]
 pub struct TnlAddressWeightFactor(pub u8);
 
 impl APerElement for TnlAddressWeightFactor {
@@ -21955,6 +22631,7 @@ impl APerElement for TnlAddressWeightFactor {
 }
 
 // TnlAssociationList
+#[derive(Clone)]
 pub struct TnlAssociationList(pub Vec<TnlAssociationItem>);
 
 impl APerElement for TnlAssociationList {
@@ -21979,6 +22656,7 @@ impl APerElement for TnlAssociationList {
 }
 
 // TnlAssociationItem
+#[derive(Clone)]
 pub struct TnlAssociationItem {
     pub tnl_association_address: CpTransportLayerInformation,
     pub cause: Cause,
@@ -22045,6 +22723,7 @@ impl APerElement for TnlAssociationUsage {
 }
 
 // TooearlyIntersystemHo
+#[derive(Clone)]
 pub struct TooearlyIntersystemHo {
     pub sourcecell_id: EutraCgi,
     pub failurecell_id: NgranCgi,
@@ -22095,6 +22774,7 @@ impl APerElement for TooearlyIntersystemHo {
 }
 
 // TraceActivation
+#[derive(Clone)]
 pub struct TraceActivation {
     pub ngran_trace_id: NgranTraceId,
     pub interfaces_to_trace: InterfacesToTrace,
@@ -22176,6 +22856,7 @@ impl APerElement for TraceDepth {
 }
 
 // TrafficLoadReductionIndication
+#[derive(Clone)]
 pub struct TrafficLoadReductionIndication(pub u8);
 
 impl APerElement for TrafficLoadReductionIndication {
@@ -22197,6 +22878,7 @@ impl APerElement for TrafficLoadReductionIndication {
 }
 
 // TransportLayerAddress
+#[derive(Clone)]
 pub struct TransportLayerAddress(pub BitString);
 
 impl APerElement for TransportLayerAddress {
@@ -22243,6 +22925,7 @@ impl APerElement for TypeOfError {
 }
 
 // TaiBasedMdt
+#[derive(Clone)]
 pub struct TaiBasedMdt {
     pub tai_listfor_mdt: TaiListforMdt,
 }
@@ -22276,6 +22959,7 @@ impl APerElement for TaiBasedMdt {
 }
 
 // TaiListforMdt
+#[derive(Clone)]
 pub struct TaiListforMdt(pub Vec<Tai>);
 
 impl APerElement for TaiListforMdt {
@@ -22297,6 +22981,7 @@ impl APerElement for TaiListforMdt {
 }
 
 // TaBasedMdt
+#[derive(Clone)]
 pub struct TaBasedMdt {
     pub ta_listfor_mdt: TaListforMdt,
 }
@@ -22330,6 +23015,7 @@ impl APerElement for TaBasedMdt {
 }
 
 // TaListforMdt
+#[derive(Clone)]
 pub struct TaListforMdt(pub Vec<Tac>);
 
 impl APerElement for TaListforMdt {
@@ -22351,6 +23037,7 @@ impl APerElement for TaListforMdt {
 }
 
 // ThresholdRsrp
+#[derive(Clone)]
 pub struct ThresholdRsrp(pub u8);
 
 impl APerElement for ThresholdRsrp {
@@ -22372,6 +23059,7 @@ impl APerElement for ThresholdRsrp {
 }
 
 // ThresholdRsrq
+#[derive(Clone)]
 pub struct ThresholdRsrq(pub u8);
 
 impl APerElement for ThresholdRsrq {
@@ -22393,6 +23081,7 @@ impl APerElement for ThresholdRsrq {
 }
 
 // ThresholdSinr
+#[derive(Clone)]
 pub struct ThresholdSinr(pub u8);
 
 impl APerElement for ThresholdSinr {
@@ -22448,6 +23137,7 @@ impl APerElement for TimeToTrigger {
 }
 
 // TwapId
+#[derive(Clone)]
 pub struct TwapId(pub Vec<u8>);
 
 impl APerElement for TwapId {
@@ -22463,6 +23153,7 @@ impl APerElement for TwapId {
 }
 
 // TwifId
+#[derive(Clone)]
 pub enum TwifId {
     TwifId(BitString),
     _Extended,
@@ -22491,6 +23182,7 @@ impl APerElement for TwifId {
 }
 
 // TscAssistanceInformation
+#[derive(Clone)]
 pub struct TscAssistanceInformation {
     pub periodicity: Periodicity,
     pub burst_arrival_time: Option<BurstArrivalTime>,
@@ -22537,6 +23229,7 @@ impl APerElement for TscAssistanceInformation {
 }
 
 // TscTrafficCharacteristics
+#[derive(Clone)]
 pub struct TscTrafficCharacteristics {
     pub tsc_assistance_information_dl: Option<TscAssistanceInformation>,
     pub tsc_assistance_information_ul: Option<TscAssistanceInformation>,
@@ -22590,6 +23283,7 @@ impl APerElement for TscTrafficCharacteristics {
 }
 
 // UeAggregateMaximumBitRate
+#[derive(Clone)]
 pub struct UeAggregateMaximumBitRate {
     pub ue_aggregate_maximum_bit_rate_dl: BitRate,
     pub ue_aggregate_maximum_bit_rate_ul: BitRate,
@@ -22637,6 +23331,7 @@ impl APerElement for UeAggregateMaximumBitRate {
 }
 
 // UeAssociatedLogicalNgConnectionList
+#[derive(Clone)]
 pub struct UeAssociatedLogicalNgConnectionList(pub Vec<UeAssociatedLogicalNgConnectionItem>);
 
 impl APerElement for UeAssociatedLogicalNgConnectionList {
@@ -22661,6 +23356,7 @@ impl APerElement for UeAssociatedLogicalNgConnectionList {
 }
 
 // UeAssociatedLogicalNgConnectionItem
+#[derive(Clone)]
 pub struct UeAssociatedLogicalNgConnectionItem {
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
     pub ran_ue_ngap_id: Option<RanUeNgapId>,
@@ -22762,6 +23458,7 @@ impl APerElement for UeContextRequest {
 }
 
 // UeContextResumeRequestTransfer
+#[derive(Clone)]
 pub struct UeContextResumeRequestTransfer {
     pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
 }
@@ -22804,6 +23501,7 @@ impl APerElement for UeContextResumeRequestTransfer {
 }
 
 // UeContextResumeResponseTransfer
+#[derive(Clone)]
 pub struct UeContextResumeResponseTransfer {
     pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
 }
@@ -22846,6 +23544,7 @@ impl APerElement for UeContextResumeResponseTransfer {
 }
 
 // UeContextSuspendRequestTransfer
+#[derive(Clone)]
 pub struct UeContextSuspendRequestTransfer {
     pub suspend_indicator: Option<SuspendIndicator>,
 }
@@ -22886,6 +23585,7 @@ impl APerElement for UeContextSuspendRequestTransfer {
 }
 
 // UeDifferentiationInfo
+#[derive(Clone)]
 pub struct UeDifferentiationInfo {
     pub periodic_communication_indicator: Option<PeriodicCommunicationIndicator>,
     pub periodic_time: Option<u16>,
@@ -22989,6 +23689,7 @@ impl APerElement for UeDifferentiationInfo {
 }
 
 // UeHistoryInformation
+#[derive(Clone)]
 pub struct UeHistoryInformation(pub Vec<LastVisitedCellItem>);
 
 impl APerElement for UeHistoryInformation {
@@ -23013,6 +23714,7 @@ impl APerElement for UeHistoryInformation {
 }
 
 // UeHistoryInformationFromTheUe
+#[derive(Clone)]
 pub enum UeHistoryInformationFromTheUe {
     Nr(NrMobilityHistoryReport),
     _Extended,
@@ -23044,6 +23746,7 @@ impl APerElement for UeHistoryInformationFromTheUe {
 }
 
 // UeIdentityIndexValue
+#[derive(Clone)]
 pub enum UeIdentityIndexValue {
     IndexLength10(BitString),
     _Extended,
@@ -23055,7 +23758,10 @@ impl APerElement for UeIdentityIndexValue {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::IndexLength10(BitString::from_aper(
                 decoder,
-                UNCONSTRAINED,
+                Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(10), Some(10))),
+                },
             )?)),
             1 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
@@ -23066,7 +23772,10 @@ impl APerElement for UeIdentityIndexValue {
         match self {
             Self::IndexLength10(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                enc.append(&x.to_aper(Constraints {
+                    value: None,
+                    size: Some(Constraint::new(Some(10), Some(10))),
+                })?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -23075,6 +23784,7 @@ impl APerElement for UeIdentityIndexValue {
 }
 
 // UeNgapIDs
+#[derive(Clone)]
 pub enum UeNgapIDs {
     UeNgapIdPair(UeNgapIdPair),
     AmfUeNgapId(AmfUeNgapId),
@@ -23115,6 +23825,7 @@ impl APerElement for UeNgapIDs {
 }
 
 // UeNgapIdPair
+#[derive(Clone)]
 pub struct UeNgapIdPair {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -23154,6 +23865,7 @@ impl APerElement for UeNgapIdPair {
 }
 
 // UePagingIdentity
+#[derive(Clone)]
 pub enum UePagingIdentity {
     FiveGSTmsi(FiveGSTmsi),
     _Extended,
@@ -23211,6 +23923,7 @@ impl APerElement for UePresence {
 }
 
 // UePresenceInAreaOfInterestList
+#[derive(Clone)]
 pub struct UePresenceInAreaOfInterestList(pub Vec<UePresenceInAreaOfInterestItem>);
 
 impl APerElement for UePresenceInAreaOfInterestList {
@@ -23235,6 +23948,7 @@ impl APerElement for UePresenceInAreaOfInterestList {
 }
 
 // UePresenceInAreaOfInterestItem
+#[derive(Clone)]
 pub struct UePresenceInAreaOfInterestItem {
     pub location_reporting_reference_id: LocationReportingReferenceId,
     pub ue_presence: UePresence,
@@ -23279,6 +23993,7 @@ impl APerElement for UePresenceInAreaOfInterestItem {
 }
 
 // UeRadioCapability
+#[derive(Clone)]
 pub struct UeRadioCapability(pub Vec<u8>);
 
 impl APerElement for UeRadioCapability {
@@ -23294,6 +24009,7 @@ impl APerElement for UeRadioCapability {
 }
 
 // UeRadioCapabilityForPaging
+#[derive(Clone)]
 pub struct UeRadioCapabilityForPaging {
     pub ue_radio_capability_for_paging_of_nr: Option<UeRadioCapabilityForPagingOfNr>,
     pub ue_radio_capability_for_paging_of_eutra: Option<UeRadioCapabilityForPagingOfEutra>,
@@ -23353,6 +24069,7 @@ impl APerElement for UeRadioCapabilityForPaging {
 }
 
 // UeRadioCapabilityForPagingOfNbIot
+#[derive(Clone)]
 pub struct UeRadioCapabilityForPagingOfNbIot(pub Vec<u8>);
 
 impl APerElement for UeRadioCapabilityForPagingOfNbIot {
@@ -23368,6 +24085,7 @@ impl APerElement for UeRadioCapabilityForPagingOfNbIot {
 }
 
 // UeRadioCapabilityForPagingOfNr
+#[derive(Clone)]
 pub struct UeRadioCapabilityForPagingOfNr(pub Vec<u8>);
 
 impl APerElement for UeRadioCapabilityForPagingOfNr {
@@ -23383,6 +24101,7 @@ impl APerElement for UeRadioCapabilityForPagingOfNr {
 }
 
 // UeRadioCapabilityForPagingOfEutra
+#[derive(Clone)]
 pub struct UeRadioCapabilityForPagingOfEutra(pub Vec<u8>);
 
 impl APerElement for UeRadioCapabilityForPagingOfEutra {
@@ -23398,6 +24117,7 @@ impl APerElement for UeRadioCapabilityForPagingOfEutra {
 }
 
 // UeRadioCapabilityId
+#[derive(Clone)]
 pub struct UeRadioCapabilityId(pub Vec<u8>);
 
 impl APerElement for UeRadioCapabilityId {
@@ -23437,6 +24157,7 @@ impl APerElement for UeRetentionInformation {
 }
 
 // UeRlfReportContainer
+#[derive(Clone)]
 pub enum UeRlfReportContainer {
     Nr(NrueRlfReportContainer),
     Lte(LteueRlfReportContainer),
@@ -23477,6 +24198,7 @@ impl APerElement for UeRlfReportContainer {
 }
 
 // UeSecurityCapabilities
+#[derive(Clone)]
 pub struct UeSecurityCapabilities {
     pub n_rencryption_algorithms: NRencryptionAlgorithms,
     pub n_rintegrity_protection_algorithms: NRintegrityProtectionAlgorithms,
@@ -23559,6 +24281,7 @@ impl APerElement for UeUpCIotSupport {
 }
 
 // UlCpSecurityInformation
+#[derive(Clone)]
 pub struct UlCpSecurityInformation {
     pub ul_nas_mac: UlNasMac,
     pub ul_nas_count: UlNasCount,
@@ -23598,6 +24321,7 @@ impl APerElement for UlCpSecurityInformation {
 }
 
 // UlNasMac
+#[derive(Clone)]
 pub struct UlNasMac(pub BitString);
 
 impl APerElement for UlNasMac {
@@ -23619,6 +24343,7 @@ impl APerElement for UlNasMac {
 }
 
 // UlNasCount
+#[derive(Clone)]
 pub struct UlNasCount(pub BitString);
 
 impl APerElement for UlNasCount {
@@ -23640,6 +24365,7 @@ impl APerElement for UlNasCount {
 }
 
 // UlNguUpTnlModifyList
+#[derive(Clone)]
 pub struct UlNguUpTnlModifyList(pub Vec<UlNguUpTnlModifyItem>);
 
 impl APerElement for UlNguUpTnlModifyList {
@@ -23664,6 +24390,7 @@ impl APerElement for UlNguUpTnlModifyList {
 }
 
 // UlNguUpTnlModifyItem
+#[derive(Clone)]
 pub struct UlNguUpTnlModifyItem {
     pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
@@ -23705,6 +24432,7 @@ impl APerElement for UlNguUpTnlModifyItem {
 }
 
 // UnavailableGuamiList
+#[derive(Clone)]
 pub struct UnavailableGuamiList(pub Vec<UnavailableGuamiItem>);
 
 impl APerElement for UnavailableGuamiList {
@@ -23729,6 +24457,7 @@ impl APerElement for UnavailableGuamiList {
 }
 
 // UnavailableGuamiItem
+#[derive(Clone)]
 pub struct UnavailableGuamiItem {
     pub guami: Guami,
     pub timer_approach_for_guami_removal: Option<TimerApproachForGuamiRemoval>,
@@ -23813,6 +24542,7 @@ impl APerElement for UlForwarding {
 }
 
 // UpdateFeedback
+#[derive(Clone)]
 pub struct UpdateFeedback(pub BitString);
 
 impl APerElement for UpdateFeedback {
@@ -23834,6 +24564,7 @@ impl APerElement for UpdateFeedback {
 }
 
 // UpTransportLayerInformation
+#[derive(Clone)]
 pub enum UpTransportLayerInformation {
     GtpTunnel(GtpTunnel),
     _Extended,
@@ -23865,6 +24596,7 @@ impl APerElement for UpTransportLayerInformation {
 }
 
 // UpTransportLayerInformationList
+#[derive(Clone)]
 pub struct UpTransportLayerInformationList(pub Vec<UpTransportLayerInformationItem>);
 
 impl APerElement for UpTransportLayerInformationList {
@@ -23889,6 +24621,7 @@ impl APerElement for UpTransportLayerInformationList {
 }
 
 // UpTransportLayerInformationItem
+#[derive(Clone)]
 pub struct UpTransportLayerInformationItem {
     pub ngu_up_tnl_information: UpTransportLayerInformation,
 }
@@ -23925,6 +24658,7 @@ impl APerElement for UpTransportLayerInformationItem {
 }
 
 // UpTransportLayerInformationPairList
+#[derive(Clone)]
 pub struct UpTransportLayerInformationPairList(pub Vec<UpTransportLayerInformationPairItem>);
 
 impl APerElement for UpTransportLayerInformationPairList {
@@ -23949,6 +24683,7 @@ impl APerElement for UpTransportLayerInformationPairList {
 }
 
 // UpTransportLayerInformationPairItem
+#[derive(Clone)]
 pub struct UpTransportLayerInformationPairItem {
     pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
@@ -23990,6 +24725,7 @@ impl APerElement for UpTransportLayerInformationPairItem {
 }
 
 // UriAddress
+#[derive(Clone)]
 pub struct UriAddress(pub VisibleString);
 
 impl APerElement for UriAddress {
@@ -24005,6 +24741,7 @@ impl APerElement for UriAddress {
 }
 
 // UserLocationInformation
+#[derive(Clone)]
 pub enum UserLocationInformation {
     UserLocationInformationEutra(UserLocationInformationEutra),
     UserLocationInformationNr(UserLocationInformationNr),
@@ -24051,6 +24788,7 @@ impl APerElement for UserLocationInformation {
 }
 
 // UserLocationInformationEutra
+#[derive(Clone)]
 pub struct UserLocationInformationEutra {
     pub eutra_cgi: EutraCgi,
     pub tai: Tai,
@@ -24101,6 +24839,7 @@ impl APerElement for UserLocationInformationEutra {
 }
 
 // UserLocationInformationN3Iwf
+#[derive(Clone)]
 pub struct UserLocationInformationN3Iwf {
     pub ip_address: TransportLayerAddress,
     pub port_number: PortNumber,
@@ -24140,6 +24879,7 @@ impl APerElement for UserLocationInformationN3Iwf {
 }
 
 // UserLocationInformationTngf
+#[derive(Clone)]
 pub struct UserLocationInformationTngf {
     pub tnap_id: TnapId,
     pub ip_address: TransportLayerAddress,
@@ -24190,6 +24930,7 @@ impl APerElement for UserLocationInformationTngf {
 }
 
 // UserLocationInformationTwif
+#[derive(Clone)]
 pub struct UserLocationInformationTwif {
     pub twap_id: TwapId,
     pub ip_address: TransportLayerAddress,
@@ -24240,6 +24981,7 @@ impl APerElement for UserLocationInformationTwif {
 }
 
 // UserLocationInformationWAgf
+#[derive(Clone)]
 pub enum UserLocationInformationWAgf {
     GlobalLineId(GlobalLineId),
     HfcNodeId(HfcNodeId),
@@ -24280,6 +25022,7 @@ impl APerElement for UserLocationInformationWAgf {
 }
 
 // UserLocationInformationNr
+#[derive(Clone)]
 pub struct UserLocationInformationNr {
     pub nr_cgi: NrCgi,
     pub tai: Tai,
@@ -24330,6 +25073,7 @@ impl APerElement for UserLocationInformationNr {
 }
 
 // UserPlaneSecurityInformation
+#[derive(Clone)]
 pub struct UserPlaneSecurityInformation {
     pub security_result: SecurityResult,
     pub security_indication: SecurityIndication,
@@ -24369,6 +25113,7 @@ impl APerElement for UserPlaneSecurityInformation {
 }
 
 // VolumeTimedReportList
+#[derive(Clone)]
 pub struct VolumeTimedReportList(pub Vec<VolumeTimedReportItem>);
 
 impl APerElement for VolumeTimedReportList {
@@ -24393,6 +25138,7 @@ impl APerElement for VolumeTimedReportList {
 }
 
 // VolumeTimedReportItem
+#[derive(Clone)]
 pub struct VolumeTimedReportItem {
     pub start_time_stamp: Vec<u8>,
     pub end_time_stamp: Vec<u8>,
@@ -24411,10 +25157,34 @@ impl APerElement for VolumeTimedReportItem {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let start_time_stamp = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
-        let end_time_stamp = Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?;
-        let usage_count_ul = u64::from_aper(decoder, UNCONSTRAINED)?;
-        let usage_count_dl = u64::from_aper(decoder, UNCONSTRAINED)?;
+        let start_time_stamp = Vec::<u8>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(4), Some(4))),
+            },
+        )?;
+        let end_time_stamp = Vec::<u8>::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(4), Some(4))),
+            },
+        )?;
+        let usage_count_ul = u64::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(18446744073709551615))),
+            },
+        )?;
+        let usage_count_dl = u64::from_aper(
+            decoder,
+            Constraints {
+                value: None,
+                size: Some(Constraint::new(Some(0), Some(18446744073709551615))),
+            },
+        )?;
 
         Ok(Self {
             start_time_stamp,
@@ -24440,6 +25210,7 @@ impl APerElement for VolumeTimedReportItem {
 }
 
 // WAgfId
+#[derive(Clone)]
 pub enum WAgfId {
     WAgfId(BitString),
     _Extended,
@@ -24468,6 +25239,7 @@ impl APerElement for WAgfId {
 }
 
 // WarningAreaCoordinates
+#[derive(Clone)]
 pub struct WarningAreaCoordinates(pub Vec<u8>);
 
 impl APerElement for WarningAreaCoordinates {
@@ -24489,6 +25261,7 @@ impl APerElement for WarningAreaCoordinates {
 }
 
 // WarningAreaList
+#[derive(Clone)]
 pub enum WarningAreaList {
     EutraCgiListForWarning(EutraCgiListForWarning),
     NrCgiListForWarning(NrCgiListForWarning),
@@ -24546,6 +25319,7 @@ impl APerElement for WarningAreaList {
 }
 
 // WarningMessageContents
+#[derive(Clone)]
 pub struct WarningMessageContents(pub Vec<u8>);
 
 impl APerElement for WarningMessageContents {
@@ -24567,6 +25341,7 @@ impl APerElement for WarningMessageContents {
 }
 
 // WarningSecurityInfo
+#[derive(Clone)]
 pub struct WarningSecurityInfo(pub Vec<u8>);
 
 impl APerElement for WarningSecurityInfo {
@@ -24588,6 +25363,7 @@ impl APerElement for WarningSecurityInfo {
 }
 
 // WarningType
+#[derive(Clone)]
 pub struct WarningType(pub Vec<u8>);
 
 impl APerElement for WarningType {
@@ -24609,6 +25385,7 @@ impl APerElement for WarningType {
 }
 
 // WlanMeasurementConfiguration
+#[derive(Clone)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_meas_config_name_list: Option<WlanMeasConfigNameList>,
@@ -24677,6 +25454,7 @@ impl APerElement for WlanMeasurementConfiguration {
 }
 
 // WlanMeasConfigNameList
+#[derive(Clone)]
 pub struct WlanMeasConfigNameList(pub Vec<WlanMeasConfigNameItem>);
 
 impl APerElement for WlanMeasConfigNameList {
@@ -24701,6 +25479,7 @@ impl APerElement for WlanMeasConfigNameList {
 }
 
 // WlanMeasConfigNameItem
+#[derive(Clone)]
 pub struct WlanMeasConfigNameItem {
     pub wlan_name: WlanName,
 }
@@ -24758,6 +25537,7 @@ impl APerElement for WlanMeasConfig {
 }
 
 // WlanName
+#[derive(Clone)]
 pub struct WlanName(pub Vec<u8>);
 
 impl APerElement for WlanName {
@@ -24779,6 +25559,7 @@ impl APerElement for WlanName {
 }
 
 // WusAssistanceInformation
+#[derive(Clone)]
 pub struct WusAssistanceInformation {
     pub paging_probability_information: PagingProbabilityInformation,
 }
@@ -24815,6 +25596,7 @@ impl APerElement for WusAssistanceInformation {
 }
 
 // XnExtTlAs
+#[derive(Clone)]
 pub struct XnExtTlAs(pub Vec<XnExtTlaItem>);
 
 impl APerElement for XnExtTlAs {
@@ -24839,6 +25621,7 @@ impl APerElement for XnExtTlAs {
 }
 
 // XnExtTlaItem
+#[derive(Clone)]
 pub struct XnExtTlaItem {
     pub i_psec_tla: Option<TransportLayerAddress>,
     pub gtp_tl_as: Option<XnGtpTlAs>,
@@ -24892,6 +25675,7 @@ impl APerElement for XnExtTlaItem {
 }
 
 // XnGtpTlAs
+#[derive(Clone)]
 pub struct XnGtpTlAs(pub Vec<TransportLayerAddress>);
 
 impl APerElement for XnGtpTlAs {
@@ -24916,6 +25700,7 @@ impl APerElement for XnGtpTlAs {
 }
 
 // XnTlAs
+#[derive(Clone)]
 pub struct XnTlAs(pub Vec<TransportLayerAddress>);
 
 impl APerElement for XnTlAs {
@@ -24940,6 +25725,7 @@ impl APerElement for XnTlAs {
 }
 
 // XnTnlConfigurationInfo
+#[derive(Clone)]
 pub struct XnTnlConfigurationInfo {
     pub xn_transport_layer_addresses: XnTlAs,
     pub xn_extended_transport_layer_addresses: Option<XnExtTlAs>,

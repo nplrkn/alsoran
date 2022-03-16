@@ -182,6 +182,7 @@ class TypeTransformer(Transformer):
         lb = 0
         if len(tree.children) <= 1:
             print("Warning: no bounds")
+            return (None, None)
         else:
             lb = tree.children[0]
             try:
@@ -202,8 +203,8 @@ class TypeTransformer(Transformer):
                     if ub is None:
                         print("Error: unknown constant ", tree.children[1])
 
-            tree.children[0] = lb
-            tree.children[1] = ub
+        tree.children[0] = lb
+        tree.children[1] = ub
 
         return (lb, ub)
 
@@ -212,6 +213,7 @@ class TypeTransformer(Transformer):
 
     def integer(self, tree):
         (lb, ub) = self.transform_bounds(tree)
+
         try:
             range = ub-lb
         except:
@@ -228,18 +230,24 @@ class TypeTransformer(Transformer):
         return Tree(t, tree.children)
 
     def bits(self, tree):
+        self.transform_bounds(tree)
         return Tree("BitString", tree.children)
 
     def printablestring(self, tree):
+        self.transform_bounds(tree)
         return Tree("PrintableString", tree.children)
 
     def utf8string(self, tree):
+        self.transform_bounds(tree)
         return Tree("Utf8String", tree.children)
 
     def visiblestring(self, tree):
+        self.transform_bounds(tree)
         return Tree("VisibleString", tree.children)
 
     def bytes(self, tree):
+        if tree.children != None:
+            self.transform_bounds(tree)
         return Tree("Vec<u8>", tree.children)
 
     def boolean(self, tree):
@@ -322,7 +330,7 @@ document
         ShortMacroEnbId
         BitString
           18
-          None
+          18
 """)
 
     def test2(self):
@@ -555,6 +563,34 @@ document
         extension_marker
       extension_marker
 """, constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
+
+    def test_unconstrained_visible_string(self):
+        self.should_generate(
+            "URI-address ::= VisibleString", """\
+document
+  None
+  tuple_struct
+    UriAddress
+    VisibleString
+""")
+
+    def test_octet_string(self):
+        self.should_generate("""\
+SNSSAI ::= SEQUENCE {
+	sD			OCTET STRING (SIZE (3)) 	OPTIONAL	,
+}
+""", """\
+document
+  None
+  struct
+    Snssai
+    sequence
+      optional_field
+        sd
+        Vec<u8>
+          3
+          3
+""")
 
 
 if __name__ == '__main__':

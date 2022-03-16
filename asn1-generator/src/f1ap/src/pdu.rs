@@ -12,6 +12,7 @@ use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
 // Reset
+#[derive(Clone)]
 pub struct Reset {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -77,6 +78,7 @@ impl APerElement for Reset {
 }
 
 // ResetType
+#[derive(Clone)]
 pub enum ResetType {
     F1Interface(ResetAll),
     PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes),
@@ -140,6 +142,7 @@ impl APerElement for ResetAll {
 }
 
 // UeAssociatedLogicalF1ConnectionListRes
+#[derive(Clone)]
 pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItemRes>);
 
 impl APerElement for UeAssociatedLogicalF1ConnectionListRes {
@@ -163,6 +166,7 @@ impl APerElement for UeAssociatedLogicalF1ConnectionListRes {
 }
 
 // ResetAcknowledge
+#[derive(Clone)]
 pub struct ResetAcknowledge {
     pub transaction_id: TransactionId,
     pub ue_associated_logical_f1_connection_list_res_ack:
@@ -245,6 +249,7 @@ impl APerElement for ResetAcknowledge {
 }
 
 // UeAssociatedLogicalF1ConnectionListResAck
+#[derive(Clone)]
 pub struct UeAssociatedLogicalF1ConnectionListResAck(
     pub Vec<UeAssociatedLogicalF1ConnectionItemResAck>,
 );
@@ -273,6 +278,7 @@ impl APerElement for UeAssociatedLogicalF1ConnectionListResAck {
 }
 
 // ErrorIndication
+#[derive(Clone)]
 pub struct ErrorIndication {
     pub transaction_id: TransactionId,
     pub gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
@@ -371,6 +377,7 @@ impl APerElement for ErrorIndication {
 }
 
 // F1SetupRequest
+#[derive(Clone)]
 pub struct F1SetupRequest {
     pub transaction_id: TransactionId,
     pub gnb_du_id: GnbDuId,
@@ -505,6 +512,7 @@ impl APerElement for F1SetupRequest {
 }
 
 // GnbDuServedCellsList
+#[derive(Clone)]
 pub struct GnbDuServedCellsList(pub Vec<GnbDuServedCellsItem>);
 
 impl APerElement for GnbDuServedCellsList {
@@ -529,6 +537,7 @@ impl APerElement for GnbDuServedCellsList {
 }
 
 // F1SetupResponse
+#[derive(Clone)]
 pub struct F1SetupResponse {
     pub transaction_id: TransactionId,
     pub gnb_cu_name: Option<GnbCuName>,
@@ -666,6 +675,7 @@ impl APerElement for F1SetupResponse {
 }
 
 // CellsToBeActivatedList
+#[derive(Clone)]
 pub struct CellsToBeActivatedList(pub Vec<CellsToBeActivatedListItem>);
 
 impl APerElement for CellsToBeActivatedList {
@@ -690,6 +700,7 @@ impl APerElement for CellsToBeActivatedList {
 }
 
 // F1SetupFailure
+#[derive(Clone)]
 pub struct F1SetupFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -774,6 +785,7 @@ impl APerElement for F1SetupFailure {
 }
 
 // GnbDuConfigurationUpdate
+#[derive(Clone)]
 pub struct GnbDuConfigurationUpdate {
     pub transaction_id: TransactionId,
     pub served_cells_to_add_list: Option<ServedCellsToAddList>,
@@ -931,6 +943,7 @@ impl APerElement for GnbDuConfigurationUpdate {
 }
 
 // ServedCellsToAddList
+#[derive(Clone)]
 pub struct ServedCellsToAddList(pub Vec<ServedCellsToAddItem>);
 
 impl APerElement for ServedCellsToAddList {
@@ -955,6 +968,7 @@ impl APerElement for ServedCellsToAddList {
 }
 
 // ServedCellsToModifyList
+#[derive(Clone)]
 pub struct ServedCellsToModifyList(pub Vec<ServedCellsToModifyItem>);
 
 impl APerElement for ServedCellsToModifyList {
@@ -979,6 +993,7 @@ impl APerElement for ServedCellsToModifyList {
 }
 
 // ServedCellsToDeleteList
+#[derive(Clone)]
 pub struct ServedCellsToDeleteList(pub Vec<ServedCellsToDeleteItem>);
 
 impl APerElement for ServedCellsToDeleteList {
@@ -1003,6 +1018,7 @@ impl APerElement for ServedCellsToDeleteList {
 }
 
 // CellsStatusList
+#[derive(Clone)]
 pub struct CellsStatusList(pub Vec<CellsStatusItem>);
 
 impl APerElement for CellsStatusList {
@@ -1027,6 +1043,7 @@ impl APerElement for CellsStatusList {
 }
 
 // DedicatedSiDeliveryNeededUeList
+#[derive(Clone)]
 pub struct DedicatedSiDeliveryNeededUeList(pub Vec<DedicatedSiDeliveryNeededUeItem>);
 
 impl APerElement for DedicatedSiDeliveryNeededUeList {
@@ -1051,6 +1068,7 @@ impl APerElement for DedicatedSiDeliveryNeededUeList {
 }
 
 // GnbDuTnlAssociationToRemoveList
+#[derive(Clone)]
 pub struct GnbDuTnlAssociationToRemoveList(pub Vec<GnbDuTnlAssociationToRemoveItem>);
 
 impl APerElement for GnbDuTnlAssociationToRemoveList {
@@ -1075,6 +1093,7 @@ impl APerElement for GnbDuTnlAssociationToRemoveList {
 }
 
 // GnbDuConfigurationUpdateAcknowledge
+#[derive(Clone)]
 pub struct GnbDuConfigurationUpdateAcknowledge {
     pub transaction_id: TransactionId,
     pub cells_to_be_activated_list: Option<CellsToBeActivatedList>,
@@ -1203,6 +1222,7 @@ impl APerElement for GnbDuConfigurationUpdateAcknowledge {
 }
 
 // GnbDuConfigurationUpdateFailure
+#[derive(Clone)]
 pub struct GnbDuConfigurationUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -1287,6 +1307,7 @@ impl APerElement for GnbDuConfigurationUpdateFailure {
 }
 
 // GnbCuConfigurationUpdate
+#[derive(Clone)]
 pub struct GnbCuConfigurationUpdate {
     pub transaction_id: TransactionId,
     pub cells_to_be_activated_list: Option<CellsToBeActivatedList>,
@@ -1488,6 +1509,7 @@ impl APerElement for GnbCuConfigurationUpdate {
 }
 
 // CellsToBeDeactivatedList
+#[derive(Clone)]
 pub struct CellsToBeDeactivatedList(pub Vec<CellsToBeDeactivatedListItem>);
 
 impl APerElement for CellsToBeDeactivatedList {
@@ -1512,6 +1534,7 @@ impl APerElement for CellsToBeDeactivatedList {
 }
 
 // GnbCuTnlAssociationToAddList
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationToAddList(pub Vec<GnbCuTnlAssociationToAddItem>);
 
 impl APerElement for GnbCuTnlAssociationToAddList {
@@ -1536,6 +1559,7 @@ impl APerElement for GnbCuTnlAssociationToAddList {
 }
 
 // GnbCuTnlAssociationToRemoveList
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationToRemoveList(pub Vec<GnbCuTnlAssociationToRemoveItem>);
 
 impl APerElement for GnbCuTnlAssociationToRemoveList {
@@ -1560,6 +1584,7 @@ impl APerElement for GnbCuTnlAssociationToRemoveList {
 }
 
 // GnbCuTnlAssociationToUpdateList
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationToUpdateList(pub Vec<GnbCuTnlAssociationToUpdateItem>);
 
 impl APerElement for GnbCuTnlAssociationToUpdateList {
@@ -1584,6 +1609,7 @@ impl APerElement for GnbCuTnlAssociationToUpdateList {
 }
 
 // CellsToBeBarredList
+#[derive(Clone)]
 pub struct CellsToBeBarredList(pub Vec<CellsToBeBarredItem>);
 
 impl APerElement for CellsToBeBarredList {
@@ -1608,6 +1634,7 @@ impl APerElement for CellsToBeBarredList {
 }
 
 // ProtectedEutraResourcesList
+#[derive(Clone)]
 pub struct ProtectedEutraResourcesList(pub Vec<ProtectedEutraResourcesItem>);
 
 impl APerElement for ProtectedEutraResourcesList {
@@ -1632,6 +1659,7 @@ impl APerElement for ProtectedEutraResourcesList {
 }
 
 // NeighbourCellInformationList
+#[derive(Clone)]
 pub struct NeighbourCellInformationList(pub Vec<NeighbourCellInformationItem>);
 
 impl APerElement for NeighbourCellInformationList {
@@ -1656,6 +1684,7 @@ impl APerElement for NeighbourCellInformationList {
 }
 
 // GnbCuConfigurationUpdateAcknowledge
+#[derive(Clone)]
 pub struct GnbCuConfigurationUpdateAcknowledge {
     pub transaction_id: TransactionId,
     pub cells_failed_to_be_activated_list: Option<CellsFailedToBeActivatedList>,
@@ -1792,6 +1821,7 @@ impl APerElement for GnbCuConfigurationUpdateAcknowledge {
 }
 
 // CellsFailedToBeActivatedList
+#[derive(Clone)]
 pub struct CellsFailedToBeActivatedList(pub Vec<CellsFailedToBeActivatedListItem>);
 
 impl APerElement for CellsFailedToBeActivatedList {
@@ -1816,6 +1846,7 @@ impl APerElement for CellsFailedToBeActivatedList {
 }
 
 // GnbCuTnlAssociationSetupList
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationSetupList(pub Vec<GnbCuTnlAssociationSetupItem>);
 
 impl APerElement for GnbCuTnlAssociationSetupList {
@@ -1840,6 +1871,7 @@ impl APerElement for GnbCuTnlAssociationSetupList {
 }
 
 // GnbCuTnlAssociationFailedToSetupList
+#[derive(Clone)]
 pub struct GnbCuTnlAssociationFailedToSetupList(pub Vec<GnbCuTnlAssociationFailedToSetupItem>);
 
 impl APerElement for GnbCuTnlAssociationFailedToSetupList {
@@ -1863,6 +1895,7 @@ impl APerElement for GnbCuTnlAssociationFailedToSetupList {
 }
 
 // GnbCuConfigurationUpdateFailure
+#[derive(Clone)]
 pub struct GnbCuConfigurationUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -1947,6 +1980,7 @@ impl APerElement for GnbCuConfigurationUpdateFailure {
 }
 
 // GnbDuResourceCoordinationRequest
+#[derive(Clone)]
 pub struct GnbDuResourceCoordinationRequest {
     pub transaction_id: TransactionId,
     pub request_type: RequestType,
@@ -2042,6 +2076,7 @@ impl APerElement for GnbDuResourceCoordinationRequest {
 }
 
 // GnbDuResourceCoordinationResponse
+#[derive(Clone)]
 pub struct GnbDuResourceCoordinationResponse {
     pub transaction_id: TransactionId,
     pub eutra_nr_cell_resource_coordination_req_ack_container:
@@ -2110,6 +2145,7 @@ impl APerElement for GnbDuResourceCoordinationResponse {
 }
 
 // UeContextSetupRequest
+#[derive(Clone)]
 pub struct UeContextSetupRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
@@ -2625,6 +2661,7 @@ impl APerElement for UeContextSetupRequest {
 }
 
 // CandidateSpCellList
+#[derive(Clone)]
 pub struct CandidateSpCellList(pub Vec<CandidateSpCellItem>);
 
 impl APerElement for CandidateSpCellList {
@@ -2649,6 +2686,7 @@ impl APerElement for CandidateSpCellList {
 }
 
 // SCellToBeSetupList
+#[derive(Clone)]
 pub struct SCellToBeSetupList(pub Vec<SCellToBeSetupItem>);
 
 impl APerElement for SCellToBeSetupList {
@@ -2673,6 +2711,7 @@ impl APerElement for SCellToBeSetupList {
 }
 
 // SrBsToBeSetupList
+#[derive(Clone)]
 pub struct SrBsToBeSetupList(pub Vec<SrBsToBeSetupItem>);
 
 impl APerElement for SrBsToBeSetupList {
@@ -2697,6 +2736,7 @@ impl APerElement for SrBsToBeSetupList {
 }
 
 // DrBsToBeSetupList
+#[derive(Clone)]
 pub struct DrBsToBeSetupList(pub Vec<DrBsToBeSetupItem>);
 
 impl APerElement for DrBsToBeSetupList {
@@ -2721,6 +2761,7 @@ impl APerElement for DrBsToBeSetupList {
 }
 
 // BhChannelsToBeSetupList
+#[derive(Clone)]
 pub struct BhChannelsToBeSetupList(pub Vec<BhChannelsToBeSetupItem>);
 
 impl APerElement for BhChannelsToBeSetupList {
@@ -2745,6 +2786,7 @@ impl APerElement for BhChannelsToBeSetupList {
 }
 
 // SldrBsToBeSetupList
+#[derive(Clone)]
 pub struct SldrBsToBeSetupList(pub Vec<SldrBsToBeSetupItem>);
 
 impl APerElement for SldrBsToBeSetupList {
@@ -2769,6 +2811,7 @@ impl APerElement for SldrBsToBeSetupList {
 }
 
 // UeContextSetupResponse
+#[derive(Clone)]
 pub struct UeContextSetupResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3038,6 +3081,7 @@ impl APerElement for UeContextSetupResponse {
 }
 
 // DrBsSetupList
+#[derive(Clone)]
 pub struct DrBsSetupList(pub Vec<DrBsSetupItem>);
 
 impl APerElement for DrBsSetupList {
@@ -3062,6 +3106,7 @@ impl APerElement for DrBsSetupList {
 }
 
 // SrBsFailedToBeSetupList
+#[derive(Clone)]
 pub struct SrBsFailedToBeSetupList(pub Vec<SrBsFailedToBeSetupItem>);
 
 impl APerElement for SrBsFailedToBeSetupList {
@@ -3086,6 +3131,7 @@ impl APerElement for SrBsFailedToBeSetupList {
 }
 
 // DrBsFailedToBeSetupList
+#[derive(Clone)]
 pub struct DrBsFailedToBeSetupList(pub Vec<DrBsFailedToBeSetupItem>);
 
 impl APerElement for DrBsFailedToBeSetupList {
@@ -3110,6 +3156,7 @@ impl APerElement for DrBsFailedToBeSetupList {
 }
 
 // SCellFailedtoSetupList
+#[derive(Clone)]
 pub struct SCellFailedtoSetupList(pub Vec<SCellFailedtoSetupItem>);
 
 impl APerElement for SCellFailedtoSetupList {
@@ -3134,6 +3181,7 @@ impl APerElement for SCellFailedtoSetupList {
 }
 
 // SrBsSetupList
+#[derive(Clone)]
 pub struct SrBsSetupList(pub Vec<SrBsSetupItem>);
 
 impl APerElement for SrBsSetupList {
@@ -3158,6 +3206,7 @@ impl APerElement for SrBsSetupList {
 }
 
 // BhChannelsSetupList
+#[derive(Clone)]
 pub struct BhChannelsSetupList(pub Vec<BhChannelsSetupItem>);
 
 impl APerElement for BhChannelsSetupList {
@@ -3182,6 +3231,7 @@ impl APerElement for BhChannelsSetupList {
 }
 
 // BhChannelsFailedToBeSetupList
+#[derive(Clone)]
 pub struct BhChannelsFailedToBeSetupList(pub Vec<BhChannelsFailedToBeSetupItem>);
 
 impl APerElement for BhChannelsFailedToBeSetupList {
@@ -3206,6 +3256,7 @@ impl APerElement for BhChannelsFailedToBeSetupList {
 }
 
 // SldrBsSetupList
+#[derive(Clone)]
 pub struct SldrBsSetupList(pub Vec<SldrBsSetupItem>);
 
 impl APerElement for SldrBsSetupList {
@@ -3230,6 +3281,7 @@ impl APerElement for SldrBsSetupList {
 }
 
 // SldrBsFailedToBeSetupList
+#[derive(Clone)]
 pub struct SldrBsFailedToBeSetupList(pub Vec<SldrBsFailedToBeSetupItem>);
 
 impl APerElement for SldrBsFailedToBeSetupList {
@@ -3254,6 +3306,7 @@ impl APerElement for SldrBsFailedToBeSetupList {
 }
 
 // UeContextSetupFailure
+#[derive(Clone)]
 pub struct UeContextSetupFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
@@ -3364,6 +3417,7 @@ impl APerElement for UeContextSetupFailure {
 }
 
 // PotentialSpCellList
+#[derive(Clone)]
 pub struct PotentialSpCellList(pub Vec<PotentialSpCellItem>);
 
 impl APerElement for PotentialSpCellList {
@@ -3388,6 +3442,7 @@ impl APerElement for PotentialSpCellList {
 }
 
 // UeContextReleaseRequest
+#[derive(Clone)]
 pub struct UeContextReleaseRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3468,6 +3523,7 @@ impl APerElement for UeContextReleaseRequest {
 }
 
 // UeContextReleaseCommand
+#[derive(Clone)]
 pub struct UeContextReleaseCommand {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3612,6 +3668,7 @@ impl APerElement for UeContextReleaseCommand {
 }
 
 // UeContextReleaseComplete
+#[derive(Clone)]
 pub struct UeContextReleaseComplete {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3682,6 +3739,7 @@ impl APerElement for UeContextReleaseComplete {
 }
 
 // UeContextModificationRequest
+#[derive(Clone)]
 pub struct UeContextModificationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -4353,6 +4411,7 @@ impl APerElement for UeContextModificationRequest {
 }
 
 // SCellToBeSetupModList
+#[derive(Clone)]
 pub struct SCellToBeSetupModList(pub Vec<SCellToBeSetupModItem>);
 
 impl APerElement for SCellToBeSetupModList {
@@ -4377,6 +4436,7 @@ impl APerElement for SCellToBeSetupModList {
 }
 
 // SCellToBeRemovedList
+#[derive(Clone)]
 pub struct SCellToBeRemovedList(pub Vec<SCellToBeRemovedItem>);
 
 impl APerElement for SCellToBeRemovedList {
@@ -4401,6 +4461,7 @@ impl APerElement for SCellToBeRemovedList {
 }
 
 // SrBsToBeSetupModList
+#[derive(Clone)]
 pub struct SrBsToBeSetupModList(pub Vec<SrBsToBeSetupModItem>);
 
 impl APerElement for SrBsToBeSetupModList {
@@ -4425,6 +4486,7 @@ impl APerElement for SrBsToBeSetupModList {
 }
 
 // DrBsToBeSetupModList
+#[derive(Clone)]
 pub struct DrBsToBeSetupModList(pub Vec<DrBsToBeSetupModItem>);
 
 impl APerElement for DrBsToBeSetupModList {
@@ -4449,6 +4511,7 @@ impl APerElement for DrBsToBeSetupModList {
 }
 
 // BhChannelsToBeSetupModList
+#[derive(Clone)]
 pub struct BhChannelsToBeSetupModList(pub Vec<BhChannelsToBeSetupModItem>);
 
 impl APerElement for BhChannelsToBeSetupModList {
@@ -4473,6 +4536,7 @@ impl APerElement for BhChannelsToBeSetupModList {
 }
 
 // DrBsToBeModifiedList
+#[derive(Clone)]
 pub struct DrBsToBeModifiedList(pub Vec<DrBsToBeModifiedItem>);
 
 impl APerElement for DrBsToBeModifiedList {
@@ -4497,6 +4561,7 @@ impl APerElement for DrBsToBeModifiedList {
 }
 
 // BhChannelsToBeModifiedList
+#[derive(Clone)]
 pub struct BhChannelsToBeModifiedList(pub Vec<BhChannelsToBeModifiedItem>);
 
 impl APerElement for BhChannelsToBeModifiedList {
@@ -4521,6 +4586,7 @@ impl APerElement for BhChannelsToBeModifiedList {
 }
 
 // SrBsToBeReleasedList
+#[derive(Clone)]
 pub struct SrBsToBeReleasedList(pub Vec<SrBsToBeReleasedItem>);
 
 impl APerElement for SrBsToBeReleasedList {
@@ -4545,6 +4611,7 @@ impl APerElement for SrBsToBeReleasedList {
 }
 
 // DrBsToBeReleasedList
+#[derive(Clone)]
 pub struct DrBsToBeReleasedList(pub Vec<DrBsToBeReleasedItem>);
 
 impl APerElement for DrBsToBeReleasedList {
@@ -4569,6 +4636,7 @@ impl APerElement for DrBsToBeReleasedList {
 }
 
 // BhChannelsToBeReleasedList
+#[derive(Clone)]
 pub struct BhChannelsToBeReleasedList(pub Vec<BhChannelsToBeReleasedItem>);
 
 impl APerElement for BhChannelsToBeReleasedList {
@@ -4593,6 +4661,7 @@ impl APerElement for BhChannelsToBeReleasedList {
 }
 
 // SldrBsToBeSetupModList
+#[derive(Clone)]
 pub struct SldrBsToBeSetupModList(pub Vec<SldrBsToBeSetupModItem>);
 
 impl APerElement for SldrBsToBeSetupModList {
@@ -4617,6 +4686,7 @@ impl APerElement for SldrBsToBeSetupModList {
 }
 
 // SldrBsToBeModifiedList
+#[derive(Clone)]
 pub struct SldrBsToBeModifiedList(pub Vec<SldrBsToBeModifiedItem>);
 
 impl APerElement for SldrBsToBeModifiedList {
@@ -4641,6 +4711,7 @@ impl APerElement for SldrBsToBeModifiedList {
 }
 
 // SldrBsToBeReleasedList
+#[derive(Clone)]
 pub struct SldrBsToBeReleasedList(pub Vec<SldrBsToBeReleasedItem>);
 
 impl APerElement for SldrBsToBeReleasedList {
@@ -4665,6 +4736,7 @@ impl APerElement for SldrBsToBeReleasedList {
 }
 
 // UeContextModificationResponse
+#[derive(Clone)]
 pub struct UeContextModificationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5052,6 +5124,7 @@ impl APerElement for UeContextModificationResponse {
 }
 
 // DrBsSetupModList
+#[derive(Clone)]
 pub struct DrBsSetupModList(pub Vec<DrBsSetupModItem>);
 
 impl APerElement for DrBsSetupModList {
@@ -5076,6 +5149,7 @@ impl APerElement for DrBsSetupModList {
 }
 
 // DrBsModifiedList
+#[derive(Clone)]
 pub struct DrBsModifiedList(pub Vec<DrBsModifiedItem>);
 
 impl APerElement for DrBsModifiedList {
@@ -5100,6 +5174,7 @@ impl APerElement for DrBsModifiedList {
 }
 
 // SrBsSetupModList
+#[derive(Clone)]
 pub struct SrBsSetupModList(pub Vec<SrBsSetupModItem>);
 
 impl APerElement for SrBsSetupModList {
@@ -5124,6 +5199,7 @@ impl APerElement for SrBsSetupModList {
 }
 
 // SrBsModifiedList
+#[derive(Clone)]
 pub struct SrBsModifiedList(pub Vec<SrBsModifiedItem>);
 
 impl APerElement for SrBsModifiedList {
@@ -5148,6 +5224,7 @@ impl APerElement for SrBsModifiedList {
 }
 
 // DrBsFailedToBeModifiedList
+#[derive(Clone)]
 pub struct DrBsFailedToBeModifiedList(pub Vec<DrBsFailedToBeModifiedItem>);
 
 impl APerElement for DrBsFailedToBeModifiedList {
@@ -5172,6 +5249,7 @@ impl APerElement for DrBsFailedToBeModifiedList {
 }
 
 // SrBsFailedToBeSetupModList
+#[derive(Clone)]
 pub struct SrBsFailedToBeSetupModList(pub Vec<SrBsFailedToBeSetupModItem>);
 
 impl APerElement for SrBsFailedToBeSetupModList {
@@ -5196,6 +5274,7 @@ impl APerElement for SrBsFailedToBeSetupModList {
 }
 
 // DrBsFailedToBeSetupModList
+#[derive(Clone)]
 pub struct DrBsFailedToBeSetupModList(pub Vec<DrBsFailedToBeSetupModItem>);
 
 impl APerElement for DrBsFailedToBeSetupModList {
@@ -5220,6 +5299,7 @@ impl APerElement for DrBsFailedToBeSetupModList {
 }
 
 // SCellFailedtoSetupModList
+#[derive(Clone)]
 pub struct SCellFailedtoSetupModList(pub Vec<SCellFailedtoSetupModItem>);
 
 impl APerElement for SCellFailedtoSetupModList {
@@ -5244,6 +5324,7 @@ impl APerElement for SCellFailedtoSetupModList {
 }
 
 // BhChannelsSetupModList
+#[derive(Clone)]
 pub struct BhChannelsSetupModList(pub Vec<BhChannelsSetupModItem>);
 
 impl APerElement for BhChannelsSetupModList {
@@ -5268,6 +5349,7 @@ impl APerElement for BhChannelsSetupModList {
 }
 
 // BhChannelsModifiedList
+#[derive(Clone)]
 pub struct BhChannelsModifiedList(pub Vec<BhChannelsModifiedItem>);
 
 impl APerElement for BhChannelsModifiedList {
@@ -5292,6 +5374,7 @@ impl APerElement for BhChannelsModifiedList {
 }
 
 // BhChannelsFailedToBeModifiedList
+#[derive(Clone)]
 pub struct BhChannelsFailedToBeModifiedList(pub Vec<BhChannelsFailedToBeModifiedItem>);
 
 impl APerElement for BhChannelsFailedToBeModifiedList {
@@ -5316,6 +5399,7 @@ impl APerElement for BhChannelsFailedToBeModifiedList {
 }
 
 // BhChannelsFailedToBeSetupModList
+#[derive(Clone)]
 pub struct BhChannelsFailedToBeSetupModList(pub Vec<BhChannelsFailedToBeSetupModItem>);
 
 impl APerElement for BhChannelsFailedToBeSetupModList {
@@ -5340,6 +5424,7 @@ impl APerElement for BhChannelsFailedToBeSetupModList {
 }
 
 // AssociatedSCellList
+#[derive(Clone)]
 pub struct AssociatedSCellList(pub Vec<AssociatedSCellItem>);
 
 impl APerElement for AssociatedSCellList {
@@ -5364,6 +5449,7 @@ impl APerElement for AssociatedSCellList {
 }
 
 // SldrBsSetupModList
+#[derive(Clone)]
 pub struct SldrBsSetupModList(pub Vec<SldrBsSetupModItem>);
 
 impl APerElement for SldrBsSetupModList {
@@ -5388,6 +5474,7 @@ impl APerElement for SldrBsSetupModList {
 }
 
 // SldrBsModifiedList
+#[derive(Clone)]
 pub struct SldrBsModifiedList(pub Vec<SldrBsModifiedItem>);
 
 impl APerElement for SldrBsModifiedList {
@@ -5412,6 +5499,7 @@ impl APerElement for SldrBsModifiedList {
 }
 
 // SldrBsFailedToBeModifiedList
+#[derive(Clone)]
 pub struct SldrBsFailedToBeModifiedList(pub Vec<SldrBsFailedToBeModifiedItem>);
 
 impl APerElement for SldrBsFailedToBeModifiedList {
@@ -5436,6 +5524,7 @@ impl APerElement for SldrBsFailedToBeModifiedList {
 }
 
 // SldrBsFailedToBeSetupModList
+#[derive(Clone)]
 pub struct SldrBsFailedToBeSetupModList(pub Vec<SldrBsFailedToBeSetupModItem>);
 
 impl APerElement for SldrBsFailedToBeSetupModList {
@@ -5460,6 +5549,7 @@ impl APerElement for SldrBsFailedToBeSetupModList {
 }
 
 // UeContextModificationFailure
+#[derive(Clone)]
 pub struct UeContextModificationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5555,6 +5645,7 @@ impl APerElement for UeContextModificationFailure {
 }
 
 // UeContextModificationRequired
+#[derive(Clone)]
 pub struct UeContextModificationRequired {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5752,6 +5843,7 @@ impl APerElement for UeContextModificationRequired {
 }
 
 // DrBsRequiredToBeModifiedList
+#[derive(Clone)]
 pub struct DrBsRequiredToBeModifiedList(pub Vec<DrBsRequiredToBeModifiedItem>);
 
 impl APerElement for DrBsRequiredToBeModifiedList {
@@ -5776,6 +5868,7 @@ impl APerElement for DrBsRequiredToBeModifiedList {
 }
 
 // DrBsRequiredToBeReleasedList
+#[derive(Clone)]
 pub struct DrBsRequiredToBeReleasedList(pub Vec<DrBsRequiredToBeReleasedItem>);
 
 impl APerElement for DrBsRequiredToBeReleasedList {
@@ -5800,6 +5893,7 @@ impl APerElement for DrBsRequiredToBeReleasedList {
 }
 
 // SrBsRequiredToBeReleasedList
+#[derive(Clone)]
 pub struct SrBsRequiredToBeReleasedList(pub Vec<SrBsRequiredToBeReleasedItem>);
 
 impl APerElement for SrBsRequiredToBeReleasedList {
@@ -5824,6 +5918,7 @@ impl APerElement for SrBsRequiredToBeReleasedList {
 }
 
 // BhChannelsRequiredToBeReleasedList
+#[derive(Clone)]
 pub struct BhChannelsRequiredToBeReleasedList(pub Vec<BhChannelsRequiredToBeReleasedItem>);
 
 impl APerElement for BhChannelsRequiredToBeReleasedList {
@@ -5848,6 +5943,7 @@ impl APerElement for BhChannelsRequiredToBeReleasedList {
 }
 
 // SldrBsRequiredToBeModifiedList
+#[derive(Clone)]
 pub struct SldrBsRequiredToBeModifiedList(pub Vec<SldrBsRequiredToBeModifiedItem>);
 
 impl APerElement for SldrBsRequiredToBeModifiedList {
@@ -5872,6 +5968,7 @@ impl APerElement for SldrBsRequiredToBeModifiedList {
 }
 
 // SldrBsRequiredToBeReleasedList
+#[derive(Clone)]
 pub struct SldrBsRequiredToBeReleasedList(pub Vec<SldrBsRequiredToBeReleasedItem>);
 
 impl APerElement for SldrBsRequiredToBeReleasedList {
@@ -5896,6 +5993,7 @@ impl APerElement for SldrBsRequiredToBeReleasedList {
 }
 
 // UeContextModificationConfirm
+#[derive(Clone)]
 pub struct UeContextModificationConfirm {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -6051,6 +6149,7 @@ impl APerElement for UeContextModificationConfirm {
 }
 
 // DrBsModifiedConfList
+#[derive(Clone)]
 pub struct DrBsModifiedConfList(pub Vec<DrBsModifiedConfItem>);
 
 impl APerElement for DrBsModifiedConfList {
@@ -6075,6 +6174,7 @@ impl APerElement for DrBsModifiedConfList {
 }
 
 // SldrBsModifiedConfList
+#[derive(Clone)]
 pub struct SldrBsModifiedConfList(pub Vec<SldrBsModifiedConfItem>);
 
 impl APerElement for SldrBsModifiedConfList {
@@ -6099,6 +6199,7 @@ impl APerElement for SldrBsModifiedConfList {
 }
 
 // UeContextModificationRefuse
+#[derive(Clone)]
 pub struct UeContextModificationRefuse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -6179,6 +6280,7 @@ impl APerElement for UeContextModificationRefuse {
 }
 
 // WriteReplaceWarningRequest
+#[derive(Clone)]
 pub struct WriteReplaceWarningRequest {
     pub transaction_id: TransactionId,
     pub pws_system_information: PwsSystemInformation,
@@ -6272,6 +6374,7 @@ impl APerElement for WriteReplaceWarningRequest {
 }
 
 // CellsToBeBroadcastList
+#[derive(Clone)]
 pub struct CellsToBeBroadcastList(pub Vec<CellsToBeBroadcastListItem>);
 
 impl APerElement for CellsToBeBroadcastList {
@@ -6296,6 +6399,7 @@ impl APerElement for CellsToBeBroadcastList {
 }
 
 // WriteReplaceWarningResponse
+#[derive(Clone)]
 pub struct WriteReplaceWarningResponse {
     pub transaction_id: TransactionId,
     pub cells_broadcast_completed_list: Option<CellsBroadcastCompletedList>,
@@ -6388,6 +6492,7 @@ impl APerElement for WriteReplaceWarningResponse {
 }
 
 // CellsBroadcastCompletedList
+#[derive(Clone)]
 pub struct CellsBroadcastCompletedList(pub Vec<CellsBroadcastCompletedListItem>);
 
 impl APerElement for CellsBroadcastCompletedList {
@@ -6412,6 +6517,7 @@ impl APerElement for CellsBroadcastCompletedList {
 }
 
 // PwsCancelRequest
+#[derive(Clone)]
 pub struct PwsCancelRequest {
     pub transaction_id: TransactionId,
     pub numberof_broadcast_request: NumberofBroadcastRequest,
@@ -6516,6 +6622,7 @@ impl APerElement for PwsCancelRequest {
 }
 
 // BroadcastToBeCancelledList
+#[derive(Clone)]
 pub struct BroadcastToBeCancelledList(pub Vec<BroadcastToBeCancelledListItem>);
 
 impl APerElement for BroadcastToBeCancelledList {
@@ -6540,6 +6647,7 @@ impl APerElement for BroadcastToBeCancelledList {
 }
 
 // PwsCancelResponse
+#[derive(Clone)]
 pub struct PwsCancelResponse {
     pub transaction_id: TransactionId,
     pub cells_broadcast_cancelled_list: Option<CellsBroadcastCancelledList>,
@@ -6617,6 +6725,7 @@ impl APerElement for PwsCancelResponse {
 }
 
 // CellsBroadcastCancelledList
+#[derive(Clone)]
 pub struct CellsBroadcastCancelledList(pub Vec<CellsBroadcastCancelledListItem>);
 
 impl APerElement for CellsBroadcastCancelledList {
@@ -6641,6 +6750,7 @@ impl APerElement for CellsBroadcastCancelledList {
 }
 
 // UeInactivityNotification
+#[derive(Clone)]
 pub struct UeInactivityNotification {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -6706,6 +6816,7 @@ impl APerElement for UeInactivityNotification {
 }
 
 // DrbActivityList
+#[derive(Clone)]
 pub struct DrbActivityList(pub Vec<DrbActivityItem>);
 
 impl APerElement for DrbActivityList {
@@ -6730,6 +6841,7 @@ impl APerElement for DrbActivityList {
 }
 
 // InitialUlrrcMessageTransfer
+#[derive(Clone)]
 pub struct InitialUlrrcMessageTransfer {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub nrcgi: Nrcgi,
@@ -6871,6 +6983,7 @@ impl APerElement for InitialUlrrcMessageTransfer {
 }
 
 // DlrrcMessageTransfer
+#[derive(Clone)]
 pub struct DlrrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -7067,6 +7180,7 @@ impl APerElement for DlrrcMessageTransfer {
 }
 
 // UlrrcMessageTransfer
+#[derive(Clone)]
 pub struct UlrrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -7172,6 +7286,7 @@ impl APerElement for UlrrcMessageTransfer {
 // PrivateMessage - omitted
 
 // SystemInformationDeliveryCommand
+#[derive(Clone)]
 pub struct SystemInformationDeliveryCommand {
     pub transaction_id: TransactionId,
     pub nrcgi: Nrcgi,
@@ -7247,6 +7362,7 @@ impl APerElement for SystemInformationDeliveryCommand {
 }
 
 // Paging
+#[derive(Clone)]
 pub struct Paging {
     pub ue_identity_index_value: UeIdentityIndexValue,
     pub paging_identity: PagingIdentity,
@@ -7353,6 +7469,7 @@ impl APerElement for Paging {
 }
 
 // PagingCellList
+#[derive(Clone)]
 pub struct PagingCellList(pub Vec<PagingCellItem>);
 
 impl APerElement for PagingCellList {
@@ -7377,6 +7494,7 @@ impl APerElement for PagingCellList {
 }
 
 // Notify
+#[derive(Clone)]
 pub struct Notify {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -7442,6 +7560,7 @@ impl APerElement for Notify {
 }
 
 // DrbNotifyList
+#[derive(Clone)]
 pub struct DrbNotifyList(pub Vec<DrbNotifyItem>);
 
 impl APerElement for DrbNotifyList {
@@ -7466,6 +7585,7 @@ impl APerElement for DrbNotifyList {
 }
 
 // NetworkAccessRateReduction
+#[derive(Clone)]
 pub struct NetworkAccessRateReduction {
     pub transaction_id: TransactionId,
     pub uac_assistance_info: UacAssistanceInfo,
@@ -7522,6 +7642,7 @@ impl APerElement for NetworkAccessRateReduction {
 }
 
 // PwsRestartIndication
+#[derive(Clone)]
 pub struct PwsRestartIndication {
     pub transaction_id: TransactionId,
     pub nr_cgi_list_for_restart_list: NrCgiListForRestartList,
@@ -7579,6 +7700,7 @@ impl APerElement for PwsRestartIndication {
 }
 
 // NrCgiListForRestartList
+#[derive(Clone)]
 pub struct NrCgiListForRestartList(pub Vec<NrCgiListForRestartListItem>);
 
 impl APerElement for NrCgiListForRestartList {
@@ -7603,6 +7725,7 @@ impl APerElement for NrCgiListForRestartList {
 }
 
 // PwsFailureIndication
+#[derive(Clone)]
 pub struct PwsFailureIndication {
     pub transaction_id: TransactionId,
     pub pws_failed_nr_cgi_list: Option<PwsFailedNrCgiList>,
@@ -7663,6 +7786,7 @@ impl APerElement for PwsFailureIndication {
 }
 
 // PwsFailedNrCgiList
+#[derive(Clone)]
 pub struct PwsFailedNrCgiList(pub Vec<PwsFailedNrCgiListItem>);
 
 impl APerElement for PwsFailedNrCgiList {
@@ -7687,6 +7811,7 @@ impl APerElement for PwsFailedNrCgiList {
 }
 
 // GnbDuStatusIndication
+#[derive(Clone)]
 pub struct GnbDuStatusIndication {
     pub transaction_id: TransactionId,
     pub gnb_du_overload_information: GnbDuOverloadInformation,
@@ -7744,6 +7869,7 @@ impl APerElement for GnbDuStatusIndication {
 }
 
 // RrcDeliveryReport
+#[derive(Clone)]
 pub struct RrcDeliveryReport {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -7820,6 +7946,7 @@ impl APerElement for RrcDeliveryReport {
 }
 
 // F1RemovalRequest
+#[derive(Clone)]
 pub struct F1RemovalRequest {
     pub transaction_id: TransactionId,
 }
@@ -7863,6 +7990,7 @@ impl APerElement for F1RemovalRequest {
 }
 
 // F1RemovalResponse
+#[derive(Clone)]
 pub struct F1RemovalResponse {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -7923,6 +8051,7 @@ impl APerElement for F1RemovalResponse {
 }
 
 // F1RemovalFailure
+#[derive(Clone)]
 pub struct F1RemovalFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -7993,6 +8122,7 @@ impl APerElement for F1RemovalFailure {
 }
 
 // TraceStart
+#[derive(Clone)]
 pub struct TraceStart {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8058,6 +8188,7 @@ impl APerElement for TraceStart {
 }
 
 // DeactivateTrace
+#[derive(Clone)]
 pub struct DeactivateTrace {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8123,6 +8254,7 @@ impl APerElement for DeactivateTrace {
 }
 
 // CellTrafficTrace
+#[derive(Clone)]
 pub struct CellTrafficTrace {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8233,6 +8365,7 @@ impl APerElement for CellTrafficTrace {
 }
 
 // DucuRadioInformationTransfer
+#[derive(Clone)]
 pub struct DucuRadioInformationTransfer {
     pub transaction_id: TransactionId,
     pub ducu_radio_information_type: DucuRadioInformationType,
@@ -8290,6 +8423,7 @@ impl APerElement for DucuRadioInformationTransfer {
 }
 
 // CuduRadioInformationTransfer
+#[derive(Clone)]
 pub struct CuduRadioInformationTransfer {
     pub transaction_id: TransactionId,
     pub cudu_radio_information_type: CuduRadioInformationType,
@@ -8347,6 +8481,7 @@ impl APerElement for CuduRadioInformationTransfer {
 }
 
 // BapMappingConfiguration
+#[derive(Clone)]
 pub struct BapMappingConfiguration {
     pub transaction_id: TransactionId,
     pub bh_routing_information_added_list: Option<BhRoutingInformationAddedList>,
@@ -8437,6 +8572,7 @@ impl APerElement for BapMappingConfiguration {
 }
 
 // BhRoutingInformationAddedList
+#[derive(Clone)]
 pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
 
 impl APerElement for BhRoutingInformationAddedList {
@@ -8461,6 +8597,7 @@ impl APerElement for BhRoutingInformationAddedList {
 }
 
 // BhRoutingInformationRemovedList
+#[derive(Clone)]
 pub struct BhRoutingInformationRemovedList(pub Vec<BhRoutingInformationRemovedListItem>);
 
 impl APerElement for BhRoutingInformationRemovedList {
@@ -8485,6 +8622,7 @@ impl APerElement for BhRoutingInformationRemovedList {
 }
 
 // BapMappingConfigurationAcknowledge
+#[derive(Clone)]
 pub struct BapMappingConfigurationAcknowledge {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -8545,6 +8683,7 @@ impl APerElement for BapMappingConfigurationAcknowledge {
 }
 
 // BapMappingConfigurationFailure
+#[derive(Clone)]
 pub struct BapMappingConfigurationFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -8629,6 +8768,7 @@ impl APerElement for BapMappingConfigurationFailure {
 }
 
 // GnbDuResourceConfiguration
+#[derive(Clone)]
 pub struct GnbDuResourceConfiguration {
     pub transaction_id: TransactionId,
     pub activated_cells_to_be_updated_list: Option<ActivatedCellsToBeUpdatedList>,
@@ -8704,6 +8844,7 @@ impl APerElement for GnbDuResourceConfiguration {
 }
 
 // GnbDuResourceConfigurationAcknowledge
+#[derive(Clone)]
 pub struct GnbDuResourceConfigurationAcknowledge {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -8764,6 +8905,7 @@ impl APerElement for GnbDuResourceConfigurationAcknowledge {
 }
 
 // GnbDuResourceConfigurationFailure
+#[derive(Clone)]
 pub struct GnbDuResourceConfigurationFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -8848,6 +8990,7 @@ impl APerElement for GnbDuResourceConfigurationFailure {
 }
 
 // IabtnlAddressRequest
+#[derive(Clone)]
 pub struct IabtnlAddressRequest {
     pub transaction_id: TransactionId,
     pub ia_bv_4_addresses_requested: Option<IaBv4AddressesRequested>,
@@ -8937,6 +9080,7 @@ impl APerElement for IabtnlAddressRequest {
 }
 
 // IabTnlAddressesToRemoveList
+#[derive(Clone)]
 pub struct IabTnlAddressesToRemoveList(pub Vec<IabTnlAddressesToRemoveItem>);
 
 impl APerElement for IabTnlAddressesToRemoveList {
@@ -8961,6 +9105,7 @@ impl APerElement for IabTnlAddressesToRemoveList {
 }
 
 // IabtnlAddressResponse
+#[derive(Clone)]
 pub struct IabtnlAddressResponse {
     pub transaction_id: TransactionId,
     pub iab_allocated_tnl_address_list: IabAllocatedTnlAddressList,
@@ -9020,6 +9165,7 @@ impl APerElement for IabtnlAddressResponse {
 }
 
 // IabAllocatedTnlAddressList
+#[derive(Clone)]
 pub struct IabAllocatedTnlAddressList(pub Vec<IabAllocatedTnlAddressListItem>);
 
 impl APerElement for IabAllocatedTnlAddressList {
@@ -9044,6 +9190,7 @@ impl APerElement for IabAllocatedTnlAddressList {
 }
 
 // IabtnlAddressFailure
+#[derive(Clone)]
 pub struct IabtnlAddressFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -9128,6 +9275,7 @@ impl APerElement for IabtnlAddressFailure {
 }
 
 // IabupConfigurationUpdateRequest
+#[derive(Clone)]
 pub struct IabupConfigurationUpdateRequest {
     pub transaction_id: TransactionId,
     pub ul_up_tnl_information_to_update_list: Option<UlUpTnlInformationToUpdateList>,
@@ -9206,6 +9354,7 @@ impl APerElement for IabupConfigurationUpdateRequest {
 }
 
 // UlUpTnlInformationToUpdateList
+#[derive(Clone)]
 pub struct UlUpTnlInformationToUpdateList(pub Vec<UlUpTnlInformationToUpdateListItem>);
 
 impl APerElement for UlUpTnlInformationToUpdateList {
@@ -9230,6 +9379,7 @@ impl APerElement for UlUpTnlInformationToUpdateList {
 }
 
 // UlUpTnlAddressToUpdateList
+#[derive(Clone)]
 pub struct UlUpTnlAddressToUpdateList(pub Vec<UlUpTnlAddressToUpdateListItem>);
 
 impl APerElement for UlUpTnlAddressToUpdateList {
@@ -9254,6 +9404,7 @@ impl APerElement for UlUpTnlAddressToUpdateList {
 }
 
 // IabupConfigurationUpdateResponse
+#[derive(Clone)]
 pub struct IabupConfigurationUpdateResponse {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -9331,6 +9482,7 @@ impl APerElement for IabupConfigurationUpdateResponse {
 }
 
 // DlUpTnlAddressToUpdateList
+#[derive(Clone)]
 pub struct DlUpTnlAddressToUpdateList(pub Vec<DlUpTnlAddressToUpdateListItem>);
 
 impl APerElement for DlUpTnlAddressToUpdateList {
@@ -9355,6 +9507,7 @@ impl APerElement for DlUpTnlAddressToUpdateList {
 }
 
 // IabupConfigurationUpdateFailure
+#[derive(Clone)]
 pub struct IabupConfigurationUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -9439,6 +9592,7 @@ impl APerElement for IabupConfigurationUpdateFailure {
 }
 
 // ResourceStatusRequest
+#[derive(Clone)]
 pub struct ResourceStatusRequest {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -9562,6 +9716,7 @@ impl APerElement for ResourceStatusRequest {
 }
 
 // ResourceStatusResponse
+#[derive(Clone)]
 pub struct ResourceStatusResponse {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -9644,6 +9799,7 @@ impl APerElement for ResourceStatusResponse {
 }
 
 // ResourceStatusFailure
+#[derive(Clone)]
 pub struct ResourceStatusFailure {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -9736,6 +9892,7 @@ impl APerElement for ResourceStatusFailure {
 }
 
 // ResourceStatusUpdate
+#[derive(Clone)]
 pub struct ResourceStatusUpdate {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -9848,6 +10005,7 @@ impl APerElement for ResourceStatusUpdate {
 }
 
 // AccessAndMobilityIndication
+#[derive(Clone)]
 pub struct AccessAndMobilityIndication {
     pub transaction_id: TransactionId,
     pub rach_report_information_list: Option<RachReportInformationList>,
@@ -9925,6 +10083,7 @@ impl APerElement for AccessAndMobilityIndication {
 }
 
 // ReferenceTimeInformationReportingControl
+#[derive(Clone)]
 pub struct ReferenceTimeInformationReportingControl {
     pub transaction_id: TransactionId,
     pub reporting_request_type: ReportingRequestType,
@@ -9981,6 +10140,7 @@ impl APerElement for ReferenceTimeInformationReportingControl {
 }
 
 // ReferenceTimeInformationReport
+#[derive(Clone)]
 pub struct ReferenceTimeInformationReport {
     pub transaction_id: TransactionId,
     pub time_reference_information: TimeReferenceInformation,
@@ -10038,6 +10198,7 @@ impl APerElement for ReferenceTimeInformationReport {
 }
 
 // AccessSuccess
+#[derive(Clone)]
 pub struct AccessSuccess {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -10103,6 +10264,7 @@ impl APerElement for AccessSuccess {
 }
 
 // PositioningAssistanceInformationControl
+#[derive(Clone)]
 pub struct PositioningAssistanceInformationControl {
     pub transaction_id: TransactionId,
     pub pos_assistance_information: Option<PosAssistanceInformation>,
@@ -10204,6 +10366,7 @@ impl APerElement for PositioningAssistanceInformationControl {
 }
 
 // PositioningAssistanceInformationFeedback
+#[derive(Clone)]
 pub struct PositioningAssistanceInformationFeedback {
     pub transaction_id: TransactionId,
     pub pos_assistance_information_failure_list: Option<PosAssistanceInformationFailureList>,
@@ -10309,6 +10472,7 @@ impl APerElement for PositioningAssistanceInformationFeedback {
 }
 
 // PositioningMeasurementRequest
+#[derive(Clone)]
 pub struct PositioningMeasurementRequest {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10494,6 +10658,7 @@ impl APerElement for PositioningMeasurementRequest {
 }
 
 // PositioningMeasurementResponse
+#[derive(Clone)]
 pub struct PositioningMeasurementResponse {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10589,6 +10754,7 @@ impl APerElement for PositioningMeasurementResponse {
 }
 
 // PositioningMeasurementFailure
+#[derive(Clone)]
 pub struct PositioningMeasurementFailure {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10679,6 +10845,7 @@ impl APerElement for PositioningMeasurementFailure {
 }
 
 // PositioningMeasurementReport
+#[derive(Clone)]
 pub struct PositioningMeasurementReport {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10756,6 +10923,7 @@ impl APerElement for PositioningMeasurementReport {
 }
 
 // PositioningMeasurementAbort
+#[derive(Clone)]
 pub struct PositioningMeasurementAbort {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10821,6 +10989,7 @@ impl APerElement for PositioningMeasurementAbort {
 }
 
 // PositioningMeasurementFailureIndication
+#[derive(Clone)]
 pub struct PositioningMeasurementFailureIndication {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10896,6 +11065,7 @@ impl APerElement for PositioningMeasurementFailureIndication {
 }
 
 // PositioningMeasurementUpdate
+#[derive(Clone)]
 pub struct PositioningMeasurementUpdate {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -10975,6 +11145,7 @@ impl APerElement for PositioningMeasurementUpdate {
 }
 
 // TrpInformationRequest
+#[derive(Clone)]
 pub struct TrpInformationRequest {
     pub transaction_id: TransactionId,
     pub trp_list: Option<TrpList>,
@@ -11048,6 +11219,7 @@ impl APerElement for TrpInformationRequest {
 }
 
 // TrpInformationTypeListTrpReq
+#[derive(Clone)]
 pub struct TrpInformationTypeListTrpReq(pub Vec<TrpInformationTypeItemTrpReq>);
 
 impl APerElement for TrpInformationTypeListTrpReq {
@@ -11072,6 +11244,7 @@ impl APerElement for TrpInformationTypeListTrpReq {
 }
 
 // TrpInformationResponse
+#[derive(Clone)]
 pub struct TrpInformationResponse {
     pub transaction_id: TransactionId,
     pub trp_information_list_trp_resp: TrpInformationListTrpResp,
@@ -11146,6 +11319,7 @@ impl APerElement for TrpInformationResponse {
 }
 
 // TrpInformationListTrpResp
+#[derive(Clone)]
 pub struct TrpInformationListTrpResp(pub Vec<TrpInformationItemTrpResp>);
 
 impl APerElement for TrpInformationListTrpResp {
@@ -11170,6 +11344,7 @@ impl APerElement for TrpInformationListTrpResp {
 }
 
 // TrpInformationFailure
+#[derive(Clone)]
 pub struct TrpInformationFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -11240,6 +11415,7 @@ impl APerElement for TrpInformationFailure {
 }
 
 // PositioningInformationRequest
+#[derive(Clone)]
 pub struct PositioningInformationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11313,6 +11489,7 @@ impl APerElement for PositioningInformationRequest {
 }
 
 // PositioningInformationResponse
+#[derive(Clone)]
 pub struct PositioningInformationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11410,6 +11587,7 @@ impl APerElement for PositioningInformationResponse {
 }
 
 // PositioningInformationFailure
+#[derive(Clone)]
 pub struct PositioningInformationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11490,6 +11668,7 @@ impl APerElement for PositioningInformationFailure {
 }
 
 // PositioningActivationRequest
+#[derive(Clone)]
 pub struct PositioningActivationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11569,6 +11748,7 @@ impl APerElement for PositioningActivationRequest {
 }
 
 // SrsType
+#[derive(Clone)]
 pub enum SrsType {
     SemipersistentSrs(SemipersistentSrs),
     AperiodicSrs(AperiodicSrs),
@@ -11609,6 +11789,7 @@ impl APerElement for SrsType {
 }
 
 // SemipersistentSrs
+#[derive(Clone)]
 pub struct SemipersistentSrs {
     pub srs_resource_set_id: SrsResourceSetId,
     pub srs_spatial_relation: Option<SpatialRelationInfo>,
@@ -11655,6 +11836,7 @@ impl APerElement for SemipersistentSrs {
 }
 
 // AperiodicSrs
+#[derive(Clone)]
 pub struct AperiodicSrs {
     pub aperiodic: Aperiodic,
     pub srs_resource_trigger: Option<SrsResourceTrigger>,
@@ -11701,6 +11883,7 @@ impl APerElement for AperiodicSrs {
 }
 
 // PositioningActivationResponse
+#[derive(Clone)]
 pub struct PositioningActivationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11798,6 +11981,7 @@ impl APerElement for PositioningActivationResponse {
 }
 
 // PositioningActivationFailure
+#[derive(Clone)]
 pub struct PositioningActivationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11878,6 +12062,7 @@ impl APerElement for PositioningActivationFailure {
 }
 
 // PositioningDeactivation
+#[derive(Clone)]
 pub struct PositioningDeactivation {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -11944,6 +12129,7 @@ impl APerElement for PositioningDeactivation {
 }
 
 // PositioningInformationUpdate
+#[derive(Clone)]
 pub struct PositioningInformationUpdate {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -12028,6 +12214,7 @@ impl APerElement for PositioningInformationUpdate {
 }
 
 // ECidMeasurementInitiationRequest
+#[derive(Clone)]
 pub struct ECidMeasurementInitiationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -12148,6 +12335,7 @@ impl APerElement for ECidMeasurementInitiationRequest {
 }
 
 // ECidMeasurementInitiationResponse
+#[derive(Clone)]
 pub struct ECidMeasurementInitiationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -12267,6 +12455,7 @@ impl APerElement for ECidMeasurementInitiationResponse {
 }
 
 // ECidMeasurementInitiationFailure
+#[derive(Clone)]
 pub struct ECidMeasurementInitiationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -12369,6 +12558,7 @@ impl APerElement for ECidMeasurementInitiationFailure {
 }
 
 // ECidMeasurementFailureIndication
+#[derive(Clone)]
 pub struct ECidMeasurementFailureIndication {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -12456,6 +12646,7 @@ impl APerElement for ECidMeasurementFailureIndication {
 }
 
 // ECidMeasurementReport
+#[derive(Clone)]
 pub struct ECidMeasurementReport {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -12559,6 +12750,7 @@ impl APerElement for ECidMeasurementReport {
 }
 
 // ECidMeasurementTerminationCommand
+#[derive(Clone)]
 pub struct ECidMeasurementTerminationCommand {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
