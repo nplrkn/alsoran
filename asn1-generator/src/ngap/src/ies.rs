@@ -2554,13 +2554,7 @@ impl APerElement for CandidatePci {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let candidate_pci = u16::from_aper(decoder, UNCONSTRAINED)?;
-        let candidate_nrarfcn = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3279165))),
-            },
-        )?;
+        let candidate_nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             candidate_pci,
@@ -3866,20 +3860,8 @@ impl APerElement for CountValueForPdcpSn12 {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let pdcp_sn12 = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(4095))),
-            },
-        )?;
-        let hfn_pdcp_sn12 = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(1048575))),
-            },
-        )?;
+        let pdcp_sn12 = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let hfn_pdcp_sn12 = u32::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             pdcp_sn12,
@@ -3918,20 +3900,8 @@ impl APerElement for CountValueForPdcpSn18 {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let pdcp_sn18 = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(262143))),
-            },
-        )?;
-        let hfn_pdcp_sn18 = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(16383))),
-            },
-        )?;
+        let pdcp_sn18 = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let hfn_pdcp_sn18 = u16::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             pdcp_sn18,
@@ -6785,13 +6755,7 @@ impl APerElement for ExpectedUeMovingTrajectoryItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
         let time_stayed_in_cell = if optionals.is_set(0) {
-            Some(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(4095))),
-                },
-            )?)
+            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -19340,13 +19304,7 @@ impl APerElement for RecommendedCellItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let ngran_cgi = NgranCgi::from_aper(decoder, UNCONSTRAINED)?;
         let time_stayed_in_cell = if optionals.is_set(0) {
-            Some(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(4095))),
-                },
-            )?)
+            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -25171,20 +25129,8 @@ impl APerElement for VolumeTimedReportItem {
                 size: Some(Constraint::new(Some(4), Some(4))),
             },
         )?;
-        let usage_count_ul = u64::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(18446744073709551615))),
-            },
-        )?;
-        let usage_count_dl = u64::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(18446744073709551615))),
-            },
-        )?;
+        let usage_count_ul = u64::from_aper(decoder, UNCONSTRAINED)?;
+        let usage_count_dl = u64::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             start_time_stamp,

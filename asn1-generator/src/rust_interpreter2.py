@@ -32,7 +32,7 @@ def type_and_constraints(typ):
     constraints = "UNCONSTRAINED"
 
     if isinstance(typ, Tree):
-        if len(typ.children) == 2:
+        if len(typ.children) == 2 and typ.data not in ["u8", "u16", "u32", "u64"]:
             lb = typ.children[0]
             ub = typ.children[1]
             constraints = f"Constraints {{ value: None, size: Some(Constraint::new(Some({lb}), Some({ub}))) }}"
@@ -1061,7 +1061,7 @@ impl APerElement for PrivateIeId {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::Local(u16::from_aper(decoder, Constraints { value: None, size: Some(Constraint::new(Some(0), Some(65535))) })?)),
+            0 => Ok(Self::Local(u16::from_aper(decoder, UNCONSTRAINED)?)),
             1 => Ok(Self::Global(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?)),
             _ => Err(DecodeError::InvalidChoice)
         }
@@ -1071,7 +1071,7 @@ impl APerElement for PrivateIeId {
         match self {
             Self::Local(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints { value: None, size: Some(Constraint::new(Some(0), Some(65535))) })?)?; }
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?; }
             Self::Global(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
                 enc.append(&x.to_aper(UNCONSTRAINED)?)?; }

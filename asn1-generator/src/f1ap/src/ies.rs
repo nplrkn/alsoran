@@ -72,63 +72,15 @@ impl APerElement for AccessPointPosition {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let latitude_sign = LatitudeSign::from_aper(decoder, UNCONSTRAINED)?;
-        let latitude = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(8388607))),
-            },
-        )?;
-        let longitude = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-8388608), Some(8388607))),
-            },
-        )?;
+        let latitude = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let longitude = u32::from_aper(decoder, UNCONSTRAINED)?;
         let direction_of_altitude = DirectionOfAltitude::from_aper(decoder, UNCONSTRAINED)?;
-        let altitude = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(32767))),
-            },
-        )?;
-        let uncertainty_semi_major = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(127))),
-            },
-        )?;
-        let uncertainty_semi_minor = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(127))),
-            },
-        )?;
-        let orientation_of_major_axis = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(179))),
-            },
-        )?;
-        let uncertainty_altitude = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(127))),
-            },
-        )?;
-        let confidence = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
+        let altitude = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let uncertainty_semi_major = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let uncertainty_semi_minor = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let orientation_of_major_axis = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let uncertainty_altitude = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             latitude_sign,
@@ -791,21 +743,9 @@ impl APerElement for AngleMeasurementQuality {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let azimuth_quality = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
+        let azimuth_quality = u8::from_aper(decoder, UNCONSTRAINED)?;
         let zenith_quality = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(255))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -2577,13 +2517,7 @@ impl APerElement for CapacityValue {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let capacity_value = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
+        let capacity_value = u8::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_area_capacity_value_list = if optionals.is_set(0) {
             Some(SsbAreaCapacityValueList::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -4542,13 +4476,7 @@ impl APerElement for DlPrs {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let prsid = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
+        let prsid = u8::from_aper(decoder, UNCONSTRAINED)?;
         let dl_prs_resource_set_id = PrsResourceSetId::from_aper(decoder, UNCONSTRAINED)?;
         let dl_prs_resource_id = if optionals.is_set(0) {
             Some(PrsResourceId::from_aper(decoder, UNCONSTRAINED)?)
@@ -6467,13 +6395,7 @@ impl APerElement for Dynamic5qiDescriptor {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let qos_priority_level = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(1), Some(127))),
-            },
-        )?;
+        let qos_priority_level = u8::from_aper(decoder, UNCONSTRAINED)?;
         let packet_delay_budget = PacketDelayBudget::from_aper(decoder, UNCONSTRAINED)?;
         let packet_error_rate = PacketErrorRate::from_aper(decoder, UNCONSTRAINED)?;
         let five_qi = if optionals.is_set(0) {
@@ -7486,36 +7408,12 @@ impl APerElement for EutraPrachConfiguration {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let root_sequence_index = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(837))),
-            },
-        )?;
-        let zero_correlation_index = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(15))),
-            },
-        )?;
+        let root_sequence_index = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let zero_correlation_index = u8::from_aper(decoder, UNCONSTRAINED)?;
         let high_speed_flag = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let prach_freq_offset = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(94))),
-            },
-        )?;
+        let prach_freq_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
         let prach_config_index = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(63))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -9519,48 +9417,12 @@ impl APerElement for GnbRxTxTimeDiffMeas {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::K0(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1970049))),
-                },
-            )?)),
-            1 => Ok(Self::K1(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(985025))),
-                },
-            )?)),
-            2 => Ok(Self::K2(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(492513))),
-                },
-            )?)),
-            3 => Ok(Self::K3(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(246257))),
-                },
-            )?)),
-            4 => Ok(Self::K4(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(123129))),
-                },
-            )?)),
-            5 => Ok(Self::K5(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(61565))),
-                },
-            )?)),
+            0 => Ok(Self::K0(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::K1(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::K2(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::K3(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Ok(Self::K4(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            5 => Ok(Self::K5(u16::from_aper(decoder, UNCONSTRAINED)?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -9570,45 +9432,27 @@ impl APerElement for GnbRxTxTimeDiffMeas {
         match self {
             Self::K0(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1970049))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K1(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(985025))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K2(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(492513))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K3(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(246257))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K4(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(123129))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(61565))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -10607,46 +10451,22 @@ impl APerElement for IabtnlAddressesRequested {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let tnl_addresses_or_prefixes_requested_all_traffic = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(1), Some(256))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
         let tnl_addresses_or_prefixes_requested_f1_c = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(1), Some(256))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
         let tnl_addresses_or_prefixes_requested_f1_u = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(1), Some(256))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
         let tnl_addresses_or_prefixes_requested_no_nf1 = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(1), Some(256))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -11196,13 +11016,7 @@ impl APerElement for L139Info {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let msg_1scs = Msg1scs::from_aper(decoder, UNCONSTRAINED)?;
         let root_sequence_index = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(137))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -11247,13 +11061,7 @@ impl APerElement for L839Info {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let root_sequence_index = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(837))),
-            },
-        )?;
+        let root_sequence_index = u16::from_aper(decoder, UNCONSTRAINED)?;
         let restricted_set_config = RestrictedSetConfig::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -11316,27 +11124,9 @@ impl APerElement for LcsToGcsTranslationAoA {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let alpha = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3599))),
-            },
-        )?;
-        let beta = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3599))),
-            },
-        )?;
-        let gamma = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3599))),
-            },
-        )?;
+        let alpha = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let beta = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let gamma = u16::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self { alpha, beta, gamma })
     }
@@ -11401,57 +11191,21 @@ impl APerElement for LcStoGcsTranslation {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let alpha = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(359))),
-            },
-        )?;
+        let alpha = u16::from_aper(decoder, UNCONSTRAINED)?;
         let alpha_fine = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(9))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
-        let beta = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(359))),
-            },
-        )?;
+        let beta = u16::from_aper(decoder, UNCONSTRAINED)?;
         let beta_fine = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(9))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
-        let gamma = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(359))),
-            },
-        )?;
+        let gamma = u16::from_aper(decoder, UNCONSTRAINED)?;
         let gamma_fine = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(9))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -11554,34 +11308,10 @@ impl APerElement for LocationUncertainty {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let horizontal_uncertainty = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
-        let horizontal_confidence = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let vertical_uncertainty = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
-        let vertical_confidence = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
+        let horizontal_uncertainty = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let horizontal_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let vertical_uncertainty = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let vertical_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             horizontal_uncertainty,
@@ -12753,69 +12483,15 @@ impl APerElement for NgranHighAccuracyAccessPointPosition {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let latitude = u64::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-2147483648), Some(2147483647))),
-            },
-        )?;
-        let longitude = u64::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-2147483648), Some(2147483647))),
-            },
-        )?;
-        let altitude = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-64000), Some(1280000))),
-            },
-        )?;
-        let uncertainty_semi_major = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
-        let uncertainty_semi_minor = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
-        let orientation_of_major_axis = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(179))),
-            },
-        )?;
-        let horizontal_confidence = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let uncertainty_altitude = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
-        let vertical_confidence = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
+        let latitude = u64::from_aper(decoder, UNCONSTRAINED)?;
+        let longitude = u64::from_aper(decoder, UNCONSTRAINED)?;
+        let altitude = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let uncertainty_semi_major = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let uncertainty_semi_minor = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let orientation_of_major_axis = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let horizontal_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let uncertainty_altitude = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let vertical_confidence = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             latitude,
@@ -13035,13 +12711,7 @@ impl APerElement for NonDynamic5qiDescriptor {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let five_qi = u8::from_aper(decoder, UNCONSTRAINED)?;
         let qos_priority_level = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(1), Some(127))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -13551,13 +13221,7 @@ impl APerElement for NrFreqInfo {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let nrarfcn = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3279165))),
-            },
-        )?;
+        let nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
         let sul_information = if optionals.is_set(0) {
             Some(SulInformation::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -13874,13 +13538,7 @@ impl APerElement for NrprachConfigItem {
         let parch_config_index = u8::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_per_rach_occasion = SsbPerRachOccasion::from_aper(decoder, UNCONSTRAINED)?;
         let freq_domain_length = FreqDomainLength::from_aper(decoder, UNCONSTRAINED)?;
-        let zero_correl_zone_config = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(15))),
-            },
-        )?;
+        let zero_correl_zone_config = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             nrscs,
@@ -14469,48 +14127,12 @@ impl APerElement for RelativePathDelay {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::K0(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(16351))),
-                },
-            )?)),
-            1 => Ok(Self::K1(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(8176))),
-                },
-            )?)),
-            2 => Ok(Self::K2(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(4088))),
-                },
-            )?)),
-            3 => Ok(Self::K3(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(2044))),
-                },
-            )?)),
-            4 => Ok(Self::K4(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1022))),
-                },
-            )?)),
-            5 => Ok(Self::K5(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(511))),
-                },
-            )?)),
+            0 => Ok(Self::K0(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::K1(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::K2(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::K3(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Ok(Self::K4(u16::from_aper(decoder, UNCONSTRAINED)?)),
+            5 => Ok(Self::K5(u16::from_aper(decoder, UNCONSTRAINED)?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -14520,45 +14142,27 @@ impl APerElement for RelativePathDelay {
         match self {
             Self::K0(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(16351))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K1(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(8176))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K2(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(4088))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K3(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(2044))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K4(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1022))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(511))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -15278,13 +14882,7 @@ impl APerElement for PosMeasurementQuantitiesItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let pos_measurement_type = PosMeasurementType::from_aper(decoder, UNCONSTRAINED)?;
         let timing_reporting_granularity_factor = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(5))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -15642,13 +15240,7 @@ impl APerElement for PosResourceSetTypeAp {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let srs_resource_trigger_list = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(1), Some(3))),
-            },
-        )?;
+        let srs_resource_trigger_list = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             srs_resource_trigger_list,
@@ -15718,37 +15310,13 @@ impl APerElement for PosSrsResourceItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let srs_pos_resource_id = SrsPosResourceId::from_aper(decoder, UNCONSTRAINED)?;
         let transmission_comb_pos = TransmissionCombPos::from_aper(decoder, UNCONSTRAINED)?;
-        let start_position = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(13))),
-            },
-        )?;
+        let start_position = u8::from_aper(decoder, UNCONSTRAINED)?;
         let nrof_symbols = NrofSymbols::from_aper(decoder, UNCONSTRAINED)?;
-        let freq_domain_shift = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(268))),
-            },
-        )?;
-        let c_srs = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(63))),
-            },
-        )?;
+        let freq_domain_shift = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let c_srs = u8::from_aper(decoder, UNCONSTRAINED)?;
         let group_or_sequence_hopping = GroupOrSequenceHopping::from_aper(decoder, UNCONSTRAINED)?;
         let resource_type_pos = ResourceTypePos::from_aper(decoder, UNCONSTRAINED)?;
-        let sequence_id = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(65535))),
-            },
-        )?;
+        let sequence_id = u16::from_aper(decoder, UNCONSTRAINED)?;
         let spatial_relation_pos = if optionals.is_set(0) {
             Some(SpatialRelationPos::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -15835,13 +15403,7 @@ impl APerElement for PosSrsResourceSetItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let possrs_resource_set_id = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(15))),
-            },
-        )?;
+        let possrs_resource_set_id = u8::from_aper(decoder, UNCONSTRAINED)?;
         let poss_rs_resource_id_list = PosSrsResourceIdList::from_aper(decoder, UNCONSTRAINED)?;
         let posresource_set_type = PosResourceSetType::from_aper(decoder, UNCONSTRAINED)?;
 
@@ -16083,28 +15645,10 @@ impl APerElement for PrsInformationPos {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let prs_id_pos = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(255))),
-            },
-        )?;
-        let prs_resource_set_id_pos = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(7))),
-            },
-        )?;
+        let prs_id_pos = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let prs_resource_set_id_pos = u8::from_aper(decoder, UNCONSTRAINED)?;
         let prs_resource_id_pos = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(63))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -16212,34 +15756,10 @@ impl APerElement for PrsAngleItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let nr_prs_azimuth = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(359))),
-            },
-        )?;
-        let nr_prs_azimuth_fine = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(9))),
-            },
-        )?;
-        let nr_prs_elevation = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(180))),
-            },
-        )?;
-        let nr_prs_elevation_fine = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(9))),
-            },
-        )?;
+        let nr_prs_azimuth = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let nr_prs_azimuth_fine = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let nr_prs_elevation = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let nr_prs_elevation_fine = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             nr_prs_azimuth,
@@ -16441,28 +15961,10 @@ impl APerElement for PrsResourceItem {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let prs_resource_id = PrsResourceId::from_aper(decoder, UNCONSTRAINED)?;
-        let sequence_id = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(4095))),
-            },
-        )?;
+        let sequence_id = u16::from_aper(decoder, UNCONSTRAINED)?;
         let re_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
-        let resource_slot_offset = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(511))),
-            },
-        )?;
-        let resource_symbol_offset = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(12))),
-            },
-        )?;
+        let resource_slot_offset = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let resource_symbol_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
         let qcl_info = if optionals.is_set(0) {
             Some(PrsResourceQclInfo::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -16557,13 +16059,7 @@ impl APerElement for PrsResourceQclSourceSsb {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let pci_nr = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(1007))),
-            },
-        )?;
+        let pci_nr = u16::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_index = if optionals.is_set(0) {
             Some(SsbIndex::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -16713,27 +16209,9 @@ impl APerElement for PrsResourceSetItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let prs_resource_set_id = PrsResourceSetId::from_aper(decoder, UNCONSTRAINED)?;
         let subcarrier_spacing = SubcarrierSpacing2::from_aper(decoder, UNCONSTRAINED)?;
-        let pr_sbandwidth = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(1), Some(63))),
-            },
-        )?;
-        let start_prb = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(2176))),
-            },
-        )?;
-        let point_a = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3279165))),
-            },
-        )?;
+        let pr_sbandwidth = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let start_prb = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let point_a = u32::from_aper(decoder, UNCONSTRAINED)?;
         let comb_size = CombSize::from_aper(decoder, UNCONSTRAINED)?;
         let cp_type = CpType::from_aper(decoder, UNCONSTRAINED)?;
         let resource_set_periodicity = ResourceSetPeriodicity::from_aper(decoder, UNCONSTRAINED)?;
@@ -16747,13 +16225,7 @@ impl APerElement for PrsResourceSetItem {
         } else {
             None
         };
-        let prs_resource_transmit_power = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-60), Some(50))),
-            },
-        )?;
+        let prs_resource_transmit_power = u8::from_aper(decoder, UNCONSTRAINED)?;
         let prs_resource_list = PrsResourceList::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -17707,27 +17179,9 @@ impl APerElement for RelativeCartesianLocation {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let xy_zunit = XyZunit::from_aper(decoder, UNCONSTRAINED)?;
-        let xvalue = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-65536), Some(65535))),
-            },
-        )?;
-        let yvalue = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-65536), Some(65535))),
-            },
-        )?;
-        let zvalue = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-32768), Some(32767))),
-            },
-        )?;
+        let xvalue = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let yvalue = u32::from_aper(decoder, UNCONSTRAINED)?;
+        let zvalue = u16::from_aper(decoder, UNCONSTRAINED)?;
         let location_uncertainty = LocationUncertainty::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -17777,27 +17231,9 @@ impl APerElement for RelativeGeodeticLocation {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let milli_arc_second_units = MilliArcSecondUnits::from_aper(decoder, UNCONSTRAINED)?;
         let height_units = HeightUnits::from_aper(decoder, UNCONSTRAINED)?;
-        let delta_latitude = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-1024), Some(1023))),
-            },
-        )?;
-        let delta_longitude = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-1024), Some(1023))),
-            },
-        )?;
-        let delta_height = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-1024), Some(1023))),
-            },
-        )?;
+        let delta_latitude = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let delta_longitude = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let delta_height = u16::from_aper(decoder, UNCONSTRAINED)?;
         let location_uncertainty = LocationUncertainty::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -18316,20 +17752,8 @@ impl APerElement for ResourceSetTypeAperiodic {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let srs_resource_trigger_list = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(1), Some(3))),
-            },
-        )?;
-        let slotoffset = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(32))),
-            },
-        )?;
+        let srs_resource_trigger_list = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let slotoffset = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             srs_resource_trigger_list,
@@ -18720,13 +18144,7 @@ impl APerElement for ResourceTypeAperiodicPos {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let slot_offset = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(32))),
-            },
-        )?;
+        let slot_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self { slot_offset })
     }
@@ -21085,24 +20503,12 @@ impl APerElement for SnssaiAvailableCapacityItem {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
         let snssai = Snssai::from_aper(decoder, UNCONSTRAINED)?;
         let slice_available_capacity_value_downlink = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(100))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
         let slice_available_capacity_value_uplink = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(100))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -22066,13 +21472,7 @@ impl APerElement for SrsCarrierListItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let point_a = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3279165))),
-            },
-        )?;
+        let point_a = u32::from_aper(decoder, UNCONSTRAINED)?;
         let uplink_channel_bw_per_scs_list =
             UplinkChannelBwPerScsList::from_aper(decoder, UNCONSTRAINED)?;
         let active_ulbwp = ActiveUlbwp::from_aper(decoder, UNCONSTRAINED)?;
@@ -22289,59 +21689,17 @@ impl APerElement for SrsResource {
         let srs_resource_id = SrsResourceId::from_aper(decoder, UNCONSTRAINED)?;
         let nrof_srs_ports = NrofSrsPorts::from_aper(decoder, UNCONSTRAINED)?;
         let transmission_comb = TransmissionComb::from_aper(decoder, UNCONSTRAINED)?;
-        let start_position = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(13))),
-            },
-        )?;
+        let start_position = u8::from_aper(decoder, UNCONSTRAINED)?;
         let nrof_symbols = NrofSymbols1::from_aper(decoder, UNCONSTRAINED)?;
         let repetition_factor = RepetitionFactor::from_aper(decoder, UNCONSTRAINED)?;
-        let freq_domain_position = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(67))),
-            },
-        )?;
-        let freq_domain_shift = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(268))),
-            },
-        )?;
-        let c_srs = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(63))),
-            },
-        )?;
-        let b_srs = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3))),
-            },
-        )?;
-        let b_hop = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3))),
-            },
-        )?;
+        let freq_domain_position = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let freq_domain_shift = u16::from_aper(decoder, UNCONSTRAINED)?;
+        let c_srs = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let b_srs = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let b_hop = u8::from_aper(decoder, UNCONSTRAINED)?;
         let group_or_sequence_hopping = GroupOrSequenceHopping1::from_aper(decoder, UNCONSTRAINED)?;
         let resource_type = ResourceType::from_aper(decoder, UNCONSTRAINED)?;
-        let sequence_id = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(1023))),
-            },
-        )?;
+        let sequence_id = u16::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             srs_resource_id,
@@ -22962,20 +22320,8 @@ impl APerElement for SsbAreaCapacityValueItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_index = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(63))),
-            },
-        )?;
-        let ssb_area_capacity_value = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
+        let ssb_index = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_capacity_value = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             ssb_index,
@@ -23044,74 +22390,20 @@ impl APerElement for SsbAreaRadioResourceStatusItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_index = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(63))),
-            },
-        )?;
-        let ssb_area_dlgbrpr_busage = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let ssb_area_ulgbrpr_busage = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let ssb_area_d_lnon_gbrpr_busage = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let ssb_area_u_lnon_gbrpr_busage = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let ssb_area_dl_total_pr_busage = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
-        let ssb_area_ul_total_pr_busage = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(100))),
-            },
-        )?;
+        let ssb_index = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_dlgbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_ulgbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_d_lnon_gbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_u_lnon_gbrpr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_dl_total_pr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_area_ul_total_pr_busage = u8::from_aper(decoder, UNCONSTRAINED)?;
         let d_lscheduling_pdcchcc_eusage = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(100))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
         let u_lscheduling_pdcchcc_eusage = if optionals.is_set(0) {
-            Some(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(100))),
-                },
-            )?)
+            Some(u8::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -23342,36 +22634,12 @@ impl APerElement for SsbTfConfiguration {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_frequency = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3279165))),
-            },
-        )?;
+        let ssb_frequency = u32::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_subcarrier_spacing = SsbSubcarrierSpacing1::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_transmit_power = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(-60), Some(50))),
-            },
-        )?;
+        let ssb_transmit_power = u8::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_periodicity = SsbPeriodicity::from_aper(decoder, UNCONSTRAINED)?;
-        let ssb_half_frame_offset = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(1))),
-            },
-        )?;
-        let ssb_sfn_offset = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(15))),
-            },
-        )?;
+        let ssb_half_frame_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let ssb_sfn_offset = u8::from_aper(decoder, UNCONSTRAINED)?;
         let ssb_position_in_burst = if optionals.is_set(0) {
             Some(SsbPositionsInBurst::from_aper(decoder, UNCONSTRAINED)?)
         } else {
@@ -23460,13 +22728,7 @@ impl APerElement for SsbToReportItem {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let ssb_index = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(63))),
-            },
-        )?;
+        let ssb_index = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self { ssb_index })
     }
@@ -23500,13 +22762,7 @@ impl APerElement for SulInformation {
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let sul_nrarfcn = u32::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3279165))),
-            },
-        )?;
+        let sul_nrarfcn = u32::from_aper(decoder, UNCONSTRAINED)?;
         let sul_transmission_bandwidth = TransmissionBandwidth::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -24012,34 +23268,10 @@ impl APerElement for TimeStampSlotIndex {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::Scs15(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(9))),
-                },
-            )?)),
-            1 => Ok(Self::Scs30(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(19))),
-                },
-            )?)),
-            2 => Ok(Self::Scs60(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(39))),
-                },
-            )?)),
-            3 => Ok(Self::Scs120(u8::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(79))),
-                },
-            )?)),
+            0 => Ok(Self::Scs15(u8::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::Scs30(u8::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::Scs60(u8::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::Scs120(u8::from_aper(decoder, UNCONSTRAINED)?)),
             4 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -24049,31 +23281,19 @@ impl APerElement for TimeStampSlotIndex {
         match self {
             Self::Scs15(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(9))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::Scs30(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(19))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::Scs60(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(39))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::Scs120(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(79))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -24127,13 +23347,7 @@ impl APerElement for TimingMeasurementQuality {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let _optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let measurement_quality = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(31))),
-            },
-        )?;
+        let measurement_quality = u8::from_aper(decoder, UNCONSTRAINED)?;
         let resolution = Resolution1::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
@@ -24887,13 +24101,7 @@ impl APerElement for TrpInformationTypeResponseItem {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::PciNr(Nrpci::from_aper(decoder, UNCONSTRAINED)?)),
             1 => Ok(Self::NgRanCgi(Nrcgi::from_aper(decoder, UNCONSTRAINED)?)),
-            2 => Ok(Self::Nrarfcn(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(3279165))),
-                },
-            )?)),
+            2 => Ok(Self::Nrarfcn(u32::from_aper(decoder, UNCONSTRAINED)?)),
             3 => Ok(Self::PrsConfiguration(PrsConfiguration::from_aper(
                 decoder,
                 UNCONSTRAINED,
@@ -24929,10 +24137,7 @@ impl APerElement for TrpInformationTypeResponseItem {
             }
             Self::Nrarfcn(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(3279165))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::PrsConfiguration(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
@@ -26017,21 +25222,9 @@ impl APerElement for UlAoA {
     };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
-        let azimuth_ao_a = u16::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3599))),
-            },
-        )?;
+        let azimuth_ao_a = u16::from_aper(decoder, UNCONSTRAINED)?;
         let zenith_ao_a = if optionals.is_set(0) {
-            Some(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1799))),
-                },
-            )?)
+            Some(u16::from_aper(decoder, UNCONSTRAINED)?)
         } else {
             None
         };
@@ -26264,48 +25457,12 @@ impl APerElement for UlRtoaMeasurementItem {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
-            0 => Ok(Self::K0(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1970049))),
-                },
-            )?)),
-            1 => Ok(Self::K1(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(985025))),
-                },
-            )?)),
-            2 => Ok(Self::K2(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(492513))),
-                },
-            )?)),
-            3 => Ok(Self::K3(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(246257))),
-                },
-            )?)),
-            4 => Ok(Self::K4(u32::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(123129))),
-                },
-            )?)),
-            5 => Ok(Self::K5(u16::from_aper(
-                decoder,
-                Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(61565))),
-                },
-            )?)),
+            0 => Ok(Self::K0(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            1 => Ok(Self::K1(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            2 => Ok(Self::K2(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            3 => Ok(Self::K3(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            4 => Ok(Self::K4(u32::from_aper(decoder, UNCONSTRAINED)?)),
+            5 => Ok(Self::K5(u16::from_aper(decoder, UNCONSTRAINED)?)),
             6 => Err(DecodeError::NotImplemented),
             _ => Err(DecodeError::InvalidChoice),
         }
@@ -26315,45 +25472,27 @@ impl APerElement for UlRtoaMeasurementItem {
         match self {
             Self::K0(x) => {
                 enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(1970049))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K1(x) => {
                 enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(985025))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K2(x) => {
                 enc.append(&(2 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(492513))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K3(x) => {
                 enc.append(&(3 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(246257))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K4(x) => {
                 enc.append(&(4 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(123129))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::K5(x) => {
                 enc.append(&(5 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(Constraints {
-                    value: None,
-                    size: Some(Constraint::new(Some(0), Some(61565))),
-                })?)?;
+                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
             }
             Self::_Extended => return Err(EncodeError::NotImplemented),
         }
@@ -28066,20 +27205,8 @@ pub struct N2 {
 impl APerElement for N2 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_2 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(1))),
-            },
-        )?;
-        let cyclic_shift_n_2 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(7))),
-            },
-        )?;
+        let comb_offset_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let cyclic_shift_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             comb_offset_n_2,
@@ -28106,20 +27233,8 @@ pub struct N4 {
 impl APerElement for N4 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_4 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3))),
-            },
-        )?;
-        let cyclic_shift_n_4 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(11))),
-            },
-        )?;
+        let comb_offset_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let cyclic_shift_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             comb_offset_n_4,
@@ -28146,20 +27261,8 @@ pub struct N21 {
 impl APerElement for N21 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_2 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(1))),
-            },
-        )?;
-        let cyclic_shift_n_2 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(7))),
-            },
-        )?;
+        let comb_offset_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let cyclic_shift_n_2 = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             comb_offset_n_2,
@@ -28186,20 +27289,8 @@ pub struct N41 {
 impl APerElement for N41 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_4 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(3))),
-            },
-        )?;
-        let cyclic_shift_n_4 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(11))),
-            },
-        )?;
+        let comb_offset_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let cyclic_shift_n_4 = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             comb_offset_n_4,
@@ -28226,20 +27317,8 @@ pub struct N8 {
 impl APerElement for N8 {
     const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let comb_offset_n_8 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(7))),
-            },
-        )?;
-        let cyclic_shift_n_8 = u8::from_aper(
-            decoder,
-            Constraints {
-                value: None,
-                size: Some(Constraint::new(Some(0), Some(5))),
-            },
-        )?;
+        let comb_offset_n_8 = u8::from_aper(decoder, UNCONSTRAINED)?;
+        let cyclic_shift_n_8 = u8::from_aper(decoder, UNCONSTRAINED)?;
 
         Ok(Self {
             comb_offset_n_8,
