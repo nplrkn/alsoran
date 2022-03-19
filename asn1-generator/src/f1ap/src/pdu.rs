@@ -5,7 +5,7 @@ use super::common::*;
 use super::ies::*;
 use asn1::aper::*;
 #[allow(unused_imports)]
-use asn1::BitString;
+use asn1::*;
 #[allow(unused_imports)]
 use num_derive::FromPrimitive;
 #[allow(unused_imports)]
@@ -20,9 +20,10 @@ pub struct Reset {
 }
 
 impl APerElement for Reset {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -57,23 +58,22 @@ impl APerElement for Reset {
             reset_type,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(48 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.reset_type.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
+        (48 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.reset_type.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -82,11 +82,9 @@ impl APerElement for Reset {
 pub enum ResetType {
     F1Interface(ResetAll),
     PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes),
-    _Extended,
 }
 
 impl APerElement for ResetType {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::F1Interface(ResetAll::from_aper(
@@ -100,20 +98,18 @@ impl APerElement for ResetType {
             _ => Err(DecodeError::InvalidChoice),
         }
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         match self {
             Self::F1Interface(x) => {
-                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                (0 as u8).to_aper(enc, UNCONSTRAINED)?;
+                x.to_aper(enc, UNCONSTRAINED)?;
             }
             Self::PartOfF1Interface(x) => {
-                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                (1 as u8).to_aper(enc, UNCONSTRAINED)?;
+                x.to_aper(enc, UNCONSTRAINED)?;
             }
-            Self::_Extended => return Err(EncodeError::NotImplemented),
         }
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -121,23 +117,20 @@ impl APerElement for ResetType {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum ResetAll {
     ResetAll,
-    _Extended,
 }
 
 impl APerElement for ResetAll {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(ResetAll::_Extended);
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
         }
-        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        let v = u8::from_aper(decoder, Constraints::value(Some(0), Some(0), false))?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        false.to_aper(enc, UNCONSTRAINED)?;
+        (*self as u8).to_aper(enc, Constraints::value(Some(0), Some(0), false))?;
+        Ok(())
     }
 }
 
@@ -146,22 +139,17 @@ impl APerElement for ResetAll {
 pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItemRes>);
 
 impl APerElement for UeAssociatedLogicalF1ConnectionListRes {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(
-            Vec::<UeAssociatedLogicalF1ConnectionItemRes>::from_aper(decoder, Self::CONSTRAINTS)?,
+            Vec::<UeAssociatedLogicalF1ConnectionItemRes>::from_aper(
+                decoder,
+                Constraints::size(Some(1), Some(65536), false),
+            )?,
         ))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -175,9 +163,10 @@ pub struct ResetAcknowledge {
 }
 
 impl APerElement for ResetAcknowledge {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut ue_associated_logical_f1_connection_list_res_ack: Option<
@@ -217,8 +206,7 @@ impl APerElement for ResetAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.ue_associated_logical_f1_connection_list_res_ack
                 .is_some(),
@@ -228,23 +216,23 @@ impl APerElement for ResetAcknowledge {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.ue_associated_logical_f1_connection_list_res_ack {
-            enc.append(&(81 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (81 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -255,25 +243,17 @@ pub struct UeAssociatedLogicalF1ConnectionListResAck(
 );
 
 impl APerElement for UeAssociatedLogicalF1ConnectionListResAck {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(
             Vec::<UeAssociatedLogicalF1ConnectionItemResAck>::from_aper(
                 decoder,
-                Self::CONSTRAINTS,
+                Constraints::size(Some(1), Some(65536), false),
             )?,
         ))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -288,9 +268,10 @@ pub struct ErrorIndication {
 }
 
 impl APerElement for ErrorIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
@@ -334,8 +315,7 @@ impl APerElement for ErrorIndication {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.gnb_cu_ue_f1ap_id.is_some(),
             self.gnb_du_ue_f1ap_id.is_some(),
@@ -346,33 +326,33 @@ impl APerElement for ErrorIndication {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.gnb_cu_ue_f1ap_id {
-            enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_ue_f1ap_id {
-            enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cause {
-            enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -390,9 +370,10 @@ pub struct F1SetupRequest {
 }
 
 impl APerElement for F1SetupRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_du_id: Option<GnbDuId> = None;
@@ -457,8 +438,7 @@ impl APerElement for F1SetupRequest {
             extended_gnb_cu_name,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.gnb_du_name.is_some(),
             self.gnb_du_served_cells_list.is_some(),
@@ -470,44 +450,44 @@ impl APerElement for F1SetupRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(42 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(171 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_rrc_version.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (42 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_id.to_aper(enc, UNCONSTRAINED)?;
+        (171 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_rrc_version.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.gnb_du_name {
-            enc.append(&(45 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (45 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_served_cells_list {
-            enc.append(&(44 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (44 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transport_layer_address_info {
-            enc.append(&(254 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (254 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bap_address {
-            enc.append(&(281 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (281 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.extended_gnb_cu_name {
-            enc.append(&(427 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (427 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -516,23 +496,15 @@ impl APerElement for F1SetupRequest {
 pub struct GnbDuServedCellsList(pub Vec<GnbDuServedCellsItem>);
 
 impl APerElement for GnbDuServedCellsList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<GnbDuServedCellsItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -550,9 +522,10 @@ pub struct F1SetupResponse {
 }
 
 impl APerElement for F1SetupResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_name: Option<GnbCuName> = None;
@@ -617,8 +590,7 @@ impl APerElement for F1SetupResponse {
             extended_gnb_du_name,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.gnb_cu_name.is_some(),
             self.cells_to_be_activated_list.is_some(),
@@ -631,46 +603,46 @@ impl APerElement for F1SetupResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(170 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_rrc_version.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (170 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_rrc_version.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.gnb_cu_name {
-            enc.append(&(82 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (82 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cells_to_be_activated_list {
-            enc.append(&(3 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (3 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transport_layer_address_info {
-            enc.append(&(254 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (254 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ul_bh_non_up_traffic_mapping {
-            enc.append(&(287 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (287 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bap_address {
-            enc.append(&(281 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (281 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.extended_gnb_du_name {
-            enc.append(&(426 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (426 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -679,23 +651,15 @@ impl APerElement for F1SetupResponse {
 pub struct CellsToBeActivatedList(pub Vec<CellsToBeActivatedListItem>);
 
 impl APerElement for CellsToBeActivatedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsToBeActivatedListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -709,9 +673,10 @@ pub struct F1SetupFailure {
 }
 
 impl APerElement for F1SetupFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -751,8 +716,7 @@ impl APerElement for F1SetupFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -761,26 +725,26 @@ impl APerElement for F1SetupFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -799,9 +763,10 @@ pub struct GnbDuConfigurationUpdate {
 }
 
 impl APerElement for GnbDuConfigurationUpdate {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut served_cells_to_add_list: Option<ServedCellsToAddList> = None;
@@ -876,8 +841,7 @@ impl APerElement for GnbDuConfigurationUpdate {
             transport_layer_address_info,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.served_cells_to_add_list.is_some(),
             self.served_cells_to_modify_list.is_some(),
@@ -892,53 +856,53 @@ impl APerElement for GnbDuConfigurationUpdate {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.served_cells_to_add_list {
-            enc.append(&(58 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (58 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.served_cells_to_modify_list {
-            enc.append(&(62 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (62 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.served_cells_to_delete_list {
-            enc.append(&(60 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (60 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cells_status_list {
-            enc.append(&(89 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (89 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dedicated_si_delivery_needed_ue_list {
-            enc.append(&(189 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (189 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_id {
-            enc.append(&(42 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (42 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_tnl_association_to_remove_list {
-            enc.append(&(228 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (228 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transport_layer_address_info {
-            enc.append(&(254 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (254 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -947,23 +911,15 @@ impl APerElement for GnbDuConfigurationUpdate {
 pub struct ServedCellsToAddList(pub Vec<ServedCellsToAddItem>);
 
 impl APerElement for ServedCellsToAddList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<ServedCellsToAddItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -972,23 +928,15 @@ impl APerElement for ServedCellsToAddList {
 pub struct ServedCellsToModifyList(pub Vec<ServedCellsToModifyItem>);
 
 impl APerElement for ServedCellsToModifyList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<ServedCellsToModifyItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -997,23 +945,15 @@ impl APerElement for ServedCellsToModifyList {
 pub struct ServedCellsToDeleteList(pub Vec<ServedCellsToDeleteItem>);
 
 impl APerElement for ServedCellsToDeleteList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<ServedCellsToDeleteItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -1022,23 +962,15 @@ impl APerElement for ServedCellsToDeleteList {
 pub struct CellsStatusList(pub Vec<CellsStatusItem>);
 
 impl APerElement for CellsStatusList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(0),
-            max: Some(0),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsStatusItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(0), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(0), Some(512), false))
     }
 }
 
@@ -1047,23 +979,15 @@ impl APerElement for CellsStatusList {
 pub struct DedicatedSiDeliveryNeededUeList(pub Vec<DedicatedSiDeliveryNeededUeItem>);
 
 impl APerElement for DedicatedSiDeliveryNeededUeList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DedicatedSiDeliveryNeededUeItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -1072,23 +996,15 @@ impl APerElement for DedicatedSiDeliveryNeededUeList {
 pub struct GnbDuTnlAssociationToRemoveList(pub Vec<GnbDuTnlAssociationToRemoveItem>);
 
 impl APerElement for GnbDuTnlAssociationToRemoveList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<GnbDuTnlAssociationToRemoveItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -1105,9 +1021,10 @@ pub struct GnbDuConfigurationUpdateAcknowledge {
 }
 
 impl APerElement for GnbDuConfigurationUpdateAcknowledge {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_to_be_activated_list: Option<CellsToBeActivatedList> = None;
@@ -1167,8 +1084,7 @@ impl APerElement for GnbDuConfigurationUpdateAcknowledge {
             bap_address,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.cells_to_be_activated_list.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -1181,43 +1097,43 @@ impl APerElement for GnbDuConfigurationUpdateAcknowledge {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cells_to_be_activated_list {
-            enc.append(&(3 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (3 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cells_to_be_deactivated_list {
-            enc.append(&(5 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (5 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transport_layer_address_info {
-            enc.append(&(254 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (254 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ul_bh_non_up_traffic_mapping {
-            enc.append(&(287 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (287 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bap_address {
-            enc.append(&(281 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (281 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -1231,9 +1147,10 @@ pub struct GnbDuConfigurationUpdateFailure {
 }
 
 impl APerElement for GnbDuConfigurationUpdateFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -1273,8 +1190,7 @@ impl APerElement for GnbDuConfigurationUpdateFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -1283,26 +1199,26 @@ impl APerElement for GnbDuConfigurationUpdateFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -1324,9 +1240,10 @@ pub struct GnbCuConfigurationUpdate {
 }
 
 impl APerElement for GnbCuConfigurationUpdate {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_to_be_activated_list: Option<CellsToBeActivatedList> = None;
@@ -1424,8 +1341,7 @@ impl APerElement for GnbCuConfigurationUpdate {
             bap_address,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.cells_to_be_activated_list.is_some(),
             self.cells_to_be_deactivated_list.is_some(),
@@ -1443,68 +1359,68 @@ impl APerElement for GnbCuConfigurationUpdate {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cells_to_be_activated_list {
-            enc.append(&(3 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (3 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cells_to_be_deactivated_list {
-            enc.append(&(5 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (5 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_cu_tnl_association_to_add_list {
-            enc.append(&(121 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (121 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_cu_tnl_association_to_remove_list {
-            enc.append(&(123 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (123 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_cu_tnl_association_to_update_list {
-            enc.append(&(125 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (125 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cells_to_be_barred_list {
-            enc.append(&(129 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (129 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.protected_eutra_resources_list {
-            enc.append(&(105 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (105 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.neighbour_cell_information_list {
-            enc.append(&(244 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (244 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transport_layer_address_info {
-            enc.append(&(254 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (254 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ul_bh_non_up_traffic_mapping {
-            enc.append(&(287 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (287 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bap_address {
-            enc.append(&(281 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (281 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -1513,23 +1429,15 @@ impl APerElement for GnbCuConfigurationUpdate {
 pub struct CellsToBeDeactivatedList(pub Vec<CellsToBeDeactivatedListItem>);
 
 impl APerElement for CellsToBeDeactivatedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsToBeDeactivatedListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -1538,23 +1446,15 @@ impl APerElement for CellsToBeDeactivatedList {
 pub struct GnbCuTnlAssociationToAddList(pub Vec<GnbCuTnlAssociationToAddItem>);
 
 impl APerElement for GnbCuTnlAssociationToAddList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<GnbCuTnlAssociationToAddItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -1563,23 +1463,15 @@ impl APerElement for GnbCuTnlAssociationToAddList {
 pub struct GnbCuTnlAssociationToRemoveList(pub Vec<GnbCuTnlAssociationToRemoveItem>);
 
 impl APerElement for GnbCuTnlAssociationToRemoveList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<GnbCuTnlAssociationToRemoveItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -1588,23 +1480,15 @@ impl APerElement for GnbCuTnlAssociationToRemoveList {
 pub struct GnbCuTnlAssociationToUpdateList(pub Vec<GnbCuTnlAssociationToUpdateItem>);
 
 impl APerElement for GnbCuTnlAssociationToUpdateList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<GnbCuTnlAssociationToUpdateItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -1613,23 +1497,15 @@ impl APerElement for GnbCuTnlAssociationToUpdateList {
 pub struct CellsToBeBarredList(pub Vec<CellsToBeBarredItem>);
 
 impl APerElement for CellsToBeBarredList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsToBeBarredItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -1638,23 +1514,15 @@ impl APerElement for CellsToBeBarredList {
 pub struct ProtectedEutraResourcesList(pub Vec<ProtectedEutraResourcesItem>);
 
 impl APerElement for ProtectedEutraResourcesList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<ProtectedEutraResourcesItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(256), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(256), false))
     }
 }
 
@@ -1663,23 +1531,15 @@ impl APerElement for ProtectedEutraResourcesList {
 pub struct NeighbourCellInformationList(pub Vec<NeighbourCellInformationItem>);
 
 impl APerElement for NeighbourCellInformationList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<NeighbourCellInformationItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -1696,9 +1556,10 @@ pub struct GnbCuConfigurationUpdateAcknowledge {
 }
 
 impl APerElement for GnbCuConfigurationUpdateAcknowledge {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_failed_to_be_activated_list: Option<CellsFailedToBeActivatedList> = None;
@@ -1766,8 +1627,7 @@ impl APerElement for GnbCuConfigurationUpdateAcknowledge {
             transport_layer_address_info,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.cells_failed_to_be_activated_list.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -1780,43 +1640,43 @@ impl APerElement for GnbCuConfigurationUpdateAcknowledge {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cells_failed_to_be_activated_list {
-            enc.append(&(1 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (1 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_cu_tnl_association_setup_list {
-            enc.append(&(132 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (132 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_cu_tnl_association_failed_to_setup_list {
-            enc.append(&(134 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (134 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dedicated_si_delivery_needed_ue_list {
-            enc.append(&(189 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (189 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transport_layer_address_info {
-            enc.append(&(254 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (254 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -1825,23 +1685,15 @@ impl APerElement for GnbCuConfigurationUpdateAcknowledge {
 pub struct CellsFailedToBeActivatedList(pub Vec<CellsFailedToBeActivatedListItem>);
 
 impl APerElement for CellsFailedToBeActivatedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsFailedToBeActivatedListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -1850,23 +1702,15 @@ impl APerElement for CellsFailedToBeActivatedList {
 pub struct GnbCuTnlAssociationSetupList(pub Vec<GnbCuTnlAssociationSetupItem>);
 
 impl APerElement for GnbCuTnlAssociationSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<GnbCuTnlAssociationSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -1875,22 +1719,17 @@ impl APerElement for GnbCuTnlAssociationSetupList {
 pub struct GnbCuTnlAssociationFailedToSetupList(pub Vec<GnbCuTnlAssociationFailedToSetupItem>);
 
 impl APerElement for GnbCuTnlAssociationFailedToSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(
-            Vec::<GnbCuTnlAssociationFailedToSetupItem>::from_aper(decoder, Self::CONSTRAINTS)?,
+            Vec::<GnbCuTnlAssociationFailedToSetupItem>::from_aper(
+                decoder,
+                Constraints::size(Some(1), Some(32), false),
+            )?,
         ))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -1904,9 +1743,10 @@ pub struct GnbCuConfigurationUpdateFailure {
 }
 
 impl APerElement for GnbCuConfigurationUpdateFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -1946,8 +1786,7 @@ impl APerElement for GnbCuConfigurationUpdateFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -1956,26 +1795,26 @@ impl APerElement for GnbCuConfigurationUpdateFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -1990,9 +1829,10 @@ pub struct GnbDuResourceCoordinationRequest {
 }
 
 impl APerElement for GnbDuResourceCoordinationRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut request_type: Option<RequestType> = None;
@@ -2043,35 +1883,31 @@ impl APerElement for GnbDuResourceCoordinationRequest {
             ignore_resource_coordination_container,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.ignore_resource_coordination_container.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(106 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.request_type.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(101 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(
-            &self
-                .eutra_nr_cell_resource_coordination_req_container
-                .to_aper(UNCONSTRAINED)?,
-        )?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (106 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.request_type.to_aper(enc, UNCONSTRAINED)?;
+        (101 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.eutra_nr_cell_resource_coordination_req_container
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.ignore_resource_coordination_container {
-            enc.append(&(213 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (213 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -2084,9 +1920,10 @@ pub struct GnbDuResourceCoordinationResponse {
 }
 
 impl APerElement for GnbDuResourceCoordinationResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut eutra_nr_cell_resource_coordination_req_ack_container: Option<
@@ -2123,24 +1960,20 @@ impl APerElement for GnbDuResourceCoordinationResponse {
             eutra_nr_cell_resource_coordination_req_ack_container,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(102 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(
-            &self
-                .eutra_nr_cell_resource_coordination_req_ack_container
-                .to_aper(UNCONSTRAINED)?,
-        )?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (102 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.eutra_nr_cell_resource_coordination_req_ack_container
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -2187,9 +2020,10 @@ pub struct UeContextSetupRequest {
 }
 
 impl APerElement for UeContextSetupRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -2435,8 +2269,7 @@ impl APerElement for UeContextSetupRequest {
             f1c_transfer_path,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.gnb_du_ue_f1ap_id.is_some(),
             self.sp_cell_ul_configured.is_some(),
@@ -2476,187 +2309,187 @@ impl APerElement for UeContextSetupRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(63 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.sp_cell_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(107 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.serv_cell_index.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(9 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.c_uto_durrc_information.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (63 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.sp_cell_id.to_aper(enc, UNCONSTRAINED)?;
+        (107 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.serv_cell_index.to_aper(enc, UNCONSTRAINED)?;
+        (9 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.c_uto_durrc_information.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.gnb_du_ue_f1ap_id {
-            enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sp_cell_ul_configured {
-            enc.append(&(96 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (96 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.candidate_sp_cell_list {
-            enc.append(&(90 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (90 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.drx_cycle {
-            enc.append(&(38 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (38 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.resource_coordination_transfer_container {
-            enc.append(&(49 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (49 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.s_cell_to_be_setup_list {
-            enc.append(&(54 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (54 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_to_be_setup_list {
-            enc.append(&(74 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (74 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_to_be_setup_list {
-            enc.append(&(35 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (35 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.inactivity_monitoring_request {
-            enc.append(&(97 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (97 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rat_frequency_priority_information {
-            enc.append(&(108 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (108 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_container {
-            enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.masked_imeisv {
-            enc.append(&(126 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (126 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.serving_plmn {
-            enc.append(&(165 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (165 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_ue_ambr_ul {
-            enc.append(&(158 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (158 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_delivery_status_request {
-            enc.append(&(184 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (184 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.resource_coordination_transfer_information {
-            enc.append(&(195 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (195 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.serving_cell_mo {
-            enc.append(&(182 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (182 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.new_gnb_cu_ue_f1ap_id {
-            enc.append(&(217 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (217 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ranueid {
-            enc.append(&(226 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (226 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.trace_activation {
-            enc.append(&(242 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (242 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.additional_rrm_priority_index {
-            enc.append(&(248 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (248 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_to_be_setup_list {
-            enc.append(&(258 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (258 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.configured_bap_address {
-            enc.append(&(282 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (282 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.nrv2x_services_authorized {
-            enc.append(&(306 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (306 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ltev2x_services_authorized {
-            enc.append(&(307 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (307 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
-            enc.append(&(308 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (308 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
-            enc.append(&(309 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (309 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.pc5_link_ambr {
-            enc.append(&(340 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (340 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_to_be_setup_list {
-            enc.append(&(330 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (330 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.conditional_inter_du_mobility_information {
-            enc.append(&(373 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (373 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.management_based_mdt_plmn_list {
-            enc.append(&(377 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (377 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.serving_nid {
-            enc.append(&(382 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (382 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.f1c_transfer_path {
-            enc.append(&(428 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (428 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -2665,23 +2498,15 @@ impl APerElement for UeContextSetupRequest {
 pub struct CandidateSpCellList(pub Vec<CandidateSpCellItem>);
 
 impl APerElement for CandidateSpCellList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CandidateSpCellItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -2690,23 +2515,15 @@ impl APerElement for CandidateSpCellList {
 pub struct SCellToBeSetupList(pub Vec<SCellToBeSetupItem>);
 
 impl APerElement for SCellToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SCellToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -2715,23 +2532,15 @@ impl APerElement for SCellToBeSetupList {
 pub struct SrBsToBeSetupList(pub Vec<SrBsToBeSetupItem>);
 
 impl APerElement for SrBsToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -2740,23 +2549,15 @@ impl APerElement for SrBsToBeSetupList {
 pub struct DrBsToBeSetupList(pub Vec<DrBsToBeSetupItem>);
 
 impl APerElement for DrBsToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -2765,23 +2566,15 @@ impl APerElement for DrBsToBeSetupList {
 pub struct BhChannelsToBeSetupList(pub Vec<BhChannelsToBeSetupItem>);
 
 impl APerElement for BhChannelsToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -2790,23 +2583,15 @@ impl APerElement for BhChannelsToBeSetupList {
 pub struct SldrBsToBeSetupList(pub Vec<SldrBsToBeSetupItem>);
 
 impl APerElement for SldrBsToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -2834,9 +2619,10 @@ pub struct UeContextSetupResponse {
 }
 
 impl APerElement for UeContextSetupResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -2966,8 +2752,7 @@ impl APerElement for UeContextSetupResponse {
             requested_target_cell_global_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.c_rnti.is_some(),
             self.resource_coordination_transfer_container.is_some(),
@@ -2989,94 +2774,94 @@ impl APerElement for UeContextSetupResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(39 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.d_uto_currc_information.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (39 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.d_uto_currc_information.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.c_rnti {
-            enc.append(&(95 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (95 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.resource_coordination_transfer_container {
-            enc.append(&(49 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (49 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.full_configuration {
-            enc.append(&(94 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (94 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_setup_list {
-            enc.append(&(27 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (27 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_failed_to_be_setup_list {
-            enc.append(&(66 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (66 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_failed_to_be_setup_list {
-            enc.append(&(15 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (15 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.s_cell_failedto_setup_list {
-            enc.append(&(83 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (83 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.inactivity_monitoring_response {
-            enc.append(&(98 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (98 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_setup_list {
-            enc.append(&(202 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (202 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_setup_list {
-            enc.append(&(260 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (260 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_failed_to_be_setup_list {
-            enc.append(&(279 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (279 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_setup_list {
-            enc.append(&(324 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (324 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_failed_to_be_setup_list {
-            enc.append(&(316 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (316 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.requested_target_cell_global_id {
-            enc.append(&(376 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (376 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -3085,23 +2870,15 @@ impl APerElement for UeContextSetupResponse {
 pub struct DrBsSetupList(pub Vec<DrBsSetupItem>);
 
 impl APerElement for DrBsSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -3110,23 +2887,15 @@ impl APerElement for DrBsSetupList {
 pub struct SrBsFailedToBeSetupList(pub Vec<SrBsFailedToBeSetupItem>);
 
 impl APerElement for SrBsFailedToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsFailedToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -3135,23 +2904,15 @@ impl APerElement for SrBsFailedToBeSetupList {
 pub struct DrBsFailedToBeSetupList(pub Vec<DrBsFailedToBeSetupItem>);
 
 impl APerElement for DrBsFailedToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsFailedToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -3160,23 +2921,15 @@ impl APerElement for DrBsFailedToBeSetupList {
 pub struct SCellFailedtoSetupList(pub Vec<SCellFailedtoSetupItem>);
 
 impl APerElement for SCellFailedtoSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SCellFailedtoSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -3185,23 +2938,15 @@ impl APerElement for SCellFailedtoSetupList {
 pub struct SrBsSetupList(pub Vec<SrBsSetupItem>);
 
 impl APerElement for SrBsSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -3210,23 +2955,15 @@ impl APerElement for SrBsSetupList {
 pub struct BhChannelsSetupList(pub Vec<BhChannelsSetupItem>);
 
 impl APerElement for BhChannelsSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -3235,23 +2972,15 @@ impl APerElement for BhChannelsSetupList {
 pub struct BhChannelsFailedToBeSetupList(pub Vec<BhChannelsFailedToBeSetupItem>);
 
 impl APerElement for BhChannelsFailedToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsFailedToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -3260,23 +2989,15 @@ impl APerElement for BhChannelsFailedToBeSetupList {
 pub struct SldrBsSetupList(pub Vec<SldrBsSetupItem>);
 
 impl APerElement for SldrBsSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -3285,23 +3006,15 @@ impl APerElement for SldrBsSetupList {
 pub struct SldrBsFailedToBeSetupList(pub Vec<SldrBsFailedToBeSetupItem>);
 
 impl APerElement for SldrBsFailedToBeSetupList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsFailedToBeSetupItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -3317,9 +3030,10 @@ pub struct UeContextSetupFailure {
 }
 
 impl APerElement for UeContextSetupFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -3371,8 +3085,7 @@ impl APerElement for UeContextSetupFailure {
             requested_target_cell_global_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.gnb_du_ue_f1ap_id.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -3383,36 +3096,36 @@ impl APerElement for UeContextSetupFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.gnb_du_ue_f1ap_id {
-            enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.potential_sp_cell_list {
-            enc.append(&(92 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (92 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.requested_target_cell_global_id {
-            enc.append(&(376 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (376 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -3421,23 +3134,15 @@ impl APerElement for UeContextSetupFailure {
 pub struct PotentialSpCellList(pub Vec<PotentialSpCellItem>);
 
 impl APerElement for PotentialSpCellList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(0),
-            max: Some(0),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<PotentialSpCellItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(0), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(0), Some(64), false))
     }
 }
 
@@ -3451,9 +3156,10 @@ pub struct UeContextReleaseRequest {
 }
 
 impl APerElement for UeContextReleaseRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -3494,31 +3200,30 @@ impl APerElement for UeContextReleaseRequest {
             target_cells_to_cancel,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.target_cells_to_cancel.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.target_cells_to_cancel {
-            enc.append(&(375 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (375 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -3537,9 +3242,10 @@ pub struct UeContextReleaseCommand {
 }
 
 impl APerElement for UeContextReleaseCommand {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -3607,8 +3313,7 @@ impl APerElement for UeContextReleaseCommand {
             target_cells_to_cancel,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.rrc_container.is_some(),
             self.srbid.is_some(),
@@ -3621,49 +3326,49 @@ impl APerElement for UeContextReleaseCommand {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.rrc_container {
-            enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.srbid {
-            enc.append(&(64 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (64 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.old_gnb_du_ue_f1ap_id {
-            enc.append(&(47 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (47 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.execute_duplication {
-            enc.append(&(109 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (109 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_delivery_status_request {
-            enc.append(&(184 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (184 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.target_cells_to_cancel {
-            enc.append(&(375 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (375 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -3676,9 +3381,10 @@ pub struct UeContextReleaseComplete {
 }
 
 impl APerElement for UeContextReleaseComplete {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -3713,28 +3419,27 @@ impl APerElement for UeContextReleaseComplete {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -3791,9 +3496,10 @@ pub struct UeContextModificationRequest {
 }
 
 impl APerElement for UeContextModificationRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -4119,8 +3825,7 @@ impl APerElement for UeContextModificationRequest {
             scg_indicator,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.sp_cell_id.is_some(),
             self.serv_cell_index.is_some(),
@@ -4172,241 +3877,241 @@ impl APerElement for UeContextModificationRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.sp_cell_id {
-            enc.append(&(63 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (63 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.serv_cell_index {
-            enc.append(&(107 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (107 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sp_cell_ul_configured {
-            enc.append(&(96 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (96 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.drx_cycle {
-            enc.append(&(38 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (38 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.c_uto_durrc_information {
-            enc.append(&(9 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (9 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.transmission_action_indicator {
-            enc.append(&(79 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (79 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.resource_coordination_transfer_container {
-            enc.append(&(49 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (49 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_reconfiguration_complete_indicator {
-            enc.append(&(87 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (87 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_container {
-            enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.s_cell_to_be_setup_mod_list {
-            enc.append(&(56 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (56 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.s_cell_to_be_removed_list {
-            enc.append(&(52 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (52 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_to_be_setup_mod_list {
-            enc.append(&(76 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (76 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_to_be_setup_mod_list {
-            enc.append(&(37 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (37 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_to_be_modified_list {
-            enc.append(&(31 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (31 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_to_be_released_list {
-            enc.append(&(72 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (72 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_to_be_released_list {
-            enc.append(&(33 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (33 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.inactivity_monitoring_request {
-            enc.append(&(97 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (97 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rat_frequency_priority_information {
-            enc.append(&(108 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (108 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.drx_configuration_indicator {
-            enc.append(&(159 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (159 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rlc_failure_indication {
-            enc.append(&(174 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (174 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.uplink_tx_direct_current_list_information {
-            enc.append(&(175 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (175 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_configuration_query {
-            enc.append(&(162 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (162 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.gnb_du_ue_ambr_ul {
-            enc.append(&(158 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (158 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.execute_duplication {
-            enc.append(&(109 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (109 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_delivery_status_request {
-            enc.append(&(184 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (184 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.resource_coordination_transfer_information {
-            enc.append(&(195 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (195 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.serving_cell_mo {
-            enc.append(&(182 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (182 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.needfor_gap {
-            enc.append(&(215 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (215 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.full_configuration {
-            enc.append(&(94 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (94 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.additional_rrm_priority_index {
-            enc.append(&(248 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (248 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.lower_layer_presence_status_change {
-            enc.append(&(253 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (253 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_to_be_setup_mod_list {
-            enc.append(&(267 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (267 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_to_be_modified_list {
-            enc.append(&(263 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (263 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_to_be_released_list {
-            enc.append(&(265 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (265 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.nrv2x_services_authorized {
-            enc.append(&(306 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (306 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ltev2x_services_authorized {
-            enc.append(&(307 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (307 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
-            enc.append(&(308 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (308 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
-            enc.append(&(309 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (309 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.pc5_link_ambr {
-            enc.append(&(340 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (340 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_to_be_setup_mod_list {
-            enc.append(&(332 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (332 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_to_be_modified_list {
-            enc.append(&(326 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (326 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_to_be_released_list {
-            enc.append(&(328 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (328 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.conditional_intra_du_mobility_information {
-            enc.append(&(374 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (374 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.f1c_transfer_path {
-            enc.append(&(428 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (428 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.scg_indicator {
-            enc.append(&(432 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (432 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -4415,23 +4120,15 @@ impl APerElement for UeContextModificationRequest {
 pub struct SCellToBeSetupModList(pub Vec<SCellToBeSetupModItem>);
 
 impl APerElement for SCellToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SCellToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -4440,23 +4137,15 @@ impl APerElement for SCellToBeSetupModList {
 pub struct SCellToBeRemovedList(pub Vec<SCellToBeRemovedItem>);
 
 impl APerElement for SCellToBeRemovedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SCellToBeRemovedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -4465,23 +4154,15 @@ impl APerElement for SCellToBeRemovedList {
 pub struct SrBsToBeSetupModList(pub Vec<SrBsToBeSetupModItem>);
 
 impl APerElement for SrBsToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -4490,23 +4171,15 @@ impl APerElement for SrBsToBeSetupModList {
 pub struct DrBsToBeSetupModList(pub Vec<DrBsToBeSetupModItem>);
 
 impl APerElement for DrBsToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -4515,23 +4188,15 @@ impl APerElement for DrBsToBeSetupModList {
 pub struct BhChannelsToBeSetupModList(pub Vec<BhChannelsToBeSetupModItem>);
 
 impl APerElement for BhChannelsToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -4540,23 +4205,15 @@ impl APerElement for BhChannelsToBeSetupModList {
 pub struct DrBsToBeModifiedList(pub Vec<DrBsToBeModifiedItem>);
 
 impl APerElement for DrBsToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -4565,23 +4222,15 @@ impl APerElement for DrBsToBeModifiedList {
 pub struct BhChannelsToBeModifiedList(pub Vec<BhChannelsToBeModifiedItem>);
 
 impl APerElement for BhChannelsToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -4590,23 +4239,15 @@ impl APerElement for BhChannelsToBeModifiedList {
 pub struct SrBsToBeReleasedList(pub Vec<SrBsToBeReleasedItem>);
 
 impl APerElement for SrBsToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -4615,23 +4256,15 @@ impl APerElement for SrBsToBeReleasedList {
 pub struct DrBsToBeReleasedList(pub Vec<DrBsToBeReleasedItem>);
 
 impl APerElement for DrBsToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -4640,23 +4273,15 @@ impl APerElement for DrBsToBeReleasedList {
 pub struct BhChannelsToBeReleasedList(pub Vec<BhChannelsToBeReleasedItem>);
 
 impl APerElement for BhChannelsToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -4665,23 +4290,15 @@ impl APerElement for BhChannelsToBeReleasedList {
 pub struct SldrBsToBeSetupModList(pub Vec<SldrBsToBeSetupModItem>);
 
 impl APerElement for SldrBsToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -4690,23 +4307,15 @@ impl APerElement for SldrBsToBeSetupModList {
 pub struct SldrBsToBeModifiedList(pub Vec<SldrBsToBeModifiedItem>);
 
 impl APerElement for SldrBsToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -4715,23 +4324,15 @@ impl APerElement for SldrBsToBeModifiedList {
 pub struct SldrBsToBeReleasedList(pub Vec<SldrBsToBeReleasedItem>);
 
 impl APerElement for SldrBsToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -4767,9 +4368,10 @@ pub struct UeContextModificationResponse {
 }
 
 impl APerElement for UeContextModificationResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -4958,8 +4560,7 @@ impl APerElement for UeContextModificationResponse {
             requested_target_cell_global_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.resource_coordination_transfer_container.is_some(),
             self.d_uto_currc_information.is_some(),
@@ -4990,136 +4591,136 @@ impl APerElement for UeContextModificationResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.resource_coordination_transfer_container {
-            enc.append(&(49 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (49 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.d_uto_currc_information {
-            enc.append(&(39 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (39 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_setup_mod_list {
-            enc.append(&(29 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (29 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_modified_list {
-            enc.append(&(21 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (21 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_failed_to_be_setup_mod_list {
-            enc.append(&(68 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (68 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_failed_to_be_setup_mod_list {
-            enc.append(&(17 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (17 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.s_cell_failedto_setup_mod_list {
-            enc.append(&(85 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (85 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_failed_to_be_modified_list {
-            enc.append(&(13 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (13 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.inactivity_monitoring_response {
-            enc.append(&(98 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (98 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.c_rnti {
-            enc.append(&(95 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (95 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.associated_s_cell_list {
-            enc.append(&(198 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (198 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_setup_mod_list {
-            enc.append(&(204 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (204 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_modified_list {
-            enc.append(&(206 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (206 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.full_configuration {
-            enc.append(&(94 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (94 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_setup_mod_list {
-            enc.append(&(275 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (275 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_modified_list {
-            enc.append(&(273 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (273 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_failed_to_be_setup_mod_list {
-            enc.append(&(271 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (271 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_failed_to_be_modified_list {
-            enc.append(&(269 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (269 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_setup_mod_list {
-            enc.append(&(333 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (333 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_modified_list {
-            enc.append(&(318 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (318 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_failed_to_be_setup_mod_list {
-            enc.append(&(334 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (334 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_failed_to_be_modified_list {
-            enc.append(&(314 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (314 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.requested_target_cell_global_id {
-            enc.append(&(376 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (376 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -5128,23 +4729,15 @@ impl APerElement for UeContextModificationResponse {
 pub struct DrBsSetupModList(pub Vec<DrBsSetupModItem>);
 
 impl APerElement for DrBsSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -5153,23 +4746,15 @@ impl APerElement for DrBsSetupModList {
 pub struct DrBsModifiedList(pub Vec<DrBsModifiedItem>);
 
 impl APerElement for DrBsModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -5178,23 +4763,15 @@ impl APerElement for DrBsModifiedList {
 pub struct SrBsSetupModList(pub Vec<SrBsSetupModItem>);
 
 impl APerElement for SrBsSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -5203,23 +4780,15 @@ impl APerElement for SrBsSetupModList {
 pub struct SrBsModifiedList(pub Vec<SrBsModifiedItem>);
 
 impl APerElement for SrBsModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -5228,23 +4797,15 @@ impl APerElement for SrBsModifiedList {
 pub struct DrBsFailedToBeModifiedList(pub Vec<DrBsFailedToBeModifiedItem>);
 
 impl APerElement for DrBsFailedToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsFailedToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -5253,23 +4814,15 @@ impl APerElement for DrBsFailedToBeModifiedList {
 pub struct SrBsFailedToBeSetupModList(pub Vec<SrBsFailedToBeSetupModItem>);
 
 impl APerElement for SrBsFailedToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsFailedToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -5278,23 +4831,15 @@ impl APerElement for SrBsFailedToBeSetupModList {
 pub struct DrBsFailedToBeSetupModList(pub Vec<DrBsFailedToBeSetupModItem>);
 
 impl APerElement for DrBsFailedToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsFailedToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -5303,23 +4848,15 @@ impl APerElement for DrBsFailedToBeSetupModList {
 pub struct SCellFailedtoSetupModList(pub Vec<SCellFailedtoSetupModItem>);
 
 impl APerElement for SCellFailedtoSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SCellFailedtoSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -5328,23 +4865,15 @@ impl APerElement for SCellFailedtoSetupModList {
 pub struct BhChannelsSetupModList(pub Vec<BhChannelsSetupModItem>);
 
 impl APerElement for BhChannelsSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -5353,23 +4882,15 @@ impl APerElement for BhChannelsSetupModList {
 pub struct BhChannelsModifiedList(pub Vec<BhChannelsModifiedItem>);
 
 impl APerElement for BhChannelsModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -5378,23 +4899,15 @@ impl APerElement for BhChannelsModifiedList {
 pub struct BhChannelsFailedToBeModifiedList(pub Vec<BhChannelsFailedToBeModifiedItem>);
 
 impl APerElement for BhChannelsFailedToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsFailedToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -5403,23 +4916,15 @@ impl APerElement for BhChannelsFailedToBeModifiedList {
 pub struct BhChannelsFailedToBeSetupModList(pub Vec<BhChannelsFailedToBeSetupModItem>);
 
 impl APerElement for BhChannelsFailedToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsFailedToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -5428,23 +4933,15 @@ impl APerElement for BhChannelsFailedToBeSetupModList {
 pub struct AssociatedSCellList(pub Vec<AssociatedSCellItem>);
 
 impl APerElement for AssociatedSCellList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<AssociatedSCellItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32), false))
     }
 }
 
@@ -5453,23 +4950,15 @@ impl APerElement for AssociatedSCellList {
 pub struct SldrBsSetupModList(pub Vec<SldrBsSetupModItem>);
 
 impl APerElement for SldrBsSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -5478,23 +4967,15 @@ impl APerElement for SldrBsSetupModList {
 pub struct SldrBsModifiedList(pub Vec<SldrBsModifiedItem>);
 
 impl APerElement for SldrBsModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -5503,23 +4984,15 @@ impl APerElement for SldrBsModifiedList {
 pub struct SldrBsFailedToBeModifiedList(pub Vec<SldrBsFailedToBeModifiedItem>);
 
 impl APerElement for SldrBsFailedToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsFailedToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -5528,23 +5001,15 @@ impl APerElement for SldrBsFailedToBeModifiedList {
 pub struct SldrBsFailedToBeSetupModList(pub Vec<SldrBsFailedToBeSetupModItem>);
 
 impl APerElement for SldrBsFailedToBeSetupModList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsFailedToBeSetupModItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -5559,9 +5024,10 @@ pub struct UeContextModificationFailure {
 }
 
 impl APerElement for UeContextModificationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -5608,8 +5074,7 @@ impl APerElement for UeContextModificationFailure {
             requested_target_cell_global_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.criticality_diagnostics.is_some(),
             self.requested_target_cell_global_id.is_some(),
@@ -5618,29 +5083,29 @@ impl APerElement for UeContextModificationFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.requested_target_cell_global_id {
-            enc.append(&(376 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (376 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -5662,9 +5127,10 @@ pub struct UeContextModificationRequired {
 }
 
 impl APerElement for UeContextModificationRequired {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -5764,8 +5230,7 @@ impl APerElement for UeContextModificationRequired {
             target_cells_to_cancel,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.resource_coordination_transfer_container.is_some(),
             self.d_uto_currc_information.is_some(),
@@ -5781,64 +5246,64 @@ impl APerElement for UeContextModificationRequired {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.resource_coordination_transfer_container {
-            enc.append(&(49 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (49 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.d_uto_currc_information {
-            enc.append(&(39 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (39 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_required_to_be_modified_list {
-            enc.append(&(23 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (23 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sr_bs_required_to_be_released_list {
-            enc.append(&(70 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (70 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_required_to_be_released_list {
-            enc.append(&(25 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (25 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_channels_required_to_be_released_list {
-            enc.append(&(277 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (277 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_required_to_be_modified_list {
-            enc.append(&(320 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (320 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_required_to_be_released_list {
-            enc.append(&(322 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (322 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.target_cells_to_cancel {
-            enc.append(&(375 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (375 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -5847,23 +5312,15 @@ impl APerElement for UeContextModificationRequired {
 pub struct DrBsRequiredToBeModifiedList(pub Vec<DrBsRequiredToBeModifiedItem>);
 
 impl APerElement for DrBsRequiredToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsRequiredToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -5872,23 +5329,15 @@ impl APerElement for DrBsRequiredToBeModifiedList {
 pub struct DrBsRequiredToBeReleasedList(pub Vec<DrBsRequiredToBeReleasedItem>);
 
 impl APerElement for DrBsRequiredToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsRequiredToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -5897,23 +5346,15 @@ impl APerElement for DrBsRequiredToBeReleasedList {
 pub struct SrBsRequiredToBeReleasedList(pub Vec<SrBsRequiredToBeReleasedItem>);
 
 impl APerElement for SrBsRequiredToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SrBsRequiredToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -5922,23 +5363,15 @@ impl APerElement for SrBsRequiredToBeReleasedList {
 pub struct BhChannelsRequiredToBeReleasedList(pub Vec<BhChannelsRequiredToBeReleasedItem>);
 
 impl APerElement for BhChannelsRequiredToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhChannelsRequiredToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65536), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65536), false))
     }
 }
 
@@ -5947,23 +5380,15 @@ impl APerElement for BhChannelsRequiredToBeReleasedList {
 pub struct SldrBsRequiredToBeModifiedList(pub Vec<SldrBsRequiredToBeModifiedItem>);
 
 impl APerElement for SldrBsRequiredToBeModifiedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsRequiredToBeModifiedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -5972,23 +5397,15 @@ impl APerElement for SldrBsRequiredToBeModifiedList {
 pub struct SldrBsRequiredToBeReleasedList(pub Vec<SldrBsRequiredToBeReleasedItem>);
 
 impl APerElement for SldrBsRequiredToBeReleasedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsRequiredToBeReleasedItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -6007,9 +5424,10 @@ pub struct UeContextModificationConfirm {
 }
 
 impl APerElement for UeContextModificationConfirm {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -6085,8 +5503,7 @@ impl APerElement for UeContextModificationConfirm {
             sldr_bs_modified_conf_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.resource_coordination_transfer_container.is_some(),
             self.dr_bs_modified_conf_list.is_some(),
@@ -6100,51 +5517,51 @@ impl APerElement for UeContextModificationConfirm {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.resource_coordination_transfer_container {
-            enc.append(&(49 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (49 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dr_bs_modified_conf_list {
-            enc.append(&(19 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (19 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_container {
-            enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.execute_duplication {
-            enc.append(&(109 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (109 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.resource_coordination_transfer_information {
-            enc.append(&(195 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (195 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sldr_bs_modified_conf_list {
-            enc.append(&(337 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (337 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6153,23 +5570,15 @@ impl APerElement for UeContextModificationConfirm {
 pub struct DrBsModifiedConfList(pub Vec<DrBsModifiedConfItem>);
 
 impl APerElement for DrBsModifiedConfList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrBsModifiedConfItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -6178,23 +5587,15 @@ impl APerElement for DrBsModifiedConfList {
 pub struct SldrBsModifiedConfList(pub Vec<SldrBsModifiedConfItem>);
 
 impl APerElement for SldrBsModifiedConfList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<SldrBsModifiedConfItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -6208,9 +5609,10 @@ pub struct UeContextModificationRefuse {
 }
 
 impl APerElement for UeContextModificationRefuse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -6251,31 +5653,30 @@ impl APerElement for UeContextModificationRefuse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6290,9 +5691,10 @@ pub struct WriteReplaceWarningRequest {
 }
 
 impl APerElement for WriteReplaceWarningRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut pws_system_information: Option<PwsSystemInformation> = None;
@@ -6342,34 +5744,34 @@ impl APerElement for WriteReplaceWarningRequest {
             cells_to_be_broadcast_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.cells_to_be_broadcast_list.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(140 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.pws_system_information.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(141 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.repetition_period.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(142 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.numberof_broadcast_request.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (140 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.pws_system_information.to_aper(enc, UNCONSTRAINED)?;
+        (141 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.repetition_period.to_aper(enc, UNCONSTRAINED)?;
+        (142 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.numberof_broadcast_request
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cells_to_be_broadcast_list {
-            enc.append(&(144 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (144 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6378,23 +5780,15 @@ impl APerElement for WriteReplaceWarningRequest {
 pub struct CellsToBeBroadcastList(pub Vec<CellsToBeBroadcastListItem>);
 
 impl APerElement for CellsToBeBroadcastList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsToBeBroadcastListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -6408,9 +5802,10 @@ pub struct WriteReplaceWarningResponse {
 }
 
 impl APerElement for WriteReplaceWarningResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_broadcast_completed_list: Option<CellsBroadcastCompletedList> = None;
@@ -6455,8 +5850,7 @@ impl APerElement for WriteReplaceWarningResponse {
             dedicated_si_delivery_needed_ue_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.cells_broadcast_completed_list.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -6466,28 +5860,28 @@ impl APerElement for WriteReplaceWarningResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cells_broadcast_completed_list {
-            enc.append(&(146 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (146 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dedicated_si_delivery_needed_ue_list {
-            enc.append(&(189 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (189 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6496,23 +5890,15 @@ impl APerElement for WriteReplaceWarningResponse {
 pub struct CellsBroadcastCompletedList(pub Vec<CellsBroadcastCompletedListItem>);
 
 impl APerElement for CellsBroadcastCompletedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsBroadcastCompletedListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -6527,9 +5913,10 @@ pub struct PwsCancelRequest {
 }
 
 impl APerElement for PwsCancelRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut numberof_broadcast_request: Option<NumberofBroadcastRequest> = None;
@@ -6582,8 +5969,7 @@ impl APerElement for PwsCancelRequest {
             notification_information,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.broadcast_to_be_cancelled_list.is_some(),
             self.cancel_all_warning_messages_indicator.is_some(),
@@ -6593,31 +5979,32 @@ impl APerElement for PwsCancelRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(142 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.numberof_broadcast_request.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (142 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.numberof_broadcast_request
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.broadcast_to_be_cancelled_list {
-            enc.append(&(148 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (148 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cancel_all_warning_messages_indicator {
-            enc.append(&(157 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (157 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.notification_information {
-            enc.append(&(220 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (220 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6626,23 +6013,15 @@ impl APerElement for PwsCancelRequest {
 pub struct BroadcastToBeCancelledList(pub Vec<BroadcastToBeCancelledListItem>);
 
 impl APerElement for BroadcastToBeCancelledList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BroadcastToBeCancelledListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -6655,9 +6034,10 @@ pub struct PwsCancelResponse {
 }
 
 impl APerElement for PwsCancelResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_broadcast_cancelled_list: Option<CellsBroadcastCancelledList> = None;
@@ -6694,8 +6074,7 @@ impl APerElement for PwsCancelResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.cells_broadcast_cancelled_list.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -6704,23 +6083,23 @@ impl APerElement for PwsCancelResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cells_broadcast_cancelled_list {
-            enc.append(&(150 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (150 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6729,23 +6108,15 @@ impl APerElement for PwsCancelResponse {
 pub struct CellsBroadcastCancelledList(pub Vec<CellsBroadcastCancelledListItem>);
 
 impl APerElement for CellsBroadcastCancelledList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<CellsBroadcastCancelledListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -6758,9 +6129,10 @@ pub struct UeInactivityNotification {
 }
 
 impl APerElement for UeInactivityNotification {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -6795,23 +6167,22 @@ impl APerElement for UeInactivityNotification {
             drb_activity_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(100 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.drb_activity_list.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (100 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.drb_activity_list.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -6820,23 +6191,15 @@ impl APerElement for UeInactivityNotification {
 pub struct DrbActivityList(pub Vec<DrbActivityItem>);
 
 impl APerElement for DrbActivityList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrbActivityItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -6855,9 +6218,10 @@ pub struct InitialUlrrcMessageTransfer {
 }
 
 impl APerElement for InitialUlrrcMessageTransfer {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut nrcgi: Option<Nrcgi> = None;
@@ -6928,8 +6292,7 @@ impl APerElement for InitialUlrrcMessageTransfer {
             rrc_container_rrc_setup_complete,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.d_uto_currc_container.is_some(),
             self.sul_access_indication.is_some(),
@@ -6940,45 +6303,45 @@ impl APerElement for InitialUlrrcMessageTransfer {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(111 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.nrcgi.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(95 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.c_rnti.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.rrc_container.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (111 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.nrcgi.to_aper(enc, UNCONSTRAINED)?;
+        (95 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.c_rnti.to_aper(enc, UNCONSTRAINED)?;
+        (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.rrc_container.to_aper(enc, UNCONSTRAINED)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.d_uto_currc_container {
-            enc.append(&(128 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (128 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sul_access_indication {
-            enc.append(&(178 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (178 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ranueid {
-            enc.append(&(226 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (226 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_container_rrc_setup_complete {
-            enc.append(&(241 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (241 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7001,9 +6364,10 @@ pub struct DlrrcMessageTransfer {
 }
 
 impl APerElement for DlrrcMessageTransfer {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -7098,8 +6462,7 @@ impl APerElement for DlrrcMessageTransfer {
             additional_rrm_priority_index,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.old_gnb_du_ue_f1ap_id.is_some(),
             self.execute_duplication.is_some(),
@@ -7115,67 +6478,67 @@ impl APerElement for DlrrcMessageTransfer {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(64 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.srbid.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.rrc_container.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (64 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.srbid.to_aper(enc, UNCONSTRAINED)?;
+        (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.rrc_container.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.old_gnb_du_ue_f1ap_id {
-            enc.append(&(47 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (47 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.execute_duplication {
-            enc.append(&(109 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (109 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rat_frequency_priority_information {
-            enc.append(&(108 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (108 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rrc_delivery_status_request {
-            enc.append(&(184 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (184 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ue_context_not_retrievable {
-            enc.append(&(222 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (222 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.redirected_rr_cmessage {
-            enc.append(&(218 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (218 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.plmn_assistance_info_for_net_shar {
-            enc.append(&(221 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (221 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.new_gnb_cu_ue_f1ap_id {
-            enc.append(&(217 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (217 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.additional_rrm_priority_index {
-            enc.append(&(248 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (248 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7191,9 +6554,10 @@ pub struct UlrrcMessageTransfer {
 }
 
 impl APerElement for UlrrcMessageTransfer {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -7244,8 +6608,7 @@ impl APerElement for UlrrcMessageTransfer {
             new_gnb_du_ue_f1ap_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.selected_plmn_id.is_some(),
             self.new_gnb_du_ue_f1ap_id.is_some(),
@@ -7254,32 +6617,32 @@ impl APerElement for UlrrcMessageTransfer {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(64 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.srbid.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(50 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.rrc_container.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (64 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.srbid.to_aper(enc, UNCONSTRAINED)?;
+        (50 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.rrc_container.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.selected_plmn_id {
-            enc.append(&(224 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (224 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.new_gnb_du_ue_f1ap_id {
-            enc.append(&(219 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (219 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7295,9 +6658,10 @@ pub struct SystemInformationDeliveryCommand {
 }
 
 impl APerElement for SystemInformationDeliveryCommand {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut nrcgi: Option<Nrcgi> = None;
@@ -7338,26 +6702,25 @@ impl APerElement for SystemInformationDeliveryCommand {
             confirmed_ueid,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(111 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.nrcgi.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(116 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.s_itype_list.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(156 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.confirmed_ueid.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (111 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.nrcgi.to_aper(enc, UNCONSTRAINED)?;
+        (116 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.s_itype_list.to_aper(enc, UNCONSTRAINED)?;
+        (156 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.confirmed_ueid.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7373,9 +6736,10 @@ pub struct Paging {
 }
 
 impl APerElement for Paging {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut ue_identity_index_value: Option<UeIdentityIndexValue> = None;
         let mut paging_identity: Option<PagingIdentity> = None;
@@ -7426,8 +6790,7 @@ impl APerElement for Paging {
             paging_origin,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.paging_drx.is_some(),
             self.paging_priority.is_some(),
@@ -7437,34 +6800,34 @@ impl APerElement for Paging {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(117 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ue_identity_index_value.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(127 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.paging_identity.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(113 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.paging_cell_list.to_aper(UNCONSTRAINED)?)?;
+        (117 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ue_identity_index_value.to_aper(enc, UNCONSTRAINED)?;
+        (127 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.paging_identity.to_aper(enc, UNCONSTRAINED)?;
+        (113 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.paging_cell_list.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.paging_drx {
-            enc.append(&(114 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (114 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.paging_priority {
-            enc.append(&(115 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (115 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.paging_origin {
-            enc.append(&(216 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (216 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7473,23 +6836,15 @@ impl APerElement for Paging {
 pub struct PagingCellList(pub Vec<PagingCellItem>);
 
 impl APerElement for PagingCellList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<PagingCellItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -7502,9 +6857,10 @@ pub struct Notify {
 }
 
 impl APerElement for Notify {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -7539,23 +6895,22 @@ impl APerElement for Notify {
             drb_notify_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(137 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.drb_notify_list.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (137 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.drb_notify_list.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7564,23 +6919,15 @@ impl APerElement for Notify {
 pub struct DrbNotifyList(pub Vec<DrbNotifyItem>);
 
 impl APerElement for DrbNotifyList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DrbNotifyItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -7592,9 +6939,10 @@ pub struct NetworkAccessRateReduction {
 }
 
 impl APerElement for NetworkAccessRateReduction {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut uac_assistance_info: Option<UacAssistanceInfo> = None;
@@ -7624,20 +6972,19 @@ impl APerElement for NetworkAccessRateReduction {
             uac_assistance_info,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(225 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.uac_assistance_info.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (225 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.uac_assistance_info.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7649,9 +6996,10 @@ pub struct PwsRestartIndication {
 }
 
 impl APerElement for PwsRestartIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut nr_cgi_list_for_restart_list: Option<NrCgiListForRestartList> = None;
@@ -7682,20 +7030,20 @@ impl APerElement for PwsRestartIndication {
             nr_cgi_list_for_restart_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(152 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.nr_cgi_list_for_restart_list.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (152 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.nr_cgi_list_for_restart_list
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7704,23 +7052,15 @@ impl APerElement for PwsRestartIndication {
 pub struct NrCgiListForRestartList(pub Vec<NrCgiListForRestartListItem>);
 
 impl APerElement for NrCgiListForRestartList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<NrCgiListForRestartListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -7732,9 +7072,10 @@ pub struct PwsFailureIndication {
 }
 
 impl APerElement for PwsFailureIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut pws_failed_nr_cgi_list: Option<PwsFailedNrCgiList> = None;
@@ -7763,25 +7104,24 @@ impl APerElement for PwsFailureIndication {
             pws_failed_nr_cgi_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.pws_failed_nr_cgi_list.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.pws_failed_nr_cgi_list {
-            enc.append(&(154 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (154 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7790,23 +7130,15 @@ impl APerElement for PwsFailureIndication {
 pub struct PwsFailedNrCgiList(pub Vec<PwsFailedNrCgiListItem>);
 
 impl APerElement for PwsFailedNrCgiList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<PwsFailedNrCgiListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(512), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(512), false))
     }
 }
 
@@ -7818,9 +7150,10 @@ pub struct GnbDuStatusIndication {
 }
 
 impl APerElement for GnbDuStatusIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_du_overload_information: Option<GnbDuOverloadInformation> = None;
@@ -7851,20 +7184,20 @@ impl APerElement for GnbDuStatusIndication {
             gnb_du_overload_information,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(172 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_overload_information.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (172 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_overload_information
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7878,9 +7211,10 @@ pub struct RrcDeliveryReport {
 }
 
 impl APerElement for RrcDeliveryReport {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -7922,26 +7256,25 @@ impl APerElement for RrcDeliveryReport {
             srbid,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(185 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.rrc_delivery_status.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(64 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.srbid.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (185 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.rrc_delivery_status.to_aper(enc, UNCONSTRAINED)?;
+        (64 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.srbid.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7952,9 +7285,10 @@ pub struct F1RemovalRequest {
 }
 
 impl APerElement for F1RemovalRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
 
@@ -7975,17 +7309,16 @@ impl APerElement for F1RemovalRequest {
         let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
         Ok(Self { transaction_id })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -7997,9 +7330,10 @@ pub struct F1RemovalResponse {
 }
 
 impl APerElement for F1RemovalResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -8028,25 +7362,24 @@ impl APerElement for F1RemovalResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8059,9 +7392,10 @@ pub struct F1RemovalFailure {
 }
 
 impl APerElement for F1RemovalFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -8096,28 +7430,27 @@ impl APerElement for F1RemovalFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8130,9 +7463,10 @@ pub struct TraceStart {
 }
 
 impl APerElement for TraceStart {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -8167,23 +7501,22 @@ impl APerElement for TraceStart {
             trace_activation,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(242 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.trace_activation.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (242 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.trace_activation.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8196,9 +7529,10 @@ pub struct DeactivateTrace {
 }
 
 impl APerElement for DeactivateTrace {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -8233,23 +7567,22 @@ impl APerElement for DeactivateTrace {
             trace_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(243 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.trace_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (243 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.trace_id.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8265,9 +7598,10 @@ pub struct CellTrafficTrace {
 }
 
 impl APerElement for CellTrafficTrace {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -8321,8 +7655,7 @@ impl APerElement for CellTrafficTrace {
             trace_collection_entity_uri,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.privacy_indicator.is_some(),
             self.trace_collection_entity_uri.is_some(),
@@ -8331,36 +7664,33 @@ impl APerElement for CellTrafficTrace {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(243 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.trace_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(378 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(
-            &self
-                .trace_collection_entity_ip_address
-                .to_aper(UNCONSTRAINED)?,
-        )?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (243 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.trace_id.to_aper(enc, UNCONSTRAINED)?;
+        (378 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.trace_collection_entity_ip_address
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.privacy_indicator {
-            enc.append(&(379 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (379 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.trace_collection_entity_uri {
-            enc.append(&(380 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (380 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8372,9 +7702,10 @@ pub struct DucuRadioInformationTransfer {
 }
 
 impl APerElement for DucuRadioInformationTransfer {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut ducu_radio_information_type: Option<DucuRadioInformationType> = None;
@@ -8405,20 +7736,20 @@ impl APerElement for DucuRadioInformationTransfer {
             ducu_radio_information_type,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(249 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ducu_radio_information_type.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (249 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.ducu_radio_information_type
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8430,9 +7761,10 @@ pub struct CuduRadioInformationTransfer {
 }
 
 impl APerElement for CuduRadioInformationTransfer {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cudu_radio_information_type: Option<CuduRadioInformationType> = None;
@@ -8463,20 +7795,20 @@ impl APerElement for CuduRadioInformationTransfer {
             cudu_radio_information_type,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(250 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cudu_radio_information_type.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (250 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cudu_radio_information_type
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8490,9 +7822,10 @@ pub struct BapMappingConfiguration {
 }
 
 impl APerElement for BapMappingConfiguration {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut bh_routing_information_added_list: Option<BhRoutingInformationAddedList> = None;
@@ -8535,8 +7868,7 @@ impl APerElement for BapMappingConfiguration {
             traffic_mapping_information,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.bh_routing_information_added_list.is_some(),
             self.bh_routing_information_removed_list.is_some(),
@@ -8546,28 +7878,28 @@ impl APerElement for BapMappingConfiguration {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.bh_routing_information_added_list {
-            enc.append(&(283 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (283 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.bh_routing_information_removed_list {
-            enc.append(&(285 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (285 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.traffic_mapping_information {
-            enc.append(&(299 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (299 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8576,23 +7908,15 @@ impl APerElement for BapMappingConfiguration {
 pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
 
 impl APerElement for BhRoutingInformationAddedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhRoutingInformationAddedListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(1024), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(1024), false))
     }
 }
 
@@ -8601,23 +7925,15 @@ impl APerElement for BhRoutingInformationAddedList {
 pub struct BhRoutingInformationRemovedList(pub Vec<BhRoutingInformationRemovedListItem>);
 
 impl APerElement for BhRoutingInformationRemovedList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<BhRoutingInformationRemovedListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(1024), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(1024), false))
     }
 }
 
@@ -8629,9 +7945,10 @@ pub struct BapMappingConfigurationAcknowledge {
 }
 
 impl APerElement for BapMappingConfigurationAcknowledge {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -8660,25 +7977,24 @@ impl APerElement for BapMappingConfigurationAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8692,9 +8008,10 @@ pub struct BapMappingConfigurationFailure {
 }
 
 impl APerElement for BapMappingConfigurationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -8734,8 +8051,7 @@ impl APerElement for BapMappingConfigurationFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -8744,26 +8060,26 @@ impl APerElement for BapMappingConfigurationFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8776,9 +8092,10 @@ pub struct GnbDuResourceConfiguration {
 }
 
 impl APerElement for GnbDuResourceConfiguration {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut activated_cells_to_be_updated_list: Option<ActivatedCellsToBeUpdatedList> = None;
@@ -8813,8 +8130,7 @@ impl APerElement for GnbDuResourceConfiguration {
             child_nodes_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.activated_cells_to_be_updated_list.is_some(),
             self.child_nodes_list.is_some(),
@@ -8823,23 +8139,23 @@ impl APerElement for GnbDuResourceConfiguration {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.activated_cells_to_be_updated_list {
-            enc.append(&(288 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (288 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.child_nodes_list {
-            enc.append(&(289 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (289 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8851,9 +8167,10 @@ pub struct GnbDuResourceConfigurationAcknowledge {
 }
 
 impl APerElement for GnbDuResourceConfigurationAcknowledge {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -8882,25 +8199,24 @@ impl APerElement for GnbDuResourceConfigurationAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8914,9 +8230,10 @@ pub struct GnbDuResourceConfigurationFailure {
 }
 
 impl APerElement for GnbDuResourceConfigurationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -8956,8 +8273,7 @@ impl APerElement for GnbDuResourceConfigurationFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -8966,26 +8282,26 @@ impl APerElement for GnbDuResourceConfigurationFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -8999,9 +8315,10 @@ pub struct IabtnlAddressRequest {
 }
 
 impl APerElement for IabtnlAddressRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut ia_bv_4_addresses_requested: Option<IaBv4AddressesRequested> = None;
@@ -9043,8 +8360,7 @@ impl APerElement for IabtnlAddressRequest {
             iab_tnl_addresses_to_remove_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.ia_bv_4_addresses_requested.is_some(),
             self.iabi_pv_6_request_type.is_some(),
@@ -9054,28 +8370,28 @@ impl APerElement for IabtnlAddressRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.ia_bv_4_addresses_requested {
-            enc.append(&(297 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (297 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.iabi_pv_6_request_type {
-            enc.append(&(296 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (296 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.iab_tnl_addresses_to_remove_list {
-            enc.append(&(292 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (292 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9084,23 +8400,15 @@ impl APerElement for IabtnlAddressRequest {
 pub struct IabTnlAddressesToRemoveList(pub Vec<IabTnlAddressesToRemoveItem>);
 
 impl APerElement for IabTnlAddressesToRemoveList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<IabTnlAddressesToRemoveItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(1024), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(1024), false))
     }
 }
 
@@ -9112,9 +8420,10 @@ pub struct IabtnlAddressResponse {
 }
 
 impl APerElement for IabtnlAddressResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut iab_allocated_tnl_address_list: Option<IabAllocatedTnlAddressList> = None;
@@ -9147,20 +8456,20 @@ impl APerElement for IabtnlAddressResponse {
             iab_allocated_tnl_address_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(294 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.iab_allocated_tnl_address_list.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (294 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.iab_allocated_tnl_address_list
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9169,23 +8478,15 @@ impl APerElement for IabtnlAddressResponse {
 pub struct IabAllocatedTnlAddressList(pub Vec<IabAllocatedTnlAddressListItem>);
 
 impl APerElement for IabAllocatedTnlAddressList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<IabAllocatedTnlAddressListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(1024), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(1024), false))
     }
 }
 
@@ -9199,9 +8500,10 @@ pub struct IabtnlAddressFailure {
 }
 
 impl APerElement for IabtnlAddressFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -9241,8 +8543,7 @@ impl APerElement for IabtnlAddressFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -9251,26 +8552,26 @@ impl APerElement for IabtnlAddressFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9283,9 +8584,10 @@ pub struct IabupConfigurationUpdateRequest {
 }
 
 impl APerElement for IabupConfigurationUpdateRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut ul_up_tnl_information_to_update_list: Option<UlUpTnlInformationToUpdateList> = None;
@@ -9323,8 +8625,7 @@ impl APerElement for IabupConfigurationUpdateRequest {
             ul_up_tnl_address_to_update_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.ul_up_tnl_information_to_update_list.is_some(),
             self.ul_up_tnl_address_to_update_list.is_some(),
@@ -9333,23 +8634,23 @@ impl APerElement for IabupConfigurationUpdateRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.ul_up_tnl_information_to_update_list {
-            enc.append(&(300 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (300 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ul_up_tnl_address_to_update_list {
-            enc.append(&(302 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (302 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9358,23 +8659,15 @@ impl APerElement for IabupConfigurationUpdateRequest {
 pub struct UlUpTnlInformationToUpdateList(pub Vec<UlUpTnlInformationToUpdateListItem>);
 
 impl APerElement for UlUpTnlInformationToUpdateList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<UlUpTnlInformationToUpdateListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(32678), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(32678), false))
     }
 }
 
@@ -9383,23 +8676,15 @@ impl APerElement for UlUpTnlInformationToUpdateList {
 pub struct UlUpTnlAddressToUpdateList(pub Vec<UlUpTnlAddressToUpdateListItem>);
 
 impl APerElement for UlUpTnlAddressToUpdateList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<UlUpTnlAddressToUpdateListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -9412,9 +8697,10 @@ pub struct IabupConfigurationUpdateResponse {
 }
 
 impl APerElement for IabupConfigurationUpdateResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -9451,8 +8737,7 @@ impl APerElement for IabupConfigurationUpdateResponse {
             dl_up_tnl_address_to_update_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.criticality_diagnostics.is_some(),
             self.dl_up_tnl_address_to_update_list.is_some(),
@@ -9461,23 +8746,23 @@ impl APerElement for IabupConfigurationUpdateResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.dl_up_tnl_address_to_update_list {
-            enc.append(&(304 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (304 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9486,23 +8771,15 @@ impl APerElement for IabupConfigurationUpdateResponse {
 pub struct DlUpTnlAddressToUpdateList(pub Vec<DlUpTnlAddressToUpdateListItem>);
 
 impl APerElement for DlUpTnlAddressToUpdateList {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<DlUpTnlAddressToUpdateListItem>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(8), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(8), false))
     }
 }
 
@@ -9516,9 +8793,10 @@ pub struct IabupConfigurationUpdateFailure {
 }
 
 impl APerElement for IabupConfigurationUpdateFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -9558,8 +8836,7 @@ impl APerElement for IabupConfigurationUpdateFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.time_to_wait.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -9568,26 +8845,26 @@ impl APerElement for IabupConfigurationUpdateFailure {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.time_to_wait {
-            enc.append(&(77 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (77 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9604,9 +8881,10 @@ pub struct ResourceStatusRequest {
 }
 
 impl APerElement for ResourceStatusRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
@@ -9667,8 +8945,7 @@ impl APerElement for ResourceStatusRequest {
             reporting_periodicity,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.gnb_du_measurement_id.is_some(),
             self.report_characteristics.is_some(),
@@ -9679,39 +8956,39 @@ impl APerElement for ResourceStatusRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(345 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(347 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.registration_request.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (345 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (347 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.registration_request.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.gnb_du_measurement_id {
-            enc.append(&(346 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (346 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.report_characteristics {
-            enc.append(&(348 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (348 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cell_to_report_list {
-            enc.append(&(349 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (349 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.reporting_periodicity {
-            enc.append(&(352 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (352 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9725,9 +9002,10 @@ pub struct ResourceStatusResponse {
 }
 
 impl APerElement for ResourceStatusResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
@@ -9770,31 +9048,30 @@ impl APerElement for ResourceStatusResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(345 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(346 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (345 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (346 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_measurement_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9809,9 +9086,10 @@ pub struct ResourceStatusFailure {
 }
 
 impl APerElement for ResourceStatusFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
@@ -9860,34 +9138,33 @@ impl APerElement for ResourceStatusFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(345 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(346 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (345 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (346 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -9903,9 +9180,10 @@ pub struct ResourceStatusUpdate {
 }
 
 impl APerElement for ResourceStatusUpdate {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
@@ -9962,8 +9240,7 @@ impl APerElement for ResourceStatusUpdate {
             cell_measurement_result_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.hardware_load_indicator.is_some(),
             self.tnl_capacity_indicator.is_some(),
@@ -9973,34 +9250,34 @@ impl APerElement for ResourceStatusUpdate {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(345 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(346 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (345 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (346 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_measurement_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.hardware_load_indicator {
-            enc.append(&(351 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (351 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.tnl_capacity_indicator {
-            enc.append(&(353 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (353 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cell_measurement_result_list {
-            enc.append(&(350 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (350 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10013,9 +9290,10 @@ pub struct AccessAndMobilityIndication {
 }
 
 impl APerElement for AccessAndMobilityIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut rach_report_information_list: Option<RachReportInformationList> = None;
@@ -10052,8 +9330,7 @@ impl APerElement for AccessAndMobilityIndication {
             rlf_report_information_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.rach_report_information_list.is_some(),
             self.rlf_report_information_list.is_some(),
@@ -10062,23 +9339,23 @@ impl APerElement for AccessAndMobilityIndication {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.rach_report_information_list {
-            enc.append(&(359 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (359 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.rlf_report_information_list {
-            enc.append(&(360 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (360 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10090,9 +9367,10 @@ pub struct ReferenceTimeInformationReportingControl {
 }
 
 impl APerElement for ReferenceTimeInformationReportingControl {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut reporting_request_type: Option<ReportingRequestType> = None;
@@ -10122,20 +9400,19 @@ impl APerElement for ReferenceTimeInformationReportingControl {
             reporting_request_type,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(365 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.reporting_request_type.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (365 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.reporting_request_type.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10147,9 +9424,10 @@ pub struct ReferenceTimeInformationReport {
 }
 
 impl APerElement for ReferenceTimeInformationReport {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut time_reference_information: Option<TimeReferenceInformation> = None;
@@ -10180,20 +9458,20 @@ impl APerElement for ReferenceTimeInformationReport {
             time_reference_information,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(366 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.time_reference_information.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (366 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.time_reference_information
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10206,9 +9484,10 @@ pub struct AccessSuccess {
 }
 
 impl APerElement for AccessSuccess {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -10243,23 +9522,22 @@ impl APerElement for AccessSuccess {
             nrcgi,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(111 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.nrcgi.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (111 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.nrcgi.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10274,9 +9552,10 @@ pub struct PositioningAssistanceInformationControl {
 }
 
 impl APerElement for PositioningAssistanceInformationControl {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut pos_assistance_information: Option<PosAssistanceInformation> = None;
@@ -10323,8 +9602,7 @@ impl APerElement for PositioningAssistanceInformationControl {
             routing_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.pos_assistance_information.is_some(),
             self.pos_broadcast.is_some(),
@@ -10335,33 +9613,33 @@ impl APerElement for PositioningAssistanceInformationControl {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.pos_assistance_information {
-            enc.append(&(392 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (392 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.pos_broadcast {
-            enc.append(&(393 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (393 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.positioning_broadcast_cells {
-            enc.append(&(406 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (406 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.routing_id {
-            enc.append(&(394 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (394 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10376,9 +9654,10 @@ pub struct PositioningAssistanceInformationFeedback {
 }
 
 impl APerElement for PositioningAssistanceInformationFeedback {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut pos_assistance_information_failure_list: Option<
@@ -10429,8 +9708,7 @@ impl APerElement for PositioningAssistanceInformationFeedback {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.pos_assistance_information_failure_list.is_some(),
             self.positioning_broadcast_cells.is_some(),
@@ -10441,33 +9719,33 @@ impl APerElement for PositioningAssistanceInformationFeedback {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.pos_assistance_information_failure_list {
-            enc.append(&(395 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (395 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.positioning_broadcast_cells {
-            enc.append(&(406 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (406 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.routing_id {
-            enc.append(&(394 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (394 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10489,9 +9767,10 @@ pub struct PositioningMeasurementRequest {
 }
 
 impl APerElement for PositioningMeasurementRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -10588,8 +9867,7 @@ impl APerElement for PositioningMeasurementRequest {
             slot_number,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.pos_measurement_periodicity.is_some(),
             self.sfn_initialisation_time.is_some(),
@@ -10602,58 +9880,61 @@ impl APerElement for PositioningMeasurementRequest {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(422 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.trp_measurement_request_list.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(408 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.pos_report_characteristics.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(396 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.pos_measurement_quantities.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (422 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.trp_measurement_request_list
+            .to_aper(enc, UNCONSTRAINED)?;
+        (408 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.pos_report_characteristics
+            .to_aper(enc, UNCONSTRAINED)?;
+        (396 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.pos_measurement_quantities
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.pos_measurement_periodicity {
-            enc.append(&(409 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (409 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sfn_initialisation_time {
-            enc.append(&(419 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (419 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.srs_configuration {
-            enc.append(&(407 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (407 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.measurement_beam_info_request {
-            enc.append(&(423 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (423 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.system_frame_number {
-            enc.append(&(420 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (420 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.slot_number {
-            enc.append(&(421 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (421 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10668,9 +9949,10 @@ pub struct PositioningMeasurementResponse {
 }
 
 impl APerElement for PositioningMeasurementResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -10717,8 +9999,7 @@ impl APerElement for PositioningMeasurementResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.pos_measurement_result_list.is_some(),
             self.criticality_diagnostics.is_some(),
@@ -10727,29 +10008,29 @@ impl APerElement for PositioningMeasurementResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.pos_measurement_result_list {
-            enc.append(&(397 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (397 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10764,9 +10045,10 @@ pub struct PositioningMeasurementFailure {
 }
 
 impl APerElement for PositioningMeasurementFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -10813,34 +10095,33 @@ impl APerElement for PositioningMeasurementFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10854,9 +10135,10 @@ pub struct PositioningMeasurementReport {
 }
 
 impl APerElement for PositioningMeasurementReport {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -10899,26 +10181,26 @@ impl APerElement for PositioningMeasurementReport {
             pos_measurement_result_list,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(397 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.pos_measurement_result_list.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (397 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.pos_measurement_result_list
+            .to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10931,9 +10213,10 @@ pub struct PositioningMeasurementAbort {
 }
 
 impl APerElement for PositioningMeasurementAbort {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -10968,23 +10251,22 @@ impl APerElement for PositioningMeasurementAbort {
             ran_measurement_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -10998,9 +10280,10 @@ pub struct PositioningMeasurementFailureIndication {
 }
 
 impl APerElement for PositioningMeasurementFailureIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -11041,26 +10324,25 @@ impl APerElement for PositioningMeasurementFailureIndication {
             cause,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11074,9 +10356,10 @@ pub struct PositioningMeasurementUpdate {
 }
 
 impl APerElement for PositioningMeasurementUpdate {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
@@ -11116,31 +10399,30 @@ impl APerElement for PositioningMeasurementUpdate {
             srs_configuration,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.srs_configuration.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(402 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(411 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (402 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (411 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_measurement_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.srs_configuration {
-            enc.append(&(407 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (407 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11153,9 +10435,10 @@ pub struct TrpInformationRequest {
 }
 
 impl APerElement for TrpInformationRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut trp_list: Option<TrpList> = None;
@@ -11192,29 +10475,25 @@ impl APerElement for TrpInformationRequest {
             trp_information_type_list_trp_req,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.trp_list.is_some()].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(398 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(
-            &self
-                .trp_information_type_list_trp_req
-                .to_aper(UNCONSTRAINED)?,
-        )?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (398 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.trp_information_type_list_trp_req
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.trp_list {
-            enc.append(&(410 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (410 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11223,23 +10502,15 @@ impl APerElement for TrpInformationRequest {
 pub struct TrpInformationTypeListTrpReq(pub Vec<TrpInformationTypeItemTrpReq>);
 
 impl APerElement for TrpInformationTypeListTrpReq {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<TrpInformationTypeItemTrpReq>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(64), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(64), false))
     }
 }
 
@@ -11252,9 +10523,10 @@ pub struct TrpInformationResponse {
 }
 
 impl APerElement for TrpInformationResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut trp_information_list_trp_resp: Option<TrpInformationListTrpResp> = None;
@@ -11293,28 +10565,28 @@ impl APerElement for TrpInformationResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(400 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.trp_information_list_trp_resp.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (400 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.trp_information_list_trp_resp
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11323,23 +10595,15 @@ impl APerElement for TrpInformationResponse {
 pub struct TrpInformationListTrpResp(pub Vec<TrpInformationItemTrpResp>);
 
 impl APerElement for TrpInformationListTrpResp {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(1),
-            max: Some(1),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         Ok(Self(Vec::<TrpInformationItemTrpResp>::from_aper(
             decoder,
-            Self::CONSTRAINTS,
+            Constraints::size(Some(1), Some(65535), false),
         )?))
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&(self.0).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        self.0
+            .to_aper(enc, Constraints::size(Some(1), Some(65535), false))
     }
 }
 
@@ -11352,9 +10616,10 @@ pub struct TrpInformationFailure {
 }
 
 impl APerElement for TrpInformationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
@@ -11389,28 +10654,27 @@ impl APerElement for TrpInformationFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(78 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.transaction_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (78 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.transaction_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11423,9 +10687,10 @@ pub struct PositioningInformationRequest {
 }
 
 impl APerElement for PositioningInformationRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -11463,28 +10728,27 @@ impl APerElement for PositioningInformationRequest {
             requested_srs_transmission_characteristics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.requested_srs_transmission_characteristics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.requested_srs_transmission_characteristics {
-            enc.append(&(391 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (391 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11499,9 +10763,10 @@ pub struct PositioningInformationResponse {
 }
 
 impl APerElement for PositioningInformationResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -11547,8 +10812,7 @@ impl APerElement for PositioningInformationResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.srs_configuration.is_some(),
             self.sfn_initialisation_time.is_some(),
@@ -11558,31 +10822,31 @@ impl APerElement for PositioningInformationResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.srs_configuration {
-            enc.append(&(407 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (407 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sfn_initialisation_time {
-            enc.append(&(419 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (419 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11596,9 +10860,10 @@ pub struct PositioningInformationFailure {
 }
 
 impl APerElement for PositioningInformationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -11639,31 +10904,30 @@ impl APerElement for PositioningInformationFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11677,9 +10941,10 @@ pub struct PositioningActivationRequest {
 }
 
 impl APerElement for PositioningActivationRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -11719,31 +10984,30 @@ impl APerElement for PositioningActivationRequest {
             activation_time,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.activation_time.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(403 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.srs_type.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (403 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.srs_type.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.activation_time {
-            enc.append(&(404 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (404 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11752,11 +11016,9 @@ impl APerElement for PositioningActivationRequest {
 pub enum SrsType {
     SemipersistentSrs(SemipersistentSrs),
     AperiodicSrs(AperiodicSrs),
-    _Extended,
 }
 
 impl APerElement for SrsType {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
         match u8::from_aper(decoder, UNCONSTRAINED)? {
             0 => Ok(Self::SemipersistentSrs(SemipersistentSrs::from_aper(
@@ -11771,20 +11033,18 @@ impl APerElement for SrsType {
             _ => Err(DecodeError::InvalidChoice),
         }
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         match self {
             Self::SemipersistentSrs(x) => {
-                enc.append(&(0 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                (0 as u8).to_aper(enc, UNCONSTRAINED)?;
+                x.to_aper(enc, UNCONSTRAINED)?;
             }
             Self::AperiodicSrs(x) => {
-                enc.append(&(1 as u8).to_aper(UNCONSTRAINED)?)?;
-                enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+                (1 as u8).to_aper(enc, UNCONSTRAINED)?;
+                x.to_aper(enc, UNCONSTRAINED)?;
             }
-            Self::_Extended => return Err(EncodeError::NotImplemented),
         }
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11796,16 +11056,11 @@ pub struct SemipersistentSrs {
 }
 
 impl APerElement for SemipersistentSrs {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(2),
-            max: Some(2),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
+        let optionals = BitString::from_aper(decoder, Constraints::size(Some(2), Some(2), false))?;
         let srs_resource_set_id = SrsResourceSetId::from_aper(decoder, UNCONSTRAINED)?;
         let srs_spatial_relation = if optionals.is_set(0) {
             Some(SpatialRelationInfo::from_aper(decoder, UNCONSTRAINED)?)
@@ -11818,20 +11073,19 @@ impl APerElement for SemipersistentSrs {
             srs_spatial_relation,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.srs_spatial_relation.is_some());
         optionals.set(1, false);
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        enc.append(&self.srs_resource_set_id.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
+        optionals.to_aper(enc, Constraints::size(Some(2), Some(2), false))?;
+        self.srs_resource_set_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.srs_spatial_relation {
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11843,16 +11097,11 @@ pub struct AperiodicSrs {
 }
 
 impl APerElement for AperiodicSrs {
-    const CONSTRAINTS: Constraints = Constraints {
-        value: None,
-        size: Some(Constraint {
-            min: Some(2),
-            max: Some(2),
-        }),
-    };
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
-        let optionals = BitString::from_aper(decoder, Self::CONSTRAINTS)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
+        let optionals = BitString::from_aper(decoder, Constraints::size(Some(2), Some(2), false))?;
         let aperiodic = Aperiodic::from_aper(decoder, UNCONSTRAINED)?;
         let srs_resource_trigger = if optionals.is_set(0) {
             Some(SrsResourceTrigger::from_aper(decoder, UNCONSTRAINED)?)
@@ -11865,20 +11114,19 @@ impl APerElement for AperiodicSrs {
             srs_resource_trigger,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let mut optionals = BitString::with_len(2);
         optionals.set(0, self.srs_resource_trigger.is_some());
         optionals.set(1, false);
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&optionals.to_aper(Self::CONSTRAINTS)?)?;
-        enc.append(&self.aperiodic.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
+        optionals.to_aper(enc, Constraints::size(Some(2), Some(2), false))?;
+        self.aperiodic.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.srs_resource_trigger {
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11893,9 +11141,10 @@ pub struct PositioningActivationResponse {
 }
 
 impl APerElement for PositioningActivationResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -11941,8 +11190,7 @@ impl APerElement for PositioningActivationResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.system_frame_number.is_some(),
             self.slot_number.is_some(),
@@ -11952,31 +11200,31 @@ impl APerElement for PositioningActivationResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.system_frame_number {
-            enc.append(&(420 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (420 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.slot_number {
-            enc.append(&(421 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (421 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -11990,9 +11238,10 @@ pub struct PositioningActivationFailure {
 }
 
 impl APerElement for PositioningActivationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12033,31 +11282,30 @@ impl APerElement for PositioningActivationFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12070,9 +11318,10 @@ pub struct PositioningDeactivation {
 }
 
 impl APerElement for PositioningDeactivation {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12108,23 +11357,22 @@ impl APerElement for PositioningDeactivation {
             abort_transmission,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(405 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.abort_transmission.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (405 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.abort_transmission.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12138,9 +11386,10 @@ pub struct PositioningInformationUpdate {
 }
 
 impl APerElement for PositioningInformationUpdate {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12180,8 +11429,7 @@ impl APerElement for PositioningInformationUpdate {
             sfn_initialisation_time,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.srs_configuration.is_some(),
             self.sfn_initialisation_time.is_some(),
@@ -12190,26 +11438,26 @@ impl APerElement for PositioningInformationUpdate {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.srs_configuration {
-            enc.append(&(407 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (407 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.sfn_initialisation_time {
-            enc.append(&(419 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (419 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12226,9 +11474,10 @@ pub struct ECidMeasurementInitiationRequest {
 }
 
 impl APerElement for ECidMeasurementInitiationRequest {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12297,40 +11546,41 @@ impl APerElement for ECidMeasurementInitiationRequest {
             e_cid_measurement_quantities,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.e_cid_measurement_periodicity.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(412 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(413 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(424 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.e_cid_report_characteristics.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(414 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.e_cid_measurement_quantities.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (412 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (413 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (424 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.e_cid_report_characteristics
+            .to_aper(enc, UNCONSTRAINED)?;
+        (414 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.e_cid_measurement_quantities
+            .to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.e_cid_measurement_periodicity {
-            enc.append(&(416 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (416 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12347,9 +11597,10 @@ pub struct ECidMeasurementInitiationResponse {
 }
 
 impl APerElement for ECidMeasurementInitiationResponse {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12409,8 +11660,7 @@ impl APerElement for ECidMeasurementInitiationResponse {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [
             self.e_cid_measurement_result.is_some(),
             self.cell_portion_id.is_some(),
@@ -12420,37 +11670,37 @@ impl APerElement for ECidMeasurementInitiationResponse {
         .filter(|&x| *x)
         .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(412 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(413 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (412 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (413 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.e_cid_measurement_result {
-            enc.append(&(417 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (417 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.cell_portion_id {
-            enc.append(&(418 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (418 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12466,9 +11716,10 @@ pub struct ECidMeasurementInitiationFailure {
 }
 
 impl APerElement for ECidMeasurementInitiationFailure {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12523,37 +11774,36 @@ impl APerElement for ECidMeasurementInitiationFailure {
             criticality_diagnostics,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.criticality_diagnostics.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(412 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(413 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (412 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (413 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.criticality_diagnostics {
-            enc.append(&(7 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (7 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12568,9 +11818,10 @@ pub struct ECidMeasurementFailureIndication {
 }
 
 impl APerElement for ECidMeasurementFailureIndication {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12619,29 +11870,28 @@ impl APerElement for ECidMeasurementFailureIndication {
             cause,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(412 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(413 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(0 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.cause.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (412 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (413 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (0 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.cause.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12657,9 +11907,10 @@ pub struct ECidMeasurementReport {
 }
 
 impl APerElement for ECidMeasurementReport {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12715,37 +11966,36 @@ impl APerElement for ECidMeasurementReport {
             cell_portion_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [self.cell_portion_id.is_some()]
             .iter()
             .filter(|&x| *x)
             .count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(412 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(413 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(417 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.e_cid_measurement_result.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (412 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (413 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (417 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+        self.e_cid_measurement_result.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.cell_portion_id {
-            enc.append(&(418 as u16).to_aper(UNCONSTRAINED)?)?;
-            enc.append(&Criticality::Ignore.to_aper(UNCONSTRAINED)?)?;
-            enc.append(&x.to_aper(UNCONSTRAINED)?)?;
+            (418 as u16).to_aper(enc, UNCONSTRAINED)?;
+            Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
+            x.to_aper(enc, UNCONSTRAINED)?;
         }
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12759,9 +12009,10 @@ pub struct ECidMeasurementTerminationCommand {
 }
 
 impl APerElement for ECidMeasurementTerminationCommand {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        let _extended = bool::from_aper(decoder, UNCONSTRAINED)?;
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
+        }
         let len = decoder.decode_length()?;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -12804,26 +12055,25 @@ impl APerElement for ECidMeasurementTerminationCommand {
             ran_ue_measurement_id,
         })
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
         let num_ies = [].iter().filter(|&x| *x).count();
 
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
+        false.to_aper(enc, UNCONSTRAINED)?;
         enc.append(&encode_length(num_ies)?)?;
-        enc.append(&(40 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_cu_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(41 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.gnb_du_ue_f1ap_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(412 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.lmf_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(413 as u16).to_aper(UNCONSTRAINED)?)?;
-        enc.append(&Criticality::Reject.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&self.ran_ue_measurement_id.to_aper(UNCONSTRAINED)?)?;
+        (40 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_cu_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (41 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.gnb_du_ue_f1ap_id.to_aper(enc, UNCONSTRAINED)?;
+        (412 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.lmf_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
+        (413 as u16).to_aper(enc, UNCONSTRAINED)?;
+        Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
+        self.ran_ue_measurement_id.to_aper(enc, UNCONSTRAINED)?;
 
-        Ok(enc)
+        Ok(())
     }
 }
 
@@ -12831,22 +12081,19 @@ impl APerElement for ECidMeasurementTerminationCommand {
 #[derive(Clone, Copy, FromPrimitive)]
 pub enum Aperiodic {
     True,
-    _Extended,
 }
 
 impl APerElement for Aperiodic {
-    const CONSTRAINTS: Constraints = UNCONSTRAINED;
     fn from_aper(decoder: &mut Decoder, _constraints: Constraints) -> Result<Self, DecodeError> {
-        if bool::from_aper(decoder, Self::CONSTRAINTS)? {
-            return Ok(Aperiodic::_Extended);
+        if bool::from_aper(decoder, UNCONSTRAINED)? {
+            return Err(DecodeError::NotImplemented);
         }
-        let v = u8::from_aper(decoder, Self::CONSTRAINTS)?;
+        let v = u8::from_aper(decoder, Constraints::value(Some(0), Some(0), false))?;
         FromPrimitive::from_u8(v).ok_or(DecodeError::MalformedInt)
     }
-    fn to_aper(&self, _constraints: Constraints) -> Result<Encoding, EncodeError> {
-        let mut enc = Encoding::new();
-        enc.append(&false.to_aper(UNCONSTRAINED)?)?;
-        enc.append(&(*self as u8).to_aper(Self::CONSTRAINTS)?)?;
-        Ok(enc)
+    fn to_aper(&self, enc: &mut Encoding, _constraints: Constraints) -> Result<(), EncodeError> {
+        false.to_aper(enc, UNCONSTRAINED)?;
+        (*self as u8).to_aper(enc, Constraints::value(Some(0), Some(0), false))?;
+        Ok(())
     }
 }

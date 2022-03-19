@@ -1,8 +1,7 @@
-use super::common::*;
 use super::ies::*;
 use super::pdu::*;
-use asn1::aper::{APerElement, EncodeError, UNCONSTRAINED};
-use asn1::BitString;
+use asn1::aper::{APerElement, EncodeError, Encoding, UNCONSTRAINED};
+use asn1::{BitString, PrintableString};
 
 #[test]
 fn test_ng_setup_encode() -> Result<(), EncodeError> {
@@ -12,7 +11,9 @@ fn test_ng_setup_encode() -> Result<(), EncodeError> {
             plmn_identity: plmn_identity.clone(),
             gnb_id: GnbId::GnbId(BitString::with_len(1)),
         }),
-        ran_node_name: Some(RanNodeName(PrintableString("free5GC".to_string()))),
+        ran_node_name: Some(RanNodeName(
+            PrintableString::from_string("free5GC".to_string()).unwrap(),
+        )),
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {
             tac: Tac(vec![0x1]),
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
@@ -30,7 +31,8 @@ fn test_ng_setup_encode() -> Result<(), EncodeError> {
         nb_iot_default_paging_drx: None,
         extended_ran_node_name: None,
     };
-    let encoding = ng_setup.to_aper(UNCONSTRAINED)?;
-    println!("{:?}", encoding);
+    let mut enc = Encoding::new();
+    ng_setup.to_aper(&mut enc, UNCONSTRAINED)?;
+    println!("{:?}", enc.bytes());
     Ok(())
 }

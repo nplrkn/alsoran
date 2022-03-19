@@ -170,6 +170,7 @@ class TypeTransformer(Transformer):
 
     def sequenceof(self, tree):
         item = tree.children[2]
+        self.transform_bounds(tree)
         if isinstance(item, Tree):
             # It must be a container
             assert(item.data == "container")
@@ -391,7 +392,7 @@ document
         foo
         Vec<OverloadStartNssaiItem>
           1
-          maxnoofSliceItems
+          3
       optional_field
         wlan_rtt
         WlanRtt
@@ -425,7 +426,7 @@ document
           0
           7
 """
-        self.should_generate(input, output)
+        self.should_generate(input, output, constants={"maxnoofSliceItems": 3})
 
     def test_optional_octet_string(self):
         self.should_generate("""\
@@ -591,6 +592,19 @@ document
           3
           3
 """)
+
+    def test_size_constrained_vec(self):
+        self.should_generate("""\
+Activated-Cells-to-be-Updated-List ::= SEQUENCE (SIZE (1..maxnoofServedCellsIAB)) OF Activated-Cells-to-be-Updated-List-Item
+""", """\
+document
+  None
+  tuple_struct
+    ActivatedCellsToBeUpdatedList
+    Vec<ActivatedCellsToBeUpdatedListItem>
+      1
+      512
+""", constants={"maxnoofServedCellsIAB": 512})
 
 
 if __name__ == '__main__':
