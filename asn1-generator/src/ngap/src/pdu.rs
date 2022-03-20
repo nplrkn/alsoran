@@ -6769,38 +6769,47 @@ impl APerElement for NgSetupRequest {
         ]
         .iter()
         .filter(|&x| *x)
-        .count();
+        .count()
+            + 3;
 
         false.to_aper(enc, UNCONSTRAINED)?;
-        enc.append(&encode_length(num_ies)?)?;
+        enc.align();
+        enc.append(&encode_int(num_ies as i64, Some(0), Some(65535))?)?;
         (27 as u16).to_aper(enc, UNCONSTRAINED)?;
         Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
-        self.global_ran_node_id.to_aper(enc, UNCONSTRAINED)?;
+        enc.append_open(&self.global_ran_node_id)?;
+        //self.global_ran_node_id.to_aper(enc, UNCONSTRAINED)?;
         (102 as u16).to_aper(enc, UNCONSTRAINED)?;
         Criticality::Reject.to_aper(enc, UNCONSTRAINED)?;
-        self.supported_ta_list.to_aper(enc, UNCONSTRAINED)?;
+        enc.append_open(&self.supported_ta_list)?;
+        //self.supported_ta_list.to_aper(enc, UNCONSTRAINED)?;
         (21 as u16).to_aper(enc, UNCONSTRAINED)?;
         Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
-        self.default_paging_drx.to_aper(enc, UNCONSTRAINED)?;
+        enc.append_open(&self.default_paging_drx)?;
+        //self.default_paging_drx.to_aper(enc, UNCONSTRAINED)?;
         if let Some(x) = &self.ran_node_name {
             (82 as u16).to_aper(enc, UNCONSTRAINED)?;
             Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
-            x.to_aper(enc, UNCONSTRAINED)?;
+            enc.append_open(x)?;
+            //x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.ue_retention_information {
             (147 as u16).to_aper(enc, UNCONSTRAINED)?;
             Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
-            x.to_aper(enc, UNCONSTRAINED)?;
+            enc.append_open(x)?;
+            //x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.nb_iot_default_paging_drx {
             (204 as u16).to_aper(enc, UNCONSTRAINED)?;
             Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
-            x.to_aper(enc, UNCONSTRAINED)?;
+            enc.append_open(x)?;
+            //x.to_aper(enc, UNCONSTRAINED)?;
         }
         if let Some(x) = &self.extended_ran_node_name {
             (273 as u16).to_aper(enc, UNCONSTRAINED)?;
             Criticality::Ignore.to_aper(enc, UNCONSTRAINED)?;
-            x.to_aper(enc, UNCONSTRAINED)?;
+            enc.append_open(x)?;
+            //x.to_aper(enc, UNCONSTRAINED)?;
         }
 
         Ok(())

@@ -254,6 +254,7 @@ class IeFields(Interpreter):
         self.mandatory_fields_to = ""
         self.optionals_presence_list = ""
         self.optional_fields_to = ""
+        self.num_mandatory_fields = 0
 
     def extension_marker(self, tree):
         self.extensible = True
@@ -275,13 +276,14 @@ class IeFields(Interpreter):
                     {name} = Some({decode_expression(tree.children[3])});
                 }}
 """
+        self.num_mandatory_fields += 1
         self.mandatory += f"""\
         let {name} = {name}.ok_or(DecodeError::InvalidChoice)?;
 """
         self.mandatory_fields_to += f"""\
         {to_aper_unconstrained(f"({id} as u16)")}?;
         {to_aper_unconstrained(f"Criticality::{criticality}")}?;
-        {to_aper_unconstrained(f"self.{name}")}?;
+        enc.append_open(&self.{name})?;
 """
 
     def optional_ie(self, tree):
@@ -308,7 +310,7 @@ class IeFields(Interpreter):
         if let Some(x) = &self.{name} {{
             {to_aper_unconstrained(f"({id} as u16)")}?;
             {to_aper_unconstrained(f"Criticality::{criticality}")}?;
-            {to_aper_unconstrained(f"x")}?;
+            enc.append_open(&self.x)?;
         }}
 """
 
@@ -520,7 +522,7 @@ impl APerElement for {name} {{
         let num_ies = [{field_interpreter.optionals_presence_list}]
             .iter()
             .filter(|&x| *x)
-            .count();
+            .count() + {field_interpreter.num_mandatory_fields};
 
         {to_aper_unconstrained("false")}?;
         enc.append(&encode_length(num_ies)?)?;
