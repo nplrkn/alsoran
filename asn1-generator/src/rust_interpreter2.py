@@ -25,11 +25,16 @@ EXTENSION_TO = f"""
 
 def type_and_constraints(typ):
     constraints = "UNCONSTRAINED"
+    string_type = None
 
     if isinstance(typ, Tree):
         bounds = typ.children
         typ = typ.data
         ext = "false"
+
+        if typ == 'String':
+            string_type = bounds[-1]
+            del bounds[-1]
 
         if len(bounds) > 1:
             MAX_I64 = 9223372036854775807
@@ -61,11 +66,11 @@ def type_and_constraints(typ):
             else:
                 constraints = f"Constraints::size(Some({lb}), {ub}, {ext})"
 
-    return (typ, constraints)
+    return (typ, constraints, string_type)
 
 
 def decode_expression(tree):
-    (typ, constraints) = type_and_constraints(tree)
+    (typ, constraints, _) = type_and_constraints(tree)
     return f"""{typ.replace("Vec<","Vec::<")}::from_aper(decoder, {constraints})?"""
 
 
@@ -166,7 +171,7 @@ class ChoiceFieldsTo(Interpreter):
 
     def choicefield(self, tree):
         name = tree.children[0]
-        (typ, constraints) = type_and_constraints(tree.children[1])
+        (typ, constraints, _) = type_and_constraints(tree.children[1])
 
         if typ != "null":
             self.fields_to += f"""\
@@ -197,7 +202,7 @@ class ChoiceFieldsFrom(Interpreter):
 
     def choicefield(self, tree):
         name = tree.children[0]
-        (typ, constraints) = type_and_constraints(tree.children[1])
+        (typ, constraints, _) = type_and_constraints(tree.children[1])
 
         if typ != "null":
             self.fields_from += f"""\
@@ -263,7 +268,7 @@ class IeFields(Interpreter):
         name = tree.children[0]
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
-        (typ, constraints) = type_and_constraints(tree.children[3])
+        (typ, constraints, _) = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
     pub {name}: {typ},
 """
@@ -291,7 +296,7 @@ class IeFields(Interpreter):
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
         typ = tree.children[3]
-        (typ, constraints) = type_and_constraints(tree.children[3])
+        (typ, constraints, _) = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
@@ -367,7 +372,7 @@ class StructInterpreter(Interpreter):
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Copy)]
+# [derive(Clone, Copy)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
@@ -398,7 +403,7 @@ pub enum {name} {{
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
-        (inner, constraints) = type_and_constraints(tree.children[1])
+        (inner, constraints, _) = type_and_constraints(tree.children[1])
         # inner = tree.children[1].data
         ub = None
         lb = None
@@ -491,10 +496,10 @@ pub struct {name} {{
 """
         return name
 
-    # def comment(self, tree, comment=""):
-    #     if comment != "":
-    #         comment = " - " + comment
-    #     self.outfile += "// " + tree.children[0] + comment + "\n"
+    def comment(self, tree, comment=""):
+        if comment != "":
+            comment = " - " + comment
+        self.outfile += "// " + tree.children[0] + comment + "\n"
 
     def objectdef(self, tree):
         print("Warning - objectdef not implemented")
@@ -544,7 +549,7 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
         output = """\
 
 // TriggeringMessage
-# [derive(Copy)]
+# [derive(Clone, Copy)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -574,7 +579,7 @@ pub struct WlanMeasurementConfiguration {
 }
 
 // WlanRtt
-# [derive(Copy)]
+# [derive(Clone, Copy)]
 pub enum WlanRtt {
     Thing1,
 }
@@ -628,7 +633,7 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
         output = """\
 
 // MaximumIntegrityProtectedDataRate
-# [derive(Copy)]
+# [derive(Clone, Copy)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
@@ -655,7 +660,7 @@ pub enum EventTrigger {
 }
 
 // OutOfCoverage
-# [derive(Copy)]
+# [derive(Clone, Copy)]
 pub enum OutOfCoverage {
     True,
 }

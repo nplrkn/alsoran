@@ -1405,11 +1405,6 @@ dependencies = [
 [[package]]
 name = "ngap"
 version = "0.1.0"
-dependencies = [
- "asn1",
- "num-derive",
- "num-traits",
-]
 
 [[package]]
 name = "node-control-api"
