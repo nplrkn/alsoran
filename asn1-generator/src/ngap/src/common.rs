@@ -3,8 +3,10 @@
 use bitvec::prelude::*;
 pub type BitString = BitVec<u8, Msb0>;
 
+
+
 // Criticality
-#[derive(Clone, Copy)]
+# [derive(Clone, Copy)]
 pub enum Criticality {
     Reject,
     Ignore,
@@ -12,7 +14,7 @@ pub enum Criticality {
 }
 
 // Presence
-#[derive(Clone, Copy)]
+# [derive(Clone, Copy)]
 pub enum Presence {
     Optional,
     Conditional,
@@ -20,26 +22,26 @@ pub enum Presence {
 }
 
 // PrivateIeId
-#[derive(Clone)]
+# [derive(Clone)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
 }
 
 // ProcedureCode
-#[derive(Clone)]
+# [derive(Clone)]
 pub struct ProcedureCode(pub u8);
 
 // ProtocolExtensionId
-#[derive(Clone)]
+# [derive(Clone)]
 pub struct ProtocolExtensionId(pub u16);
 
 // ProtocolIeId
-#[derive(Clone)]
+# [derive(Clone)]
 pub struct ProtocolIeId(pub u16);
 
 // TriggeringMessage
-#[derive(Clone, Copy)]
+# [derive(Clone, Copy)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,

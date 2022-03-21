@@ -71,7 +71,7 @@ def type_and_constraints(typ):
 
 def decode_expression(tree):
     (typ, constraints, _) = type_and_constraints(tree)
-    return f"""{typ.replace("Vec<","Vec::<")}::from_aper(decoder, {constraints})?"""
+    return f"""{typ}::decode(data)?"""
 
 
 class StructFieldsFrom(Interpreter):
@@ -283,7 +283,9 @@ class IeFields(Interpreter):
 """
         self.num_mandatory_fields += 1
         self.mandatory += f"""\
-        let {name} = {name}.ok_or(DecodeError::InvalidChoice)?;
+        let {name} = {name}.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE {name}"
+        )))?
 """
         self.mandatory_fields_to += f"""\
         {to_aper_unconstrained(f"({id} as u16)")}?;
@@ -453,6 +455,38 @@ pub struct {name}(pub {inner});
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
+
+impl AperCodec for {orig_name} {{
+    type Output = {orig_name};
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
+{field_interpreter.mut_field_vars}
+        for _ in 0..len {{
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {{
+{field_interpreter.matches}\
+                _ => {{
+                    if let Criticality::Reject = criticality {{
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {{}} with criticality reject",
+                            x
+                        )));
+                    }}
+                }}
+            }}
+        }}
+{field_interpreter.mandatory}\
+        Ok(Self {{
+{field_interpreter.self_fields}\
+        }})
+    }}
+}}
+
 """
 
     def struct(self, tree):
@@ -686,6 +720,48 @@ pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_paging_priority: Option<Vec<u8>>,
 }
+
+impl AperCodec for PduSessionResourceSetupRequest {
+    type Output = PduSessionResourceSetupRequest;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
+        let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
+        let mut ran_paging_priority: Option<Vec<u8>> = None;
+
+        for _ in 0..len {
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                10 => {
+                    amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?);
+                }
+                83 => {
+                    ran_paging_priority = Some(aper::decode::decode_octetstring(data, None, None, false)?);
+                }
+                x => {
+                    if let Criticality::Reject = criticality {
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
+                    }
+                }
+            }
+        }
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE amf_ue_ngap_id"
+        )))?;
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_paging_priority,
+        })
+    }
+}
+
 """, constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
 
     def test_bit_string(self):

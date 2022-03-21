@@ -11,6 +11,9 @@ USE_ASN1 = """
 use bitvec::prelude::*;
 pub type BitString = BitVec<u8, Msb0>;
 """
+USE_APER_TRAIT = """
+use asn1_codecs::aper::{AperCodec, AperCodecData, AperCodecError};
+"""
 USE_COMMON = "use super::common::*;\n"
 USE_IES = "use super::ies::*;"
 
@@ -67,6 +70,7 @@ pub mod pdu;
             + i
             + "\n"
             + USE_ASN1
+            + USE_APER_TRAIT
             + USE_COMMON
             + USE_IES
             + "\n\n")

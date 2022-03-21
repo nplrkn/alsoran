@@ -2787,6 +2787,102 @@ pub struct PduSessionResourceModifyRequestTransfer {
     pub security_indication: Option<SecurityIndication>,
 }
 
+impl AperCodec for PduSessionResourceModifyRequestTransfer {
+    type Output = PduSessionResourceModifyRequestTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        // extension marker TODO
+        let len = decoder.decode_length()?;
+        let mut pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate> =
+            None;
+        let mut ul_ngu_up_tnl_modify_list: Option<UlNguUpTnlModifyList> = None;
+        let mut network_instance: Option<NetworkInstance> = None;
+        let mut qos_flow_add_or_modify_request_list: Option<QosFlowAddOrModifyRequestList> = None;
+        let mut qos_flow_to_release_list: Option<QosFlowListWithCause> = None;
+        let mut additional_ul_ngu_up_tnl_information: Option<UpTransportLayerInformationList> =
+            None;
+        let mut common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut additional_redundant_ul_ngu_up_tnl_information: Option<
+            UpTransportLayerInformationList,
+        > = None;
+        let mut redundant_common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut redundant_ul_ngu_up_tnl_information: Option<UpTransportLayerInformation> = None;
+        let mut security_indication: Option<SecurityIndication> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                130 => {
+                    pdu_session_aggregate_maximum_bit_rate = Some(
+                        PduSessionAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                140 => {
+                    ul_ngu_up_tnl_modify_list =
+                        Some(UlNguUpTnlModifyList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                129 => {
+                    network_instance = Some(NetworkInstance::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                135 => {
+                    qos_flow_add_or_modify_request_list = Some(
+                        QosFlowAddOrModifyRequestList::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                137 => {
+                    qos_flow_to_release_list =
+                        Some(QosFlowListWithCause::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                126 => {
+                    additional_ul_ngu_up_tnl_information = Some(
+                        UpTransportLayerInformationList::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                166 => {
+                    common_network_instance =
+                        Some(CommonNetworkInstance::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                186 => {
+                    additional_redundant_ul_ngu_up_tnl_information = Some(
+                        UpTransportLayerInformationList::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                190 => {
+                    redundant_common_network_instance =
+                        Some(CommonNetworkInstance::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                195 => {
+                    redundant_ul_ngu_up_tnl_information = Some(
+                        UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                138 => {
+                    security_indication =
+                        Some(SecurityIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            pdu_session_aggregate_maximum_bit_rate,
+            ul_ngu_up_tnl_modify_list,
+            network_instance,
+            qos_flow_add_or_modify_request_list,
+            qos_flow_to_release_list,
+            additional_ul_ngu_up_tnl_information,
+            common_network_instance,
+            additional_redundant_ul_ngu_up_tnl_information,
+            redundant_common_network_instance,
+            redundant_ul_ngu_up_tnl_information,
+            security_indication,
+        })
+    }
+}
+
 // PduSessionResourceModifyResponseTransfer
 #[derive(Clone)]
 pub struct PduSessionResourceModifyResponseTransfer {
@@ -3043,6 +3139,130 @@ pub struct PduSessionResourceSetupRequestTransfer {
     pub additional_redundant_ul_ngu_up_tnl_information: Option<UpTransportLayerInformationList>,
     pub redundant_common_network_instance: Option<CommonNetworkInstance>,
     pub redundant_pdu_session_information: Option<RedundantPduSessionInformation>,
+}
+
+impl AperCodec for PduSessionResourceSetupRequestTransfer {
+    type Output = PduSessionResourceSetupRequestTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        // extension marker TODO
+        let len = decoder.decode_length()?;
+        let mut pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate> =
+            None;
+        let mut ul_ngu_up_tnl_information: Option<UpTransportLayerInformation> = None;
+        let mut additional_ul_ngu_up_tnl_information: Option<UpTransportLayerInformationList> =
+            None;
+        let mut data_forwarding_not_possible: Option<DataForwardingNotPossible> = None;
+        let mut pdu_session_type: Option<PduSessionType> = None;
+        let mut security_indication: Option<SecurityIndication> = None;
+        let mut network_instance: Option<NetworkInstance> = None;
+        let mut qos_flow_setup_request_list: Option<QosFlowSetupRequestList> = None;
+        let mut common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut direct_forwarding_path_availability: Option<DirectForwardingPathAvailability> =
+            None;
+        let mut redundant_ul_ngu_up_tnl_information: Option<UpTransportLayerInformation> = None;
+        let mut additional_redundant_ul_ngu_up_tnl_information: Option<
+            UpTransportLayerInformationList,
+        > = None;
+        let mut redundant_common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut redundant_pdu_session_information: Option<RedundantPduSessionInformation> = None;
+
+        for _ in 0..len {
+            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
+            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            match id {
+                130 => {
+                    pdu_session_aggregate_maximum_bit_rate = Some(
+                        PduSessionAggregateMaximumBitRate::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                139 => {
+                    ul_ngu_up_tnl_information = Some(UpTransportLayerInformation::from_aper(
+                        decoder,
+                        UNCONSTRAINED,
+                    )?);
+                }
+                126 => {
+                    additional_ul_ngu_up_tnl_information = Some(
+                        UpTransportLayerInformationList::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                127 => {
+                    data_forwarding_not_possible = Some(DataForwardingNotPossible::from_aper(
+                        decoder,
+                        UNCONSTRAINED,
+                    )?);
+                }
+                134 => {
+                    pdu_session_type = Some(PduSessionType::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                138 => {
+                    security_indication =
+                        Some(SecurityIndication::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                129 => {
+                    network_instance = Some(NetworkInstance::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                136 => {
+                    qos_flow_setup_request_list =
+                        Some(QosFlowSetupRequestList::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                166 => {
+                    common_network_instance =
+                        Some(CommonNetworkInstance::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                22 => {
+                    direct_forwarding_path_availability = Some(
+                        DirectForwardingPathAvailability::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                195 => {
+                    redundant_ul_ngu_up_tnl_information = Some(
+                        UpTransportLayerInformation::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                186 => {
+                    additional_redundant_ul_ngu_up_tnl_information = Some(
+                        UpTransportLayerInformationList::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                190 => {
+                    redundant_common_network_instance =
+                        Some(CommonNetworkInstance::from_aper(decoder, UNCONSTRAINED)?);
+                }
+                197 => {
+                    redundant_pdu_session_information = Some(
+                        RedundantPduSessionInformation::from_aper(decoder, UNCONSTRAINED)?,
+                    );
+                }
+                _ => {
+                    if let Criticality::Reject = criticality {
+                        return Err(DecodeError::InvalidChoice);
+                    }
+                }
+            }
+        }
+        let ul_ngu_up_tnl_information =
+            ul_ngu_up_tnl_information.ok_or(DecodeError::InvalidChoice)?;
+        let pdu_session_type = pdu_session_type.ok_or(DecodeError::InvalidChoice)?;
+        let qos_flow_setup_request_list =
+            qos_flow_setup_request_list.ok_or(DecodeError::InvalidChoice)?;
+        Ok(Self {
+            pdu_session_aggregate_maximum_bit_rate,
+            ul_ngu_up_tnl_information,
+            additional_ul_ngu_up_tnl_information,
+            data_forwarding_not_possible,
+            pdu_session_type,
+            security_indication,
+            network_instance,
+            qos_flow_setup_request_list,
+            common_network_instance,
+            direct_forwarding_path_availability,
+            redundant_ul_ngu_up_tnl_information,
+            additional_redundant_ul_ngu_up_tnl_information,
+            redundant_common_network_instance,
+            redundant_pdu_session_information,
+        })
+    }
 }
 
 // PduSessionResourceSetupResponseTransfer
