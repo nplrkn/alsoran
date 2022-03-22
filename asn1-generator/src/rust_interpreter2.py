@@ -11,16 +11,8 @@ from parser import parse_string, parse_file
 from transformer import transform
 
 
-def to_aper_unconstrained(t1):
-    return to_aper(t1, "UNCONSTRAINED")
-
-
-def to_aper(t1, constraints):
-    return f"{t1}.to_aper(enc, {constraints})"
-
-
-EXTENSION_TO = f"""
-        {to_aper_unconstrained("false")}?;"""
+def bool_to_rust(b):
+    return "true" if b else "false"
 
 
 def type_and_constraints(typ):
@@ -71,6 +63,9 @@ def type_and_constraints(typ):
 
 def decode_expression(tree):
     (typ, constraints, _) = type_and_constraints(tree)
+    if typ == "Vec<u8>":
+        return "aper::decode::decode_octetstring(data, None, None, false)?"
+    else:
     return f"""{typ}::decode(data)?"""
 
 
@@ -285,7 +280,7 @@ class IeFields(Interpreter):
         self.mandatory += f"""\
         let {name} = {name}.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE {name}"
-        )))?
+        )))?;
 """
         self.mandatory_fields_to += f"""\
         {to_aper_unconstrained(f"({id} as u16)")}?;
@@ -298,7 +293,7 @@ class IeFields(Interpreter):
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
         typ = tree.children[3]
-        (typ, constraints, _) = type_and_constraints(tree.children[3])
+        (typ, constraints, _) = type_and_attributes(tree.children[3])
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
@@ -418,7 +413,8 @@ pub enum {name} {{
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone)]
+#[derive(Clone, AperCodec)]
+#[asn(type = {asntype}, )
 pub struct {name}(pub {inner});
 """
 
@@ -461,16 +457,16 @@ impl AperCodec for {orig_name} {{
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
         let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
-        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 {field_interpreter.mut_field_vars}
         for _ in 0..len {{
-            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
             let criticality = Criticality::decode(data)?;
             let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {field_interpreter.matches}\
-                _ => {{
+                x => {{
                     if let Criticality::Reject = criticality {{
                         return Err(aper::AperCodecError::new(format!(
                             "Unrecognised IE type {{}} with criticality reject",
@@ -524,6 +520,7 @@ impl AperCodec for {orig_name} {{
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone)]
+#[asn(type = "SEQUENCE", extensible = {bool_to_rust(self.extensible)})]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -726,13 +723,13 @@ impl AperCodec for PduSessionResourceSetupRequest {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
-        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_paging_priority: Option<Vec<u8>> = None;
 
         for _ in 0..len {
-            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
             let criticality = Criticality::decode(data)?;
             let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {

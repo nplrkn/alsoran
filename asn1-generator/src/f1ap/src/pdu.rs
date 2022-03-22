@@ -3,8 +3,10 @@
 
 use bitvec::prelude::*;
 pub type BitString = BitVec<u8, Msb0>;
+
 use super::common::*;
 use super::ies::*;
+use asn1_codecs::aper::{AperCodec, AperCodecData, AperCodecError};
 
 // Reset
 #[derive(Clone)]
@@ -17,35 +19,47 @@ pub struct Reset {
 impl AperCodec for Reset {
     type Output = Reset;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut reset_type: Option<ResetType> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 48 => {
-                    reset_type = Some(ResetType::from_aper(decoder, UNCONSTRAINED)?);
+                    reset_type = Some(ResetType::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
-        let reset_type = reset_type.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
+        let reset_type = reset_type.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE reset_type"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -83,8 +97,10 @@ pub struct ResetAcknowledge {
 impl AperCodec for ResetAcknowledge {
     type Output = ResetAcknowledge;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut ue_associated_logical_f1_connection_list_res_ack: Option<
             UeAssociatedLogicalF1ConnectionListResAck,
@@ -92,31 +108,33 @@ impl AperCodec for ResetAcknowledge {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 81 => {
                     ue_associated_logical_f1_connection_list_res_ack =
-                        Some(UeAssociatedLogicalF1ConnectionListResAck::from_aper(
-                            decoder,
-                            UNCONSTRAINED,
-                        )?);
+                        Some(UeAssociatedLogicalF1ConnectionListResAck::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             ue_associated_logical_f1_connection_list_res_ack,
@@ -144,8 +162,10 @@ pub struct ErrorIndication {
 impl AperCodec for ErrorIndication {
     type Output = ErrorIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -153,33 +173,38 @@ impl AperCodec for ErrorIndication {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             gnb_cu_ue_f1ap_id,
@@ -206,8 +231,10 @@ pub struct F1SetupRequest {
 impl AperCodec for F1SetupRequest {
     type Output = F1SetupRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_du_id: Option<GnbDuId> = None;
         let mut gnb_du_name: Option<GnbDuName> = None;
@@ -218,48 +245,53 @@ impl AperCodec for F1SetupRequest {
         let mut extended_gnb_cu_name: Option<ExtendedGnbCuName> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 42 => {
-                    gnb_du_id = Some(GnbDuId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_id = Some(GnbDuId::decode(data)?);
                 }
                 45 => {
-                    gnb_du_name = Some(GnbDuName::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_name = Some(GnbDuName::decode(data)?);
                 }
                 44 => {
-                    gnb_du_served_cells_list =
-                        Some(GnbDuServedCellsList::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_served_cells_list = Some(GnbDuServedCellsList::decode(data)?);
                 }
                 171 => {
-                    gnb_du_rrc_version = Some(RrcVersion::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_rrc_version = Some(RrcVersion::decode(data)?);
                 }
                 254 => {
-                    transport_layer_address_info = Some(TransportLayerAddressInfo::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?);
                 }
                 281 => {
-                    bap_address = Some(BapAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    bap_address = Some(BapAddress::decode(data)?);
                 }
                 427 => {
-                    extended_gnb_cu_name =
-                        Some(ExtendedGnbCuName::from_aper(decoder, UNCONSTRAINED)?);
+                    extended_gnb_cu_name = Some(ExtendedGnbCuName::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_id = gnb_du_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_rrc_version = gnb_du_rrc_version.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_du_id = gnb_du_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_id"
+        )))?;
+        let gnb_du_rrc_version = gnb_du_rrc_version.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_rrc_version"
+        )))?;
         Ok(Self {
             transaction_id,
             gnb_du_id,
@@ -293,8 +325,10 @@ pub struct F1SetupResponse {
 impl AperCodec for F1SetupResponse {
     type Output = F1SetupResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_name: Option<GnbCuName> = None;
         let mut cells_to_be_activated_list: Option<CellsToBeActivatedList> = None;
@@ -305,48 +339,50 @@ impl AperCodec for F1SetupResponse {
         let mut extended_gnb_du_name: Option<ExtendedGnbDuName> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 82 => {
-                    gnb_cu_name = Some(GnbCuName::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_name = Some(GnbCuName::decode(data)?);
                 }
                 3 => {
-                    cells_to_be_activated_list =
-                        Some(CellsToBeActivatedList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_activated_list = Some(CellsToBeActivatedList::decode(data)?);
                 }
                 170 => {
-                    gnb_cu_rrc_version = Some(RrcVersion::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_rrc_version = Some(RrcVersion::decode(data)?);
                 }
                 254 => {
-                    transport_layer_address_info = Some(TransportLayerAddressInfo::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?);
                 }
                 287 => {
-                    ul_bh_non_up_traffic_mapping =
-                        Some(UlBhNonUpTrafficMapping::from_aper(decoder, UNCONSTRAINED)?);
+                    ul_bh_non_up_traffic_mapping = Some(UlBhNonUpTrafficMapping::decode(data)?);
                 }
                 281 => {
-                    bap_address = Some(BapAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    bap_address = Some(BapAddress::decode(data)?);
                 }
                 426 => {
-                    extended_gnb_du_name =
-                        Some(ExtendedGnbDuName::from_aper(decoder, UNCONSTRAINED)?);
+                    extended_gnb_du_name = Some(ExtendedGnbDuName::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_cu_rrc_version = gnb_cu_rrc_version.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_cu_rrc_version = gnb_cu_rrc_version.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_rrc_version"
+        )))?;
         Ok(Self {
             transaction_id,
             gnb_cu_name,
@@ -376,39 +412,48 @@ pub struct F1SetupFailure {
 impl AperCodec for F1SetupFailure {
     type Output = F1SetupFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -435,8 +480,10 @@ pub struct GnbDuConfigurationUpdate {
 impl AperCodec for GnbDuConfigurationUpdate {
     type Output = GnbDuConfigurationUpdate;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut served_cells_to_add_list: Option<ServedCellsToAddList> = None;
         let mut served_cells_to_modify_list: Option<ServedCellsToModifyList> = None;
@@ -450,54 +497,52 @@ impl AperCodec for GnbDuConfigurationUpdate {
         let mut transport_layer_address_info: Option<TransportLayerAddressInfo> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 58 => {
-                    served_cells_to_add_list =
-                        Some(ServedCellsToAddList::from_aper(decoder, UNCONSTRAINED)?);
+                    served_cells_to_add_list = Some(ServedCellsToAddList::decode(data)?);
                 }
                 62 => {
-                    served_cells_to_modify_list =
-                        Some(ServedCellsToModifyList::from_aper(decoder, UNCONSTRAINED)?);
+                    served_cells_to_modify_list = Some(ServedCellsToModifyList::decode(data)?);
                 }
                 60 => {
-                    served_cells_to_delete_list =
-                        Some(ServedCellsToDeleteList::from_aper(decoder, UNCONSTRAINED)?);
+                    served_cells_to_delete_list = Some(ServedCellsToDeleteList::decode(data)?);
                 }
                 89 => {
-                    cells_status_list = Some(CellsStatusList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_status_list = Some(CellsStatusList::decode(data)?);
                 }
                 189 => {
-                    dedicated_si_delivery_needed_ue_list = Some(
-                        DedicatedSiDeliveryNeededUeList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    dedicated_si_delivery_needed_ue_list =
+                        Some(DedicatedSiDeliveryNeededUeList::decode(data)?);
                 }
                 42 => {
-                    gnb_du_id = Some(GnbDuId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_id = Some(GnbDuId::decode(data)?);
                 }
                 228 => {
-                    gnb_du_tnl_association_to_remove_list = Some(
-                        GnbDuTnlAssociationToRemoveList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    gnb_du_tnl_association_to_remove_list =
+                        Some(GnbDuTnlAssociationToRemoveList::decode(data)?);
                 }
                 254 => {
-                    transport_layer_address_info = Some(TransportLayerAddressInfo::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             served_cells_to_add_list,
@@ -551,8 +596,10 @@ pub struct GnbDuConfigurationUpdateAcknowledge {
 impl AperCodec for GnbDuConfigurationUpdateAcknowledge {
     type Output = GnbDuConfigurationUpdateAcknowledge;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_to_be_activated_list: Option<CellsToBeActivatedList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -562,45 +609,44 @@ impl AperCodec for GnbDuConfigurationUpdateAcknowledge {
         let mut bap_address: Option<BapAddress> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 3 => {
-                    cells_to_be_activated_list =
-                        Some(CellsToBeActivatedList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_activated_list = Some(CellsToBeActivatedList::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 5 => {
-                    cells_to_be_deactivated_list =
-                        Some(CellsToBeDeactivatedList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_deactivated_list = Some(CellsToBeDeactivatedList::decode(data)?);
                 }
                 254 => {
-                    transport_layer_address_info = Some(TransportLayerAddressInfo::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?);
                 }
                 287 => {
-                    ul_bh_non_up_traffic_mapping =
-                        Some(UlBhNonUpTrafficMapping::from_aper(decoder, UNCONSTRAINED)?);
+                    ul_bh_non_up_traffic_mapping = Some(UlBhNonUpTrafficMapping::decode(data)?);
                 }
                 281 => {
-                    bap_address = Some(BapAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    bap_address = Some(BapAddress::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             cells_to_be_activated_list,
@@ -625,39 +671,48 @@ pub struct GnbDuConfigurationUpdateFailure {
 impl AperCodec for GnbDuConfigurationUpdateFailure {
     type Output = GnbDuConfigurationUpdateFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -687,8 +742,10 @@ pub struct GnbCuConfigurationUpdate {
 impl AperCodec for GnbCuConfigurationUpdate {
     type Output = GnbCuConfigurationUpdate;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_to_be_activated_list: Option<CellsToBeActivatedList> = None;
         let mut cells_to_be_deactivated_list: Option<CellsToBeDeactivatedList> = None;
@@ -705,71 +762,64 @@ impl AperCodec for GnbCuConfigurationUpdate {
         let mut bap_address: Option<BapAddress> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 3 => {
-                    cells_to_be_activated_list =
-                        Some(CellsToBeActivatedList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_activated_list = Some(CellsToBeActivatedList::decode(data)?);
                 }
                 5 => {
-                    cells_to_be_deactivated_list =
-                        Some(CellsToBeDeactivatedList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_deactivated_list = Some(CellsToBeDeactivatedList::decode(data)?);
                 }
                 121 => {
-                    gnb_cu_tnl_association_to_add_list = Some(
-                        GnbCuTnlAssociationToAddList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    gnb_cu_tnl_association_to_add_list =
+                        Some(GnbCuTnlAssociationToAddList::decode(data)?);
                 }
                 123 => {
-                    gnb_cu_tnl_association_to_remove_list = Some(
-                        GnbCuTnlAssociationToRemoveList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    gnb_cu_tnl_association_to_remove_list =
+                        Some(GnbCuTnlAssociationToRemoveList::decode(data)?);
                 }
                 125 => {
-                    gnb_cu_tnl_association_to_update_list = Some(
-                        GnbCuTnlAssociationToUpdateList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    gnb_cu_tnl_association_to_update_list =
+                        Some(GnbCuTnlAssociationToUpdateList::decode(data)?);
                 }
                 129 => {
-                    cells_to_be_barred_list =
-                        Some(CellsToBeBarredList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_barred_list = Some(CellsToBeBarredList::decode(data)?);
                 }
                 105 => {
-                    protected_eutra_resources_list = Some(ProtectedEutraResourcesList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    protected_eutra_resources_list =
+                        Some(ProtectedEutraResourcesList::decode(data)?);
                 }
                 244 => {
-                    neighbour_cell_information_list = Some(
-                        NeighbourCellInformationList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    neighbour_cell_information_list =
+                        Some(NeighbourCellInformationList::decode(data)?);
                 }
                 254 => {
-                    transport_layer_address_info = Some(TransportLayerAddressInfo::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?);
                 }
                 287 => {
-                    ul_bh_non_up_traffic_mapping =
-                        Some(UlBhNonUpTrafficMapping::from_aper(decoder, UNCONSTRAINED)?);
+                    ul_bh_non_up_traffic_mapping = Some(UlBhNonUpTrafficMapping::decode(data)?);
                 }
                 281 => {
-                    bap_address = Some(BapAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    bap_address = Some(BapAddress::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             cells_to_be_activated_list,
@@ -830,8 +880,10 @@ pub struct GnbCuConfigurationUpdateAcknowledge {
 impl AperCodec for GnbCuConfigurationUpdateAcknowledge {
     type Output = GnbCuConfigurationUpdateAcknowledge;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_failed_to_be_activated_list: Option<CellsFailedToBeActivatedList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -844,50 +896,48 @@ impl AperCodec for GnbCuConfigurationUpdateAcknowledge {
         let mut transport_layer_address_info: Option<TransportLayerAddressInfo> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 1 => {
-                    cells_failed_to_be_activated_list = Some(
-                        CellsFailedToBeActivatedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    cells_failed_to_be_activated_list =
+                        Some(CellsFailedToBeActivatedList::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 132 => {
-                    gnb_cu_tnl_association_setup_list = Some(
-                        GnbCuTnlAssociationSetupList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    gnb_cu_tnl_association_setup_list =
+                        Some(GnbCuTnlAssociationSetupList::decode(data)?);
                 }
                 134 => {
-                    gnb_cu_tnl_association_failed_to_setup_list = Some(
-                        GnbCuTnlAssociationFailedToSetupList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    gnb_cu_tnl_association_failed_to_setup_list =
+                        Some(GnbCuTnlAssociationFailedToSetupList::decode(data)?);
                 }
                 189 => {
-                    dedicated_si_delivery_needed_ue_list = Some(
-                        DedicatedSiDeliveryNeededUeList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    dedicated_si_delivery_needed_ue_list =
+                        Some(DedicatedSiDeliveryNeededUeList::decode(data)?);
                 }
                 254 => {
-                    transport_layer_address_info = Some(TransportLayerAddressInfo::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             cells_failed_to_be_activated_list,
@@ -924,39 +974,48 @@ pub struct GnbCuConfigurationUpdateFailure {
 impl AperCodec for GnbCuConfigurationUpdateFailure {
     type Output = GnbCuConfigurationUpdateFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -979,8 +1038,10 @@ pub struct GnbDuResourceCoordinationRequest {
 impl AperCodec for GnbDuResourceCoordinationRequest {
     type Output = GnbDuResourceCoordinationRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut request_type: Option<RequestType> = None;
         let mut eutra_nr_cell_resource_coordination_req_container: Option<
@@ -991,38 +1052,44 @@ impl AperCodec for GnbDuResourceCoordinationRequest {
         > = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 106 => {
-                    request_type = Some(RequestType::from_aper(decoder, UNCONSTRAINED)?);
+                    request_type = Some(RequestType::decode(data)?);
                 }
                 101 => {
                     eutra_nr_cell_resource_coordination_req_container =
-                        Some(EutraNrCellResourceCoordinationReqContainer::from_aper(
-                            decoder,
-                            UNCONSTRAINED,
-                        )?);
+                        Some(EutraNrCellResourceCoordinationReqContainer::decode(data)?);
                 }
                 213 => {
-                    ignore_resource_coordination_container = Some(
-                        IgnoreResourceCoordinationContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    ignore_resource_coordination_container =
+                        Some(IgnoreResourceCoordinationContainer::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let request_type = request_type.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let request_type = request_type.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE request_type"
+        )))?;
         let eutra_nr_cell_resource_coordination_req_container =
-            eutra_nr_cell_resource_coordination_req_container.ok_or(DecodeError::InvalidChoice)?;
+            eutra_nr_cell_resource_coordination_req_container.ok_or(aper::AperCodecError::new(
+                format!("Missing mandatory IE eutra_nr_cell_resource_coordination_req_container"),
+            ))?;
         Ok(Self {
             transaction_id,
             request_type,
@@ -1043,38 +1110,47 @@ pub struct GnbDuResourceCoordinationResponse {
 impl AperCodec for GnbDuResourceCoordinationResponse {
     type Output = GnbDuResourceCoordinationResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut eutra_nr_cell_resource_coordination_req_ack_container: Option<
             EutraNrCellResourceCoordinationReqAckContainer,
         > = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 102 => {
-                    eutra_nr_cell_resource_coordination_req_ack_container =
-                        Some(EutraNrCellResourceCoordinationReqAckContainer::from_aper(
-                            decoder,
-                            UNCONSTRAINED,
-                        )?);
+                    eutra_nr_cell_resource_coordination_req_ack_container = Some(
+                        EutraNrCellResourceCoordinationReqAckContainer::decode(data)?,
+                    );
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         let eutra_nr_cell_resource_coordination_req_ack_container =
-            eutra_nr_cell_resource_coordination_req_ack_container
-                .ok_or(DecodeError::InvalidChoice)?;
+            eutra_nr_cell_resource_coordination_req_ack_container.ok_or(
+                aper::AperCodecError::new(format!(
+                    "Missing mandatory IE eutra_nr_cell_resource_coordination_req_ack_container"
+                )),
+            )?;
         Ok(Self {
             transaction_id,
             eutra_nr_cell_resource_coordination_req_ack_container,
@@ -1127,8 +1203,10 @@ pub struct UeContextSetupRequest {
 impl AperCodec for UeContextSetupRequest {
     type Output = UeContextSetupRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut sp_cell_id: Option<Nrcgi> = None;
@@ -1178,161 +1256,150 @@ impl AperCodec for UeContextSetupRequest {
         let mut f1c_transfer_path: Option<F1cTransferPath> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 63 => {
-                    sp_cell_id = Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    sp_cell_id = Some(Nrcgi::decode(data)?);
                 }
                 107 => {
-                    serv_cell_index = Some(ServCellIndex::from_aper(decoder, UNCONSTRAINED)?);
+                    serv_cell_index = Some(ServCellIndex::decode(data)?);
                 }
                 96 => {
-                    sp_cell_ul_configured =
-                        Some(CellUlConfigured::from_aper(decoder, UNCONSTRAINED)?);
+                    sp_cell_ul_configured = Some(CellUlConfigured::decode(data)?);
                 }
                 9 => {
-                    c_uto_durrc_information =
-                        Some(CUtoDurrcInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    c_uto_durrc_information = Some(CUtoDurrcInformation::decode(data)?);
                 }
                 90 => {
-                    candidate_sp_cell_list =
-                        Some(CandidateSpCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    candidate_sp_cell_list = Some(CandidateSpCellList::decode(data)?);
                 }
                 38 => {
-                    drx_cycle = Some(DrxCycle::from_aper(decoder, UNCONSTRAINED)?);
+                    drx_cycle = Some(DrxCycle::decode(data)?);
                 }
                 49 => {
-                    resource_coordination_transfer_container = Some(
-                        ResourceCoordinationTransferContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_container =
+                        Some(ResourceCoordinationTransferContainer::decode(data)?);
                 }
                 54 => {
-                    s_cell_to_be_setup_list =
-                        Some(SCellToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    s_cell_to_be_setup_list = Some(SCellToBeSetupList::decode(data)?);
                 }
                 74 => {
-                    sr_bs_to_be_setup_list =
-                        Some(SrBsToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_to_be_setup_list = Some(SrBsToBeSetupList::decode(data)?);
                 }
                 35 => {
-                    dr_bs_to_be_setup_list =
-                        Some(DrBsToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_to_be_setup_list = Some(DrBsToBeSetupList::decode(data)?);
                 }
                 97 => {
-                    inactivity_monitoring_request = Some(InactivityMonitoringRequest::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    inactivity_monitoring_request =
+                        Some(InactivityMonitoringRequest::decode(data)?);
                 }
                 108 => {
-                    rat_frequency_priority_information = Some(
-                        RatFrequencyPriorityInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    rat_frequency_priority_information =
+                        Some(RatFrequencyPriorityInformation::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 126 => {
-                    masked_imeisv = Some(MaskedImeisv::from_aper(decoder, UNCONSTRAINED)?);
+                    masked_imeisv = Some(MaskedImeisv::decode(data)?);
                 }
                 165 => {
-                    serving_plmn = Some(PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?);
+                    serving_plmn = Some(PlmnIdentity::decode(data)?);
                 }
                 158 => {
-                    gnb_du_ue_ambr_ul = Some(BitRate::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_ambr_ul = Some(BitRate::decode(data)?);
                 }
                 184 => {
-                    rrc_delivery_status_request =
-                        Some(RrcDeliveryStatusRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?);
                 }
                 195 => {
-                    resource_coordination_transfer_information = Some(
-                        ResourceCoordinationTransferInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_information =
+                        Some(ResourceCoordinationTransferInformation::decode(data)?);
                 }
                 182 => {
-                    serving_cell_mo = Some(ServingCellMo::from_aper(decoder, UNCONSTRAINED)?);
+                    serving_cell_mo = Some(ServingCellMo::decode(data)?);
                 }
                 217 => {
-                    new_gnb_cu_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    new_gnb_cu_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 226 => {
-                    ranueid = Some(Ranueid::from_aper(decoder, UNCONSTRAINED)?);
+                    ranueid = Some(Ranueid::decode(data)?);
                 }
                 242 => {
-                    trace_activation = Some(TraceActivation::from_aper(decoder, UNCONSTRAINED)?);
+                    trace_activation = Some(TraceActivation::decode(data)?);
                 }
                 248 => {
-                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?);
                 }
                 258 => {
-                    bh_channels_to_be_setup_list =
-                        Some(BhChannelsToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    bh_channels_to_be_setup_list = Some(BhChannelsToBeSetupList::decode(data)?);
                 }
                 282 => {
-                    configured_bap_address = Some(BapAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    configured_bap_address = Some(BapAddress::decode(data)?);
                 }
                 306 => {
-                    nrv2x_services_authorized =
-                        Some(Nrv2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                    nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?);
                 }
                 307 => {
-                    ltev2x_services_authorized =
-                        Some(Ltev2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                    ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?);
                 }
                 308 => {
-                    nrue_sidelink_aggregate_maximum_bitrate = Some(
-                        NrueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    nrue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?);
                 }
                 309 => {
-                    lteue_sidelink_aggregate_maximum_bitrate = Some(
-                        LteueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    lteue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?);
                 }
                 340 => {
-                    pc5_link_ambr = Some(BitRate::from_aper(decoder, UNCONSTRAINED)?);
+                    pc5_link_ambr = Some(BitRate::decode(data)?);
                 }
                 330 => {
-                    sldr_bs_to_be_setup_list =
-                        Some(SldrBsToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_to_be_setup_list = Some(SldrBsToBeSetupList::decode(data)?);
                 }
                 373 => {
-                    conditional_inter_du_mobility_information = Some(
-                        ConditionalInterDuMobilityInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    conditional_inter_du_mobility_information =
+                        Some(ConditionalInterDuMobilityInformation::decode(data)?);
                 }
                 377 => {
-                    management_based_mdt_plmn_list =
-                        Some(MdtPlmnList::from_aper(decoder, UNCONSTRAINED)?);
+                    management_based_mdt_plmn_list = Some(MdtPlmnList::decode(data)?);
                 }
                 382 => {
-                    serving_nid = Some(Nid::from_aper(decoder, UNCONSTRAINED)?);
+                    serving_nid = Some(Nid::decode(data)?);
                 }
                 428 => {
-                    f1c_transfer_path = Some(F1cTransferPath::from_aper(decoder, UNCONSTRAINED)?);
+                    f1c_transfer_path = Some(F1cTransferPath::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let sp_cell_id = sp_cell_id.ok_or(DecodeError::InvalidChoice)?;
-        let serv_cell_index = serv_cell_index.ok_or(DecodeError::InvalidChoice)?;
-        let c_uto_durrc_information = c_uto_durrc_information.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let sp_cell_id = sp_cell_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE sp_cell_id"
+        )))?;
+        let serv_cell_index = serv_cell_index.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE serv_cell_index"
+        )))?;
+        let c_uto_durrc_information = c_uto_durrc_information.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE c_uto_durrc_information"),
+        ))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -1425,8 +1492,10 @@ pub struct UeContextSetupResponse {
 impl AperCodec for UeContextSetupResponse {
     type Output = UeContextSetupResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
@@ -1449,91 +1518,87 @@ impl AperCodec for UeContextSetupResponse {
         let mut requested_target_cell_global_id: Option<Nrcgi> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 39 => {
-                    d_uto_currc_information =
-                        Some(DUtoCurrcInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?);
                 }
                 95 => {
-                    c_rnti = Some(CRnti::from_aper(decoder, UNCONSTRAINED)?);
+                    c_rnti = Some(CRnti::decode(data)?);
                 }
                 49 => {
-                    resource_coordination_transfer_container = Some(
-                        ResourceCoordinationTransferContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_container =
+                        Some(ResourceCoordinationTransferContainer::decode(data)?);
                 }
                 94 => {
-                    full_configuration =
-                        Some(FullConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    full_configuration = Some(FullConfiguration::decode(data)?);
                 }
                 27 => {
-                    dr_bs_setup_list = Some(DrBsSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_setup_list = Some(DrBsSetupList::decode(data)?);
                 }
                 66 => {
-                    sr_bs_failed_to_be_setup_list =
-                        Some(SrBsFailedToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_failed_to_be_setup_list = Some(SrBsFailedToBeSetupList::decode(data)?);
                 }
                 15 => {
-                    dr_bs_failed_to_be_setup_list =
-                        Some(DrBsFailedToBeSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_failed_to_be_setup_list = Some(DrBsFailedToBeSetupList::decode(data)?);
                 }
                 83 => {
-                    s_cell_failedto_setup_list =
-                        Some(SCellFailedtoSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    s_cell_failedto_setup_list = Some(SCellFailedtoSetupList::decode(data)?);
                 }
                 98 => {
-                    inactivity_monitoring_response = Some(InactivityMonitoringResponse::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    inactivity_monitoring_response =
+                        Some(InactivityMonitoringResponse::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 202 => {
-                    sr_bs_setup_list = Some(SrBsSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_setup_list = Some(SrBsSetupList::decode(data)?);
                 }
                 260 => {
-                    bh_channels_setup_list =
-                        Some(BhChannelsSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    bh_channels_setup_list = Some(BhChannelsSetupList::decode(data)?);
                 }
                 279 => {
-                    bh_channels_failed_to_be_setup_list = Some(
-                        BhChannelsFailedToBeSetupList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    bh_channels_failed_to_be_setup_list =
+                        Some(BhChannelsFailedToBeSetupList::decode(data)?);
                 }
                 324 => {
-                    sldr_bs_setup_list = Some(SldrBsSetupList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_setup_list = Some(SldrBsSetupList::decode(data)?);
                 }
                 316 => {
-                    sldr_bs_failed_to_be_setup_list = Some(SldrBsFailedToBeSetupList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    sldr_bs_failed_to_be_setup_list =
+                        Some(SldrBsFailedToBeSetupList::decode(data)?);
                 }
                 376 => {
-                    requested_target_cell_global_id =
-                        Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    requested_target_cell_global_id = Some(Nrcgi::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let d_uto_currc_information = d_uto_currc_information.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let d_uto_currc_information = d_uto_currc_information.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE d_uto_currc_information"),
+        ))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -1607,8 +1672,10 @@ pub struct UeContextSetupFailure {
 impl AperCodec for UeContextSetupFailure {
     type Output = UeContextSetupFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
@@ -1617,39 +1684,44 @@ impl AperCodec for UeContextSetupFailure {
         let mut requested_target_cell_global_id: Option<Nrcgi> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 92 => {
-                    potential_sp_cell_list =
-                        Some(PotentialSpCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    potential_sp_cell_list = Some(PotentialSpCellList::decode(data)?);
                 }
                 376 => {
-                    requested_target_cell_global_id =
-                        Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    requested_target_cell_global_id = Some(Nrcgi::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -1677,40 +1749,51 @@ pub struct UeContextReleaseRequest {
 impl AperCodec for UeContextReleaseRequest {
     type Output = UeContextReleaseRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut target_cells_to_cancel: Option<TargetCellList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 375 => {
-                    target_cells_to_cancel =
-                        Some(TargetCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    target_cells_to_cancel = Some(TargetCellList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -1737,8 +1820,10 @@ pub struct UeContextReleaseCommand {
 impl AperCodec for UeContextReleaseCommand {
     type Output = UeContextReleaseCommand;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
@@ -1750,49 +1835,56 @@ impl AperCodec for UeContextReleaseCommand {
         let mut target_cells_to_cancel: Option<TargetCellList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 64 => {
-                    srbid = Some(Srbid::from_aper(decoder, UNCONSTRAINED)?);
+                    srbid = Some(Srbid::decode(data)?);
                 }
                 47 => {
-                    old_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    old_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 109 => {
-                    execute_duplication =
-                        Some(ExecuteDuplication::from_aper(decoder, UNCONSTRAINED)?);
+                    execute_duplication = Some(ExecuteDuplication::decode(data)?);
                 }
                 184 => {
-                    rrc_delivery_status_request =
-                        Some(RrcDeliveryStatusRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?);
                 }
                 375 => {
-                    target_cells_to_cancel =
-                        Some(TargetCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    target_cells_to_cancel = Some(TargetCellList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -1818,35 +1910,44 @@ pub struct UeContextReleaseComplete {
 impl AperCodec for UeContextReleaseComplete {
     type Output = UeContextReleaseComplete;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -1910,8 +2011,10 @@ pub struct UeContextModificationRequest {
 impl AperCodec for UeContextModificationRequest {
     type Output = UeContextModificationRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut sp_cell_id: Option<Nrcgi> = None;
@@ -1975,217 +2078,181 @@ impl AperCodec for UeContextModificationRequest {
         let mut scg_indicator: Option<ScgIndicator> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 63 => {
-                    sp_cell_id = Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    sp_cell_id = Some(Nrcgi::decode(data)?);
                 }
                 107 => {
-                    serv_cell_index = Some(ServCellIndex::from_aper(decoder, UNCONSTRAINED)?);
+                    serv_cell_index = Some(ServCellIndex::decode(data)?);
                 }
                 96 => {
-                    sp_cell_ul_configured =
-                        Some(CellUlConfigured::from_aper(decoder, UNCONSTRAINED)?);
+                    sp_cell_ul_configured = Some(CellUlConfigured::decode(data)?);
                 }
                 38 => {
-                    drx_cycle = Some(DrxCycle::from_aper(decoder, UNCONSTRAINED)?);
+                    drx_cycle = Some(DrxCycle::decode(data)?);
                 }
                 9 => {
-                    c_uto_durrc_information =
-                        Some(CUtoDurrcInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    c_uto_durrc_information = Some(CUtoDurrcInformation::decode(data)?);
                 }
                 79 => {
-                    transmission_action_indicator = Some(TransmissionActionIndicator::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    transmission_action_indicator =
+                        Some(TransmissionActionIndicator::decode(data)?);
                 }
                 49 => {
-                    resource_coordination_transfer_container = Some(
-                        ResourceCoordinationTransferContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_container =
+                        Some(ResourceCoordinationTransferContainer::decode(data)?);
                 }
                 87 => {
-                    rrc_reconfiguration_complete_indicator = Some(
-                        RrcReconfigurationCompleteIndicator::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    rrc_reconfiguration_complete_indicator =
+                        Some(RrcReconfigurationCompleteIndicator::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 56 => {
-                    s_cell_to_be_setup_mod_list =
-                        Some(SCellToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    s_cell_to_be_setup_mod_list = Some(SCellToBeSetupModList::decode(data)?);
                 }
                 52 => {
-                    s_cell_to_be_removed_list =
-                        Some(SCellToBeRemovedList::from_aper(decoder, UNCONSTRAINED)?);
+                    s_cell_to_be_removed_list = Some(SCellToBeRemovedList::decode(data)?);
                 }
                 76 => {
-                    sr_bs_to_be_setup_mod_list =
-                        Some(SrBsToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_to_be_setup_mod_list = Some(SrBsToBeSetupModList::decode(data)?);
                 }
                 37 => {
-                    dr_bs_to_be_setup_mod_list =
-                        Some(DrBsToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_to_be_setup_mod_list = Some(DrBsToBeSetupModList::decode(data)?);
                 }
                 31 => {
-                    dr_bs_to_be_modified_list =
-                        Some(DrBsToBeModifiedList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_to_be_modified_list = Some(DrBsToBeModifiedList::decode(data)?);
                 }
                 72 => {
-                    sr_bs_to_be_released_list =
-                        Some(SrBsToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_to_be_released_list = Some(SrBsToBeReleasedList::decode(data)?);
                 }
                 33 => {
-                    dr_bs_to_be_released_list =
-                        Some(DrBsToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_to_be_released_list = Some(DrBsToBeReleasedList::decode(data)?);
                 }
                 97 => {
-                    inactivity_monitoring_request = Some(InactivityMonitoringRequest::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    inactivity_monitoring_request =
+                        Some(InactivityMonitoringRequest::decode(data)?);
                 }
                 108 => {
-                    rat_frequency_priority_information = Some(
-                        RatFrequencyPriorityInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    rat_frequency_priority_information =
+                        Some(RatFrequencyPriorityInformation::decode(data)?);
                 }
                 159 => {
-                    drx_configuration_indicator = Some(DrxConfigurationIndicator::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    drx_configuration_indicator = Some(DrxConfigurationIndicator::decode(data)?);
                 }
                 174 => {
-                    rlc_failure_indication =
-                        Some(RlcFailureIndication::from_aper(decoder, UNCONSTRAINED)?);
+                    rlc_failure_indication = Some(RlcFailureIndication::decode(data)?);
                 }
                 175 => {
-                    uplink_tx_direct_current_list_information = Some(
-                        UplinkTxDirectCurrentListInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    uplink_tx_direct_current_list_information =
+                        Some(UplinkTxDirectCurrentListInformation::decode(data)?);
                 }
                 162 => {
-                    gnb_du_configuration_query =
-                        Some(GnbDuConfigurationQuery::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_configuration_query = Some(GnbDuConfigurationQuery::decode(data)?);
                 }
                 158 => {
-                    gnb_du_ue_ambr_ul = Some(BitRate::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_ambr_ul = Some(BitRate::decode(data)?);
                 }
                 109 => {
-                    execute_duplication =
-                        Some(ExecuteDuplication::from_aper(decoder, UNCONSTRAINED)?);
+                    execute_duplication = Some(ExecuteDuplication::decode(data)?);
                 }
                 184 => {
-                    rrc_delivery_status_request =
-                        Some(RrcDeliveryStatusRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?);
                 }
                 195 => {
-                    resource_coordination_transfer_information = Some(
-                        ResourceCoordinationTransferInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_information =
+                        Some(ResourceCoordinationTransferInformation::decode(data)?);
                 }
                 182 => {
-                    serving_cell_mo = Some(ServingCellMo::from_aper(decoder, UNCONSTRAINED)?);
+                    serving_cell_mo = Some(ServingCellMo::decode(data)?);
                 }
                 215 => {
-                    needfor_gap = Some(NeedforGap::from_aper(decoder, UNCONSTRAINED)?);
+                    needfor_gap = Some(NeedforGap::decode(data)?);
                 }
                 94 => {
-                    full_configuration =
-                        Some(FullConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    full_configuration = Some(FullConfiguration::decode(data)?);
                 }
                 248 => {
-                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?);
                 }
                 253 => {
-                    lower_layer_presence_status_change = Some(
-                        LowerLayerPresenceStatusChange::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    lower_layer_presence_status_change =
+                        Some(LowerLayerPresenceStatusChange::decode(data)?);
                 }
                 267 => {
-                    bh_channels_to_be_setup_mod_list = Some(BhChannelsToBeSetupModList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    bh_channels_to_be_setup_mod_list =
+                        Some(BhChannelsToBeSetupModList::decode(data)?);
                 }
                 263 => {
-                    bh_channels_to_be_modified_list = Some(BhChannelsToBeModifiedList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    bh_channels_to_be_modified_list =
+                        Some(BhChannelsToBeModifiedList::decode(data)?);
                 }
                 265 => {
-                    bh_channels_to_be_released_list = Some(BhChannelsToBeReleasedList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    bh_channels_to_be_released_list =
+                        Some(BhChannelsToBeReleasedList::decode(data)?);
                 }
                 306 => {
-                    nrv2x_services_authorized =
-                        Some(Nrv2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                    nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?);
                 }
                 307 => {
-                    ltev2x_services_authorized =
-                        Some(Ltev2xServicesAuthorized::from_aper(decoder, UNCONSTRAINED)?);
+                    ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?);
                 }
                 308 => {
-                    nrue_sidelink_aggregate_maximum_bitrate = Some(
-                        NrueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    nrue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?);
                 }
                 309 => {
-                    lteue_sidelink_aggregate_maximum_bitrate = Some(
-                        LteueSidelinkAggregateMaximumBitrate::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    lteue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?);
                 }
                 340 => {
-                    pc5_link_ambr = Some(BitRate::from_aper(decoder, UNCONSTRAINED)?);
+                    pc5_link_ambr = Some(BitRate::decode(data)?);
                 }
                 332 => {
-                    sldr_bs_to_be_setup_mod_list =
-                        Some(SldrBsToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_to_be_setup_mod_list = Some(SldrBsToBeSetupModList::decode(data)?);
                 }
                 326 => {
-                    sldr_bs_to_be_modified_list =
-                        Some(SldrBsToBeModifiedList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_to_be_modified_list = Some(SldrBsToBeModifiedList::decode(data)?);
                 }
                 328 => {
-                    sldr_bs_to_be_released_list =
-                        Some(SldrBsToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_to_be_released_list = Some(SldrBsToBeReleasedList::decode(data)?);
                 }
                 374 => {
-                    conditional_intra_du_mobility_information = Some(
-                        ConditionalIntraDuMobilityInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    conditional_intra_du_mobility_information =
+                        Some(ConditionalIntraDuMobilityInformation::decode(data)?);
                 }
                 428 => {
-                    f1c_transfer_path = Some(F1cTransferPath::from_aper(decoder, UNCONSTRAINED)?);
+                    f1c_transfer_path = Some(F1cTransferPath::decode(data)?);
                 }
                 432 => {
-                    scg_indicator = Some(ScgIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                    scg_indicator = Some(ScgIndicator::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -2324,8 +2391,10 @@ pub struct UeContextModificationResponse {
 impl AperCodec for UeContextModificationResponse {
     type Output = UeContextModificationResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut resource_coordination_transfer_container: Option<
@@ -2358,132 +2427,113 @@ impl AperCodec for UeContextModificationResponse {
         let mut requested_target_cell_global_id: Option<Nrcgi> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 49 => {
-                    resource_coordination_transfer_container = Some(
-                        ResourceCoordinationTransferContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_container =
+                        Some(ResourceCoordinationTransferContainer::decode(data)?);
                 }
                 39 => {
-                    d_uto_currc_information =
-                        Some(DUtoCurrcInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?);
                 }
                 29 => {
-                    dr_bs_setup_mod_list =
-                        Some(DrBsSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_setup_mod_list = Some(DrBsSetupModList::decode(data)?);
                 }
                 21 => {
-                    dr_bs_modified_list =
-                        Some(DrBsModifiedList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_modified_list = Some(DrBsModifiedList::decode(data)?);
                 }
                 68 => {
-                    sr_bs_failed_to_be_setup_mod_list = Some(
-                        SrBsFailedToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    sr_bs_failed_to_be_setup_mod_list =
+                        Some(SrBsFailedToBeSetupModList::decode(data)?);
                 }
                 17 => {
-                    dr_bs_failed_to_be_setup_mod_list = Some(
-                        DrBsFailedToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    dr_bs_failed_to_be_setup_mod_list =
+                        Some(DrBsFailedToBeSetupModList::decode(data)?);
                 }
                 85 => {
-                    s_cell_failedto_setup_mod_list = Some(SCellFailedtoSetupModList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    s_cell_failedto_setup_mod_list = Some(SCellFailedtoSetupModList::decode(data)?);
                 }
                 13 => {
-                    dr_bs_failed_to_be_modified_list = Some(DrBsFailedToBeModifiedList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    dr_bs_failed_to_be_modified_list =
+                        Some(DrBsFailedToBeModifiedList::decode(data)?);
                 }
                 98 => {
-                    inactivity_monitoring_response = Some(InactivityMonitoringResponse::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    inactivity_monitoring_response =
+                        Some(InactivityMonitoringResponse::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 95 => {
-                    c_rnti = Some(CRnti::from_aper(decoder, UNCONSTRAINED)?);
+                    c_rnti = Some(CRnti::decode(data)?);
                 }
                 198 => {
-                    associated_s_cell_list =
-                        Some(AssociatedSCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    associated_s_cell_list = Some(AssociatedSCellList::decode(data)?);
                 }
                 204 => {
-                    sr_bs_setup_mod_list =
-                        Some(SrBsSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_setup_mod_list = Some(SrBsSetupModList::decode(data)?);
                 }
                 206 => {
-                    sr_bs_modified_list =
-                        Some(SrBsModifiedList::from_aper(decoder, UNCONSTRAINED)?);
+                    sr_bs_modified_list = Some(SrBsModifiedList::decode(data)?);
                 }
                 94 => {
-                    full_configuration =
-                        Some(FullConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    full_configuration = Some(FullConfiguration::decode(data)?);
                 }
                 275 => {
-                    bh_channels_setup_mod_list =
-                        Some(BhChannelsSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    bh_channels_setup_mod_list = Some(BhChannelsSetupModList::decode(data)?);
                 }
                 273 => {
-                    bh_channels_modified_list =
-                        Some(BhChannelsModifiedList::from_aper(decoder, UNCONSTRAINED)?);
+                    bh_channels_modified_list = Some(BhChannelsModifiedList::decode(data)?);
                 }
                 271 => {
-                    bh_channels_failed_to_be_setup_mod_list = Some(
-                        BhChannelsFailedToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    bh_channels_failed_to_be_setup_mod_list =
+                        Some(BhChannelsFailedToBeSetupModList::decode(data)?);
                 }
                 269 => {
-                    bh_channels_failed_to_be_modified_list = Some(
-                        BhChannelsFailedToBeModifiedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    bh_channels_failed_to_be_modified_list =
+                        Some(BhChannelsFailedToBeModifiedList::decode(data)?);
                 }
                 333 => {
-                    sldr_bs_setup_mod_list =
-                        Some(SldrBsSetupModList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_setup_mod_list = Some(SldrBsSetupModList::decode(data)?);
                 }
                 318 => {
-                    sldr_bs_modified_list =
-                        Some(SldrBsModifiedList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_modified_list = Some(SldrBsModifiedList::decode(data)?);
                 }
                 334 => {
-                    sldr_bs_failed_to_be_setup_mod_list = Some(
-                        SldrBsFailedToBeSetupModList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    sldr_bs_failed_to_be_setup_mod_list =
+                        Some(SldrBsFailedToBeSetupModList::decode(data)?);
                 }
                 314 => {
-                    sldr_bs_failed_to_be_modified_list = Some(
-                        SldrBsFailedToBeModifiedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    sldr_bs_failed_to_be_modified_list =
+                        Some(SldrBsFailedToBeModifiedList::decode(data)?);
                 }
                 376 => {
-                    requested_target_cell_global_id =
-                        Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    requested_target_cell_global_id = Some(Nrcgi::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -2596,8 +2646,10 @@ pub struct UeContextModificationFailure {
 impl AperCodec for UeContextModificationFailure {
     type Output = UeContextModificationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
@@ -2605,36 +2657,44 @@ impl AperCodec for UeContextModificationFailure {
         let mut requested_target_cell_global_id: Option<Nrcgi> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 376 => {
-                    requested_target_cell_global_id =
-                        Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    requested_target_cell_global_id = Some(Nrcgi::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -2665,8 +2725,10 @@ pub struct UeContextModificationRequired {
 impl AperCodec for UeContextModificationRequired {
     type Output = UeContextModificationRequired;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut resource_coordination_transfer_container: Option<
@@ -2685,71 +2747,72 @@ impl AperCodec for UeContextModificationRequired {
         let mut target_cells_to_cancel: Option<TargetCellList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 49 => {
-                    resource_coordination_transfer_container = Some(
-                        ResourceCoordinationTransferContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_container =
+                        Some(ResourceCoordinationTransferContainer::decode(data)?);
                 }
                 39 => {
-                    d_uto_currc_information =
-                        Some(DUtoCurrcInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?);
                 }
                 23 => {
-                    dr_bs_required_to_be_modified_list = Some(
-                        DrBsRequiredToBeModifiedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    dr_bs_required_to_be_modified_list =
+                        Some(DrBsRequiredToBeModifiedList::decode(data)?);
                 }
                 70 => {
-                    sr_bs_required_to_be_released_list = Some(
-                        SrBsRequiredToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    sr_bs_required_to_be_released_list =
+                        Some(SrBsRequiredToBeReleasedList::decode(data)?);
                 }
                 25 => {
-                    dr_bs_required_to_be_released_list = Some(
-                        DrBsRequiredToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    dr_bs_required_to_be_released_list =
+                        Some(DrBsRequiredToBeReleasedList::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 277 => {
-                    bh_channels_required_to_be_released_list = Some(
-                        BhChannelsRequiredToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    bh_channels_required_to_be_released_list =
+                        Some(BhChannelsRequiredToBeReleasedList::decode(data)?);
                 }
                 320 => {
-                    sldr_bs_required_to_be_modified_list = Some(
-                        SldrBsRequiredToBeModifiedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    sldr_bs_required_to_be_modified_list =
+                        Some(SldrBsRequiredToBeModifiedList::decode(data)?);
                 }
                 322 => {
-                    sldr_bs_required_to_be_released_list = Some(
-                        SldrBsRequiredToBeReleasedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    sldr_bs_required_to_be_released_list =
+                        Some(SldrBsRequiredToBeReleasedList::decode(data)?);
                 }
                 375 => {
-                    target_cells_to_cancel =
-                        Some(TargetCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    target_cells_to_cancel = Some(TargetCellList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -2808,8 +2871,10 @@ pub struct UeContextModificationConfirm {
 impl AperCodec for UeContextModificationConfirm {
     type Output = UeContextModificationConfirm;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut resource_coordination_transfer_container: Option<
@@ -2825,53 +2890,55 @@ impl AperCodec for UeContextModificationConfirm {
         let mut sldr_bs_modified_conf_list: Option<SldrBsModifiedConfList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 49 => {
-                    resource_coordination_transfer_container = Some(
-                        ResourceCoordinationTransferContainer::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_container =
+                        Some(ResourceCoordinationTransferContainer::decode(data)?);
                 }
                 19 => {
-                    dr_bs_modified_conf_list =
-                        Some(DrBsModifiedConfList::from_aper(decoder, UNCONSTRAINED)?);
+                    dr_bs_modified_conf_list = Some(DrBsModifiedConfList::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 109 => {
-                    execute_duplication =
-                        Some(ExecuteDuplication::from_aper(decoder, UNCONSTRAINED)?);
+                    execute_duplication = Some(ExecuteDuplication::decode(data)?);
                 }
                 195 => {
-                    resource_coordination_transfer_information = Some(
-                        ResourceCoordinationTransferInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    resource_coordination_transfer_information =
+                        Some(ResourceCoordinationTransferInformation::decode(data)?);
                 }
                 337 => {
-                    sldr_bs_modified_conf_list =
-                        Some(SldrBsModifiedConfList::from_aper(decoder, UNCONSTRAINED)?);
+                    sldr_bs_modified_conf_list = Some(SldrBsModifiedConfList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -2906,40 +2973,51 @@ pub struct UeContextModificationRefuse {
 impl AperCodec for UeContextModificationRefuse {
     type Output = UeContextModificationRefuse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -2962,8 +3040,10 @@ pub struct WriteReplaceWarningRequest {
 impl AperCodec for WriteReplaceWarningRequest {
     type Output = WriteReplaceWarningRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut pws_system_information: Option<PwsSystemInformation> = None;
         let mut repetition_period: Option<RepetitionPeriod> = None;
@@ -2971,39 +3051,47 @@ impl AperCodec for WriteReplaceWarningRequest {
         let mut cells_to_be_broadcast_list: Option<CellsToBeBroadcastList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 140 => {
-                    pws_system_information =
-                        Some(PwsSystemInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    pws_system_information = Some(PwsSystemInformation::decode(data)?);
                 }
                 141 => {
-                    repetition_period = Some(RepetitionPeriod::from_aper(decoder, UNCONSTRAINED)?);
+                    repetition_period = Some(RepetitionPeriod::decode(data)?);
                 }
                 142 => {
-                    numberof_broadcast_request =
-                        Some(NumberofBroadcastRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    numberof_broadcast_request = Some(NumberofBroadcastRequest::decode(data)?);
                 }
                 144 => {
-                    cells_to_be_broadcast_list =
-                        Some(CellsToBeBroadcastList::from_aper(decoder, UNCONSTRAINED)?);
+                    cells_to_be_broadcast_list = Some(CellsToBeBroadcastList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let pws_system_information = pws_system_information.ok_or(DecodeError::InvalidChoice)?;
-        let repetition_period = repetition_period.ok_or(DecodeError::InvalidChoice)?;
-        let numberof_broadcast_request =
-            numberof_broadcast_request.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let pws_system_information = pws_system_information.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE pws_system_information"),
+        ))?;
+        let repetition_period = repetition_period.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE repetition_period"
+        )))?;
+        let numberof_broadcast_request = numberof_broadcast_request.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE numberof_broadcast_request")),
+        )?;
         Ok(Self {
             transaction_id,
             pws_system_information,
@@ -3030,8 +3118,10 @@ pub struct WriteReplaceWarningResponse {
 impl AperCodec for WriteReplaceWarningResponse {
     type Output = WriteReplaceWarningResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_broadcast_completed_list: Option<CellsBroadcastCompletedList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
@@ -3039,35 +3129,37 @@ impl AperCodec for WriteReplaceWarningResponse {
             None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 146 => {
-                    cells_broadcast_completed_list = Some(CellsBroadcastCompletedList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    cells_broadcast_completed_list =
+                        Some(CellsBroadcastCompletedList::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 189 => {
-                    dedicated_si_delivery_needed_ue_list = Some(
-                        DedicatedSiDeliveryNeededUeList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    dedicated_si_delivery_needed_ue_list =
+                        Some(DedicatedSiDeliveryNeededUeList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             cells_broadcast_completed_list,
@@ -3094,8 +3186,10 @@ pub struct PwsCancelRequest {
 impl AperCodec for PwsCancelRequest {
     type Output = PwsCancelRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut numberof_broadcast_request: Option<NumberofBroadcastRequest> = None;
         let mut broadcast_to_be_cancelled_list: Option<BroadcastToBeCancelledList> = None;
@@ -3104,41 +3198,43 @@ impl AperCodec for PwsCancelRequest {
         let mut notification_information: Option<NotificationInformation> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 142 => {
-                    numberof_broadcast_request =
-                        Some(NumberofBroadcastRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    numberof_broadcast_request = Some(NumberofBroadcastRequest::decode(data)?);
                 }
                 148 => {
-                    broadcast_to_be_cancelled_list = Some(BroadcastToBeCancelledList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    broadcast_to_be_cancelled_list =
+                        Some(BroadcastToBeCancelledList::decode(data)?);
                 }
                 157 => {
-                    cancel_all_warning_messages_indicator = Some(
-                        CancelAllWarningMessagesIndicator::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    cancel_all_warning_messages_indicator =
+                        Some(CancelAllWarningMessagesIndicator::decode(data)?);
                 }
                 220 => {
-                    notification_information =
-                        Some(NotificationInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    notification_information = Some(NotificationInformation::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let numberof_broadcast_request =
-            numberof_broadcast_request.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let numberof_broadcast_request = numberof_broadcast_request.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE numberof_broadcast_request")),
+        )?;
         Ok(Self {
             transaction_id,
             numberof_broadcast_request,
@@ -3164,37 +3260,42 @@ pub struct PwsCancelResponse {
 impl AperCodec for PwsCancelResponse {
     type Output = PwsCancelResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cells_broadcast_cancelled_list: Option<CellsBroadcastCancelledList> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 150 => {
-                    cells_broadcast_cancelled_list = Some(CellsBroadcastCancelledList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    cells_broadcast_cancelled_list =
+                        Some(CellsBroadcastCancelledList::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             cells_broadcast_cancelled_list,
@@ -3218,35 +3319,47 @@ pub struct UeInactivityNotification {
 impl AperCodec for UeInactivityNotification {
     type Output = UeInactivityNotification;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut drb_activity_list: Option<DrbActivityList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 100 => {
-                    drb_activity_list = Some(DrbActivityList::from_aper(decoder, UNCONSTRAINED)?);
+                    drb_activity_list = Some(DrbActivityList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let drb_activity_list = drb_activity_list.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let drb_activity_list = drb_activity_list.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE drb_activity_list"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -3276,8 +3389,10 @@ pub struct InitialUlrrcMessageTransfer {
 impl AperCodec for InitialUlrrcMessageTransfer {
     type Output = InitialUlrrcMessageTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut nrcgi: Option<Nrcgi> = None;
         let mut c_rnti: Option<CRnti> = None;
@@ -3289,52 +3404,63 @@ impl AperCodec for InitialUlrrcMessageTransfer {
         let mut rrc_container_rrc_setup_complete: Option<RrcContainerRrcSetupComplete> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 111 => {
-                    nrcgi = Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    nrcgi = Some(Nrcgi::decode(data)?);
                 }
                 95 => {
-                    c_rnti = Some(CRnti::from_aper(decoder, UNCONSTRAINED)?);
+                    c_rnti = Some(CRnti::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 128 => {
-                    d_uto_currc_container =
-                        Some(DUtoCurrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    d_uto_currc_container = Some(DUtoCurrcContainer::decode(data)?);
                 }
                 178 => {
-                    sul_access_indication =
-                        Some(SulAccessIndication::from_aper(decoder, UNCONSTRAINED)?);
+                    sul_access_indication = Some(SulAccessIndication::decode(data)?);
                 }
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 226 => {
-                    ranueid = Some(Ranueid::from_aper(decoder, UNCONSTRAINED)?);
+                    ranueid = Some(Ranueid::decode(data)?);
                 }
                 241 => {
-                    rrc_container_rrc_setup_complete = Some(
-                        RrcContainerRrcSetupComplete::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    rrc_container_rrc_setup_complete =
+                        Some(RrcContainerRrcSetupComplete::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let nrcgi = nrcgi.ok_or(DecodeError::InvalidChoice)?;
-        let c_rnti = c_rnti.ok_or(DecodeError::InvalidChoice)?;
-        let rrc_container = rrc_container.ok_or(DecodeError::InvalidChoice)?;
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nrcgi"
+        )))?;
+        let c_rnti = c_rnti.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE c_rnti"
+        )))?;
+        let rrc_container = rrc_container.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE rrc_container"
+        )))?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             gnb_du_ue_f1ap_id,
             nrcgi,
@@ -3370,8 +3496,10 @@ pub struct DlrrcMessageTransfer {
 impl AperCodec for DlrrcMessageTransfer {
     type Output = DlrrcMessageTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut old_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -3387,68 +3515,73 @@ impl AperCodec for DlrrcMessageTransfer {
         let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 47 => {
-                    old_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    old_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 64 => {
-                    srbid = Some(Srbid::from_aper(decoder, UNCONSTRAINED)?);
+                    srbid = Some(Srbid::decode(data)?);
                 }
                 109 => {
-                    execute_duplication =
-                        Some(ExecuteDuplication::from_aper(decoder, UNCONSTRAINED)?);
+                    execute_duplication = Some(ExecuteDuplication::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 108 => {
-                    rat_frequency_priority_information = Some(
-                        RatFrequencyPriorityInformation::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    rat_frequency_priority_information =
+                        Some(RatFrequencyPriorityInformation::decode(data)?);
                 }
                 184 => {
-                    rrc_delivery_status_request =
-                        Some(RrcDeliveryStatusRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?);
                 }
                 222 => {
-                    ue_context_not_retrievable =
-                        Some(UeContextNotRetrievable::from_aper(decoder, UNCONSTRAINED)?);
+                    ue_context_not_retrievable = Some(UeContextNotRetrievable::decode(data)?);
                 }
                 218 => {
-                    redirected_rr_cmessage = Some(Vec::<u8>::from_aper(decoder, UNCONSTRAINED)?);
+                    redirected_rr_cmessage =
+                        Some(aper::decode::decode_octetstring(data, None, None, false)?);
                 }
                 221 => {
-                    plmn_assistance_info_for_net_shar =
-                        Some(PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?);
+                    plmn_assistance_info_for_net_shar = Some(PlmnIdentity::decode(data)?);
                 }
                 217 => {
-                    new_gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    new_gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 248 => {
-                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let srbid = srbid.ok_or(DecodeError::InvalidChoice)?;
-        let rrc_container = rrc_container.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let srbid = srbid.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srbid"
+        )))?;
+        let rrc_container = rrc_container.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE rrc_container"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -3481,8 +3614,10 @@ pub struct UlrrcMessageTransfer {
 impl AperCodec for UlrrcMessageTransfer {
     type Output = UlrrcMessageTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut srbid: Option<Srbid> = None;
@@ -3491,38 +3626,50 @@ impl AperCodec for UlrrcMessageTransfer {
         let mut new_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 64 => {
-                    srbid = Some(Srbid::from_aper(decoder, UNCONSTRAINED)?);
+                    srbid = Some(Srbid::decode(data)?);
                 }
                 50 => {
-                    rrc_container = Some(RrcContainer::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_container = Some(RrcContainer::decode(data)?);
                 }
                 224 => {
-                    selected_plmn_id = Some(PlmnIdentity::from_aper(decoder, UNCONSTRAINED)?);
+                    selected_plmn_id = Some(PlmnIdentity::decode(data)?);
                 }
                 219 => {
-                    new_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    new_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let srbid = srbid.ok_or(DecodeError::InvalidChoice)?;
-        let rrc_container = rrc_container.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let srbid = srbid.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srbid"
+        )))?;
+        let rrc_container = rrc_container.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE rrc_container"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -3548,40 +3695,54 @@ pub struct SystemInformationDeliveryCommand {
 impl AperCodec for SystemInformationDeliveryCommand {
     type Output = SystemInformationDeliveryCommand;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut nrcgi: Option<Nrcgi> = None;
         let mut s_itype_list: Option<SItypeList> = None;
         let mut confirmed_ueid: Option<GnbDuUeF1apId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 111 => {
-                    nrcgi = Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    nrcgi = Some(Nrcgi::decode(data)?);
                 }
                 116 => {
-                    s_itype_list = Some(SItypeList::from_aper(decoder, UNCONSTRAINED)?);
+                    s_itype_list = Some(SItypeList::decode(data)?);
                 }
                 156 => {
-                    confirmed_ueid = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    confirmed_ueid = Some(GnbDuUeF1apId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let nrcgi = nrcgi.ok_or(DecodeError::InvalidChoice)?;
-        let s_itype_list = s_itype_list.ok_or(DecodeError::InvalidChoice)?;
-        let confirmed_ueid = confirmed_ueid.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nrcgi"
+        )))?;
+        let s_itype_list = s_itype_list.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE s_itype_list"
+        )))?;
+        let confirmed_ueid = confirmed_ueid.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE confirmed_ueid"
+        )))?;
         Ok(Self {
             transaction_id,
             nrcgi,
@@ -3605,8 +3766,10 @@ pub struct Paging {
 impl AperCodec for Paging {
     type Output = Paging;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut ue_identity_index_value: Option<UeIdentityIndexValue> = None;
         let mut paging_identity: Option<PagingIdentity> = None;
         let mut paging_drx: Option<PagingDrx> = None;
@@ -3615,38 +3778,47 @@ impl AperCodec for Paging {
         let mut paging_origin: Option<PagingOrigin> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 117 => {
-                    ue_identity_index_value =
-                        Some(UeIdentityIndexValue::from_aper(decoder, UNCONSTRAINED)?);
+                    ue_identity_index_value = Some(UeIdentityIndexValue::decode(data)?);
                 }
                 127 => {
-                    paging_identity = Some(PagingIdentity::from_aper(decoder, UNCONSTRAINED)?);
+                    paging_identity = Some(PagingIdentity::decode(data)?);
                 }
                 114 => {
-                    paging_drx = Some(PagingDrx::from_aper(decoder, UNCONSTRAINED)?);
+                    paging_drx = Some(PagingDrx::decode(data)?);
                 }
                 115 => {
-                    paging_priority = Some(PagingPriority::from_aper(decoder, UNCONSTRAINED)?);
+                    paging_priority = Some(PagingPriority::decode(data)?);
                 }
                 113 => {
-                    paging_cell_list = Some(PagingCellList::from_aper(decoder, UNCONSTRAINED)?);
+                    paging_cell_list = Some(PagingCellList::decode(data)?);
                 }
                 216 => {
-                    paging_origin = Some(PagingOrigin::from_aper(decoder, UNCONSTRAINED)?);
+                    paging_origin = Some(PagingOrigin::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let ue_identity_index_value = ue_identity_index_value.ok_or(DecodeError::InvalidChoice)?;
-        let paging_identity = paging_identity.ok_or(DecodeError::InvalidChoice)?;
-        let paging_cell_list = paging_cell_list.ok_or(DecodeError::InvalidChoice)?;
+        let ue_identity_index_value = ue_identity_index_value.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ue_identity_index_value"),
+        ))?;
+        let paging_identity = paging_identity.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE paging_identity"
+        )))?;
+        let paging_cell_list = paging_cell_list.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE paging_cell_list"
+        )))?;
         Ok(Self {
             ue_identity_index_value,
             paging_identity,
@@ -3673,35 +3845,47 @@ pub struct Notify {
 impl AperCodec for Notify {
     type Output = Notify;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut drb_notify_list: Option<DrbNotifyList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 137 => {
-                    drb_notify_list = Some(DrbNotifyList::from_aper(decoder, UNCONSTRAINED)?);
+                    drb_notify_list = Some(DrbNotifyList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let drb_notify_list = drb_notify_list.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let drb_notify_list = drb_notify_list.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE drb_notify_list"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -3724,31 +3908,40 @@ pub struct NetworkAccessRateReduction {
 impl AperCodec for NetworkAccessRateReduction {
     type Output = NetworkAccessRateReduction;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut uac_assistance_info: Option<UacAssistanceInfo> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 225 => {
-                    uac_assistance_info =
-                        Some(UacAssistanceInfo::from_aper(decoder, UNCONSTRAINED)?);
+                    uac_assistance_info = Some(UacAssistanceInfo::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let uac_assistance_info = uac_assistance_info.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let uac_assistance_info = uac_assistance_info.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE uac_assistance_info"
+        )))?;
         Ok(Self {
             transaction_id,
             uac_assistance_info,
@@ -3766,32 +3959,40 @@ pub struct PwsRestartIndication {
 impl AperCodec for PwsRestartIndication {
     type Output = PwsRestartIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut nr_cgi_list_for_restart_list: Option<NrCgiListForRestartList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 152 => {
-                    nr_cgi_list_for_restart_list =
-                        Some(NrCgiListForRestartList::from_aper(decoder, UNCONSTRAINED)?);
+                    nr_cgi_list_for_restart_list = Some(NrCgiListForRestartList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let nr_cgi_list_for_restart_list =
-            nr_cgi_list_for_restart_list.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let nr_cgi_list_for_restart_list = nr_cgi_list_for_restart_list.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE nr_cgi_list_for_restart_list")),
+        )?;
         Ok(Self {
             transaction_id,
             nr_cgi_list_for_restart_list,
@@ -3813,30 +4014,37 @@ pub struct PwsFailureIndication {
 impl AperCodec for PwsFailureIndication {
     type Output = PwsFailureIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut pws_failed_nr_cgi_list: Option<PwsFailedNrCgiList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 154 => {
-                    pws_failed_nr_cgi_list =
-                        Some(PwsFailedNrCgiList::from_aper(decoder, UNCONSTRAINED)?);
+                    pws_failed_nr_cgi_list = Some(PwsFailedNrCgiList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             pws_failed_nr_cgi_list,
@@ -3858,32 +4066,40 @@ pub struct GnbDuStatusIndication {
 impl AperCodec for GnbDuStatusIndication {
     type Output = GnbDuStatusIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_du_overload_information: Option<GnbDuOverloadInformation> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 172 => {
-                    gnb_du_overload_information =
-                        Some(GnbDuOverloadInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_overload_information = Some(GnbDuOverloadInformation::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_overload_information =
-            gnb_du_overload_information.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_du_overload_information = gnb_du_overload_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE gnb_du_overload_information")),
+        )?;
         Ok(Self {
             transaction_id,
             gnb_du_overload_information,
@@ -3903,41 +4119,54 @@ pub struct RrcDeliveryReport {
 impl AperCodec for RrcDeliveryReport {
     type Output = RrcDeliveryReport;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut rrc_delivery_status: Option<RrcDeliveryStatus> = None;
         let mut srbid: Option<Srbid> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 185 => {
-                    rrc_delivery_status =
-                        Some(RrcDeliveryStatus::from_aper(decoder, UNCONSTRAINED)?);
+                    rrc_delivery_status = Some(RrcDeliveryStatus::decode(data)?);
                 }
                 64 => {
-                    srbid = Some(Srbid::from_aper(decoder, UNCONSTRAINED)?);
+                    srbid = Some(Srbid::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let rrc_delivery_status = rrc_delivery_status.ok_or(DecodeError::InvalidChoice)?;
-        let srbid = srbid.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let rrc_delivery_status = rrc_delivery_status.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE rrc_delivery_status"
+        )))?;
+        let srbid = srbid.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srbid"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -3956,25 +4185,33 @@ pub struct F1RemovalRequest {
 impl AperCodec for F1RemovalRequest {
     type Output = F1RemovalRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self { transaction_id })
     }
 }
@@ -3989,30 +4226,37 @@ pub struct F1RemovalResponse {
 impl AperCodec for F1RemovalResponse {
     type Output = F1RemovalResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             criticality_diagnostics,
@@ -4031,35 +4275,44 @@ pub struct F1RemovalFailure {
 impl AperCodec for F1RemovalFailure {
     type Output = F1RemovalFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -4079,35 +4332,47 @@ pub struct TraceStart {
 impl AperCodec for TraceStart {
     type Output = TraceStart;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut trace_activation: Option<TraceActivation> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 242 => {
-                    trace_activation = Some(TraceActivation::from_aper(decoder, UNCONSTRAINED)?);
+                    trace_activation = Some(TraceActivation::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let trace_activation = trace_activation.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let trace_activation = trace_activation.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE trace_activation"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -4127,35 +4392,47 @@ pub struct DeactivateTrace {
 impl AperCodec for DeactivateTrace {
     type Output = DeactivateTrace;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut trace_id: Option<TraceId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 243 => {
-                    trace_id = Some(TraceId::from_aper(decoder, UNCONSTRAINED)?);
+                    trace_id = Some(TraceId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let trace_id = trace_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let trace_id = trace_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE trace_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -4178,8 +4455,10 @@ pub struct CellTrafficTrace {
 impl AperCodec for CellTrafficTrace {
     type Output = CellTrafficTrace;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut trace_id: Option<TraceId> = None;
@@ -4188,41 +4467,51 @@ impl AperCodec for CellTrafficTrace {
         let mut trace_collection_entity_uri: Option<UriAddress> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 243 => {
-                    trace_id = Some(TraceId::from_aper(decoder, UNCONSTRAINED)?);
+                    trace_id = Some(TraceId::decode(data)?);
                 }
                 378 => {
-                    trace_collection_entity_ip_address =
-                        Some(TransportLayerAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    trace_collection_entity_ip_address = Some(TransportLayerAddress::decode(data)?);
                 }
                 379 => {
-                    privacy_indicator = Some(PrivacyIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                    privacy_indicator = Some(PrivacyIndicator::decode(data)?);
                 }
                 380 => {
-                    trace_collection_entity_uri =
-                        Some(UriAddress::from_aper(decoder, UNCONSTRAINED)?);
+                    trace_collection_entity_uri = Some(UriAddress::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let trace_id = trace_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let trace_id = trace_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE trace_id"
+        )))?;
         let trace_collection_entity_ip_address =
-            trace_collection_entity_ip_address.ok_or(DecodeError::InvalidChoice)?;
+            trace_collection_entity_ip_address.ok_or(aper::AperCodecError::new(format!(
+                "Missing mandatory IE trace_collection_entity_ip_address"
+            )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -4244,32 +4533,40 @@ pub struct DucuRadioInformationTransfer {
 impl AperCodec for DucuRadioInformationTransfer {
     type Output = DucuRadioInformationTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut ducu_radio_information_type: Option<DucuRadioInformationType> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 249 => {
-                    ducu_radio_information_type =
-                        Some(DucuRadioInformationType::from_aper(decoder, UNCONSTRAINED)?);
+                    ducu_radio_information_type = Some(DucuRadioInformationType::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let ducu_radio_information_type =
-            ducu_radio_information_type.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let ducu_radio_information_type = ducu_radio_information_type.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE ducu_radio_information_type")),
+        )?;
         Ok(Self {
             transaction_id,
             ducu_radio_information_type,
@@ -4287,32 +4584,40 @@ pub struct CuduRadioInformationTransfer {
 impl AperCodec for CuduRadioInformationTransfer {
     type Output = CuduRadioInformationTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cudu_radio_information_type: Option<CuduRadioInformationType> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 250 => {
-                    cudu_radio_information_type =
-                        Some(CuduRadioInformationType::from_aper(decoder, UNCONSTRAINED)?);
+                    cudu_radio_information_type = Some(CuduRadioInformationType::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cudu_radio_information_type =
-            cudu_radio_information_type.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cudu_radio_information_type = cudu_radio_information_type.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE cudu_radio_information_type")),
+        )?;
         Ok(Self {
             transaction_id,
             cudu_radio_information_type,
@@ -4332,42 +4637,47 @@ pub struct BapMappingConfiguration {
 impl AperCodec for BapMappingConfiguration {
     type Output = BapMappingConfiguration;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut bh_routing_information_added_list: Option<BhRoutingInformationAddedList> = None;
         let mut bh_routing_information_removed_list: Option<BhRoutingInformationRemovedList> = None;
         let mut traffic_mapping_information: Option<TrafficMappingInfo> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 283 => {
-                    bh_routing_information_added_list = Some(
-                        BhRoutingInformationAddedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    bh_routing_information_added_list =
+                        Some(BhRoutingInformationAddedList::decode(data)?);
                 }
                 285 => {
-                    bh_routing_information_removed_list = Some(
-                        BhRoutingInformationRemovedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    bh_routing_information_removed_list =
+                        Some(BhRoutingInformationRemovedList::decode(data)?);
                 }
                 299 => {
-                    traffic_mapping_information =
-                        Some(TrafficMappingInfo::from_aper(decoder, UNCONSTRAINED)?);
+                    traffic_mapping_information = Some(TrafficMappingInfo::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             bh_routing_information_added_list,
@@ -4395,30 +4705,37 @@ pub struct BapMappingConfigurationAcknowledge {
 impl AperCodec for BapMappingConfigurationAcknowledge {
     type Output = BapMappingConfigurationAcknowledge;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             criticality_diagnostics,
@@ -4438,39 +4755,48 @@ pub struct BapMappingConfigurationFailure {
 impl AperCodec for BapMappingConfigurationFailure {
     type Output = BapMappingConfigurationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -4491,35 +4817,42 @@ pub struct GnbDuResourceConfiguration {
 impl AperCodec for GnbDuResourceConfiguration {
     type Output = GnbDuResourceConfiguration;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut activated_cells_to_be_updated_list: Option<ActivatedCellsToBeUpdatedList> = None;
         let mut child_nodes_list: Option<ChildNodesList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 288 => {
-                    activated_cells_to_be_updated_list = Some(
-                        ActivatedCellsToBeUpdatedList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    activated_cells_to_be_updated_list =
+                        Some(ActivatedCellsToBeUpdatedList::decode(data)?);
                 }
                 289 => {
-                    child_nodes_list = Some(ChildNodesList::from_aper(decoder, UNCONSTRAINED)?);
+                    child_nodes_list = Some(ChildNodesList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             activated_cells_to_be_updated_list,
@@ -4538,30 +4871,37 @@ pub struct GnbDuResourceConfigurationAcknowledge {
 impl AperCodec for GnbDuResourceConfigurationAcknowledge {
     type Output = GnbDuResourceConfigurationAcknowledge;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             criticality_diagnostics,
@@ -4581,39 +4921,48 @@ pub struct GnbDuResourceConfigurationFailure {
 impl AperCodec for GnbDuResourceConfigurationFailure {
     type Output = GnbDuResourceConfigurationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -4635,41 +4984,46 @@ pub struct IabtnlAddressRequest {
 impl AperCodec for IabtnlAddressRequest {
     type Output = IabtnlAddressRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut ia_bv_4_addresses_requested: Option<IaBv4AddressesRequested> = None;
         let mut iabi_pv_6_request_type: Option<IabiPv6RequestType> = None;
         let mut iab_tnl_addresses_to_remove_list: Option<IabTnlAddressesToRemoveList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 297 => {
-                    ia_bv_4_addresses_requested =
-                        Some(IaBv4AddressesRequested::from_aper(decoder, UNCONSTRAINED)?);
+                    ia_bv_4_addresses_requested = Some(IaBv4AddressesRequested::decode(data)?);
                 }
                 296 => {
-                    iabi_pv_6_request_type =
-                        Some(IabiPv6RequestType::from_aper(decoder, UNCONSTRAINED)?);
+                    iabi_pv_6_request_type = Some(IabiPv6RequestType::decode(data)?);
                 }
                 292 => {
-                    iab_tnl_addresses_to_remove_list = Some(
-                        IabTnlAddressesToRemoveList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    iab_tnl_addresses_to_remove_list =
+                        Some(IabTnlAddressesToRemoveList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             ia_bv_4_addresses_requested,
@@ -4693,34 +5047,42 @@ pub struct IabtnlAddressResponse {
 impl AperCodec for IabtnlAddressResponse {
     type Output = IabtnlAddressResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut iab_allocated_tnl_address_list: Option<IabAllocatedTnlAddressList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 294 => {
-                    iab_allocated_tnl_address_list = Some(IabAllocatedTnlAddressList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    iab_allocated_tnl_address_list =
+                        Some(IabAllocatedTnlAddressList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         let iab_allocated_tnl_address_list =
-            iab_allocated_tnl_address_list.ok_or(DecodeError::InvalidChoice)?;
+            iab_allocated_tnl_address_list.ok_or(aper::AperCodecError::new(format!(
+                "Missing mandatory IE iab_allocated_tnl_address_list"
+            )))?;
         Ok(Self {
             transaction_id,
             iab_allocated_tnl_address_list,
@@ -4744,39 +5106,48 @@ pub struct IabtnlAddressFailure {
 impl AperCodec for IabtnlAddressFailure {
     type Output = IabtnlAddressFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -4797,38 +5168,43 @@ pub struct IabupConfigurationUpdateRequest {
 impl AperCodec for IabupConfigurationUpdateRequest {
     type Output = IabupConfigurationUpdateRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut ul_up_tnl_information_to_update_list: Option<UlUpTnlInformationToUpdateList> = None;
         let mut ul_up_tnl_address_to_update_list: Option<UlUpTnlAddressToUpdateList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 300 => {
-                    ul_up_tnl_information_to_update_list = Some(
-                        UlUpTnlInformationToUpdateList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    ul_up_tnl_information_to_update_list =
+                        Some(UlUpTnlInformationToUpdateList::decode(data)?);
                 }
                 302 => {
-                    ul_up_tnl_address_to_update_list = Some(UlUpTnlAddressToUpdateList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    ul_up_tnl_address_to_update_list =
+                        Some(UlUpTnlAddressToUpdateList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             ul_up_tnl_information_to_update_list,
@@ -4856,37 +5232,42 @@ pub struct IabupConfigurationUpdateResponse {
 impl AperCodec for IabupConfigurationUpdateResponse {
     type Output = IabupConfigurationUpdateResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut dl_up_tnl_address_to_update_list: Option<DlUpTnlAddressToUpdateList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
                 304 => {
-                    dl_up_tnl_address_to_update_list = Some(DlUpTnlAddressToUpdateList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    dl_up_tnl_address_to_update_list =
+                        Some(DlUpTnlAddressToUpdateList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             criticality_diagnostics,
@@ -4911,39 +5292,48 @@ pub struct IabupConfigurationUpdateFailure {
 impl AperCodec for IabupConfigurationUpdateFailure {
     type Output = IabupConfigurationUpdateFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut time_to_wait: Option<TimeToWait> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 77 => {
-                    time_to_wait = Some(TimeToWait::from_aper(decoder, UNCONSTRAINED)?);
+                    time_to_wait = Some(TimeToWait::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -4968,8 +5358,10 @@ pub struct ResourceStatusRequest {
 impl AperCodec for ResourceStatusRequest {
     type Output = ResourceStatusRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
         let mut gnb_du_measurement_id: Option<GnbDuMeasurementId> = None;
@@ -4979,46 +5371,50 @@ impl AperCodec for ResourceStatusRequest {
         let mut reporting_periodicity: Option<ReportingPeriodicity> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 345 => {
-                    gnb_cu_measurement_id =
-                        Some(GnbCuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_measurement_id = Some(GnbCuMeasurementId::decode(data)?);
                 }
                 346 => {
-                    gnb_du_measurement_id =
-                        Some(GnbDuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_measurement_id = Some(GnbDuMeasurementId::decode(data)?);
                 }
                 347 => {
-                    registration_request =
-                        Some(RegistrationRequest::from_aper(decoder, UNCONSTRAINED)?);
+                    registration_request = Some(RegistrationRequest::decode(data)?);
                 }
                 348 => {
-                    report_characteristics =
-                        Some(ReportCharacteristics::from_aper(decoder, UNCONSTRAINED)?);
+                    report_characteristics = Some(ReportCharacteristics::decode(data)?);
                 }
                 349 => {
-                    cell_to_report_list =
-                        Some(CellToReportList::from_aper(decoder, UNCONSTRAINED)?);
+                    cell_to_report_list = Some(CellToReportList::decode(data)?);
                 }
                 352 => {
-                    reporting_periodicity =
-                        Some(ReportingPeriodicity::from_aper(decoder, UNCONSTRAINED)?);
+                    reporting_periodicity = Some(ReportingPeriodicity::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let registration_request = registration_request.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_cu_measurement_id"),
+        ))?;
+        let registration_request = registration_request.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE registration_request"),
+        ))?;
         Ok(Self {
             transaction_id,
             gnb_cu_measurement_id,
@@ -5043,42 +5439,51 @@ pub struct ResourceStatusResponse {
 impl AperCodec for ResourceStatusResponse {
     type Output = ResourceStatusResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
         let mut gnb_du_measurement_id: Option<GnbDuMeasurementId> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 345 => {
-                    gnb_cu_measurement_id =
-                        Some(GnbCuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_measurement_id = Some(GnbCuMeasurementId::decode(data)?);
                 }
                 346 => {
-                    gnb_du_measurement_id =
-                        Some(GnbDuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_measurement_id = Some(GnbDuMeasurementId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_measurement_id = gnb_du_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_cu_measurement_id"),
+        ))?;
+        let gnb_du_measurement_id = gnb_du_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_du_measurement_id"),
+        ))?;
         Ok(Self {
             transaction_id,
             gnb_cu_measurement_id,
@@ -5101,8 +5506,10 @@ pub struct ResourceStatusFailure {
 impl AperCodec for ResourceStatusFailure {
     type Output = ResourceStatusFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
         let mut gnb_du_measurement_id: Option<GnbDuMeasurementId> = None;
@@ -5110,38 +5517,47 @@ impl AperCodec for ResourceStatusFailure {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 345 => {
-                    gnb_cu_measurement_id =
-                        Some(GnbCuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_measurement_id = Some(GnbCuMeasurementId::decode(data)?);
                 }
                 346 => {
-                    gnb_du_measurement_id =
-                        Some(GnbDuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_measurement_id = Some(GnbDuMeasurementId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_measurement_id = gnb_du_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_cu_measurement_id"),
+        ))?;
+        let gnb_du_measurement_id = gnb_du_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_du_measurement_id"),
+        ))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             gnb_cu_measurement_id,
@@ -5166,8 +5582,10 @@ pub struct ResourceStatusUpdate {
 impl AperCodec for ResourceStatusUpdate {
     type Output = ResourceStatusUpdate;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_measurement_id: Option<GnbCuMeasurementId> = None;
         let mut gnb_du_measurement_id: Option<GnbDuMeasurementId> = None;
@@ -5176,44 +5594,47 @@ impl AperCodec for ResourceStatusUpdate {
         let mut cell_measurement_result_list: Option<CellMeasurementResultList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 345 => {
-                    gnb_cu_measurement_id =
-                        Some(GnbCuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_measurement_id = Some(GnbCuMeasurementId::decode(data)?);
                 }
                 346 => {
-                    gnb_du_measurement_id =
-                        Some(GnbDuMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_measurement_id = Some(GnbDuMeasurementId::decode(data)?);
                 }
                 351 => {
-                    hardware_load_indicator =
-                        Some(HardwareLoadIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                    hardware_load_indicator = Some(HardwareLoadIndicator::decode(data)?);
                 }
                 353 => {
-                    tnl_capacity_indicator =
-                        Some(TnlCapacityIndicator::from_aper(decoder, UNCONSTRAINED)?);
+                    tnl_capacity_indicator = Some(TnlCapacityIndicator::decode(data)?);
                 }
                 350 => {
-                    cell_measurement_result_list = Some(CellMeasurementResultList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    cell_measurement_result_list = Some(CellMeasurementResultList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_measurement_id = gnb_du_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let gnb_cu_measurement_id = gnb_cu_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_cu_measurement_id"),
+        ))?;
+        let gnb_du_measurement_id = gnb_du_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE gnb_du_measurement_id"),
+        ))?;
         Ok(Self {
             transaction_id,
             gnb_cu_measurement_id,
@@ -5236,37 +5657,41 @@ pub struct AccessAndMobilityIndication {
 impl AperCodec for AccessAndMobilityIndication {
     type Output = AccessAndMobilityIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut rach_report_information_list: Option<RachReportInformationList> = None;
         let mut rlf_report_information_list: Option<RlfReportInformationList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 359 => {
-                    rach_report_information_list = Some(RachReportInformationList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    rach_report_information_list = Some(RachReportInformationList::decode(data)?);
                 }
                 360 => {
-                    rlf_report_information_list =
-                        Some(RlfReportInformationList::from_aper(decoder, UNCONSTRAINED)?);
+                    rlf_report_information_list = Some(RlfReportInformationList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             rach_report_information_list,
@@ -5285,31 +5710,40 @@ pub struct ReferenceTimeInformationReportingControl {
 impl AperCodec for ReferenceTimeInformationReportingControl {
     type Output = ReferenceTimeInformationReportingControl;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut reporting_request_type: Option<ReportingRequestType> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 365 => {
-                    reporting_request_type =
-                        Some(ReportingRequestType::from_aper(decoder, UNCONSTRAINED)?);
+                    reporting_request_type = Some(ReportingRequestType::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let reporting_request_type = reporting_request_type.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let reporting_request_type = reporting_request_type.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE reporting_request_type"),
+        ))?;
         Ok(Self {
             transaction_id,
             reporting_request_type,
@@ -5327,32 +5761,40 @@ pub struct ReferenceTimeInformationReport {
 impl AperCodec for ReferenceTimeInformationReport {
     type Output = ReferenceTimeInformationReport;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut time_reference_information: Option<TimeReferenceInformation> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 366 => {
-                    time_reference_information =
-                        Some(TimeReferenceInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    time_reference_information = Some(TimeReferenceInformation::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let time_reference_information =
-            time_reference_information.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let time_reference_information = time_reference_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE time_reference_information")),
+        )?;
         Ok(Self {
             transaction_id,
             time_reference_information,
@@ -5371,35 +5813,47 @@ pub struct AccessSuccess {
 impl AperCodec for AccessSuccess {
     type Output = AccessSuccess;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut nrcgi: Option<Nrcgi> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 111 => {
-                    nrcgi = Some(Nrcgi::from_aper(decoder, UNCONSTRAINED)?);
+                    nrcgi = Some(Nrcgi::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let nrcgi = nrcgi.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nrcgi"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -5421,8 +5875,10 @@ pub struct PositioningAssistanceInformationControl {
 impl AperCodec for PositioningAssistanceInformationControl {
     type Output = PositioningAssistanceInformationControl;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut pos_assistance_information: Option<PosAssistanceInformation> = None;
         let mut pos_broadcast: Option<PosBroadcast> = None;
@@ -5430,36 +5886,38 @@ impl AperCodec for PositioningAssistanceInformationControl {
         let mut routing_id: Option<RoutingId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 392 => {
-                    pos_assistance_information =
-                        Some(PosAssistanceInformation::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_assistance_information = Some(PosAssistanceInformation::decode(data)?);
                 }
                 393 => {
-                    pos_broadcast = Some(PosBroadcast::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_broadcast = Some(PosBroadcast::decode(data)?);
                 }
                 406 => {
-                    positioning_broadcast_cells = Some(PositioningBroadcastCells::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    positioning_broadcast_cells = Some(PositioningBroadcastCells::decode(data)?);
                 }
                 394 => {
-                    routing_id = Some(RoutingId::from_aper(decoder, UNCONSTRAINED)?);
+                    routing_id = Some(RoutingId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             pos_assistance_information,
@@ -5483,8 +5941,10 @@ pub struct PositioningAssistanceInformationFeedback {
 impl AperCodec for PositioningAssistanceInformationFeedback {
     type Output = PositioningAssistanceInformationFeedback;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut pos_assistance_information_failure_list: Option<
             PosAssistanceInformationFailureList,
@@ -5494,38 +5954,39 @@ impl AperCodec for PositioningAssistanceInformationFeedback {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 395 => {
-                    pos_assistance_information_failure_list = Some(
-                        PosAssistanceInformationFailureList::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    pos_assistance_information_failure_list =
+                        Some(PosAssistanceInformationFailureList::decode(data)?);
                 }
                 406 => {
-                    positioning_broadcast_cells = Some(PositioningBroadcastCells::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    positioning_broadcast_cells = Some(PositioningBroadcastCells::decode(data)?);
                 }
                 394 => {
-                    routing_id = Some(RoutingId::from_aper(decoder, UNCONSTRAINED)?);
+                    routing_id = Some(RoutingId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         Ok(Self {
             transaction_id,
             pos_assistance_information_failure_list,
@@ -5556,8 +6017,10 @@ pub struct PositioningMeasurementRequest {
 impl AperCodec for PositioningMeasurementRequest {
     type Output = PositioningMeasurementRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
@@ -5572,72 +6035,74 @@ impl AperCodec for PositioningMeasurementRequest {
         let mut slot_number: Option<SlotNumber> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
                 422 => {
-                    trp_measurement_request_list = Some(TrpMeasurementRequestList::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    trp_measurement_request_list = Some(TrpMeasurementRequestList::decode(data)?);
                 }
                 408 => {
-                    pos_report_characteristics =
-                        Some(PosReportCharacteristics::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_report_characteristics = Some(PosReportCharacteristics::decode(data)?);
                 }
                 409 => {
-                    pos_measurement_periodicity =
-                        Some(MeasurementPeriodicity::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_measurement_periodicity = Some(MeasurementPeriodicity::decode(data)?);
                 }
                 396 => {
-                    pos_measurement_quantities =
-                        Some(PosMeasurementQuantities::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_measurement_quantities = Some(PosMeasurementQuantities::decode(data)?);
                 }
                 419 => {
-                    sfn_initialisation_time =
-                        Some(RelativeTime1900::from_aper(decoder, UNCONSTRAINED)?);
+                    sfn_initialisation_time = Some(RelativeTime1900::decode(data)?);
                 }
                 407 => {
-                    srs_configuration = Some(SrsConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    srs_configuration = Some(SrsConfiguration::decode(data)?);
                 }
                 423 => {
-                    measurement_beam_info_request = Some(MeasurementBeamInfoRequest::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    measurement_beam_info_request = Some(MeasurementBeamInfoRequest::decode(data)?);
                 }
                 420 => {
-                    system_frame_number =
-                        Some(SystemFrameNumber::from_aper(decoder, UNCONSTRAINED)?);
+                    system_frame_number = Some(SystemFrameNumber::decode(data)?);
                 }
                 421 => {
-                    slot_number = Some(SlotNumber::from_aper(decoder, UNCONSTRAINED)?);
+                    slot_number = Some(SlotNumber::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let trp_measurement_request_list =
-            trp_measurement_request_list.ok_or(DecodeError::InvalidChoice)?;
-        let pos_report_characteristics =
-            pos_report_characteristics.ok_or(DecodeError::InvalidChoice)?;
-        let pos_measurement_quantities =
-            pos_measurement_quantities.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
+        let trp_measurement_request_list = trp_measurement_request_list.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE trp_measurement_request_list")),
+        )?;
+        let pos_report_characteristics = pos_report_characteristics.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE pos_report_characteristics")),
+        )?;
+        let pos_measurement_quantities = pos_measurement_quantities.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE pos_measurement_quantities")),
+        )?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -5668,8 +6133,10 @@ pub struct PositioningMeasurementResponse {
 impl AperCodec for PositioningMeasurementResponse {
     type Output = PositioningMeasurementResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
@@ -5677,36 +6144,44 @@ impl AperCodec for PositioningMeasurementResponse {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
                 397 => {
-                    pos_measurement_result_list =
-                        Some(PosMeasurementResultList::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_measurement_result_list = Some(PosMeasurementResultList::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -5730,8 +6205,10 @@ pub struct PositioningMeasurementFailure {
 impl AperCodec for PositioningMeasurementFailure {
     type Output = PositioningMeasurementFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
@@ -5739,36 +6216,47 @@ impl AperCodec for PositioningMeasurementFailure {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -5791,42 +6279,54 @@ pub struct PositioningMeasurementReport {
 impl AperCodec for PositioningMeasurementReport {
     type Output = PositioningMeasurementReport;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
         let mut pos_measurement_result_list: Option<PosMeasurementResultList> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
                 397 => {
-                    pos_measurement_result_list =
-                        Some(PosMeasurementResultList::from_aper(decoder, UNCONSTRAINED)?);
+                    pos_measurement_result_list = Some(PosMeasurementResultList::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let pos_measurement_result_list =
-            pos_measurement_result_list.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
+        let pos_measurement_result_list = pos_measurement_result_list.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE pos_measurement_result_list")),
+        )?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -5847,35 +6347,47 @@ pub struct PositioningMeasurementAbort {
 impl AperCodec for PositioningMeasurementAbort {
     type Output = PositioningMeasurementAbort;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -5896,40 +6408,54 @@ pub struct PositioningMeasurementFailureIndication {
 impl AperCodec for PositioningMeasurementFailureIndication {
     type Output = PositioningMeasurementFailureIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
         let mut cause: Option<Cause> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -5951,39 +6477,51 @@ pub struct PositioningMeasurementUpdate {
 impl AperCodec for PositioningMeasurementUpdate {
     type Output = PositioningMeasurementUpdate;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut lmf_measurement_id: Option<LmfMeasurementId> = None;
         let mut ran_measurement_id: Option<RanMeasurementId> = None;
         let mut srs_configuration: Option<SrsConfiguration> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 402 => {
-                    lmf_measurement_id = Some(LmfMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_measurement_id = Some(LmfMeasurementId::decode(data)?);
                 }
                 411 => {
-                    ran_measurement_id = Some(RanMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_measurement_id = Some(RanMeasurementId::decode(data)?);
                 }
                 407 => {
-                    srs_configuration = Some(SrsConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    srs_configuration = Some(SrsConfiguration::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_measurement_id = lmf_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_measurement_id = ran_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let lmf_measurement_id = lmf_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE lmf_measurement_id"
+        )))?;
+        let ran_measurement_id = ran_measurement_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE ran_measurement_id"
+        )))?;
         Ok(Self {
             transaction_id,
             lmf_measurement_id,
@@ -6004,37 +6542,46 @@ pub struct TrpInformationRequest {
 impl AperCodec for TrpInformationRequest {
     type Output = TrpInformationRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut trp_list: Option<TrpList> = None;
         let mut trp_information_type_list_trp_req: Option<TrpInformationTypeListTrpReq> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 410 => {
-                    trp_list = Some(TrpList::from_aper(decoder, UNCONSTRAINED)?);
+                    trp_list = Some(TrpList::decode(data)?);
                 }
                 398 => {
-                    trp_information_type_list_trp_req = Some(
-                        TrpInformationTypeListTrpReq::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    trp_information_type_list_trp_req =
+                        Some(TrpInformationTypeListTrpReq::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         let trp_information_type_list_trp_req =
-            trp_information_type_list_trp_req.ok_or(DecodeError::InvalidChoice)?;
+            trp_information_type_list_trp_req.ok_or(aper::AperCodecError::new(format!(
+                "Missing mandatory IE trp_information_type_list_trp_req"
+            )))?;
         Ok(Self {
             transaction_id,
             trp_list,
@@ -6058,39 +6605,45 @@ pub struct TrpInformationResponse {
 impl AperCodec for TrpInformationResponse {
     type Output = TrpInformationResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut trp_information_list_trp_resp: Option<TrpInformationListTrpResp> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 400 => {
-                    trp_information_list_trp_resp = Some(TrpInformationListTrpResp::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    trp_information_list_trp_resp = Some(TrpInformationListTrpResp::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
         let trp_information_list_trp_resp =
-            trp_information_list_trp_resp.ok_or(DecodeError::InvalidChoice)?;
+            trp_information_list_trp_resp.ok_or(aper::AperCodecError::new(format!(
+                "Missing mandatory IE trp_information_list_trp_resp"
+            )))?;
         Ok(Self {
             transaction_id,
             trp_information_list_trp_resp,
@@ -6114,35 +6667,44 @@ pub struct TrpInformationFailure {
 impl AperCodec for TrpInformationFailure {
     type Output = TrpInformationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut transaction_id: Option<TransactionId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => {
-                    transaction_id = Some(TransactionId::from_aper(decoder, UNCONSTRAINED)?);
+                    transaction_id = Some(TransactionId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let transaction_id = transaction_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE transaction_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             transaction_id,
             cause,
@@ -6162,8 +6724,10 @@ pub struct PositioningInformationRequest {
 impl AperCodec for PositioningInformationRequest {
     type Output = PositioningInformationRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut requested_srs_transmission_characteristics: Option<
@@ -6171,29 +6735,36 @@ impl AperCodec for PositioningInformationRequest {
         > = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 391 => {
-                    requested_srs_transmission_characteristics = Some(
-                        RequestedSrsTransmissionCharacteristics::from_aper(decoder, UNCONSTRAINED)?,
-                    );
+                    requested_srs_transmission_characteristics =
+                        Some(RequestedSrsTransmissionCharacteristics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6215,8 +6786,10 @@ pub struct PositioningInformationResponse {
 impl AperCodec for PositioningInformationResponse {
     type Output = PositioningInformationResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut srs_configuration: Option<SrsConfiguration> = None;
@@ -6224,35 +6797,41 @@ impl AperCodec for PositioningInformationResponse {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 407 => {
-                    srs_configuration = Some(SrsConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    srs_configuration = Some(SrsConfiguration::decode(data)?);
                 }
                 419 => {
-                    sfn_initialisation_time =
-                        Some(RelativeTime1900::from_aper(decoder, UNCONSTRAINED)?);
+                    sfn_initialisation_time = Some(RelativeTime1900::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6275,40 +6854,51 @@ pub struct PositioningInformationFailure {
 impl AperCodec for PositioningInformationFailure {
     type Output = PositioningInformationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6330,39 +6920,51 @@ pub struct PositioningActivationRequest {
 impl AperCodec for PositioningActivationRequest {
     type Output = PositioningActivationRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut srs_type: Option<SrsType> = None;
         let mut activation_time: Option<RelativeTime1900> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 403 => {
-                    srs_type = Some(SrsType::from_aper(decoder, UNCONSTRAINED)?);
+                    srs_type = Some(SrsType::decode(data)?);
                 }
                 404 => {
-                    activation_time = Some(RelativeTime1900::from_aper(decoder, UNCONSTRAINED)?);
+                    activation_time = Some(RelativeTime1900::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let srs_type = srs_type.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let srs_type = srs_type.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srs_type"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6406,8 +7008,10 @@ pub struct PositioningActivationResponse {
 impl AperCodec for PositioningActivationResponse {
     type Output = PositioningActivationResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut system_frame_number: Option<SystemFrameNumber> = None;
@@ -6415,35 +7019,41 @@ impl AperCodec for PositioningActivationResponse {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 420 => {
-                    system_frame_number =
-                        Some(SystemFrameNumber::from_aper(decoder, UNCONSTRAINED)?);
+                    system_frame_number = Some(SystemFrameNumber::decode(data)?);
                 }
                 421 => {
-                    slot_number = Some(SlotNumber::from_aper(decoder, UNCONSTRAINED)?);
+                    slot_number = Some(SlotNumber::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6466,40 +7076,51 @@ pub struct PositioningActivationFailure {
 impl AperCodec for PositioningActivationFailure {
     type Output = PositioningActivationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6520,36 +7141,47 @@ pub struct PositioningDeactivation {
 impl AperCodec for PositioningDeactivation {
     type Output = PositioningDeactivation;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut abort_transmission: Option<AbortTransmission> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 405 => {
-                    abort_transmission =
-                        Some(AbortTransmission::from_aper(decoder, UNCONSTRAINED)?);
+                    abort_transmission = Some(AbortTransmission::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let abort_transmission = abort_transmission.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let abort_transmission = abort_transmission.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE abort_transmission"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6570,39 +7202,48 @@ pub struct PositioningInformationUpdate {
 impl AperCodec for PositioningInformationUpdate {
     type Output = PositioningInformationUpdate;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut srs_configuration: Option<SrsConfiguration> = None;
         let mut sfn_initialisation_time: Option<RelativeTime1900> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 407 => {
-                    srs_configuration = Some(SrsConfiguration::from_aper(decoder, UNCONSTRAINED)?);
+                    srs_configuration = Some(SrsConfiguration::decode(data)?);
                 }
                 419 => {
-                    sfn_initialisation_time =
-                        Some(RelativeTime1900::from_aper(decoder, UNCONSTRAINED)?);
+                    sfn_initialisation_time = Some(RelativeTime1900::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6627,8 +7268,10 @@ pub struct ECidMeasurementInitiationRequest {
 impl AperCodec for ECidMeasurementInitiationRequest {
     type Output = ECidMeasurementInitiationRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut lmf_ue_measurement_id: Option<LmfUeMeasurementId> = None;
@@ -6638,54 +7281,59 @@ impl AperCodec for ECidMeasurementInitiationRequest {
         let mut e_cid_measurement_quantities: Option<ECidMeasurementQuantities> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 412 => {
-                    lmf_ue_measurement_id =
-                        Some(LmfUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_ue_measurement_id = Some(LmfUeMeasurementId::decode(data)?);
                 }
                 413 => {
-                    ran_ue_measurement_id =
-                        Some(RanUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_ue_measurement_id = Some(RanUeMeasurementId::decode(data)?);
                 }
                 424 => {
-                    e_cid_report_characteristics = Some(ECidReportCharacteristics::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    e_cid_report_characteristics = Some(ECidReportCharacteristics::decode(data)?);
                 }
                 416 => {
-                    e_cid_measurement_periodicity =
-                        Some(MeasurementPeriodicity::from_aper(decoder, UNCONSTRAINED)?);
+                    e_cid_measurement_periodicity = Some(MeasurementPeriodicity::decode(data)?);
                 }
                 414 => {
-                    e_cid_measurement_quantities = Some(ECidMeasurementQuantities::from_aper(
-                        decoder,
-                        UNCONSTRAINED,
-                    )?);
+                    e_cid_measurement_quantities = Some(ECidMeasurementQuantities::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let e_cid_report_characteristics =
-            e_cid_report_characteristics.ok_or(DecodeError::InvalidChoice)?;
-        let e_cid_measurement_quantities =
-            e_cid_measurement_quantities.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE lmf_ue_measurement_id"),
+        ))?;
+        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ran_ue_measurement_id"),
+        ))?;
+        let e_cid_report_characteristics = e_cid_report_characteristics.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE e_cid_report_characteristics")),
+        )?;
+        let e_cid_measurement_quantities = e_cid_measurement_quantities.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE e_cid_measurement_quantities")),
+        )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6713,8 +7361,10 @@ pub struct ECidMeasurementInitiationResponse {
 impl AperCodec for ECidMeasurementInitiationResponse {
     type Output = ECidMeasurementInitiationResponse;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut lmf_ue_measurement_id: Option<LmfUeMeasurementId> = None;
@@ -6724,45 +7374,53 @@ impl AperCodec for ECidMeasurementInitiationResponse {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 412 => {
-                    lmf_ue_measurement_id =
-                        Some(LmfUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_ue_measurement_id = Some(LmfUeMeasurementId::decode(data)?);
                 }
                 413 => {
-                    ran_ue_measurement_id =
-                        Some(RanUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_ue_measurement_id = Some(RanUeMeasurementId::decode(data)?);
                 }
                 417 => {
-                    e_cid_measurement_result =
-                        Some(ECidMeasurementResult::from_aper(decoder, UNCONSTRAINED)?);
+                    e_cid_measurement_result = Some(ECidMeasurementResult::decode(data)?);
                 }
                 418 => {
-                    cell_portion_id = Some(CellPortionId::from_aper(decoder, UNCONSTRAINED)?);
+                    cell_portion_id = Some(CellPortionId::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE lmf_ue_measurement_id"),
+        ))?;
+        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ran_ue_measurement_id"),
+        ))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6789,8 +7447,10 @@ pub struct ECidMeasurementInitiationFailure {
 impl AperCodec for ECidMeasurementInitiationFailure {
     type Output = ECidMeasurementInitiationFailure;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut lmf_ue_measurement_id: Option<LmfUeMeasurementId> = None;
@@ -6799,42 +7459,53 @@ impl AperCodec for ECidMeasurementInitiationFailure {
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 412 => {
-                    lmf_ue_measurement_id =
-                        Some(LmfUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_ue_measurement_id = Some(LmfUeMeasurementId::decode(data)?);
                 }
                 413 => {
-                    ran_ue_measurement_id =
-                        Some(RanUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_ue_measurement_id = Some(RanUeMeasurementId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
                 7 => {
-                    criticality_diagnostics =
-                        Some(CriticalityDiagnostics::from_aper(decoder, UNCONSTRAINED)?);
+                    criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE lmf_ue_measurement_id"),
+        ))?;
+        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ran_ue_measurement_id"),
+        ))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6859,8 +7530,10 @@ pub struct ECidMeasurementFailureIndication {
 impl AperCodec for ECidMeasurementFailureIndication {
     type Output = ECidMeasurementFailureIndication;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut lmf_ue_measurement_id: Option<LmfUeMeasurementId> = None;
@@ -6868,38 +7541,50 @@ impl AperCodec for ECidMeasurementFailureIndication {
         let mut cause: Option<Cause> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 412 => {
-                    lmf_ue_measurement_id =
-                        Some(LmfUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_ue_measurement_id = Some(LmfUeMeasurementId::decode(data)?);
                 }
                 413 => {
-                    ran_ue_measurement_id =
-                        Some(RanUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_ue_measurement_id = Some(RanUeMeasurementId::decode(data)?);
                 }
                 0 => {
-                    cause = Some(Cause::from_aper(decoder, UNCONSTRAINED)?);
+                    cause = Some(Cause::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let cause = cause.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE lmf_ue_measurement_id"),
+        ))?;
+        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ran_ue_measurement_id"),
+        ))?;
+        let cause = cause.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE cause"
+        )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6924,8 +7609,10 @@ pub struct ECidMeasurementReport {
 impl AperCodec for ECidMeasurementReport {
     type Output = ECidMeasurementReport;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut lmf_ue_measurement_id: Option<LmfUeMeasurementId> = None;
@@ -6934,43 +7621,53 @@ impl AperCodec for ECidMeasurementReport {
         let mut cell_portion_id: Option<CellPortionId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 412 => {
-                    lmf_ue_measurement_id =
-                        Some(LmfUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_ue_measurement_id = Some(LmfUeMeasurementId::decode(data)?);
                 }
                 413 => {
-                    ran_ue_measurement_id =
-                        Some(RanUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_ue_measurement_id = Some(RanUeMeasurementId::decode(data)?);
                 }
                 417 => {
-                    e_cid_measurement_result =
-                        Some(ECidMeasurementResult::from_aper(decoder, UNCONSTRAINED)?);
+                    e_cid_measurement_result = Some(ECidMeasurementResult::decode(data)?);
                 }
                 418 => {
-                    cell_portion_id = Some(CellPortionId::from_aper(decoder, UNCONSTRAINED)?);
+                    cell_portion_id = Some(CellPortionId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let e_cid_measurement_result =
-            e_cid_measurement_result.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE lmf_ue_measurement_id"),
+        ))?;
+        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ran_ue_measurement_id"),
+        ))?;
+        let e_cid_measurement_result = e_cid_measurement_result.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE e_cid_measurement_result")),
+        )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
@@ -6994,42 +7691,54 @@ pub struct ECidMeasurementTerminationCommand {
 impl AperCodec for ECidMeasurementTerminationCommand {
     type Output = ECidMeasurementTerminationCommand;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        // extension marker TODO
-        let len = decoder.decode_length()?;
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut lmf_ue_measurement_id: Option<LmfUeMeasurementId> = None;
         let mut ran_ue_measurement_id: Option<RanUeMeasurementId> = None;
 
         for _ in 0..len {
-            let id = u16::from_aper(decoder, UNCONSTRAINED)?;
-            let criticality = Criticality::from_aper(decoder, UNCONSTRAINED)?;
+            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 40 => {
-                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?);
                 }
                 41 => {
-                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::from_aper(decoder, UNCONSTRAINED)?);
+                    gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?);
                 }
                 412 => {
-                    lmf_ue_measurement_id =
-                        Some(LmfUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    lmf_ue_measurement_id = Some(LmfUeMeasurementId::decode(data)?);
                 }
                 413 => {
-                    ran_ue_measurement_id =
-                        Some(RanUeMeasurementId::from_aper(decoder, UNCONSTRAINED)?);
+                    ran_ue_measurement_id = Some(RanUeMeasurementId::decode(data)?);
                 }
-                _ => {
+                x => {
                     if let Criticality::Reject = criticality {
-                        return Err(DecodeError::InvalidChoice);
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
                     }
                 }
             }
         }
-        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(DecodeError::InvalidChoice)?;
-        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
-        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(DecodeError::InvalidChoice)?;
+        let gnb_cu_ue_f1ap_id = gnb_cu_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_cu_ue_f1ap_id"
+        )))?;
+        let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE gnb_du_ue_f1ap_id"
+        )))?;
+        let lmf_ue_measurement_id = lmf_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE lmf_ue_measurement_id"),
+        ))?;
+        let ran_ue_measurement_id = ran_ue_measurement_id.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE ran_ue_measurement_id"),
+        ))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
