@@ -170,13 +170,15 @@ class TypeTransformer(Transformer):
 
     def sequenceof(self, tree):
         item = tree.children[2]
+        item = self.convert(item)
         self.transform_bounds(tree)
         if isinstance(item, Tree):
             # It must be a container
             assert(item.data == "container")
-            item = item.children[1].replace("IEs", "")
-        return Tree(
-            "Vec<" + self.convert(item) + ">", [tree.children[0], tree.children[1]])
+            tree.children[2] = item.children[1].replace("IEs", "")
+        tree.children[2] = item
+        return tree
+        # "Vec<" + self.convert(item) + ">", [tree.children[0], tree.children[1]])
 
     def transform_bounds(self, tree):
         ub = 18446744073709551615
@@ -402,9 +404,10 @@ document
           1099511627775
       field
         foo
-        Vec<OverloadStartNssaiItem>
+        sequenceof
           1
           3
+          OverloadStartNssaiItem
       optional_field
         wlan_rtt
         WlanRtt
@@ -534,14 +537,16 @@ document
         SrsResourceSetList1
   tuple_struct
     SrsResourceSetList
-    Vec<Foo>
+    sequenceof
       1
       2
+      Foo
   tuple_struct
     SrsResourceSetList1
-    Vec<Foo>
+    sequenceof
       1
       3
+      Foo
 """)
 
     def test_pdu_contents(self):
@@ -613,9 +618,10 @@ document
   None
   tuple_struct
     ActivatedCellsToBeUpdatedList
-    Vec<ActivatedCellsToBeUpdatedListItem>
+    sequenceof
       1
       512
+      ActivatedCellsToBeUpdatedListItem
 """, constants={"maxnoofServedCellsIAB": 512})
 
 

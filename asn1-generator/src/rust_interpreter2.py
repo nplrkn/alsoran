@@ -17,12 +17,19 @@ def bool_to_rust(b):
 
 def type_and_constraints(typ):
     constraints = "UNCONSTRAINED"
-    string_type = None
+    extra_type = None
+    seqof = False
 
     if isinstance(typ, Tree):
         bounds = typ.children
         typ = typ.data
         ext = "false"
+
+        if typ == "sequenceof":
+            seqof = True
+            extra_type = type_and_constraints(bounds[-1])[0]
+            bounds = bounds[0: -1]
+            typ = f"Vec<{extra_type}>"
 
         if len(bounds) > 1:
             MAX_U64 = 18446744073709551615
@@ -50,20 +57,29 @@ def type_and_constraints(typ):
             constraints = "None, None, false"
 
     if typ in ["VisibleString", "PrintableString", "UTF8String"]:
-        string_type = snake_case(typ)
+        extra_type = snake_case(typ)
         typ = "String"
 
-    return (typ, constraints, string_type)
+    return (typ, constraints, extra_type, seqof)
 
 
 def decode_expression(tree):
-    (typ, constraints, string_type) = type_and_constraints(tree)
-    if typ == "Vec<u8>":
+    (typ, constraints, extra_type, seqof) = type_and_constraints(tree)
+    if seqof:
+        return f"""{{
+            let length = aper::decode::decode_length_determinent(data, {constraints})?;
+            let mut items = vec![];
+            for _ in 0..length {{
+                items.push({(decode_expression(tree.children[2]))});
+            }}
+            items
+        }}"""
+    elif typ == "Vec<u8>":
         return f"aper::decode::decode_octetstring(data, {constraints})?"
     elif typ == "BitString":
         return f"aper::decode::decode_bitstring(data, {constraints})?"
     elif typ == "String":
-        return f"aper::decode::decode_{string_type}(data, {constraints})?"
+        return f"aper::decode::decode_{extra_type}(data, {constraints})?"
     elif typ == "i128":
         return f"aper::decode::decode_integer(data, {constraints})?.0"
     elif typ in ["u8", "u16", "u32", "u64"]:
@@ -202,7 +218,7 @@ class ChoiceFieldsFrom(Interpreter):
 
     def choicefield(self, tree):
         name = tree.children[0]
-        (typ, constraints, _) = type_and_constraints(tree.children[1])
+        (typ, constraints, _, _) = type_and_constraints(tree.children[1])
 
         if typ != "null":
             self.fields_from += f"""\
@@ -268,7 +284,7 @@ class IeFields(Interpreter):
         name = tree.children[0]
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
-        (typ, constraints, _) = type_and_constraints(tree.children[3])
+        (typ, constraints, _, _) = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
     pub {name}: {typ},
 """
@@ -298,7 +314,7 @@ class IeFields(Interpreter):
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
         typ = tree.children[3]
-        (typ, constraints, _) = type_and_constraints(tree.children[3])
+        (typ, constraints, _, _) = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
@@ -427,7 +443,7 @@ impl AperCodec for {name} {{
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
-        (inner, _, _) = type_and_constraints(tree.children[1])
+        inner = type_and_constraints(tree.children[1])[0]
         # # inner = tree.children[1].data
         # ub = None
         # lb = None
@@ -1014,6 +1030,30 @@ impl AperCodec for UriAddress {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_visible_string(data, None, None, false)?))
+    }
+}
+
+""")
+
+    def test_seq_of_non_primitive(self):
+        self.should_generate("""\
+AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalDLUPTNLInformationForHOItem
+""", """
+// AdditionalDluptnlInformationForHoList
+#[derive(Clone)]
+pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
+
+impl AperCodec for AdditionalDluptnlInformationForHoList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(50), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AdditionalDluptnlInformationForHoItem::decode(data)?);
+            }
+            items
+        }))
     }
 }
 
