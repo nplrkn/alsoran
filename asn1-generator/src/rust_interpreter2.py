@@ -65,8 +65,10 @@ def decode_expression(tree):
     (typ, constraints, _) = type_and_constraints(tree)
     if typ == "Vec<u8>":
         return "aper::decode::decode_octetstring(data, None, None, false)?"
+    elif typ == "BitString":
+        return "aper::decode::decode_bitstring(data, None, None, false)?"
     else:
-    return f"""{typ}::decode(data)?"""
+        return f"""{typ}::decode(data)?"""
 
 
 class StructFieldsFrom(Interpreter):
@@ -159,35 +161,35 @@ class ChoiceFields(Interpreter):
         print("Warning - extensible CHOICE not implemented")
 
 
-class ChoiceFieldsTo(Interpreter):
-    def __init__(self):
-        self.fields_to = ""
-        self.field_index = 0
+# class ChoiceFieldsTo(Interpreter):
+#     def __init__(self):
+#         self.fields_to = ""
+#         self.field_index = 0
 
-    def choicefield(self, tree):
-        name = tree.children[0]
-        (typ, constraints, _) = type_and_constraints(tree.children[1])
+#     def choicefield(self, tree):
+#         name = tree.children[0]
+#         (typ, constraints, _) = type_and_constraints(tree.children[1])
 
-        if typ != "null":
-            self.fields_to += f"""\
-            Self::{name}(x) => {{
-                {to_aper_unconstrained(f"({self.field_index} as u8)")}?;
-                {to_aper("x", constraints)}?;
-            }}
-"""
-        else:
-            self.fields_to += f"""\
-            Self::{name} => {{
-                {to_aper_unconstrained(f"({self.field_index} as u8)")}?;
-            }}
-"""
-        self.field_index += 1
+#         if typ != "null":
+#             self.fields_to += f"""\
+#             Self::{name}(x) => {{
+#                 {to_aper_unconstrained(f"({self.field_index} as u8)")}?;
+#                 {to_aper("x", constraints)}?;
+#             }}
+# """
+#         else:
+#             self.fields_to += f"""\
+#             Self::{name} => {{
+#                 {to_aper_unconstrained(f"({self.field_index} as u8)")}?;
+#             }}
+# """
+#         self.field_index += 1
 
-    def extension_container(self, tree):
-        #         self.fields_to += f"""\
-        #             Self::_Extended => return Err(EncodeError::NotImplemented),
-        # """
-        self.field_index += 1
+#     def extension_container(self, tree):
+#         #         self.fields_to += f"""\
+#         #             Self::_Extended => return Err(EncodeError::NotImplemented),
+#         # """
+#         self.field_index += 1
 
 
 class ChoiceFieldsFrom(Interpreter):
@@ -211,7 +213,7 @@ class ChoiceFieldsFrom(Interpreter):
 
     def extension_container(self, tree):
         self.fields_from += f"""\
-            {self.field_index} => Err(DecodeError::NotImplemented),
+            {self.field_index} => Err(AperCodecError::new("Choice extension container not implemented")),
 """
         self.field_index += 1
 
@@ -308,37 +310,37 @@ class IeFields(Interpreter):
 """
         self.optionals_presence_list += f"self.{name}.is_some(),"
 
-        self.optional_fields_to += f"""\
-        if let Some(x) = &self.{name} {{
-            {to_aper_unconstrained(f"({id} as u16)")}?;
-            {to_aper_unconstrained(f"Criticality::{criticality}")}?;
-            enc.append_open(&self.x)?;
-        }}
-"""
+#         self.optional_fields_to += f"""\
+#         if let Some(x) = &self.{name} {{
+#             {to_aper_unconstrained(f"({id} as u16)")}?;
+#             {to_aper_unconstrained(f"Criticality::{criticality}")}?;
+#             enc.append_open(&self.x)?;
+#         }}
+# """
 
 
-class StructFieldsTo(Interpreter):
-    def __init__(self):
-        self.fields_to = ""
+# class StructFieldsTo(Interpreter):
+#     def __init__(self):
+#         self.fields_to = ""
 
-    def field(self, tree):
-        name = tree.children[0]
-        self.fields_to += f"""\
-        {to_aper_unconstrained(f"self.{name}")}?;
-"""
+#     def field(self, tree):
+#         name = tree.children[0]
+#         self.fields_to += f"""\
+#         {to_aper_unconstrained(f"self.{name}")}?;
+# """
 
-    def optional_field(self, tree):
-        name = tree.children[0]
-        self.fields_to += f"""\
-        if let Some(x) = &self.{name} {{
-            {to_aper_unconstrained("x")}?;
-        }}
-"""
+#     def optional_field(self, tree):
+#         name = tree.children[0]
+#         self.fields_to += f"""\
+#         if let Some(x) = &self.{name} {{
+#             {to_aper_unconstrained("x")}?;
+#         }}
+# """
 
 
-class IeFieldsTo(Interpreter):
-    def field(self, tree):
-        pass
+# class IeFieldsTo(Interpreter):
+#     def field(self, tree):
+#         pass
 
 
 MUT_OPTIONALS = """let mut optionals = BitString::with_len({num_optionals});"""
@@ -364,15 +366,25 @@ class StructInterpreter(Interpreter):
         num_variants = field_interpreter.variants
 
         assert(num_variants <= 256)
-        typ = "u8"
-        constraints = f"Constraints::value(Some(0), Some({num_variants - 1}), false)"
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
+
+impl AperCodec for {name} {{
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{\
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some({num_variants - 1}, false)?;
+        if extended {{
+            return Err(aper::AperCodecError::new("Extended enum not implemented"))
+        }}
+        Self::try_from(idx).ok_or(AperCodecError::new("Unknown enum variant"))
+    }}
+}}
+
 """
         return name
 
@@ -385,15 +397,30 @@ pub enum {name} {{
 
         fields_from_interpreter = ChoiceFieldsFrom()
         fields_from_interpreter.visit(tree.children[1])
-        fields_to_interpreter = ChoiceFieldsTo()
-        fields_to_interpreter.visit(tree.children[1])
+        #fields_to_interpreter = ChoiceFieldsTo()
+        # fields_to_interpreter.visit(tree.children[1])
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone)]
+#[derive(Clone)]
 pub enum {name} {{
 {field_interpreter.choice_fields}\
 }}
+
+impl AperCodec for {name} {{
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, false)?;
+        if extended {{
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }}
+        match idx {{
+{fields_from_interpreter.fields_from}\
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }}
+    }}
+}}
+
 """
 
     def tuple_struct(self, tree):
@@ -413,9 +440,20 @@ pub enum {name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, AperCodec)]
-#[asn(type = {asntype}, )
+#[derive(Clone)]
 pub struct {name}(pub {inner});
+
+impl AperCodec for {name} {{
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        let (val, extended) = aper::decode::decode_integer(data, Some(0), Some(4095), true)?;
+        if extended {{
+            return Err(aper::AperCodecError::new("Integer extension not implemented"))
+        }}
+        Ok(Self(val as {inner}))
+    }}
+}}
+
 """
 
     def ie(self, tree):
@@ -447,7 +485,7 @@ pub struct {name}(pub {inner});
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -505,10 +543,13 @@ impl AperCodec for {orig_name} {{
         field_interpreter = StructFields()
         fields_from_interpreter = StructFieldsFrom()
         find_opt_interpreter = StructFindOptionals()
-        fields_to_interpreter = StructFieldsTo()
-
-        for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter, fields_to_interpreter]:
+        for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter]:
             i.visit(tree.children[1])
+
+        #fields_to_interpreter = StructFieldsTo()
+
+        # for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter, fields_to_interpreter]:
+        #     i.visit(tree.children[1])
         # field_interpreter.visit(tree.children[1])
         # fields_from_interpreter.visit(tree.children[1])
         # find_opt_interpreter.visit(tree.children[1])
@@ -519,11 +560,23 @@ impl AperCodec for {orig_name} {{
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone)]
-#[asn(type = "SEQUENCE", extensible = {bool_to_rust(self.extensible)})]
+#[derive(Clone)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
+
+impl AperCodec for {orig_name} {{
+    type Output = {orig_name};
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        let (bitmap, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
+        {optionals_from if num_optionals > 0 else ""}
+{fields_from_interpreter.fields_from}
+        Ok(Self {{
+{fields_from_interpreter.self_fields}\
+        }})
+    }}
+}}
+
 """
         return name
 
@@ -580,7 +633,7 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
         output = """\
 
 // TriggeringMessage
-# [derive(Clone, Copy)]
+#[derive(Clone, Copy)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -603,14 +656,14 @@ WLANMeasurementConfiguration ::= SEQUENCE {
         output = """\
 
 // WlanMeasurementConfiguration
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_rtt: Option<WlanRtt>,
 }
 
 // WlanRtt
-# [derive(Clone, Copy)]
+#[derive(Clone, Copy)]
 pub enum WlanRtt {
     Thing1,
 }
@@ -624,7 +677,7 @@ LTEUERLFReportContainer::= OCTET STRING
         output = """\
 
 // LteueRlfReportContainer
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
 """
         self.should_generate(input, output)
@@ -636,8 +689,20 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
         output = """\
 
 // MaximumDataBurstVolume
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct MaximumDataBurstVolume(pub u16);
+
+impl AperCodec for MaximumDataBurstVolume {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (val, extended) = aper::decode::decode_integer(data, Some(0), Some(4095), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Integer extension not implemented"))
+        }
+        Ok(Self(val as u16))
+    }
+}
+
 """
         self.should_generate(input, output)
 
@@ -648,7 +713,7 @@ MobilityInformation ::= BIT STRING(SIZE(16))
         output = """\
 
 // MobilityInformation
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct MobilityInformation(pub BitString);
 """
         self.should_generate(input, output)
@@ -664,7 +729,7 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
         output = """\
 
 // MaximumIntegrityProtectedDataRate
-# [derive(Clone, Copy)]
+#[derive(Clone, Copy)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
@@ -683,7 +748,7 @@ EventTrigger ::= CHOICE {
 """, """\
 
 // EventTrigger
-# [derive(Clone)]
+#[derive(Clone)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig,
@@ -691,7 +756,7 @@ pub enum EventTrigger {
 }
 
 // OutOfCoverage
-# [derive(Clone, Copy)]
+#[derive(Clone, Copy)]
 pub enum OutOfCoverage {
     True,
 }
@@ -712,7 +777,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 """, """\
 
 // PduSessionResourceSetupRequest
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_paging_priority: Option<Vec<u8>>,
@@ -770,10 +835,26 @@ GNB-ID ::= CHOICE {
 """, """\
 
 // GnbId
-# [derive(Clone)]
+#[derive(Clone)]
 pub enum GnbId {
     GnbId(BitString),
 }
+
+impl AperCodec for GnbId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::GnbId(aper::decode::decode_bitstring(data, None, None, false)?)),
+            1 => Err(AperCodecError::new("Choice extension container not implemented")),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+}
+
 """)
 
     def test_bug(self):
@@ -785,11 +866,27 @@ PrivateIE-ID	::= CHOICE {
 """, """\
 
 // PrivateIeId
-# [derive(Clone)]
+#[derive(Clone)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
 }
+
+impl AperCodec for PrivateIeId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::Local(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+            1 => Ok(Self::Global(aper::decode::decode_octetstring(data, None, None, false)?)),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+}
+
 """)
 
     def test_int_options(self):
@@ -798,7 +895,7 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 """, """\
 
 // ExpectedActivityPeriod
-# [derive(Clone)]
+#[derive(Clone)]
 pub struct ExpectedActivityPeriod(pub u8);
 """)
 
