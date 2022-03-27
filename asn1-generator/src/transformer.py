@@ -181,9 +181,10 @@ class TypeTransformer(Transformer):
     def transform_bounds(self, tree):
         ub = 18446744073709551615
         lb = 0
+        extensible = False
         if len(tree.children) <= 1:
             print("Warning: no bounds")
-            return (None, None)
+            return (None, None, False)
         else:
             lb = tree.children[0]
             try:
@@ -204,30 +205,38 @@ class TypeTransformer(Transformer):
                     if ub is None:
                         print("Error: unknown constant ", tree.children[1])
 
+            for idx in range(2, len(tree.children)-1):
+                item = tree.children[idx]
+                if isinstance(item, Tree) and item.data == "extension_marker":
+                    extensible = True
+
         tree.children[0] = lb
         tree.children[1] = ub
 
-        return (lb, ub)
+        return (lb, ub, extensible)
 
     def namedvalues(self, tree):
         return Discard
 
     def integer(self, tree):
-        (lb, ub) = self.transform_bounds(tree)
+        (lb, ub, extensible) = self.transform_bounds(tree)
 
-        try:
-            range = ub-lb
-        except:
-            print("Warning: unable to determine size - using u8")
-            range = 255
-        if range < 256:
-            t = "u8"
-        elif range < 65536:
-            t = "u16"
-        elif range < 4294967295:
-            t = "u32"
+        if extensible:
+            t = "i128"
         else:
-            t = "u64"
+            try:
+                range = ub-lb
+            except:
+                print("Warning: unable to determine size - using u8")
+                range = 255
+            if range < 256:
+                t = "u8"
+            elif range < 65536:
+                t = "u16"
+            elif range < 4294967295:
+                t = "u32"
+            else:
+                t = "u64"
         return Tree(t, tree.children)
 
     def bits(self, tree):
@@ -346,7 +355,7 @@ document
   None
   tuple_struct
     MaximumDataBurstVolume
-    u16
+    i128
       -234
       255
       extension_marker

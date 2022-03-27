@@ -29,10 +29,10 @@ def type_and_constraints(typ):
             del bounds[-1]
 
         if len(bounds) > 1:
-            MAX_I64 = 9223372036854775807
+            MAX_U64 = 18446744073709551615
             MIN_I64 = -9223372036854775808
-            lb = MAX_I64  # i64::MAX
-            ub = MIN_I64  # i64::MIN
+            lb = MAX_U64
+            ub = MIN_I64
             for i in range(0, len(bounds), 2):
                 if isinstance(bounds[i], Tree):
                     assert bounds[i].data == "extension_marker"
@@ -44,19 +44,14 @@ def type_and_constraints(typ):
                     lb = min(lb, int(bounds[i+1]))
                     ub = max(ub, int(bounds[i+1]))
 
-            if ub > MAX_I64:
-                print("Warning: upper bound exceeds i64 - incorrect coding will result")
-                ub = MAX_I64
-
-            if ub in [MAX_I64, MIN_I64]:
+            if ub in [MAX_U64, MIN_I64]:
                 ub = "None"
             else:
                 ub = f"Some({ub})"
 
-            if typ in ["u8", "u16", "u32", "u64"]:
-                constraints = f"Constraints::value(Some({lb}), {ub}, {ext})"
-            else:
-                constraints = f"Constraints::size(Some({lb}), {ub}, {ext})"
+            constraints = f"Some({lb}), {ub}, {ext}"
+        else:
+            constraints = "None, None, false"
 
     return (typ, constraints, string_type)
 
@@ -64,9 +59,13 @@ def type_and_constraints(typ):
 def decode_expression(tree):
     (typ, constraints, _) = type_and_constraints(tree)
     if typ == "Vec<u8>":
-        return "aper::decode::decode_octetstring(data, None, None, false)?"
+        return f"aper::decode::decode_octetstring(data, {constraints})?"
     elif typ == "BitString":
-        return "aper::decode::decode_bitstring(data, None, None, false)?"
+        return f"aper::decode::decode_bitstring(data, {constraints})?"
+    elif typ == "i128":
+        return f"aper::decode::decode_integer(data, {constraints})?.0"
+    elif typ in ["u8", "u16", "u32", "u64"]:
+        return f"aper::decode::decode_integer(data, {constraints})?.0 as {typ}"
     else:
         return f"""{typ}::decode(data)?"""
 
@@ -75,6 +74,7 @@ class StructFieldsFrom(Interpreter):
     def __init__(self):
         self.fields_from = ""
         self.self_fields = ""
+        self.optional_idx = 0
 
     def field(self, tree):
         name = tree.children[0]
@@ -87,12 +87,13 @@ class StructFieldsFrom(Interpreter):
         name = tree.children[0]
         self.self_fields += f"            {name},\n"
         self.fields_from += f"""\
-        let {name} = if optionals.is_set(0) {{
+        let {name} = if optionals[{self.optional_idx}] {{
             Some({decode_expression(tree.children[1])})
         }} else {{
             None
         }};
 """
+        self.optional_idx += 1
 
 
 class StructFindOptionals(Interpreter):
@@ -284,18 +285,18 @@ class IeFields(Interpreter):
             "Missing mandatory IE {name}"
         )))?;
 """
-        self.mandatory_fields_to += f"""\
-        {to_aper_unconstrained(f"({id} as u16)")}?;
-        {to_aper_unconstrained(f"Criticality::{criticality}")}?;
-        enc.append_open(&self.{name})?;
-"""
+#         self.mandatory_fields_to += f"""\
+#         {to_aper_unconstrained(f"({id} as u16)")}?;
+#         {to_aper_unconstrained(f"Criticality::{criticality}")}?;
+#         enc.append_open(&self.{name})?;
+# """
 
     def optional_ie(self, tree):
         name = tree.children[0]
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
         typ = tree.children[3]
-        (typ, constraints, _) = type_and_attributes(tree.children[3])
+        (typ, constraints, _) = type_and_constraints(tree.children[3])
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
@@ -363,25 +364,22 @@ class StructInterpreter(Interpreter):
         field_interpreter = EnumFields()
         field_interpreter.visit(tree.children[1])
 
-        num_variants = field_interpreter.variants
-
-        assert(num_variants <= 256)
-
         self.outfile += f"""
 // {orig_name}
 #[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
 
 impl AperCodec for {name} {{
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{\
-        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some({num_variants - 1}, false)?;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
-            return Err(aper::AperCodecError::new("Extended enum not implemented"))
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
         }}
-        Self::try_from(idx).ok_or(AperCodecError::new("Unknown enum variant"))
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }}
 }}
 
@@ -427,16 +425,16 @@ impl AperCodec for {name} {{
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
-        (inner, constraints, _) = type_and_constraints(tree.children[1])
-        # inner = tree.children[1].data
-        ub = None
-        lb = None
-        if len(tree.children[1].children) > 2:
-            ub = tree.children[1].children[1]
-        if len(tree.children[1].children) > 1:
-            lb = tree.children[1].children[0]
-        if ub == None:
-            ub = lb
+        (inner, _, _) = type_and_constraints(tree.children[1])
+        # # inner = tree.children[1].data
+        # ub = None
+        # lb = None
+        # if len(tree.children[1].children) > 2:
+        #     ub = tree.children[1].children[1]
+        # if len(tree.children[1].children) > 1:
+        #     lb = tree.children[1].children[0]
+        # if ub == None:
+        #     ub = lb
 
         self.outfile += f"""
 // {orig_name}
@@ -446,11 +444,7 @@ pub struct {name}(pub {inner});
 impl AperCodec for {name} {{
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
-        let (val, extended) = aper::decode::decode_integer(data, Some(0), Some(4095), true)?;
-        if extended {{
-            return Err(aper::AperCodecError::new("Integer extension not implemented"))
-        }}
-        Ok(Self(val as {inner}))
+        Ok(Self({decode_expression(tree.children[1])}))
     }}
 }}
 
@@ -556,8 +550,6 @@ impl AperCodec for {orig_name} {{
         # fields_to_interpreter.visit(tree.children[1])
         num_optionals = find_opt_interpreter.num_optionals
 
-        optionals_from = f"""let {"_" if num_optionals == 1 else ""}optionals = BitString::from_aper(decoder, Constraints::size(Some({num_optionals}), Some({num_optionals}), false))?;"""
-
         self.outfile += f"""
 // {orig_name}
 #[derive(Clone)]
@@ -568,8 +560,7 @@ pub struct {name} {{
 impl AperCodec for {orig_name} {{
     type Output = {orig_name};
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
-        let (bitmap, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
-        {optionals_from if num_optionals > 0 else ""}
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
 {fields_from_interpreter.fields_from}
         Ok(Self {{
 {fields_from_interpreter.self_fields}\
@@ -633,12 +624,25 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
         output = """\
 
 // TriggeringMessage
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
     UnsuccessfulOutcome,
 }
+
+impl AperCodec for TriggeringMessage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 """
         self.should_generate(input, output)
 
@@ -662,11 +666,43 @@ pub struct WlanMeasurementConfiguration {
     pub wlan_rtt: Option<WlanRtt>,
 }
 
+impl AperCodec for WlanMeasurementConfiguration {
+    type Output = WlanMeasurementConfiguration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let wlan_meas_config = WlanMeasConfig::decode(data)?;
+        let wlan_rtt = if optionals[0] {
+            Some(WlanRtt::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            wlan_meas_config,
+            wlan_rtt,
+        })
+    }
+}
+
+
 // WlanRtt
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum WlanRtt {
     Thing1,
 }
+
+impl AperCodec for WlanRtt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 """
         self.should_generate(input, output)
 
@@ -679,6 +715,14 @@ LTEUERLFReportContainer::= OCTET STRING
 // LteueRlfReportContainer
 #[derive(Clone)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
+
+impl AperCodec for LteueRlfReportContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(data, None, None, false)?))
+    }
+}
+
 """
         self.should_generate(input, output)
 
@@ -690,16 +734,12 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
 
 // MaximumDataBurstVolume
 #[derive(Clone)]
-pub struct MaximumDataBurstVolume(pub u16);
+pub struct MaximumDataBurstVolume(pub i128);
 
 impl AperCodec for MaximumDataBurstVolume {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        let (val, extended) = aper::decode::decode_integer(data, Some(0), Some(4095), true)?;
-        if extended {
-            return Err(aper::AperCodecError::new("Integer extension not implemented"))
-        }
-        Ok(Self(val as u16))
+        Ok(Self(aper::decode::decode_integer(data, Some(0), Some(4095), true)?.0))
     }
 }
 
@@ -715,6 +755,14 @@ MobilityInformation ::= BIT STRING(SIZE(16))
 // MobilityInformation
 #[derive(Clone)]
 pub struct MobilityInformation(pub BitString);
+
+impl AperCodec for MobilityInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(data, Some(16), Some(16), false)?))
+    }
+}
+
 """
         self.should_generate(input, output)
 
@@ -729,11 +777,24 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
         output = """\
 
 // MaximumIntegrityProtectedDataRate
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
 }
+
+impl AperCodec for MaximumIntegrityProtectedDataRate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 """
         self.should_generate(input, output)
 
@@ -755,11 +816,42 @@ pub enum EventTrigger {
     ShortMacroEnbId(BitString),
 }
 
+impl AperCodec for EventTrigger {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::OutOfCoverage(OutOfCoverage::decode(data)?)),
+            1 => Ok(Self::EventL1LoggedMdtConfig),
+            2 => Ok(Self::ShortMacroEnbId(aper::decode::decode_bitstring(data, Some(18), Some(18), false)?)),
+            3 => Err(AperCodecError::new("Choice extension container not implemented")),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+}
+
+
 // OutOfCoverage
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum OutOfCoverage {
     True,
 }
+
+impl AperCodec for OutOfCoverage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 """)
 
     def test_pdu_contents(self):
@@ -848,7 +940,7 @@ impl AperCodec for GnbId {
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::GnbId(aper::decode::decode_bitstring(data, None, None, false)?)),
+            0 => Ok(Self::GnbId(aper::decode::decode_bitstring(data, Some(22), Some(32), false)?)),
             1 => Err(AperCodecError::new("Choice extension container not implemented")),
             _ => Err(AperCodecError::new("Unknown choice idx"))
         }
@@ -880,7 +972,7 @@ impl AperCodec for PrivateIeId {
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::Local(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+            0 => Ok(Self::Local(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16)),
             1 => Ok(Self::Global(aper::decode::decode_octetstring(data, None, None, false)?)),
             _ => Err(AperCodecError::new("Unknown choice idx"))
         }
@@ -896,7 +988,15 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 
 // ExpectedActivityPeriod
 #[derive(Clone)]
-pub struct ExpectedActivityPeriod(pub u8);
+pub struct ExpectedActivityPeriod(pub i128);
+
+impl AperCodec for ExpectedActivityPeriod {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_integer(data, Some(1), Some(50), true)?.0))
+    }
+}
+
 """)
 
 
