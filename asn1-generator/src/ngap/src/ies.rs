@@ -3,12 +3,27 @@
 use super::common::*;
 
 use bitvec::prelude::*;
-pub type BitString = BitVec<u8, Msb0>;
+pub type BitString = BitVec<Msb0, u8>;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
+use num_enum::TryFromPrimitive;
 
 // AdditionalDluptnlInformationForHoList
 #[derive(Clone)]
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
+
+impl AperCodec for AdditionalDluptnlInformationForHoList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AdditionalDluptnlInformationForHoItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AdditionalDluptnlInformationForHoItem
 #[derive(Clone)]
@@ -18,10 +33,42 @@ pub struct AdditionalDluptnlInformationForHoItem {
     pub additional_dl_forwarding_uptnl_information: Option<UpTransportLayerInformation>,
 }
 
+impl AperCodec for AdditionalDluptnlInformationForHoItem {
+    type Output = AdditionalDluptnlInformationForHoItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let additional_dl_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let additional_qos_flow_setup_response_list = QosFlowListWithDataForwarding::decode(data)?;
+        let additional_dl_forwarding_uptnl_information = if optionals[0] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            additional_dl_ngu_up_tnl_information,
+            additional_qos_flow_setup_response_list,
+            additional_dl_forwarding_uptnl_information,
+        })
+    }
+}
+
 // AdditionalQosFlowInformation
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum AdditionalQosFlowInformation {
     MoreLikely,
+}
+
+impl AperCodec for AdditionalQosFlowInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // AllocationAndRetentionPriority
@@ -32,13 +79,58 @@ pub struct AllocationAndRetentionPriority {
     pub pre_emption_vulnerability: PreEmptionVulnerability,
 }
 
+impl AperCodec for AllocationAndRetentionPriority {
+    type Output = AllocationAndRetentionPriority;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let priority_level_arp = PriorityLevelArp::decode(data)?;
+        let pre_emption_capability = PreEmptionCapability::decode(data)?;
+        let pre_emption_vulnerability = PreEmptionVulnerability::decode(data)?;
+
+        Ok(Self {
+            priority_level_arp,
+            pre_emption_capability,
+            pre_emption_vulnerability,
+        })
+    }
+}
+
 // AllowedCagListPerPlmn
 #[derive(Clone)]
 pub struct AllowedCagListPerPlmn(pub Vec<CagId>);
 
+impl AperCodec for AllowedCagListPerPlmn {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CagId::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // AllowedNssai
 #[derive(Clone)]
 pub struct AllowedNssai(pub Vec<AllowedNssaiItem>);
+
+impl AperCodec for AllowedNssai {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AllowedNssaiItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AllowedNssaiItem
 #[derive(Clone)]
@@ -46,9 +138,34 @@ pub struct AllowedNssaiItem {
     pub s_nssai: SNssai,
 }
 
+impl AperCodec for AllowedNssaiItem {
+    type Output = AllowedNssaiItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let s_nssai = SNssai::decode(data)?;
+
+        Ok(Self { s_nssai })
+    }
+}
+
 // AllowedPniNpnList
 #[derive(Clone)]
 pub struct AllowedPniNpnList(pub Vec<AllowedPniNpnItem>);
+
+impl AperCodec for AllowedPniNpnList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AllowedPniNpnItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AllowedPniNpnItem
 #[derive(Clone)]
@@ -58,21 +175,84 @@ pub struct AllowedPniNpnItem {
     pub allowed_cag_list_per_plmn: AllowedCagListPerPlmn,
 }
 
+impl AperCodec for AllowedPniNpnItem {
+    type Output = AllowedPniNpnItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let pni_npn_restricted = PniNpnRestricted::decode(data)?;
+        let allowed_cag_list_per_plmn = AllowedCagListPerPlmn::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            pni_npn_restricted,
+            allowed_cag_list_per_plmn,
+        })
+    }
+}
+
 // AllowedTaCs
 #[derive(Clone)]
 pub struct AllowedTaCs(pub Vec<Tac>);
+
+impl AperCodec for AllowedTaCs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tac::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AlternativeQosParaSetIndex
 #[derive(Clone)]
 pub struct AlternativeQosParaSetIndex(pub u8);
 
+impl AperCodec for AlternativeQosParaSetIndex {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(8), true)?.0 as u8,
+        ))
+    }
+}
+
 // AlternativeQosParaSetNotifyIndex
 #[derive(Clone)]
 pub struct AlternativeQosParaSetNotifyIndex(pub u8);
 
+impl AperCodec for AlternativeQosParaSetNotifyIndex {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(8), true)?.0 as u8,
+        ))
+    }
+}
+
 // AlternativeQosParaSetList
 #[derive(Clone)]
 pub struct AlternativeQosParaSetList(pub Vec<AlternativeQosParaSetItem>);
+
+impl AperCodec for AlternativeQosParaSetList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AlternativeQosParaSetItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AlternativeQosParaSetItem
 #[derive(Clone)]
@@ -84,17 +264,89 @@ pub struct AlternativeQosParaSetItem {
     pub packet_error_rate: Option<PacketErrorRate>,
 }
 
+impl AperCodec for AlternativeQosParaSetItem {
+    type Output = AlternativeQosParaSetItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let alternative_qos_para_set_index = AlternativeQosParaSetIndex::decode(data)?;
+        let guaranteed_flow_bit_rate_dl = if optionals[0] {
+            Some(BitRate::decode(data)?)
+        } else {
+            None
+        };
+        let guaranteed_flow_bit_rate_ul = if optionals[1] {
+            Some(BitRate::decode(data)?)
+        } else {
+            None
+        };
+        let packet_delay_budget = if optionals[2] {
+            Some(PacketDelayBudget::decode(data)?)
+        } else {
+            None
+        };
+        let packet_error_rate = if optionals[3] {
+            Some(PacketErrorRate::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            alternative_qos_para_set_index,
+            guaranteed_flow_bit_rate_dl,
+            guaranteed_flow_bit_rate_ul,
+            packet_delay_budget,
+            packet_error_rate,
+        })
+    }
+}
+
 // AmfName
 #[derive(Clone)]
 pub struct AmfName(pub String);
+
+impl AperCodec for AmfName {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_printable_string(
+            data,
+            Some(1),
+            Some(150),
+            true,
+        )?))
+    }
+}
 
 // AmfNameVisibleString
 #[derive(Clone)]
 pub struct AmfNameVisibleString(pub String);
 
+impl AperCodec for AmfNameVisibleString {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_visible_string(
+            data,
+            Some(1),
+            Some(150),
+            true,
+        )?))
+    }
+}
+
 // AmfNameUtf8String
 #[derive(Clone)]
 pub struct AmfNameUtf8String(pub String);
+
+impl AperCodec for AmfNameUtf8String {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_utf8_string(
+            data,
+            Some(1),
+            Some(150),
+            true,
+        )?))
+    }
+}
 
 // AmfPagingTarget
 #[derive(Clone)]
@@ -103,21 +355,91 @@ pub enum AmfPagingTarget {
     Tai(Tai),
 }
 
+impl AperCodec for AmfPagingTarget {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::GlobalRanNodeId(GlobalRanNodeId::decode(data)?)),
+            1 => Ok(Self::Tai(Tai::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // AmfPointer
 #[derive(Clone)]
 pub struct AmfPointer(pub BitString);
+
+impl AperCodec for AmfPointer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(6),
+            Some(6),
+            false,
+        )?))
+    }
+}
 
 // AmfRegionId
 #[derive(Clone)]
 pub struct AmfRegionId(pub BitString);
 
+impl AperCodec for AmfRegionId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
+
 // AmfSetId
 #[derive(Clone)]
 pub struct AmfSetId(pub BitString);
 
+impl AperCodec for AmfSetId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(10),
+            Some(10),
+            false,
+        )?))
+    }
+}
+
 // AmfTnlAssociationSetupList
 #[derive(Clone)]
 pub struct AmfTnlAssociationSetupList(pub Vec<AmfTnlAssociationSetupItem>);
+
+impl AperCodec for AmfTnlAssociationSetupList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AmfTnlAssociationSetupItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AmfTnlAssociationSetupItem
 #[derive(Clone)]
@@ -125,9 +447,36 @@ pub struct AmfTnlAssociationSetupItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
 }
 
+impl AperCodec for AmfTnlAssociationSetupItem {
+    type Output = AmfTnlAssociationSetupItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::decode(data)?;
+
+        Ok(Self {
+            amf_tnl_association_address,
+        })
+    }
+}
+
 // AmfTnlAssociationToAddList
 #[derive(Clone)]
 pub struct AmfTnlAssociationToAddList(pub Vec<AmfTnlAssociationToAddItem>);
+
+impl AperCodec for AmfTnlAssociationToAddList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AmfTnlAssociationToAddItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AmfTnlAssociationToAddItem
 #[derive(Clone)]
@@ -137,9 +486,43 @@ pub struct AmfTnlAssociationToAddItem {
     pub tnl_address_weight_factor: TnlAddressWeightFactor,
 }
 
+impl AperCodec for AmfTnlAssociationToAddItem {
+    type Output = AmfTnlAssociationToAddItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::decode(data)?;
+        let tnl_association_usage = if optionals[0] {
+            Some(TnlAssociationUsage::decode(data)?)
+        } else {
+            None
+        };
+        let tnl_address_weight_factor = TnlAddressWeightFactor::decode(data)?;
+
+        Ok(Self {
+            amf_tnl_association_address,
+            tnl_association_usage,
+            tnl_address_weight_factor,
+        })
+    }
+}
+
 // AmfTnlAssociationToRemoveList
 #[derive(Clone)]
 pub struct AmfTnlAssociationToRemoveList(pub Vec<AmfTnlAssociationToRemoveItem>);
+
+impl AperCodec for AmfTnlAssociationToRemoveList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AmfTnlAssociationToRemoveItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AmfTnlAssociationToRemoveItem
 #[derive(Clone)]
@@ -147,9 +530,36 @@ pub struct AmfTnlAssociationToRemoveItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
 }
 
+impl AperCodec for AmfTnlAssociationToRemoveItem {
+    type Output = AmfTnlAssociationToRemoveItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::decode(data)?;
+
+        Ok(Self {
+            amf_tnl_association_address,
+        })
+    }
+}
+
 // AmfTnlAssociationToUpdateList
 #[derive(Clone)]
 pub struct AmfTnlAssociationToUpdateList(pub Vec<AmfTnlAssociationToUpdateItem>);
+
+impl AperCodec for AmfTnlAssociationToUpdateList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AmfTnlAssociationToUpdateItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AmfTnlAssociationToUpdateItem
 #[derive(Clone)]
@@ -159,9 +569,42 @@ pub struct AmfTnlAssociationToUpdateItem {
     pub tnl_address_weight_factor: Option<TnlAddressWeightFactor>,
 }
 
+impl AperCodec for AmfTnlAssociationToUpdateItem {
+    type Output = AmfTnlAssociationToUpdateItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let amf_tnl_association_address = CpTransportLayerInformation::decode(data)?;
+        let tnl_association_usage = if optionals[0] {
+            Some(TnlAssociationUsage::decode(data)?)
+        } else {
+            None
+        };
+        let tnl_address_weight_factor = if optionals[1] {
+            Some(TnlAddressWeightFactor::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            amf_tnl_association_address,
+            tnl_association_usage,
+            tnl_address_weight_factor,
+        })
+    }
+}
+
 // AmfUeNgapId
 #[derive(Clone)]
 pub struct AmfUeNgapId(pub u64);
+
+impl AperCodec for AmfUeNgapId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(1099511627775), false)?.0 as u64,
+        ))
+    }
+}
 
 // AreaOfInterest
 #[derive(Clone)]
@@ -171,9 +614,51 @@ pub struct AreaOfInterest {
     pub area_of_interest_ran_node_list: Option<AreaOfInterestRanNodeList>,
 }
 
+impl AperCodec for AreaOfInterest {
+    type Output = AreaOfInterest;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let area_of_interest_tai_list = if optionals[0] {
+            Some(AreaOfInterestTaiList::decode(data)?)
+        } else {
+            None
+        };
+        let area_of_interest_cell_list = if optionals[1] {
+            Some(AreaOfInterestCellList::decode(data)?)
+        } else {
+            None
+        };
+        let area_of_interest_ran_node_list = if optionals[2] {
+            Some(AreaOfInterestRanNodeList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            area_of_interest_tai_list,
+            area_of_interest_cell_list,
+            area_of_interest_ran_node_list,
+        })
+    }
+}
+
 // AreaOfInterestCellList
 #[derive(Clone)]
 pub struct AreaOfInterestCellList(pub Vec<AreaOfInterestCellItem>);
+
+impl AperCodec for AreaOfInterestCellList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AreaOfInterestCellItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AreaOfInterestCellItem
 #[derive(Clone)]
@@ -181,9 +666,34 @@ pub struct AreaOfInterestCellItem {
     pub ngran_cgi: NgranCgi,
 }
 
+impl AperCodec for AreaOfInterestCellItem {
+    type Output = AreaOfInterestCellItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ngran_cgi = NgranCgi::decode(data)?;
+
+        Ok(Self { ngran_cgi })
+    }
+}
+
 // AreaOfInterestList
 #[derive(Clone)]
 pub struct AreaOfInterestList(pub Vec<AreaOfInterestItem>);
+
+impl AperCodec for AreaOfInterestList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AreaOfInterestItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AreaOfInterestItem
 #[derive(Clone)]
@@ -192,9 +702,38 @@ pub struct AreaOfInterestItem {
     pub location_reporting_reference_id: LocationReportingReferenceId,
 }
 
+impl AperCodec for AreaOfInterestItem {
+    type Output = AreaOfInterestItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let area_of_interest = AreaOfInterest::decode(data)?;
+        let location_reporting_reference_id = LocationReportingReferenceId::decode(data)?;
+
+        Ok(Self {
+            area_of_interest,
+            location_reporting_reference_id,
+        })
+    }
+}
+
 // AreaOfInterestRanNodeList
 #[derive(Clone)]
 pub struct AreaOfInterestRanNodeList(pub Vec<AreaOfInterestRanNodeItem>);
+
+impl AperCodec for AreaOfInterestRanNodeList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AreaOfInterestRanNodeItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AreaOfInterestRanNodeItem
 #[derive(Clone)]
@@ -202,14 +741,50 @@ pub struct AreaOfInterestRanNodeItem {
     pub global_ran_node_id: GlobalRanNodeId,
 }
 
+impl AperCodec for AreaOfInterestRanNodeItem {
+    type Output = AreaOfInterestRanNodeItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let global_ran_node_id = GlobalRanNodeId::decode(data)?;
+
+        Ok(Self { global_ran_node_id })
+    }
+}
+
 // AreaOfInterestTaiList
 #[derive(Clone)]
 pub struct AreaOfInterestTaiList(pub Vec<AreaOfInterestTaiItem>);
+
+impl AperCodec for AreaOfInterestTaiList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AreaOfInterestTaiItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AreaOfInterestTaiItem
 #[derive(Clone)]
 pub struct AreaOfInterestTaiItem {
     pub tai: Tai,
+}
+
+impl AperCodec for AreaOfInterestTaiItem {
+    type Output = AreaOfInterestTaiItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+
+        Ok(Self { tai })
+    }
 }
 
 // AssistanceDataForPaging
@@ -219,15 +794,64 @@ pub struct AssistanceDataForPaging {
     pub paging_attempt_information: Option<PagingAttemptInformation>,
 }
 
+impl AperCodec for AssistanceDataForPaging {
+    type Output = AssistanceDataForPaging;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let assistance_data_for_recommended_cells = if optionals[0] {
+            Some(AssistanceDataForRecommendedCells::decode(data)?)
+        } else {
+            None
+        };
+        let paging_attempt_information = if optionals[1] {
+            Some(PagingAttemptInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            assistance_data_for_recommended_cells,
+            paging_attempt_information,
+        })
+    }
+}
+
 // AssistanceDataForRecommendedCells
 #[derive(Clone)]
 pub struct AssistanceDataForRecommendedCells {
     pub recommended_cells_for_paging: RecommendedCellsForPaging,
 }
 
+impl AperCodec for AssistanceDataForRecommendedCells {
+    type Output = AssistanceDataForRecommendedCells;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let recommended_cells_for_paging = RecommendedCellsForPaging::decode(data)?;
+
+        Ok(Self {
+            recommended_cells_for_paging,
+        })
+    }
+}
+
 // AssociatedQosFlowList
 #[derive(Clone)]
 pub struct AssociatedQosFlowList(pub Vec<AssociatedQosFlowItem>);
+
+impl AperCodec for AssociatedQosFlowList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AssociatedQosFlowItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AssociatedQosFlowItem
 #[derive(Clone)]
@@ -236,15 +860,54 @@ pub struct AssociatedQosFlowItem {
     pub qos_flow_mapping_indication: Option<QosFlowMappingIndication>,
 }
 
+impl AperCodec for AssociatedQosFlowItem {
+    type Output = AssociatedQosFlowItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let qos_flow_mapping_indication = if optionals[0] {
+            Some(QosFlowMappingIndication::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            qos_flow_mapping_indication,
+        })
+    }
+}
+
 // AuthenticatedIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum AuthenticatedIndication {
     True,
+}
+
+impl AperCodec for AuthenticatedIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // AveragingWindow
 #[derive(Clone)]
 pub struct AveragingWindow(pub u16);
+
+impl AperCodec for AveragingWindow {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4095), true)?.0 as u16,
+        ))
+    }
+}
 
 // AreaScopeOfMdtNr
 #[derive(Clone)]
@@ -253,6 +916,28 @@ pub enum AreaScopeOfMdtNr {
     TaBased(TaBasedMdt),
     PlmnWide,
     TaiBased(TaiBasedMdt),
+}
+
+impl AperCodec for AreaScopeOfMdtNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::CellBased(CellBasedMdtNr::decode(data)?)),
+            1 => Ok(Self::TaBased(TaBasedMdt::decode(data)?)),
+            2 => Ok(Self::PlmnWide),
+            3 => Ok(Self::TaiBased(TaiBasedMdt::decode(data)?)),
+            4 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // AreaScopeOfMdtEutra
@@ -264,9 +949,45 @@ pub enum AreaScopeOfMdtEutra {
     TaiBased(TaiBasedMdt),
 }
 
+impl AperCodec for AreaScopeOfMdtEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::CellBased(CellBasedMdtEutra::decode(data)?)),
+            1 => Ok(Self::TaBased(TaBasedMdt::decode(data)?)),
+            2 => Ok(Self::PlmnWide),
+            3 => Ok(Self::TaiBased(TaiBasedMdt::decode(data)?)),
+            4 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // AreaScopeOfNeighCellsList
 #[derive(Clone)]
 pub struct AreaScopeOfNeighCellsList(pub Vec<AreaScopeOfNeighCellsItem>);
+
+impl AperCodec for AreaScopeOfNeighCellsList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(AreaScopeOfNeighCellsItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // AreaScopeOfNeighCellsItem
 #[derive(Clone)]
@@ -275,9 +996,36 @@ pub struct AreaScopeOfNeighCellsItem {
     pub pci_list_for_mdt: Option<PciListForMdt>,
 }
 
+impl AperCodec for AreaScopeOfNeighCellsItem {
+    type Output = AreaScopeOfNeighCellsItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let nr_frequency_info = NrFrequencyInfo::decode(data)?;
+        let pci_list_for_mdt = if optionals[0] {
+            Some(PciListForMdt::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            nr_frequency_info,
+            pci_list_for_mdt,
+        })
+    }
+}
+
 // BitRate
 #[derive(Clone)]
 pub struct BitRate(pub u64);
+
+impl AperCodec for BitRate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4000000000000), true)?.0 as u64,
+        ))
+    }
+}
 
 // BroadcastCancelledAreaList
 #[derive(Clone)]
@@ -288,6 +1036,36 @@ pub enum BroadcastCancelledAreaList {
     CellIdCancelledNr(CellIdCancelledNr),
     TaiCancelledNr(TaiCancelledNr),
     EmergencyAreaIdCancelledNr(EmergencyAreaIdCancelledNr),
+}
+
+impl AperCodec for BroadcastCancelledAreaList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 6, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::CellIdCancelledEutra(CellIdCancelledEutra::decode(
+                data,
+            )?)),
+            1 => Ok(Self::TaiCancelledEutra(TaiCancelledEutra::decode(data)?)),
+            2 => Ok(Self::EmergencyAreaIdCancelledEutra(
+                EmergencyAreaIdCancelledEutra::decode(data)?,
+            )),
+            3 => Ok(Self::CellIdCancelledNr(CellIdCancelledNr::decode(data)?)),
+            4 => Ok(Self::TaiCancelledNr(TaiCancelledNr::decode(data)?)),
+            5 => Ok(Self::EmergencyAreaIdCancelledNr(
+                EmergencyAreaIdCancelledNr::decode(data)?,
+            )),
+            6 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // BroadcastCompletedAreaList
@@ -301,15 +1079,74 @@ pub enum BroadcastCompletedAreaList {
     EmergencyAreaIdBroadcastNr(EmergencyAreaIdBroadcastNr),
 }
 
+impl AperCodec for BroadcastCompletedAreaList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 6, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::CellIdBroadcastEutra(CellIdBroadcastEutra::decode(
+                data,
+            )?)),
+            1 => Ok(Self::TaiBroadcastEutra(TaiBroadcastEutra::decode(data)?)),
+            2 => Ok(Self::EmergencyAreaIdBroadcastEutra(
+                EmergencyAreaIdBroadcastEutra::decode(data)?,
+            )),
+            3 => Ok(Self::CellIdBroadcastNr(CellIdBroadcastNr::decode(data)?)),
+            4 => Ok(Self::TaiBroadcastNr(TaiBroadcastNr::decode(data)?)),
+            5 => Ok(Self::EmergencyAreaIdBroadcastNr(
+                EmergencyAreaIdBroadcastNr::decode(data)?,
+            )),
+            6 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // BroadcastPlmnList
 #[derive(Clone)]
 pub struct BroadcastPlmnList(pub Vec<BroadcastPlmnItem>);
+
+impl AperCodec for BroadcastPlmnList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(12), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(BroadcastPlmnItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // BroadcastPlmnItem
 #[derive(Clone)]
 pub struct BroadcastPlmnItem {
     pub plmn_identity: PlmnIdentity,
     pub tai_slice_support_list: SliceSupportList,
+}
+
+impl AperCodec for BroadcastPlmnItem {
+    type Output = BroadcastPlmnItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let tai_slice_support_list = SliceSupportList::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            tai_slice_support_list,
+        })
+    }
 }
 
 // BluetoothMeasurementConfiguration
@@ -320,9 +1157,47 @@ pub struct BluetoothMeasurementConfiguration {
     pub bt_rssi: Option<BtRssi>,
 }
 
+impl AperCodec for BluetoothMeasurementConfiguration {
+    type Output = BluetoothMeasurementConfiguration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let bluetooth_meas_config = BluetoothMeasConfig::decode(data)?;
+        let bluetooth_meas_config_name_list = if optionals[0] {
+            Some(BluetoothMeasConfigNameList::decode(data)?)
+        } else {
+            None
+        };
+        let bt_rssi = if optionals[1] {
+            Some(BtRssi::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            bluetooth_meas_config,
+            bluetooth_meas_config_name_list,
+            bt_rssi,
+        })
+    }
+}
+
 // BluetoothMeasConfigNameList
 #[derive(Clone)]
 pub struct BluetoothMeasConfigNameList(pub Vec<BluetoothMeasConfigNameItem>);
+
+impl AperCodec for BluetoothMeasConfigNameList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(4), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(BluetoothMeasConfigNameItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // BluetoothMeasConfigNameItem
 #[derive(Clone)]
@@ -330,33 +1205,116 @@ pub struct BluetoothMeasConfigNameItem {
     pub bluetooth_name: BluetoothName,
 }
 
+impl AperCodec for BluetoothMeasConfigNameItem {
+    type Output = BluetoothMeasConfigNameItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let bluetooth_name = BluetoothName::decode(data)?;
+
+        Ok(Self { bluetooth_name })
+    }
+}
+
 // BluetoothMeasConfig
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum BluetoothMeasConfig {
     Setup,
+}
+
+impl AperCodec for BluetoothMeasConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // BluetoothName
 #[derive(Clone)]
 pub struct BluetoothName(pub Vec<u8>);
 
+impl AperCodec for BluetoothName {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(1),
+            Some(248),
+            false,
+        )?))
+    }
+}
+
 // BurstArrivalTime
 #[derive(Clone)]
 pub struct BurstArrivalTime(pub Vec<u8>);
+
+impl AperCodec for BurstArrivalTime {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // CagId
 #[derive(Clone)]
 pub struct CagId(pub BitString);
 
+impl AperCodec for CagId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(32),
+            Some(32),
+            false,
+        )?))
+    }
+}
+
 // CancelAllWarningMessages
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CancelAllWarningMessages {
     True,
+}
+
+impl AperCodec for CancelAllWarningMessages {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // CancelledCellsInEaiEutra
 #[derive(Clone)]
 pub struct CancelledCellsInEaiEutra(pub Vec<CancelledCellsInEaiEutraItem>);
+
+impl AperCodec for CancelledCellsInEaiEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CancelledCellsInEaiEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CancelledCellsInEaiEutraItem
 #[derive(Clone)]
@@ -365,9 +1323,39 @@ pub struct CancelledCellsInEaiEutraItem {
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
+impl AperCodec for CancelledCellsInEaiEutraItem {
+    type Output = CancelledCellsInEaiEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+        let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
+
+        Ok(Self {
+            eutra_cgi,
+            number_of_broadcasts,
+        })
+    }
+}
+
 // CancelledCellsInEaiNr
 #[derive(Clone)]
 pub struct CancelledCellsInEaiNr(pub Vec<CancelledCellsInEaiNrItem>);
+
+impl AperCodec for CancelledCellsInEaiNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CancelledCellsInEaiNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CancelledCellsInEaiNrItem
 #[derive(Clone)]
@@ -376,9 +1364,39 @@ pub struct CancelledCellsInEaiNrItem {
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
+impl AperCodec for CancelledCellsInEaiNrItem {
+    type Output = CancelledCellsInEaiNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_cgi = NrCgi::decode(data)?;
+        let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
+
+        Ok(Self {
+            nr_cgi,
+            number_of_broadcasts,
+        })
+    }
+}
+
 // CancelledCellsInTaiEutra
 #[derive(Clone)]
 pub struct CancelledCellsInTaiEutra(pub Vec<CancelledCellsInTaiEutraItem>);
+
+impl AperCodec for CancelledCellsInTaiEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CancelledCellsInTaiEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CancelledCellsInTaiEutraItem
 #[derive(Clone)]
@@ -387,9 +1405,39 @@ pub struct CancelledCellsInTaiEutraItem {
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
+impl AperCodec for CancelledCellsInTaiEutraItem {
+    type Output = CancelledCellsInTaiEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+        let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
+
+        Ok(Self {
+            eutra_cgi,
+            number_of_broadcasts,
+        })
+    }
+}
+
 // CancelledCellsInTaiNr
 #[derive(Clone)]
 pub struct CancelledCellsInTaiNr(pub Vec<CancelledCellsInTaiNrItem>);
+
+impl AperCodec for CancelledCellsInTaiNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CancelledCellsInTaiNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CancelledCellsInTaiNrItem
 #[derive(Clone)]
@@ -398,14 +1446,54 @@ pub struct CancelledCellsInTaiNrItem {
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
+impl AperCodec for CancelledCellsInTaiNrItem {
+    type Output = CancelledCellsInTaiNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_cgi = NrCgi::decode(data)?;
+        let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
+
+        Ok(Self {
+            nr_cgi,
+            number_of_broadcasts,
+        })
+    }
+}
+
 // CandidateCellList
 #[derive(Clone)]
 pub struct CandidateCellList(pub Vec<CandidateCellItem>);
+
+impl AperCodec for CandidateCellList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CandidateCellItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CandidateCellItem
 #[derive(Clone)]
 pub struct CandidateCellItem {
     pub candidate_cell: CandidateCell,
+}
+
+impl AperCodec for CandidateCellItem {
+    type Output = CandidateCellItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let candidate_cell = CandidateCell::decode(data)?;
+
+        Ok(Self { candidate_cell })
+    }
 }
 
 // CandidateCell
@@ -415,10 +1503,41 @@ pub enum CandidateCell {
     CandidatePci(CandidatePci),
 }
 
+impl AperCodec for CandidateCell {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::CandidateCgi(CandidateCellId::decode(data)?)),
+            1 => Ok(Self::CandidatePci(CandidatePci::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // CandidateCellId
 #[derive(Clone)]
 pub struct CandidateCellId {
     pub candidate_cell_id: NrCgi,
+}
+
+impl AperCodec for CandidateCellId {
+    type Output = CandidateCellId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let candidate_cell_id = NrCgi::decode(data)?;
+
+        Ok(Self { candidate_cell_id })
+    }
 }
 
 // CandidatePci
@@ -426,6 +1545,22 @@ pub struct CandidateCellId {
 pub struct CandidatePci {
     pub candidate_pci: u16,
     pub candidate_nrarfcn: u32,
+}
+
+impl AperCodec for CandidatePci {
+    type Output = CandidatePci;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let candidate_pci = aper::decode::decode_integer(data, Some(0), Some(1007), true)?.0 as u16;
+        let candidate_nrarfcn =
+            aper::decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32;
+
+        Ok(Self {
+            candidate_pci,
+            candidate_nrarfcn,
+        })
+    }
 }
 
 // Cause
@@ -438,8 +1573,32 @@ pub enum Cause {
     Misc(CauseMisc),
 }
 
+impl AperCodec for Cause {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 5, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::RadioNetwork(CauseRadioNetwork::decode(data)?)),
+            1 => Ok(Self::Transport(CauseTransport::decode(data)?)),
+            2 => Ok(Self::Nas(CauseNas::decode(data)?)),
+            3 => Ok(Self::Protocol(CauseProtocol::decode(data)?)),
+            4 => Ok(Self::Misc(CauseMisc::decode(data)?)),
+            5 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // CauseMisc
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CauseMisc {
     ControlProcessingOverload,
     NotEnoughUserPlaneProcessingResources,
@@ -449,8 +1608,20 @@ pub enum CauseMisc {
     Unspecified,
 }
 
+impl AperCodec for CauseMisc {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(5), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // CauseNas
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CauseNas {
     NormalRelease,
     AuthenticationFailure,
@@ -458,8 +1629,20 @@ pub enum CauseNas {
     Unspecified,
 }
 
+impl AperCodec for CauseNas {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // CauseProtocol
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CauseProtocol {
     TransferSyntaxError,
     AbstractSyntaxErrorReject,
@@ -470,8 +1653,20 @@ pub enum CauseProtocol {
     Unspecified,
 }
 
+impl AperCodec for CauseProtocol {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(6), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // CauseRadioNetwork
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CauseRadioNetwork {
     Unspecified,
     TxnrelocoverallExpiry,
@@ -520,11 +1715,34 @@ pub enum CauseRadioNetwork {
     ReleaseDueToCnDetectedMobility,
 }
 
+impl AperCodec for CauseRadioNetwork {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(44), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // CauseTransport
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CauseTransport {
     TransportResourceUnavailable,
     Unspecified,
+}
+
+impl AperCodec for CauseTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // CellCagInformation
@@ -534,13 +1752,57 @@ pub struct CellCagInformation {
     pub cell_cag_list: CellCagList,
 }
 
+impl AperCodec for CellCagInformation {
+    type Output = CellCagInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ngran_cgi = NgranCgi::decode(data)?;
+        let cell_cag_list = CellCagList::decode(data)?;
+
+        Ok(Self {
+            ngran_cgi,
+            cell_cag_list,
+        })
+    }
+}
+
 // CellCagList
 #[derive(Clone)]
 pub struct CellCagList(pub Vec<CagId>);
 
+impl AperCodec for CellCagList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CagId::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // CellIdBroadcastEutra
 #[derive(Clone)]
 pub struct CellIdBroadcastEutra(pub Vec<CellIdBroadcastEutraItem>);
+
+impl AperCodec for CellIdBroadcastEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CellIdBroadcastEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CellIdBroadcastEutraItem
 #[derive(Clone)]
@@ -548,9 +1810,35 @@ pub struct CellIdBroadcastEutraItem {
     pub eutra_cgi: EutraCgi,
 }
 
+impl AperCodec for CellIdBroadcastEutraItem {
+    type Output = CellIdBroadcastEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+
+        Ok(Self { eutra_cgi })
+    }
+}
+
 // CellIdBroadcastNr
 #[derive(Clone)]
 pub struct CellIdBroadcastNr(pub Vec<CellIdBroadcastNrItem>);
+
+impl AperCodec for CellIdBroadcastNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CellIdBroadcastNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CellIdBroadcastNrItem
 #[derive(Clone)]
@@ -558,9 +1846,35 @@ pub struct CellIdBroadcastNrItem {
     pub nr_cgi: NrCgi,
 }
 
+impl AperCodec for CellIdBroadcastNrItem {
+    type Output = CellIdBroadcastNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_cgi = NrCgi::decode(data)?;
+
+        Ok(Self { nr_cgi })
+    }
+}
+
 // CellIdCancelledEutra
 #[derive(Clone)]
 pub struct CellIdCancelledEutra(pub Vec<CellIdCancelledEutraItem>);
+
+impl AperCodec for CellIdCancelledEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CellIdCancelledEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CellIdCancelledEutraItem
 #[derive(Clone)]
@@ -569,15 +1883,60 @@ pub struct CellIdCancelledEutraItem {
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
+impl AperCodec for CellIdCancelledEutraItem {
+    type Output = CellIdCancelledEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+        let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
+
+        Ok(Self {
+            eutra_cgi,
+            number_of_broadcasts,
+        })
+    }
+}
+
 // CellIdCancelledNr
 #[derive(Clone)]
 pub struct CellIdCancelledNr(pub Vec<CellIdCancelledNrItem>);
+
+impl AperCodec for CellIdCancelledNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CellIdCancelledNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CellIdCancelledNrItem
 #[derive(Clone)]
 pub struct CellIdCancelledNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
+}
+
+impl AperCodec for CellIdCancelledNrItem {
+    type Output = CellIdCancelledNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_cgi = NrCgi::decode(data)?;
+        let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
+
+        Ok(Self {
+            nr_cgi,
+            number_of_broadcasts,
+        })
+    }
 }
 
 // CellIdListForRestart
@@ -587,13 +1946,45 @@ pub enum CellIdListForRestart {
     NrCgiListforRestart(NrCgiList),
 }
 
+impl AperCodec for CellIdListForRestart {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::EutraCgiListforRestart(EutraCgiList::decode(data)?)),
+            1 => Ok(Self::NrCgiListforRestart(NrCgiList::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // CellSize
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CellSize {
     Verysmall,
     Small,
     Medium,
     Large,
+}
+
+impl AperCodec for CellSize {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // CellType
@@ -602,17 +1993,52 @@ pub struct CellType {
     pub cell_size: CellSize,
 }
 
+impl AperCodec for CellType {
+    type Output = CellType;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cell_size = CellSize::decode(data)?;
+
+        Ok(Self { cell_size })
+    }
+}
+
 // CEmodeBSupportIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CEmodeBSupportIndicator {
     Supported,
 }
 
+impl AperCodec for CEmodeBSupportIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // CEmodeBrestricted
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CEmodeBrestricted {
     Restricted,
     NotRestricted,
+}
+
+impl AperCodec for CEmodeBrestricted {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // CnAssistedRanTuning
@@ -621,9 +2047,39 @@ pub struct CnAssistedRanTuning {
     pub expected_ue_behaviour: Option<ExpectedUeBehaviour>,
 }
 
+impl AperCodec for CnAssistedRanTuning {
+    type Output = CnAssistedRanTuning;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let expected_ue_behaviour = if optionals[0] {
+            Some(ExpectedUeBehaviour::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            expected_ue_behaviour,
+        })
+    }
+}
+
 // CnTypeRestrictionsForEquivalent
 #[derive(Clone)]
 pub struct CnTypeRestrictionsForEquivalent(pub Vec<CnTypeRestrictionsForEquivalentItem>);
+
+impl AperCodec for CnTypeRestrictionsForEquivalent {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(15), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CnTypeRestrictionsForEquivalentItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CnTypeRestrictionsForEquivalentItem
 #[derive(Clone)]
@@ -632,19 +2088,70 @@ pub struct CnTypeRestrictionsForEquivalentItem {
     pub cn_type: CnType,
 }
 
+impl AperCodec for CnTypeRestrictionsForEquivalentItem {
+    type Output = CnTypeRestrictionsForEquivalentItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let cn_type = CnType::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            cn_type,
+        })
+    }
+}
+
 // CnTypeRestrictionsForServing
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CnTypeRestrictionsForServing {
     EpcForbidden,
+}
+
+impl AperCodec for CnTypeRestrictionsForServing {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // CommonNetworkInstance
 #[derive(Clone)]
 pub struct CommonNetworkInstance(pub Vec<u8>);
 
+impl AperCodec for CommonNetworkInstance {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // CompletedCellsInEaiEutra
 #[derive(Clone)]
 pub struct CompletedCellsInEaiEutra(pub Vec<CompletedCellsInEaiEutraItem>);
+
+impl AperCodec for CompletedCellsInEaiEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CompletedCellsInEaiEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CompletedCellsInEaiEutraItem
 #[derive(Clone)]
@@ -652,9 +2159,35 @@ pub struct CompletedCellsInEaiEutraItem {
     pub eutra_cgi: EutraCgi,
 }
 
+impl AperCodec for CompletedCellsInEaiEutraItem {
+    type Output = CompletedCellsInEaiEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+
+        Ok(Self { eutra_cgi })
+    }
+}
+
 // CompletedCellsInEaiNr
 #[derive(Clone)]
 pub struct CompletedCellsInEaiNr(pub Vec<CompletedCellsInEaiNrItem>);
+
+impl AperCodec for CompletedCellsInEaiNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CompletedCellsInEaiNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CompletedCellsInEaiNrItem
 #[derive(Clone)]
@@ -662,9 +2195,35 @@ pub struct CompletedCellsInEaiNrItem {
     pub nr_cgi: NrCgi,
 }
 
+impl AperCodec for CompletedCellsInEaiNrItem {
+    type Output = CompletedCellsInEaiNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_cgi = NrCgi::decode(data)?;
+
+        Ok(Self { nr_cgi })
+    }
+}
+
 // CompletedCellsInTaiEutra
 #[derive(Clone)]
 pub struct CompletedCellsInTaiEutra(pub Vec<CompletedCellsInTaiEutraItem>);
+
+impl AperCodec for CompletedCellsInTaiEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CompletedCellsInTaiEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CompletedCellsInTaiEutraItem
 #[derive(Clone)]
@@ -672,9 +2231,35 @@ pub struct CompletedCellsInTaiEutraItem {
     pub eutra_cgi: EutraCgi,
 }
 
+impl AperCodec for CompletedCellsInTaiEutraItem {
+    type Output = CompletedCellsInTaiEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+
+        Ok(Self { eutra_cgi })
+    }
+}
+
 // CompletedCellsInTaiNr
 #[derive(Clone)]
 pub struct CompletedCellsInTaiNr(pub Vec<CompletedCellsInTaiNrItem>);
+
+impl AperCodec for CompletedCellsInTaiNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CompletedCellsInTaiNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CompletedCellsInTaiNrItem
 #[derive(Clone)]
@@ -682,31 +2267,90 @@ pub struct CompletedCellsInTaiNrItem {
     pub nr_cgi: NrCgi,
 }
 
+impl AperCodec for CompletedCellsInTaiNrItem {
+    type Output = CompletedCellsInTaiNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_cgi = NrCgi::decode(data)?;
+
+        Ok(Self { nr_cgi })
+    }
+}
+
 // ConcurrentWarningMessageInd
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ConcurrentWarningMessageInd {
     True,
 }
 
+impl AperCodec for ConcurrentWarningMessageInd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ConfidentialityProtectionIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ConfidentialityProtectionIndication {
     Required,
     Preferred,
     NotNeeded,
 }
 
+impl AperCodec for ConfidentialityProtectionIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ConfidentialityProtectionResult
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ConfidentialityProtectionResult {
     Performed,
     NotPerformed,
 }
 
+impl AperCodec for ConfidentialityProtectionResult {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ConfiguredTacIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ConfiguredTacIndication {
     True,
+}
+
+impl AperCodec for ConfiguredTacIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // CoreNetworkAssistanceInformationForInactive
@@ -720,11 +2364,61 @@ pub struct CoreNetworkAssistanceInformationForInactive {
     pub expected_ue_behaviour: Option<ExpectedUeBehaviour>,
 }
 
+impl AperCodec for CoreNetworkAssistanceInformationForInactive {
+    type Output = CoreNetworkAssistanceInformationForInactive;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let ue_identity_index_value = UeIdentityIndexValue::decode(data)?;
+        let ue_specific_drx = if optionals[0] {
+            Some(PagingDrx::decode(data)?)
+        } else {
+            None
+        };
+        let periodic_registration_update_timer = PeriodicRegistrationUpdateTimer::decode(data)?;
+        let mico_mode_indication = if optionals[1] {
+            Some(MicoModeIndication::decode(data)?)
+        } else {
+            None
+        };
+        let tai_list_for_inactive = TaiListForInactive::decode(data)?;
+        let expected_ue_behaviour = if optionals[2] {
+            Some(ExpectedUeBehaviour::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ue_identity_index_value,
+            ue_specific_drx,
+            periodic_registration_update_timer,
+            mico_mode_indication,
+            tai_list_for_inactive,
+            expected_ue_behaviour,
+        })
+    }
+}
+
 // CountValueForPdcpSn12
 #[derive(Clone)]
 pub struct CountValueForPdcpSn12 {
     pub pdcp_sn12: u16,
     pub hfn_pdcp_sn12: u32,
+}
+
+impl AperCodec for CountValueForPdcpSn12 {
+    type Output = CountValueForPdcpSn12;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdcp_sn12 = aper::decode::decode_integer(data, Some(0), Some(4095), false)?.0 as u16;
+        let hfn_pdcp_sn12 =
+            aper::decode::decode_integer(data, Some(0), Some(1048575), false)?.0 as u32;
+
+        Ok(Self {
+            pdcp_sn12,
+            hfn_pdcp_sn12,
+        })
+    }
 }
 
 // CountValueForPdcpSn18
@@ -734,14 +2428,60 @@ pub struct CountValueForPdcpSn18 {
     pub hfn_pdcp_sn18: u16,
 }
 
+impl AperCodec for CountValueForPdcpSn18 {
+    type Output = CountValueForPdcpSn18;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdcp_sn18 = aper::decode::decode_integer(data, Some(0), Some(262143), false)?.0 as u32;
+        let hfn_pdcp_sn18 =
+            aper::decode::decode_integer(data, Some(0), Some(16383), false)?.0 as u16;
+
+        Ok(Self {
+            pdcp_sn18,
+            hfn_pdcp_sn18,
+        })
+    }
+}
+
 // CoverageEnhancementLevel
 #[derive(Clone)]
 pub struct CoverageEnhancementLevel(pub Vec<u8>);
+
+impl AperCodec for CoverageEnhancementLevel {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // CpTransportLayerInformation
 #[derive(Clone)]
 pub enum CpTransportLayerInformation {
     EndpointIpAddress(TransportLayerAddress),
+}
+
+impl AperCodec for CpTransportLayerInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::EndpointIpAddress(TransportLayerAddress::decode(
+                data,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // CriticalityDiagnostics
@@ -753,9 +2493,57 @@ pub struct CriticalityDiagnostics {
     pub i_es_criticality_diagnostics: Option<CriticalityDiagnosticsIeList>,
 }
 
+impl AperCodec for CriticalityDiagnostics {
+    type Output = CriticalityDiagnostics;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let procedure_code = if optionals[0] {
+            Some(ProcedureCode::decode(data)?)
+        } else {
+            None
+        };
+        let triggering_message = if optionals[1] {
+            Some(TriggeringMessage::decode(data)?)
+        } else {
+            None
+        };
+        let procedure_criticality = if optionals[2] {
+            Some(Criticality::decode(data)?)
+        } else {
+            None
+        };
+        let i_es_criticality_diagnostics = if optionals[3] {
+            Some(CriticalityDiagnosticsIeList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            procedure_code,
+            triggering_message,
+            procedure_criticality,
+            i_es_criticality_diagnostics,
+        })
+    }
+}
+
 // CriticalityDiagnosticsIeList
 #[derive(Clone)]
 pub struct CriticalityDiagnosticsIeList(pub Vec<CriticalityDiagnosticsIeItem>);
+
+impl AperCodec for CriticalityDiagnosticsIeList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(CriticalityDiagnosticsIeItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CriticalityDiagnosticsIeItem
 #[derive(Clone)]
@@ -765,15 +2553,59 @@ pub struct CriticalityDiagnosticsIeItem {
     pub type_of_error: TypeOfError,
 }
 
+impl AperCodec for CriticalityDiagnosticsIeItem {
+    type Output = CriticalityDiagnosticsIeItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ie_criticality = Criticality::decode(data)?;
+        let ie_id = ProtocolIeId::decode(data)?;
+        let type_of_error = TypeOfError::decode(data)?;
+
+        Ok(Self {
+            ie_criticality,
+            ie_id,
+            type_of_error,
+        })
+    }
+}
+
 // CellBasedMdtNr
 #[derive(Clone)]
 pub struct CellBasedMdtNr {
     pub cell_id_listfor_mdt: CellIdListforMdtNr,
 }
 
+impl AperCodec for CellBasedMdtNr {
+    type Output = CellBasedMdtNr;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cell_id_listfor_mdt = CellIdListforMdtNr::decode(data)?;
+
+        Ok(Self {
+            cell_id_listfor_mdt,
+        })
+    }
+}
+
 // CellIdListforMdtNr
 #[derive(Clone)]
 pub struct CellIdListforMdtNr(pub Vec<NrCgi>);
+
+impl AperCodec for CellIdListforMdtNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(NrCgi::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // CellBasedMdtEutra
 #[derive(Clone)]
@@ -781,29 +2613,106 @@ pub struct CellBasedMdtEutra {
     pub cell_id_listfor_mdt: CellIdListforMdtEutra,
 }
 
+impl AperCodec for CellBasedMdtEutra {
+    type Output = CellBasedMdtEutra;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cell_id_listfor_mdt = CellIdListforMdtEutra::decode(data)?;
+
+        Ok(Self {
+            cell_id_listfor_mdt,
+        })
+    }
+}
+
 // CellIdListforMdtEutra
 #[derive(Clone)]
 pub struct CellIdListforMdtEutra(pub Vec<EutraCgi>);
+
+impl AperCodec for CellIdListforMdtEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EutraCgi::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DataCodingScheme
 #[derive(Clone)]
 pub struct DataCodingScheme(pub BitString);
 
+impl AperCodec for DataCodingScheme {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
+
 // DataForwardingAccepted
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DataForwardingAccepted {
     DataForwardingAccepted,
 }
 
+impl AperCodec for DataForwardingAccepted {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // DataForwardingNotPossible
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DataForwardingNotPossible {
     DataForwardingNotPossible,
+}
+
+impl AperCodec for DataForwardingNotPossible {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // DataForwardingResponseDrbList
 #[derive(Clone)]
 pub struct DataForwardingResponseDrbList(pub Vec<DataForwardingResponseDrbItem>);
+
+impl AperCodec for DataForwardingResponseDrbList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DataForwardingResponseDrbItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DataForwardingResponseDrbItem
 #[derive(Clone)]
@@ -813,15 +2722,64 @@ pub struct DataForwardingResponseDrbItem {
     pub ul_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
 }
 
+impl AperCodec for DataForwardingResponseDrbItem {
+    type Output = DataForwardingResponseDrbItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let drb_id = DrbId::decode(data)?;
+        let dl_forwarding_up_tnl_information = if optionals[0] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+        let ul_forwarding_up_tnl_information = if optionals[1] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            drb_id,
+            dl_forwarding_up_tnl_information,
+            ul_forwarding_up_tnl_information,
+        })
+    }
+}
+
 // DapsRequestInfo
 #[derive(Clone)]
 pub struct DapsRequestInfo {
     pub daps_indicator: DapsIndicator,
 }
 
+impl AperCodec for DapsRequestInfo {
+    type Output = DapsRequestInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let daps_indicator = DapsIndicator::decode(data)?;
+
+        Ok(Self { daps_indicator })
+    }
+}
+
 // DapsResponseInfoList
 #[derive(Clone)]
 pub struct DapsResponseInfoList(pub Vec<DapsResponseInfoItem>);
+
+impl AperCodec for DapsResponseInfoList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DapsResponseInfoItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DapsResponseInfoItem
 #[derive(Clone)]
@@ -830,15 +2788,57 @@ pub struct DapsResponseInfoItem {
     pub daps_response_info: DapsResponseInfo,
 }
 
+impl AperCodec for DapsResponseInfoItem {
+    type Output = DapsResponseInfoItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let drb_id = DrbId::decode(data)?;
+        let daps_response_info = DapsResponseInfo::decode(data)?;
+
+        Ok(Self {
+            drb_id,
+            daps_response_info,
+        })
+    }
+}
+
 // DapsResponseInfo
 #[derive(Clone)]
 pub struct DapsResponseInfo {
     pub dapsresponseindicator: Dapsresponseindicator,
 }
 
+impl AperCodec for DapsResponseInfo {
+    type Output = DapsResponseInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let dapsresponseindicator = Dapsresponseindicator::decode(data)?;
+
+        Ok(Self {
+            dapsresponseindicator,
+        })
+    }
+}
+
 // DataForwardingResponseErabList
 #[derive(Clone)]
 pub struct DataForwardingResponseErabList(pub Vec<DataForwardingResponseErabListItem>);
+
+impl AperCodec for DataForwardingResponseErabList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DataForwardingResponseErabListItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DataForwardingResponseErabListItem
 #[derive(Clone)]
@@ -847,11 +2847,38 @@ pub struct DataForwardingResponseErabListItem {
     pub dl_forwarding_up_tnl_information: UpTransportLayerInformation,
 }
 
+impl AperCodec for DataForwardingResponseErabListItem {
+    type Output = DataForwardingResponseErabListItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let e_rab_id = ERabId::decode(data)?;
+        let dl_forwarding_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+
+        Ok(Self {
+            e_rab_id,
+            dl_forwarding_up_tnl_information,
+        })
+    }
+}
+
 // DelayCritical
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DelayCritical {
     DelayCritical,
     NonDelayCritical,
+}
+
+impl AperCodec for DelayCritical {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // DlCpSecurityInformation
@@ -860,35 +2887,117 @@ pub struct DlCpSecurityInformation {
     pub dl_nas_mac: DlNasMac,
 }
 
+impl AperCodec for DlCpSecurityInformation {
+    type Output = DlCpSecurityInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let dl_nas_mac = DlNasMac::decode(data)?;
+
+        Ok(Self { dl_nas_mac })
+    }
+}
+
 // DlNasMac
 #[derive(Clone)]
 pub struct DlNasMac(pub BitString);
 
+impl AperCodec for DlNasMac {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            false,
+        )?))
+    }
+}
+
 // DlForwarding
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DlForwarding {
     DlForwardingProposed,
 }
 
+impl AperCodec for DlForwarding {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // DlNguTnlInformationReused
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DlNguTnlInformationReused {
     True,
 }
 
+impl AperCodec for DlNguTnlInformationReused {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // DirectForwardingPathAvailability
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DirectForwardingPathAvailability {
     DirectPathAvailable,
+}
+
+impl AperCodec for DirectForwardingPathAvailability {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // DrbId
 #[derive(Clone)]
 pub struct DrbId(pub u8);
 
+impl AperCodec for DrbId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(32), true)?.0 as u8,
+        ))
+    }
+}
+
 // DrBsSubjectToStatusTransferList
 #[derive(Clone)]
 pub struct DrBsSubjectToStatusTransferList(pub Vec<DrBsSubjectToStatusTransferItem>);
+
+impl AperCodec for DrBsSubjectToStatusTransferList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DrBsSubjectToStatusTransferItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DrBsSubjectToStatusTransferItem
 #[derive(Clone)]
@@ -898,11 +3007,48 @@ pub struct DrBsSubjectToStatusTransferItem {
     pub drb_status_dl: DrbStatusDl,
 }
 
+impl AperCodec for DrBsSubjectToStatusTransferItem {
+    type Output = DrBsSubjectToStatusTransferItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let drb_id = DrbId::decode(data)?;
+        let drb_status_ul = DrbStatusUl::decode(data)?;
+        let drb_status_dl = DrbStatusDl::decode(data)?;
+
+        Ok(Self {
+            drb_id,
+            drb_status_ul,
+            drb_status_dl,
+        })
+    }
+}
+
 // DrbStatusDl
 #[derive(Clone)]
 pub enum DrbStatusDl {
     DrbStatusDl12(DrbStatusDl12),
     DrbStatusDl18(DrbStatusDl18),
+}
+
+impl AperCodec for DrbStatusDl {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::DrbStatusDl12(DrbStatusDl12::decode(data)?)),
+            1 => Ok(Self::DrbStatusDl18(DrbStatusDl18::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // DrbStatusDl12
@@ -911,10 +3057,32 @@ pub struct DrbStatusDl12 {
     pub dl_count_value: CountValueForPdcpSn12,
 }
 
+impl AperCodec for DrbStatusDl12 {
+    type Output = DrbStatusDl12;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let dl_count_value = CountValueForPdcpSn12::decode(data)?;
+
+        Ok(Self { dl_count_value })
+    }
+}
+
 // DrbStatusDl18
 #[derive(Clone)]
 pub struct DrbStatusDl18 {
     pub dl_count_value: CountValueForPdcpSn18,
+}
+
+impl AperCodec for DrbStatusDl18 {
+    type Output = DrbStatusDl18;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let dl_count_value = CountValueForPdcpSn18::decode(data)?;
+
+        Ok(Self { dl_count_value })
+    }
 }
 
 // DrbStatusUl
@@ -924,11 +3092,54 @@ pub enum DrbStatusUl {
     DrbStatusUl18(DrbStatusUl18),
 }
 
+impl AperCodec for DrbStatusUl {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::DrbStatusUl12(DrbStatusUl12::decode(data)?)),
+            1 => Ok(Self::DrbStatusUl18(DrbStatusUl18::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // DrbStatusUl12
 #[derive(Clone)]
 pub struct DrbStatusUl12 {
     pub ul_count_value: CountValueForPdcpSn12,
     pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
+}
+
+impl AperCodec for DrbStatusUl12 {
+    type Output = DrbStatusUl12;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let ul_count_value = CountValueForPdcpSn12::decode(data)?;
+        let receive_status_of_ul_pdcp_sd_us = if optionals[0] {
+            Some(aper::decode::decode_bitstring(
+                data,
+                Some(1),
+                Some(2048),
+                false,
+            )?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ul_count_value,
+            receive_status_of_ul_pdcp_sd_us,
+        })
+    }
 }
 
 // DrbStatusUl18
@@ -938,15 +3149,67 @@ pub struct DrbStatusUl18 {
     pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
 }
 
+impl AperCodec for DrbStatusUl18 {
+    type Output = DrbStatusUl18;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let ul_count_value = CountValueForPdcpSn18::decode(data)?;
+        let receive_status_of_ul_pdcp_sd_us = if optionals[0] {
+            Some(aper::decode::decode_bitstring(
+                data,
+                Some(1),
+                Some(131072),
+                false,
+            )?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ul_count_value,
+            receive_status_of_ul_pdcp_sd_us,
+        })
+    }
+}
+
 // DrBsToQosFlowsMappingList
 #[derive(Clone)]
 pub struct DrBsToQosFlowsMappingList(pub Vec<DrBsToQosFlowsMappingItem>);
+
+impl AperCodec for DrBsToQosFlowsMappingList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DrBsToQosFlowsMappingItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DrBsToQosFlowsMappingItem
 #[derive(Clone)]
 pub struct DrBsToQosFlowsMappingItem {
     pub drb_id: DrbId,
     pub associated_qos_flow_list: AssociatedQosFlowList,
+}
+
+impl AperCodec for DrBsToQosFlowsMappingItem {
+    type Output = DrBsToQosFlowsMappingItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let drb_id = DrbId::decode(data)?;
+        let associated_qos_flow_list = AssociatedQosFlowList::decode(data)?;
+
+        Ok(Self {
+            drb_id,
+            associated_qos_flow_list,
+        })
+    }
 }
 
 // Dynamic5qiDescriptor
@@ -961,10 +3224,61 @@ pub struct Dynamic5qiDescriptor {
     pub maximum_data_burst_volume: Option<MaximumDataBurstVolume>,
 }
 
+impl AperCodec for Dynamic5qiDescriptor {
+    type Output = Dynamic5qiDescriptor;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let priority_level_qos = PriorityLevelQos::decode(data)?;
+        let packet_delay_budget = PacketDelayBudget::decode(data)?;
+        let packet_error_rate = PacketErrorRate::decode(data)?;
+        let five_qi = if optionals[0] {
+            Some(FiveQi::decode(data)?)
+        } else {
+            None
+        };
+        let delay_critical = if optionals[1] {
+            Some(DelayCritical::decode(data)?)
+        } else {
+            None
+        };
+        let averaging_window = if optionals[2] {
+            Some(AveragingWindow::decode(data)?)
+        } else {
+            None
+        };
+        let maximum_data_burst_volume = if optionals[3] {
+            Some(MaximumDataBurstVolume::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            priority_level_qos,
+            packet_delay_budget,
+            packet_error_rate,
+            five_qi,
+            delay_critical,
+            averaging_window,
+            maximum_data_burst_volume,
+        })
+    }
+}
+
 // EarlyStatusTransferTransparentContainer
 #[derive(Clone)]
 pub struct EarlyStatusTransferTransparentContainer {
     pub procedure_stage: ProcedureStageChoice,
+}
+
+impl AperCodec for EarlyStatusTransferTransparentContainer {
+    type Output = EarlyStatusTransferTransparentContainer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let procedure_stage = ProcedureStageChoice::decode(data)?;
+
+        Ok(Self { procedure_stage })
+    }
 }
 
 // ProcedureStageChoice
@@ -973,15 +3287,62 @@ pub enum ProcedureStageChoice {
     FirstDlCount(FirstDlCount),
 }
 
+impl AperCodec for ProcedureStageChoice {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::FirstDlCount(FirstDlCount::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // FirstDlCount
 #[derive(Clone)]
 pub struct FirstDlCount {
     pub dr_bs_subject_to_early_status_transfer: DrBsSubjectToEarlyStatusTransferList,
 }
 
+impl AperCodec for FirstDlCount {
+    type Output = FirstDlCount;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let dr_bs_subject_to_early_status_transfer =
+            DrBsSubjectToEarlyStatusTransferList::decode(data)?;
+
+        Ok(Self {
+            dr_bs_subject_to_early_status_transfer,
+        })
+    }
+}
+
 // DrBsSubjectToEarlyStatusTransferList
 #[derive(Clone)]
 pub struct DrBsSubjectToEarlyStatusTransferList(pub Vec<DrBsSubjectToEarlyStatusTransferItem>);
+
+impl AperCodec for DrBsSubjectToEarlyStatusTransferList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DrBsSubjectToEarlyStatusTransferItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // DrBsSubjectToEarlyStatusTransferItem
 #[derive(Clone)]
@@ -990,19 +3351,73 @@ pub struct DrBsSubjectToEarlyStatusTransferItem {
     pub first_dlcount: DrbStatusDl,
 }
 
+impl AperCodec for DrBsSubjectToEarlyStatusTransferItem {
+    type Output = DrBsSubjectToEarlyStatusTransferItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let drb_id = DrbId::decode(data)?;
+        let first_dlcount = DrbStatusDl::decode(data)?;
+
+        Ok(Self {
+            drb_id,
+            first_dlcount,
+        })
+    }
+}
+
 // EdtSession
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EdtSession {
     True,
+}
+
+impl AperCodec for EdtSession {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // EmergencyAreaId
 #[derive(Clone)]
 pub struct EmergencyAreaId(pub Vec<u8>);
 
+impl AperCodec for EmergencyAreaId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(3),
+            Some(3),
+            false,
+        )?))
+    }
+}
+
 // EmergencyAreaIdBroadcastEutra
 #[derive(Clone)]
 pub struct EmergencyAreaIdBroadcastEutra(pub Vec<EmergencyAreaIdBroadcastEutraItem>);
+
+impl AperCodec for EmergencyAreaIdBroadcastEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EmergencyAreaIdBroadcastEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // EmergencyAreaIdBroadcastEutraItem
 #[derive(Clone)]
@@ -1011,9 +3426,39 @@ pub struct EmergencyAreaIdBroadcastEutraItem {
     pub completed_cells_in_eai_eutra: CompletedCellsInEaiEutra,
 }
 
+impl AperCodec for EmergencyAreaIdBroadcastEutraItem {
+    type Output = EmergencyAreaIdBroadcastEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let emergency_area_id = EmergencyAreaId::decode(data)?;
+        let completed_cells_in_eai_eutra = CompletedCellsInEaiEutra::decode(data)?;
+
+        Ok(Self {
+            emergency_area_id,
+            completed_cells_in_eai_eutra,
+        })
+    }
+}
+
 // EmergencyAreaIdBroadcastNr
 #[derive(Clone)]
 pub struct EmergencyAreaIdBroadcastNr(pub Vec<EmergencyAreaIdBroadcastNrItem>);
+
+impl AperCodec for EmergencyAreaIdBroadcastNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EmergencyAreaIdBroadcastNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // EmergencyAreaIdBroadcastNrItem
 #[derive(Clone)]
@@ -1022,9 +3467,39 @@ pub struct EmergencyAreaIdBroadcastNrItem {
     pub completed_cells_in_eai_nr: CompletedCellsInEaiNr,
 }
 
+impl AperCodec for EmergencyAreaIdBroadcastNrItem {
+    type Output = EmergencyAreaIdBroadcastNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let emergency_area_id = EmergencyAreaId::decode(data)?;
+        let completed_cells_in_eai_nr = CompletedCellsInEaiNr::decode(data)?;
+
+        Ok(Self {
+            emergency_area_id,
+            completed_cells_in_eai_nr,
+        })
+    }
+}
+
 // EmergencyAreaIdCancelledEutra
 #[derive(Clone)]
 pub struct EmergencyAreaIdCancelledEutra(pub Vec<EmergencyAreaIdCancelledEutraItem>);
+
+impl AperCodec for EmergencyAreaIdCancelledEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EmergencyAreaIdCancelledEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // EmergencyAreaIdCancelledEutraItem
 #[derive(Clone)]
@@ -1033,9 +3508,39 @@ pub struct EmergencyAreaIdCancelledEutraItem {
     pub cancelled_cells_in_eai_eutra: CancelledCellsInEaiEutra,
 }
 
+impl AperCodec for EmergencyAreaIdCancelledEutraItem {
+    type Output = EmergencyAreaIdCancelledEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let emergency_area_id = EmergencyAreaId::decode(data)?;
+        let cancelled_cells_in_eai_eutra = CancelledCellsInEaiEutra::decode(data)?;
+
+        Ok(Self {
+            emergency_area_id,
+            cancelled_cells_in_eai_eutra,
+        })
+    }
+}
+
 // EmergencyAreaIdCancelledNr
 #[derive(Clone)]
 pub struct EmergencyAreaIdCancelledNr(pub Vec<EmergencyAreaIdCancelledNrItem>);
+
+impl AperCodec for EmergencyAreaIdCancelledNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EmergencyAreaIdCancelledNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // EmergencyAreaIdCancelledNrItem
 #[derive(Clone)]
@@ -1044,13 +3549,57 @@ pub struct EmergencyAreaIdCancelledNrItem {
     pub cancelled_cells_in_eai_nr: CancelledCellsInEaiNr,
 }
 
+impl AperCodec for EmergencyAreaIdCancelledNrItem {
+    type Output = EmergencyAreaIdCancelledNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let emergency_area_id = EmergencyAreaId::decode(data)?;
+        let cancelled_cells_in_eai_nr = CancelledCellsInEaiNr::decode(data)?;
+
+        Ok(Self {
+            emergency_area_id,
+            cancelled_cells_in_eai_nr,
+        })
+    }
+}
+
 // EmergencyAreaIdList
 #[derive(Clone)]
 pub struct EmergencyAreaIdList(pub Vec<EmergencyAreaId>);
 
+impl AperCodec for EmergencyAreaIdList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EmergencyAreaId::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // EmergencyAreaIdListForRestart
 #[derive(Clone)]
 pub struct EmergencyAreaIdListForRestart(pub Vec<EmergencyAreaId>);
+
+impl AperCodec for EmergencyAreaIdListForRestart {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EmergencyAreaId::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // EmergencyFallbackIndicator
 #[derive(Clone)]
@@ -1059,17 +3608,59 @@ pub struct EmergencyFallbackIndicator {
     pub emergency_service_target_cn: Option<EmergencyServiceTargetCn>,
 }
 
+impl AperCodec for EmergencyFallbackIndicator {
+    type Output = EmergencyFallbackIndicator;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let emergency_fallback_request_indicator = EmergencyFallbackRequestIndicator::decode(data)?;
+        let emergency_service_target_cn = if optionals[0] {
+            Some(EmergencyServiceTargetCn::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            emergency_fallback_request_indicator,
+            emergency_service_target_cn,
+        })
+    }
+}
+
 // EmergencyFallbackRequestIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EmergencyFallbackRequestIndicator {
     EmergencyFallbackRequested,
 }
 
+impl AperCodec for EmergencyFallbackRequestIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // EmergencyServiceTargetCn
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EmergencyServiceTargetCn {
     FiveGc,
     Epc,
+}
+
+impl AperCodec for EmergencyServiceTargetCn {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // EnbId
@@ -1081,19 +3672,91 @@ pub enum EnbId {
     LongMacroEnbId(BitString),
 }
 
+impl AperCodec for EnbId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::MacroEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(20),
+                Some(20),
+                false,
+            )?)),
+            1 => Ok(Self::HomeEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(28),
+                Some(28),
+                false,
+            )?)),
+            2 => Ok(Self::ShortMacroEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(18),
+                Some(18),
+                false,
+            )?)),
+            3 => Ok(Self::LongMacroEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(21),
+                Some(21),
+                false,
+            )?)),
+            4 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // EnhancedCoverageRestriction
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EnhancedCoverageRestriction {
     Restricted,
+}
+
+impl AperCodec for EnhancedCoverageRestriction {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // ExtendedConnectedTime
 #[derive(Clone)]
 pub struct ExtendedConnectedTime(pub u8);
 
+impl AperCodec for ExtendedConnectedTime {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8,
+        ))
+    }
+}
+
 // EnDcsonConfigurationTransfer
 #[derive(Clone)]
 pub struct EnDcsonConfigurationTransfer(pub Vec<u8>);
+
+impl AperCodec for EnDcsonConfigurationTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // EndpointIpAddressAndPort
 #[derive(Clone)]
@@ -1102,20 +3765,73 @@ pub struct EndpointIpAddressAndPort {
     pub port_number: PortNumber,
 }
 
+impl AperCodec for EndpointIpAddressAndPort {
+    type Output = EndpointIpAddressAndPort;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, false, 1)?;
+        let endpoint_ip_address = TransportLayerAddress::decode(data)?;
+        let port_number = PortNumber::decode(data)?;
+
+        Ok(Self {
+            endpoint_ip_address,
+            port_number,
+        })
+    }
+}
+
 // EndIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EndIndication {
     NoFurtherData,
     FurtherDataExists,
+}
+
+impl AperCodec for EndIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // EquivalentPlmnS
 #[derive(Clone)]
 pub struct EquivalentPlmnS(pub Vec<PlmnIdentity>);
 
+impl AperCodec for EquivalentPlmnS {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(15), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PlmnIdentity::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // EpsTac
 #[derive(Clone)]
 pub struct EpsTac(pub Vec<u8>);
+
+impl AperCodec for EpsTac {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(2),
+            Some(2),
+            false,
+        )?))
+    }
+}
 
 // EpsTai
 #[derive(Clone)]
@@ -1124,13 +3840,51 @@ pub struct EpsTai {
     pub eps_tac: EpsTac,
 }
 
+impl AperCodec for EpsTai {
+    type Output = EpsTai;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let eps_tac = EpsTac::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            eps_tac,
+        })
+    }
+}
+
 // ERabId
 #[derive(Clone)]
 pub struct ERabId(pub u8);
 
+impl AperCodec for ERabId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(15), true)?.0 as u8,
+        ))
+    }
+}
+
 // ERabInformationList
 #[derive(Clone)]
 pub struct ERabInformationList(pub Vec<ERabInformationItem>);
+
+impl AperCodec for ERabInformationList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(ERabInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // ERabInformationItem
 #[derive(Clone)]
@@ -1139,9 +3893,39 @@ pub struct ERabInformationItem {
     pub dl_forwarding: Option<DlForwarding>,
 }
 
+impl AperCodec for ERabInformationItem {
+    type Output = ERabInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let e_rab_id = ERabId::decode(data)?;
+        let dl_forwarding = if optionals[0] {
+            Some(DlForwarding::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            e_rab_id,
+            dl_forwarding,
+        })
+    }
+}
+
 // EutraCellIdentity
 #[derive(Clone)]
 pub struct EutraCellIdentity(pub BitString);
+
+impl AperCodec for EutraCellIdentity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(28),
+            Some(28),
+            false,
+        )?))
+    }
+}
 
 // EutraCgi
 #[derive(Clone)]
@@ -1150,24 +3934,93 @@ pub struct EutraCgi {
     pub eutra_cell_identity: EutraCellIdentity,
 }
 
+impl AperCodec for EutraCgi {
+    type Output = EutraCgi;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let eutra_cell_identity = EutraCellIdentity::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            eutra_cell_identity,
+        })
+    }
+}
+
 // EutraCgiList
 #[derive(Clone)]
 pub struct EutraCgiList(pub Vec<EutraCgi>);
+
+impl AperCodec for EutraCgiList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EutraCgi::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // EutraCgiListForWarning
 #[derive(Clone)]
 pub struct EutraCgiListForWarning(pub Vec<EutraCgi>);
 
+impl AperCodec for EutraCgiListForWarning {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(EutraCgi::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // EutrAencryptionAlgorithms
 #[derive(Clone)]
 pub struct EutrAencryptionAlgorithms(pub BitString);
+
+impl AperCodec for EutrAencryptionAlgorithms {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            true,
+        )?))
+    }
+}
 
 // EutrAintegrityProtectionAlgorithms
 #[derive(Clone)]
 pub struct EutrAintegrityProtectionAlgorithms(pub BitString);
 
+impl AperCodec for EutrAintegrityProtectionAlgorithms {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            true,
+        )?))
+    }
+}
+
 // EventType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EventType {
     Direct,
     ChangeOfServeCell,
@@ -1177,12 +4030,33 @@ pub enum EventType {
     CancelLocationReportingForTheUe,
 }
 
+impl AperCodec for EventType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(5), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ExpectedActivityPeriod
 #[derive(Clone)]
 pub struct ExpectedActivityPeriod(pub u8);
 
+impl AperCodec for ExpectedActivityPeriod {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(181), true)?.0 as u8,
+        ))
+    }
+}
+
 // ExpectedHoInterval
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ExpectedHoInterval {
     Sec15,
     Sec30,
@@ -1193,9 +4067,29 @@ pub enum ExpectedHoInterval {
     LongTime,
 }
 
+impl AperCodec for ExpectedHoInterval {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(6), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ExpectedIdlePeriod
 #[derive(Clone)]
 pub struct ExpectedIdlePeriod(pub u8);
+
+impl AperCodec for ExpectedIdlePeriod {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(181), true)?.0 as u8,
+        ))
+    }
+}
 
 // ExpectedUeActivityBehaviour
 #[derive(Clone)]
@@ -1203,6 +4097,34 @@ pub struct ExpectedUeActivityBehaviour {
     pub expected_activity_period: Option<ExpectedActivityPeriod>,
     pub expected_idle_period: Option<ExpectedIdlePeriod>,
     pub source_of_ue_activity_behaviour_information: Option<SourceOfUeActivityBehaviourInformation>,
+}
+
+impl AperCodec for ExpectedUeActivityBehaviour {
+    type Output = ExpectedUeActivityBehaviour;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let expected_activity_period = if optionals[0] {
+            Some(ExpectedActivityPeriod::decode(data)?)
+        } else {
+            None
+        };
+        let expected_idle_period = if optionals[1] {
+            Some(ExpectedIdlePeriod::decode(data)?)
+        } else {
+            None
+        };
+        let source_of_ue_activity_behaviour_information = if optionals[2] {
+            Some(SourceOfUeActivityBehaviourInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            expected_activity_period,
+            expected_idle_period,
+            source_of_ue_activity_behaviour_information,
+        })
+    }
 }
 
 // ExpectedUeBehaviour
@@ -1214,22 +4136,100 @@ pub struct ExpectedUeBehaviour {
     pub expected_ue_moving_trajectory: Option<ExpectedUeMovingTrajectory>,
 }
 
+impl AperCodec for ExpectedUeBehaviour {
+    type Output = ExpectedUeBehaviour;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let expected_ue_activity_behaviour = if optionals[0] {
+            Some(ExpectedUeActivityBehaviour::decode(data)?)
+        } else {
+            None
+        };
+        let expected_ho_interval = if optionals[1] {
+            Some(ExpectedHoInterval::decode(data)?)
+        } else {
+            None
+        };
+        let expected_ue_mobility = if optionals[2] {
+            Some(ExpectedUeMobility::decode(data)?)
+        } else {
+            None
+        };
+        let expected_ue_moving_trajectory = if optionals[3] {
+            Some(ExpectedUeMovingTrajectory::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            expected_ue_activity_behaviour,
+            expected_ho_interval,
+            expected_ue_mobility,
+            expected_ue_moving_trajectory,
+        })
+    }
+}
+
 // ExpectedUeMobility
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ExpectedUeMobility {
     Stationary,
     Mobile,
+}
+
+impl AperCodec for ExpectedUeMobility {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // ExpectedUeMovingTrajectory
 #[derive(Clone)]
 pub struct ExpectedUeMovingTrajectory(pub Vec<ExpectedUeMovingTrajectoryItem>);
 
+impl AperCodec for ExpectedUeMovingTrajectory {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(ExpectedUeMovingTrajectoryItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // ExpectedUeMovingTrajectoryItem
 #[derive(Clone)]
 pub struct ExpectedUeMovingTrajectoryItem {
     pub ngran_cgi: NgranCgi,
     pub time_stayed_in_cell: Option<u16>,
+}
+
+impl AperCodec for ExpectedUeMovingTrajectoryItem {
+    type Output = ExpectedUeMovingTrajectoryItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let ngran_cgi = NgranCgi::decode(data)?;
+        let time_stayed_in_cell = if optionals[0] {
+            Some(aper::decode::decode_integer(data, Some(0), Some(4095), false)?.0 as u16)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ngran_cgi,
+            time_stayed_in_cell,
+        })
+    }
 }
 
 // ExtendedAmfName
@@ -1239,15 +4239,68 @@ pub struct ExtendedAmfName {
     pub amf_name_utf8_string: Option<AmfNameUtf8String>,
 }
 
+impl AperCodec for ExtendedAmfName {
+    type Output = ExtendedAmfName;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let amf_name_visible_string = if optionals[0] {
+            Some(AmfNameVisibleString::decode(data)?)
+        } else {
+            None
+        };
+        let amf_name_utf8_string = if optionals[1] {
+            Some(AmfNameUtf8String::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            amf_name_visible_string,
+            amf_name_utf8_string,
+        })
+    }
+}
+
 // ExtendedPacketDelayBudget
 #[derive(Clone)]
 pub struct ExtendedPacketDelayBudget(pub u16);
+
+impl AperCodec for ExtendedPacketDelayBudget {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(65535), true)?.0 as u16,
+        ))
+    }
+}
 
 // ExtendedRanNodeName
 #[derive(Clone)]
 pub struct ExtendedRanNodeName {
     pub ran_node_name_visible_string: Option<RanNodeNameVisibleString>,
     pub ran_node_name_utf8_string: Option<RanNodeNameUtf8String>,
+}
+
+impl AperCodec for ExtendedRanNodeName {
+    type Output = ExtendedRanNodeName;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let ran_node_name_visible_string = if optionals[0] {
+            Some(RanNodeNameVisibleString::decode(data)?)
+        } else {
+            None
+        };
+        let ran_node_name_utf8_string = if optionals[1] {
+            Some(RanNodeNameUtf8String::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ran_node_name_visible_string,
+            ran_node_name_utf8_string,
+        })
+    }
 }
 
 // ExtendedRatRestrictionInformation
@@ -1257,23 +4310,97 @@ pub struct ExtendedRatRestrictionInformation {
     pub secondary_rat_restriction: BitString,
 }
 
+impl AperCodec for ExtendedRatRestrictionInformation {
+    type Output = ExtendedRatRestrictionInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let primary_rat_restriction = aper::decode::decode_bitstring(data, Some(8), Some(8), true)?;
+        let secondary_rat_restriction =
+            aper::decode::decode_bitstring(data, Some(8), Some(8), true)?;
+
+        Ok(Self {
+            primary_rat_restriction,
+            secondary_rat_restriction,
+        })
+    }
+}
+
 // ExtendedRncId
 #[derive(Clone)]
 pub struct ExtendedRncId(pub u16);
+
+impl AperCodec for ExtendedRncId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(4096), Some(65535), false)?.0 as u16,
+        ))
+    }
+}
 
 // ExtendedSliceSupportList
 #[derive(Clone)]
 pub struct ExtendedSliceSupportList(pub Vec<SliceSupportItem>);
 
+impl AperCodec for ExtendedSliceSupportList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SliceSupportItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // ExtendedUeIdentityIndexValue
 #[derive(Clone)]
 pub struct ExtendedUeIdentityIndexValue(pub BitString);
+
+impl AperCodec for ExtendedUeIdentityIndexValue {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            false,
+        )?))
+    }
+}
 
 // EventTrigger
 #[derive(Clone)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig(EventL1LoggedMdtConfig),
+}
+
+impl AperCodec for EventTrigger {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::OutOfCoverage(OutOfCoverage::decode(data)?)),
+            1 => Ok(Self::EventL1LoggedMdtConfig(
+                EventL1LoggedMdtConfig::decode(data)?,
+            )),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // EventL1LoggedMdtConfig
@@ -1284,6 +4411,23 @@ pub struct EventL1LoggedMdtConfig {
     pub time_to_trigger: TimeToTrigger,
 }
 
+impl AperCodec for EventL1LoggedMdtConfig {
+    type Output = EventL1LoggedMdtConfig;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let l1_threshold = MeasurementThresholdL1LoggedMdt::decode(data)?;
+        let hysteresis = Hysteresis::decode(data)?;
+        let time_to_trigger = TimeToTrigger::decode(data)?;
+
+        Ok(Self {
+            l1_threshold,
+            hysteresis,
+            time_to_trigger,
+        })
+    }
+}
+
 // MeasurementThresholdL1LoggedMdt
 #[derive(Clone)]
 pub enum MeasurementThresholdL1LoggedMdt {
@@ -1291,10 +4435,43 @@ pub enum MeasurementThresholdL1LoggedMdt {
     ThresholdRsrq(ThresholdRsrq),
 }
 
+impl AperCodec for MeasurementThresholdL1LoggedMdt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::ThresholdRsrp(ThresholdRsrp::decode(data)?)),
+            1 => Ok(Self::ThresholdRsrq(ThresholdRsrq::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // FailureIndication
 #[derive(Clone)]
 pub struct FailureIndication {
     pub ue_rlf_report_container: UeRlfReportContainer,
+}
+
+impl AperCodec for FailureIndication {
+    type Output = FailureIndication;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ue_rlf_report_container = UeRlfReportContainer::decode(data)?;
+
+        Ok(Self {
+            ue_rlf_report_container,
+        })
+    }
 }
 
 // FiveGSTmsi
@@ -1305,17 +4482,69 @@ pub struct FiveGSTmsi {
     pub five_g_tmsi: FiveGTmsi,
 }
 
+impl AperCodec for FiveGSTmsi {
+    type Output = FiveGSTmsi;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let amf_set_id = AmfSetId::decode(data)?;
+        let amf_pointer = AmfPointer::decode(data)?;
+        let five_g_tmsi = FiveGTmsi::decode(data)?;
+
+        Ok(Self {
+            amf_set_id,
+            amf_pointer,
+            five_g_tmsi,
+        })
+    }
+}
+
 // FiveGTmsi
 #[derive(Clone)]
 pub struct FiveGTmsi(pub Vec<u8>);
+
+impl AperCodec for FiveGTmsi {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(4),
+            Some(4),
+            false,
+        )?))
+    }
+}
 
 // FiveQi
 #[derive(Clone)]
 pub struct FiveQi(pub u8);
 
+impl AperCodec for FiveQi {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), true)?.0 as u8,
+        ))
+    }
+}
+
 // ForbiddenAreaInformation
 #[derive(Clone)]
 pub struct ForbiddenAreaInformation(pub Vec<ForbiddenAreaInformationItem>);
+
+impl AperCodec for ForbiddenAreaInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(ForbiddenAreaInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // ForbiddenAreaInformationItem
 #[derive(Clone)]
@@ -1324,9 +4553,38 @@ pub struct ForbiddenAreaInformationItem {
     pub forbidden_ta_cs: ForbiddenTaCs,
 }
 
+impl AperCodec for ForbiddenAreaInformationItem {
+    type Output = ForbiddenAreaInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let forbidden_ta_cs = ForbiddenTaCs::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            forbidden_ta_cs,
+        })
+    }
+}
+
 // ForbiddenTaCs
 #[derive(Clone)]
 pub struct ForbiddenTaCs(pub Vec<Tac>);
+
+impl AperCodec for ForbiddenTaCs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(4096), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tac::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // FromEutranToNgran
 #[derive(Clone)]
@@ -1335,11 +4593,41 @@ pub struct FromEutranToNgran {
     pub target_ngran_node_id: IntersystemSonNgranNodeId,
 }
 
+impl AperCodec for FromEutranToNgran {
+    type Output = FromEutranToNgran;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, false, 1)?;
+        let source_enb_id = IntersystemSonEnbId::decode(data)?;
+        let target_ngran_node_id = IntersystemSonNgranNodeId::decode(data)?;
+
+        Ok(Self {
+            source_enb_id,
+            target_ngran_node_id,
+        })
+    }
+}
+
 // FromNgranToEutran
 #[derive(Clone)]
 pub struct FromNgranToEutran {
     pub source_ngran_node_id: IntersystemSonNgranNodeId,
     pub target_enb_id: IntersystemSonEnbId,
+}
+
+impl AperCodec for FromNgranToEutran {
+    type Output = FromNgranToEutran;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, false, 1)?;
+        let source_ngran_node_id = IntersystemSonNgranNodeId::decode(data)?;
+        let target_enb_id = IntersystemSonEnbId::decode(data)?;
+
+        Ok(Self {
+            source_ngran_node_id,
+            target_enb_id,
+        })
+    }
 }
 
 // GbrQosInformation
@@ -1354,15 +4642,75 @@ pub struct GbrQosInformation {
     pub maximum_packet_loss_rate_ul: Option<PacketLossRate>,
 }
 
+impl AperCodec for GbrQosInformation {
+    type Output = GbrQosInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let maximum_flow_bit_rate_dl = BitRate::decode(data)?;
+        let maximum_flow_bit_rate_ul = BitRate::decode(data)?;
+        let guaranteed_flow_bit_rate_dl = BitRate::decode(data)?;
+        let guaranteed_flow_bit_rate_ul = BitRate::decode(data)?;
+        let notification_control = if optionals[0] {
+            Some(NotificationControl::decode(data)?)
+        } else {
+            None
+        };
+        let maximum_packet_loss_rate_dl = if optionals[1] {
+            Some(PacketLossRate::decode(data)?)
+        } else {
+            None
+        };
+        let maximum_packet_loss_rate_ul = if optionals[2] {
+            Some(PacketLossRate::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            maximum_flow_bit_rate_dl,
+            maximum_flow_bit_rate_ul,
+            guaranteed_flow_bit_rate_dl,
+            guaranteed_flow_bit_rate_ul,
+            notification_control,
+            maximum_packet_loss_rate_dl,
+            maximum_packet_loss_rate_ul,
+        })
+    }
+}
+
 // GlobalCableId
 #[derive(Clone)]
 pub struct GlobalCableId(pub Vec<u8>);
+
+impl AperCodec for GlobalCableId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // GlobalEnbId
 #[derive(Clone)]
 pub struct GlobalEnbId {
     pub plmn_identity: PlmnIdentity,
     pub enb_id: EnbId,
+}
+
+impl AperCodec for GlobalEnbId {
+    type Output = GlobalEnbId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let enb_id = EnbId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            enb_id,
+        })
+    }
 }
 
 // GlobalGnbId
@@ -1372,11 +4720,41 @@ pub struct GlobalGnbId {
     pub gnb_id: GnbId,
 }
 
+impl AperCodec for GlobalGnbId {
+    type Output = GlobalGnbId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let gnb_id = GnbId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            gnb_id,
+        })
+    }
+}
+
 // GlobalN3IwfId
 #[derive(Clone)]
 pub struct GlobalN3IwfId {
     pub plmn_identity: PlmnIdentity,
     pub n3_iwf_id: N3IwfId,
+}
+
+impl AperCodec for GlobalN3IwfId {
+    type Output = GlobalN3IwfId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let n3_iwf_id = N3IwfId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            n3_iwf_id,
+        })
+    }
 }
 
 // GlobalLineId
@@ -1386,15 +4764,57 @@ pub struct GlobalLineId {
     pub line_type: Option<LineType>,
 }
 
+impl AperCodec for GlobalLineId {
+    type Output = GlobalLineId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let global_line_identity = GlobalLineIdentity::decode(data)?;
+        let line_type = if optionals[0] {
+            Some(LineType::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            global_line_identity,
+            line_type,
+        })
+    }
+}
+
 // GlobalLineIdentity
 #[derive(Clone)]
 pub struct GlobalLineIdentity(pub Vec<u8>);
+
+impl AperCodec for GlobalLineIdentity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // GlobalNgEnbId
 #[derive(Clone)]
 pub struct GlobalNgEnbId {
     pub plmn_identity: PlmnIdentity,
     pub ng_enb_id: NgEnbId,
+}
+
+impl AperCodec for GlobalNgEnbId {
+    type Output = GlobalNgEnbId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let ng_enb_id = NgEnbId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            ng_enb_id,
+        })
+    }
 }
 
 // GlobalRanNodeId
@@ -1405,11 +4825,47 @@ pub enum GlobalRanNodeId {
     GlobalN3IwfId(GlobalN3IwfId),
 }
 
+impl AperCodec for GlobalRanNodeId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::GlobalGnbId(GlobalGnbId::decode(data)?)),
+            1 => Ok(Self::GlobalNgEnbId(GlobalNgEnbId::decode(data)?)),
+            2 => Ok(Self::GlobalN3IwfId(GlobalN3IwfId::decode(data)?)),
+            3 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // GlobalTngfId
 #[derive(Clone)]
 pub struct GlobalTngfId {
     pub plmn_identity: PlmnIdentity,
     pub tngf_id: TngfId,
+}
+
+impl AperCodec for GlobalTngfId {
+    type Output = GlobalTngfId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let tngf_id = TngfId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            tngf_id,
+        })
+    }
 }
 
 // GlobalTwifId
@@ -1419,11 +4875,41 @@ pub struct GlobalTwifId {
     pub twif_id: TwifId,
 }
 
+impl AperCodec for GlobalTwifId {
+    type Output = GlobalTwifId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let twif_id = TwifId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            twif_id,
+        })
+    }
+}
+
 // GlobalWAgfId
 #[derive(Clone)]
 pub struct GlobalWAgfId {
     pub plmn_identity: PlmnIdentity,
     pub w_agf_id: WAgfId,
+}
+
+impl AperCodec for GlobalWAgfId {
+    type Output = GlobalWAgfId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let w_agf_id = WAgfId::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            w_agf_id,
+        })
+    }
 }
 
 // GnbId
@@ -1432,15 +4918,66 @@ pub enum GnbId {
     GnbId(BitString),
 }
 
+impl AperCodec for GnbId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::GnbId(aper::decode::decode_bitstring(
+                data,
+                Some(22),
+                Some(32),
+                false,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // GtpTeid
 #[derive(Clone)]
 pub struct GtpTeid(pub Vec<u8>);
+
+impl AperCodec for GtpTeid {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(4),
+            Some(4),
+            false,
+        )?))
+    }
+}
 
 // GtpTunnel
 #[derive(Clone)]
 pub struct GtpTunnel {
     pub transport_layer_address: TransportLayerAddress,
     pub gtp_teid: GtpTeid,
+}
+
+impl AperCodec for GtpTunnel {
+    type Output = GtpTunnel;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let transport_layer_address = TransportLayerAddress::decode(data)?;
+        let gtp_teid = GtpTeid::decode(data)?;
+
+        Ok(Self {
+            transport_layer_address,
+            gtp_teid,
+        })
+    }
 }
 
 // Guami
@@ -1452,11 +4989,42 @@ pub struct Guami {
     pub amf_pointer: AmfPointer,
 }
 
+impl AperCodec for Guami {
+    type Output = Guami;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let amf_region_id = AmfRegionId::decode(data)?;
+        let amf_set_id = AmfSetId::decode(data)?;
+        let amf_pointer = AmfPointer::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            amf_region_id,
+            amf_set_id,
+            amf_pointer,
+        })
+    }
+}
+
 // GuamiType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum GuamiType {
     Native,
     Mapped,
+}
+
+impl AperCodec for GuamiType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // HandoverCommandTransfer
@@ -1467,16 +5035,67 @@ pub struct HandoverCommandTransfer {
     pub data_forwarding_response_drb_list: Option<DataForwardingResponseDrbList>,
 }
 
+impl AperCodec for HandoverCommandTransfer {
+    type Output = HandoverCommandTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let dl_forwarding_up_tnl_information = if optionals[0] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_to_be_forwarded_list = if optionals[1] {
+            Some(QosFlowToBeForwardedList::decode(data)?)
+        } else {
+            None
+        };
+        let data_forwarding_response_drb_list = if optionals[2] {
+            Some(DataForwardingResponseDrbList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_forwarding_up_tnl_information,
+            qos_flow_to_be_forwarded_list,
+            data_forwarding_response_drb_list,
+        })
+    }
+}
+
 // HandoverFlag
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum HandoverFlag {
     HandoverPreparation,
+}
+
+impl AperCodec for HandoverFlag {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // HandoverPreparationUnsuccessfulTransfer
 #[derive(Clone)]
 pub struct HandoverPreparationUnsuccessfulTransfer {
     pub cause: Cause,
+}
+
+impl AperCodec for HandoverPreparationUnsuccessfulTransfer {
+    type Output = HandoverPreparationUnsuccessfulTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self { cause })
+    }
 }
 
 // HandoverRequestAcknowledgeTransfer
@@ -1490,10 +5109,64 @@ pub struct HandoverRequestAcknowledgeTransfer {
     pub data_forwarding_response_drb_list: Option<DataForwardingResponseDrbList>,
 }
 
+impl AperCodec for HandoverRequestAcknowledgeTransfer {
+    type Output = HandoverRequestAcknowledgeTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let dl_forwarding_up_tnl_information = if optionals[0] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+        let security_result = if optionals[1] {
+            Some(SecurityResult::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_setup_response_list = QosFlowListWithDataForwarding::decode(data)?;
+        let qos_flow_failed_to_setup_list = if optionals[2] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+        let data_forwarding_response_drb_list = if optionals[3] {
+            Some(DataForwardingResponseDrbList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_ngu_up_tnl_information,
+            dl_forwarding_up_tnl_information,
+            security_result,
+            qos_flow_setup_response_list,
+            qos_flow_failed_to_setup_list,
+            data_forwarding_response_drb_list,
+        })
+    }
+}
+
 // HandoverRequiredTransfer
 #[derive(Clone)]
 pub struct HandoverRequiredTransfer {
     pub direct_forwarding_path_availability: Option<DirectForwardingPathAvailability>,
+}
+
+impl AperCodec for HandoverRequiredTransfer {
+    type Output = HandoverRequiredTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let direct_forwarding_path_availability = if optionals[0] {
+            Some(DirectForwardingPathAvailability::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            direct_forwarding_path_availability,
+        })
+    }
 }
 
 // HandoverResourceAllocationUnsuccessfulTransfer
@@ -1503,17 +5176,56 @@ pub struct HandoverResourceAllocationUnsuccessfulTransfer {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
+impl AperCodec for HandoverResourceAllocationUnsuccessfulTransfer {
+    type Output = HandoverResourceAllocationUnsuccessfulTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let cause = Cause::decode(data)?;
+        let criticality_diagnostics = if optionals[0] {
+            Some(CriticalityDiagnostics::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            cause,
+            criticality_diagnostics,
+        })
+    }
+}
+
 // HandoverType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum HandoverType {
     Intra5gs,
     FivegsToEps,
     EpsTo5gs,
 }
 
+impl AperCodec for HandoverType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // HfcNodeId
 #[derive(Clone)]
 pub struct HfcNodeId(pub Vec<u8>);
+
+impl AperCodec for HfcNodeId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // HoReport
 #[derive(Clone)]
@@ -1529,39 +5241,158 @@ pub struct HoReport {
     pub ue_rlf_report_container: Option<UeRlfReportContainer>,
 }
 
+impl AperCodec for HoReport {
+    type Output = HoReport;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 6)?;
+        let handover_report_type = HandoverReportType::decode(data)?;
+        let handover_cause = Cause::decode(data)?;
+        let sourcecell_cgi = NgranCgi::decode(data)?;
+        let targetcell_cgi = NgranCgi::decode(data)?;
+        let reestablishmentcell_cgi = if optionals[0] {
+            Some(NgranCgi::decode(data)?)
+        } else {
+            None
+        };
+        let sourcecell_c_rnti = if optionals[1] {
+            Some(aper::decode::decode_bitstring(
+                data,
+                Some(16),
+                Some(16),
+                false,
+            )?)
+        } else {
+            None
+        };
+        let targetcellin_e_utran = if optionals[2] {
+            Some(EutraCgi::decode(data)?)
+        } else {
+            None
+        };
+        let mobility_information = if optionals[3] {
+            Some(MobilityInformation::decode(data)?)
+        } else {
+            None
+        };
+        let ue_rlf_report_container = if optionals[4] {
+            Some(UeRlfReportContainer::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            handover_report_type,
+            handover_cause,
+            sourcecell_cgi,
+            targetcell_cgi,
+            reestablishmentcell_cgi,
+            sourcecell_c_rnti,
+            targetcellin_e_utran,
+            mobility_information,
+            ue_rlf_report_container,
+        })
+    }
+}
+
 // Hysteresis
 #[derive(Clone)]
 pub struct Hysteresis(pub u8);
 
+impl AperCodec for Hysteresis {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(30), false)?.0 as u8,
+        ))
+    }
+}
+
 // IabAuthorized
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum IabAuthorized {
     Authorized,
     NotAuthorized,
 }
 
+impl AperCodec for IabAuthorized {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // IabSupported
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum IabSupported {
     True,
 }
 
+impl AperCodec for IabSupported {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // IabNodeIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum IabNodeIndication {
     True,
 }
 
+impl AperCodec for IabNodeIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ImsVoiceSupportIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ImsVoiceSupportIndicator {
     Supported,
     NotSupported,
 }
 
+impl AperCodec for ImsVoiceSupportIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // IndexToRfsp
 #[derive(Clone)]
 pub struct IndexToRfsp(pub u8);
+
+impl AperCodec for IndexToRfsp {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(256), true)?.0 as u8,
+        ))
+    }
+}
 
 // InfoOnRecommendedCellsAndRanNodesForPaging
 #[derive(Clone)]
@@ -1570,28 +5401,88 @@ pub struct InfoOnRecommendedCellsAndRanNodesForPaging {
     pub recommend_ran_nodes_for_paging: RecommendedRanNodesForPaging,
 }
 
+impl AperCodec for InfoOnRecommendedCellsAndRanNodesForPaging {
+    type Output = InfoOnRecommendedCellsAndRanNodesForPaging;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let recommended_cells_for_paging = RecommendedCellsForPaging::decode(data)?;
+        let recommend_ran_nodes_for_paging = RecommendedRanNodesForPaging::decode(data)?;
+
+        Ok(Self {
+            recommended_cells_for_paging,
+            recommend_ran_nodes_for_paging,
+        })
+    }
+}
+
 // IntegrityProtectionIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum IntegrityProtectionIndication {
     Required,
     Preferred,
     NotNeeded,
 }
 
+impl AperCodec for IntegrityProtectionIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // IntegrityProtectionResult
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum IntegrityProtectionResult {
     Performed,
     NotPerformed,
+}
+
+impl AperCodec for IntegrityProtectionResult {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // IntendedNumberOfPagingAttempts
 #[derive(Clone)]
 pub struct IntendedNumberOfPagingAttempts(pub u8);
 
+impl AperCodec for IntendedNumberOfPagingAttempts {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(16), true)?.0 as u8,
+        ))
+    }
+}
+
 // InterfacesToTrace
 #[derive(Clone)]
 pub struct InterfacesToTrace(pub BitString);
+
+impl AperCodec for InterfacesToTrace {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
 
 // ImmediateMdtNr
 #[derive(Clone)]
@@ -1608,10 +5499,93 @@ pub struct ImmediateMdtNr {
     pub sensor_measurement_configuration: Option<SensorMeasurementConfiguration>,
 }
 
+impl AperCodec for ImmediateMdtNr {
+    type Output = ImmediateMdtNr;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 10)?;
+        let measurements_to_activate = MeasurementsToActivate::decode(data)?;
+        let m1_configuration = if optionals[0] {
+            Some(M1Configuration::decode(data)?)
+        } else {
+            None
+        };
+        let m4_configuration = if optionals[1] {
+            Some(M4Configuration::decode(data)?)
+        } else {
+            None
+        };
+        let m5_configuration = if optionals[2] {
+            Some(M5Configuration::decode(data)?)
+        } else {
+            None
+        };
+        let m6_configuration = if optionals[3] {
+            Some(M6Configuration::decode(data)?)
+        } else {
+            None
+        };
+        let m7_configuration = if optionals[4] {
+            Some(M7Configuration::decode(data)?)
+        } else {
+            None
+        };
+        let bluetooth_measurement_configuration = if optionals[5] {
+            Some(BluetoothMeasurementConfiguration::decode(data)?)
+        } else {
+            None
+        };
+        let wlan_measurement_configuration = if optionals[6] {
+            Some(WlanMeasurementConfiguration::decode(data)?)
+        } else {
+            None
+        };
+        let mdt_location_info = if optionals[7] {
+            Some(MdtLocationInfo::decode(data)?)
+        } else {
+            None
+        };
+        let sensor_measurement_configuration = if optionals[8] {
+            Some(SensorMeasurementConfiguration::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            measurements_to_activate,
+            m1_configuration,
+            m4_configuration,
+            m5_configuration,
+            m6_configuration,
+            m7_configuration,
+            bluetooth_measurement_configuration,
+            wlan_measurement_configuration,
+            mdt_location_info,
+            sensor_measurement_configuration,
+        })
+    }
+}
+
 // InterSystemFailureIndication
 #[derive(Clone)]
 pub struct InterSystemFailureIndication {
     pub ue_rlf_report_container: Option<UeRlfReportContainer>,
+}
+
+impl AperCodec for InterSystemFailureIndication {
+    type Output = InterSystemFailureIndication;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let ue_rlf_report_container = if optionals[0] {
+            Some(UeRlfReportContainer::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ue_rlf_report_container,
+        })
+    }
 }
 
 // IntersystemSonConfigurationTransfer
@@ -1621,11 +5595,46 @@ pub struct IntersystemSonConfigurationTransfer {
     pub intersystem_son_information: IntersystemSonInformation,
 }
 
+impl AperCodec for IntersystemSonConfigurationTransfer {
+    type Output = IntersystemSonConfigurationTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let transfer_type = IntersystemSonTransferType::decode(data)?;
+        let intersystem_son_information = IntersystemSonInformation::decode(data)?;
+
+        Ok(Self {
+            transfer_type,
+            intersystem_son_information,
+        })
+    }
+}
+
 // IntersystemSonTransferType
 #[derive(Clone)]
 pub enum IntersystemSonTransferType {
     FromEutranToNgran(FromEutranToNgran),
     FromNgranToEutran(FromNgranToEutran),
+}
+
+impl AperCodec for IntersystemSonTransferType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::FromEutranToNgran(FromEutranToNgran::decode(data)?)),
+            1 => Ok(Self::FromNgranToEutran(FromNgranToEutran::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // IntersystemSonEnbId
@@ -1635,6 +5644,21 @@ pub struct IntersystemSonEnbId {
     pub selected_epstai: EpsTai,
 }
 
+impl AperCodec for IntersystemSonEnbId {
+    type Output = IntersystemSonEnbId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let global_enb_id = GlobalEnbId::decode(data)?;
+        let selected_epstai = EpsTai::decode(data)?;
+
+        Ok(Self {
+            global_enb_id,
+            selected_epstai,
+        })
+    }
+}
+
 // IntersystemSonNgranNodeId
 #[derive(Clone)]
 pub struct IntersystemSonNgranNodeId {
@@ -1642,10 +5666,46 @@ pub struct IntersystemSonNgranNodeId {
     pub selected_tai: Tai,
 }
 
+impl AperCodec for IntersystemSonNgranNodeId {
+    type Output = IntersystemSonNgranNodeId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let global_ran_node_id = GlobalRanNodeId::decode(data)?;
+        let selected_tai = Tai::decode(data)?;
+
+        Ok(Self {
+            global_ran_node_id,
+            selected_tai,
+        })
+    }
+}
+
 // IntersystemSonInformation
 #[derive(Clone)]
 pub enum IntersystemSonInformation {
     IntersystemSonInformationReport(IntersystemSonInformationReport),
+}
+
+impl AperCodec for IntersystemSonInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::IntersystemSonInformationReport(
+                IntersystemSonInformationReport::decode(data)?,
+            )),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // IntersystemSonInformationReport
@@ -1655,10 +5715,47 @@ pub enum IntersystemSonInformationReport {
     FailureIndicationInformation(InterSystemFailureIndication),
 }
 
+impl AperCodec for IntersystemSonInformationReport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::HoReportInformation(InterSystemHoReport::decode(
+                data,
+            )?)),
+            1 => Ok(Self::FailureIndicationInformation(
+                InterSystemFailureIndication::decode(data)?,
+            )),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // InterSystemHoReport
 #[derive(Clone)]
 pub struct InterSystemHoReport {
     pub handover_report_type: InterSystemHandoverReportType,
+}
+
+impl AperCodec for InterSystemHoReport {
+    type Output = InterSystemHoReport;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let handover_report_type = InterSystemHandoverReportType::decode(data)?;
+
+        Ok(Self {
+            handover_report_type,
+        })
+    }
 }
 
 // InterSystemHandoverReportType
@@ -1666,6 +5763,30 @@ pub struct InterSystemHoReport {
 pub enum InterSystemHandoverReportType {
     TooearlyIntersystemHo(TooearlyIntersystemHo),
     IntersystemUnnecessaryHo(IntersystemUnnecessaryHo),
+}
+
+impl AperCodec for InterSystemHandoverReportType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::TooearlyIntersystemHo(TooearlyIntersystemHo::decode(
+                data,
+            )?)),
+            1 => Ok(Self::IntersystemUnnecessaryHo(
+                IntersystemUnnecessaryHo::decode(data)?,
+            )),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // IntersystemUnnecessaryHo
@@ -1677,15 +5798,58 @@ pub struct IntersystemUnnecessaryHo {
     pub candidate_cell_list: CandidateCellList,
 }
 
+impl AperCodec for IntersystemUnnecessaryHo {
+    type Output = IntersystemUnnecessaryHo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let sourcecell_id = NgranCgi::decode(data)?;
+        let targetcell_id = EutraCgi::decode(data)?;
+        let early_iratho = EarlyIratho::decode(data)?;
+        let candidate_cell_list = CandidateCellList::decode(data)?;
+
+        Ok(Self {
+            sourcecell_id,
+            targetcell_id,
+            early_iratho,
+            candidate_cell_list,
+        })
+    }
+}
+
 // Lac
 #[derive(Clone)]
 pub struct Lac(pub Vec<u8>);
+
+impl AperCodec for Lac {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(2),
+            Some(2),
+            false,
+        )?))
+    }
+}
 
 // Lai
 #[derive(Clone)]
 pub struct Lai {
     pub plmn_identity: PlmnIdentity,
     pub lac: Lac,
+}
+
+impl AperCodec for Lai {
+    type Output = Lai;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let lac = Lac::decode(data)?;
+
+        Ok(Self { plmn_identity, lac })
+    }
 }
 
 // LastVisitedCellInformation
@@ -1697,19 +5861,80 @@ pub enum LastVisitedCellInformation {
     GeranCell(LastVisitedGeranCellInformation),
 }
 
+impl AperCodec for LastVisitedCellInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::NgranCell(LastVisitedNgranCellInformation::decode(
+                data,
+            )?)),
+            1 => Ok(Self::EutranCell(LastVisitedEutranCellInformation::decode(
+                data,
+            )?)),
+            2 => Ok(Self::UtranCell(LastVisitedUtranCellInformation::decode(
+                data,
+            )?)),
+            3 => Ok(Self::GeranCell(LastVisitedGeranCellInformation::decode(
+                data,
+            )?)),
+            4 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // LastVisitedCellItem
 #[derive(Clone)]
 pub struct LastVisitedCellItem {
     pub last_visited_cell_information: LastVisitedCellInformation,
 }
 
+impl AperCodec for LastVisitedCellItem {
+    type Output = LastVisitedCellItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let last_visited_cell_information = LastVisitedCellInformation::decode(data)?;
+
+        Ok(Self {
+            last_visited_cell_information,
+        })
+    }
+}
+
 // LastVisitedEutranCellInformation
 #[derive(Clone)]
 pub struct LastVisitedEutranCellInformation(pub Vec<u8>);
 
+impl AperCodec for LastVisitedEutranCellInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // LastVisitedGeranCellInformation
 #[derive(Clone)]
 pub struct LastVisitedGeranCellInformation(pub Vec<u8>);
+
+impl AperCodec for LastVisitedGeranCellInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // LastVisitedNgranCellInformation
 #[derive(Clone)]
@@ -1721,26 +5946,96 @@ pub struct LastVisitedNgranCellInformation {
     pub ho_cause_value: Option<Cause>,
 }
 
+impl AperCodec for LastVisitedNgranCellInformation {
+    type Output = LastVisitedNgranCellInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let global_cell_id = NgranCgi::decode(data)?;
+        let cell_type = CellType::decode(data)?;
+        let time_ue_stayed_in_cell = TimeUeStayedInCell::decode(data)?;
+        let time_ue_stayed_in_cell_enhanced_granularity = if optionals[0] {
+            Some(TimeUeStayedInCellEnhancedGranularity::decode(data)?)
+        } else {
+            None
+        };
+        let ho_cause_value = if optionals[1] {
+            Some(Cause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            global_cell_id,
+            cell_type,
+            time_ue_stayed_in_cell,
+            time_ue_stayed_in_cell_enhanced_granularity,
+            ho_cause_value,
+        })
+    }
+}
+
 // LastVisitedUtranCellInformation
 #[derive(Clone)]
 pub struct LastVisitedUtranCellInformation(pub Vec<u8>);
 
+impl AperCodec for LastVisitedUtranCellInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // LineType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum LineType {
     Dsl,
     Pon,
 }
 
+impl AperCodec for LineType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // LocationReportingAdditionalInfo
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum LocationReportingAdditionalInfo {
     IncludePsCell,
+}
+
+impl AperCodec for LocationReportingAdditionalInfo {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // LocationReportingReferenceId
 #[derive(Clone)]
 pub struct LocationReportingReferenceId(pub u8);
+
+impl AperCodec for LocationReportingReferenceId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(64), true)?.0 as u8,
+        ))
+    }
+}
 
 // LocationReportingRequestType
 #[derive(Clone)]
@@ -1749,6 +6044,32 @@ pub struct LocationReportingRequestType {
     pub report_area: ReportArea,
     pub area_of_interest_list: Option<AreaOfInterestList>,
     pub location_reporting_reference_id_to_be_cancelled: Option<LocationReportingReferenceId>,
+}
+
+impl AperCodec for LocationReportingRequestType {
+    type Output = LocationReportingRequestType;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let event_type = EventType::decode(data)?;
+        let report_area = ReportArea::decode(data)?;
+        let area_of_interest_list = if optionals[0] {
+            Some(AreaOfInterestList::decode(data)?)
+        } else {
+            None
+        };
+        let location_reporting_reference_id_to_be_cancelled = if optionals[1] {
+            Some(LocationReportingReferenceId::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            event_type,
+            report_area,
+            area_of_interest_list,
+            location_reporting_reference_id_to_be_cancelled,
+        })
+    }
 }
 
 // LoggedMdtNr
@@ -1763,8 +6084,49 @@ pub struct LoggedMdtNr {
     pub area_scope_of_neigh_cells_list: Option<AreaScopeOfNeighCellsList>,
 }
 
+impl AperCodec for LoggedMdtNr {
+    type Output = LoggedMdtNr;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let logging_interval = LoggingInterval::decode(data)?;
+        let logging_duration = LoggingDuration::decode(data)?;
+        let logged_mdt_trigger = LoggedMdtTrigger::decode(data)?;
+        let bluetooth_measurement_configuration = if optionals[0] {
+            Some(BluetoothMeasurementConfiguration::decode(data)?)
+        } else {
+            None
+        };
+        let wlan_measurement_configuration = if optionals[1] {
+            Some(WlanMeasurementConfiguration::decode(data)?)
+        } else {
+            None
+        };
+        let sensor_measurement_configuration = if optionals[2] {
+            Some(SensorMeasurementConfiguration::decode(data)?)
+        } else {
+            None
+        };
+        let area_scope_of_neigh_cells_list = if optionals[3] {
+            Some(AreaScopeOfNeighCellsList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            logging_interval,
+            logging_duration,
+            logged_mdt_trigger,
+            bluetooth_measurement_configuration,
+            wlan_measurement_configuration,
+            sensor_measurement_configuration,
+            area_scope_of_neigh_cells_list,
+        })
+    }
+}
+
 // LoggingInterval
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum LoggingInterval {
     Ms320,
     Ms640,
@@ -1779,8 +6141,20 @@ pub enum LoggingInterval {
     Infinity,
 }
 
+impl AperCodec for LoggingInterval {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(10), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // LoggingDuration
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum LoggingDuration {
     M10,
     M20,
@@ -1790,12 +6164,35 @@ pub enum LoggingDuration {
     M120,
 }
 
+impl AperCodec for LoggingDuration {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(5), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // LinksToLog
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum LinksToLog {
     Uplink,
     Downlink,
     BothUplinkAndDownlink,
+}
+
+impl AperCodec for LinksToLog {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // LoggedMdtTrigger
@@ -1805,15 +6202,56 @@ pub enum LoggedMdtTrigger {
     EventTrigger(EventTrigger),
 }
 
+impl AperCodec for LoggedMdtTrigger {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::Periodical),
+            1 => Ok(Self::EventTrigger(EventTrigger::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // LtemIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum LtemIndication {
     LteM,
+}
+
+impl AperCodec for LtemIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // LteueRlfReportContainer
 #[derive(Clone)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
+
+impl AperCodec for LteueRlfReportContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // Ltev2xServicesAuthorized
 #[derive(Clone)]
@@ -1822,40 +6260,144 @@ pub struct Ltev2xServicesAuthorized {
     pub pedestrian_ue: Option<PedestrianUe>,
 }
 
+impl AperCodec for Ltev2xServicesAuthorized {
+    type Output = Ltev2xServicesAuthorized;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let vehicle_ue = if optionals[0] {
+            Some(VehicleUe::decode(data)?)
+        } else {
+            None
+        };
+        let pedestrian_ue = if optionals[1] {
+            Some(PedestrianUe::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            vehicle_ue,
+            pedestrian_ue,
+        })
+    }
+}
+
 // LteueSidelinkAggregateMaximumBitrate
 #[derive(Clone)]
 pub struct LteueSidelinkAggregateMaximumBitrate {
     pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
 }
 
+impl AperCodec for LteueSidelinkAggregateMaximumBitrate {
+    type Output = LteueSidelinkAggregateMaximumBitrate;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ue_sidelink_aggregate_maximum_bit_rate = BitRate::decode(data)?;
+
+        Ok(Self {
+            ue_sidelink_aggregate_maximum_bit_rate,
+        })
+    }
+}
+
 // MaskedImeisv
 #[derive(Clone)]
 pub struct MaskedImeisv(pub BitString);
 
+impl AperCodec for MaskedImeisv {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(64),
+            Some(64),
+            false,
+        )?))
+    }
+}
+
 // MaximumDataBurstVolume
 #[derive(Clone)]
-pub struct MaximumDataBurstVolume(pub u16);
+pub struct MaximumDataBurstVolume(pub i128);
+
+impl AperCodec for MaximumDataBurstVolume {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4095), true)?.0,
+        ))
+    }
+}
 
 // MessageIdentifier
 #[derive(Clone)]
 pub struct MessageIdentifier(pub BitString);
 
+impl AperCodec for MessageIdentifier {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            false,
+        )?))
+    }
+}
+
 // MaximumIntegrityProtectedDataRate
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
 }
 
+impl AperCodec for MaximumIntegrityProtectedDataRate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // MicoModeIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum MicoModeIndication {
     True,
+}
+
+impl AperCodec for MicoModeIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // MobilityInformation
 #[derive(Clone)]
 pub struct MobilityInformation(pub BitString);
+
+impl AperCodec for MobilityInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            false,
+        )?))
+    }
+}
 
 // MobilityRestrictionList
 #[derive(Clone)]
@@ -1867,15 +6409,87 @@ pub struct MobilityRestrictionList {
     pub service_area_information: Option<ServiceAreaInformation>,
 }
 
+impl AperCodec for MobilityRestrictionList {
+    type Output = MobilityRestrictionList;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
+        let serving_plmn = PlmnIdentity::decode(data)?;
+        let equivalent_plmn_s = if optionals[0] {
+            Some(EquivalentPlmnS::decode(data)?)
+        } else {
+            None
+        };
+        let rat_restrictions = if optionals[1] {
+            Some(RatRestrictions::decode(data)?)
+        } else {
+            None
+        };
+        let forbidden_area_information = if optionals[2] {
+            Some(ForbiddenAreaInformation::decode(data)?)
+        } else {
+            None
+        };
+        let service_area_information = if optionals[3] {
+            Some(ServiceAreaInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            serving_plmn,
+            equivalent_plmn_s,
+            rat_restrictions,
+            forbidden_area_information,
+            service_area_information,
+        })
+    }
+}
+
 // MdtPlmnList
 #[derive(Clone)]
 pub struct MdtPlmnList(pub Vec<PlmnIdentity>);
+
+impl AperCodec for MdtPlmnList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PlmnIdentity::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // MdtConfiguration
 #[derive(Clone)]
 pub struct MdtConfiguration {
     pub mdt_config_nr: Option<MdtConfigurationNr>,
     pub mdt_config_eutra: Option<MdtConfigurationEutra>,
+}
+
+impl AperCodec for MdtConfiguration {
+    type Output = MdtConfiguration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let mdt_config_nr = if optionals[0] {
+            Some(MdtConfigurationNr::decode(data)?)
+        } else {
+            None
+        };
+        let mdt_config_eutra = if optionals[1] {
+            Some(MdtConfigurationEutra::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            mdt_config_nr,
+            mdt_config_eutra,
+        })
+    }
 }
 
 // MdtConfigurationNr
@@ -1887,6 +6501,28 @@ pub struct MdtConfigurationNr {
     pub signalling_based_mdt_plmn_list: Option<MdtPlmnList>,
 }
 
+impl AperCodec for MdtConfigurationNr {
+    type Output = MdtConfigurationNr;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let mdt_activation = MdtActivation::decode(data)?;
+        let area_scope_of_mdt = AreaScopeOfMdtNr::decode(data)?;
+        let mdt_mode_nr = MdtModeNr::decode(data)?;
+        let signalling_based_mdt_plmn_list = if optionals[0] {
+            Some(MdtPlmnList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            mdt_activation,
+            area_scope_of_mdt,
+            mdt_mode_nr,
+            signalling_based_mdt_plmn_list,
+        })
+    }
+}
+
 // MdtConfigurationEutra
 #[derive(Clone)]
 pub struct MdtConfigurationEutra {
@@ -1896,12 +6532,46 @@ pub struct MdtConfigurationEutra {
     pub signalling_based_mdt_plmn_list: Option<MdtPlmnList>,
 }
 
+impl AperCodec for MdtConfigurationEutra {
+    type Output = MdtConfigurationEutra;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let mdt_activation = MdtActivation::decode(data)?;
+        let area_scope_of_mdt = AreaScopeOfMdtEutra::decode(data)?;
+        let mdt_mode = MdtModeEutra::decode(data)?;
+        let signalling_based_mdt_plmn_list = if optionals[0] {
+            Some(MdtPlmnList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            mdt_activation,
+            area_scope_of_mdt,
+            mdt_mode,
+            signalling_based_mdt_plmn_list,
+        })
+    }
+}
+
 // MdtActivation
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum MdtActivation {
     ImmediateMdtOnly,
     LoggedMdtOnly,
     ImmediateMdtAndTrace,
+}
+
+impl AperCodec for MdtActivation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // MdtModeNr
@@ -1911,13 +6581,54 @@ pub enum MdtModeNr {
     LoggedMdtNr(LoggedMdtNr),
 }
 
+impl AperCodec for MdtModeNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::ImmediateMdtNr(ImmediateMdtNr::decode(data)?)),
+            1 => Ok(Self::LoggedMdtNr(LoggedMdtNr::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // MdtModeEutra
 #[derive(Clone)]
 pub struct MdtModeEutra(pub Vec<u8>);
 
+impl AperCodec for MdtModeEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // MeasurementsToActivate
 #[derive(Clone)]
 pub struct MeasurementsToActivate(pub BitString);
+
+impl AperCodec for MeasurementsToActivate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
 
 // M1Configuration
 #[derive(Clone)]
@@ -1927,18 +6638,65 @@ pub struct M1Configuration {
     pub m1periodic_reporting: Option<M1PeriodicReporting>,
 }
 
+impl AperCodec for M1Configuration {
+    type Output = M1Configuration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let m1reporting_trigger = M1ReportingTrigger::decode(data)?;
+        let m1threshold_event_a2 = if optionals[0] {
+            Some(M1ThresholdEventA2::decode(data)?)
+        } else {
+            None
+        };
+        let m1periodic_reporting = if optionals[1] {
+            Some(M1PeriodicReporting::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            m1reporting_trigger,
+            m1threshold_event_a2,
+            m1periodic_reporting,
+        })
+    }
+}
+
 // M1ReportingTrigger
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum M1ReportingTrigger {
     Periodic,
     A2eventtriggered,
     A2eventtriggeredPeriodic,
 }
 
+impl AperCodec for M1ReportingTrigger {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // M1ThresholdEventA2
 #[derive(Clone)]
 pub struct M1ThresholdEventA2 {
     pub m1_threshold_type: M1ThresholdType,
+}
+
+impl AperCodec for M1ThresholdEventA2 {
+    type Output = M1ThresholdEventA2;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let m1_threshold_type = M1ThresholdType::decode(data)?;
+
+        Ok(Self { m1_threshold_type })
+    }
 }
 
 // M1ThresholdType
@@ -1949,11 +6707,47 @@ pub enum M1ThresholdType {
     ThresholdSinr(ThresholdSinr),
 }
 
+impl AperCodec for M1ThresholdType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::ThresholdRsrp(ThresholdRsrp::decode(data)?)),
+            1 => Ok(Self::ThresholdRsrq(ThresholdRsrq::decode(data)?)),
+            2 => Ok(Self::ThresholdSinr(ThresholdSinr::decode(data)?)),
+            3 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // M1PeriodicReporting
 #[derive(Clone)]
 pub struct M1PeriodicReporting {
     pub report_interval: ReportIntervalMdt,
     pub report_amount: ReportAmountMdt,
+}
+
+impl AperCodec for M1PeriodicReporting {
+    type Output = M1PeriodicReporting;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let report_interval = ReportIntervalMdt::decode(data)?;
+        let report_amount = ReportAmountMdt::decode(data)?;
+
+        Ok(Self {
+            report_interval,
+            report_amount,
+        })
+    }
 }
 
 // M4Configuration
@@ -1963,14 +6757,41 @@ pub struct M4Configuration {
     pub m4_links_to_log: LinksToLog,
 }
 
+impl AperCodec for M4Configuration {
+    type Output = M4Configuration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let m4period = M4period::decode(data)?;
+        let m4_links_to_log = LinksToLog::decode(data)?;
+
+        Ok(Self {
+            m4period,
+            m4_links_to_log,
+        })
+    }
+}
+
 // M4period
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum M4period {
     Ms1024,
     Ms2048,
     Ms5120,
     Ms10240,
     Min1,
+}
+
+impl AperCodec for M4period {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(4), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // M5Configuration
@@ -1980,14 +6801,41 @@ pub struct M5Configuration {
     pub m5_links_to_log: LinksToLog,
 }
 
+impl AperCodec for M5Configuration {
+    type Output = M5Configuration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let m5period = M5period::decode(data)?;
+        let m5_links_to_log = LinksToLog::decode(data)?;
+
+        Ok(Self {
+            m5period,
+            m5_links_to_log,
+        })
+    }
+}
+
 // M5period
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum M5period {
     Ms1024,
     Ms2048,
     Ms5120,
     Ms10240,
     Min1,
+}
+
+impl AperCodec for M5period {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(4), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // M6Configuration
@@ -1997,8 +6845,24 @@ pub struct M6Configuration {
     pub m6_links_to_log: LinksToLog,
 }
 
+impl AperCodec for M6Configuration {
+    type Output = M6Configuration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let m6report_interval = M6reportInterval::decode(data)?;
+        let m6_links_to_log = LinksToLog::decode(data)?;
+
+        Ok(Self {
+            m6report_interval,
+            m6_links_to_log,
+        })
+    }
+}
+
 // M6reportInterval
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum M6reportInterval {
     Ms120,
     Ms240,
@@ -2016,6 +6880,17 @@ pub enum M6reportInterval {
     Min30,
 }
 
+impl AperCodec for M6reportInterval {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(13), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // M7Configuration
 #[derive(Clone)]
 pub struct M7Configuration {
@@ -2023,9 +6898,33 @@ pub struct M7Configuration {
     pub m7_links_to_log: LinksToLog,
 }
 
+impl AperCodec for M7Configuration {
+    type Output = M7Configuration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let m7period = M7period::decode(data)?;
+        let m7_links_to_log = LinksToLog::decode(data)?;
+
+        Ok(Self {
+            m7period,
+            m7_links_to_log,
+        })
+    }
+}
+
 // M7period
 #[derive(Clone)]
 pub struct M7period(pub u8);
+
+impl AperCodec for M7period {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(60), true)?.0 as u8,
+        ))
+    }
+}
 
 // MdtLocationInfo
 #[derive(Clone)]
@@ -2033,9 +6932,34 @@ pub struct MdtLocationInfo {
     pub mdt_location_information: MdtLocationInformation,
 }
 
+impl AperCodec for MdtLocationInfo {
+    type Output = MdtLocationInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let mdt_location_information = MdtLocationInformation::decode(data)?;
+
+        Ok(Self {
+            mdt_location_information,
+        })
+    }
+}
+
 // MdtLocationInformation
 #[derive(Clone)]
 pub struct MdtLocationInformation(pub BitString);
+
+impl AperCodec for MdtLocationInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
 
 // N3IwfId
 #[derive(Clone)]
@@ -2043,16 +6967,59 @@ pub enum N3IwfId {
     N3IwfId(BitString),
 }
 
+impl AperCodec for N3IwfId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::N3IwfId(aper::decode::decode_bitstring(
+                data,
+                Some(16),
+                Some(16),
+                false,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // NasPdu
 #[derive(Clone)]
 pub struct NasPdu(pub Vec<u8>);
+
+impl AperCodec for NasPdu {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // NasSecurityParametersFromNgran
 #[derive(Clone)]
 pub struct NasSecurityParametersFromNgran(pub Vec<u8>);
 
+impl AperCodec for NasSecurityParametersFromNgran {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // NbIotDefaultPagingDrx
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NbIotDefaultPagingDrx {
     Rf128,
     Rf256,
@@ -2060,8 +7027,20 @@ pub enum NbIotDefaultPagingDrx {
     Rf1024,
 }
 
+impl AperCodec for NbIotDefaultPagingDrx {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // NbIotPagingDrx
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NbIotPagingDrx {
     Rf32,
     Rf64,
@@ -2071,8 +7050,20 @@ pub enum NbIotPagingDrx {
     Rf1024,
 }
 
+impl AperCodec for NbIotPagingDrx {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(5), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // NbIotPagingEDrxCycle
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NbIotPagingEDrxCycle {
     Hf2,
     Hf4,
@@ -2090,8 +7081,20 @@ pub enum NbIotPagingEDrxCycle {
     Hf1024,
 }
 
+impl AperCodec for NbIotPagingEDrxCycle {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(13), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // NbIotPagingTimeWindow
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NbIotPagingTimeWindow {
     S1,
     S2,
@@ -2111,6 +7114,17 @@ pub enum NbIotPagingTimeWindow {
     S16,
 }
 
+impl AperCodec for NbIotPagingTimeWindow {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(15), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // NbIotPagingEDrxInfo
 #[derive(Clone)]
 pub struct NbIotPagingEDrxInfo {
@@ -2118,29 +7132,98 @@ pub struct NbIotPagingEDrxInfo {
     pub nb_iot_paging_time_window: Option<NbIotPagingTimeWindow>,
 }
 
+impl AperCodec for NbIotPagingEDrxInfo {
+    type Output = NbIotPagingEDrxInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let nb_iot_paging_e_drx_cycle = NbIotPagingEDrxCycle::decode(data)?;
+        let nb_iot_paging_time_window = if optionals[0] {
+            Some(NbIotPagingTimeWindow::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            nb_iot_paging_e_drx_cycle,
+            nb_iot_paging_time_window,
+        })
+    }
+}
+
 // NbIotUePriority
 #[derive(Clone)]
 pub struct NbIotUePriority(pub u8);
+
+impl AperCodec for NbIotUePriority {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), true)?.0 as u8,
+        ))
+    }
+}
 
 // NetworkInstance
 #[derive(Clone)]
 pub struct NetworkInstance(pub u8);
 
+impl AperCodec for NetworkInstance {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(256), true)?.0 as u8,
+        ))
+    }
+}
+
 // NewSecurityContextInd
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NewSecurityContextInd {
     True,
+}
+
+impl AperCodec for NewSecurityContextInd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // NextHopChainingCount
 #[derive(Clone)]
 pub struct NextHopChainingCount(pub u8);
 
+impl AperCodec for NextHopChainingCount {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(7), false)?.0 as u8,
+        ))
+    }
+}
+
 // NextPagingAreaScope
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NextPagingAreaScope {
     Same,
     Changed,
+}
+
+impl AperCodec for NextPagingAreaScope {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // NgEnbId
@@ -2151,10 +7234,58 @@ pub enum NgEnbId {
     LongMacroNgEnbId(BitString),
 }
 
+impl AperCodec for NgEnbId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::MacroNgEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(20),
+                Some(20),
+                false,
+            )?)),
+            1 => Ok(Self::ShortMacroNgEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(18),
+                Some(18),
+                false,
+            )?)),
+            2 => Ok(Self::LongMacroNgEnbId(aper::decode::decode_bitstring(
+                data,
+                Some(21),
+                Some(21),
+                false,
+            )?)),
+            3 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // NotifySourceNgranNode
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NotifySourceNgranNode {
     NotifySource,
+}
+
+impl AperCodec for NotifySourceNgranNode {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // NgranCgi
@@ -2164,9 +7295,43 @@ pub enum NgranCgi {
     EutraCgi(EutraCgi),
 }
 
+impl AperCodec for NgranCgi {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::NrCgi(NrCgi::decode(data)?)),
+            1 => Ok(Self::EutraCgi(EutraCgi::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // NgranTnlAssociationToRemoveList
 #[derive(Clone)]
 pub struct NgranTnlAssociationToRemoveList(pub Vec<NgranTnlAssociationToRemoveItem>);
+
+impl AperCodec for NgranTnlAssociationToRemoveList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(NgranTnlAssociationToRemoveItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // NgranTnlAssociationToRemoveItem
 #[derive(Clone)]
@@ -2175,13 +7340,56 @@ pub struct NgranTnlAssociationToRemoveItem {
     pub tnl_association_transport_layer_address_amf: Option<CpTransportLayerInformation>,
 }
 
+impl AperCodec for NgranTnlAssociationToRemoveItem {
+    type Output = NgranTnlAssociationToRemoveItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, false, 2)?;
+        let tnl_association_transport_layer_address = CpTransportLayerInformation::decode(data)?;
+        let tnl_association_transport_layer_address_amf = if optionals[0] {
+            Some(CpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            tnl_association_transport_layer_address,
+            tnl_association_transport_layer_address_amf,
+        })
+    }
+}
+
 // NgranTraceId
 #[derive(Clone)]
 pub struct NgranTraceId(pub Vec<u8>);
 
+impl AperCodec for NgranTraceId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
+
 // Nid
 #[derive(Clone)]
 pub struct Nid(pub BitString);
+
+impl AperCodec for Nid {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(44),
+            Some(44),
+            false,
+        )?))
+    }
+}
 
 // NonDynamic5qiDescriptor
 #[derive(Clone)]
@@ -2192,27 +7400,114 @@ pub struct NonDynamic5qiDescriptor {
     pub maximum_data_burst_volume: Option<MaximumDataBurstVolume>,
 }
 
+impl AperCodec for NonDynamic5qiDescriptor {
+    type Output = NonDynamic5qiDescriptor;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let five_qi = FiveQi::decode(data)?;
+        let priority_level_qos = if optionals[0] {
+            Some(PriorityLevelQos::decode(data)?)
+        } else {
+            None
+        };
+        let averaging_window = if optionals[1] {
+            Some(AveragingWindow::decode(data)?)
+        } else {
+            None
+        };
+        let maximum_data_burst_volume = if optionals[2] {
+            Some(MaximumDataBurstVolume::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            five_qi,
+            priority_level_qos,
+            averaging_window,
+            maximum_data_burst_volume,
+        })
+    }
+}
+
 // NotAllowedTaCs
 #[derive(Clone)]
 pub struct NotAllowedTaCs(pub Vec<Tac>);
 
+impl AperCodec for NotAllowedTaCs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tac::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // NotificationCause
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NotificationCause {
     Fulfilled,
     NotFulfilled,
 }
 
+impl AperCodec for NotificationCause {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // NotificationControl
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum NotificationControl {
     NotificationRequested,
+}
+
+impl AperCodec for NotificationControl {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // NpnAccessInformation
 #[derive(Clone)]
 pub enum NpnAccessInformation {
     PniNpnAccessInformation(CellCagList),
+}
+
+impl AperCodec for NpnAccessInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::PniNpnAccessInformation(CellCagList::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // NpnMobilityInformation
@@ -2222,10 +7517,55 @@ pub enum NpnMobilityInformation {
     PniNpnMobilityInformation(PniNpnMobilityInformation),
 }
 
+impl AperCodec for NpnMobilityInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::SnpnMobilityInformation(
+                SnpnMobilityInformation::decode(data)?,
+            )),
+            1 => Ok(Self::PniNpnMobilityInformation(
+                PniNpnMobilityInformation::decode(data)?,
+            )),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // NpnPagingAssistanceInformation
 #[derive(Clone)]
 pub enum NpnPagingAssistanceInformation {
     PniNpnPagingAssistance(AllowedPniNpnList),
+}
+
+impl AperCodec for NpnPagingAssistanceInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::PniNpnPagingAssistance(AllowedPniNpnList::decode(
+                data,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // NpnSupport
@@ -2234,9 +7574,40 @@ pub enum NpnSupport {
     Snpn(Nid),
 }
 
+impl AperCodec for NpnSupport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::Snpn(Nid::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // NrCellIdentity
 #[derive(Clone)]
 pub struct NrCellIdentity(pub BitString);
+
+impl AperCodec for NrCellIdentity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(36),
+            Some(36),
+            false,
+        )?))
+    }
+}
 
 // NrCgi
 #[derive(Clone)]
@@ -2245,58 +7616,215 @@ pub struct NrCgi {
     pub nr_cell_identity: NrCellIdentity,
 }
 
+impl AperCodec for NrCgi {
+    type Output = NrCgi;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let nr_cell_identity = NrCellIdentity::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            nr_cell_identity,
+        })
+    }
+}
+
 // NrCgiList
 #[derive(Clone)]
 pub struct NrCgiList(pub Vec<NrCgi>);
+
+impl AperCodec for NrCgiList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(16384), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(NrCgi::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // NrCgiListForWarning
 #[derive(Clone)]
 pub struct NrCgiListForWarning(pub Vec<NrCgi>);
 
+impl AperCodec for NrCgiListForWarning {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(NrCgi::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // NRencryptionAlgorithms
 #[derive(Clone)]
 pub struct NRencryptionAlgorithms(pub BitString);
+
+impl AperCodec for NRencryptionAlgorithms {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            true,
+        )?))
+    }
+}
 
 // NRintegrityProtectionAlgorithms
 #[derive(Clone)]
 pub struct NRintegrityProtectionAlgorithms(pub BitString);
 
+impl AperCodec for NRintegrityProtectionAlgorithms {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            true,
+        )?))
+    }
+}
+
 // NrMobilityHistoryReport
 #[derive(Clone)]
 pub struct NrMobilityHistoryReport(pub Vec<u8>);
+
+impl AperCodec for NrMobilityHistoryReport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // NrpPaPdu
 #[derive(Clone)]
 pub struct NrpPaPdu(pub Vec<u8>);
 
+impl AperCodec for NrpPaPdu {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // NrueRlfReportContainer
 #[derive(Clone)]
 pub struct NrueRlfReportContainer(pub Vec<u8>);
+
+impl AperCodec for NrueRlfReportContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // NumberOfBroadcasts
 #[derive(Clone)]
 pub struct NumberOfBroadcasts(pub u16);
 
+impl AperCodec for NumberOfBroadcasts {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+        ))
+    }
+}
+
 // NumberOfBroadcastsRequested
 #[derive(Clone)]
 pub struct NumberOfBroadcastsRequested(pub u16);
+
+impl AperCodec for NumberOfBroadcastsRequested {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+        ))
+    }
+}
 
 // Nrarfcn
 #[derive(Clone)]
 pub struct Nrarfcn(pub u32);
 
+impl AperCodec for Nrarfcn {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32,
+        ))
+    }
+}
+
 // NrFrequencyBand
 #[derive(Clone)]
 pub struct NrFrequencyBand(pub u16);
+
+impl AperCodec for NrFrequencyBand {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(1024), true)?.0 as u16,
+        ))
+    }
+}
 
 // NrFrequencyBandList
 #[derive(Clone)]
 pub struct NrFrequencyBandList(pub Vec<NrFrequencyBandItem>);
 
+impl AperCodec for NrFrequencyBandList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(NrFrequencyBandItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // NrFrequencyBandItem
 #[derive(Clone)]
 pub struct NrFrequencyBandItem {
     pub nr_frequency_band: NrFrequencyBand,
+}
+
+impl AperCodec for NrFrequencyBandItem {
+    type Output = NrFrequencyBandItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_frequency_band = NrFrequencyBand::decode(data)?;
+
+        Ok(Self { nr_frequency_band })
+    }
 }
 
 // NrFrequencyInfo
@@ -2306,9 +7834,33 @@ pub struct NrFrequencyInfo {
     pub frequency_band_list: NrFrequencyBandList,
 }
 
+impl AperCodec for NrFrequencyInfo {
+    type Output = NrFrequencyInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let nr_arfcn = Nrarfcn::decode(data)?;
+        let frequency_band_list = NrFrequencyBandList::decode(data)?;
+
+        Ok(Self {
+            nr_arfcn,
+            frequency_band_list,
+        })
+    }
+}
+
 // NrPci
 #[derive(Clone)]
 pub struct NrPci(pub u16);
+
+impl AperCodec for NrPci {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(1007), true)?.0 as u16,
+        ))
+    }
+}
 
 // Nrv2xServicesAuthorized
 #[derive(Clone)]
@@ -2317,18 +7869,64 @@ pub struct Nrv2xServicesAuthorized {
     pub pedestrian_ue: Option<PedestrianUe>,
 }
 
+impl AperCodec for Nrv2xServicesAuthorized {
+    type Output = Nrv2xServicesAuthorized;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let vehicle_ue = if optionals[0] {
+            Some(VehicleUe::decode(data)?)
+        } else {
+            None
+        };
+        let pedestrian_ue = if optionals[1] {
+            Some(PedestrianUe::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            vehicle_ue,
+            pedestrian_ue,
+        })
+    }
+}
+
 // VehicleUe
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum VehicleUe {
     Authorized,
     NotAuthorized,
 }
 
+impl AperCodec for VehicleUe {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PedestrianUe
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PedestrianUe {
     Authorized,
     NotAuthorized,
+}
+
+impl AperCodec for PedestrianUe {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // NrueSidelinkAggregateMaximumBitrate
@@ -2337,13 +7935,38 @@ pub struct NrueSidelinkAggregateMaximumBitrate {
     pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
 }
 
+impl AperCodec for NrueSidelinkAggregateMaximumBitrate {
+    type Output = NrueSidelinkAggregateMaximumBitrate;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ue_sidelink_aggregate_maximum_bit_rate = BitRate::decode(data)?;
+
+        Ok(Self {
+            ue_sidelink_aggregate_maximum_bit_rate,
+        })
+    }
+}
+
 // OverloadAction
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum OverloadAction {
     RejectNonEmergencyMoDt,
     RejectRrcCrSignalling,
     PermitEmergencySessionsAndMobileTerminatedServicesOnly,
     PermitHighPrioritySessionsAndMobileTerminatedServicesOnly,
+}
+
+impl AperCodec for OverloadAction {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // OverloadResponse
@@ -2352,9 +7975,42 @@ pub enum OverloadResponse {
     OverloadAction(OverloadAction),
 }
 
+impl AperCodec for OverloadResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::OverloadAction(OverloadAction::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // OverloadStartNssaiList
 #[derive(Clone)]
 pub struct OverloadStartNssaiList(pub Vec<OverloadStartNssaiItem>);
+
+impl AperCodec for OverloadStartNssaiList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(OverloadStartNssaiItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // OverloadStartNssaiItem
 #[derive(Clone)]
@@ -2364,9 +8020,42 @@ pub struct OverloadStartNssaiItem {
     pub slice_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication>,
 }
 
+impl AperCodec for OverloadStartNssaiItem {
+    type Output = OverloadStartNssaiItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let slice_overload_list = SliceOverloadList::decode(data)?;
+        let slice_overload_response = if optionals[0] {
+            Some(OverloadResponse::decode(data)?)
+        } else {
+            None
+        };
+        let slice_traffic_load_reduction_indication = if optionals[1] {
+            Some(TrafficLoadReductionIndication::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            slice_overload_list,
+            slice_overload_response,
+            slice_traffic_load_reduction_indication,
+        })
+    }
+}
+
 // PacketDelayBudget
 #[derive(Clone)]
 pub struct PacketDelayBudget(pub u16);
+
+impl AperCodec for PacketDelayBudget {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(1023), true)?.0 as u16,
+        ))
+    }
+}
 
 // PacketErrorRate
 #[derive(Clone)]
@@ -2375,15 +8064,54 @@ pub struct PacketErrorRate {
     pub per_exponent: u8,
 }
 
+impl AperCodec for PacketErrorRate {
+    type Output = PacketErrorRate;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let per_scalar = aper::decode::decode_integer(data, Some(0), Some(9), true)?.0 as u8;
+        let per_exponent = aper::decode::decode_integer(data, Some(0), Some(9), true)?.0 as u8;
+
+        Ok(Self {
+            per_scalar,
+            per_exponent,
+        })
+    }
+}
+
 // PacketLossRate
 #[derive(Clone)]
 pub struct PacketLossRate(pub u16);
+
+impl AperCodec for PacketLossRate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(1000), true)?.0 as u16,
+        ))
+    }
+}
 
 // PagingAssisDataforCEcapabUe
 #[derive(Clone)]
 pub struct PagingAssisDataforCEcapabUe {
     pub eutra_cgi: EutraCgi,
     pub coverage_enhancement_level: CoverageEnhancementLevel,
+}
+
+impl AperCodec for PagingAssisDataforCEcapabUe {
+    type Output = PagingAssisDataforCEcapabUe;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+        let coverage_enhancement_level = CoverageEnhancementLevel::decode(data)?;
+
+        Ok(Self {
+            eutra_cgi,
+            coverage_enhancement_level,
+        })
+    }
 }
 
 // PagingAttemptInformation
@@ -2394,12 +8122,42 @@ pub struct PagingAttemptInformation {
     pub next_paging_area_scope: Option<NextPagingAreaScope>,
 }
 
+impl AperCodec for PagingAttemptInformation {
+    type Output = PagingAttemptInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let paging_attempt_count = PagingAttemptCount::decode(data)?;
+        let intended_number_of_paging_attempts = IntendedNumberOfPagingAttempts::decode(data)?;
+        let next_paging_area_scope = if optionals[0] {
+            Some(NextPagingAreaScope::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            paging_attempt_count,
+            intended_number_of_paging_attempts,
+            next_paging_area_scope,
+        })
+    }
+}
+
 // PagingAttemptCount
 #[derive(Clone)]
 pub struct PagingAttemptCount(pub u8);
 
+impl AperCodec for PagingAttemptCount {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(16), true)?.0 as u8,
+        ))
+    }
+}
+
 // PagingDrx
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PagingDrx {
     V32,
     V64,
@@ -2407,14 +8165,38 @@ pub enum PagingDrx {
     V256,
 }
 
+impl AperCodec for PagingDrx {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PagingOrigin
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PagingOrigin {
     Non3gpp,
 }
 
+impl AperCodec for PagingOrigin {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PagingPriority
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PagingPriority {
     Priolevel1,
     Priolevel2,
@@ -2426,6 +8208,17 @@ pub enum PagingPriority {
     Priolevel8,
 }
 
+impl AperCodec for PagingPriority {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(7), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PagingeDrxInformation
 #[derive(Clone)]
 pub struct PagingeDrxInformation {
@@ -2433,8 +8226,27 @@ pub struct PagingeDrxInformation {
     pub paging_time_window: Option<PagingTimeWindow>,
 }
 
+impl AperCodec for PagingeDrxInformation {
+    type Output = PagingeDrxInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let paging_e_drx_cycle = PagingEDrxCycle::decode(data)?;
+        let paging_time_window = if optionals[0] {
+            Some(PagingTimeWindow::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            paging_e_drx_cycle,
+            paging_time_window,
+        })
+    }
+}
+
 // PagingEDrxCycle
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PagingEDrxCycle {
     Hfhalf,
     Hf1,
@@ -2452,8 +8264,20 @@ pub enum PagingEDrxCycle {
     Hf256,
 }
 
+impl AperCodec for PagingEDrxCycle {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(13), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PagingTimeWindow
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PagingTimeWindow {
     S1,
     S2,
@@ -2473,8 +8297,20 @@ pub enum PagingTimeWindow {
     S16,
 }
 
+impl AperCodec for PagingTimeWindow {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(15), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PagingProbabilityInformation
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PagingProbabilityInformation {
     P00,
     P05,
@@ -2499,6 +8335,17 @@ pub enum PagingProbabilityInformation {
     P100,
 }
 
+impl AperCodec for PagingProbabilityInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(20), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PathSwitchRequestAcknowledgeTransfer
 #[derive(Clone)]
 pub struct PathSwitchRequestAcknowledgeTransfer {
@@ -2506,10 +8353,43 @@ pub struct PathSwitchRequestAcknowledgeTransfer {
     pub security_indication: Option<SecurityIndication>,
 }
 
+impl AperCodec for PathSwitchRequestAcknowledgeTransfer {
+    type Output = PathSwitchRequestAcknowledgeTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let ul_ngu_up_tnl_information = if optionals[0] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+        let security_indication = if optionals[1] {
+            Some(SecurityIndication::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ul_ngu_up_tnl_information,
+            security_indication,
+        })
+    }
+}
+
 // PathSwitchRequestSetupFailedTransfer
 #[derive(Clone)]
 pub struct PathSwitchRequestSetupFailedTransfer {
     pub cause: Cause,
+}
+
+impl AperCodec for PathSwitchRequestSetupFailedTransfer {
+    type Output = PathSwitchRequestSetupFailedTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self { cause })
+    }
 }
 
 // PathSwitchRequestTransfer
@@ -2521,10 +8401,47 @@ pub struct PathSwitchRequestTransfer {
     pub qos_flow_accepted_list: QosFlowAcceptedList,
 }
 
+impl AperCodec for PathSwitchRequestTransfer {
+    type Output = PathSwitchRequestTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let dl_ngu_tnl_information_reused = if optionals[0] {
+            Some(DlNguTnlInformationReused::decode(data)?)
+        } else {
+            None
+        };
+        let user_plane_security_information = if optionals[1] {
+            Some(UserPlaneSecurityInformation::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_accepted_list = QosFlowAcceptedList::decode(data)?;
+
+        Ok(Self {
+            dl_ngu_up_tnl_information,
+            dl_ngu_tnl_information_reused,
+            user_plane_security_information,
+            qos_flow_accepted_list,
+        })
+    }
+}
+
 // PathSwitchRequestUnsuccessfulTransfer
 #[derive(Clone)]
 pub struct PathSwitchRequestUnsuccessfulTransfer {
     pub cause: Cause,
+}
+
+impl AperCodec for PathSwitchRequestUnsuccessfulTransfer {
+    type Output = PathSwitchRequestUnsuccessfulTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self { cause })
+    }
 }
 
 // Pc5QosParameters
@@ -2534,9 +8451,41 @@ pub struct Pc5QosParameters {
     pub pc_5_link_aggregate_bit_rates: Option<BitRate>,
 }
 
+impl AperCodec for Pc5QosParameters {
+    type Output = Pc5QosParameters;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let pc_5_qos_flow_list = Pc5QosFlowList::decode(data)?;
+        let pc_5_link_aggregate_bit_rates = if optionals[0] {
+            Some(BitRate::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pc_5_qos_flow_list,
+            pc_5_link_aggregate_bit_rates,
+        })
+    }
+}
+
 // Pc5QosFlowList
 #[derive(Clone)]
 pub struct Pc5QosFlowList(pub Vec<Pc5QosFlowItem>);
+
+impl AperCodec for Pc5QosFlowList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2048), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Pc5QosFlowItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // Pc5QosFlowItem
 #[derive(Clone)]
@@ -2546,6 +8495,30 @@ pub struct Pc5QosFlowItem {
     pub range: Option<Range>,
 }
 
+impl AperCodec for Pc5QosFlowItem {
+    type Output = Pc5QosFlowItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let pqi = FiveQi::decode(data)?;
+        let pc_5_flow_bit_rates = if optionals[0] {
+            Some(Pc5FlowBitRates::decode(data)?)
+        } else {
+            None
+        };
+        let range = if optionals[1] {
+            Some(Range::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pqi,
+            pc_5_flow_bit_rates,
+            range,
+        })
+    }
+}
+
 // Pc5FlowBitRates
 #[derive(Clone)]
 pub struct Pc5FlowBitRates {
@@ -2553,15 +8526,56 @@ pub struct Pc5FlowBitRates {
     pub maximum_flow_bit_rate: BitRate,
 }
 
+impl AperCodec for Pc5FlowBitRates {
+    type Output = Pc5FlowBitRates;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let guaranteed_flow_bit_rate = BitRate::decode(data)?;
+        let maximum_flow_bit_rate = BitRate::decode(data)?;
+
+        Ok(Self {
+            guaranteed_flow_bit_rate,
+            maximum_flow_bit_rate,
+        })
+    }
+}
+
 // PciListForMdt
 #[derive(Clone)]
 pub struct PciListForMdt(pub Vec<NrPci>);
 
+impl AperCodec for PciListForMdt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(NrPci::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // PrivacyIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PrivacyIndicator {
     ImmediateMdt,
     LoggedMdt,
+}
+
+impl AperCodec for PrivacyIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // PduSessionAggregateMaximumBitRate
@@ -2571,13 +8585,51 @@ pub struct PduSessionAggregateMaximumBitRate {
     pub pdu_session_aggregate_maximum_bit_rate_ul: BitRate,
 }
 
+impl AperCodec for PduSessionAggregateMaximumBitRate {
+    type Output = PduSessionAggregateMaximumBitRate;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_aggregate_maximum_bit_rate_dl = BitRate::decode(data)?;
+        let pdu_session_aggregate_maximum_bit_rate_ul = BitRate::decode(data)?;
+
+        Ok(Self {
+            pdu_session_aggregate_maximum_bit_rate_dl,
+            pdu_session_aggregate_maximum_bit_rate_ul,
+        })
+    }
+}
+
 // PduSessionId
 #[derive(Clone)]
 pub struct PduSessionId(pub u8);
 
+impl AperCodec for PduSessionId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8,
+        ))
+    }
+}
+
 // PduSessionResourceAdmittedList
 #[derive(Clone)]
 pub struct PduSessionResourceAdmittedList(pub Vec<PduSessionResourceAdmittedItem>);
+
+impl AperCodec for PduSessionResourceAdmittedList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceAdmittedItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceAdmittedItem
 #[derive(Clone)]
@@ -2586,11 +8638,41 @@ pub struct PduSessionResourceAdmittedItem {
     pub handover_request_acknowledge_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceAdmittedItem {
+    type Output = PduSessionResourceAdmittedItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let handover_request_acknowledge_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_request_acknowledge_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToModifyListModCfm
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToModifyListModCfm(
     pub Vec<PduSessionResourceFailedToModifyItemModCfm>,
 );
+
+impl AperCodec for PduSessionResourceFailedToModifyListModCfm {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToModifyItemModCfm::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToModifyItemModCfm
 #[derive(Clone)]
@@ -2599,11 +8681,41 @@ pub struct PduSessionResourceFailedToModifyItemModCfm {
     pub pdu_session_resource_modify_indication_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToModifyItemModCfm {
+    type Output = PduSessionResourceFailedToModifyItemModCfm;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_modify_indication_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_indication_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToModifyListModRes
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToModifyListModRes(
     pub Vec<PduSessionResourceFailedToModifyItemModRes>,
 );
+
+impl AperCodec for PduSessionResourceFailedToModifyListModRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToModifyItemModRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToModifyItemModRes
 #[derive(Clone)]
@@ -2612,11 +8724,41 @@ pub struct PduSessionResourceFailedToModifyItemModRes {
     pub pdu_session_resource_modify_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToModifyItemModRes {
+    type Output = PduSessionResourceFailedToModifyItemModRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_modify_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToResumeListResReq
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToResumeListResReq(
     pub Vec<PduSessionResourceFailedToResumeItemResReq>,
 );
+
+impl AperCodec for PduSessionResourceFailedToResumeListResReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToResumeItemResReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToResumeItemResReq
 #[derive(Clone)]
@@ -2625,11 +8767,40 @@ pub struct PduSessionResourceFailedToResumeItemResReq {
     pub cause: Cause,
 }
 
+impl AperCodec for PduSessionResourceFailedToResumeItemResReq {
+    type Output = PduSessionResourceFailedToResumeItemResReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self {
+            pdu_session_id,
+            cause,
+        })
+    }
+}
+
 // PduSessionResourceFailedToResumeListResRes
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToResumeListResRes(
     pub Vec<PduSessionResourceFailedToResumeItemResRes>,
 );
+
+impl AperCodec for PduSessionResourceFailedToResumeListResRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToResumeItemResRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToResumeItemResRes
 #[derive(Clone)]
@@ -2638,11 +8809,40 @@ pub struct PduSessionResourceFailedToResumeItemResRes {
     pub cause: Cause,
 }
 
+impl AperCodec for PduSessionResourceFailedToResumeItemResRes {
+    type Output = PduSessionResourceFailedToResumeItemResRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self {
+            pdu_session_id,
+            cause,
+        })
+    }
+}
+
 // PduSessionResourceFailedToSetupListCxtFail
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListCxtFail(
     pub Vec<PduSessionResourceFailedToSetupItemCxtFail>,
 );
+
+impl AperCodec for PduSessionResourceFailedToSetupListCxtFail {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToSetupItemCxtFail::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToSetupItemCxtFail
 #[derive(Clone)]
@@ -2651,11 +8851,41 @@ pub struct PduSessionResourceFailedToSetupItemCxtFail {
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToSetupItemCxtFail {
+    type Output = PduSessionResourceFailedToSetupItemCxtFail;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_setup_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToSetupListCxtRes
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListCxtRes(
     pub Vec<PduSessionResourceFailedToSetupItemCxtRes>,
 );
+
+impl AperCodec for PduSessionResourceFailedToSetupListCxtRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToSetupItemCxtRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToSetupItemCxtRes
 #[derive(Clone)]
@@ -2664,11 +8894,41 @@ pub struct PduSessionResourceFailedToSetupItemCxtRes {
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToSetupItemCxtRes {
+    type Output = PduSessionResourceFailedToSetupItemCxtRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_setup_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToSetupListHoAck
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListHoAck(
     pub Vec<PduSessionResourceFailedToSetupItemHoAck>,
 );
+
+impl AperCodec for PduSessionResourceFailedToSetupListHoAck {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToSetupItemHoAck::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToSetupItemHoAck
 #[derive(Clone)]
@@ -2677,11 +8937,41 @@ pub struct PduSessionResourceFailedToSetupItemHoAck {
     pub handover_resource_allocation_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToSetupItemHoAck {
+    type Output = PduSessionResourceFailedToSetupItemHoAck;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let handover_resource_allocation_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_resource_allocation_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToSetupListPsReq
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListPsReq(
     pub Vec<PduSessionResourceFailedToSetupItemPsReq>,
 );
+
+impl AperCodec for PduSessionResourceFailedToSetupListPsReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToSetupItemPsReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToSetupItemPsReq
 #[derive(Clone)]
@@ -2690,11 +8980,41 @@ pub struct PduSessionResourceFailedToSetupItemPsReq {
     pub path_switch_request_setup_failed_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToSetupItemPsReq {
+    type Output = PduSessionResourceFailedToSetupItemPsReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let path_switch_request_setup_failed_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_setup_failed_transfer,
+        })
+    }
+}
+
 // PduSessionResourceFailedToSetupListSuRes
 #[derive(Clone)]
 pub struct PduSessionResourceFailedToSetupListSuRes(
     pub Vec<PduSessionResourceFailedToSetupItemSuRes>,
 );
+
+impl AperCodec for PduSessionResourceFailedToSetupListSuRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceFailedToSetupItemSuRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceFailedToSetupItemSuRes
 #[derive(Clone)]
@@ -2703,9 +9023,39 @@ pub struct PduSessionResourceFailedToSetupItemSuRes {
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceFailedToSetupItemSuRes {
+    type Output = PduSessionResourceFailedToSetupItemSuRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_setup_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceHandoverList
 #[derive(Clone)]
 pub struct PduSessionResourceHandoverList(pub Vec<PduSessionResourceHandoverItem>);
+
+impl AperCodec for PduSessionResourceHandoverList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceHandoverItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceHandoverItem
 #[derive(Clone)]
@@ -2714,9 +9064,38 @@ pub struct PduSessionResourceHandoverItem {
     pub handover_command_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceHandoverItem {
+    type Output = PduSessionResourceHandoverItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let handover_command_transfer = aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_command_transfer,
+        })
+    }
+}
+
 // PduSessionResourceInformationList
 #[derive(Clone)]
 pub struct PduSessionResourceInformationList(pub Vec<PduSessionResourceInformationItem>);
+
+impl AperCodec for PduSessionResourceInformationList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceInformationItem
 #[derive(Clone)]
@@ -2726,9 +9105,43 @@ pub struct PduSessionResourceInformationItem {
     pub dr_bs_to_qos_flows_mapping_list: Option<DrBsToQosFlowsMappingList>,
 }
 
+impl AperCodec for PduSessionResourceInformationItem {
+    type Output = PduSessionResourceInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let qos_flow_information_list = QosFlowInformationList::decode(data)?;
+        let dr_bs_to_qos_flows_mapping_list = if optionals[0] {
+            Some(DrBsToQosFlowsMappingList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pdu_session_id,
+            qos_flow_information_list,
+            dr_bs_to_qos_flows_mapping_list,
+        })
+    }
+}
+
 // PduSessionResourceListCxtRelCpl
 #[derive(Clone)]
 pub struct PduSessionResourceListCxtRelCpl(pub Vec<PduSessionResourceItemCxtRelCpl>);
+
+impl AperCodec for PduSessionResourceListCxtRelCpl {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceItemCxtRelCpl::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceItemCxtRelCpl
 #[derive(Clone)]
@@ -2736,9 +9149,34 @@ pub struct PduSessionResourceItemCxtRelCpl {
     pub pdu_session_id: PduSessionId,
 }
 
+impl AperCodec for PduSessionResourceItemCxtRelCpl {
+    type Output = PduSessionResourceItemCxtRelCpl;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+
+        Ok(Self { pdu_session_id })
+    }
+}
+
 // PduSessionResourceListCxtRelReq
 #[derive(Clone)]
 pub struct PduSessionResourceListCxtRelReq(pub Vec<PduSessionResourceItemCxtRelReq>);
+
+impl AperCodec for PduSessionResourceListCxtRelReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceItemCxtRelReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceItemCxtRelReq
 #[derive(Clone)]
@@ -2746,15 +9184,55 @@ pub struct PduSessionResourceItemCxtRelReq {
     pub pdu_session_id: PduSessionId,
 }
 
+impl AperCodec for PduSessionResourceItemCxtRelReq {
+    type Output = PduSessionResourceItemCxtRelReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+
+        Ok(Self { pdu_session_id })
+    }
+}
+
 // PduSessionResourceListHoRqd
 #[derive(Clone)]
 pub struct PduSessionResourceListHoRqd(pub Vec<PduSessionResourceItemHoRqd>);
+
+impl AperCodec for PduSessionResourceListHoRqd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceItemHoRqd::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceItemHoRqd
 #[derive(Clone)]
 pub struct PduSessionResourceItemHoRqd {
     pub pdu_session_id: PduSessionId,
     pub handover_required_transfer: Vec<u8>,
+}
+
+impl AperCodec for PduSessionResourceItemHoRqd {
+    type Output = PduSessionResourceItemHoRqd;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let handover_required_transfer = aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_required_transfer,
+        })
+    }
 }
 
 // PduSessionResourceModifyConfirmTransfer
@@ -2766,10 +9244,47 @@ pub struct PduSessionResourceModifyConfirmTransfer {
     pub qos_flow_failed_to_modify_list: Option<QosFlowListWithCause>,
 }
 
+impl AperCodec for PduSessionResourceModifyConfirmTransfer {
+    type Output = PduSessionResourceModifyConfirmTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let qos_flow_modify_confirm_list = QosFlowModifyConfirmList::decode(data)?;
+        let ulngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let additional_ng_uuptnl_information = if optionals[0] {
+            Some(UpTransportLayerInformationPairList::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_failed_to_modify_list = if optionals[1] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_modify_confirm_list,
+            ulngu_up_tnl_information,
+            additional_ng_uuptnl_information,
+            qos_flow_failed_to_modify_list,
+        })
+    }
+}
+
 // PduSessionResourceModifyIndicationUnsuccessfulTransfer
 #[derive(Clone)]
 pub struct PduSessionResourceModifyIndicationUnsuccessfulTransfer {
     pub cause: Cause,
+}
+
+impl AperCodec for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
+    type Output = PduSessionResourceModifyIndicationUnsuccessfulTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self { cause })
+    }
 }
 
 // PduSessionResourceModifyRequestTransfer
@@ -2793,7 +9308,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
-        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate> =
             None;
@@ -2812,7 +9327,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         let mut security_indication: Option<SecurityIndication> = None;
 
         for _ in 0..len {
-            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
             let criticality = Criticality::decode(data)?;
             let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
@@ -2890,6 +9405,46 @@ pub struct PduSessionResourceModifyResponseTransfer {
     pub qos_flow_failed_to_add_or_modify_list: Option<QosFlowListWithCause>,
 }
 
+impl AperCodec for PduSessionResourceModifyResponseTransfer {
+    type Output = PduSessionResourceModifyResponseTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 6)?;
+        let dl_ngu_up_tnl_information = if optionals[0] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+        let ul_ngu_up_tnl_information = if optionals[1] {
+            Some(UpTransportLayerInformation::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_add_or_modify_response_list = if optionals[2] {
+            Some(QosFlowAddOrModifyResponseList::decode(data)?)
+        } else {
+            None
+        };
+        let additional_dl_qos_flow_per_tnl_information = if optionals[3] {
+            Some(QosFlowPerTnlInformationList::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_failed_to_add_or_modify_list = if optionals[4] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_ngu_up_tnl_information,
+            ul_ngu_up_tnl_information,
+            qos_flow_add_or_modify_response_list,
+            additional_dl_qos_flow_per_tnl_information,
+            qos_flow_failed_to_add_or_modify_list,
+        })
+    }
+}
+
 // PduSessionResourceModifyIndicationTransfer
 #[derive(Clone)]
 pub struct PduSessionResourceModifyIndicationTransfer {
@@ -2897,9 +9452,41 @@ pub struct PduSessionResourceModifyIndicationTransfer {
     pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
 }
 
+impl AperCodec for PduSessionResourceModifyIndicationTransfer {
+    type Output = PduSessionResourceModifyIndicationTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let dl_qos_flow_per_tnl_information = QosFlowPerTnlInformation::decode(data)?;
+        let additional_dl_qos_flow_per_tnl_information = if optionals[0] {
+            Some(QosFlowPerTnlInformationList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_qos_flow_per_tnl_information,
+            additional_dl_qos_flow_per_tnl_information,
+        })
+    }
+}
+
 // PduSessionResourceModifyListModCfm
 #[derive(Clone)]
 pub struct PduSessionResourceModifyListModCfm(pub Vec<PduSessionResourceModifyItemModCfm>);
+
+impl AperCodec for PduSessionResourceModifyListModCfm {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceModifyItemModCfm::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceModifyItemModCfm
 #[derive(Clone)]
@@ -2908,9 +9495,39 @@ pub struct PduSessionResourceModifyItemModCfm {
     pub pdu_session_resource_modify_confirm_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceModifyItemModCfm {
+    type Output = PduSessionResourceModifyItemModCfm;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_modify_confirm_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_confirm_transfer,
+        })
+    }
+}
+
 // PduSessionResourceModifyListModInd
 #[derive(Clone)]
 pub struct PduSessionResourceModifyListModInd(pub Vec<PduSessionResourceModifyItemModInd>);
+
+impl AperCodec for PduSessionResourceModifyListModInd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceModifyItemModInd::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceModifyItemModInd
 #[derive(Clone)]
@@ -2919,9 +9536,39 @@ pub struct PduSessionResourceModifyItemModInd {
     pub pdu_session_resource_modify_indication_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceModifyItemModInd {
+    type Output = PduSessionResourceModifyItemModInd;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_modify_indication_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_indication_transfer,
+        })
+    }
+}
+
 // PduSessionResourceModifyListModReq
 #[derive(Clone)]
 pub struct PduSessionResourceModifyListModReq(pub Vec<PduSessionResourceModifyItemModReq>);
+
+impl AperCodec for PduSessionResourceModifyListModReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceModifyItemModReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceModifyItemModReq
 #[derive(Clone)]
@@ -2931,15 +9578,66 @@ pub struct PduSessionResourceModifyItemModReq {
     pub pdu_session_resource_modify_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceModifyItemModReq {
+    type Output = PduSessionResourceModifyItemModReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let nas_pdu = if optionals[0] {
+            Some(NasPdu::decode(data)?)
+        } else {
+            None
+        };
+        let pdu_session_resource_modify_request_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            nas_pdu,
+            pdu_session_resource_modify_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceModifyListModRes
 #[derive(Clone)]
 pub struct PduSessionResourceModifyListModRes(pub Vec<PduSessionResourceModifyItemModRes>);
+
+impl AperCodec for PduSessionResourceModifyListModRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceModifyItemModRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceModifyItemModRes
 #[derive(Clone)]
 pub struct PduSessionResourceModifyItemModRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_response_transfer: Vec<u8>,
+}
+
+impl AperCodec for PduSessionResourceModifyItemModRes {
+    type Output = PduSessionResourceModifyItemModRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_modify_response_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_modify_response_transfer,
+        })
+    }
 }
 
 // PduSessionResourceModifyUnsuccessfulTransfer
@@ -2949,9 +9647,41 @@ pub struct PduSessionResourceModifyUnsuccessfulTransfer {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
+impl AperCodec for PduSessionResourceModifyUnsuccessfulTransfer {
+    type Output = PduSessionResourceModifyUnsuccessfulTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let cause = Cause::decode(data)?;
+        let criticality_diagnostics = if optionals[0] {
+            Some(CriticalityDiagnostics::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            cause,
+            criticality_diagnostics,
+        })
+    }
+}
+
 // PduSessionResourceNotifyList
 #[derive(Clone)]
 pub struct PduSessionResourceNotifyList(pub Vec<PduSessionResourceNotifyItem>);
+
+impl AperCodec for PduSessionResourceNotifyList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceNotifyItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceNotifyItem
 #[derive(Clone)]
@@ -2960,10 +9690,37 @@ pub struct PduSessionResourceNotifyItem {
     pub pdu_session_resource_notify_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceNotifyItem {
+    type Output = PduSessionResourceNotifyItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_notify_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_notify_transfer,
+        })
+    }
+}
+
 // PduSessionResourceNotifyReleasedTransfer
 #[derive(Clone)]
 pub struct PduSessionResourceNotifyReleasedTransfer {
     pub cause: Cause,
+}
+
+impl AperCodec for PduSessionResourceNotifyReleasedTransfer {
+    type Output = PduSessionResourceNotifyReleasedTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self { cause })
+    }
 }
 
 // PduSessionResourceNotifyTransfer
@@ -2973,15 +9730,62 @@ pub struct PduSessionResourceNotifyTransfer {
     pub qos_flow_released_list: Option<QosFlowListWithCause>,
 }
 
+impl AperCodec for PduSessionResourceNotifyTransfer {
+    type Output = PduSessionResourceNotifyTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let qos_flow_notify_list = if optionals[0] {
+            Some(QosFlowNotifyList::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_released_list = if optionals[1] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_notify_list,
+            qos_flow_released_list,
+        })
+    }
+}
+
 // PduSessionResourceReleaseCommandTransfer
 #[derive(Clone)]
 pub struct PduSessionResourceReleaseCommandTransfer {
     pub cause: Cause,
 }
 
+impl AperCodec for PduSessionResourceReleaseCommandTransfer {
+    type Output = PduSessionResourceReleaseCommandTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self { cause })
+    }
+}
+
 // PduSessionResourceReleasedListNot
 #[derive(Clone)]
 pub struct PduSessionResourceReleasedListNot(pub Vec<PduSessionResourceReleasedItemNot>);
+
+impl AperCodec for PduSessionResourceReleasedListNot {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceReleasedItemNot::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceReleasedItemNot
 #[derive(Clone)]
@@ -2990,9 +9794,39 @@ pub struct PduSessionResourceReleasedItemNot {
     pub pdu_session_resource_notify_released_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceReleasedItemNot {
+    type Output = PduSessionResourceReleasedItemNot;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_notify_released_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_notify_released_transfer,
+        })
+    }
+}
+
 // PduSessionResourceReleasedListPsAck
 #[derive(Clone)]
 pub struct PduSessionResourceReleasedListPsAck(pub Vec<PduSessionResourceReleasedItemPsAck>);
+
+impl AperCodec for PduSessionResourceReleasedListPsAck {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceReleasedItemPsAck::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceReleasedItemPsAck
 #[derive(Clone)]
@@ -3001,9 +9835,39 @@ pub struct PduSessionResourceReleasedItemPsAck {
     pub path_switch_request_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceReleasedItemPsAck {
+    type Output = PduSessionResourceReleasedItemPsAck;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let path_switch_request_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceReleasedListPsFail
 #[derive(Clone)]
 pub struct PduSessionResourceReleasedListPsFail(pub Vec<PduSessionResourceReleasedItemPsFail>);
+
+impl AperCodec for PduSessionResourceReleasedListPsFail {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceReleasedItemPsFail::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceReleasedItemPsFail
 #[derive(Clone)]
@@ -3012,9 +9876,39 @@ pub struct PduSessionResourceReleasedItemPsFail {
     pub path_switch_request_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceReleasedItemPsFail {
+    type Output = PduSessionResourceReleasedItemPsFail;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let path_switch_request_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceReleasedListRelRes
 #[derive(Clone)]
 pub struct PduSessionResourceReleasedListRelRes(pub Vec<PduSessionResourceReleasedItemRelRes>);
+
+impl AperCodec for PduSessionResourceReleasedListRelRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceReleasedItemRelRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceReleasedItemRelRes
 #[derive(Clone)]
@@ -3022,11 +9916,42 @@ pub struct PduSessionResourceReleasedItemRelRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_release_response_transfer: Vec<u8>,
 }
+
+impl AperCodec for PduSessionResourceReleasedItemRelRes {
+    type Output = PduSessionResourceReleasedItemRelRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_release_response_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_release_response_transfer,
+        })
+    }
+}
+
 // PduSessionResourceReleaseResponseTransfer - omitted
 
 // PduSessionResourceResumeListResReq
 #[derive(Clone)]
 pub struct PduSessionResourceResumeListResReq(pub Vec<PduSessionResourceResumeItemResReq>);
+
+impl AperCodec for PduSessionResourceResumeListResReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceResumeItemResReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceResumeItemResReq
 #[derive(Clone)]
@@ -3035,9 +9960,39 @@ pub struct PduSessionResourceResumeItemResReq {
     pub ue_context_resume_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceResumeItemResReq {
+    type Output = PduSessionResourceResumeItemResReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let ue_context_resume_request_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            ue_context_resume_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceResumeListResRes
 #[derive(Clone)]
 pub struct PduSessionResourceResumeListResRes(pub Vec<PduSessionResourceResumeItemResRes>);
+
+impl AperCodec for PduSessionResourceResumeListResRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceResumeItemResRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceResumeItemResRes
 #[derive(Clone)]
@@ -3046,11 +10001,41 @@ pub struct PduSessionResourceResumeItemResRes {
     pub ue_context_resume_response_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceResumeItemResRes {
+    type Output = PduSessionResourceResumeItemResRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let ue_context_resume_response_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            ue_context_resume_response_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSecondaryRatUsageList
 #[derive(Clone)]
 pub struct PduSessionResourceSecondaryRatUsageList(
     pub Vec<PduSessionResourceSecondaryRatUsageItem>,
 );
+
+impl AperCodec for PduSessionResourceSecondaryRatUsageList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSecondaryRatUsageItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSecondaryRatUsageItem
 #[derive(Clone)]
@@ -3059,9 +10044,39 @@ pub struct PduSessionResourceSecondaryRatUsageItem {
     pub secondary_rat_data_usage_report_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSecondaryRatUsageItem {
+    type Output = PduSessionResourceSecondaryRatUsageItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let secondary_rat_data_usage_report_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            secondary_rat_data_usage_report_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSetupListCxtReq
 #[derive(Clone)]
 pub struct PduSessionResourceSetupListCxtReq(pub Vec<PduSessionResourceSetupItemCxtReq>);
+
+impl AperCodec for PduSessionResourceSetupListCxtReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSetupItemCxtReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSetupItemCxtReq
 #[derive(Clone)]
@@ -3072,9 +10087,46 @@ pub struct PduSessionResourceSetupItemCxtReq {
     pub pdu_session_resource_setup_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSetupItemCxtReq {
+    type Output = PduSessionResourceSetupItemCxtReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let nas_pdu = if optionals[0] {
+            Some(NasPdu::decode(data)?)
+        } else {
+            None
+        };
+        let s_nssai = SNssai::decode(data)?;
+        let pdu_session_resource_setup_request_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            nas_pdu,
+            s_nssai,
+            pdu_session_resource_setup_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSetupListCxtRes
 #[derive(Clone)]
 pub struct PduSessionResourceSetupListCxtRes(pub Vec<PduSessionResourceSetupItemCxtRes>);
+
+impl AperCodec for PduSessionResourceSetupListCxtRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSetupItemCxtRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSetupItemCxtRes
 #[derive(Clone)]
@@ -3083,9 +10135,39 @@ pub struct PduSessionResourceSetupItemCxtRes {
     pub pdu_session_resource_setup_response_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSetupItemCxtRes {
+    type Output = PduSessionResourceSetupItemCxtRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_setup_response_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_response_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSetupListHoReq
 #[derive(Clone)]
 pub struct PduSessionResourceSetupListHoReq(pub Vec<PduSessionResourceSetupItemHoReq>);
+
+impl AperCodec for PduSessionResourceSetupListHoReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSetupItemHoReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSetupItemHoReq
 #[derive(Clone)]
@@ -3095,9 +10177,40 @@ pub struct PduSessionResourceSetupItemHoReq {
     pub handover_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSetupItemHoReq {
+    type Output = PduSessionResourceSetupItemHoReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let s_nssai = SNssai::decode(data)?;
+        let handover_request_transfer = aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            s_nssai,
+            handover_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSetupListSuReq
 #[derive(Clone)]
 pub struct PduSessionResourceSetupListSuReq(pub Vec<PduSessionResourceSetupItemSuReq>);
+
+impl AperCodec for PduSessionResourceSetupListSuReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSetupItemSuReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSetupItemSuReq
 #[derive(Clone)]
@@ -3108,15 +10221,68 @@ pub struct PduSessionResourceSetupItemSuReq {
     pub pdu_session_resource_setup_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSetupItemSuReq {
+    type Output = PduSessionResourceSetupItemSuReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_nas_pdu = if optionals[0] {
+            Some(NasPdu::decode(data)?)
+        } else {
+            None
+        };
+        let s_nssai = SNssai::decode(data)?;
+        let pdu_session_resource_setup_request_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_nas_pdu,
+            s_nssai,
+            pdu_session_resource_setup_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSetupListSuRes
 #[derive(Clone)]
 pub struct PduSessionResourceSetupListSuRes(pub Vec<PduSessionResourceSetupItemSuRes>);
+
+impl AperCodec for PduSessionResourceSetupListSuRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSetupItemSuRes::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSetupItemSuRes
 #[derive(Clone)]
 pub struct PduSessionResourceSetupItemSuRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_response_transfer: Vec<u8>,
+}
+
+impl AperCodec for PduSessionResourceSetupItemSuRes {
+    type Output = PduSessionResourceSetupItemSuRes;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_setup_response_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_setup_response_transfer,
+        })
+    }
 }
 
 // PduSessionResourceSetupRequestTransfer
@@ -3143,7 +10309,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
-        let len = aper::decode::decode_length_determinent(data, 0, 65535, false)?;
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate> =
             None;
@@ -3166,7 +10332,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         let mut redundant_pdu_session_information: Option<RedundantPduSessionInformation> = None;
 
         for _ in 0..len {
-            let id = aper::decode::decode_integer(data, 0, 65535, false)?;
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
             let criticality = Criticality::decode(data)?;
             let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
@@ -3265,6 +10431,36 @@ pub struct PduSessionResourceSetupResponseTransfer {
     pub qos_flow_failed_to_setup_list: Option<QosFlowListWithCause>,
 }
 
+impl AperCodec for PduSessionResourceSetupResponseTransfer {
+    type Output = PduSessionResourceSetupResponseTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let dl_qos_flow_per_tnl_information = QosFlowPerTnlInformation::decode(data)?;
+        let additional_dl_qos_flow_per_tnl_information = if optionals[0] {
+            Some(QosFlowPerTnlInformationList::decode(data)?)
+        } else {
+            None
+        };
+        let security_result = if optionals[1] {
+            Some(SecurityResult::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flow_failed_to_setup_list = if optionals[2] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dl_qos_flow_per_tnl_information,
+            additional_dl_qos_flow_per_tnl_information,
+            security_result,
+            qos_flow_failed_to_setup_list,
+        })
+    }
+}
+
 // PduSessionResourceSetupUnsuccessfulTransfer
 #[derive(Clone)]
 pub struct PduSessionResourceSetupUnsuccessfulTransfer {
@@ -3272,9 +10468,41 @@ pub struct PduSessionResourceSetupUnsuccessfulTransfer {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
+impl AperCodec for PduSessionResourceSetupUnsuccessfulTransfer {
+    type Output = PduSessionResourceSetupUnsuccessfulTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let cause = Cause::decode(data)?;
+        let criticality_diagnostics = if optionals[0] {
+            Some(CriticalityDiagnostics::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            cause,
+            criticality_diagnostics,
+        })
+    }
+}
+
 // PduSessionResourceSuspendListSusReq
 #[derive(Clone)]
 pub struct PduSessionResourceSuspendListSusReq(pub Vec<PduSessionResourceSuspendItemSusReq>);
+
+impl AperCodec for PduSessionResourceSuspendListSusReq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSuspendItemSusReq::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSuspendItemSusReq
 #[derive(Clone)]
@@ -3283,9 +10511,39 @@ pub struct PduSessionResourceSuspendItemSusReq {
     pub ue_context_suspend_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSuspendItemSusReq {
+    type Output = PduSessionResourceSuspendItemSusReq;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let ue_context_suspend_request_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            ue_context_suspend_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceSwitchedList
 #[derive(Clone)]
 pub struct PduSessionResourceSwitchedList(pub Vec<PduSessionResourceSwitchedItem>);
+
+impl AperCodec for PduSessionResourceSwitchedList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceSwitchedItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceSwitchedItem
 #[derive(Clone)]
@@ -3294,9 +10552,39 @@ pub struct PduSessionResourceSwitchedItem {
     pub path_switch_request_acknowledge_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceSwitchedItem {
+    type Output = PduSessionResourceSwitchedItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let path_switch_request_acknowledge_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_acknowledge_transfer,
+        })
+    }
+}
+
 // PduSessionResourceToBeSwitchedDlList
 #[derive(Clone)]
 pub struct PduSessionResourceToBeSwitchedDlList(pub Vec<PduSessionResourceToBeSwitchedDlItem>);
+
+impl AperCodec for PduSessionResourceToBeSwitchedDlList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceToBeSwitchedDlItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceToBeSwitchedDlItem
 #[derive(Clone)]
@@ -3305,9 +10593,39 @@ pub struct PduSessionResourceToBeSwitchedDlItem {
     pub path_switch_request_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceToBeSwitchedDlItem {
+    type Output = PduSessionResourceToBeSwitchedDlItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let path_switch_request_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            path_switch_request_transfer,
+        })
+    }
+}
+
 // PduSessionResourceToReleaseListHoCmd
 #[derive(Clone)]
 pub struct PduSessionResourceToReleaseListHoCmd(pub Vec<PduSessionResourceToReleaseItemHoCmd>);
+
+impl AperCodec for PduSessionResourceToReleaseListHoCmd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceToReleaseItemHoCmd::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceToReleaseItemHoCmd
 #[derive(Clone)]
@@ -3316,9 +10634,39 @@ pub struct PduSessionResourceToReleaseItemHoCmd {
     pub handover_preparation_unsuccessful_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceToReleaseItemHoCmd {
+    type Output = PduSessionResourceToReleaseItemHoCmd;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let handover_preparation_unsuccessful_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            handover_preparation_unsuccessful_transfer,
+        })
+    }
+}
+
 // PduSessionResourceToReleaseListRelCmd
 #[derive(Clone)]
 pub struct PduSessionResourceToReleaseListRelCmd(pub Vec<PduSessionResourceToReleaseItemRelCmd>);
+
+impl AperCodec for PduSessionResourceToReleaseListRelCmd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PduSessionResourceToReleaseItemRelCmd::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PduSessionResourceToReleaseItemRelCmd
 #[derive(Clone)]
@@ -3327,14 +10675,42 @@ pub struct PduSessionResourceToReleaseItemRelCmd {
     pub pdu_session_resource_release_command_transfer: Vec<u8>,
 }
 
+impl AperCodec for PduSessionResourceToReleaseItemRelCmd {
+    type Output = PduSessionResourceToReleaseItemRelCmd;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let pdu_session_id = PduSessionId::decode(data)?;
+        let pdu_session_resource_release_command_transfer =
+            aper::decode::decode_octetstring(data, None, None, false)?;
+
+        Ok(Self {
+            pdu_session_id,
+            pdu_session_resource_release_command_transfer,
+        })
+    }
+}
+
 // PduSessionType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PduSessionType {
     Ipv4,
     Ipv6,
     Ipv4v6,
     Ethernet,
     Unstructured,
+}
+
+impl AperCodec for PduSessionType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(4), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // PduSessionUsageReport
@@ -3344,21 +10720,83 @@ pub struct PduSessionUsageReport {
     pub pdu_session_timed_report_list: VolumeTimedReportList,
 }
 
+impl AperCodec for PduSessionUsageReport {
+    type Output = PduSessionUsageReport;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let rat_type = RatType::decode(data)?;
+        let pdu_session_timed_report_list = VolumeTimedReportList::decode(data)?;
+
+        Ok(Self {
+            rat_type,
+            pdu_session_timed_report_list,
+        })
+    }
+}
+
 // Periodicity
 #[derive(Clone)]
 pub struct Periodicity(pub u32);
+
+impl AperCodec for Periodicity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(640000), true)?.0 as u32,
+        ))
+    }
+}
 
 // PeriodicRegistrationUpdateTimer
 #[derive(Clone)]
 pub struct PeriodicRegistrationUpdateTimer(pub BitString);
 
+impl AperCodec for PeriodicRegistrationUpdateTimer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            false,
+        )?))
+    }
+}
+
 // PlmnIdentity
 #[derive(Clone)]
 pub struct PlmnIdentity(pub Vec<u8>);
 
+impl AperCodec for PlmnIdentity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(3),
+            Some(3),
+            false,
+        )?))
+    }
+}
+
 // PlmnSupportList
 #[derive(Clone)]
 pub struct PlmnSupportList(pub Vec<PlmnSupportItem>);
+
+impl AperCodec for PlmnSupportList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(12), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(PlmnSupportItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // PlmnSupportItem
 #[derive(Clone)]
@@ -3367,43 +10805,145 @@ pub struct PlmnSupportItem {
     pub slice_support_list: SliceSupportList,
 }
 
+impl AperCodec for PlmnSupportItem {
+    type Output = PlmnSupportItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let slice_support_list = SliceSupportList::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            slice_support_list,
+        })
+    }
+}
+
 // PniNpnMobilityInformation
 #[derive(Clone)]
 pub struct PniNpnMobilityInformation {
     pub allowed_pni_npi_list: AllowedPniNpnList,
 }
 
+impl AperCodec for PniNpnMobilityInformation {
+    type Output = PniNpnMobilityInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let allowed_pni_npi_list = AllowedPniNpnList::decode(data)?;
+
+        Ok(Self {
+            allowed_pni_npi_list,
+        })
+    }
+}
+
 // PortNumber
 #[derive(Clone)]
 pub struct PortNumber(pub Vec<u8>);
 
+impl AperCodec for PortNumber {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(2),
+            Some(2),
+            false,
+        )?))
+    }
+}
+
 // PreEmptionCapability
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PreEmptionCapability {
     ShallNotTriggerPreEmption,
     MayTriggerPreEmption,
 }
 
+impl AperCodec for PreEmptionCapability {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PreEmptionVulnerability
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PreEmptionVulnerability {
     NotPreEmptable,
     PreEmptable,
+}
+
+impl AperCodec for PreEmptionVulnerability {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // PriorityLevelArp
 #[derive(Clone)]
 pub struct PriorityLevelArp(pub u8);
 
+impl AperCodec for PriorityLevelArp {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(15), false)?.0 as u8,
+        ))
+    }
+}
+
 // PriorityLevelQos
 #[derive(Clone)]
 pub struct PriorityLevelQos(pub u8);
+
+impl AperCodec for PriorityLevelQos {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(127), true)?.0 as u8,
+        ))
+    }
+}
 
 // PwsFailedCellIdList
 #[derive(Clone)]
 pub enum PwsFailedCellIdList {
     EutraCgiPwsFailedList(EutraCgiList),
     NrCgiPwsFailedList(NrCgiList),
+}
+
+impl AperCodec for PwsFailedCellIdList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::EutraCgiPwsFailedList(EutraCgiList::decode(data)?)),
+            1 => Ok(Self::NrCgiPwsFailedList(NrCgiList::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // QosCharacteristics
@@ -3413,9 +10953,43 @@ pub enum QosCharacteristics {
     Dynamic5qi(Dynamic5qiDescriptor),
 }
 
+impl AperCodec for QosCharacteristics {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::NonDynamic5qi(NonDynamic5qiDescriptor::decode(data)?)),
+            1 => Ok(Self::Dynamic5qi(Dynamic5qiDescriptor::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // QosFlowAcceptedList
 #[derive(Clone)]
 pub struct QosFlowAcceptedList(pub Vec<QosFlowAcceptedItem>);
+
+impl AperCodec for QosFlowAcceptedList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowAcceptedItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowAcceptedItem
 #[derive(Clone)]
@@ -3423,9 +10997,36 @@ pub struct QosFlowAcceptedItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
 
+impl AperCodec for QosFlowAcceptedItem {
+    type Output = QosFlowAcceptedItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+}
+
 // QosFlowAddOrModifyRequestList
 #[derive(Clone)]
 pub struct QosFlowAddOrModifyRequestList(pub Vec<QosFlowAddOrModifyRequestItem>);
+
+impl AperCodec for QosFlowAddOrModifyRequestList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowAddOrModifyRequestItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowAddOrModifyRequestItem
 #[derive(Clone)]
@@ -3435,9 +11036,47 @@ pub struct QosFlowAddOrModifyRequestItem {
     pub e_rab_id: Option<ERabId>,
 }
 
+impl AperCodec for QosFlowAddOrModifyRequestItem {
+    type Output = QosFlowAddOrModifyRequestItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let qos_flow_level_qos_parameters = if optionals[0] {
+            Some(QosFlowLevelQosParameters::decode(data)?)
+        } else {
+            None
+        };
+        let e_rab_id = if optionals[1] {
+            Some(ERabId::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            qos_flow_level_qos_parameters,
+            e_rab_id,
+        })
+    }
+}
+
 // QosFlowAddOrModifyResponseList
 #[derive(Clone)]
 pub struct QosFlowAddOrModifyResponseList(pub Vec<QosFlowAddOrModifyResponseItem>);
+
+impl AperCodec for QosFlowAddOrModifyResponseList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowAddOrModifyResponseItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowAddOrModifyResponseItem
 #[derive(Clone)]
@@ -3445,9 +11084,36 @@ pub struct QosFlowAddOrModifyResponseItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
 
+impl AperCodec for QosFlowAddOrModifyResponseItem {
+    type Output = QosFlowAddOrModifyResponseItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+}
+
 // QosFlowFeedbackList
 #[derive(Clone)]
 pub struct QosFlowFeedbackList(pub Vec<QosFlowFeedbackItem>);
+
+impl AperCodec for QosFlowFeedbackList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowFeedbackItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowFeedbackItem
 #[derive(Clone)]
@@ -3458,19 +11124,90 @@ pub struct QosFlowFeedbackItem {
     pub c_npacket_delay_budget_ul: Option<ExtendedPacketDelayBudget>,
 }
 
+impl AperCodec for QosFlowFeedbackItem {
+    type Output = QosFlowFeedbackItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let update_feedback = if optionals[0] {
+            Some(UpdateFeedback::decode(data)?)
+        } else {
+            None
+        };
+        let c_npacket_delay_budget_dl = if optionals[1] {
+            Some(ExtendedPacketDelayBudget::decode(data)?)
+        } else {
+            None
+        };
+        let c_npacket_delay_budget_ul = if optionals[2] {
+            Some(ExtendedPacketDelayBudget::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            update_feedback,
+            c_npacket_delay_budget_dl,
+            c_npacket_delay_budget_ul,
+        })
+    }
+}
+
 // QosFlowIdentifier
 #[derive(Clone)]
 pub struct QosFlowIdentifier(pub u8);
 
+impl AperCodec for QosFlowIdentifier {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(63), true)?.0 as u8,
+        ))
+    }
+}
+
 // QosFlowInformationList
 #[derive(Clone)]
 pub struct QosFlowInformationList(pub Vec<QosFlowInformationItem>);
+
+impl AperCodec for QosFlowInformationList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowInformationItem
 #[derive(Clone)]
 pub struct QosFlowInformationItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub dl_forwarding: Option<DlForwarding>,
+}
+
+impl AperCodec for QosFlowInformationItem {
+    type Output = QosFlowInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let dl_forwarding = if optionals[0] {
+            Some(DlForwarding::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            dl_forwarding,
+        })
+    }
 }
 
 // QosFlowLevelQosParameters
@@ -3483,21 +11220,88 @@ pub struct QosFlowLevelQosParameters {
     pub additional_qos_flow_information: Option<AdditionalQosFlowInformation>,
 }
 
+impl AperCodec for QosFlowLevelQosParameters {
+    type Output = QosFlowLevelQosParameters;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let qos_characteristics = QosCharacteristics::decode(data)?;
+        let allocation_and_retention_priority = AllocationAndRetentionPriority::decode(data)?;
+        let gbr_qos_information = if optionals[0] {
+            Some(GbrQosInformation::decode(data)?)
+        } else {
+            None
+        };
+        let reflective_qos_attribute = if optionals[1] {
+            Some(ReflectiveQosAttribute::decode(data)?)
+        } else {
+            None
+        };
+        let additional_qos_flow_information = if optionals[2] {
+            Some(AdditionalQosFlowInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_characteristics,
+            allocation_and_retention_priority,
+            gbr_qos_information,
+            reflective_qos_attribute,
+            additional_qos_flow_information,
+        })
+    }
+}
+
 // QosMonitoringRequest
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum QosMonitoringRequest {
     Ul,
     Dl,
     Both,
 }
 
+impl AperCodec for QosMonitoringRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // QosMonitoringReportingFrequency
 #[derive(Clone)]
 pub struct QosMonitoringReportingFrequency(pub u16);
 
+impl AperCodec for QosMonitoringReportingFrequency {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(1800), true)?.0 as u16,
+        ))
+    }
+}
+
 // QosFlowListWithCause
 #[derive(Clone)]
 pub struct QosFlowListWithCause(pub Vec<QosFlowWithCauseItem>);
+
+impl AperCodec for QosFlowListWithCause {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowWithCauseItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowWithCauseItem
 #[derive(Clone)]
@@ -3506,9 +11310,38 @@ pub struct QosFlowWithCauseItem {
     pub cause: Cause,
 }
 
+impl AperCodec for QosFlowWithCauseItem {
+    type Output = QosFlowWithCauseItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+            cause,
+        })
+    }
+}
+
 // QosFlowModifyConfirmList
 #[derive(Clone)]
 pub struct QosFlowModifyConfirmList(pub Vec<QosFlowModifyConfirmItem>);
+
+impl AperCodec for QosFlowModifyConfirmList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowModifyConfirmItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowModifyConfirmItem
 #[derive(Clone)]
@@ -3516,9 +11349,36 @@ pub struct QosFlowModifyConfirmItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
 
+impl AperCodec for QosFlowModifyConfirmItem {
+    type Output = QosFlowModifyConfirmItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+}
+
 // QosFlowNotifyList
 #[derive(Clone)]
 pub struct QosFlowNotifyList(pub Vec<QosFlowNotifyItem>);
+
+impl AperCodec for QosFlowNotifyList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowNotifyItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowNotifyItem
 #[derive(Clone)]
@@ -3527,15 +11387,62 @@ pub struct QosFlowNotifyItem {
     pub notification_cause: NotificationCause,
 }
 
+impl AperCodec for QosFlowNotifyItem {
+    type Output = QosFlowNotifyItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let notification_cause = NotificationCause::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+            notification_cause,
+        })
+    }
+}
+
 // QosFlowParametersList
 #[derive(Clone)]
 pub struct QosFlowParametersList(pub Vec<QosFlowParametersItem>);
+
+impl AperCodec for QosFlowParametersList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowParametersItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowParametersItem
 #[derive(Clone)]
 pub struct QosFlowParametersItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub alternative_qos_para_set_list: Option<AlternativeQosParaSetList>,
+}
+
+impl AperCodec for QosFlowParametersItem {
+    type Output = QosFlowParametersItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let alternative_qos_para_set_list = if optionals[0] {
+            Some(AlternativeQosParaSetList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            alternative_qos_para_set_list,
+        })
+    }
 }
 
 // QosFlowPerTnlInformation
@@ -3545,9 +11452,38 @@ pub struct QosFlowPerTnlInformation {
     pub associated_qos_flow_list: AssociatedQosFlowList,
 }
 
+impl AperCodec for QosFlowPerTnlInformation {
+    type Output = QosFlowPerTnlInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let up_transport_layer_information = UpTransportLayerInformation::decode(data)?;
+        let associated_qos_flow_list = AssociatedQosFlowList::decode(data)?;
+
+        Ok(Self {
+            up_transport_layer_information,
+            associated_qos_flow_list,
+        })
+    }
+}
+
 // QosFlowPerTnlInformationList
 #[derive(Clone)]
 pub struct QosFlowPerTnlInformationList(pub Vec<QosFlowPerTnlInformationItem>);
+
+impl AperCodec for QosFlowPerTnlInformationList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowPerTnlInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowPerTnlInformationItem
 #[derive(Clone)]
@@ -3555,9 +11491,36 @@ pub struct QosFlowPerTnlInformationItem {
     pub qos_flow_per_tnl_information: QosFlowPerTnlInformation,
 }
 
+impl AperCodec for QosFlowPerTnlInformationItem {
+    type Output = QosFlowPerTnlInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_per_tnl_information = QosFlowPerTnlInformation::decode(data)?;
+
+        Ok(Self {
+            qos_flow_per_tnl_information,
+        })
+    }
+}
+
 // QosFlowSetupRequestList
 #[derive(Clone)]
 pub struct QosFlowSetupRequestList(pub Vec<QosFlowSetupRequestItem>);
+
+impl AperCodec for QosFlowSetupRequestList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowSetupRequestItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowSetupRequestItem
 #[derive(Clone)]
@@ -3567,9 +11530,43 @@ pub struct QosFlowSetupRequestItem {
     pub e_rab_id: Option<ERabId>,
 }
 
+impl AperCodec for QosFlowSetupRequestItem {
+    type Output = QosFlowSetupRequestItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let qos_flow_level_qos_parameters = QosFlowLevelQosParameters::decode(data)?;
+        let e_rab_id = if optionals[0] {
+            Some(ERabId::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            qos_flow_level_qos_parameters,
+            e_rab_id,
+        })
+    }
+}
+
 // QosFlowListWithDataForwarding
 #[derive(Clone)]
 pub struct QosFlowListWithDataForwarding(pub Vec<QosFlowItemWithDataForwarding>);
+
+impl AperCodec for QosFlowListWithDataForwarding {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowItemWithDataForwarding::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowItemWithDataForwarding
 #[derive(Clone)]
@@ -3578,9 +11575,41 @@ pub struct QosFlowItemWithDataForwarding {
     pub data_forwarding_accepted: Option<DataForwardingAccepted>,
 }
 
+impl AperCodec for QosFlowItemWithDataForwarding {
+    type Output = QosFlowItemWithDataForwarding;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let data_forwarding_accepted = if optionals[0] {
+            Some(DataForwardingAccepted::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_identifier,
+            data_forwarding_accepted,
+        })
+    }
+}
+
 // QosFlowToBeForwardedList
 #[derive(Clone)]
 pub struct QosFlowToBeForwardedList(pub Vec<QosFlowToBeForwardedItem>);
+
+impl AperCodec for QosFlowToBeForwardedList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowToBeForwardedItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowToBeForwardedItem
 #[derive(Clone)]
@@ -3588,9 +11617,36 @@ pub struct QosFlowToBeForwardedItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
 
+impl AperCodec for QosFlowToBeForwardedItem {
+    type Output = QosFlowToBeForwardedItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+        })
+    }
+}
+
 // QosFlowsUsageReportList
 #[derive(Clone)]
 pub struct QosFlowsUsageReportList(pub Vec<QosFlowsUsageReportItem>);
+
+impl AperCodec for QosFlowsUsageReportList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(QosFlowsUsageReportItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // QosFlowsUsageReportItem
 #[derive(Clone)]
@@ -3600,8 +11656,26 @@ pub struct QosFlowsUsageReportItem {
     pub qos_flows_timed_report_list: VolumeTimedReportList,
 }
 
+impl AperCodec for QosFlowsUsageReportItem {
+    type Output = QosFlowsUsageReportItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
+        let rat_type = RatType1::decode(data)?;
+        let qos_flows_timed_report_list = VolumeTimedReportList::decode(data)?;
+
+        Ok(Self {
+            qos_flow_identifier,
+            rat_type,
+            qos_flows_timed_report_list,
+        })
+    }
+}
+
 // Range
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum Range {
     M50,
     M80,
@@ -3614,21 +11688,77 @@ pub enum Range {
     M1000,
 }
 
+impl AperCodec for Range {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(8), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RanNodeName
 #[derive(Clone)]
 pub struct RanNodeName(pub String);
+
+impl AperCodec for RanNodeName {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_printable_string(
+            data,
+            Some(1),
+            Some(150),
+            true,
+        )?))
+    }
+}
 
 // RanNodeNameVisibleString
 #[derive(Clone)]
 pub struct RanNodeNameVisibleString(pub String);
 
+impl AperCodec for RanNodeNameVisibleString {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_visible_string(
+            data,
+            Some(1),
+            Some(150),
+            true,
+        )?))
+    }
+}
+
 // RanNodeNameUtf8String
 #[derive(Clone)]
 pub struct RanNodeNameUtf8String(pub String);
 
+impl AperCodec for RanNodeNameUtf8String {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_utf8_string(
+            data,
+            Some(1),
+            Some(150),
+            true,
+        )?))
+    }
+}
+
 // RanPagingPriority
 #[derive(Clone)]
 pub struct RanPagingPriority(pub u8);
+
+impl AperCodec for RanPagingPriority {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(256), false)?.0 as u8,
+        ))
+    }
+}
 
 // RanStatusTransferTransparentContainer
 #[derive(Clone)]
@@ -3636,20 +11766,68 @@ pub struct RanStatusTransferTransparentContainer {
     pub dr_bs_subject_to_status_transfer_list: DrBsSubjectToStatusTransferList,
 }
 
+impl AperCodec for RanStatusTransferTransparentContainer {
+    type Output = RanStatusTransferTransparentContainer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let dr_bs_subject_to_status_transfer_list = DrBsSubjectToStatusTransferList::decode(data)?;
+
+        Ok(Self {
+            dr_bs_subject_to_status_transfer_list,
+        })
+    }
+}
+
 // RanUeNgapId
 #[derive(Clone)]
 pub struct RanUeNgapId(pub u64);
 
+impl AperCodec for RanUeNgapId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u64,
+        ))
+    }
+}
+
 // RatInformation
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RatInformation {
     Unlicensed,
     NbIot,
 }
 
+impl AperCodec for RatInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RatRestrictions
 #[derive(Clone)]
 pub struct RatRestrictions(pub Vec<RatRestrictionsItem>);
+
+impl AperCodec for RatRestrictions {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(RatRestrictionsItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // RatRestrictionsItem
 #[derive(Clone)]
@@ -3658,9 +11836,36 @@ pub struct RatRestrictionsItem {
     pub rat_restriction_information: RatRestrictionInformation,
 }
 
+impl AperCodec for RatRestrictionsItem {
+    type Output = RatRestrictionsItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let rat_restriction_information = RatRestrictionInformation::decode(data)?;
+
+        Ok(Self {
+            plmn_identity,
+            rat_restriction_information,
+        })
+    }
+}
+
 // RatRestrictionInformation
 #[derive(Clone)]
 pub struct RatRestrictionInformation(pub BitString);
+
+impl AperCodec for RatRestrictionInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            true,
+        )?))
+    }
+}
 
 // RecommendedCellsForPaging
 #[derive(Clone)]
@@ -3668,9 +11873,36 @@ pub struct RecommendedCellsForPaging {
     pub recommended_cell_list: RecommendedCellList,
 }
 
+impl AperCodec for RecommendedCellsForPaging {
+    type Output = RecommendedCellsForPaging;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let recommended_cell_list = RecommendedCellList::decode(data)?;
+
+        Ok(Self {
+            recommended_cell_list,
+        })
+    }
+}
+
 // RecommendedCellList
 #[derive(Clone)]
 pub struct RecommendedCellList(pub Vec<RecommendedCellItem>);
+
+impl AperCodec for RecommendedCellList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(RecommendedCellItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // RecommendedCellItem
 #[derive(Clone)]
@@ -3679,15 +11911,60 @@ pub struct RecommendedCellItem {
     pub time_stayed_in_cell: Option<u16>,
 }
 
+impl AperCodec for RecommendedCellItem {
+    type Output = RecommendedCellItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let ngran_cgi = NgranCgi::decode(data)?;
+        let time_stayed_in_cell = if optionals[0] {
+            Some(aper::decode::decode_integer(data, Some(0), Some(4095), false)?.0 as u16)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ngran_cgi,
+            time_stayed_in_cell,
+        })
+    }
+}
+
 // RecommendedRanNodesForPaging
 #[derive(Clone)]
 pub struct RecommendedRanNodesForPaging {
     pub recommended_ran_node_list: RecommendedRanNodeList,
 }
 
+impl AperCodec for RecommendedRanNodesForPaging {
+    type Output = RecommendedRanNodesForPaging;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let recommended_ran_node_list = RecommendedRanNodeList::decode(data)?;
+
+        Ok(Self {
+            recommended_ran_node_list,
+        })
+    }
+}
+
 // RecommendedRanNodeList
 #[derive(Clone)]
 pub struct RecommendedRanNodeList(pub Vec<RecommendedRanNodeItem>);
+
+impl AperCodec for RecommendedRanNodeList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(RecommendedRanNodeItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // RecommendedRanNodeItem
 #[derive(Clone)]
@@ -3695,11 +11972,34 @@ pub struct RecommendedRanNodeItem {
     pub amf_paging_target: AmfPagingTarget,
 }
 
+impl AperCodec for RecommendedRanNodeItem {
+    type Output = RecommendedRanNodeItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let amf_paging_target = AmfPagingTarget::decode(data)?;
+
+        Ok(Self { amf_paging_target })
+    }
+}
+
 // RedirectionVoiceFallback
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RedirectionVoiceFallback {
     Possible,
     NotPossible,
+}
+
+impl AperCodec for RedirectionVoiceFallback {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // RedundantPduSessionInformation
@@ -3708,41 +12008,119 @@ pub struct RedundantPduSessionInformation {
     pub rsn: Rsn,
 }
 
+impl AperCodec for RedundantPduSessionInformation {
+    type Output = RedundantPduSessionInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let rsn = Rsn::decode(data)?;
+
+        Ok(Self { rsn })
+    }
+}
+
 // RedundantQosFlowIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RedundantQosFlowIndicator {
     True,
     False,
 }
 
+impl AperCodec for RedundantQosFlowIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ReflectiveQosAttribute
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ReflectiveQosAttribute {
     SubjectTo,
+}
+
+impl AperCodec for ReflectiveQosAttribute {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // RelativeAmfCapacity
 #[derive(Clone)]
 pub struct RelativeAmfCapacity(pub u8);
 
+impl AperCodec for RelativeAmfCapacity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8,
+        ))
+    }
+}
+
 // ReportArea
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ReportArea {
     Cell,
+}
+
+impl AperCodec for ReportArea {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // RepetitionPeriod
 #[derive(Clone)]
 pub struct RepetitionPeriod(pub u32);
 
+impl AperCodec for RepetitionPeriod {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(131071), false)?.0 as u32,
+        ))
+    }
+}
+
 // ResetAll
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ResetAll {
     ResetAll,
 }
 
+impl AperCodec for ResetAll {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ReportAmountMdt
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ReportAmountMdt {
     R1,
     R2,
@@ -3754,8 +12132,20 @@ pub enum ReportAmountMdt {
     Rinfinity,
 }
 
+impl AperCodec for ReportAmountMdt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(7), false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ReportIntervalMdt
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum ReportIntervalMdt {
     Ms120,
     Ms240,
@@ -3772,6 +12162,17 @@ pub enum ReportIntervalMdt {
     Min60,
 }
 
+impl AperCodec for ReportIntervalMdt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(12), false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // ResetType
 #[derive(Clone)]
 pub enum ResetType {
@@ -3779,24 +12180,83 @@ pub enum ResetType {
     PartOfNgInterface(UeAssociatedLogicalNgConnectionList),
 }
 
+impl AperCodec for ResetType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::NgInterface(ResetAll::decode(data)?)),
+            1 => Ok(Self::PartOfNgInterface(
+                UeAssociatedLogicalNgConnectionList::decode(data)?,
+            )),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // RgLevelWirelineAccessCharacteristics
 #[derive(Clone)]
 pub struct RgLevelWirelineAccessCharacteristics(pub Vec<u8>);
+
+impl AperCodec for RgLevelWirelineAccessCharacteristics {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // RncId
 #[derive(Clone)]
 pub struct RncId(pub u16);
 
+impl AperCodec for RncId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4095), false)?.0 as u16,
+        ))
+    }
+}
+
 // RoutingId
 #[derive(Clone)]
 pub struct RoutingId(pub Vec<u8>);
+
+impl AperCodec for RoutingId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // RrcContainer
 #[derive(Clone)]
 pub struct RrcContainer(pub Vec<u8>);
 
+impl AperCodec for RrcContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // RrcEstablishmentCause
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RrcEstablishmentCause {
     Emergency,
     HighPriorityAccess,
@@ -3810,26 +12270,73 @@ pub enum RrcEstablishmentCause {
     McsPriorityAccess,
 }
 
+impl AperCodec for RrcEstablishmentCause {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(9), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RrcInactiveTransitionReportRequest
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RrcInactiveTransitionReportRequest {
     SubsequentStateTransitionReport,
     SingleRrcConnectedStateReport,
     CancelReport,
 }
 
+impl AperCodec for RrcInactiveTransitionReportRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RrcState
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RrcState {
     Inactive,
     Connected,
 }
 
+impl AperCodec for RrcState {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // Rsn
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum Rsn {
     V1,
     V2,
+}
+
+impl AperCodec for Rsn {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // RimInformationTransfer
@@ -3840,6 +12347,23 @@ pub struct RimInformationTransfer {
     pub rim_information: RimInformation,
 }
 
+impl AperCodec for RimInformationTransfer {
+    type Output = RimInformationTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let target_ran_node_id = TargetRanNodeId::decode(data)?;
+        let source_ran_node_id = SourceRanNodeId::decode(data)?;
+        let rim_information = RimInformation::decode(data)?;
+
+        Ok(Self {
+            target_ran_node_id,
+            source_ran_node_id,
+            rim_information,
+        })
+    }
+}
+
 // RimInformation
 #[derive(Clone)]
 pub struct RimInformation {
@@ -3847,9 +12371,36 @@ pub struct RimInformation {
     pub rim_rs_detection: RimRsDetection,
 }
 
+impl AperCodec for RimInformation {
+    type Output = RimInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let target_gnb_set_id = GnbSetId::decode(data)?;
+        let rim_rs_detection = RimRsDetection::decode(data)?;
+
+        Ok(Self {
+            target_gnb_set_id,
+            rim_rs_detection,
+        })
+    }
+}
+
 // GnbSetId
 #[derive(Clone)]
 pub struct GnbSetId(pub BitString);
+
+impl AperCodec for GnbSetId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(22),
+            Some(22),
+            false,
+        )?))
+    }
+}
 
 // ScheduledCommunicationTime
 #[derive(Clone)]
@@ -3859,13 +12410,72 @@ pub struct ScheduledCommunicationTime {
     pub timeof_day_end: Option<u32>,
 }
 
+impl AperCodec for ScheduledCommunicationTime {
+    type Output = ScheduledCommunicationTime;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let dayof_week = if optionals[0] {
+            Some(aper::decode::decode_bitstring(
+                data,
+                Some(7),
+                Some(7),
+                false,
+            )?)
+        } else {
+            None
+        };
+        let timeof_day_start = if optionals[1] {
+            Some(aper::decode::decode_integer(data, Some(0), Some(86399), true)?.0 as u32)
+        } else {
+            None
+        };
+        let timeof_day_end = if optionals[2] {
+            Some(aper::decode::decode_integer(data, Some(0), Some(86399), true)?.0 as u32)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            dayof_week,
+            timeof_day_start,
+            timeof_day_end,
+        })
+    }
+}
+
 // SctpTlAs
 #[derive(Clone)]
 pub struct SctpTlAs(pub Vec<TransportLayerAddress>);
 
+impl AperCodec for SctpTlAs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TransportLayerAddress::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // Sd
 #[derive(Clone)]
 pub struct Sd(pub Vec<u8>);
+
+impl AperCodec for Sd {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(3),
+            Some(3),
+            false,
+        )?))
+    }
+}
 
 // SecondaryRatUsageInformation
 #[derive(Clone)]
@@ -3874,10 +12484,48 @@ pub struct SecondaryRatUsageInformation {
     pub qos_flows_usage_report_list: Option<QosFlowsUsageReportList>,
 }
 
+impl AperCodec for SecondaryRatUsageInformation {
+    type Output = SecondaryRatUsageInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let pdu_session_usage_report = if optionals[0] {
+            Some(PduSessionUsageReport::decode(data)?)
+        } else {
+            None
+        };
+        let qos_flows_usage_report_list = if optionals[1] {
+            Some(QosFlowsUsageReportList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            pdu_session_usage_report,
+            qos_flows_usage_report_list,
+        })
+    }
+}
+
 // SecondaryRatDataUsageReportTransfer
 #[derive(Clone)]
 pub struct SecondaryRatDataUsageReportTransfer {
     pub secondary_rat_usage_information: Option<SecondaryRatUsageInformation>,
+}
+
+impl AperCodec for SecondaryRatDataUsageReportTransfer {
+    type Output = SecondaryRatDataUsageReportTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let secondary_rat_usage_information = if optionals[0] {
+            Some(SecondaryRatUsageInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            secondary_rat_usage_information,
+        })
+    }
 }
 
 // SecurityContext
@@ -3885,6 +12533,21 @@ pub struct SecondaryRatDataUsageReportTransfer {
 pub struct SecurityContext {
     pub next_hop_chaining_count: NextHopChainingCount,
     pub next_hop_nh: SecurityKey,
+}
+
+impl AperCodec for SecurityContext {
+    type Output = SecurityContext;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let next_hop_chaining_count = NextHopChainingCount::decode(data)?;
+        let next_hop_nh = SecurityKey::decode(data)?;
+
+        Ok(Self {
+            next_hop_chaining_count,
+            next_hop_nh,
+        })
+    }
 }
 
 // SecurityIndication
@@ -3895,15 +12558,63 @@ pub struct SecurityIndication {
     pub maximum_integrity_protected_data_rate_ul: Option<MaximumIntegrityProtectedDataRate>,
 }
 
+impl AperCodec for SecurityIndication {
+    type Output = SecurityIndication;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let integrity_protection_indication = IntegrityProtectionIndication::decode(data)?;
+        let confidentiality_protection_indication =
+            ConfidentialityProtectionIndication::decode(data)?;
+        let maximum_integrity_protected_data_rate_ul = if optionals[0] {
+            Some(MaximumIntegrityProtectedDataRate::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            integrity_protection_indication,
+            confidentiality_protection_indication,
+            maximum_integrity_protected_data_rate_ul,
+        })
+    }
+}
+
 // SecurityKey
 #[derive(Clone)]
 pub struct SecurityKey(pub BitString);
+
+impl AperCodec for SecurityKey {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(256),
+            Some(256),
+            false,
+        )?))
+    }
+}
 
 // SecurityResult
 #[derive(Clone)]
 pub struct SecurityResult {
     pub integrity_protection_result: IntegrityProtectionResult,
     pub confidentiality_protection_result: ConfidentialityProtectionResult,
+}
+
+impl AperCodec for SecurityResult {
+    type Output = SecurityResult;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let integrity_protection_result = IntegrityProtectionResult::decode(data)?;
+        let confidentiality_protection_result = ConfidentialityProtectionResult::decode(data)?;
+
+        Ok(Self {
+            integrity_protection_result,
+            confidentiality_protection_result,
+        })
+    }
 }
 
 // SensorMeasurementConfiguration
@@ -3913,9 +12624,41 @@ pub struct SensorMeasurementConfiguration {
     pub sensor_meas_config_name_list: Option<SensorMeasConfigNameList>,
 }
 
+impl AperCodec for SensorMeasurementConfiguration {
+    type Output = SensorMeasurementConfiguration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let sensor_meas_config = SensorMeasConfig::decode(data)?;
+        let sensor_meas_config_name_list = if optionals[0] {
+            Some(SensorMeasConfigNameList::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            sensor_meas_config,
+            sensor_meas_config_name_list,
+        })
+    }
+}
+
 // SensorMeasConfigNameList
 #[derive(Clone)]
 pub struct SensorMeasConfigNameList(pub Vec<SensorMeasConfigNameItem>);
+
+impl AperCodec for SensorMeasConfigNameList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SensorMeasConfigNameItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // SensorMeasConfigNameItem
 #[derive(Clone)]
@@ -3923,10 +12666,33 @@ pub struct SensorMeasConfigNameItem {
     pub sensor_name_config: SensorNameConfig,
 }
 
+impl AperCodec for SensorMeasConfigNameItem {
+    type Output = SensorMeasConfigNameItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let sensor_name_config = SensorNameConfig::decode(data)?;
+
+        Ok(Self { sensor_name_config })
+    }
+}
+
 // SensorMeasConfig
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SensorMeasConfig {
     Setup,
+}
+
+impl AperCodec for SensorMeasConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // SensorNameConfig
@@ -3937,13 +12703,64 @@ pub enum SensorNameConfig {
     UeOrientationConfig(UeOrientationConfig),
 }
 
+impl AperCodec for SensorNameConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::UncompensatedBarometricConfig(
+                UncompensatedBarometricConfig::decode(data)?,
+            )),
+            1 => Ok(Self::UeSpeedConfig(UeSpeedConfig::decode(data)?)),
+            2 => Ok(Self::UeOrientationConfig(UeOrientationConfig::decode(
+                data,
+            )?)),
+            3 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // SerialNumber
 #[derive(Clone)]
 pub struct SerialNumber(pub BitString);
 
+impl AperCodec for SerialNumber {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            false,
+        )?))
+    }
+}
+
 // ServedGuamiList
 #[derive(Clone)]
 pub struct ServedGuamiList(pub Vec<ServedGuamiItem>);
+
+impl AperCodec for ServedGuamiList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(ServedGuamiItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // ServedGuamiItem
 #[derive(Clone)]
@@ -3952,9 +12769,41 @@ pub struct ServedGuamiItem {
     pub backup_amf_name: Option<AmfName>,
 }
 
+impl AperCodec for ServedGuamiItem {
+    type Output = ServedGuamiItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let guami = Guami::decode(data)?;
+        let backup_amf_name = if optionals[0] {
+            Some(AmfName::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            guami,
+            backup_amf_name,
+        })
+    }
+}
+
 // ServiceAreaInformation
 #[derive(Clone)]
 pub struct ServiceAreaInformation(pub Vec<ServiceAreaInformationItem>);
+
+impl AperCodec for ServiceAreaInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(ServiceAreaInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // ServiceAreaInformationItem
 #[derive(Clone)]
@@ -3964,13 +12813,60 @@ pub struct ServiceAreaInformationItem {
     pub not_allowed_ta_cs: Option<NotAllowedTaCs>,
 }
 
+impl AperCodec for ServiceAreaInformationItem {
+    type Output = ServiceAreaInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let allowed_ta_cs = if optionals[0] {
+            Some(AllowedTaCs::decode(data)?)
+        } else {
+            None
+        };
+        let not_allowed_ta_cs = if optionals[1] {
+            Some(NotAllowedTaCs::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            plmn_identity,
+            allowed_ta_cs,
+            not_allowed_ta_cs,
+        })
+    }
+}
+
 // SGnbUeX2apId
 #[derive(Clone)]
 pub struct SGnbUeX2apId(pub u64);
 
+impl AperCodec for SGnbUeX2apId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u64,
+        ))
+    }
+}
+
 // SliceOverloadList
 #[derive(Clone)]
 pub struct SliceOverloadList(pub Vec<SliceOverloadItem>);
+
+impl AperCodec for SliceOverloadList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SliceOverloadItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // SliceOverloadItem
 #[derive(Clone)]
@@ -3978,14 +12874,50 @@ pub struct SliceOverloadItem {
     pub s_nssai: SNssai,
 }
 
+impl AperCodec for SliceOverloadItem {
+    type Output = SliceOverloadItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let s_nssai = SNssai::decode(data)?;
+
+        Ok(Self { s_nssai })
+    }
+}
+
 // SliceSupportList
 #[derive(Clone)]
 pub struct SliceSupportList(pub Vec<SliceSupportItem>);
+
+impl AperCodec for SliceSupportList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SliceSupportItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // SliceSupportItem
 #[derive(Clone)]
 pub struct SliceSupportItem {
     pub s_nssai: SNssai,
+}
+
+impl AperCodec for SliceSupportItem {
+    type Output = SliceSupportItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let s_nssai = SNssai::decode(data)?;
+
+        Ok(Self { s_nssai })
+    }
 }
 
 // SnpnMobilityInformation
@@ -3994,11 +12926,37 @@ pub struct SnpnMobilityInformation {
     pub serving_nid: Nid,
 }
 
+impl AperCodec for SnpnMobilityInformation {
+    type Output = SnpnMobilityInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let serving_nid = Nid::decode(data)?;
+
+        Ok(Self { serving_nid })
+    }
+}
+
 // SNssai
 #[derive(Clone)]
 pub struct SNssai {
     pub sst: Sst,
     pub sd: Option<Sd>,
+}
+
+impl AperCodec for SNssai {
+    type Output = SNssai;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let sst = Sst::decode(data)?;
+        let sd = if optionals[0] {
+            Some(Sd::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self { sst, sd })
+    }
 }
 
 // SonConfigurationTransfer
@@ -4010,6 +12968,28 @@ pub struct SonConfigurationTransfer {
     pub xn_tnl_configuration_info: Option<XnTnlConfigurationInfo>,
 }
 
+impl AperCodec for SonConfigurationTransfer {
+    type Output = SonConfigurationTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let target_ran_node_id = TargetRanNodeId::decode(data)?;
+        let source_ran_node_id = SourceRanNodeId::decode(data)?;
+        let son_information = SonInformation::decode(data)?;
+        let xn_tnl_configuration_info = if optionals[0] {
+            Some(XnTnlConfigurationInfo::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            target_ran_node_id,
+            source_ran_node_id,
+            son_information,
+            xn_tnl_configuration_info,
+        })
+    }
+}
+
 // SonInformation
 #[derive(Clone)]
 pub enum SonInformation {
@@ -4017,10 +12997,50 @@ pub enum SonInformation {
     SonInformationReply(SonInformationReply),
 }
 
+impl AperCodec for SonInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::SonInformationRequest(SonInformationRequest::decode(
+                data,
+            )?)),
+            1 => Ok(Self::SonInformationReply(SonInformationReply::decode(
+                data,
+            )?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // SonInformationReply
 #[derive(Clone)]
 pub struct SonInformationReply {
     pub xn_tnl_configuration_info: Option<XnTnlConfigurationInfo>,
+}
+
+impl AperCodec for SonInformationReply {
+    type Output = SonInformationReply;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let xn_tnl_configuration_info = if optionals[0] {
+            Some(XnTnlConfigurationInfo::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            xn_tnl_configuration_info,
+        })
+    }
 }
 
 // SonInformationReport
@@ -4030,10 +13050,44 @@ pub enum SonInformationReport {
     HoReportInformation(HoReport),
 }
 
+impl AperCodec for SonInformationReport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::FailureIndicationInformation(
+                FailureIndication::decode(data)?,
+            )),
+            1 => Ok(Self::HoReportInformation(HoReport::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // SonInformationRequest
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SonInformationRequest {
     XnTnlConfigurationInfo,
+}
+
+impl AperCodec for SonInformationRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // SourceNgranNodeToTargetNgranNodeTransparentContainer
@@ -4047,11 +13101,57 @@ pub struct SourceNgranNodeToTargetNgranNodeTransparentContainer {
     pub ue_history_information: UeHistoryInformation,
 }
 
+impl AperCodec for SourceNgranNodeToTargetNgranNodeTransparentContainer {
+    type Output = SourceNgranNodeToTargetNgranNodeTransparentContainer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let rrc_container = RrcContainer::decode(data)?;
+        let pdu_session_resource_information_list = if optionals[0] {
+            Some(PduSessionResourceInformationList::decode(data)?)
+        } else {
+            None
+        };
+        let e_rab_information_list = if optionals[1] {
+            Some(ERabInformationList::decode(data)?)
+        } else {
+            None
+        };
+        let target_cell_id = NgranCgi::decode(data)?;
+        let index_to_rfsp = if optionals[2] {
+            Some(IndexToRfsp::decode(data)?)
+        } else {
+            None
+        };
+        let ue_history_information = UeHistoryInformation::decode(data)?;
+
+        Ok(Self {
+            rrc_container,
+            pdu_session_resource_information_list,
+            e_rab_information_list,
+            target_cell_id,
+            index_to_rfsp,
+            ue_history_information,
+        })
+    }
+}
+
 // SourceOfUeActivityBehaviourInformation
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SourceOfUeActivityBehaviourInformation {
     SubscriptionInformation,
     Statistics,
+}
+
+impl AperCodec for SourceOfUeActivityBehaviourInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // SourceRanNodeId
@@ -4061,9 +13161,33 @@ pub struct SourceRanNodeId {
     pub selected_tai: Tai,
 }
 
+impl AperCodec for SourceRanNodeId {
+    type Output = SourceRanNodeId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let global_ran_node_id = GlobalRanNodeId::decode(data)?;
+        let selected_tai = Tai::decode(data)?;
+
+        Ok(Self {
+            global_ran_node_id,
+            selected_tai,
+        })
+    }
+}
+
 // SourceToTargetTransparentContainer
 #[derive(Clone)]
 pub struct SourceToTargetTransparentContainer(pub Vec<u8>);
+
+impl AperCodec for SourceToTargetTransparentContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // SourceToTargetAmfInformationReroute
 #[derive(Clone)]
@@ -4073,32 +13197,134 @@ pub struct SourceToTargetAmfInformationReroute {
     pub rejected_nssa_iin_ta: Option<RejectedNssaIinTa>,
 }
 
+impl AperCodec for SourceToTargetAmfInformationReroute {
+    type Output = SourceToTargetAmfInformationReroute;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let configured_nssai = if optionals[0] {
+            Some(ConfiguredNssai::decode(data)?)
+        } else {
+            None
+        };
+        let rejected_nssa_iin_plmn = if optionals[1] {
+            Some(RejectedNssaIinPlmn::decode(data)?)
+        } else {
+            None
+        };
+        let rejected_nssa_iin_ta = if optionals[2] {
+            Some(RejectedNssaIinTa::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            configured_nssai,
+            rejected_nssa_iin_plmn,
+            rejected_nssa_iin_ta,
+        })
+    }
+}
+
 // SrvccOperationPossible
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SrvccOperationPossible {
     Possible,
     NotPossible,
+}
+
+impl AperCodec for SrvccOperationPossible {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // ConfiguredNssai
 #[derive(Clone)]
 pub struct ConfiguredNssai(pub Vec<u8>);
 
+impl AperCodec for ConfiguredNssai {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(128),
+            Some(128),
+            false,
+        )?))
+    }
+}
+
 // RejectedNssaIinPlmn
 #[derive(Clone)]
 pub struct RejectedNssaIinPlmn(pub Vec<u8>);
+
+impl AperCodec for RejectedNssaIinPlmn {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(32),
+            Some(32),
+            false,
+        )?))
+    }
+}
 
 // RejectedNssaIinTa
 #[derive(Clone)]
 pub struct RejectedNssaIinTa(pub Vec<u8>);
 
+impl AperCodec for RejectedNssaIinTa {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(32),
+            Some(32),
+            false,
+        )?))
+    }
+}
+
 // Sst
 #[derive(Clone)]
 pub struct Sst(pub Vec<u8>);
 
+impl AperCodec for Sst {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(1),
+            Some(1),
+            false,
+        )?))
+    }
+}
+
 // SupportedTaList
 #[derive(Clone)]
 pub struct SupportedTaList(pub Vec<SupportedTaItem>);
+
+impl AperCodec for SupportedTaList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SupportedTaItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // SupportedTaItem
 #[derive(Clone)]
@@ -4107,27 +13333,90 @@ pub struct SupportedTaItem {
     pub broadcast_plmn_list: BroadcastPlmnList,
 }
 
+impl AperCodec for SupportedTaItem {
+    type Output = SupportedTaItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tac = Tac::decode(data)?;
+        let broadcast_plmn_list = BroadcastPlmnList::decode(data)?;
+
+        Ok(Self {
+            tac,
+            broadcast_plmn_list,
+        })
+    }
+}
+
 // SuspendIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SuspendIndicator {
     True,
 }
 
+impl AperCodec for SuspendIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // SuspendRequestIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SuspendRequestIndication {
     SuspendRequested,
 }
 
+impl AperCodec for SuspendRequestIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // SuspendResponseIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum SuspendResponseIndication {
     SuspendIndicated,
+}
+
+impl AperCodec for SuspendResponseIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // Tac
 #[derive(Clone)]
 pub struct Tac(pub Vec<u8>);
+
+impl AperCodec for Tac {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(3),
+            Some(3),
+            false,
+        )?))
+    }
+}
 
 // Tai
 #[derive(Clone)]
@@ -4136,9 +13425,36 @@ pub struct Tai {
     pub tac: Tac,
 }
 
+impl AperCodec for Tai {
+    type Output = Tai;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let plmn_identity = PlmnIdentity::decode(data)?;
+        let tac = Tac::decode(data)?;
+
+        Ok(Self { plmn_identity, tac })
+    }
+}
+
 // TaiBroadcastEutra
 #[derive(Clone)]
 pub struct TaiBroadcastEutra(pub Vec<TaiBroadcastEutraItem>);
+
+impl AperCodec for TaiBroadcastEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TaiBroadcastEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaiBroadcastEutraItem
 #[derive(Clone)]
@@ -4147,9 +13463,39 @@ pub struct TaiBroadcastEutraItem {
     pub completed_cells_in_tai_eutra: CompletedCellsInTaiEutra,
 }
 
+impl AperCodec for TaiBroadcastEutraItem {
+    type Output = TaiBroadcastEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+        let completed_cells_in_tai_eutra = CompletedCellsInTaiEutra::decode(data)?;
+
+        Ok(Self {
+            tai,
+            completed_cells_in_tai_eutra,
+        })
+    }
+}
+
 // TaiBroadcastNr
 #[derive(Clone)]
 pub struct TaiBroadcastNr(pub Vec<TaiBroadcastNrItem>);
+
+impl AperCodec for TaiBroadcastNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TaiBroadcastNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaiBroadcastNrItem
 #[derive(Clone)]
@@ -4158,9 +13504,39 @@ pub struct TaiBroadcastNrItem {
     pub completed_cells_in_tai_nr: CompletedCellsInTaiNr,
 }
 
+impl AperCodec for TaiBroadcastNrItem {
+    type Output = TaiBroadcastNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+        let completed_cells_in_tai_nr = CompletedCellsInTaiNr::decode(data)?;
+
+        Ok(Self {
+            tai,
+            completed_cells_in_tai_nr,
+        })
+    }
+}
+
 // TaiCancelledEutra
 #[derive(Clone)]
 pub struct TaiCancelledEutra(pub Vec<TaiCancelledEutraItem>);
+
+impl AperCodec for TaiCancelledEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TaiCancelledEutraItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaiCancelledEutraItem
 #[derive(Clone)]
@@ -4169,9 +13545,39 @@ pub struct TaiCancelledEutraItem {
     pub cancelled_cells_in_tai_eutra: CancelledCellsInTaiEutra,
 }
 
+impl AperCodec for TaiCancelledEutraItem {
+    type Output = TaiCancelledEutraItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+        let cancelled_cells_in_tai_eutra = CancelledCellsInTaiEutra::decode(data)?;
+
+        Ok(Self {
+            tai,
+            cancelled_cells_in_tai_eutra,
+        })
+    }
+}
+
 // TaiCancelledNr
 #[derive(Clone)]
 pub struct TaiCancelledNr(pub Vec<TaiCancelledNrItem>);
+
+impl AperCodec for TaiCancelledNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TaiCancelledNrItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaiCancelledNrItem
 #[derive(Clone)]
@@ -4180,9 +13586,38 @@ pub struct TaiCancelledNrItem {
     pub cancelled_cells_in_tai_nr: CancelledCellsInTaiNr,
 }
 
+impl AperCodec for TaiCancelledNrItem {
+    type Output = TaiCancelledNrItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+        let cancelled_cells_in_tai_nr = CancelledCellsInTaiNr::decode(data)?;
+
+        Ok(Self {
+            tai,
+            cancelled_cells_in_tai_nr,
+        })
+    }
+}
+
 // TaiListForInactive
 #[derive(Clone)]
 pub struct TaiListForInactive(pub Vec<TaiListForInactiveItem>);
+
+impl AperCodec for TaiListForInactive {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TaiListForInactiveItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaiListForInactiveItem
 #[derive(Clone)]
@@ -4190,9 +13625,34 @@ pub struct TaiListForInactiveItem {
     pub tai: Tai,
 }
 
+impl AperCodec for TaiListForInactiveItem {
+    type Output = TaiListForInactiveItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+
+        Ok(Self { tai })
+    }
+}
+
 // TaiListForPaging
 #[derive(Clone)]
 pub struct TaiListForPaging(pub Vec<TaiListForPagingItem>);
+
+impl AperCodec for TaiListForPaging {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TaiListForPagingItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaiListForPagingItem
 #[derive(Clone)]
@@ -4200,19 +13660,74 @@ pub struct TaiListForPagingItem {
     pub tai: Tai,
 }
 
+impl AperCodec for TaiListForPagingItem {
+    type Output = TaiListForPagingItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai = Tai::decode(data)?;
+
+        Ok(Self { tai })
+    }
+}
+
 // TaiListForRestart
 #[derive(Clone)]
 pub struct TaiListForRestart(pub Vec<Tai>);
 
+impl AperCodec for TaiListForRestart {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2048), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tai::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // TaiListForWarning
 #[derive(Clone)]
 pub struct TaiListForWarning(pub Vec<Tai>);
+
+impl AperCodec for TaiListForWarning {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tai::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TargetEnbId
 #[derive(Clone)]
 pub struct TargetEnbId {
     pub global_enb_id: GlobalNgEnbId,
     pub selected_eps_tai: EpsTai,
+}
+
+impl AperCodec for TargetEnbId {
+    type Output = TargetEnbId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let global_enb_id = GlobalNgEnbId::decode(data)?;
+        let selected_eps_tai = EpsTai::decode(data)?;
+
+        Ok(Self {
+            global_enb_id,
+            selected_eps_tai,
+        })
+    }
 }
 
 // TargetId
@@ -4222,10 +13737,41 @@ pub enum TargetId {
     TargetEnbId(TargetEnbId),
 }
 
+impl AperCodec for TargetId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::TargetRanNodeId(TargetRanNodeId::decode(data)?)),
+            1 => Ok(Self::TargetEnbId(TargetEnbId::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // TargetNgranNodeToSourceNgranNodeTransparentContainer
 #[derive(Clone)]
 pub struct TargetNgranNodeToSourceNgranNodeTransparentContainer {
     pub rrc_container: RrcContainer,
+}
+
+impl AperCodec for TargetNgranNodeToSourceNgranNodeTransparentContainer {
+    type Output = TargetNgranNodeToSourceNgranNodeTransparentContainer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let rrc_container = RrcContainer::decode(data)?;
+
+        Ok(Self { rrc_container })
+    }
 }
 
 // TargetNgranNodeToSourceNgranNodeFailureTransparentContainer
@@ -4234,11 +13780,39 @@ pub struct TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
     pub cell_cag_information: CellCagInformation,
 }
 
+impl AperCodec for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
+    type Output = TargetNgranNodeToSourceNgranNodeFailureTransparentContainer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let cell_cag_information = CellCagInformation::decode(data)?;
+
+        Ok(Self {
+            cell_cag_information,
+        })
+    }
+}
+
 // TargetRanNodeId
 #[derive(Clone)]
 pub struct TargetRanNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
+}
+
+impl AperCodec for TargetRanNodeId {
+    type Output = TargetRanNodeId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let global_ran_node_id = GlobalRanNodeId::decode(data)?;
+        let selected_tai = Tai::decode(data)?;
+
+        Ok(Self {
+            global_ran_node_id,
+            selected_tai,
+        })
+    }
 }
 
 // TargetRncId
@@ -4249,26 +13823,89 @@ pub struct TargetRncId {
     pub extended_rnc_id: Option<ExtendedRncId>,
 }
 
+impl AperCodec for TargetRncId {
+    type Output = TargetRncId;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let lai = Lai::decode(data)?;
+        let rnc_id = RncId::decode(data)?;
+        let extended_rnc_id = if optionals[0] {
+            Some(ExtendedRncId::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            lai,
+            rnc_id,
+            extended_rnc_id,
+        })
+    }
+}
+
 // TargetToSourceTransparentContainer
 #[derive(Clone)]
 pub struct TargetToSourceTransparentContainer(pub Vec<u8>);
+
+impl AperCodec for TargetToSourceTransparentContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // TargettoSourceFailureTransparentContainer
 #[derive(Clone)]
 pub struct TargettoSourceFailureTransparentContainer(pub Vec<u8>);
 
+impl AperCodec for TargettoSourceFailureTransparentContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // TimerApproachForGuamiRemoval
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TimerApproachForGuamiRemoval {
     ApplyTimer,
+}
+
+impl AperCodec for TimerApproachForGuamiRemoval {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // TimeStamp
 #[derive(Clone)]
 pub struct TimeStamp(pub Vec<u8>);
 
+impl AperCodec for TimeStamp {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(4),
+            Some(4),
+            false,
+        )?))
+    }
+}
+
 // TimeToWait
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TimeToWait {
     V1s,
     V2s,
@@ -4278,17 +13915,55 @@ pub enum TimeToWait {
     V60s,
 }
 
+impl AperCodec for TimeToWait {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(5), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // TimeUeStayedInCell
 #[derive(Clone)]
 pub struct TimeUeStayedInCell(pub u16);
+
+impl AperCodec for TimeUeStayedInCell {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(4095), false)?.0 as u16,
+        ))
+    }
+}
 
 // TimeUeStayedInCellEnhancedGranularity
 #[derive(Clone)]
 pub struct TimeUeStayedInCellEnhancedGranularity(pub u16);
 
+impl AperCodec for TimeUeStayedInCellEnhancedGranularity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(40950), false)?.0 as u16,
+        ))
+    }
+}
+
 // TnapId
 #[derive(Clone)]
 pub struct TnapId(pub Vec<u8>);
+
+impl AperCodec for TnapId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // TngfId
 #[derive(Clone)]
@@ -4296,13 +13971,60 @@ pub enum TngfId {
     TngfId(BitString),
 }
 
+impl AperCodec for TngfId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::TngfId(aper::decode::decode_bitstring(
+                data,
+                Some(32),
+                Some(32),
+                true,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // TnlAddressWeightFactor
 #[derive(Clone)]
 pub struct TnlAddressWeightFactor(pub u8);
 
+impl AperCodec for TnlAddressWeightFactor {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8,
+        ))
+    }
+}
+
 // TnlAssociationList
 #[derive(Clone)]
 pub struct TnlAssociationList(pub Vec<TnlAssociationItem>);
+
+impl AperCodec for TnlAssociationList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TnlAssociationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TnlAssociationItem
 #[derive(Clone)]
@@ -4311,12 +14033,39 @@ pub struct TnlAssociationItem {
     pub cause: Cause,
 }
 
+impl AperCodec for TnlAssociationItem {
+    type Output = TnlAssociationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tnl_association_address = CpTransportLayerInformation::decode(data)?;
+        let cause = Cause::decode(data)?;
+
+        Ok(Self {
+            tnl_association_address,
+            cause,
+        })
+    }
+}
+
 // TnlAssociationUsage
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TnlAssociationUsage {
     Ue,
     NonUe,
     Both,
+}
+
+impl AperCodec for TnlAssociationUsage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // TooearlyIntersystemHo
@@ -4325,6 +14074,26 @@ pub struct TooearlyIntersystemHo {
     pub sourcecell_id: EutraCgi,
     pub failurecell_id: NgranCgi,
     pub ue_rlf_report_container: Option<UeRlfReportContainer>,
+}
+
+impl AperCodec for TooearlyIntersystemHo {
+    type Output = TooearlyIntersystemHo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let sourcecell_id = EutraCgi::decode(data)?;
+        let failurecell_id = NgranCgi::decode(data)?;
+        let ue_rlf_report_container = if optionals[0] {
+            Some(UeRlfReportContainer::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            sourcecell_id,
+            failurecell_id,
+            ue_rlf_report_container,
+        })
+    }
 }
 
 // TraceActivation
@@ -4336,8 +14105,28 @@ pub struct TraceActivation {
     pub trace_collection_entity_ip_address: TransportLayerAddress,
 }
 
+impl AperCodec for TraceActivation {
+    type Output = TraceActivation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ngran_trace_id = NgranTraceId::decode(data)?;
+        let interfaces_to_trace = InterfacesToTrace::decode(data)?;
+        let trace_depth = TraceDepth::decode(data)?;
+        let trace_collection_entity_ip_address = TransportLayerAddress::decode(data)?;
+
+        Ok(Self {
+            ngran_trace_id,
+            interfaces_to_trace,
+            trace_depth,
+            trace_collection_entity_ip_address,
+        })
+    }
+}
+
 // TraceDepth
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TraceDepth {
     Minimum,
     Medium,
@@ -4347,19 +14136,63 @@ pub enum TraceDepth {
     MaximumWithoutVendorSpecificExtension,
 }
 
+impl AperCodec for TraceDepth {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(5), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // TrafficLoadReductionIndication
 #[derive(Clone)]
 pub struct TrafficLoadReductionIndication(pub u8);
+
+impl AperCodec for TrafficLoadReductionIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(1), Some(99), false)?.0 as u8,
+        ))
+    }
+}
 
 // TransportLayerAddress
 #[derive(Clone)]
 pub struct TransportLayerAddress(pub BitString);
 
+impl AperCodec for TransportLayerAddress {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(1),
+            Some(160),
+            true,
+        )?))
+    }
+}
+
 // TypeOfError
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TypeOfError {
     NotUnderstood,
     Missing,
+}
+
+impl AperCodec for TypeOfError {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // TaiBasedMdt
@@ -4368,9 +14201,34 @@ pub struct TaiBasedMdt {
     pub tai_listfor_mdt: TaiListforMdt,
 }
 
+impl AperCodec for TaiBasedMdt {
+    type Output = TaiBasedMdt;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let tai_listfor_mdt = TaiListforMdt::decode(data)?;
+
+        Ok(Self { tai_listfor_mdt })
+    }
+}
+
 // TaiListforMdt
 #[derive(Clone)]
 pub struct TaiListforMdt(pub Vec<Tai>);
+
+impl AperCodec for TaiListforMdt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tai::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // TaBasedMdt
 #[derive(Clone)]
@@ -4378,24 +14236,77 @@ pub struct TaBasedMdt {
     pub ta_listfor_mdt: TaListforMdt,
 }
 
+impl AperCodec for TaBasedMdt {
+    type Output = TaBasedMdt;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ta_listfor_mdt = TaListforMdt::decode(data)?;
+
+        Ok(Self { ta_listfor_mdt })
+    }
+}
+
 // TaListforMdt
 #[derive(Clone)]
 pub struct TaListforMdt(pub Vec<Tac>);
+
+impl AperCodec for TaListforMdt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(Tac::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // ThresholdRsrp
 #[derive(Clone)]
 pub struct ThresholdRsrp(pub u8);
 
+impl AperCodec for ThresholdRsrp {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(127), false)?.0 as u8,
+        ))
+    }
+}
+
 // ThresholdRsrq
 #[derive(Clone)]
 pub struct ThresholdRsrq(pub u8);
+
+impl AperCodec for ThresholdRsrq {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(127), false)?.0 as u8,
+        ))
+    }
+}
 
 // ThresholdSinr
 #[derive(Clone)]
 pub struct ThresholdSinr(pub u8);
 
+impl AperCodec for ThresholdSinr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(127), false)?.0 as u8,
+        ))
+    }
+}
+
 // TimeToTrigger
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TimeToTrigger {
     Ms0,
     Ms40,
@@ -4415,14 +14326,58 @@ pub enum TimeToTrigger {
     Ms5120,
 }
 
+impl AperCodec for TimeToTrigger {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(15), false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // TwapId
 #[derive(Clone)]
 pub struct TwapId(pub Vec<u8>);
+
+impl AperCodec for TwapId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // TwifId
 #[derive(Clone)]
 pub enum TwifId {
     TwifId(BitString),
+}
+
+impl AperCodec for TwifId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::TwifId(aper::decode::decode_bitstring(
+                data,
+                Some(32),
+                Some(32),
+                true,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // TscAssistanceInformation
@@ -4432,11 +14387,51 @@ pub struct TscAssistanceInformation {
     pub burst_arrival_time: Option<BurstArrivalTime>,
 }
 
+impl AperCodec for TscAssistanceInformation {
+    type Output = TscAssistanceInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let periodicity = Periodicity::decode(data)?;
+        let burst_arrival_time = if optionals[0] {
+            Some(BurstArrivalTime::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            periodicity,
+            burst_arrival_time,
+        })
+    }
+}
+
 // TscTrafficCharacteristics
 #[derive(Clone)]
 pub struct TscTrafficCharacteristics {
     pub tsc_assistance_information_dl: Option<TscAssistanceInformation>,
     pub tsc_assistance_information_ul: Option<TscAssistanceInformation>,
+}
+
+impl AperCodec for TscTrafficCharacteristics {
+    type Output = TscTrafficCharacteristics;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let tsc_assistance_information_dl = if optionals[0] {
+            Some(TscAssistanceInformation::decode(data)?)
+        } else {
+            None
+        };
+        let tsc_assistance_information_ul = if optionals[1] {
+            Some(TscAssistanceInformation::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            tsc_assistance_information_dl,
+            tsc_assistance_information_ul,
+        })
+    }
 }
 
 // UeAggregateMaximumBitRate
@@ -4446,9 +14441,39 @@ pub struct UeAggregateMaximumBitRate {
     pub ue_aggregate_maximum_bit_rate_ul: BitRate,
 }
 
+impl AperCodec for UeAggregateMaximumBitRate {
+    type Output = UeAggregateMaximumBitRate;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ue_aggregate_maximum_bit_rate_dl = BitRate::decode(data)?;
+        let ue_aggregate_maximum_bit_rate_ul = BitRate::decode(data)?;
+
+        Ok(Self {
+            ue_aggregate_maximum_bit_rate_dl,
+            ue_aggregate_maximum_bit_rate_ul,
+        })
+    }
+}
+
 // UeAssociatedLogicalNgConnectionList
 #[derive(Clone)]
 pub struct UeAssociatedLogicalNgConnectionList(pub Vec<UeAssociatedLogicalNgConnectionItem>);
+
+impl AperCodec for UeAssociatedLogicalNgConnectionList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length =
+                aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(UeAssociatedLogicalNgConnectionItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UeAssociatedLogicalNgConnectionItem
 #[derive(Clone)]
@@ -4457,16 +14482,62 @@ pub struct UeAssociatedLogicalNgConnectionItem {
     pub ran_ue_ngap_id: Option<RanUeNgapId>,
 }
 
+impl AperCodec for UeAssociatedLogicalNgConnectionItem {
+    type Output = UeAssociatedLogicalNgConnectionItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let amf_ue_ngap_id = if optionals[0] {
+            Some(AmfUeNgapId::decode(data)?)
+        } else {
+            None
+        };
+        let ran_ue_ngap_id = if optionals[1] {
+            Some(RanUeNgapId::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+        })
+    }
+}
+
 // UeCapabilityInfoRequest
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UeCapabilityInfoRequest {
     Requested,
 }
 
+impl AperCodec for UeCapabilityInfoRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // UeContextRequest
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UeContextRequest {
     Requested,
+}
+
+impl AperCodec for UeContextRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // UeContextResumeRequestTransfer
@@ -4475,16 +14546,62 @@ pub struct UeContextResumeRequestTransfer {
     pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
 }
 
+impl AperCodec for UeContextResumeRequestTransfer {
+    type Output = UeContextResumeRequestTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_failed_to_resume_list = if optionals[0] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_failed_to_resume_list,
+        })
+    }
+}
+
 // UeContextResumeResponseTransfer
 #[derive(Clone)]
 pub struct UeContextResumeResponseTransfer {
     pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
 }
 
+impl AperCodec for UeContextResumeResponseTransfer {
+    type Output = UeContextResumeResponseTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let qos_flow_failed_to_resume_list = if optionals[0] {
+            Some(QosFlowListWithCause::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qos_flow_failed_to_resume_list,
+        })
+    }
+}
+
 // UeContextSuspendRequestTransfer
 #[derive(Clone)]
 pub struct UeContextSuspendRequestTransfer {
     pub suspend_indicator: Option<SuspendIndicator>,
+}
+
+impl AperCodec for UeContextSuspendRequestTransfer {
+    type Output = UeContextSuspendRequestTransfer;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let suspend_indicator = if optionals[0] {
+            Some(SuspendIndicator::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self { suspend_indicator })
+    }
 }
 
 // UeDifferentiationInfo
@@ -4498,9 +14615,69 @@ pub struct UeDifferentiationInfo {
     pub battery_indication: Option<BatteryIndication>,
 }
 
+impl AperCodec for UeDifferentiationInfo {
+    type Output = UeDifferentiationInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 7)?;
+        let periodic_communication_indicator = if optionals[0] {
+            Some(PeriodicCommunicationIndicator::decode(data)?)
+        } else {
+            None
+        };
+        let periodic_time = if optionals[1] {
+            Some(aper::decode::decode_integer(data, Some(1), Some(3600), true)?.0 as u16)
+        } else {
+            None
+        };
+        let scheduled_communication_time = if optionals[2] {
+            Some(ScheduledCommunicationTime::decode(data)?)
+        } else {
+            None
+        };
+        let stationary_indication = if optionals[3] {
+            Some(StationaryIndication::decode(data)?)
+        } else {
+            None
+        };
+        let traffic_profile = if optionals[4] {
+            Some(TrafficProfile::decode(data)?)
+        } else {
+            None
+        };
+        let battery_indication = if optionals[5] {
+            Some(BatteryIndication::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            periodic_communication_indicator,
+            periodic_time,
+            scheduled_communication_time,
+            stationary_indication,
+            traffic_profile,
+            battery_indication,
+        })
+    }
+}
+
 // UeHistoryInformation
 #[derive(Clone)]
 pub struct UeHistoryInformation(pub Vec<LastVisitedCellItem>);
+
+impl AperCodec for UeHistoryInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(LastVisitedCellItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UeHistoryInformationFromTheUe
 #[derive(Clone)]
@@ -4508,10 +14685,53 @@ pub enum UeHistoryInformationFromTheUe {
     Nr(NrMobilityHistoryReport),
 }
 
+impl AperCodec for UeHistoryInformationFromTheUe {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::Nr(NrMobilityHistoryReport::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // UeIdentityIndexValue
 #[derive(Clone)]
 pub enum UeIdentityIndexValue {
     IndexLength10(BitString),
+}
+
+impl AperCodec for UeIdentityIndexValue {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::IndexLength10(aper::decode::decode_bitstring(
+                data,
+                Some(10),
+                Some(10),
+                false,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // UeNgapIDs
@@ -4521,11 +14741,46 @@ pub enum UeNgapIDs {
     AmfUeNgapId(AmfUeNgapId),
 }
 
+impl AperCodec for UeNgapIDs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::UeNgapIdPair(UeNgapIdPair::decode(data)?)),
+            1 => Ok(Self::AmfUeNgapId(AmfUeNgapId::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // UeNgapIdPair
 #[derive(Clone)]
 pub struct UeNgapIdPair {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
+}
+
+impl AperCodec for UeNgapIdPair {
+    type Output = UeNgapIdPair;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let amf_ue_ngap_id = AmfUeNgapId::decode(data)?;
+        let ran_ue_ngap_id = RanUeNgapId::decode(data)?;
+
+        Ok(Self {
+            amf_ue_ngap_id,
+            ran_ue_ngap_id,
+        })
+    }
 }
 
 // UePagingIdentity
@@ -4534,17 +14789,62 @@ pub enum UePagingIdentity {
     FiveGSTmsi(FiveGSTmsi),
 }
 
+impl AperCodec for UePagingIdentity {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::FiveGSTmsi(FiveGSTmsi::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // UePresence
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UePresence {
     In,
     Out,
     Unknown,
 }
 
+impl AperCodec for UePresence {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // UePresenceInAreaOfInterestList
 #[derive(Clone)]
 pub struct UePresenceInAreaOfInterestList(pub Vec<UePresenceInAreaOfInterestItem>);
+
+impl AperCodec for UePresenceInAreaOfInterestList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(UePresenceInAreaOfInterestItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UePresenceInAreaOfInterestItem
 #[derive(Clone)]
@@ -4553,9 +14853,33 @@ pub struct UePresenceInAreaOfInterestItem {
     pub ue_presence: UePresence,
 }
 
+impl AperCodec for UePresenceInAreaOfInterestItem {
+    type Output = UePresenceInAreaOfInterestItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let location_reporting_reference_id = LocationReportingReferenceId::decode(data)?;
+        let ue_presence = UePresence::decode(data)?;
+
+        Ok(Self {
+            location_reporting_reference_id,
+            ue_presence,
+        })
+    }
+}
+
 // UeRadioCapability
 #[derive(Clone)]
 pub struct UeRadioCapability(pub Vec<u8>);
+
+impl AperCodec for UeRadioCapability {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // UeRadioCapabilityForPaging
 #[derive(Clone)]
@@ -4564,26 +14888,96 @@ pub struct UeRadioCapabilityForPaging {
     pub ue_radio_capability_for_paging_of_eutra: Option<UeRadioCapabilityForPagingOfEutra>,
 }
 
+impl AperCodec for UeRadioCapabilityForPaging {
+    type Output = UeRadioCapabilityForPaging;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let ue_radio_capability_for_paging_of_nr = if optionals[0] {
+            Some(UeRadioCapabilityForPagingOfNr::decode(data)?)
+        } else {
+            None
+        };
+        let ue_radio_capability_for_paging_of_eutra = if optionals[1] {
+            Some(UeRadioCapabilityForPagingOfEutra::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            ue_radio_capability_for_paging_of_nr,
+            ue_radio_capability_for_paging_of_eutra,
+        })
+    }
+}
+
 // UeRadioCapabilityForPagingOfNbIot
 #[derive(Clone)]
 pub struct UeRadioCapabilityForPagingOfNbIot(pub Vec<u8>);
+
+impl AperCodec for UeRadioCapabilityForPagingOfNbIot {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // UeRadioCapabilityForPagingOfNr
 #[derive(Clone)]
 pub struct UeRadioCapabilityForPagingOfNr(pub Vec<u8>);
 
+impl AperCodec for UeRadioCapabilityForPagingOfNr {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // UeRadioCapabilityForPagingOfEutra
 #[derive(Clone)]
 pub struct UeRadioCapabilityForPagingOfEutra(pub Vec<u8>);
+
+impl AperCodec for UeRadioCapabilityForPagingOfEutra {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // UeRadioCapabilityId
 #[derive(Clone)]
 pub struct UeRadioCapabilityId(pub Vec<u8>);
 
+impl AperCodec for UeRadioCapabilityId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data, None, None, false,
+        )?))
+    }
+}
+
 // UeRetentionInformation
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UeRetentionInformation {
     UesRetained,
+}
+
+impl AperCodec for UeRetentionInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // UeRlfReportContainer
@@ -4591,6 +14985,26 @@ pub enum UeRetentionInformation {
 pub enum UeRlfReportContainer {
     Nr(NrueRlfReportContainer),
     Lte(LteueRlfReportContainer),
+}
+
+impl AperCodec for UeRlfReportContainer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::Nr(NrueRlfReportContainer::decode(data)?)),
+            1 => Ok(Self::Lte(LteueRlfReportContainer::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // UeSecurityCapabilities
@@ -4602,10 +15016,42 @@ pub struct UeSecurityCapabilities {
     pub eutr_aintegrity_protection_algorithms: EutrAintegrityProtectionAlgorithms,
 }
 
+impl AperCodec for UeSecurityCapabilities {
+    type Output = UeSecurityCapabilities;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let n_rencryption_algorithms = NRencryptionAlgorithms::decode(data)?;
+        let n_rintegrity_protection_algorithms = NRintegrityProtectionAlgorithms::decode(data)?;
+        let eutr_aencryption_algorithms = EutrAencryptionAlgorithms::decode(data)?;
+        let eutr_aintegrity_protection_algorithms =
+            EutrAintegrityProtectionAlgorithms::decode(data)?;
+
+        Ok(Self {
+            n_rencryption_algorithms,
+            n_rintegrity_protection_algorithms,
+            eutr_aencryption_algorithms,
+            eutr_aintegrity_protection_algorithms,
+        })
+    }
+}
+
 // UeUpCIotSupport
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UeUpCIotSupport {
     Supported,
+}
+
+impl AperCodec for UeUpCIotSupport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // UlCpSecurityInformation
@@ -4615,17 +15061,70 @@ pub struct UlCpSecurityInformation {
     pub ul_nas_count: UlNasCount,
 }
 
+impl AperCodec for UlCpSecurityInformation {
+    type Output = UlCpSecurityInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ul_nas_mac = UlNasMac::decode(data)?;
+        let ul_nas_count = UlNasCount::decode(data)?;
+
+        Ok(Self {
+            ul_nas_mac,
+            ul_nas_count,
+        })
+    }
+}
+
 // UlNasMac
 #[derive(Clone)]
 pub struct UlNasMac(pub BitString);
+
+impl AperCodec for UlNasMac {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(16),
+            Some(16),
+            false,
+        )?))
+    }
+}
 
 // UlNasCount
 #[derive(Clone)]
 pub struct UlNasCount(pub BitString);
 
+impl AperCodec for UlNasCount {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(5),
+            Some(5),
+            false,
+        )?))
+    }
+}
+
 // UlNguUpTnlModifyList
 #[derive(Clone)]
 pub struct UlNguUpTnlModifyList(pub Vec<UlNguUpTnlModifyItem>);
+
+impl AperCodec for UlNguUpTnlModifyList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(4), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(UlNguUpTnlModifyItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UlNguUpTnlModifyItem
 #[derive(Clone)]
@@ -4634,9 +15133,38 @@ pub struct UlNguUpTnlModifyItem {
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
 }
 
+impl AperCodec for UlNguUpTnlModifyItem {
+    type Output = UlNguUpTnlModifyItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ul_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+
+        Ok(Self {
+            ul_ngu_up_tnl_information,
+            dl_ngu_up_tnl_information,
+        })
+    }
+}
+
 // UnavailableGuamiList
 #[derive(Clone)]
 pub struct UnavailableGuamiList(pub Vec<UnavailableGuamiItem>);
+
+impl AperCodec for UnavailableGuamiList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(UnavailableGuamiItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UnavailableGuamiItem
 #[derive(Clone)]
@@ -4646,15 +15174,63 @@ pub struct UnavailableGuamiItem {
     pub backup_amf_name: Option<AmfName>,
 }
 
+impl AperCodec for UnavailableGuamiItem {
+    type Output = UnavailableGuamiItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let guami = Guami::decode(data)?;
+        let timer_approach_for_guami_removal = if optionals[0] {
+            Some(TimerApproachForGuamiRemoval::decode(data)?)
+        } else {
+            None
+        };
+        let backup_amf_name = if optionals[1] {
+            Some(AmfName::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            guami,
+            timer_approach_for_guami_removal,
+            backup_amf_name,
+        })
+    }
+}
+
 // UlForwarding
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UlForwarding {
     UlForwardingProposed,
+}
+
+impl AperCodec for UlForwarding {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // UpdateFeedback
 #[derive(Clone)]
 pub struct UpdateFeedback(pub BitString);
+
+impl AperCodec for UpdateFeedback {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_bitstring(
+            data,
+            Some(8),
+            Some(8),
+            true,
+        )?))
+    }
+}
 
 // UpTransportLayerInformation
 #[derive(Clone)]
@@ -4662,9 +15238,42 @@ pub enum UpTransportLayerInformation {
     GtpTunnel(GtpTunnel),
 }
 
+impl AperCodec for UpTransportLayerInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::GtpTunnel(GtpTunnel::decode(data)?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // UpTransportLayerInformationList
 #[derive(Clone)]
 pub struct UpTransportLayerInformationList(pub Vec<UpTransportLayerInformationItem>);
+
+impl AperCodec for UpTransportLayerInformationList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(UpTransportLayerInformationItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UpTransportLayerInformationItem
 #[derive(Clone)]
@@ -4672,9 +15281,36 @@ pub struct UpTransportLayerInformationItem {
     pub ngu_up_tnl_information: UpTransportLayerInformation,
 }
 
+impl AperCodec for UpTransportLayerInformationItem {
+    type Output = UpTransportLayerInformationItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+
+        Ok(Self {
+            ngu_up_tnl_information,
+        })
+    }
+}
+
 // UpTransportLayerInformationPairList
 #[derive(Clone)]
 pub struct UpTransportLayerInformationPairList(pub Vec<UpTransportLayerInformationPairItem>);
+
+impl AperCodec for UpTransportLayerInformationPairList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(UpTransportLayerInformationPairItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // UpTransportLayerInformationPairItem
 #[derive(Clone)]
@@ -4683,9 +15319,33 @@ pub struct UpTransportLayerInformationPairItem {
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
 }
 
+impl AperCodec for UpTransportLayerInformationPairItem {
+    type Output = UpTransportLayerInformationPairItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ul_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+        let dl_ngu_up_tnl_information = UpTransportLayerInformation::decode(data)?;
+
+        Ok(Self {
+            ul_ngu_up_tnl_information,
+            dl_ngu_up_tnl_information,
+        })
+    }
+}
+
 // UriAddress
 #[derive(Clone)]
 pub struct UriAddress(pub String);
+
+impl AperCodec for UriAddress {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_visible_string(
+            data, None, None, false,
+        )?))
+    }
+}
 
 // UserLocationInformation
 #[derive(Clone)]
@@ -4693,6 +15353,33 @@ pub enum UserLocationInformation {
     UserLocationInformationEutra(UserLocationInformationEutra),
     UserLocationInformationNr(UserLocationInformationNr),
     UserLocationInformationN3Iwf(UserLocationInformationN3Iwf),
+}
+
+impl AperCodec for UserLocationInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::UserLocationInformationEutra(
+                UserLocationInformationEutra::decode(data)?,
+            )),
+            1 => Ok(Self::UserLocationInformationNr(
+                UserLocationInformationNr::decode(data)?,
+            )),
+            2 => Ok(Self::UserLocationInformationN3Iwf(
+                UserLocationInformationN3Iwf::decode(data)?,
+            )),
+            3 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // UserLocationInformationEutra
@@ -4703,11 +15390,46 @@ pub struct UserLocationInformationEutra {
     pub time_stamp: Option<TimeStamp>,
 }
 
+impl AperCodec for UserLocationInformationEutra {
+    type Output = UserLocationInformationEutra;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let eutra_cgi = EutraCgi::decode(data)?;
+        let tai = Tai::decode(data)?;
+        let time_stamp = if optionals[0] {
+            Some(TimeStamp::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            eutra_cgi,
+            tai,
+            time_stamp,
+        })
+    }
+}
+
 // UserLocationInformationN3Iwf
 #[derive(Clone)]
 pub struct UserLocationInformationN3Iwf {
     pub ip_address: TransportLayerAddress,
     pub port_number: PortNumber,
+}
+
+impl AperCodec for UserLocationInformationN3Iwf {
+    type Output = UserLocationInformationN3Iwf;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let ip_address = TransportLayerAddress::decode(data)?;
+        let port_number = PortNumber::decode(data)?;
+
+        Ok(Self {
+            ip_address,
+            port_number,
+        })
+    }
 }
 
 // UserLocationInformationTngf
@@ -4718,6 +15440,26 @@ pub struct UserLocationInformationTngf {
     pub port_number: Option<PortNumber>,
 }
 
+impl AperCodec for UserLocationInformationTngf {
+    type Output = UserLocationInformationTngf;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let tnap_id = TnapId::decode(data)?;
+        let ip_address = TransportLayerAddress::decode(data)?;
+        let port_number = if optionals[0] {
+            Some(PortNumber::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            tnap_id,
+            ip_address,
+            port_number,
+        })
+    }
+}
+
 // UserLocationInformationTwif
 #[derive(Clone)]
 pub struct UserLocationInformationTwif {
@@ -4726,11 +15468,51 @@ pub struct UserLocationInformationTwif {
     pub port_number: Option<PortNumber>,
 }
 
+impl AperCodec for UserLocationInformationTwif {
+    type Output = UserLocationInformationTwif;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let twap_id = TwapId::decode(data)?;
+        let ip_address = TransportLayerAddress::decode(data)?;
+        let port_number = if optionals[0] {
+            Some(PortNumber::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            twap_id,
+            ip_address,
+            port_number,
+        })
+    }
+}
+
 // UserLocationInformationWAgf
 #[derive(Clone)]
 pub enum UserLocationInformationWAgf {
     GlobalLineId(GlobalLineId),
     HfcNodeId(HfcNodeId),
+}
+
+impl AperCodec for UserLocationInformationWAgf {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::GlobalLineId(GlobalLineId::decode(data)?)),
+            1 => Ok(Self::HfcNodeId(HfcNodeId::decode(data)?)),
+            2 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
 }
 
 // UserLocationInformationNr
@@ -4741,6 +15523,26 @@ pub struct UserLocationInformationNr {
     pub time_stamp: Option<TimeStamp>,
 }
 
+impl AperCodec for UserLocationInformationNr {
+    type Output = UserLocationInformationNr;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let nr_cgi = NrCgi::decode(data)?;
+        let tai = Tai::decode(data)?;
+        let time_stamp = if optionals[0] {
+            Some(TimeStamp::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            nr_cgi,
+            tai,
+            time_stamp,
+        })
+    }
+}
+
 // UserPlaneSecurityInformation
 #[derive(Clone)]
 pub struct UserPlaneSecurityInformation {
@@ -4748,9 +15550,38 @@ pub struct UserPlaneSecurityInformation {
     pub security_indication: SecurityIndication,
 }
 
+impl AperCodec for UserPlaneSecurityInformation {
+    type Output = UserPlaneSecurityInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let security_result = SecurityResult::decode(data)?;
+        let security_indication = SecurityIndication::decode(data)?;
+
+        Ok(Self {
+            security_result,
+            security_indication,
+        })
+    }
+}
+
 // VolumeTimedReportList
 #[derive(Clone)]
 pub struct VolumeTimedReportList(pub Vec<VolumeTimedReportItem>);
+
+impl AperCodec for VolumeTimedReportList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(VolumeTimedReportItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // VolumeTimedReportItem
 #[derive(Clone)]
@@ -4761,15 +15592,70 @@ pub struct VolumeTimedReportItem {
     pub usage_count_dl: u64,
 }
 
+impl AperCodec for VolumeTimedReportItem {
+    type Output = VolumeTimedReportItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let start_time_stamp = aper::decode::decode_octetstring(data, Some(4), Some(4), false)?;
+        let end_time_stamp = aper::decode::decode_octetstring(data, Some(4), Some(4), false)?;
+        let usage_count_ul = aper::decode::decode_integer(data, Some(0), None, false)?.0 as u64;
+        let usage_count_dl = aper::decode::decode_integer(data, Some(0), None, false)?.0 as u64;
+
+        Ok(Self {
+            start_time_stamp,
+            end_time_stamp,
+            usage_count_ul,
+            usage_count_dl,
+        })
+    }
+}
+
 // WAgfId
 #[derive(Clone)]
 pub enum WAgfId {
     WAgfId(BitString),
 }
 
+impl AperCodec for WAgfId {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::WAgfId(aper::decode::decode_bitstring(
+                data,
+                Some(16),
+                Some(16),
+                true,
+            )?)),
+            1 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // WarningAreaCoordinates
 #[derive(Clone)]
 pub struct WarningAreaCoordinates(pub Vec<u8>);
+
+impl AperCodec for WarningAreaCoordinates {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(1),
+            Some(1024),
+            false,
+        )?))
+    }
+}
 
 // WarningAreaList
 #[derive(Clone)]
@@ -4780,17 +15666,81 @@ pub enum WarningAreaList {
     EmergencyAreaIdList(EmergencyAreaIdList),
 }
 
+impl AperCodec for WarningAreaList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
+        }
+        match idx {
+            0 => Ok(Self::EutraCgiListForWarning(
+                EutraCgiListForWarning::decode(data)?,
+            )),
+            1 => Ok(Self::NrCgiListForWarning(NrCgiListForWarning::decode(
+                data,
+            )?)),
+            2 => Ok(Self::TaiListForWarning(TaiListForWarning::decode(data)?)),
+            3 => Ok(Self::EmergencyAreaIdList(EmergencyAreaIdList::decode(
+                data,
+            )?)),
+            4 => Err(AperCodecError::new(
+                "Choice extension container not implemented",
+            )),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
+        }
+    }
+}
+
 // WarningMessageContents
 #[derive(Clone)]
 pub struct WarningMessageContents(pub Vec<u8>);
+
+impl AperCodec for WarningMessageContents {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(1),
+            Some(9600),
+            false,
+        )?))
+    }
+}
 
 // WarningSecurityInfo
 #[derive(Clone)]
 pub struct WarningSecurityInfo(pub Vec<u8>);
 
+impl AperCodec for WarningSecurityInfo {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(50),
+            Some(50),
+            false,
+        )?))
+    }
+}
+
 // WarningType
 #[derive(Clone)]
 pub struct WarningType(pub Vec<u8>);
+
+impl AperCodec for WarningType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(2),
+            Some(2),
+            false,
+        )?))
+    }
+}
 
 // WlanMeasurementConfiguration
 #[derive(Clone)]
@@ -4801,9 +15751,53 @@ pub struct WlanMeasurementConfiguration {
     pub wlan_rtt: Option<WlanRtt>,
 }
 
+impl AperCodec for WlanMeasurementConfiguration {
+    type Output = WlanMeasurementConfiguration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
+        let wlan_meas_config = WlanMeasConfig::decode(data)?;
+        let wlan_meas_config_name_list = if optionals[0] {
+            Some(WlanMeasConfigNameList::decode(data)?)
+        } else {
+            None
+        };
+        let wlan_rssi = if optionals[1] {
+            Some(WlanRssi::decode(data)?)
+        } else {
+            None
+        };
+        let wlan_rtt = if optionals[2] {
+            Some(WlanRtt::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            wlan_meas_config,
+            wlan_meas_config_name_list,
+            wlan_rssi,
+            wlan_rtt,
+        })
+    }
+}
+
 // WlanMeasConfigNameList
 #[derive(Clone)]
 pub struct WlanMeasConfigNameList(pub Vec<WlanMeasConfigNameItem>);
+
+impl AperCodec for WlanMeasConfigNameList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(4), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(WlanMeasConfigNameItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // WlanMeasConfigNameItem
 #[derive(Clone)]
@@ -4811,15 +15805,50 @@ pub struct WlanMeasConfigNameItem {
     pub wlan_name: WlanName,
 }
 
+impl AperCodec for WlanMeasConfigNameItem {
+    type Output = WlanMeasConfigNameItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let wlan_name = WlanName::decode(data)?;
+
+        Ok(Self { wlan_name })
+    }
+}
+
 // WlanMeasConfig
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum WlanMeasConfig {
     Setup,
+}
+
+impl AperCodec for WlanMeasConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }
 
 // WlanName
 #[derive(Clone)]
 pub struct WlanName(pub Vec<u8>);
+
+impl AperCodec for WlanName {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_octetstring(
+            data,
+            Some(1),
+            Some(32),
+            false,
+        )?))
+    }
+}
 
 // WusAssistanceInformation
 #[derive(Clone)]
@@ -4827,9 +15856,36 @@ pub struct WusAssistanceInformation {
     pub paging_probability_information: PagingProbabilityInformation,
 }
 
+impl AperCodec for WusAssistanceInformation {
+    type Output = WusAssistanceInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+        let paging_probability_information = PagingProbabilityInformation::decode(data)?;
+
+        Ok(Self {
+            paging_probability_information,
+        })
+    }
+}
+
 // XnExtTlAs
 #[derive(Clone)]
 pub struct XnExtTlAs(pub Vec<XnExtTlaItem>);
+
+impl AperCodec for XnExtTlAs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(XnExtTlaItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // XnExtTlaItem
 #[derive(Clone)]
@@ -4838,13 +15894,63 @@ pub struct XnExtTlaItem {
     pub gtp_tl_as: Option<XnGtpTlAs>,
 }
 
+impl AperCodec for XnExtTlaItem {
+    type Output = XnExtTlaItem;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
+        let i_psec_tla = if optionals[0] {
+            Some(TransportLayerAddress::decode(data)?)
+        } else {
+            None
+        };
+        let gtp_tl_as = if optionals[1] {
+            Some(XnGtpTlAs::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            i_psec_tla,
+            gtp_tl_as,
+        })
+    }
+}
+
 // XnGtpTlAs
 #[derive(Clone)]
 pub struct XnGtpTlAs(pub Vec<TransportLayerAddress>);
 
+impl AperCodec for XnGtpTlAs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(16), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TransportLayerAddress::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
 // XnTlAs
 #[derive(Clone)]
 pub struct XnTlAs(pub Vec<TransportLayerAddress>);
+
+impl AperCodec for XnTlAs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TransportLayerAddress::decode(data)?);
+            }
+            items
+        }))
+    }
+}
 
 // XnTnlConfigurationInfo
 #[derive(Clone)]
@@ -4853,144 +15959,414 @@ pub struct XnTnlConfigurationInfo {
     pub xn_extended_transport_layer_addresses: Option<XnExtTlAs>,
 }
 
+impl AperCodec for XnTnlConfigurationInfo {
+    type Output = XnTnlConfigurationInfo;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
+        let xn_transport_layer_addresses = XnTlAs::decode(data)?;
+        let xn_extended_transport_layer_addresses = if optionals[0] {
+            Some(XnExtTlAs::decode(data)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            xn_transport_layer_addresses,
+            xn_extended_transport_layer_addresses,
+        })
+    }
+}
+
 // PniNpnRestricted
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PniNpnRestricted {
     Restricted,
     NotRestricted,
 }
 
+impl AperCodec for PniNpnRestricted {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // QosFlowMappingIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum QosFlowMappingIndication {
     Ul,
     Dl,
 }
 
+impl AperCodec for QosFlowMappingIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // BtRssi
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum BtRssi {
     True,
 }
 
+impl AperCodec for BtRssi {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // CnType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum CnType {
     EpcForbidden,
     FiveGcForbidden,
 }
 
+impl AperCodec for CnType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // DapsIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum DapsIndicator {
     DapsHoRequired,
 }
 
+impl AperCodec for DapsIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // Dapsresponseindicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum Dapsresponseindicator {
     DapsHoAccepted,
     DapsHoNotAccepted,
 }
 
+impl AperCodec for Dapsresponseindicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // OutOfCoverage
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum OutOfCoverage {
     True,
 }
 
+impl AperCodec for OutOfCoverage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // HandoverReportType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum HandoverReportType {
     HoTooEarly,
     HoToWrongCell,
     IntersystemPingPong,
 }
 
+impl AperCodec for HandoverReportType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // EarlyIratho
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum EarlyIratho {
     True,
     False,
 }
 
+impl AperCodec for EarlyIratho {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RatType
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RatType {
     Nr,
     Eutra,
 }
 
+impl AperCodec for RatType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RatType1
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RatType1 {
     Nr,
     Eutra,
 }
 
+impl AperCodec for RatType1 {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // RimRsDetection
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum RimRsDetection {
     RsDetected,
     RsDisappeared,
 }
 
+impl AperCodec for RimRsDetection {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // UncompensatedBarometricConfig
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UncompensatedBarometricConfig {
     True,
 }
 
+impl AperCodec for UncompensatedBarometricConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // UeSpeedConfig
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UeSpeedConfig {
     True,
 }
 
+impl AperCodec for UeSpeedConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // UeOrientationConfig
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum UeOrientationConfig {
     True,
 }
 
+impl AperCodec for UeOrientationConfig {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // PeriodicCommunicationIndicator
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum PeriodicCommunicationIndicator {
     Periodically,
     Ondemand,
 }
 
+impl AperCodec for PeriodicCommunicationIndicator {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // StationaryIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum StationaryIndication {
     Stationary,
     Mobile,
 }
 
+impl AperCodec for StationaryIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // TrafficProfile
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TrafficProfile {
     SinglePacket,
     DualPackets,
     MultiplePackets,
 }
 
+impl AperCodec for TrafficProfile {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // BatteryIndication
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum BatteryIndication {
     BatteryPowered,
     BatteryPoweredNotRechargeableOrReplaceable,
     NotBatteryPowered,
 }
 
+impl AperCodec for BatteryIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // WlanRssi
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum WlanRssi {
     True,
 }
 
+impl AperCodec for WlanRssi {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+}
+
 // WlanRtt
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum WlanRtt {
     True,
+}
+
+impl AperCodec for WlanRtt {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+        }
+        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
 }

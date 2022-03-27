@@ -567,6 +567,9 @@ impl AperCodec for {orig_name} {{
         # find_opt_interpreter.visit(tree.children[1])
         # fields_to_interpreter.visit(tree.children[1])
         num_optionals = find_opt_interpreter.num_optionals
+        optionals_var = "optionals"
+        if num_optionals == 0 or (num_optionals == 1 and find_opt_interpreter.has_extension_container):
+            optionals_var = "_optionals"
 
         self.outfile += f"""
 // {orig_name}
@@ -578,7 +581,7 @@ pub struct {name} {{
 impl AperCodec for {orig_name} {{
     type Output = {orig_name};
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
-        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
+        let ({optionals_var}, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
 {fields_from_interpreter.fields_from}
         Ok(Self {{
 {fields_from_interpreter.self_fields}\

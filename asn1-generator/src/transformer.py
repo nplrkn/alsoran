@@ -170,14 +170,15 @@ class TypeTransformer(Transformer):
 
     def sequenceof(self, tree):
         item = tree.children[2]
-        item = self.convert(item)
         self.transform_bounds(tree)
         if isinstance(item, Tree):
             # It must be a container
             assert(item.data == "container")
-            tree.children[2] = item.children[1].replace("IEs", "")
+            item = pascal_case(item.children[1].replace("IEs", ""))
+        else:
+            item = self.convert(item)
         tree.children[2] = item
-        return tree
+        return Tree("sequenceof", tree.children)
         # "Vec<" + self.convert(item) + ">", [tree.children[0], tree.children[1]])
 
     def transform_bounds(self, tree):

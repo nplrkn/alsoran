@@ -104,7 +104,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6b6d37e64f221985f1cd3b0b56785e1e2e75998f19465ced7fea9b1ad465c9e"
 dependencies = [
- "bitvec 0.22.3",
+ "bitvec",
  "log",
  "proc-macro2 1.0.36",
  "syn 1.0.89",
@@ -117,7 +117,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "626f3715a9fb389cc74d640836cb552b8b5c88bfdbee22ff731b6d3c8034fe05"
 dependencies = [
  "asn1-codecs",
- "bitvec 0.22.3",
+ "bitvec",
  "log",
  "proc-macro2 1.0.36",
  "quote 1.0.16",
@@ -356,23 +356,11 @@ version = "0.22.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5237f00a8c86130a0cc317830e558b966dd7850d48a953d998c813f01a41b527"
 dependencies = [
- "funty 1.2.0",
- "radium 0.6.2",
+ "funty",
+ "radium",
  "serde",
  "tap",
- "wyz 0.4.0",
-]
-
-[[package]]
-name = "bitvec"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1489fcb93a5bb47da0462ca93ad252ad6af2145cce58d10d46a83931ba9f016b"
-dependencies = [
- "funty 2.0.0",
- "radium 0.7.0",
- "tap",
- "wyz 0.5.0",
+ "wyz",
 ]
 
 [[package]]
@@ -490,7 +478,7 @@ dependencies = [
  "async-std",
  "async-stream",
  "async-trait",
- "bitvec 0.22.3",
+ "bitvec",
  "errno",
  "futures",
  "futures-core",
@@ -672,7 +660,11 @@ checksum = "77f3309417938f28bf8228fcff79a4a37103981e3e186d2ccd19c74b38f4eb71"
 name = "f1ap"
 version = "0.1.0"
 dependencies = [
- "bitvec 1.0.0",
+ "asn1-codecs",
+ "asn1_codecs_derive",
+ "bitvec",
+ "hex",
+ "num_enum",
 ]
 
 [[package]]
@@ -844,12 +836,6 @@ name = "funty"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1847abb9cb65d566acd5942e94aea9c8f547ad02c98e1649326fc0e8910b8b1e"
-
-[[package]]
-name = "funty"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
 name = "futures"
@@ -1180,7 +1166,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "backtrace",
- "bitvec 0.22.3",
+ "bitvec",
  "common",
  "coordinator",
  "f1ap",
@@ -1415,7 +1401,7 @@ version = "0.1.0"
 dependencies = [
  "asn1-codecs",
  "asn1_codecs_derive",
- "bitvec 0.22.3",
+ "bitvec",
  "hex",
  "num_enum",
 ]
@@ -1727,12 +1713,6 @@ name = "radium"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "643f8f41a8ebc4c5dc4515c82bb8abd397b527fc20fd681b7c011c2aee5d44fb"
-
-[[package]]
-name = "radium"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 
 [[package]]
 name = "redox_syscall"
@@ -2675,7 +2655,7 @@ dependencies = [
  "async-channel",
  "async-std",
  "async-trait",
- "bitvec 0.22.3",
+ "bitvec",
  "byteorder",
  "common",
  "f1ap",
@@ -2707,15 +2687,6 @@ name = "wyz"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "129e027ad65ce1453680623c3fb5163cbf7107bfe1aa32257e7d0e63f9ced188"
-dependencies = [
- "tap",
-]
-
-[[package]]
-name = "wyz"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30b31594f29d27036c383b53b59ed3476874d518f0efb151b27a4c275141390e"
 dependencies = [
  "tap",
 ]
