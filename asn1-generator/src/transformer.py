@@ -245,18 +245,18 @@ class TypeTransformer(Transformer):
 
     def printablestring(self, tree):
         self.transform_bounds(tree)
-        tree.children.append("PrintableString")
-        return Tree("String", tree.children)
+        # tree.children.append("PrintableString")
+        return Tree("PrintableString", tree.children)
 
     def utf8string(self, tree):
         self.transform_bounds(tree)
-        tree.children.append("UTF8String")
-        return Tree("String", tree.children)
+        # tree.children.append("UTF8String")
+        return Tree("UTF8String", tree.children)
 
     def visiblestring(self, tree):
         self.transform_bounds(tree)
-        tree.children.append("VisibleString")
-        return Tree("String", tree.children)
+        # tree.children.append("VisibleString")
+        return Tree("VisibleString", tree.children)
 
     def bytes(self, tree):
         if tree.children != None:
@@ -391,11 +391,10 @@ document
         WlanMeasConfig
       field
         um_are_you_sure
-        String
+        PrintableString
           1
           150
           extension_marker
-          PrintableString
       field
         some_num
         u64
@@ -585,7 +584,7 @@ document
   None
   tuple_struct
     UriAddress
-    String\tVisibleString
+    VisibleString
 """)
 
     def test_octet_string(self):

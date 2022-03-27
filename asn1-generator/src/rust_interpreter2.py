@@ -24,10 +24,6 @@ def type_and_constraints(typ):
         typ = typ.data
         ext = "false"
 
-        if typ == 'String':
-            string_type = bounds[-1]
-            del bounds[-1]
-
         if len(bounds) > 1:
             MAX_U64 = 18446744073709551615
             MIN_I64 = -9223372036854775808
@@ -53,15 +49,21 @@ def type_and_constraints(typ):
         else:
             constraints = "None, None, false"
 
+    if typ in ["VisibleString", "PrintableString", "UTF8String"]:
+        string_type = snake_case(typ)
+        typ = "String"
+
     return (typ, constraints, string_type)
 
 
 def decode_expression(tree):
-    (typ, constraints, _) = type_and_constraints(tree)
+    (typ, constraints, string_type) = type_and_constraints(tree)
     if typ == "Vec<u8>":
         return f"aper::decode::decode_octetstring(data, {constraints})?"
     elif typ == "BitString":
         return f"aper::decode::decode_bitstring(data, {constraints})?"
+    elif typ == "String":
+        return f"aper::decode::decode_{string_type}(data, {constraints})?"
     elif typ == "i128":
         return f"aper::decode::decode_integer(data, {constraints})?.0"
     elif typ in ["u8", "u16", "u32", "u64"]:
@@ -395,7 +397,7 @@ impl AperCodec for {name} {{
 
         fields_from_interpreter = ChoiceFieldsFrom()
         fields_from_interpreter.visit(tree.children[1])
-        #fields_to_interpreter = ChoiceFieldsTo()
+        # fields_to_interpreter = ChoiceFieldsTo()
         # fields_to_interpreter.visit(tree.children[1])
 
         self.outfile += f"""
@@ -540,7 +542,7 @@ impl AperCodec for {orig_name} {{
         for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter]:
             i.visit(tree.children[1])
 
-        #fields_to_interpreter = StructFieldsTo()
+        # fields_to_interpreter = StructFieldsTo()
 
         # for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter, fields_to_interpreter]:
         #     i.visit(tree.children[1])
@@ -994,6 +996,24 @@ impl AperCodec for ExpectedActivityPeriod {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(1), Some(50), true)?.0))
+    }
+}
+
+""")
+
+    def test_simple_visible_string(self):
+        self.should_generate("""\
+URI-address ::= VisibleString
+""", """\
+
+// UriAddress
+#[derive(Clone)]
+pub struct UriAddress(pub String);
+
+impl AperCodec for UriAddress {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_visible_string(data, None, None, false)?))
     }
 }
 
