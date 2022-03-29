@@ -16,7 +16,7 @@ def bool_to_rust(b):
 
 
 def type_and_constraints(typ):
-    constraints = "UNCONSTRAINED"
+    constraints = "None, None, false"
     extra_type = None
     seqof = False
 
@@ -53,8 +53,6 @@ def type_and_constraints(typ):
                 ub = f"Some({ub})"
 
             constraints = f"Some({lb}), {ub}, {ext}"
-        else:
-            constraints = "None, None, false"
 
     if typ in ["VisibleString", "PrintableString", "UTF8String"]:
         extra_type = snake_case(typ)
@@ -84,6 +82,8 @@ def decode_expression(tree):
         return f"aper::decode::decode_integer(data, {constraints})?.0"
     elif typ in ["u8", "u16", "u32", "u64"]:
         return f"aper::decode::decode_integer(data, {constraints})?.0 as {typ}"
+    elif typ == "bool":
+        return f"aper::decode::decode_bool(data)?"
     else:
         return f"""{typ}::decode(data)?"""
 
@@ -247,18 +247,14 @@ class StructFields(Interpreter):
 
     def field(self, tree):
         name = tree.children[0]
-        typ = tree.children[1]
-        if isinstance(typ, Tree):
-            typ = typ.data
+        typ = type_and_constraints(tree.children[1])[0]
         self.struct_fields += f"""\
     pub {name}: {typ},
 """
 
     def optional_field(self, tree):
         name = tree.children[0]
-        typ = tree.children[1]
-        if isinstance(typ, Tree):
-            typ = typ.data
+        typ = type_and_constraints(tree.children[1])[0]
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
@@ -384,8 +380,8 @@ class StructInterpreter(Interpreter):
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
@@ -418,7 +414,7 @@ impl AperCodec for {name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub enum {name} {{
 {field_interpreter.choice_fields}\
 }}
@@ -456,7 +452,7 @@ impl AperCodec for {name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct {name}(pub {inner});
 
 impl AperCodec for {name} {{
@@ -497,7 +493,7 @@ impl AperCodec for {name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -573,7 +569,7 @@ impl AperCodec for {orig_name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -645,8 +641,8 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
         output = """\
 
 // TriggeringMessage
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -681,7 +677,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
         output = """\
 
 // WlanMeasurementConfiguration
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_rtt: Option<WlanRtt>,
@@ -707,8 +703,8 @@ impl AperCodec for WlanMeasurementConfiguration {
 
 
 // WlanRtt
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum WlanRtt {
     Thing1,
 }
@@ -734,7 +730,7 @@ LTEUERLFReportContainer::= OCTET STRING
         output = """\
 
 // LteueRlfReportContainer
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
 
 impl AperCodec for LteueRlfReportContainer {
@@ -754,7 +750,7 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
         output = """\
 
 // MaximumDataBurstVolume
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl AperCodec for MaximumDataBurstVolume {
@@ -774,7 +770,7 @@ MobilityInformation ::= BIT STRING(SIZE(16))
         output = """\
 
 // MobilityInformation
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct MobilityInformation(pub BitString);
 
 impl AperCodec for MobilityInformation {
@@ -798,8 +794,8 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
         output = """\
 
 // MaximumIntegrityProtectedDataRate
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
@@ -830,7 +826,7 @@ EventTrigger ::= CHOICE {
 """, """\
 
 // EventTrigger
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig,
@@ -856,8 +852,8 @@ impl AperCodec for EventTrigger {
 
 
 // OutOfCoverage
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum OutOfCoverage {
     True,
 }
@@ -890,7 +886,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 """, """\
 
 // PduSessionResourceSetupRequest
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_paging_priority: Option<Vec<u8>>,
@@ -948,7 +944,7 @@ GNB-ID ::= CHOICE {
 """, """\
 
 // GnbId
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub enum GnbId {
     GnbId(BitString),
 }
@@ -979,7 +975,7 @@ PrivateIE-ID	::= CHOICE {
 """, """\
 
 // PrivateIeId
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
@@ -1008,7 +1004,7 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 """, """\
 
 // ExpectedActivityPeriod
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct ExpectedActivityPeriod(pub i128);
 
 impl AperCodec for ExpectedActivityPeriod {
@@ -1026,7 +1022,7 @@ URI-address ::= VisibleString
 """, """\
 
 // UriAddress
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct UriAddress(pub String);
 
 impl AperCodec for UriAddress {
@@ -1043,7 +1039,7 @@ impl AperCodec for UriAddress {
 AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalDLUPTNLInformationForHOItem
 """, """
 // AdditionalDluptnlInformationForHoList
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
 
 impl AperCodec for AdditionalDluptnlInformationForHoList {
@@ -1061,6 +1057,74 @@ impl AperCodec for AdditionalDluptnlInformationForHoList {
 }
 
 """)
+
+    def test_sequence_of(self):
+        self.should_generate("""\
+DLPRSResourceCoordinates ::= SEQUENCE {
+	listofDL-PRSResourceSetARP		SEQUENCE (SIZE (1.. maxnoofPRS-ResourceSets)) OF DLPRSResourceSetARP,
+	iE-Extensions					ProtocolExtensionContainer { { DLPRSResourceCoordinates-ExtIEs } } OPTIONAL
+}
+""", """\
+
+// DlprsResourceCoordinates
+# [derive(Clone, Debug)]
+pub struct DlprsResourceCoordinates {
+    pub listof_dl_prs_resource_set_arp: Vec<DlprsResourceSetArp>,
+}
+
+impl AperCodec for DlprsResourceCoordinates {
+    type Output = DlprsResourceCoordinates;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
+        let listof_dl_prs_resource_set_arp = {
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(DlprsResourceSetArp::decode(data)?);
+            }
+            items
+        };
+
+        Ok(Self {
+            listof_dl_prs_resource_set_arp,
+        })
+    }
+}
+
+""", constants={"maxnoofPRS-ResourceSets": 2})
+
+    def test_seq_of_ie(self):
+        self.should_generate("""\
+UE-associatedLogicalF1-ConnectionListRes ::= SEQUENCE (SIZE (1.. maxnoofIndividualF1ConnectionsToReset)) OF ProtocolIE-SingleContainer { { UE-associatedLogicalF1-ConnectionItemRes } }
+
+UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
+	{ ID id-UE-associatedLogicalF1-ConnectionItem	CRITICALITY reject	TYPE UE-associatedLogicalF1-ConnectionItem	PRESENCE mandatory } ,
+	...
+}
+""", """\
+
+// UeAssociatedLogicalF1ConnectionListRes
+# [derive(Clone, Debug)]
+pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
+
+impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(63356), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
+""", constants={"maxnoofIndividualF1ConnectionsToReset": 63356})
 
 
 if __name__ == '__main__':

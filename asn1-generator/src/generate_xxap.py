@@ -13,6 +13,7 @@ pub type BitString = BitVec<Msb0, u8>;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 """
 USE_NUM_ENUM = """\
+#[allow(unused_imports)]
 use num_enum::TryFromPrimitive;
 """
 USE_COMMON = "use super::common::*;\n"
@@ -72,6 +73,7 @@ pub mod pdu;
             + "\n"
             + USE_ASN1
             + USE_COMMON
+            + USE_NUM_ENUM
             + USE_IES
             + "\n\n")
     f.write(generate_structs(input_file_path(i), constants))

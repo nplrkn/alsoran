@@ -186,7 +186,6 @@ class TypeTransformer(Transformer):
         lb = 0
         extensible = False
         if len(tree.children) <= 1:
-            print("Warning: no bounds")
             return (None, None, False)
         else:
             lb = tree.children[0]
@@ -624,6 +623,29 @@ document
       512
       ActivatedCellsToBeUpdatedListItem
 """, constants={"maxnoofServedCellsIAB": 512})
+
+    def test_seq_of_ie(self):
+        self.should_generate("""\
+UE-associatedLogicalF1-ConnectionListRes ::= SEQUENCE (SIZE (1.. maxnoofIndividualF1ConnectionsToReset)) OF ProtocolIE-SingleContainer { { UE-associatedLogicalF1-ConnectionItemRes } }
+
+UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
+	{ ID id-UE-associatedLogicalF1-ConnectionItem	CRITICALITY reject	TYPE UE-associatedLogicalF1-ConnectionItem	PRESENCE mandatory } ,
+	...
+}
+""", """\
+document
+  None
+  tuple_struct
+    UeAssociatedLogicalF1ConnectionListRes
+    sequenceof
+      1
+      63356
+      ie
+        80
+        reject
+        UEAssociatedLogicalF1ConnectionItem    
+
+""", constants={"maxnoofIndividualF1ConnectionsToReset": 63356, "id-UE-associatedLogicalF1-ConnectionItem": 80})
 
 
 if __name__ == '__main__':
