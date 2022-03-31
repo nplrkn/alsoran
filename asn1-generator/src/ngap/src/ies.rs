@@ -5,10 +5,11 @@ use super::common::*;
 use bitvec::prelude::*;
 pub type BitString = BitVec<Msb0, u8>;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
+#[allow(unused_imports)]
 use num_enum::TryFromPrimitive;
 
 // AdditionalDluptnlInformationForHoList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
 
 impl AperCodec for AdditionalDluptnlInformationForHoList {
@@ -26,7 +27,7 @@ impl AperCodec for AdditionalDluptnlInformationForHoList {
 }
 
 // AdditionalDluptnlInformationForHoItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AdditionalDluptnlInformationForHoItem {
     pub additional_dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub additional_qos_flow_setup_response_list: QosFlowListWithDataForwarding,
@@ -54,7 +55,7 @@ impl AperCodec for AdditionalDluptnlInformationForHoItem {
 }
 
 // AdditionalQosFlowInformation
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum AdditionalQosFlowInformation {
     MoreLikely,
@@ -72,7 +73,7 @@ impl AperCodec for AdditionalQosFlowInformation {
 }
 
 // AllocationAndRetentionPriority
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllocationAndRetentionPriority {
     pub priority_level_arp: PriorityLevelArp,
     pub pre_emption_capability: PreEmptionCapability,
@@ -97,7 +98,7 @@ impl AperCodec for AllocationAndRetentionPriority {
 }
 
 // AllowedCagListPerPlmn
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllowedCagListPerPlmn(pub Vec<CagId>);
 
 impl AperCodec for AllowedCagListPerPlmn {
@@ -115,7 +116,7 @@ impl AperCodec for AllowedCagListPerPlmn {
 }
 
 // AllowedNssai
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllowedNssai(pub Vec<AllowedNssaiItem>);
 
 impl AperCodec for AllowedNssai {
@@ -133,7 +134,7 @@ impl AperCodec for AllowedNssai {
 }
 
 // AllowedNssaiItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllowedNssaiItem {
     pub s_nssai: SNssai,
 }
@@ -150,7 +151,7 @@ impl AperCodec for AllowedNssaiItem {
 }
 
 // AllowedPniNpnList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllowedPniNpnList(pub Vec<AllowedPniNpnItem>);
 
 impl AperCodec for AllowedPniNpnList {
@@ -168,7 +169,7 @@ impl AperCodec for AllowedPniNpnList {
 }
 
 // AllowedPniNpnItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllowedPniNpnItem {
     pub plmn_identity: PlmnIdentity,
     pub pni_npn_restricted: PniNpnRestricted,
@@ -193,7 +194,7 @@ impl AperCodec for AllowedPniNpnItem {
 }
 
 // AllowedTaCs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AllowedTaCs(pub Vec<Tac>);
 
 impl AperCodec for AllowedTaCs {
@@ -211,7 +212,7 @@ impl AperCodec for AllowedTaCs {
 }
 
 // AlternativeQosParaSetIndex
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AlternativeQosParaSetIndex(pub u8);
 
 impl AperCodec for AlternativeQosParaSetIndex {
@@ -224,7 +225,7 @@ impl AperCodec for AlternativeQosParaSetIndex {
 }
 
 // AlternativeQosParaSetNotifyIndex
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AlternativeQosParaSetNotifyIndex(pub u8);
 
 impl AperCodec for AlternativeQosParaSetNotifyIndex {
@@ -237,7 +238,7 @@ impl AperCodec for AlternativeQosParaSetNotifyIndex {
 }
 
 // AlternativeQosParaSetList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AlternativeQosParaSetList(pub Vec<AlternativeQosParaSetItem>);
 
 impl AperCodec for AlternativeQosParaSetList {
@@ -255,7 +256,7 @@ impl AperCodec for AlternativeQosParaSetList {
 }
 
 // AlternativeQosParaSetItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AlternativeQosParaSetItem {
     pub alternative_qos_para_set_index: AlternativeQosParaSetIndex,
     pub guaranteed_flow_bit_rate_dl: Option<BitRate>,
@@ -301,7 +302,7 @@ impl AperCodec for AlternativeQosParaSetItem {
 }
 
 // AmfName
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfName(pub String);
 
 impl AperCodec for AmfName {
@@ -317,7 +318,7 @@ impl AperCodec for AmfName {
 }
 
 // AmfNameVisibleString
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfNameVisibleString(pub String);
 
 impl AperCodec for AmfNameVisibleString {
@@ -333,7 +334,7 @@ impl AperCodec for AmfNameVisibleString {
 }
 
 // AmfNameUtf8String
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfNameUtf8String(pub String);
 
 impl AperCodec for AmfNameUtf8String {
@@ -349,7 +350,7 @@ impl AperCodec for AmfNameUtf8String {
 }
 
 // AmfPagingTarget
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum AmfPagingTarget {
     GlobalRanNodeId(GlobalRanNodeId),
     Tai(Tai),
@@ -376,7 +377,7 @@ impl AperCodec for AmfPagingTarget {
 }
 
 // AmfPointer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfPointer(pub BitString);
 
 impl AperCodec for AmfPointer {
@@ -392,7 +393,7 @@ impl AperCodec for AmfPointer {
 }
 
 // AmfRegionId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfRegionId(pub BitString);
 
 impl AperCodec for AmfRegionId {
@@ -408,7 +409,7 @@ impl AperCodec for AmfRegionId {
 }
 
 // AmfSetId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfSetId(pub BitString);
 
 impl AperCodec for AmfSetId {
@@ -424,7 +425,7 @@ impl AperCodec for AmfSetId {
 }
 
 // AmfTnlAssociationSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationSetupList(pub Vec<AmfTnlAssociationSetupItem>);
 
 impl AperCodec for AmfTnlAssociationSetupList {
@@ -442,7 +443,7 @@ impl AperCodec for AmfTnlAssociationSetupList {
 }
 
 // AmfTnlAssociationSetupItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationSetupItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
 }
@@ -461,7 +462,7 @@ impl AperCodec for AmfTnlAssociationSetupItem {
 }
 
 // AmfTnlAssociationToAddList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationToAddList(pub Vec<AmfTnlAssociationToAddItem>);
 
 impl AperCodec for AmfTnlAssociationToAddList {
@@ -479,7 +480,7 @@ impl AperCodec for AmfTnlAssociationToAddList {
 }
 
 // AmfTnlAssociationToAddItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationToAddItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
     pub tnl_association_usage: Option<TnlAssociationUsage>,
@@ -507,7 +508,7 @@ impl AperCodec for AmfTnlAssociationToAddItem {
 }
 
 // AmfTnlAssociationToRemoveList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationToRemoveList(pub Vec<AmfTnlAssociationToRemoveItem>);
 
 impl AperCodec for AmfTnlAssociationToRemoveList {
@@ -525,7 +526,7 @@ impl AperCodec for AmfTnlAssociationToRemoveList {
 }
 
 // AmfTnlAssociationToRemoveItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationToRemoveItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
 }
@@ -544,7 +545,7 @@ impl AperCodec for AmfTnlAssociationToRemoveItem {
 }
 
 // AmfTnlAssociationToUpdateList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationToUpdateList(pub Vec<AmfTnlAssociationToUpdateItem>);
 
 impl AperCodec for AmfTnlAssociationToUpdateList {
@@ -562,7 +563,7 @@ impl AperCodec for AmfTnlAssociationToUpdateList {
 }
 
 // AmfTnlAssociationToUpdateItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfTnlAssociationToUpdateItem {
     pub amf_tnl_association_address: CpTransportLayerInformation,
     pub tnl_association_usage: Option<TnlAssociationUsage>,
@@ -594,7 +595,7 @@ impl AperCodec for AmfTnlAssociationToUpdateItem {
 }
 
 // AmfUeNgapId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfUeNgapId(pub u64);
 
 impl AperCodec for AmfUeNgapId {
@@ -607,7 +608,7 @@ impl AperCodec for AmfUeNgapId {
 }
 
 // AreaOfInterest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterest {
     pub area_of_interest_tai_list: Option<AreaOfInterestTaiList>,
     pub area_of_interest_cell_list: Option<AreaOfInterestCellList>,
@@ -643,7 +644,7 @@ impl AperCodec for AreaOfInterest {
 }
 
 // AreaOfInterestCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestCellList(pub Vec<AreaOfInterestCellItem>);
 
 impl AperCodec for AreaOfInterestCellList {
@@ -661,7 +662,7 @@ impl AperCodec for AreaOfInterestCellList {
 }
 
 // AreaOfInterestCellItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestCellItem {
     pub ngran_cgi: NgranCgi,
 }
@@ -678,7 +679,7 @@ impl AperCodec for AreaOfInterestCellItem {
 }
 
 // AreaOfInterestList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestList(pub Vec<AreaOfInterestItem>);
 
 impl AperCodec for AreaOfInterestList {
@@ -696,7 +697,7 @@ impl AperCodec for AreaOfInterestList {
 }
 
 // AreaOfInterestItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestItem {
     pub area_of_interest: AreaOfInterest,
     pub location_reporting_reference_id: LocationReportingReferenceId,
@@ -718,7 +719,7 @@ impl AperCodec for AreaOfInterestItem {
 }
 
 // AreaOfInterestRanNodeList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestRanNodeList(pub Vec<AreaOfInterestRanNodeItem>);
 
 impl AperCodec for AreaOfInterestRanNodeList {
@@ -736,7 +737,7 @@ impl AperCodec for AreaOfInterestRanNodeList {
 }
 
 // AreaOfInterestRanNodeItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestRanNodeItem {
     pub global_ran_node_id: GlobalRanNodeId,
 }
@@ -753,7 +754,7 @@ impl AperCodec for AreaOfInterestRanNodeItem {
 }
 
 // AreaOfInterestTaiList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestTaiList(pub Vec<AreaOfInterestTaiItem>);
 
 impl AperCodec for AreaOfInterestTaiList {
@@ -771,7 +772,7 @@ impl AperCodec for AreaOfInterestTaiList {
 }
 
 // AreaOfInterestTaiItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaOfInterestTaiItem {
     pub tai: Tai,
 }
@@ -788,7 +789,7 @@ impl AperCodec for AreaOfInterestTaiItem {
 }
 
 // AssistanceDataForPaging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AssistanceDataForPaging {
     pub assistance_data_for_recommended_cells: Option<AssistanceDataForRecommendedCells>,
     pub paging_attempt_information: Option<PagingAttemptInformation>,
@@ -817,7 +818,7 @@ impl AperCodec for AssistanceDataForPaging {
 }
 
 // AssistanceDataForRecommendedCells
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AssistanceDataForRecommendedCells {
     pub recommended_cells_for_paging: RecommendedCellsForPaging,
 }
@@ -836,7 +837,7 @@ impl AperCodec for AssistanceDataForRecommendedCells {
 }
 
 // AssociatedQosFlowList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AssociatedQosFlowList(pub Vec<AssociatedQosFlowItem>);
 
 impl AperCodec for AssociatedQosFlowList {
@@ -854,7 +855,7 @@ impl AperCodec for AssociatedQosFlowList {
 }
 
 // AssociatedQosFlowItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AssociatedQosFlowItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_mapping_indication: Option<QosFlowMappingIndication>,
@@ -879,7 +880,7 @@ impl AperCodec for AssociatedQosFlowItem {
 }
 
 // AuthenticatedIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum AuthenticatedIndication {
     True,
@@ -897,7 +898,7 @@ impl AperCodec for AuthenticatedIndication {
 }
 
 // AveragingWindow
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AveragingWindow(pub u16);
 
 impl AperCodec for AveragingWindow {
@@ -910,7 +911,7 @@ impl AperCodec for AveragingWindow {
 }
 
 // AreaScopeOfMdtNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum AreaScopeOfMdtNr {
     CellBased(CellBasedMdtNr),
     TaBased(TaBasedMdt),
@@ -941,7 +942,7 @@ impl AperCodec for AreaScopeOfMdtNr {
 }
 
 // AreaScopeOfMdtEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum AreaScopeOfMdtEutra {
     CellBased(CellBasedMdtEutra),
     TaBased(TaBasedMdt),
@@ -972,7 +973,7 @@ impl AperCodec for AreaScopeOfMdtEutra {
 }
 
 // AreaScopeOfNeighCellsList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaScopeOfNeighCellsList(pub Vec<AreaScopeOfNeighCellsItem>);
 
 impl AperCodec for AreaScopeOfNeighCellsList {
@@ -990,7 +991,7 @@ impl AperCodec for AreaScopeOfNeighCellsList {
 }
 
 // AreaScopeOfNeighCellsItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AreaScopeOfNeighCellsItem {
     pub nr_frequency_info: NrFrequencyInfo,
     pub pci_list_for_mdt: Option<PciListForMdt>,
@@ -1015,7 +1016,7 @@ impl AperCodec for AreaScopeOfNeighCellsItem {
 }
 
 // BitRate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BitRate(pub u64);
 
 impl AperCodec for BitRate {
@@ -1028,7 +1029,7 @@ impl AperCodec for BitRate {
 }
 
 // BroadcastCancelledAreaList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum BroadcastCancelledAreaList {
     CellIdCancelledEutra(CellIdCancelledEutra),
     TaiCancelledEutra(TaiCancelledEutra),
@@ -1069,7 +1070,7 @@ impl AperCodec for BroadcastCancelledAreaList {
 }
 
 // BroadcastCompletedAreaList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum BroadcastCompletedAreaList {
     CellIdBroadcastEutra(CellIdBroadcastEutra),
     TaiBroadcastEutra(TaiBroadcastEutra),
@@ -1110,7 +1111,7 @@ impl AperCodec for BroadcastCompletedAreaList {
 }
 
 // BroadcastPlmnList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BroadcastPlmnList(pub Vec<BroadcastPlmnItem>);
 
 impl AperCodec for BroadcastPlmnList {
@@ -1128,7 +1129,7 @@ impl AperCodec for BroadcastPlmnList {
 }
 
 // BroadcastPlmnItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BroadcastPlmnItem {
     pub plmn_identity: PlmnIdentity,
     pub tai_slice_support_list: SliceSupportList,
@@ -1150,7 +1151,7 @@ impl AperCodec for BroadcastPlmnItem {
 }
 
 // BluetoothMeasurementConfiguration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BluetoothMeasurementConfiguration {
     pub bluetooth_meas_config: BluetoothMeasConfig,
     pub bluetooth_meas_config_name_list: Option<BluetoothMeasConfigNameList>,
@@ -1182,7 +1183,7 @@ impl AperCodec for BluetoothMeasurementConfiguration {
 }
 
 // BluetoothMeasConfigNameList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BluetoothMeasConfigNameList(pub Vec<BluetoothMeasConfigNameItem>);
 
 impl AperCodec for BluetoothMeasConfigNameList {
@@ -1200,7 +1201,7 @@ impl AperCodec for BluetoothMeasConfigNameList {
 }
 
 // BluetoothMeasConfigNameItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BluetoothMeasConfigNameItem {
     pub bluetooth_name: BluetoothName,
 }
@@ -1217,7 +1218,7 @@ impl AperCodec for BluetoothMeasConfigNameItem {
 }
 
 // BluetoothMeasConfig
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum BluetoothMeasConfig {
     Setup,
@@ -1235,7 +1236,7 @@ impl AperCodec for BluetoothMeasConfig {
 }
 
 // BluetoothName
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BluetoothName(pub Vec<u8>);
 
 impl AperCodec for BluetoothName {
@@ -1251,7 +1252,7 @@ impl AperCodec for BluetoothName {
 }
 
 // BurstArrivalTime
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BurstArrivalTime(pub Vec<u8>);
 
 impl AperCodec for BurstArrivalTime {
@@ -1264,7 +1265,7 @@ impl AperCodec for BurstArrivalTime {
 }
 
 // CagId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CagId(pub BitString);
 
 impl AperCodec for CagId {
@@ -1280,7 +1281,7 @@ impl AperCodec for CagId {
 }
 
 // CancelAllWarningMessages
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CancelAllWarningMessages {
     True,
@@ -1298,7 +1299,7 @@ impl AperCodec for CancelAllWarningMessages {
 }
 
 // CancelledCellsInEaiEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInEaiEutra(pub Vec<CancelledCellsInEaiEutraItem>);
 
 impl AperCodec for CancelledCellsInEaiEutra {
@@ -1317,7 +1318,7 @@ impl AperCodec for CancelledCellsInEaiEutra {
 }
 
 // CancelledCellsInEaiEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInEaiEutraItem {
     pub eutra_cgi: EutraCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -1339,7 +1340,7 @@ impl AperCodec for CancelledCellsInEaiEutraItem {
 }
 
 // CancelledCellsInEaiNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInEaiNr(pub Vec<CancelledCellsInEaiNrItem>);
 
 impl AperCodec for CancelledCellsInEaiNr {
@@ -1358,7 +1359,7 @@ impl AperCodec for CancelledCellsInEaiNr {
 }
 
 // CancelledCellsInEaiNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInEaiNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -1380,7 +1381,7 @@ impl AperCodec for CancelledCellsInEaiNrItem {
 }
 
 // CancelledCellsInTaiEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInTaiEutra(pub Vec<CancelledCellsInTaiEutraItem>);
 
 impl AperCodec for CancelledCellsInTaiEutra {
@@ -1399,7 +1400,7 @@ impl AperCodec for CancelledCellsInTaiEutra {
 }
 
 // CancelledCellsInTaiEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInTaiEutraItem {
     pub eutra_cgi: EutraCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -1421,7 +1422,7 @@ impl AperCodec for CancelledCellsInTaiEutraItem {
 }
 
 // CancelledCellsInTaiNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInTaiNr(pub Vec<CancelledCellsInTaiNrItem>);
 
 impl AperCodec for CancelledCellsInTaiNr {
@@ -1440,7 +1441,7 @@ impl AperCodec for CancelledCellsInTaiNr {
 }
 
 // CancelledCellsInTaiNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CancelledCellsInTaiNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -1462,7 +1463,7 @@ impl AperCodec for CancelledCellsInTaiNrItem {
 }
 
 // CandidateCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CandidateCellList(pub Vec<CandidateCellItem>);
 
 impl AperCodec for CandidateCellList {
@@ -1480,7 +1481,7 @@ impl AperCodec for CandidateCellList {
 }
 
 // CandidateCellItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CandidateCellItem {
     pub candidate_cell: CandidateCell,
 }
@@ -1497,7 +1498,7 @@ impl AperCodec for CandidateCellItem {
 }
 
 // CandidateCell
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CandidateCell {
     CandidateCgi(CandidateCellId),
     CandidatePci(CandidatePci),
@@ -1524,7 +1525,7 @@ impl AperCodec for CandidateCell {
 }
 
 // CandidateCellId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CandidateCellId {
     pub candidate_cell_id: NrCgi,
 }
@@ -1541,7 +1542,7 @@ impl AperCodec for CandidateCellId {
 }
 
 // CandidatePci
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CandidatePci {
     pub candidate_pci: u16,
     pub candidate_nrarfcn: u32,
@@ -1564,7 +1565,7 @@ impl AperCodec for CandidatePci {
 }
 
 // Cause
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Cause {
     RadioNetwork(CauseRadioNetwork),
     Transport(CauseTransport),
@@ -1597,7 +1598,7 @@ impl AperCodec for Cause {
 }
 
 // CauseMisc
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CauseMisc {
     ControlProcessingOverload,
@@ -1620,7 +1621,7 @@ impl AperCodec for CauseMisc {
 }
 
 // CauseNas
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CauseNas {
     NormalRelease,
@@ -1641,7 +1642,7 @@ impl AperCodec for CauseNas {
 }
 
 // CauseProtocol
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CauseProtocol {
     TransferSyntaxError,
@@ -1665,7 +1666,7 @@ impl AperCodec for CauseProtocol {
 }
 
 // CauseRadioNetwork
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CauseRadioNetwork {
     Unspecified,
@@ -1727,7 +1728,7 @@ impl AperCodec for CauseRadioNetwork {
 }
 
 // CauseTransport
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CauseTransport {
     TransportResourceUnavailable,
@@ -1746,7 +1747,7 @@ impl AperCodec for CauseTransport {
 }
 
 // CellCagInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellCagInformation {
     pub ngran_cgi: NgranCgi,
     pub cell_cag_list: CellCagList,
@@ -1768,7 +1769,7 @@ impl AperCodec for CellCagInformation {
 }
 
 // CellCagList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellCagList(pub Vec<CagId>);
 
 impl AperCodec for CellCagList {
@@ -1786,7 +1787,7 @@ impl AperCodec for CellCagList {
 }
 
 // CellIdBroadcastEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdBroadcastEutra(pub Vec<CellIdBroadcastEutraItem>);
 
 impl AperCodec for CellIdBroadcastEutra {
@@ -1805,7 +1806,7 @@ impl AperCodec for CellIdBroadcastEutra {
 }
 
 // CellIdBroadcastEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdBroadcastEutraItem {
     pub eutra_cgi: EutraCgi,
 }
@@ -1822,7 +1823,7 @@ impl AperCodec for CellIdBroadcastEutraItem {
 }
 
 // CellIdBroadcastNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdBroadcastNr(pub Vec<CellIdBroadcastNrItem>);
 
 impl AperCodec for CellIdBroadcastNr {
@@ -1841,7 +1842,7 @@ impl AperCodec for CellIdBroadcastNr {
 }
 
 // CellIdBroadcastNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdBroadcastNrItem {
     pub nr_cgi: NrCgi,
 }
@@ -1858,7 +1859,7 @@ impl AperCodec for CellIdBroadcastNrItem {
 }
 
 // CellIdCancelledEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdCancelledEutra(pub Vec<CellIdCancelledEutraItem>);
 
 impl AperCodec for CellIdCancelledEutra {
@@ -1877,7 +1878,7 @@ impl AperCodec for CellIdCancelledEutra {
 }
 
 // CellIdCancelledEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdCancelledEutraItem {
     pub eutra_cgi: EutraCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -1899,7 +1900,7 @@ impl AperCodec for CellIdCancelledEutraItem {
 }
 
 // CellIdCancelledNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdCancelledNr(pub Vec<CellIdCancelledNrItem>);
 
 impl AperCodec for CellIdCancelledNr {
@@ -1918,7 +1919,7 @@ impl AperCodec for CellIdCancelledNr {
 }
 
 // CellIdCancelledNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdCancelledNrItem {
     pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
@@ -1940,7 +1941,7 @@ impl AperCodec for CellIdCancelledNrItem {
 }
 
 // CellIdListForRestart
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CellIdListForRestart {
     EutraCgiListforRestart(EutraCgiList),
     NrCgiListforRestart(NrCgiList),
@@ -1967,7 +1968,7 @@ impl AperCodec for CellIdListForRestart {
 }
 
 // CellSize
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CellSize {
     Verysmall,
@@ -1988,7 +1989,7 @@ impl AperCodec for CellSize {
 }
 
 // CellType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellType {
     pub cell_size: CellSize,
 }
@@ -2005,7 +2006,7 @@ impl AperCodec for CellType {
 }
 
 // CEmodeBSupportIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CEmodeBSupportIndicator {
     Supported,
@@ -2023,7 +2024,7 @@ impl AperCodec for CEmodeBSupportIndicator {
 }
 
 // CEmodeBrestricted
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CEmodeBrestricted {
     Restricted,
@@ -2042,7 +2043,7 @@ impl AperCodec for CEmodeBrestricted {
 }
 
 // CnAssistedRanTuning
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CnAssistedRanTuning {
     pub expected_ue_behaviour: Option<ExpectedUeBehaviour>,
 }
@@ -2064,7 +2065,7 @@ impl AperCodec for CnAssistedRanTuning {
 }
 
 // CnTypeRestrictionsForEquivalent
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CnTypeRestrictionsForEquivalent(pub Vec<CnTypeRestrictionsForEquivalentItem>);
 
 impl AperCodec for CnTypeRestrictionsForEquivalent {
@@ -2082,7 +2083,7 @@ impl AperCodec for CnTypeRestrictionsForEquivalent {
 }
 
 // CnTypeRestrictionsForEquivalentItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CnTypeRestrictionsForEquivalentItem {
     pub plmn_identity: PlmnIdentity,
     pub cn_type: CnType,
@@ -2104,7 +2105,7 @@ impl AperCodec for CnTypeRestrictionsForEquivalentItem {
 }
 
 // CnTypeRestrictionsForServing
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CnTypeRestrictionsForServing {
     EpcForbidden,
@@ -2122,7 +2123,7 @@ impl AperCodec for CnTypeRestrictionsForServing {
 }
 
 // CommonNetworkInstance
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CommonNetworkInstance(pub Vec<u8>);
 
 impl AperCodec for CommonNetworkInstance {
@@ -2135,7 +2136,7 @@ impl AperCodec for CommonNetworkInstance {
 }
 
 // CompletedCellsInEaiEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInEaiEutra(pub Vec<CompletedCellsInEaiEutraItem>);
 
 impl AperCodec for CompletedCellsInEaiEutra {
@@ -2154,7 +2155,7 @@ impl AperCodec for CompletedCellsInEaiEutra {
 }
 
 // CompletedCellsInEaiEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInEaiEutraItem {
     pub eutra_cgi: EutraCgi,
 }
@@ -2171,7 +2172,7 @@ impl AperCodec for CompletedCellsInEaiEutraItem {
 }
 
 // CompletedCellsInEaiNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInEaiNr(pub Vec<CompletedCellsInEaiNrItem>);
 
 impl AperCodec for CompletedCellsInEaiNr {
@@ -2190,7 +2191,7 @@ impl AperCodec for CompletedCellsInEaiNr {
 }
 
 // CompletedCellsInEaiNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInEaiNrItem {
     pub nr_cgi: NrCgi,
 }
@@ -2207,7 +2208,7 @@ impl AperCodec for CompletedCellsInEaiNrItem {
 }
 
 // CompletedCellsInTaiEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInTaiEutra(pub Vec<CompletedCellsInTaiEutraItem>);
 
 impl AperCodec for CompletedCellsInTaiEutra {
@@ -2226,7 +2227,7 @@ impl AperCodec for CompletedCellsInTaiEutra {
 }
 
 // CompletedCellsInTaiEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInTaiEutraItem {
     pub eutra_cgi: EutraCgi,
 }
@@ -2243,7 +2244,7 @@ impl AperCodec for CompletedCellsInTaiEutraItem {
 }
 
 // CompletedCellsInTaiNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInTaiNr(pub Vec<CompletedCellsInTaiNrItem>);
 
 impl AperCodec for CompletedCellsInTaiNr {
@@ -2262,7 +2263,7 @@ impl AperCodec for CompletedCellsInTaiNr {
 }
 
 // CompletedCellsInTaiNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompletedCellsInTaiNrItem {
     pub nr_cgi: NrCgi,
 }
@@ -2279,7 +2280,7 @@ impl AperCodec for CompletedCellsInTaiNrItem {
 }
 
 // ConcurrentWarningMessageInd
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ConcurrentWarningMessageInd {
     True,
@@ -2297,7 +2298,7 @@ impl AperCodec for ConcurrentWarningMessageInd {
 }
 
 // ConfidentialityProtectionIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ConfidentialityProtectionIndication {
     Required,
@@ -2317,7 +2318,7 @@ impl AperCodec for ConfidentialityProtectionIndication {
 }
 
 // ConfidentialityProtectionResult
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ConfidentialityProtectionResult {
     Performed,
@@ -2336,7 +2337,7 @@ impl AperCodec for ConfidentialityProtectionResult {
 }
 
 // ConfiguredTacIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ConfiguredTacIndication {
     True,
@@ -2354,7 +2355,7 @@ impl AperCodec for ConfiguredTacIndication {
 }
 
 // CoreNetworkAssistanceInformationForInactive
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CoreNetworkAssistanceInformationForInactive {
     pub ue_identity_index_value: UeIdentityIndexValue,
     pub ue_specific_drx: Option<PagingDrx>,
@@ -2399,7 +2400,7 @@ impl AperCodec for CoreNetworkAssistanceInformationForInactive {
 }
 
 // CountValueForPdcpSn12
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CountValueForPdcpSn12 {
     pub pdcp_sn12: u16,
     pub hfn_pdcp_sn12: u32,
@@ -2422,7 +2423,7 @@ impl AperCodec for CountValueForPdcpSn12 {
 }
 
 // CountValueForPdcpSn18
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CountValueForPdcpSn18 {
     pub pdcp_sn18: u32,
     pub hfn_pdcp_sn18: u16,
@@ -2445,7 +2446,7 @@ impl AperCodec for CountValueForPdcpSn18 {
 }
 
 // CoverageEnhancementLevel
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CoverageEnhancementLevel(pub Vec<u8>);
 
 impl AperCodec for CoverageEnhancementLevel {
@@ -2458,7 +2459,7 @@ impl AperCodec for CoverageEnhancementLevel {
 }
 
 // CpTransportLayerInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CpTransportLayerInformation {
     EndpointIpAddress(TransportLayerAddress),
 }
@@ -2485,7 +2486,7 @@ impl AperCodec for CpTransportLayerInformation {
 }
 
 // CriticalityDiagnostics
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CriticalityDiagnostics {
     pub procedure_code: Option<ProcedureCode>,
     pub triggering_message: Option<TriggeringMessage>,
@@ -2528,7 +2529,7 @@ impl AperCodec for CriticalityDiagnostics {
 }
 
 // CriticalityDiagnosticsIeList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CriticalityDiagnosticsIeList(pub Vec<CriticalityDiagnosticsIeItem>);
 
 impl AperCodec for CriticalityDiagnosticsIeList {
@@ -2546,7 +2547,7 @@ impl AperCodec for CriticalityDiagnosticsIeList {
 }
 
 // CriticalityDiagnosticsIeItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CriticalityDiagnosticsIeItem {
     pub ie_criticality: Criticality,
     pub ie_id: ProtocolIeId,
@@ -2571,7 +2572,7 @@ impl AperCodec for CriticalityDiagnosticsIeItem {
 }
 
 // CellBasedMdtNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellBasedMdtNr {
     pub cell_id_listfor_mdt: CellIdListforMdtNr,
 }
@@ -2590,7 +2591,7 @@ impl AperCodec for CellBasedMdtNr {
 }
 
 // CellIdListforMdtNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdListforMdtNr(pub Vec<NrCgi>);
 
 impl AperCodec for CellIdListforMdtNr {
@@ -2608,7 +2609,7 @@ impl AperCodec for CellIdListforMdtNr {
 }
 
 // CellBasedMdtEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellBasedMdtEutra {
     pub cell_id_listfor_mdt: CellIdListforMdtEutra,
 }
@@ -2627,7 +2628,7 @@ impl AperCodec for CellBasedMdtEutra {
 }
 
 // CellIdListforMdtEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellIdListforMdtEutra(pub Vec<EutraCgi>);
 
 impl AperCodec for CellIdListforMdtEutra {
@@ -2645,7 +2646,7 @@ impl AperCodec for CellIdListforMdtEutra {
 }
 
 // DataCodingScheme
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DataCodingScheme(pub BitString);
 
 impl AperCodec for DataCodingScheme {
@@ -2661,7 +2662,7 @@ impl AperCodec for DataCodingScheme {
 }
 
 // DataForwardingAccepted
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DataForwardingAccepted {
     DataForwardingAccepted,
@@ -2679,7 +2680,7 @@ impl AperCodec for DataForwardingAccepted {
 }
 
 // DataForwardingNotPossible
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DataForwardingNotPossible {
     DataForwardingNotPossible,
@@ -2697,7 +2698,7 @@ impl AperCodec for DataForwardingNotPossible {
 }
 
 // DataForwardingResponseDrbList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DataForwardingResponseDrbList(pub Vec<DataForwardingResponseDrbItem>);
 
 impl AperCodec for DataForwardingResponseDrbList {
@@ -2715,7 +2716,7 @@ impl AperCodec for DataForwardingResponseDrbList {
 }
 
 // DataForwardingResponseDrbItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DataForwardingResponseDrbItem {
     pub drb_id: DrbId,
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
@@ -2747,7 +2748,7 @@ impl AperCodec for DataForwardingResponseDrbItem {
 }
 
 // DapsRequestInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DapsRequestInfo {
     pub daps_indicator: DapsIndicator,
 }
@@ -2764,7 +2765,7 @@ impl AperCodec for DapsRequestInfo {
 }
 
 // DapsResponseInfoList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DapsResponseInfoList(pub Vec<DapsResponseInfoItem>);
 
 impl AperCodec for DapsResponseInfoList {
@@ -2782,7 +2783,7 @@ impl AperCodec for DapsResponseInfoList {
 }
 
 // DapsResponseInfoItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DapsResponseInfoItem {
     pub drb_id: DrbId,
     pub daps_response_info: DapsResponseInfo,
@@ -2804,7 +2805,7 @@ impl AperCodec for DapsResponseInfoItem {
 }
 
 // DapsResponseInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DapsResponseInfo {
     pub dapsresponseindicator: Dapsresponseindicator,
 }
@@ -2823,7 +2824,7 @@ impl AperCodec for DapsResponseInfo {
 }
 
 // DataForwardingResponseErabList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DataForwardingResponseErabList(pub Vec<DataForwardingResponseErabListItem>);
 
 impl AperCodec for DataForwardingResponseErabList {
@@ -2841,7 +2842,7 @@ impl AperCodec for DataForwardingResponseErabList {
 }
 
 // DataForwardingResponseErabListItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DataForwardingResponseErabListItem {
     pub e_rab_id: ERabId,
     pub dl_forwarding_up_tnl_information: UpTransportLayerInformation,
@@ -2863,7 +2864,7 @@ impl AperCodec for DataForwardingResponseErabListItem {
 }
 
 // DelayCritical
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DelayCritical {
     DelayCritical,
@@ -2882,7 +2883,7 @@ impl AperCodec for DelayCritical {
 }
 
 // DlCpSecurityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DlCpSecurityInformation {
     pub dl_nas_mac: DlNasMac,
 }
@@ -2899,7 +2900,7 @@ impl AperCodec for DlCpSecurityInformation {
 }
 
 // DlNasMac
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DlNasMac(pub BitString);
 
 impl AperCodec for DlNasMac {
@@ -2915,7 +2916,7 @@ impl AperCodec for DlNasMac {
 }
 
 // DlForwarding
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DlForwarding {
     DlForwardingProposed,
@@ -2933,7 +2934,7 @@ impl AperCodec for DlForwarding {
 }
 
 // DlNguTnlInformationReused
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DlNguTnlInformationReused {
     True,
@@ -2951,7 +2952,7 @@ impl AperCodec for DlNguTnlInformationReused {
 }
 
 // DirectForwardingPathAvailability
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DirectForwardingPathAvailability {
     DirectPathAvailable,
@@ -2969,7 +2970,7 @@ impl AperCodec for DirectForwardingPathAvailability {
 }
 
 // DrbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbId(pub u8);
 
 impl AperCodec for DrbId {
@@ -2982,7 +2983,7 @@ impl AperCodec for DrbId {
 }
 
 // DrBsSubjectToStatusTransferList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsSubjectToStatusTransferList(pub Vec<DrBsSubjectToStatusTransferItem>);
 
 impl AperCodec for DrBsSubjectToStatusTransferList {
@@ -3000,7 +3001,7 @@ impl AperCodec for DrBsSubjectToStatusTransferList {
 }
 
 // DrBsSubjectToStatusTransferItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsSubjectToStatusTransferItem {
     pub drb_id: DrbId,
     pub drb_status_ul: DrbStatusUl,
@@ -3025,7 +3026,7 @@ impl AperCodec for DrBsSubjectToStatusTransferItem {
 }
 
 // DrbStatusDl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum DrbStatusDl {
     DrbStatusDl12(DrbStatusDl12),
     DrbStatusDl18(DrbStatusDl18),
@@ -3052,7 +3053,7 @@ impl AperCodec for DrbStatusDl {
 }
 
 // DrbStatusDl12
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbStatusDl12 {
     pub dl_count_value: CountValueForPdcpSn12,
 }
@@ -3069,7 +3070,7 @@ impl AperCodec for DrbStatusDl12 {
 }
 
 // DrbStatusDl18
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbStatusDl18 {
     pub dl_count_value: CountValueForPdcpSn18,
 }
@@ -3086,7 +3087,7 @@ impl AperCodec for DrbStatusDl18 {
 }
 
 // DrbStatusUl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum DrbStatusUl {
     DrbStatusUl12(DrbStatusUl12),
     DrbStatusUl18(DrbStatusUl18),
@@ -3113,7 +3114,7 @@ impl AperCodec for DrbStatusUl {
 }
 
 // DrbStatusUl12
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbStatusUl12 {
     pub ul_count_value: CountValueForPdcpSn12,
     pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
@@ -3143,7 +3144,7 @@ impl AperCodec for DrbStatusUl12 {
 }
 
 // DrbStatusUl18
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbStatusUl18 {
     pub ul_count_value: CountValueForPdcpSn18,
     pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
@@ -3173,7 +3174,7 @@ impl AperCodec for DrbStatusUl18 {
 }
 
 // DrBsToQosFlowsMappingList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsToQosFlowsMappingList(pub Vec<DrBsToQosFlowsMappingItem>);
 
 impl AperCodec for DrBsToQosFlowsMappingList {
@@ -3191,7 +3192,7 @@ impl AperCodec for DrBsToQosFlowsMappingList {
 }
 
 // DrBsToQosFlowsMappingItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsToQosFlowsMappingItem {
     pub drb_id: DrbId,
     pub associated_qos_flow_list: AssociatedQosFlowList,
@@ -3213,7 +3214,7 @@ impl AperCodec for DrBsToQosFlowsMappingItem {
 }
 
 // Dynamic5qiDescriptor
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Dynamic5qiDescriptor {
     pub priority_level_qos: PriorityLevelQos,
     pub packet_delay_budget: PacketDelayBudget,
@@ -3265,7 +3266,7 @@ impl AperCodec for Dynamic5qiDescriptor {
 }
 
 // EarlyStatusTransferTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EarlyStatusTransferTransparentContainer {
     pub procedure_stage: ProcedureStageChoice,
 }
@@ -3282,7 +3283,7 @@ impl AperCodec for EarlyStatusTransferTransparentContainer {
 }
 
 // ProcedureStageChoice
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ProcedureStageChoice {
     FirstDlCount(FirstDlCount),
 }
@@ -3307,7 +3308,7 @@ impl AperCodec for ProcedureStageChoice {
 }
 
 // FirstDlCount
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FirstDlCount {
     pub dr_bs_subject_to_early_status_transfer: DrBsSubjectToEarlyStatusTransferList,
 }
@@ -3327,7 +3328,7 @@ impl AperCodec for FirstDlCount {
 }
 
 // DrBsSubjectToEarlyStatusTransferList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsSubjectToEarlyStatusTransferList(pub Vec<DrBsSubjectToEarlyStatusTransferItem>);
 
 impl AperCodec for DrBsSubjectToEarlyStatusTransferList {
@@ -3345,7 +3346,7 @@ impl AperCodec for DrBsSubjectToEarlyStatusTransferList {
 }
 
 // DrBsSubjectToEarlyStatusTransferItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsSubjectToEarlyStatusTransferItem {
     pub drb_id: DrbId,
     pub first_dlcount: DrbStatusDl,
@@ -3367,7 +3368,7 @@ impl AperCodec for DrBsSubjectToEarlyStatusTransferItem {
 }
 
 // EdtSession
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EdtSession {
     True,
@@ -3385,7 +3386,7 @@ impl AperCodec for EdtSession {
 }
 
 // EmergencyAreaId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaId(pub Vec<u8>);
 
 impl AperCodec for EmergencyAreaId {
@@ -3401,7 +3402,7 @@ impl AperCodec for EmergencyAreaId {
 }
 
 // EmergencyAreaIdBroadcastEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdBroadcastEutra(pub Vec<EmergencyAreaIdBroadcastEutraItem>);
 
 impl AperCodec for EmergencyAreaIdBroadcastEutra {
@@ -3420,7 +3421,7 @@ impl AperCodec for EmergencyAreaIdBroadcastEutra {
 }
 
 // EmergencyAreaIdBroadcastEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdBroadcastEutraItem {
     pub emergency_area_id: EmergencyAreaId,
     pub completed_cells_in_eai_eutra: CompletedCellsInEaiEutra,
@@ -3442,7 +3443,7 @@ impl AperCodec for EmergencyAreaIdBroadcastEutraItem {
 }
 
 // EmergencyAreaIdBroadcastNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdBroadcastNr(pub Vec<EmergencyAreaIdBroadcastNrItem>);
 
 impl AperCodec for EmergencyAreaIdBroadcastNr {
@@ -3461,7 +3462,7 @@ impl AperCodec for EmergencyAreaIdBroadcastNr {
 }
 
 // EmergencyAreaIdBroadcastNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdBroadcastNrItem {
     pub emergency_area_id: EmergencyAreaId,
     pub completed_cells_in_eai_nr: CompletedCellsInEaiNr,
@@ -3483,7 +3484,7 @@ impl AperCodec for EmergencyAreaIdBroadcastNrItem {
 }
 
 // EmergencyAreaIdCancelledEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdCancelledEutra(pub Vec<EmergencyAreaIdCancelledEutraItem>);
 
 impl AperCodec for EmergencyAreaIdCancelledEutra {
@@ -3502,7 +3503,7 @@ impl AperCodec for EmergencyAreaIdCancelledEutra {
 }
 
 // EmergencyAreaIdCancelledEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdCancelledEutraItem {
     pub emergency_area_id: EmergencyAreaId,
     pub cancelled_cells_in_eai_eutra: CancelledCellsInEaiEutra,
@@ -3524,7 +3525,7 @@ impl AperCodec for EmergencyAreaIdCancelledEutraItem {
 }
 
 // EmergencyAreaIdCancelledNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdCancelledNr(pub Vec<EmergencyAreaIdCancelledNrItem>);
 
 impl AperCodec for EmergencyAreaIdCancelledNr {
@@ -3543,7 +3544,7 @@ impl AperCodec for EmergencyAreaIdCancelledNr {
 }
 
 // EmergencyAreaIdCancelledNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdCancelledNrItem {
     pub emergency_area_id: EmergencyAreaId,
     pub cancelled_cells_in_eai_nr: CancelledCellsInEaiNr,
@@ -3565,7 +3566,7 @@ impl AperCodec for EmergencyAreaIdCancelledNrItem {
 }
 
 // EmergencyAreaIdList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdList(pub Vec<EmergencyAreaId>);
 
 impl AperCodec for EmergencyAreaIdList {
@@ -3584,7 +3585,7 @@ impl AperCodec for EmergencyAreaIdList {
 }
 
 // EmergencyAreaIdListForRestart
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyAreaIdListForRestart(pub Vec<EmergencyAreaId>);
 
 impl AperCodec for EmergencyAreaIdListForRestart {
@@ -3602,7 +3603,7 @@ impl AperCodec for EmergencyAreaIdListForRestart {
 }
 
 // EmergencyFallbackIndicator
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EmergencyFallbackIndicator {
     pub emergency_fallback_request_indicator: EmergencyFallbackRequestIndicator,
     pub emergency_service_target_cn: Option<EmergencyServiceTargetCn>,
@@ -3627,7 +3628,7 @@ impl AperCodec for EmergencyFallbackIndicator {
 }
 
 // EmergencyFallbackRequestIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EmergencyFallbackRequestIndicator {
     EmergencyFallbackRequested,
@@ -3645,7 +3646,7 @@ impl AperCodec for EmergencyFallbackRequestIndicator {
 }
 
 // EmergencyServiceTargetCn
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EmergencyServiceTargetCn {
     FiveGc,
@@ -3664,7 +3665,7 @@ impl AperCodec for EmergencyServiceTargetCn {
 }
 
 // EnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum EnbId {
     MacroEnbId(BitString),
     HomeEnbId(BitString),
@@ -3715,7 +3716,7 @@ impl AperCodec for EnbId {
 }
 
 // EnhancedCoverageRestriction
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EnhancedCoverageRestriction {
     Restricted,
@@ -3733,7 +3734,7 @@ impl AperCodec for EnhancedCoverageRestriction {
 }
 
 // ExtendedConnectedTime
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedConnectedTime(pub u8);
 
 impl AperCodec for ExtendedConnectedTime {
@@ -3746,7 +3747,7 @@ impl AperCodec for ExtendedConnectedTime {
 }
 
 // EnDcsonConfigurationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EnDcsonConfigurationTransfer(pub Vec<u8>);
 
 impl AperCodec for EnDcsonConfigurationTransfer {
@@ -3759,7 +3760,7 @@ impl AperCodec for EnDcsonConfigurationTransfer {
 }
 
 // EndpointIpAddressAndPort
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EndpointIpAddressAndPort {
     pub endpoint_ip_address: TransportLayerAddress,
     pub port_number: PortNumber,
@@ -3781,7 +3782,7 @@ impl AperCodec for EndpointIpAddressAndPort {
 }
 
 // EndIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EndIndication {
     NoFurtherData,
@@ -3800,7 +3801,7 @@ impl AperCodec for EndIndication {
 }
 
 // EquivalentPlmnS
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EquivalentPlmnS(pub Vec<PlmnIdentity>);
 
 impl AperCodec for EquivalentPlmnS {
@@ -3818,7 +3819,7 @@ impl AperCodec for EquivalentPlmnS {
 }
 
 // EpsTac
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EpsTac(pub Vec<u8>);
 
 impl AperCodec for EpsTac {
@@ -3834,7 +3835,7 @@ impl AperCodec for EpsTac {
 }
 
 // EpsTai
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EpsTai {
     pub plmn_identity: PlmnIdentity,
     pub eps_tac: EpsTac,
@@ -3856,7 +3857,7 @@ impl AperCodec for EpsTai {
 }
 
 // ERabId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ERabId(pub u8);
 
 impl AperCodec for ERabId {
@@ -3869,7 +3870,7 @@ impl AperCodec for ERabId {
 }
 
 // ERabInformationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ERabInformationList(pub Vec<ERabInformationItem>);
 
 impl AperCodec for ERabInformationList {
@@ -3887,7 +3888,7 @@ impl AperCodec for ERabInformationList {
 }
 
 // ERabInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ERabInformationItem {
     pub e_rab_id: ERabId,
     pub dl_forwarding: Option<DlForwarding>,
@@ -3912,7 +3913,7 @@ impl AperCodec for ERabInformationItem {
 }
 
 // EutraCellIdentity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EutraCellIdentity(pub BitString);
 
 impl AperCodec for EutraCellIdentity {
@@ -3928,7 +3929,7 @@ impl AperCodec for EutraCellIdentity {
 }
 
 // EutraCgi
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EutraCgi {
     pub plmn_identity: PlmnIdentity,
     pub eutra_cell_identity: EutraCellIdentity,
@@ -3950,7 +3951,7 @@ impl AperCodec for EutraCgi {
 }
 
 // EutraCgiList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EutraCgiList(pub Vec<EutraCgi>);
 
 impl AperCodec for EutraCgiList {
@@ -3968,7 +3969,7 @@ impl AperCodec for EutraCgiList {
 }
 
 // EutraCgiListForWarning
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EutraCgiListForWarning(pub Vec<EutraCgi>);
 
 impl AperCodec for EutraCgiListForWarning {
@@ -3987,7 +3988,7 @@ impl AperCodec for EutraCgiListForWarning {
 }
 
 // EutrAencryptionAlgorithms
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EutrAencryptionAlgorithms(pub BitString);
 
 impl AperCodec for EutrAencryptionAlgorithms {
@@ -4003,7 +4004,7 @@ impl AperCodec for EutrAencryptionAlgorithms {
 }
 
 // EutrAintegrityProtectionAlgorithms
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EutrAintegrityProtectionAlgorithms(pub BitString);
 
 impl AperCodec for EutrAintegrityProtectionAlgorithms {
@@ -4019,7 +4020,7 @@ impl AperCodec for EutrAintegrityProtectionAlgorithms {
 }
 
 // EventType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EventType {
     Direct,
@@ -4042,7 +4043,7 @@ impl AperCodec for EventType {
 }
 
 // ExpectedActivityPeriod
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpectedActivityPeriod(pub u8);
 
 impl AperCodec for ExpectedActivityPeriod {
@@ -4055,7 +4056,7 @@ impl AperCodec for ExpectedActivityPeriod {
 }
 
 // ExpectedHoInterval
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ExpectedHoInterval {
     Sec15,
@@ -4079,7 +4080,7 @@ impl AperCodec for ExpectedHoInterval {
 }
 
 // ExpectedIdlePeriod
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpectedIdlePeriod(pub u8);
 
 impl AperCodec for ExpectedIdlePeriod {
@@ -4092,7 +4093,7 @@ impl AperCodec for ExpectedIdlePeriod {
 }
 
 // ExpectedUeActivityBehaviour
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpectedUeActivityBehaviour {
     pub expected_activity_period: Option<ExpectedActivityPeriod>,
     pub expected_idle_period: Option<ExpectedIdlePeriod>,
@@ -4128,7 +4129,7 @@ impl AperCodec for ExpectedUeActivityBehaviour {
 }
 
 // ExpectedUeBehaviour
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpectedUeBehaviour {
     pub expected_ue_activity_behaviour: Option<ExpectedUeActivityBehaviour>,
     pub expected_ho_interval: Option<ExpectedHoInterval>,
@@ -4171,7 +4172,7 @@ impl AperCodec for ExpectedUeBehaviour {
 }
 
 // ExpectedUeMobility
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ExpectedUeMobility {
     Stationary,
@@ -4190,7 +4191,7 @@ impl AperCodec for ExpectedUeMobility {
 }
 
 // ExpectedUeMovingTrajectory
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpectedUeMovingTrajectory(pub Vec<ExpectedUeMovingTrajectoryItem>);
 
 impl AperCodec for ExpectedUeMovingTrajectory {
@@ -4208,7 +4209,7 @@ impl AperCodec for ExpectedUeMovingTrajectory {
 }
 
 // ExpectedUeMovingTrajectoryItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExpectedUeMovingTrajectoryItem {
     pub ngran_cgi: NgranCgi,
     pub time_stayed_in_cell: Option<u16>,
@@ -4233,7 +4234,7 @@ impl AperCodec for ExpectedUeMovingTrajectoryItem {
 }
 
 // ExtendedAmfName
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedAmfName {
     pub amf_name_visible_string: Option<AmfNameVisibleString>,
     pub amf_name_utf8_string: Option<AmfNameUtf8String>,
@@ -4262,7 +4263,7 @@ impl AperCodec for ExtendedAmfName {
 }
 
 // ExtendedPacketDelayBudget
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedPacketDelayBudget(pub u16);
 
 impl AperCodec for ExtendedPacketDelayBudget {
@@ -4275,7 +4276,7 @@ impl AperCodec for ExtendedPacketDelayBudget {
 }
 
 // ExtendedRanNodeName
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedRanNodeName {
     pub ran_node_name_visible_string: Option<RanNodeNameVisibleString>,
     pub ran_node_name_utf8_string: Option<RanNodeNameUtf8String>,
@@ -4304,7 +4305,7 @@ impl AperCodec for ExtendedRanNodeName {
 }
 
 // ExtendedRatRestrictionInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedRatRestrictionInformation {
     pub primary_rat_restriction: BitString,
     pub secondary_rat_restriction: BitString,
@@ -4327,7 +4328,7 @@ impl AperCodec for ExtendedRatRestrictionInformation {
 }
 
 // ExtendedRncId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedRncId(pub u16);
 
 impl AperCodec for ExtendedRncId {
@@ -4340,7 +4341,7 @@ impl AperCodec for ExtendedRncId {
 }
 
 // ExtendedSliceSupportList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedSliceSupportList(pub Vec<SliceSupportItem>);
 
 impl AperCodec for ExtendedSliceSupportList {
@@ -4359,7 +4360,7 @@ impl AperCodec for ExtendedSliceSupportList {
 }
 
 // ExtendedUeIdentityIndexValue
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ExtendedUeIdentityIndexValue(pub BitString);
 
 impl AperCodec for ExtendedUeIdentityIndexValue {
@@ -4375,7 +4376,7 @@ impl AperCodec for ExtendedUeIdentityIndexValue {
 }
 
 // EventTrigger
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig(EventL1LoggedMdtConfig),
@@ -4404,7 +4405,7 @@ impl AperCodec for EventTrigger {
 }
 
 // EventL1LoggedMdtConfig
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EventL1LoggedMdtConfig {
     pub l1_threshold: MeasurementThresholdL1LoggedMdt,
     pub hysteresis: Hysteresis,
@@ -4429,7 +4430,7 @@ impl AperCodec for EventL1LoggedMdtConfig {
 }
 
 // MeasurementThresholdL1LoggedMdt
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum MeasurementThresholdL1LoggedMdt {
     ThresholdRsrp(ThresholdRsrp),
     ThresholdRsrq(ThresholdRsrq),
@@ -4456,7 +4457,7 @@ impl AperCodec for MeasurementThresholdL1LoggedMdt {
 }
 
 // FailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FailureIndication {
     pub ue_rlf_report_container: UeRlfReportContainer,
 }
@@ -4475,7 +4476,7 @@ impl AperCodec for FailureIndication {
 }
 
 // FiveGSTmsi
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FiveGSTmsi {
     pub amf_set_id: AmfSetId,
     pub amf_pointer: AmfPointer,
@@ -4500,7 +4501,7 @@ impl AperCodec for FiveGSTmsi {
 }
 
 // FiveGTmsi
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FiveGTmsi(pub Vec<u8>);
 
 impl AperCodec for FiveGTmsi {
@@ -4516,7 +4517,7 @@ impl AperCodec for FiveGTmsi {
 }
 
 // FiveQi
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FiveQi(pub u8);
 
 impl AperCodec for FiveQi {
@@ -4529,7 +4530,7 @@ impl AperCodec for FiveQi {
 }
 
 // ForbiddenAreaInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ForbiddenAreaInformation(pub Vec<ForbiddenAreaInformationItem>);
 
 impl AperCodec for ForbiddenAreaInformation {
@@ -4547,7 +4548,7 @@ impl AperCodec for ForbiddenAreaInformation {
 }
 
 // ForbiddenAreaInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ForbiddenAreaInformationItem {
     pub plmn_identity: PlmnIdentity,
     pub forbidden_ta_cs: ForbiddenTaCs,
@@ -4569,7 +4570,7 @@ impl AperCodec for ForbiddenAreaInformationItem {
 }
 
 // ForbiddenTaCs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ForbiddenTaCs(pub Vec<Tac>);
 
 impl AperCodec for ForbiddenTaCs {
@@ -4587,7 +4588,7 @@ impl AperCodec for ForbiddenTaCs {
 }
 
 // FromEutranToNgran
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FromEutranToNgran {
     pub source_enb_id: IntersystemSonEnbId,
     pub target_ngran_node_id: IntersystemSonNgranNodeId,
@@ -4609,7 +4610,7 @@ impl AperCodec for FromEutranToNgran {
 }
 
 // FromNgranToEutran
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FromNgranToEutran {
     pub source_ngran_node_id: IntersystemSonNgranNodeId,
     pub target_enb_id: IntersystemSonEnbId,
@@ -4631,7 +4632,7 @@ impl AperCodec for FromNgranToEutran {
 }
 
 // GbrQosInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GbrQosInformation {
     pub maximum_flow_bit_rate_dl: BitRate,
     pub maximum_flow_bit_rate_ul: BitRate,
@@ -4679,7 +4680,7 @@ impl AperCodec for GbrQosInformation {
 }
 
 // GlobalCableId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalCableId(pub Vec<u8>);
 
 impl AperCodec for GlobalCableId {
@@ -4692,7 +4693,7 @@ impl AperCodec for GlobalCableId {
 }
 
 // GlobalEnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalEnbId {
     pub plmn_identity: PlmnIdentity,
     pub enb_id: EnbId,
@@ -4714,7 +4715,7 @@ impl AperCodec for GlobalEnbId {
 }
 
 // GlobalGnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalGnbId {
     pub plmn_identity: PlmnIdentity,
     pub gnb_id: GnbId,
@@ -4736,7 +4737,7 @@ impl AperCodec for GlobalGnbId {
 }
 
 // GlobalN3IwfId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalN3IwfId {
     pub plmn_identity: PlmnIdentity,
     pub n3_iwf_id: N3IwfId,
@@ -4758,7 +4759,7 @@ impl AperCodec for GlobalN3IwfId {
 }
 
 // GlobalLineId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalLineId {
     pub global_line_identity: GlobalLineIdentity,
     pub line_type: Option<LineType>,
@@ -4783,7 +4784,7 @@ impl AperCodec for GlobalLineId {
 }
 
 // GlobalLineIdentity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalLineIdentity(pub Vec<u8>);
 
 impl AperCodec for GlobalLineIdentity {
@@ -4796,7 +4797,7 @@ impl AperCodec for GlobalLineIdentity {
 }
 
 // GlobalNgEnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalNgEnbId {
     pub plmn_identity: PlmnIdentity,
     pub ng_enb_id: NgEnbId,
@@ -4818,7 +4819,7 @@ impl AperCodec for GlobalNgEnbId {
 }
 
 // GlobalRanNodeId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum GlobalRanNodeId {
     GlobalGnbId(GlobalGnbId),
     GlobalNgEnbId(GlobalNgEnbId),
@@ -4847,7 +4848,7 @@ impl AperCodec for GlobalRanNodeId {
 }
 
 // GlobalTngfId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalTngfId {
     pub plmn_identity: PlmnIdentity,
     pub tngf_id: TngfId,
@@ -4869,7 +4870,7 @@ impl AperCodec for GlobalTngfId {
 }
 
 // GlobalTwifId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalTwifId {
     pub plmn_identity: PlmnIdentity,
     pub twif_id: TwifId,
@@ -4891,7 +4892,7 @@ impl AperCodec for GlobalTwifId {
 }
 
 // GlobalWAgfId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GlobalWAgfId {
     pub plmn_identity: PlmnIdentity,
     pub w_agf_id: WAgfId,
@@ -4913,7 +4914,7 @@ impl AperCodec for GlobalWAgfId {
 }
 
 // GnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum GnbId {
     GnbId(BitString),
 }
@@ -4943,7 +4944,7 @@ impl AperCodec for GnbId {
 }
 
 // GtpTeid
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GtpTeid(pub Vec<u8>);
 
 impl AperCodec for GtpTeid {
@@ -4959,7 +4960,7 @@ impl AperCodec for GtpTeid {
 }
 
 // GtpTunnel
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GtpTunnel {
     pub transport_layer_address: TransportLayerAddress,
     pub gtp_teid: GtpTeid,
@@ -4981,7 +4982,7 @@ impl AperCodec for GtpTunnel {
 }
 
 // Guami
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Guami {
     pub plmn_identity: PlmnIdentity,
     pub amf_region_id: AmfRegionId,
@@ -5009,7 +5010,7 @@ impl AperCodec for Guami {
 }
 
 // GuamiType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum GuamiType {
     Native,
@@ -5028,7 +5029,7 @@ impl AperCodec for GuamiType {
 }
 
 // HandoverCommandTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverCommandTransfer {
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
     pub qos_flow_to_be_forwarded_list: Option<QosFlowToBeForwardedList>,
@@ -5064,7 +5065,7 @@ impl AperCodec for HandoverCommandTransfer {
 }
 
 // HandoverFlag
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum HandoverFlag {
     HandoverPreparation,
@@ -5082,7 +5083,7 @@ impl AperCodec for HandoverFlag {
 }
 
 // HandoverPreparationUnsuccessfulTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverPreparationUnsuccessfulTransfer {
     pub cause: Cause,
 }
@@ -5099,7 +5100,7 @@ impl AperCodec for HandoverPreparationUnsuccessfulTransfer {
 }
 
 // HandoverRequestAcknowledgeTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverRequestAcknowledgeTransfer {
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_forwarding_up_tnl_information: Option<UpTransportLayerInformation>,
@@ -5148,7 +5149,7 @@ impl AperCodec for HandoverRequestAcknowledgeTransfer {
 }
 
 // HandoverRequiredTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverRequiredTransfer {
     pub direct_forwarding_path_availability: Option<DirectForwardingPathAvailability>,
 }
@@ -5170,7 +5171,7 @@ impl AperCodec for HandoverRequiredTransfer {
 }
 
 // HandoverResourceAllocationUnsuccessfulTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverResourceAllocationUnsuccessfulTransfer {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -5195,7 +5196,7 @@ impl AperCodec for HandoverResourceAllocationUnsuccessfulTransfer {
 }
 
 // HandoverType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum HandoverType {
     Intra5gs,
@@ -5215,7 +5216,7 @@ impl AperCodec for HandoverType {
 }
 
 // HfcNodeId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HfcNodeId(pub Vec<u8>);
 
 impl AperCodec for HfcNodeId {
@@ -5228,7 +5229,7 @@ impl AperCodec for HfcNodeId {
 }
 
 // HoReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HoReport {
     pub handover_report_type: HandoverReportType,
     pub handover_cause: Cause,
@@ -5295,7 +5296,7 @@ impl AperCodec for HoReport {
 }
 
 // Hysteresis
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Hysteresis(pub u8);
 
 impl AperCodec for Hysteresis {
@@ -5308,7 +5309,7 @@ impl AperCodec for Hysteresis {
 }
 
 // IabAuthorized
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum IabAuthorized {
     Authorized,
@@ -5327,7 +5328,7 @@ impl AperCodec for IabAuthorized {
 }
 
 // IabSupported
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum IabSupported {
     True,
@@ -5345,7 +5346,7 @@ impl AperCodec for IabSupported {
 }
 
 // IabNodeIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum IabNodeIndication {
     True,
@@ -5363,7 +5364,7 @@ impl AperCodec for IabNodeIndication {
 }
 
 // ImsVoiceSupportIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ImsVoiceSupportIndicator {
     Supported,
@@ -5382,7 +5383,7 @@ impl AperCodec for ImsVoiceSupportIndicator {
 }
 
 // IndexToRfsp
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IndexToRfsp(pub u8);
 
 impl AperCodec for IndexToRfsp {
@@ -5395,7 +5396,7 @@ impl AperCodec for IndexToRfsp {
 }
 
 // InfoOnRecommendedCellsAndRanNodesForPaging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InfoOnRecommendedCellsAndRanNodesForPaging {
     pub recommended_cells_for_paging: RecommendedCellsForPaging,
     pub recommend_ran_nodes_for_paging: RecommendedRanNodesForPaging,
@@ -5417,7 +5418,7 @@ impl AperCodec for InfoOnRecommendedCellsAndRanNodesForPaging {
 }
 
 // IntegrityProtectionIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum IntegrityProtectionIndication {
     Required,
@@ -5437,7 +5438,7 @@ impl AperCodec for IntegrityProtectionIndication {
 }
 
 // IntegrityProtectionResult
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum IntegrityProtectionResult {
     Performed,
@@ -5456,7 +5457,7 @@ impl AperCodec for IntegrityProtectionResult {
 }
 
 // IntendedNumberOfPagingAttempts
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IntendedNumberOfPagingAttempts(pub u8);
 
 impl AperCodec for IntendedNumberOfPagingAttempts {
@@ -5469,7 +5470,7 @@ impl AperCodec for IntendedNumberOfPagingAttempts {
 }
 
 // InterfacesToTrace
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InterfacesToTrace(pub BitString);
 
 impl AperCodec for InterfacesToTrace {
@@ -5485,7 +5486,7 @@ impl AperCodec for InterfacesToTrace {
 }
 
 // ImmediateMdtNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ImmediateMdtNr {
     pub measurements_to_activate: MeasurementsToActivate,
     pub m1_configuration: Option<M1Configuration>,
@@ -5567,7 +5568,7 @@ impl AperCodec for ImmediateMdtNr {
 }
 
 // InterSystemFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InterSystemFailureIndication {
     pub ue_rlf_report_container: Option<UeRlfReportContainer>,
 }
@@ -5589,7 +5590,7 @@ impl AperCodec for InterSystemFailureIndication {
 }
 
 // IntersystemSonConfigurationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IntersystemSonConfigurationTransfer {
     pub transfer_type: IntersystemSonTransferType,
     pub intersystem_son_information: IntersystemSonInformation,
@@ -5611,7 +5612,7 @@ impl AperCodec for IntersystemSonConfigurationTransfer {
 }
 
 // IntersystemSonTransferType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum IntersystemSonTransferType {
     FromEutranToNgran(FromEutranToNgran),
     FromNgranToEutran(FromNgranToEutran),
@@ -5638,7 +5639,7 @@ impl AperCodec for IntersystemSonTransferType {
 }
 
 // IntersystemSonEnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IntersystemSonEnbId {
     pub global_enb_id: GlobalEnbId,
     pub selected_epstai: EpsTai,
@@ -5660,7 +5661,7 @@ impl AperCodec for IntersystemSonEnbId {
 }
 
 // IntersystemSonNgranNodeId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IntersystemSonNgranNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
@@ -5682,7 +5683,7 @@ impl AperCodec for IntersystemSonNgranNodeId {
 }
 
 // IntersystemSonInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum IntersystemSonInformation {
     IntersystemSonInformationReport(IntersystemSonInformationReport),
 }
@@ -5709,7 +5710,7 @@ impl AperCodec for IntersystemSonInformation {
 }
 
 // IntersystemSonInformationReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum IntersystemSonInformationReport {
     HoReportInformation(InterSystemHoReport),
     FailureIndicationInformation(InterSystemFailureIndication),
@@ -5740,7 +5741,7 @@ impl AperCodec for IntersystemSonInformationReport {
 }
 
 // InterSystemHoReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InterSystemHoReport {
     pub handover_report_type: InterSystemHandoverReportType,
 }
@@ -5759,7 +5760,7 @@ impl AperCodec for InterSystemHoReport {
 }
 
 // InterSystemHandoverReportType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum InterSystemHandoverReportType {
     TooearlyIntersystemHo(TooearlyIntersystemHo),
     IntersystemUnnecessaryHo(IntersystemUnnecessaryHo),
@@ -5790,7 +5791,7 @@ impl AperCodec for InterSystemHandoverReportType {
 }
 
 // IntersystemUnnecessaryHo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IntersystemUnnecessaryHo {
     pub sourcecell_id: NgranCgi,
     pub targetcell_id: EutraCgi,
@@ -5818,7 +5819,7 @@ impl AperCodec for IntersystemUnnecessaryHo {
 }
 
 // Lac
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Lac(pub Vec<u8>);
 
 impl AperCodec for Lac {
@@ -5834,7 +5835,7 @@ impl AperCodec for Lac {
 }
 
 // Lai
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Lai {
     pub plmn_identity: PlmnIdentity,
     pub lac: Lac,
@@ -5853,7 +5854,7 @@ impl AperCodec for Lai {
 }
 
 // LastVisitedCellInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum LastVisitedCellInformation {
     NgranCell(LastVisitedNgranCellInformation),
     EutranCell(LastVisitedEutranCellInformation),
@@ -5892,7 +5893,7 @@ impl AperCodec for LastVisitedCellInformation {
 }
 
 // LastVisitedCellItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LastVisitedCellItem {
     pub last_visited_cell_information: LastVisitedCellInformation,
 }
@@ -5911,7 +5912,7 @@ impl AperCodec for LastVisitedCellItem {
 }
 
 // LastVisitedEutranCellInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LastVisitedEutranCellInformation(pub Vec<u8>);
 
 impl AperCodec for LastVisitedEutranCellInformation {
@@ -5924,7 +5925,7 @@ impl AperCodec for LastVisitedEutranCellInformation {
 }
 
 // LastVisitedGeranCellInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LastVisitedGeranCellInformation(pub Vec<u8>);
 
 impl AperCodec for LastVisitedGeranCellInformation {
@@ -5937,7 +5938,7 @@ impl AperCodec for LastVisitedGeranCellInformation {
 }
 
 // LastVisitedNgranCellInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LastVisitedNgranCellInformation {
     pub global_cell_id: NgranCgi,
     pub cell_type: CellType,
@@ -5975,7 +5976,7 @@ impl AperCodec for LastVisitedNgranCellInformation {
 }
 
 // LastVisitedUtranCellInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LastVisitedUtranCellInformation(pub Vec<u8>);
 
 impl AperCodec for LastVisitedUtranCellInformation {
@@ -5988,7 +5989,7 @@ impl AperCodec for LastVisitedUtranCellInformation {
 }
 
 // LineType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum LineType {
     Dsl,
@@ -6007,7 +6008,7 @@ impl AperCodec for LineType {
 }
 
 // LocationReportingAdditionalInfo
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum LocationReportingAdditionalInfo {
     IncludePsCell,
@@ -6025,7 +6026,7 @@ impl AperCodec for LocationReportingAdditionalInfo {
 }
 
 // LocationReportingReferenceId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LocationReportingReferenceId(pub u8);
 
 impl AperCodec for LocationReportingReferenceId {
@@ -6038,7 +6039,7 @@ impl AperCodec for LocationReportingReferenceId {
 }
 
 // LocationReportingRequestType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LocationReportingRequestType {
     pub event_type: EventType,
     pub report_area: ReportArea,
@@ -6073,7 +6074,7 @@ impl AperCodec for LocationReportingRequestType {
 }
 
 // LoggedMdtNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LoggedMdtNr {
     pub logging_interval: LoggingInterval,
     pub logging_duration: LoggingDuration,
@@ -6125,7 +6126,7 @@ impl AperCodec for LoggedMdtNr {
 }
 
 // LoggingInterval
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum LoggingInterval {
     Ms320,
@@ -6153,7 +6154,7 @@ impl AperCodec for LoggingInterval {
 }
 
 // LoggingDuration
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum LoggingDuration {
     M10,
@@ -6176,7 +6177,7 @@ impl AperCodec for LoggingDuration {
 }
 
 // LinksToLog
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum LinksToLog {
     Uplink,
@@ -6196,7 +6197,7 @@ impl AperCodec for LinksToLog {
 }
 
 // LoggedMdtTrigger
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum LoggedMdtTrigger {
     Periodical,
     EventTrigger(EventTrigger),
@@ -6223,7 +6224,7 @@ impl AperCodec for LoggedMdtTrigger {
 }
 
 // LtemIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum LtemIndication {
     LteM,
@@ -6241,7 +6242,7 @@ impl AperCodec for LtemIndication {
 }
 
 // LteueRlfReportContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
 
 impl AperCodec for LteueRlfReportContainer {
@@ -6254,7 +6255,7 @@ impl AperCodec for LteueRlfReportContainer {
 }
 
 // Ltev2xServicesAuthorized
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Ltev2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
@@ -6283,7 +6284,7 @@ impl AperCodec for Ltev2xServicesAuthorized {
 }
 
 // LteueSidelinkAggregateMaximumBitrate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LteueSidelinkAggregateMaximumBitrate {
     pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
 }
@@ -6302,7 +6303,7 @@ impl AperCodec for LteueSidelinkAggregateMaximumBitrate {
 }
 
 // MaskedImeisv
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MaskedImeisv(pub BitString);
 
 impl AperCodec for MaskedImeisv {
@@ -6318,7 +6319,7 @@ impl AperCodec for MaskedImeisv {
 }
 
 // MaximumDataBurstVolume
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl AperCodec for MaximumDataBurstVolume {
@@ -6331,7 +6332,7 @@ impl AperCodec for MaximumDataBurstVolume {
 }
 
 // MessageIdentifier
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MessageIdentifier(pub BitString);
 
 impl AperCodec for MessageIdentifier {
@@ -6347,7 +6348,7 @@ impl AperCodec for MessageIdentifier {
 }
 
 // MaximumIntegrityProtectedDataRate
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
@@ -6366,7 +6367,7 @@ impl AperCodec for MaximumIntegrityProtectedDataRate {
 }
 
 // MicoModeIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum MicoModeIndication {
     True,
@@ -6384,7 +6385,7 @@ impl AperCodec for MicoModeIndication {
 }
 
 // MobilityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MobilityInformation(pub BitString);
 
 impl AperCodec for MobilityInformation {
@@ -6400,7 +6401,7 @@ impl AperCodec for MobilityInformation {
 }
 
 // MobilityRestrictionList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MobilityRestrictionList {
     pub serving_plmn: PlmnIdentity,
     pub equivalent_plmn_s: Option<EquivalentPlmnS>,
@@ -6446,7 +6447,7 @@ impl AperCodec for MobilityRestrictionList {
 }
 
 // MdtPlmnList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtPlmnList(pub Vec<PlmnIdentity>);
 
 impl AperCodec for MdtPlmnList {
@@ -6464,7 +6465,7 @@ impl AperCodec for MdtPlmnList {
 }
 
 // MdtConfiguration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtConfiguration {
     pub mdt_config_nr: Option<MdtConfigurationNr>,
     pub mdt_config_eutra: Option<MdtConfigurationEutra>,
@@ -6493,7 +6494,7 @@ impl AperCodec for MdtConfiguration {
 }
 
 // MdtConfigurationNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtConfigurationNr {
     pub mdt_activation: MdtActivation,
     pub area_scope_of_mdt: AreaScopeOfMdtNr,
@@ -6524,7 +6525,7 @@ impl AperCodec for MdtConfigurationNr {
 }
 
 // MdtConfigurationEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtConfigurationEutra {
     pub mdt_activation: MdtActivation,
     pub area_scope_of_mdt: AreaScopeOfMdtEutra,
@@ -6555,7 +6556,7 @@ impl AperCodec for MdtConfigurationEutra {
 }
 
 // MdtActivation
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum MdtActivation {
     ImmediateMdtOnly,
@@ -6575,7 +6576,7 @@ impl AperCodec for MdtActivation {
 }
 
 // MdtModeNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum MdtModeNr {
     ImmediateMdtNr(ImmediateMdtNr),
     LoggedMdtNr(LoggedMdtNr),
@@ -6602,7 +6603,7 @@ impl AperCodec for MdtModeNr {
 }
 
 // MdtModeEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtModeEutra(pub Vec<u8>);
 
 impl AperCodec for MdtModeEutra {
@@ -6615,7 +6616,7 @@ impl AperCodec for MdtModeEutra {
 }
 
 // MeasurementsToActivate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MeasurementsToActivate(pub BitString);
 
 impl AperCodec for MeasurementsToActivate {
@@ -6631,7 +6632,7 @@ impl AperCodec for MeasurementsToActivate {
 }
 
 // M1Configuration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M1Configuration {
     pub m1reporting_trigger: M1ReportingTrigger,
     pub m1threshold_event_a2: Option<M1ThresholdEventA2>,
@@ -6663,7 +6664,7 @@ impl AperCodec for M1Configuration {
 }
 
 // M1ReportingTrigger
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum M1ReportingTrigger {
     Periodic,
@@ -6683,7 +6684,7 @@ impl AperCodec for M1ReportingTrigger {
 }
 
 // M1ThresholdEventA2
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M1ThresholdEventA2 {
     pub m1_threshold_type: M1ThresholdType,
 }
@@ -6700,7 +6701,7 @@ impl AperCodec for M1ThresholdEventA2 {
 }
 
 // M1ThresholdType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum M1ThresholdType {
     ThresholdRsrp(ThresholdRsrp),
     ThresholdRsrq(ThresholdRsrq),
@@ -6729,7 +6730,7 @@ impl AperCodec for M1ThresholdType {
 }
 
 // M1PeriodicReporting
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M1PeriodicReporting {
     pub report_interval: ReportIntervalMdt,
     pub report_amount: ReportAmountMdt,
@@ -6751,7 +6752,7 @@ impl AperCodec for M1PeriodicReporting {
 }
 
 // M4Configuration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M4Configuration {
     pub m4period: M4period,
     pub m4_links_to_log: LinksToLog,
@@ -6773,7 +6774,7 @@ impl AperCodec for M4Configuration {
 }
 
 // M4period
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum M4period {
     Ms1024,
@@ -6795,7 +6796,7 @@ impl AperCodec for M4period {
 }
 
 // M5Configuration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M5Configuration {
     pub m5period: M5period,
     pub m5_links_to_log: LinksToLog,
@@ -6817,7 +6818,7 @@ impl AperCodec for M5Configuration {
 }
 
 // M5period
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum M5period {
     Ms1024,
@@ -6839,7 +6840,7 @@ impl AperCodec for M5period {
 }
 
 // M6Configuration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M6Configuration {
     pub m6report_interval: M6reportInterval,
     pub m6_links_to_log: LinksToLog,
@@ -6861,7 +6862,7 @@ impl AperCodec for M6Configuration {
 }
 
 // M6reportInterval
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum M6reportInterval {
     Ms120,
@@ -6892,7 +6893,7 @@ impl AperCodec for M6reportInterval {
 }
 
 // M7Configuration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M7Configuration {
     pub m7period: M7period,
     pub m7_links_to_log: LinksToLog,
@@ -6914,7 +6915,7 @@ impl AperCodec for M7Configuration {
 }
 
 // M7period
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct M7period(pub u8);
 
 impl AperCodec for M7period {
@@ -6927,7 +6928,7 @@ impl AperCodec for M7period {
 }
 
 // MdtLocationInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtLocationInfo {
     pub mdt_location_information: MdtLocationInformation,
 }
@@ -6946,7 +6947,7 @@ impl AperCodec for MdtLocationInfo {
 }
 
 // MdtLocationInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MdtLocationInformation(pub BitString);
 
 impl AperCodec for MdtLocationInformation {
@@ -6962,7 +6963,7 @@ impl AperCodec for MdtLocationInformation {
 }
 
 // N3IwfId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum N3IwfId {
     N3IwfId(BitString),
 }
@@ -6992,7 +6993,7 @@ impl AperCodec for N3IwfId {
 }
 
 // NasPdu
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NasPdu(pub Vec<u8>);
 
 impl AperCodec for NasPdu {
@@ -7005,7 +7006,7 @@ impl AperCodec for NasPdu {
 }
 
 // NasSecurityParametersFromNgran
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NasSecurityParametersFromNgran(pub Vec<u8>);
 
 impl AperCodec for NasSecurityParametersFromNgran {
@@ -7018,7 +7019,7 @@ impl AperCodec for NasSecurityParametersFromNgran {
 }
 
 // NbIotDefaultPagingDrx
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NbIotDefaultPagingDrx {
     Rf128,
@@ -7039,7 +7040,7 @@ impl AperCodec for NbIotDefaultPagingDrx {
 }
 
 // NbIotPagingDrx
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NbIotPagingDrx {
     Rf32,
@@ -7062,7 +7063,7 @@ impl AperCodec for NbIotPagingDrx {
 }
 
 // NbIotPagingEDrxCycle
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NbIotPagingEDrxCycle {
     Hf2,
@@ -7093,7 +7094,7 @@ impl AperCodec for NbIotPagingEDrxCycle {
 }
 
 // NbIotPagingTimeWindow
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NbIotPagingTimeWindow {
     S1,
@@ -7126,7 +7127,7 @@ impl AperCodec for NbIotPagingTimeWindow {
 }
 
 // NbIotPagingEDrxInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NbIotPagingEDrxInfo {
     pub nb_iot_paging_e_drx_cycle: NbIotPagingEDrxCycle,
     pub nb_iot_paging_time_window: Option<NbIotPagingTimeWindow>,
@@ -7151,7 +7152,7 @@ impl AperCodec for NbIotPagingEDrxInfo {
 }
 
 // NbIotUePriority
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NbIotUePriority(pub u8);
 
 impl AperCodec for NbIotUePriority {
@@ -7164,7 +7165,7 @@ impl AperCodec for NbIotUePriority {
 }
 
 // NetworkInstance
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NetworkInstance(pub u8);
 
 impl AperCodec for NetworkInstance {
@@ -7177,7 +7178,7 @@ impl AperCodec for NetworkInstance {
 }
 
 // NewSecurityContextInd
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NewSecurityContextInd {
     True,
@@ -7195,7 +7196,7 @@ impl AperCodec for NewSecurityContextInd {
 }
 
 // NextHopChainingCount
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NextHopChainingCount(pub u8);
 
 impl AperCodec for NextHopChainingCount {
@@ -7208,7 +7209,7 @@ impl AperCodec for NextHopChainingCount {
 }
 
 // NextPagingAreaScope
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NextPagingAreaScope {
     Same,
@@ -7227,7 +7228,7 @@ impl AperCodec for NextPagingAreaScope {
 }
 
 // NgEnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NgEnbId {
     MacroNgEnbId(BitString),
     ShortMacroNgEnbId(BitString),
@@ -7271,7 +7272,7 @@ impl AperCodec for NgEnbId {
 }
 
 // NotifySourceNgranNode
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NotifySourceNgranNode {
     NotifySource,
@@ -7289,7 +7290,7 @@ impl AperCodec for NotifySourceNgranNode {
 }
 
 // NgranCgi
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NgranCgi {
     NrCgi(NrCgi),
     EutraCgi(EutraCgi),
@@ -7316,7 +7317,7 @@ impl AperCodec for NgranCgi {
 }
 
 // NgranTnlAssociationToRemoveList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgranTnlAssociationToRemoveList(pub Vec<NgranTnlAssociationToRemoveItem>);
 
 impl AperCodec for NgranTnlAssociationToRemoveList {
@@ -7334,7 +7335,7 @@ impl AperCodec for NgranTnlAssociationToRemoveList {
 }
 
 // NgranTnlAssociationToRemoveItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgranTnlAssociationToRemoveItem {
     pub tnl_association_transport_layer_address: CpTransportLayerInformation,
     pub tnl_association_transport_layer_address_amf: Option<CpTransportLayerInformation>,
@@ -7360,7 +7361,7 @@ impl AperCodec for NgranTnlAssociationToRemoveItem {
 }
 
 // NgranTraceId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgranTraceId(pub Vec<u8>);
 
 impl AperCodec for NgranTraceId {
@@ -7376,7 +7377,7 @@ impl AperCodec for NgranTraceId {
 }
 
 // Nid
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Nid(pub BitString);
 
 impl AperCodec for Nid {
@@ -7392,7 +7393,7 @@ impl AperCodec for Nid {
 }
 
 // NonDynamic5qiDescriptor
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NonDynamic5qiDescriptor {
     pub five_qi: FiveQi,
     pub priority_level_qos: Option<PriorityLevelQos>,
@@ -7431,7 +7432,7 @@ impl AperCodec for NonDynamic5qiDescriptor {
 }
 
 // NotAllowedTaCs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NotAllowedTaCs(pub Vec<Tac>);
 
 impl AperCodec for NotAllowedTaCs {
@@ -7449,7 +7450,7 @@ impl AperCodec for NotAllowedTaCs {
 }
 
 // NotificationCause
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NotificationCause {
     Fulfilled,
@@ -7468,7 +7469,7 @@ impl AperCodec for NotificationCause {
 }
 
 // NotificationControl
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum NotificationControl {
     NotificationRequested,
@@ -7486,7 +7487,7 @@ impl AperCodec for NotificationControl {
 }
 
 // NpnAccessInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NpnAccessInformation {
     PniNpnAccessInformation(CellCagList),
 }
@@ -7511,7 +7512,7 @@ impl AperCodec for NpnAccessInformation {
 }
 
 // NpnMobilityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NpnMobilityInformation {
     SnpnMobilityInformation(SnpnMobilityInformation),
     PniNpnMobilityInformation(PniNpnMobilityInformation),
@@ -7542,7 +7543,7 @@ impl AperCodec for NpnMobilityInformation {
 }
 
 // NpnPagingAssistanceInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NpnPagingAssistanceInformation {
     PniNpnPagingAssistance(AllowedPniNpnList),
 }
@@ -7569,7 +7570,7 @@ impl AperCodec for NpnPagingAssistanceInformation {
 }
 
 // NpnSupport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NpnSupport {
     Snpn(Nid),
 }
@@ -7594,7 +7595,7 @@ impl AperCodec for NpnSupport {
 }
 
 // NrCellIdentity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrCellIdentity(pub BitString);
 
 impl AperCodec for NrCellIdentity {
@@ -7610,7 +7611,7 @@ impl AperCodec for NrCellIdentity {
 }
 
 // NrCgi
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrCgi {
     pub plmn_identity: PlmnIdentity,
     pub nr_cell_identity: NrCellIdentity,
@@ -7632,7 +7633,7 @@ impl AperCodec for NrCgi {
 }
 
 // NrCgiList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrCgiList(pub Vec<NrCgi>);
 
 impl AperCodec for NrCgiList {
@@ -7651,7 +7652,7 @@ impl AperCodec for NrCgiList {
 }
 
 // NrCgiListForWarning
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrCgiListForWarning(pub Vec<NrCgi>);
 
 impl AperCodec for NrCgiListForWarning {
@@ -7670,7 +7671,7 @@ impl AperCodec for NrCgiListForWarning {
 }
 
 // NRencryptionAlgorithms
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NRencryptionAlgorithms(pub BitString);
 
 impl AperCodec for NRencryptionAlgorithms {
@@ -7686,7 +7687,7 @@ impl AperCodec for NRencryptionAlgorithms {
 }
 
 // NRintegrityProtectionAlgorithms
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NRintegrityProtectionAlgorithms(pub BitString);
 
 impl AperCodec for NRintegrityProtectionAlgorithms {
@@ -7702,7 +7703,7 @@ impl AperCodec for NRintegrityProtectionAlgorithms {
 }
 
 // NrMobilityHistoryReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrMobilityHistoryReport(pub Vec<u8>);
 
 impl AperCodec for NrMobilityHistoryReport {
@@ -7715,7 +7716,7 @@ impl AperCodec for NrMobilityHistoryReport {
 }
 
 // NrpPaPdu
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrpPaPdu(pub Vec<u8>);
 
 impl AperCodec for NrpPaPdu {
@@ -7728,7 +7729,7 @@ impl AperCodec for NrpPaPdu {
 }
 
 // NrueRlfReportContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrueRlfReportContainer(pub Vec<u8>);
 
 impl AperCodec for NrueRlfReportContainer {
@@ -7741,7 +7742,7 @@ impl AperCodec for NrueRlfReportContainer {
 }
 
 // NumberOfBroadcasts
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NumberOfBroadcasts(pub u16);
 
 impl AperCodec for NumberOfBroadcasts {
@@ -7754,7 +7755,7 @@ impl AperCodec for NumberOfBroadcasts {
 }
 
 // NumberOfBroadcastsRequested
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NumberOfBroadcastsRequested(pub u16);
 
 impl AperCodec for NumberOfBroadcastsRequested {
@@ -7767,7 +7768,7 @@ impl AperCodec for NumberOfBroadcastsRequested {
 }
 
 // Nrarfcn
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Nrarfcn(pub u32);
 
 impl AperCodec for Nrarfcn {
@@ -7780,7 +7781,7 @@ impl AperCodec for Nrarfcn {
 }
 
 // NrFrequencyBand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrFrequencyBand(pub u16);
 
 impl AperCodec for NrFrequencyBand {
@@ -7793,7 +7794,7 @@ impl AperCodec for NrFrequencyBand {
 }
 
 // NrFrequencyBandList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrFrequencyBandList(pub Vec<NrFrequencyBandItem>);
 
 impl AperCodec for NrFrequencyBandList {
@@ -7811,7 +7812,7 @@ impl AperCodec for NrFrequencyBandList {
 }
 
 // NrFrequencyBandItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrFrequencyBandItem {
     pub nr_frequency_band: NrFrequencyBand,
 }
@@ -7828,7 +7829,7 @@ impl AperCodec for NrFrequencyBandItem {
 }
 
 // NrFrequencyInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrFrequencyInfo {
     pub nr_arfcn: Nrarfcn,
     pub frequency_band_list: NrFrequencyBandList,
@@ -7850,7 +7851,7 @@ impl AperCodec for NrFrequencyInfo {
 }
 
 // NrPci
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrPci(pub u16);
 
 impl AperCodec for NrPci {
@@ -7863,7 +7864,7 @@ impl AperCodec for NrPci {
 }
 
 // Nrv2xServicesAuthorized
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Nrv2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
@@ -7892,7 +7893,7 @@ impl AperCodec for Nrv2xServicesAuthorized {
 }
 
 // VehicleUe
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum VehicleUe {
     Authorized,
@@ -7911,7 +7912,7 @@ impl AperCodec for VehicleUe {
 }
 
 // PedestrianUe
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PedestrianUe {
     Authorized,
@@ -7930,7 +7931,7 @@ impl AperCodec for PedestrianUe {
 }
 
 // NrueSidelinkAggregateMaximumBitrate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NrueSidelinkAggregateMaximumBitrate {
     pub ue_sidelink_aggregate_maximum_bit_rate: BitRate,
 }
@@ -7949,7 +7950,7 @@ impl AperCodec for NrueSidelinkAggregateMaximumBitrate {
 }
 
 // OverloadAction
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum OverloadAction {
     RejectNonEmergencyMoDt,
@@ -7970,7 +7971,7 @@ impl AperCodec for OverloadAction {
 }
 
 // OverloadResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum OverloadResponse {
     OverloadAction(OverloadAction),
 }
@@ -7995,7 +7996,7 @@ impl AperCodec for OverloadResponse {
 }
 
 // OverloadStartNssaiList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct OverloadStartNssaiList(pub Vec<OverloadStartNssaiItem>);
 
 impl AperCodec for OverloadStartNssaiList {
@@ -8013,7 +8014,7 @@ impl AperCodec for OverloadStartNssaiList {
 }
 
 // OverloadStartNssaiItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct OverloadStartNssaiItem {
     pub slice_overload_list: SliceOverloadList,
     pub slice_overload_response: Option<OverloadResponse>,
@@ -8045,7 +8046,7 @@ impl AperCodec for OverloadStartNssaiItem {
 }
 
 // PacketDelayBudget
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PacketDelayBudget(pub u16);
 
 impl AperCodec for PacketDelayBudget {
@@ -8058,7 +8059,7 @@ impl AperCodec for PacketDelayBudget {
 }
 
 // PacketErrorRate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PacketErrorRate {
     pub per_scalar: u8,
     pub per_exponent: u8,
@@ -8080,7 +8081,7 @@ impl AperCodec for PacketErrorRate {
 }
 
 // PacketLossRate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PacketLossRate(pub u16);
 
 impl AperCodec for PacketLossRate {
@@ -8093,7 +8094,7 @@ impl AperCodec for PacketLossRate {
 }
 
 // PagingAssisDataforCEcapabUe
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PagingAssisDataforCEcapabUe {
     pub eutra_cgi: EutraCgi,
     pub coverage_enhancement_level: CoverageEnhancementLevel,
@@ -8115,7 +8116,7 @@ impl AperCodec for PagingAssisDataforCEcapabUe {
 }
 
 // PagingAttemptInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PagingAttemptInformation {
     pub paging_attempt_count: PagingAttemptCount,
     pub intended_number_of_paging_attempts: IntendedNumberOfPagingAttempts,
@@ -8143,7 +8144,7 @@ impl AperCodec for PagingAttemptInformation {
 }
 
 // PagingAttemptCount
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PagingAttemptCount(pub u8);
 
 impl AperCodec for PagingAttemptCount {
@@ -8156,7 +8157,7 @@ impl AperCodec for PagingAttemptCount {
 }
 
 // PagingDrx
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PagingDrx {
     V32,
@@ -8177,7 +8178,7 @@ impl AperCodec for PagingDrx {
 }
 
 // PagingOrigin
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PagingOrigin {
     Non3gpp,
@@ -8195,7 +8196,7 @@ impl AperCodec for PagingOrigin {
 }
 
 // PagingPriority
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PagingPriority {
     Priolevel1,
@@ -8220,7 +8221,7 @@ impl AperCodec for PagingPriority {
 }
 
 // PagingeDrxInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PagingeDrxInformation {
     pub paging_e_drx_cycle: PagingEDrxCycle,
     pub paging_time_window: Option<PagingTimeWindow>,
@@ -8245,7 +8246,7 @@ impl AperCodec for PagingeDrxInformation {
 }
 
 // PagingEDrxCycle
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PagingEDrxCycle {
     Hfhalf,
@@ -8276,7 +8277,7 @@ impl AperCodec for PagingEDrxCycle {
 }
 
 // PagingTimeWindow
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PagingTimeWindow {
     S1,
@@ -8309,7 +8310,7 @@ impl AperCodec for PagingTimeWindow {
 }
 
 // PagingProbabilityInformation
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PagingProbabilityInformation {
     P00,
@@ -8347,7 +8348,7 @@ impl AperCodec for PagingProbabilityInformation {
 }
 
 // PathSwitchRequestAcknowledgeTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequestAcknowledgeTransfer {
     pub ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
     pub security_indication: Option<SecurityIndication>,
@@ -8376,7 +8377,7 @@ impl AperCodec for PathSwitchRequestAcknowledgeTransfer {
 }
 
 // PathSwitchRequestSetupFailedTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequestSetupFailedTransfer {
     pub cause: Cause,
 }
@@ -8393,7 +8394,7 @@ impl AperCodec for PathSwitchRequestSetupFailedTransfer {
 }
 
 // PathSwitchRequestTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequestTransfer {
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_ngu_tnl_information_reused: Option<DlNguTnlInformationReused>,
@@ -8428,7 +8429,7 @@ impl AperCodec for PathSwitchRequestTransfer {
 }
 
 // PathSwitchRequestUnsuccessfulTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequestUnsuccessfulTransfer {
     pub cause: Cause,
 }
@@ -8445,7 +8446,7 @@ impl AperCodec for PathSwitchRequestUnsuccessfulTransfer {
 }
 
 // Pc5QosParameters
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Pc5QosParameters {
     pub pc_5_qos_flow_list: Pc5QosFlowList,
     pub pc_5_link_aggregate_bit_rates: Option<BitRate>,
@@ -8470,7 +8471,7 @@ impl AperCodec for Pc5QosParameters {
 }
 
 // Pc5QosFlowList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Pc5QosFlowList(pub Vec<Pc5QosFlowItem>);
 
 impl AperCodec for Pc5QosFlowList {
@@ -8488,7 +8489,7 @@ impl AperCodec for Pc5QosFlowList {
 }
 
 // Pc5QosFlowItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Pc5QosFlowItem {
     pub pqi: FiveQi,
     pub pc_5_flow_bit_rates: Option<Pc5FlowBitRates>,
@@ -8520,7 +8521,7 @@ impl AperCodec for Pc5QosFlowItem {
 }
 
 // Pc5FlowBitRates
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Pc5FlowBitRates {
     pub guaranteed_flow_bit_rate: BitRate,
     pub maximum_flow_bit_rate: BitRate,
@@ -8542,7 +8543,7 @@ impl AperCodec for Pc5FlowBitRates {
 }
 
 // PciListForMdt
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PciListForMdt(pub Vec<NrPci>);
 
 impl AperCodec for PciListForMdt {
@@ -8560,7 +8561,7 @@ impl AperCodec for PciListForMdt {
 }
 
 // PrivacyIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PrivacyIndicator {
     ImmediateMdt,
@@ -8579,7 +8580,7 @@ impl AperCodec for PrivacyIndicator {
 }
 
 // PduSessionAggregateMaximumBitRate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionAggregateMaximumBitRate {
     pub pdu_session_aggregate_maximum_bit_rate_dl: BitRate,
     pub pdu_session_aggregate_maximum_bit_rate_ul: BitRate,
@@ -8601,7 +8602,7 @@ impl AperCodec for PduSessionAggregateMaximumBitRate {
 }
 
 // PduSessionId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionId(pub u8);
 
 impl AperCodec for PduSessionId {
@@ -8614,7 +8615,7 @@ impl AperCodec for PduSessionId {
 }
 
 // PduSessionResourceAdmittedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceAdmittedList(pub Vec<PduSessionResourceAdmittedItem>);
 
 impl AperCodec for PduSessionResourceAdmittedList {
@@ -8632,7 +8633,7 @@ impl AperCodec for PduSessionResourceAdmittedList {
 }
 
 // PduSessionResourceAdmittedItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceAdmittedItem {
     pub pdu_session_id: PduSessionId,
     pub handover_request_acknowledge_transfer: Vec<u8>,
@@ -8655,7 +8656,7 @@ impl AperCodec for PduSessionResourceAdmittedItem {
 }
 
 // PduSessionResourceFailedToModifyListModCfm
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToModifyListModCfm(
     pub Vec<PduSessionResourceFailedToModifyItemModCfm>,
 );
@@ -8675,7 +8676,7 @@ impl AperCodec for PduSessionResourceFailedToModifyListModCfm {
 }
 
 // PduSessionResourceFailedToModifyItemModCfm
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToModifyItemModCfm {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_indication_unsuccessful_transfer: Vec<u8>,
@@ -8698,7 +8699,7 @@ impl AperCodec for PduSessionResourceFailedToModifyItemModCfm {
 }
 
 // PduSessionResourceFailedToModifyListModRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToModifyListModRes(
     pub Vec<PduSessionResourceFailedToModifyItemModRes>,
 );
@@ -8718,7 +8719,7 @@ impl AperCodec for PduSessionResourceFailedToModifyListModRes {
 }
 
 // PduSessionResourceFailedToModifyItemModRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToModifyItemModRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_unsuccessful_transfer: Vec<u8>,
@@ -8741,7 +8742,7 @@ impl AperCodec for PduSessionResourceFailedToModifyItemModRes {
 }
 
 // PduSessionResourceFailedToResumeListResReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToResumeListResReq(
     pub Vec<PduSessionResourceFailedToResumeItemResReq>,
 );
@@ -8761,7 +8762,7 @@ impl AperCodec for PduSessionResourceFailedToResumeListResReq {
 }
 
 // PduSessionResourceFailedToResumeItemResReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToResumeItemResReq {
     pub pdu_session_id: PduSessionId,
     pub cause: Cause,
@@ -8783,7 +8784,7 @@ impl AperCodec for PduSessionResourceFailedToResumeItemResReq {
 }
 
 // PduSessionResourceFailedToResumeListResRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToResumeListResRes(
     pub Vec<PduSessionResourceFailedToResumeItemResRes>,
 );
@@ -8803,7 +8804,7 @@ impl AperCodec for PduSessionResourceFailedToResumeListResRes {
 }
 
 // PduSessionResourceFailedToResumeItemResRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToResumeItemResRes {
     pub pdu_session_id: PduSessionId,
     pub cause: Cause,
@@ -8825,7 +8826,7 @@ impl AperCodec for PduSessionResourceFailedToResumeItemResRes {
 }
 
 // PduSessionResourceFailedToSetupListCxtFail
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupListCxtFail(
     pub Vec<PduSessionResourceFailedToSetupItemCxtFail>,
 );
@@ -8845,7 +8846,7 @@ impl AperCodec for PduSessionResourceFailedToSetupListCxtFail {
 }
 
 // PduSessionResourceFailedToSetupItemCxtFail
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupItemCxtFail {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
@@ -8868,7 +8869,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemCxtFail {
 }
 
 // PduSessionResourceFailedToSetupListCxtRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupListCxtRes(
     pub Vec<PduSessionResourceFailedToSetupItemCxtRes>,
 );
@@ -8888,7 +8889,7 @@ impl AperCodec for PduSessionResourceFailedToSetupListCxtRes {
 }
 
 // PduSessionResourceFailedToSetupItemCxtRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupItemCxtRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
@@ -8911,7 +8912,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemCxtRes {
 }
 
 // PduSessionResourceFailedToSetupListHoAck
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupListHoAck(
     pub Vec<PduSessionResourceFailedToSetupItemHoAck>,
 );
@@ -8931,7 +8932,7 @@ impl AperCodec for PduSessionResourceFailedToSetupListHoAck {
 }
 
 // PduSessionResourceFailedToSetupItemHoAck
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupItemHoAck {
     pub pdu_session_id: PduSessionId,
     pub handover_resource_allocation_unsuccessful_transfer: Vec<u8>,
@@ -8954,7 +8955,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemHoAck {
 }
 
 // PduSessionResourceFailedToSetupListPsReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupListPsReq(
     pub Vec<PduSessionResourceFailedToSetupItemPsReq>,
 );
@@ -8974,7 +8975,7 @@ impl AperCodec for PduSessionResourceFailedToSetupListPsReq {
 }
 
 // PduSessionResourceFailedToSetupItemPsReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupItemPsReq {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_setup_failed_transfer: Vec<u8>,
@@ -8997,7 +8998,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemPsReq {
 }
 
 // PduSessionResourceFailedToSetupListSuRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupListSuRes(
     pub Vec<PduSessionResourceFailedToSetupItemSuRes>,
 );
@@ -9017,7 +9018,7 @@ impl AperCodec for PduSessionResourceFailedToSetupListSuRes {
 }
 
 // PduSessionResourceFailedToSetupItemSuRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceFailedToSetupItemSuRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_unsuccessful_transfer: Vec<u8>,
@@ -9040,7 +9041,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemSuRes {
 }
 
 // PduSessionResourceHandoverList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceHandoverList(pub Vec<PduSessionResourceHandoverItem>);
 
 impl AperCodec for PduSessionResourceHandoverList {
@@ -9058,7 +9059,7 @@ impl AperCodec for PduSessionResourceHandoverList {
 }
 
 // PduSessionResourceHandoverItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceHandoverItem {
     pub pdu_session_id: PduSessionId,
     pub handover_command_transfer: Vec<u8>,
@@ -9080,7 +9081,7 @@ impl AperCodec for PduSessionResourceHandoverItem {
 }
 
 // PduSessionResourceInformationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceInformationList(pub Vec<PduSessionResourceInformationItem>);
 
 impl AperCodec for PduSessionResourceInformationList {
@@ -9098,7 +9099,7 @@ impl AperCodec for PduSessionResourceInformationList {
 }
 
 // PduSessionResourceInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceInformationItem {
     pub pdu_session_id: PduSessionId,
     pub qos_flow_information_list: QosFlowInformationList,
@@ -9126,7 +9127,7 @@ impl AperCodec for PduSessionResourceInformationItem {
 }
 
 // PduSessionResourceListCxtRelCpl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceListCxtRelCpl(pub Vec<PduSessionResourceItemCxtRelCpl>);
 
 impl AperCodec for PduSessionResourceListCxtRelCpl {
@@ -9144,7 +9145,7 @@ impl AperCodec for PduSessionResourceListCxtRelCpl {
 }
 
 // PduSessionResourceItemCxtRelCpl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceItemCxtRelCpl {
     pub pdu_session_id: PduSessionId,
 }
@@ -9161,7 +9162,7 @@ impl AperCodec for PduSessionResourceItemCxtRelCpl {
 }
 
 // PduSessionResourceListCxtRelReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceListCxtRelReq(pub Vec<PduSessionResourceItemCxtRelReq>);
 
 impl AperCodec for PduSessionResourceListCxtRelReq {
@@ -9179,7 +9180,7 @@ impl AperCodec for PduSessionResourceListCxtRelReq {
 }
 
 // PduSessionResourceItemCxtRelReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceItemCxtRelReq {
     pub pdu_session_id: PduSessionId,
 }
@@ -9196,7 +9197,7 @@ impl AperCodec for PduSessionResourceItemCxtRelReq {
 }
 
 // PduSessionResourceListHoRqd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceListHoRqd(pub Vec<PduSessionResourceItemHoRqd>);
 
 impl AperCodec for PduSessionResourceListHoRqd {
@@ -9214,7 +9215,7 @@ impl AperCodec for PduSessionResourceListHoRqd {
 }
 
 // PduSessionResourceItemHoRqd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceItemHoRqd {
     pub pdu_session_id: PduSessionId,
     pub handover_required_transfer: Vec<u8>,
@@ -9236,7 +9237,7 @@ impl AperCodec for PduSessionResourceItemHoRqd {
 }
 
 // PduSessionResourceModifyConfirmTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyConfirmTransfer {
     pub qos_flow_modify_confirm_list: QosFlowModifyConfirmList,
     pub ulngu_up_tnl_information: UpTransportLayerInformation,
@@ -9271,7 +9272,7 @@ impl AperCodec for PduSessionResourceModifyConfirmTransfer {
 }
 
 // PduSessionResourceModifyIndicationUnsuccessfulTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyIndicationUnsuccessfulTransfer {
     pub cause: Cause,
 }
@@ -9288,7 +9289,7 @@ impl AperCodec for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
 }
 
 // PduSessionResourceModifyRequestTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyRequestTransfer {
     pub pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate>,
     pub ul_ngu_up_tnl_modify_list: Option<UlNguUpTnlModifyList>,
@@ -9396,7 +9397,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
 }
 
 // PduSessionResourceModifyResponseTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyResponseTransfer {
     pub dl_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
     pub ul_ngu_up_tnl_information: Option<UpTransportLayerInformation>,
@@ -9446,7 +9447,7 @@ impl AperCodec for PduSessionResourceModifyResponseTransfer {
 }
 
 // PduSessionResourceModifyIndicationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyIndicationTransfer {
     pub dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation,
     pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
@@ -9471,7 +9472,7 @@ impl AperCodec for PduSessionResourceModifyIndicationTransfer {
 }
 
 // PduSessionResourceModifyListModCfm
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyListModCfm(pub Vec<PduSessionResourceModifyItemModCfm>);
 
 impl AperCodec for PduSessionResourceModifyListModCfm {
@@ -9489,7 +9490,7 @@ impl AperCodec for PduSessionResourceModifyListModCfm {
 }
 
 // PduSessionResourceModifyItemModCfm
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyItemModCfm {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_confirm_transfer: Vec<u8>,
@@ -9512,7 +9513,7 @@ impl AperCodec for PduSessionResourceModifyItemModCfm {
 }
 
 // PduSessionResourceModifyListModInd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyListModInd(pub Vec<PduSessionResourceModifyItemModInd>);
 
 impl AperCodec for PduSessionResourceModifyListModInd {
@@ -9530,7 +9531,7 @@ impl AperCodec for PduSessionResourceModifyListModInd {
 }
 
 // PduSessionResourceModifyItemModInd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyItemModInd {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_indication_transfer: Vec<u8>,
@@ -9553,7 +9554,7 @@ impl AperCodec for PduSessionResourceModifyItemModInd {
 }
 
 // PduSessionResourceModifyListModReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyListModReq(pub Vec<PduSessionResourceModifyItemModReq>);
 
 impl AperCodec for PduSessionResourceModifyListModReq {
@@ -9571,7 +9572,7 @@ impl AperCodec for PduSessionResourceModifyListModReq {
 }
 
 // PduSessionResourceModifyItemModReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyItemModReq {
     pub pdu_session_id: PduSessionId,
     pub nas_pdu: Option<NasPdu>,
@@ -9600,7 +9601,7 @@ impl AperCodec for PduSessionResourceModifyItemModReq {
 }
 
 // PduSessionResourceModifyListModRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyListModRes(pub Vec<PduSessionResourceModifyItemModRes>);
 
 impl AperCodec for PduSessionResourceModifyListModRes {
@@ -9618,7 +9619,7 @@ impl AperCodec for PduSessionResourceModifyListModRes {
 }
 
 // PduSessionResourceModifyItemModRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyItemModRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_modify_response_transfer: Vec<u8>,
@@ -9641,7 +9642,7 @@ impl AperCodec for PduSessionResourceModifyItemModRes {
 }
 
 // PduSessionResourceModifyUnsuccessfulTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyUnsuccessfulTransfer {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -9666,7 +9667,7 @@ impl AperCodec for PduSessionResourceModifyUnsuccessfulTransfer {
 }
 
 // PduSessionResourceNotifyList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceNotifyList(pub Vec<PduSessionResourceNotifyItem>);
 
 impl AperCodec for PduSessionResourceNotifyList {
@@ -9684,7 +9685,7 @@ impl AperCodec for PduSessionResourceNotifyList {
 }
 
 // PduSessionResourceNotifyItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceNotifyItem {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_notify_transfer: Vec<u8>,
@@ -9707,7 +9708,7 @@ impl AperCodec for PduSessionResourceNotifyItem {
 }
 
 // PduSessionResourceNotifyReleasedTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceNotifyReleasedTransfer {
     pub cause: Cause,
 }
@@ -9724,7 +9725,7 @@ impl AperCodec for PduSessionResourceNotifyReleasedTransfer {
 }
 
 // PduSessionResourceNotifyTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceNotifyTransfer {
     pub qos_flow_notify_list: Option<QosFlowNotifyList>,
     pub qos_flow_released_list: Option<QosFlowListWithCause>,
@@ -9753,7 +9754,7 @@ impl AperCodec for PduSessionResourceNotifyTransfer {
 }
 
 // PduSessionResourceReleaseCommandTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleaseCommandTransfer {
     pub cause: Cause,
 }
@@ -9770,7 +9771,7 @@ impl AperCodec for PduSessionResourceReleaseCommandTransfer {
 }
 
 // PduSessionResourceReleasedListNot
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedListNot(pub Vec<PduSessionResourceReleasedItemNot>);
 
 impl AperCodec for PduSessionResourceReleasedListNot {
@@ -9788,7 +9789,7 @@ impl AperCodec for PduSessionResourceReleasedListNot {
 }
 
 // PduSessionResourceReleasedItemNot
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedItemNot {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_notify_released_transfer: Vec<u8>,
@@ -9811,7 +9812,7 @@ impl AperCodec for PduSessionResourceReleasedItemNot {
 }
 
 // PduSessionResourceReleasedListPsAck
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedListPsAck(pub Vec<PduSessionResourceReleasedItemPsAck>);
 
 impl AperCodec for PduSessionResourceReleasedListPsAck {
@@ -9829,7 +9830,7 @@ impl AperCodec for PduSessionResourceReleasedListPsAck {
 }
 
 // PduSessionResourceReleasedItemPsAck
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedItemPsAck {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_unsuccessful_transfer: Vec<u8>,
@@ -9852,7 +9853,7 @@ impl AperCodec for PduSessionResourceReleasedItemPsAck {
 }
 
 // PduSessionResourceReleasedListPsFail
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedListPsFail(pub Vec<PduSessionResourceReleasedItemPsFail>);
 
 impl AperCodec for PduSessionResourceReleasedListPsFail {
@@ -9870,7 +9871,7 @@ impl AperCodec for PduSessionResourceReleasedListPsFail {
 }
 
 // PduSessionResourceReleasedItemPsFail
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedItemPsFail {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_unsuccessful_transfer: Vec<u8>,
@@ -9893,7 +9894,7 @@ impl AperCodec for PduSessionResourceReleasedItemPsFail {
 }
 
 // PduSessionResourceReleasedListRelRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedListRelRes(pub Vec<PduSessionResourceReleasedItemRelRes>);
 
 impl AperCodec for PduSessionResourceReleasedListRelRes {
@@ -9911,7 +9912,7 @@ impl AperCodec for PduSessionResourceReleasedListRelRes {
 }
 
 // PduSessionResourceReleasedItemRelRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleasedItemRelRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_release_response_transfer: Vec<u8>,
@@ -9936,7 +9937,7 @@ impl AperCodec for PduSessionResourceReleasedItemRelRes {
 // PduSessionResourceReleaseResponseTransfer - omitted
 
 // PduSessionResourceResumeListResReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceResumeListResReq(pub Vec<PduSessionResourceResumeItemResReq>);
 
 impl AperCodec for PduSessionResourceResumeListResReq {
@@ -9954,7 +9955,7 @@ impl AperCodec for PduSessionResourceResumeListResReq {
 }
 
 // PduSessionResourceResumeItemResReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceResumeItemResReq {
     pub pdu_session_id: PduSessionId,
     pub ue_context_resume_request_transfer: Vec<u8>,
@@ -9977,7 +9978,7 @@ impl AperCodec for PduSessionResourceResumeItemResReq {
 }
 
 // PduSessionResourceResumeListResRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceResumeListResRes(pub Vec<PduSessionResourceResumeItemResRes>);
 
 impl AperCodec for PduSessionResourceResumeListResRes {
@@ -9995,7 +9996,7 @@ impl AperCodec for PduSessionResourceResumeListResRes {
 }
 
 // PduSessionResourceResumeItemResRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceResumeItemResRes {
     pub pdu_session_id: PduSessionId,
     pub ue_context_resume_response_transfer: Vec<u8>,
@@ -10018,7 +10019,7 @@ impl AperCodec for PduSessionResourceResumeItemResRes {
 }
 
 // PduSessionResourceSecondaryRatUsageList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSecondaryRatUsageList(
     pub Vec<PduSessionResourceSecondaryRatUsageItem>,
 );
@@ -10038,7 +10039,7 @@ impl AperCodec for PduSessionResourceSecondaryRatUsageList {
 }
 
 // PduSessionResourceSecondaryRatUsageItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSecondaryRatUsageItem {
     pub pdu_session_id: PduSessionId,
     pub secondary_rat_data_usage_report_transfer: Vec<u8>,
@@ -10061,7 +10062,7 @@ impl AperCodec for PduSessionResourceSecondaryRatUsageItem {
 }
 
 // PduSessionResourceSetupListCxtReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupListCxtReq(pub Vec<PduSessionResourceSetupItemCxtReq>);
 
 impl AperCodec for PduSessionResourceSetupListCxtReq {
@@ -10079,7 +10080,7 @@ impl AperCodec for PduSessionResourceSetupListCxtReq {
 }
 
 // PduSessionResourceSetupItemCxtReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupItemCxtReq {
     pub pdu_session_id: PduSessionId,
     pub nas_pdu: Option<NasPdu>,
@@ -10111,7 +10112,7 @@ impl AperCodec for PduSessionResourceSetupItemCxtReq {
 }
 
 // PduSessionResourceSetupListCxtRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupListCxtRes(pub Vec<PduSessionResourceSetupItemCxtRes>);
 
 impl AperCodec for PduSessionResourceSetupListCxtRes {
@@ -10129,7 +10130,7 @@ impl AperCodec for PduSessionResourceSetupListCxtRes {
 }
 
 // PduSessionResourceSetupItemCxtRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupItemCxtRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_response_transfer: Vec<u8>,
@@ -10152,7 +10153,7 @@ impl AperCodec for PduSessionResourceSetupItemCxtRes {
 }
 
 // PduSessionResourceSetupListHoReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupListHoReq(pub Vec<PduSessionResourceSetupItemHoReq>);
 
 impl AperCodec for PduSessionResourceSetupListHoReq {
@@ -10170,7 +10171,7 @@ impl AperCodec for PduSessionResourceSetupListHoReq {
 }
 
 // PduSessionResourceSetupItemHoReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupItemHoReq {
     pub pdu_session_id: PduSessionId,
     pub s_nssai: SNssai,
@@ -10195,7 +10196,7 @@ impl AperCodec for PduSessionResourceSetupItemHoReq {
 }
 
 // PduSessionResourceSetupListSuReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupListSuReq(pub Vec<PduSessionResourceSetupItemSuReq>);
 
 impl AperCodec for PduSessionResourceSetupListSuReq {
@@ -10213,7 +10214,7 @@ impl AperCodec for PduSessionResourceSetupListSuReq {
 }
 
 // PduSessionResourceSetupItemSuReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupItemSuReq {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_nas_pdu: Option<NasPdu>,
@@ -10245,7 +10246,7 @@ impl AperCodec for PduSessionResourceSetupItemSuReq {
 }
 
 // PduSessionResourceSetupListSuRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupListSuRes(pub Vec<PduSessionResourceSetupItemSuRes>);
 
 impl AperCodec for PduSessionResourceSetupListSuRes {
@@ -10263,7 +10264,7 @@ impl AperCodec for PduSessionResourceSetupListSuRes {
 }
 
 // PduSessionResourceSetupItemSuRes
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupItemSuRes {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_setup_response_transfer: Vec<u8>,
@@ -10286,7 +10287,7 @@ impl AperCodec for PduSessionResourceSetupItemSuRes {
 }
 
 // PduSessionResourceSetupRequestTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupRequestTransfer {
     pub pdu_session_aggregate_maximum_bit_rate: Option<PduSessionAggregateMaximumBitRate>,
     pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
@@ -10423,7 +10424,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
 }
 
 // PduSessionResourceSetupResponseTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupResponseTransfer {
     pub dl_qos_flow_per_tnl_information: QosFlowPerTnlInformation,
     pub additional_dl_qos_flow_per_tnl_information: Option<QosFlowPerTnlInformationList>,
@@ -10462,7 +10463,7 @@ impl AperCodec for PduSessionResourceSetupResponseTransfer {
 }
 
 // PduSessionResourceSetupUnsuccessfulTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupUnsuccessfulTransfer {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -10487,7 +10488,7 @@ impl AperCodec for PduSessionResourceSetupUnsuccessfulTransfer {
 }
 
 // PduSessionResourceSuspendListSusReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSuspendListSusReq(pub Vec<PduSessionResourceSuspendItemSusReq>);
 
 impl AperCodec for PduSessionResourceSuspendListSusReq {
@@ -10505,7 +10506,7 @@ impl AperCodec for PduSessionResourceSuspendListSusReq {
 }
 
 // PduSessionResourceSuspendItemSusReq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSuspendItemSusReq {
     pub pdu_session_id: PduSessionId,
     pub ue_context_suspend_request_transfer: Vec<u8>,
@@ -10528,7 +10529,7 @@ impl AperCodec for PduSessionResourceSuspendItemSusReq {
 }
 
 // PduSessionResourceSwitchedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSwitchedList(pub Vec<PduSessionResourceSwitchedItem>);
 
 impl AperCodec for PduSessionResourceSwitchedList {
@@ -10546,7 +10547,7 @@ impl AperCodec for PduSessionResourceSwitchedList {
 }
 
 // PduSessionResourceSwitchedItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSwitchedItem {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_acknowledge_transfer: Vec<u8>,
@@ -10569,7 +10570,7 @@ impl AperCodec for PduSessionResourceSwitchedItem {
 }
 
 // PduSessionResourceToBeSwitchedDlList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceToBeSwitchedDlList(pub Vec<PduSessionResourceToBeSwitchedDlItem>);
 
 impl AperCodec for PduSessionResourceToBeSwitchedDlList {
@@ -10587,7 +10588,7 @@ impl AperCodec for PduSessionResourceToBeSwitchedDlList {
 }
 
 // PduSessionResourceToBeSwitchedDlItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceToBeSwitchedDlItem {
     pub pdu_session_id: PduSessionId,
     pub path_switch_request_transfer: Vec<u8>,
@@ -10610,7 +10611,7 @@ impl AperCodec for PduSessionResourceToBeSwitchedDlItem {
 }
 
 // PduSessionResourceToReleaseListHoCmd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceToReleaseListHoCmd(pub Vec<PduSessionResourceToReleaseItemHoCmd>);
 
 impl AperCodec for PduSessionResourceToReleaseListHoCmd {
@@ -10628,7 +10629,7 @@ impl AperCodec for PduSessionResourceToReleaseListHoCmd {
 }
 
 // PduSessionResourceToReleaseItemHoCmd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceToReleaseItemHoCmd {
     pub pdu_session_id: PduSessionId,
     pub handover_preparation_unsuccessful_transfer: Vec<u8>,
@@ -10651,7 +10652,7 @@ impl AperCodec for PduSessionResourceToReleaseItemHoCmd {
 }
 
 // PduSessionResourceToReleaseListRelCmd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceToReleaseListRelCmd(pub Vec<PduSessionResourceToReleaseItemRelCmd>);
 
 impl AperCodec for PduSessionResourceToReleaseListRelCmd {
@@ -10669,7 +10670,7 @@ impl AperCodec for PduSessionResourceToReleaseListRelCmd {
 }
 
 // PduSessionResourceToReleaseItemRelCmd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceToReleaseItemRelCmd {
     pub pdu_session_id: PduSessionId,
     pub pdu_session_resource_release_command_transfer: Vec<u8>,
@@ -10692,7 +10693,7 @@ impl AperCodec for PduSessionResourceToReleaseItemRelCmd {
 }
 
 // PduSessionType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PduSessionType {
     Ipv4,
@@ -10714,7 +10715,7 @@ impl AperCodec for PduSessionType {
 }
 
 // PduSessionUsageReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionUsageReport {
     pub rat_type: RatType,
     pub pdu_session_timed_report_list: VolumeTimedReportList,
@@ -10736,7 +10737,7 @@ impl AperCodec for PduSessionUsageReport {
 }
 
 // Periodicity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Periodicity(pub u32);
 
 impl AperCodec for Periodicity {
@@ -10749,7 +10750,7 @@ impl AperCodec for Periodicity {
 }
 
 // PeriodicRegistrationUpdateTimer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PeriodicRegistrationUpdateTimer(pub BitString);
 
 impl AperCodec for PeriodicRegistrationUpdateTimer {
@@ -10765,7 +10766,7 @@ impl AperCodec for PeriodicRegistrationUpdateTimer {
 }
 
 // PlmnIdentity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PlmnIdentity(pub Vec<u8>);
 
 impl AperCodec for PlmnIdentity {
@@ -10781,7 +10782,7 @@ impl AperCodec for PlmnIdentity {
 }
 
 // PlmnSupportList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PlmnSupportList(pub Vec<PlmnSupportItem>);
 
 impl AperCodec for PlmnSupportList {
@@ -10799,7 +10800,7 @@ impl AperCodec for PlmnSupportList {
 }
 
 // PlmnSupportItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PlmnSupportItem {
     pub plmn_identity: PlmnIdentity,
     pub slice_support_list: SliceSupportList,
@@ -10821,7 +10822,7 @@ impl AperCodec for PlmnSupportItem {
 }
 
 // PniNpnMobilityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PniNpnMobilityInformation {
     pub allowed_pni_npi_list: AllowedPniNpnList,
 }
@@ -10840,7 +10841,7 @@ impl AperCodec for PniNpnMobilityInformation {
 }
 
 // PortNumber
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PortNumber(pub Vec<u8>);
 
 impl AperCodec for PortNumber {
@@ -10856,7 +10857,7 @@ impl AperCodec for PortNumber {
 }
 
 // PreEmptionCapability
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PreEmptionCapability {
     ShallNotTriggerPreEmption,
@@ -10875,7 +10876,7 @@ impl AperCodec for PreEmptionCapability {
 }
 
 // PreEmptionVulnerability
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PreEmptionVulnerability {
     NotPreEmptable,
@@ -10894,7 +10895,7 @@ impl AperCodec for PreEmptionVulnerability {
 }
 
 // PriorityLevelArp
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PriorityLevelArp(pub u8);
 
 impl AperCodec for PriorityLevelArp {
@@ -10907,7 +10908,7 @@ impl AperCodec for PriorityLevelArp {
 }
 
 // PriorityLevelQos
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PriorityLevelQos(pub u8);
 
 impl AperCodec for PriorityLevelQos {
@@ -10920,7 +10921,7 @@ impl AperCodec for PriorityLevelQos {
 }
 
 // PwsFailedCellIdList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum PwsFailedCellIdList {
     EutraCgiPwsFailedList(EutraCgiList),
     NrCgiPwsFailedList(NrCgiList),
@@ -10947,7 +10948,7 @@ impl AperCodec for PwsFailedCellIdList {
 }
 
 // QosCharacteristics
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum QosCharacteristics {
     NonDynamic5qi(NonDynamic5qiDescriptor),
     Dynamic5qi(Dynamic5qiDescriptor),
@@ -10974,7 +10975,7 @@ impl AperCodec for QosCharacteristics {
 }
 
 // QosFlowAcceptedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowAcceptedList(pub Vec<QosFlowAcceptedItem>);
 
 impl AperCodec for QosFlowAcceptedList {
@@ -10992,7 +10993,7 @@ impl AperCodec for QosFlowAcceptedList {
 }
 
 // QosFlowAcceptedItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowAcceptedItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -11011,7 +11012,7 @@ impl AperCodec for QosFlowAcceptedItem {
 }
 
 // QosFlowAddOrModifyRequestList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowAddOrModifyRequestList(pub Vec<QosFlowAddOrModifyRequestItem>);
 
 impl AperCodec for QosFlowAddOrModifyRequestList {
@@ -11029,7 +11030,7 @@ impl AperCodec for QosFlowAddOrModifyRequestList {
 }
 
 // QosFlowAddOrModifyRequestItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowAddOrModifyRequestItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_level_qos_parameters: Option<QosFlowLevelQosParameters>,
@@ -11061,7 +11062,7 @@ impl AperCodec for QosFlowAddOrModifyRequestItem {
 }
 
 // QosFlowAddOrModifyResponseList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowAddOrModifyResponseList(pub Vec<QosFlowAddOrModifyResponseItem>);
 
 impl AperCodec for QosFlowAddOrModifyResponseList {
@@ -11079,7 +11080,7 @@ impl AperCodec for QosFlowAddOrModifyResponseList {
 }
 
 // QosFlowAddOrModifyResponseItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowAddOrModifyResponseItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -11098,7 +11099,7 @@ impl AperCodec for QosFlowAddOrModifyResponseItem {
 }
 
 // QosFlowFeedbackList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowFeedbackList(pub Vec<QosFlowFeedbackItem>);
 
 impl AperCodec for QosFlowFeedbackList {
@@ -11116,7 +11117,7 @@ impl AperCodec for QosFlowFeedbackList {
 }
 
 // QosFlowFeedbackItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowFeedbackItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub update_feedback: Option<UpdateFeedback>,
@@ -11155,7 +11156,7 @@ impl AperCodec for QosFlowFeedbackItem {
 }
 
 // QosFlowIdentifier
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowIdentifier(pub u8);
 
 impl AperCodec for QosFlowIdentifier {
@@ -11168,7 +11169,7 @@ impl AperCodec for QosFlowIdentifier {
 }
 
 // QosFlowInformationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowInformationList(pub Vec<QosFlowInformationItem>);
 
 impl AperCodec for QosFlowInformationList {
@@ -11186,7 +11187,7 @@ impl AperCodec for QosFlowInformationList {
 }
 
 // QosFlowInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowInformationItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub dl_forwarding: Option<DlForwarding>,
@@ -11211,7 +11212,7 @@ impl AperCodec for QosFlowInformationItem {
 }
 
 // QosFlowLevelQosParameters
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowLevelQosParameters {
     pub qos_characteristics: QosCharacteristics,
     pub allocation_and_retention_priority: AllocationAndRetentionPriority,
@@ -11253,7 +11254,7 @@ impl AperCodec for QosFlowLevelQosParameters {
 }
 
 // QosMonitoringRequest
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum QosMonitoringRequest {
     Ul,
@@ -11273,7 +11274,7 @@ impl AperCodec for QosMonitoringRequest {
 }
 
 // QosMonitoringReportingFrequency
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosMonitoringReportingFrequency(pub u16);
 
 impl AperCodec for QosMonitoringReportingFrequency {
@@ -11286,7 +11287,7 @@ impl AperCodec for QosMonitoringReportingFrequency {
 }
 
 // QosFlowListWithCause
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowListWithCause(pub Vec<QosFlowWithCauseItem>);
 
 impl AperCodec for QosFlowListWithCause {
@@ -11304,7 +11305,7 @@ impl AperCodec for QosFlowListWithCause {
 }
 
 // QosFlowWithCauseItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowWithCauseItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub cause: Cause,
@@ -11326,7 +11327,7 @@ impl AperCodec for QosFlowWithCauseItem {
 }
 
 // QosFlowModifyConfirmList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowModifyConfirmList(pub Vec<QosFlowModifyConfirmItem>);
 
 impl AperCodec for QosFlowModifyConfirmList {
@@ -11344,7 +11345,7 @@ impl AperCodec for QosFlowModifyConfirmList {
 }
 
 // QosFlowModifyConfirmItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowModifyConfirmItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -11363,7 +11364,7 @@ impl AperCodec for QosFlowModifyConfirmItem {
 }
 
 // QosFlowNotifyList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowNotifyList(pub Vec<QosFlowNotifyItem>);
 
 impl AperCodec for QosFlowNotifyList {
@@ -11381,7 +11382,7 @@ impl AperCodec for QosFlowNotifyList {
 }
 
 // QosFlowNotifyItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowNotifyItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub notification_cause: NotificationCause,
@@ -11403,7 +11404,7 @@ impl AperCodec for QosFlowNotifyItem {
 }
 
 // QosFlowParametersList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowParametersList(pub Vec<QosFlowParametersItem>);
 
 impl AperCodec for QosFlowParametersList {
@@ -11421,7 +11422,7 @@ impl AperCodec for QosFlowParametersList {
 }
 
 // QosFlowParametersItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowParametersItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub alternative_qos_para_set_list: Option<AlternativeQosParaSetList>,
@@ -11446,7 +11447,7 @@ impl AperCodec for QosFlowParametersItem {
 }
 
 // QosFlowPerTnlInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowPerTnlInformation {
     pub up_transport_layer_information: UpTransportLayerInformation,
     pub associated_qos_flow_list: AssociatedQosFlowList,
@@ -11468,7 +11469,7 @@ impl AperCodec for QosFlowPerTnlInformation {
 }
 
 // QosFlowPerTnlInformationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowPerTnlInformationList(pub Vec<QosFlowPerTnlInformationItem>);
 
 impl AperCodec for QosFlowPerTnlInformationList {
@@ -11486,7 +11487,7 @@ impl AperCodec for QosFlowPerTnlInformationList {
 }
 
 // QosFlowPerTnlInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowPerTnlInformationItem {
     pub qos_flow_per_tnl_information: QosFlowPerTnlInformation,
 }
@@ -11505,7 +11506,7 @@ impl AperCodec for QosFlowPerTnlInformationItem {
 }
 
 // QosFlowSetupRequestList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowSetupRequestList(pub Vec<QosFlowSetupRequestItem>);
 
 impl AperCodec for QosFlowSetupRequestList {
@@ -11523,7 +11524,7 @@ impl AperCodec for QosFlowSetupRequestList {
 }
 
 // QosFlowSetupRequestItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowSetupRequestItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_level_qos_parameters: QosFlowLevelQosParameters,
@@ -11551,7 +11552,7 @@ impl AperCodec for QosFlowSetupRequestItem {
 }
 
 // QosFlowListWithDataForwarding
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowListWithDataForwarding(pub Vec<QosFlowItemWithDataForwarding>);
 
 impl AperCodec for QosFlowListWithDataForwarding {
@@ -11569,7 +11570,7 @@ impl AperCodec for QosFlowListWithDataForwarding {
 }
 
 // QosFlowItemWithDataForwarding
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowItemWithDataForwarding {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub data_forwarding_accepted: Option<DataForwardingAccepted>,
@@ -11594,7 +11595,7 @@ impl AperCodec for QosFlowItemWithDataForwarding {
 }
 
 // QosFlowToBeForwardedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowToBeForwardedList(pub Vec<QosFlowToBeForwardedItem>);
 
 impl AperCodec for QosFlowToBeForwardedList {
@@ -11612,7 +11613,7 @@ impl AperCodec for QosFlowToBeForwardedList {
 }
 
 // QosFlowToBeForwardedItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowToBeForwardedItem {
     pub qos_flow_identifier: QosFlowIdentifier,
 }
@@ -11631,7 +11632,7 @@ impl AperCodec for QosFlowToBeForwardedItem {
 }
 
 // QosFlowsUsageReportList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowsUsageReportList(pub Vec<QosFlowsUsageReportItem>);
 
 impl AperCodec for QosFlowsUsageReportList {
@@ -11649,7 +11650,7 @@ impl AperCodec for QosFlowsUsageReportList {
 }
 
 // QosFlowsUsageReportItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QosFlowsUsageReportItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub rat_type: RatType1,
@@ -11674,7 +11675,7 @@ impl AperCodec for QosFlowsUsageReportItem {
 }
 
 // Range
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Range {
     M50,
@@ -11700,7 +11701,7 @@ impl AperCodec for Range {
 }
 
 // RanNodeName
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanNodeName(pub String);
 
 impl AperCodec for RanNodeName {
@@ -11716,7 +11717,7 @@ impl AperCodec for RanNodeName {
 }
 
 // RanNodeNameVisibleString
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanNodeNameVisibleString(pub String);
 
 impl AperCodec for RanNodeNameVisibleString {
@@ -11732,7 +11733,7 @@ impl AperCodec for RanNodeNameVisibleString {
 }
 
 // RanNodeNameUtf8String
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanNodeNameUtf8String(pub String);
 
 impl AperCodec for RanNodeNameUtf8String {
@@ -11748,7 +11749,7 @@ impl AperCodec for RanNodeNameUtf8String {
 }
 
 // RanPagingPriority
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanPagingPriority(pub u8);
 
 impl AperCodec for RanPagingPriority {
@@ -11761,7 +11762,7 @@ impl AperCodec for RanPagingPriority {
 }
 
 // RanStatusTransferTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanStatusTransferTransparentContainer {
     pub dr_bs_subject_to_status_transfer_list: DrBsSubjectToStatusTransferList,
 }
@@ -11780,7 +11781,7 @@ impl AperCodec for RanStatusTransferTransparentContainer {
 }
 
 // RanUeNgapId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanUeNgapId(pub u64);
 
 impl AperCodec for RanUeNgapId {
@@ -11793,7 +11794,7 @@ impl AperCodec for RanUeNgapId {
 }
 
 // RatInformation
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RatInformation {
     Unlicensed,
@@ -11812,7 +11813,7 @@ impl AperCodec for RatInformation {
 }
 
 // RatRestrictions
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RatRestrictions(pub Vec<RatRestrictionsItem>);
 
 impl AperCodec for RatRestrictions {
@@ -11830,7 +11831,7 @@ impl AperCodec for RatRestrictions {
 }
 
 // RatRestrictionsItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RatRestrictionsItem {
     pub plmn_identity: PlmnIdentity,
     pub rat_restriction_information: RatRestrictionInformation,
@@ -11852,7 +11853,7 @@ impl AperCodec for RatRestrictionsItem {
 }
 
 // RatRestrictionInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RatRestrictionInformation(pub BitString);
 
 impl AperCodec for RatRestrictionInformation {
@@ -11868,7 +11869,7 @@ impl AperCodec for RatRestrictionInformation {
 }
 
 // RecommendedCellsForPaging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecommendedCellsForPaging {
     pub recommended_cell_list: RecommendedCellList,
 }
@@ -11887,7 +11888,7 @@ impl AperCodec for RecommendedCellsForPaging {
 }
 
 // RecommendedCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecommendedCellList(pub Vec<RecommendedCellItem>);
 
 impl AperCodec for RecommendedCellList {
@@ -11905,7 +11906,7 @@ impl AperCodec for RecommendedCellList {
 }
 
 // RecommendedCellItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecommendedCellItem {
     pub ngran_cgi: NgranCgi,
     pub time_stayed_in_cell: Option<u16>,
@@ -11930,7 +11931,7 @@ impl AperCodec for RecommendedCellItem {
 }
 
 // RecommendedRanNodesForPaging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecommendedRanNodesForPaging {
     pub recommended_ran_node_list: RecommendedRanNodeList,
 }
@@ -11949,7 +11950,7 @@ impl AperCodec for RecommendedRanNodesForPaging {
 }
 
 // RecommendedRanNodeList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecommendedRanNodeList(pub Vec<RecommendedRanNodeItem>);
 
 impl AperCodec for RecommendedRanNodeList {
@@ -11967,7 +11968,7 @@ impl AperCodec for RecommendedRanNodeList {
 }
 
 // RecommendedRanNodeItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecommendedRanNodeItem {
     pub amf_paging_target: AmfPagingTarget,
 }
@@ -11984,7 +11985,7 @@ impl AperCodec for RecommendedRanNodeItem {
 }
 
 // RedirectionVoiceFallback
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RedirectionVoiceFallback {
     Possible,
@@ -12003,7 +12004,7 @@ impl AperCodec for RedirectionVoiceFallback {
 }
 
 // RedundantPduSessionInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RedundantPduSessionInformation {
     pub rsn: Rsn,
 }
@@ -12020,7 +12021,7 @@ impl AperCodec for RedundantPduSessionInformation {
 }
 
 // RedundantQosFlowIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RedundantQosFlowIndicator {
     True,
@@ -12039,7 +12040,7 @@ impl AperCodec for RedundantQosFlowIndicator {
 }
 
 // ReflectiveQosAttribute
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ReflectiveQosAttribute {
     SubjectTo,
@@ -12057,7 +12058,7 @@ impl AperCodec for ReflectiveQosAttribute {
 }
 
 // RelativeAmfCapacity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RelativeAmfCapacity(pub u8);
 
 impl AperCodec for RelativeAmfCapacity {
@@ -12070,7 +12071,7 @@ impl AperCodec for RelativeAmfCapacity {
 }
 
 // ReportArea
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ReportArea {
     Cell,
@@ -12088,7 +12089,7 @@ impl AperCodec for ReportArea {
 }
 
 // RepetitionPeriod
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RepetitionPeriod(pub u32);
 
 impl AperCodec for RepetitionPeriod {
@@ -12101,7 +12102,7 @@ impl AperCodec for RepetitionPeriod {
 }
 
 // ResetAll
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ResetAll {
     ResetAll,
@@ -12119,7 +12120,7 @@ impl AperCodec for ResetAll {
 }
 
 // ReportAmountMdt
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ReportAmountMdt {
     R1,
@@ -12144,7 +12145,7 @@ impl AperCodec for ReportAmountMdt {
 }
 
 // ReportIntervalMdt
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ReportIntervalMdt {
     Ms120,
@@ -12174,7 +12175,7 @@ impl AperCodec for ReportIntervalMdt {
 }
 
 // ResetType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ResetType {
     NgInterface(ResetAll),
     PartOfNgInterface(UeAssociatedLogicalNgConnectionList),
@@ -12203,7 +12204,7 @@ impl AperCodec for ResetType {
 }
 
 // RgLevelWirelineAccessCharacteristics
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RgLevelWirelineAccessCharacteristics(pub Vec<u8>);
 
 impl AperCodec for RgLevelWirelineAccessCharacteristics {
@@ -12216,7 +12217,7 @@ impl AperCodec for RgLevelWirelineAccessCharacteristics {
 }
 
 // RncId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RncId(pub u16);
 
 impl AperCodec for RncId {
@@ -12229,7 +12230,7 @@ impl AperCodec for RncId {
 }
 
 // RoutingId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RoutingId(pub Vec<u8>);
 
 impl AperCodec for RoutingId {
@@ -12242,7 +12243,7 @@ impl AperCodec for RoutingId {
 }
 
 // RrcContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RrcContainer(pub Vec<u8>);
 
 impl AperCodec for RrcContainer {
@@ -12255,7 +12256,7 @@ impl AperCodec for RrcContainer {
 }
 
 // RrcEstablishmentCause
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RrcEstablishmentCause {
     Emergency,
@@ -12282,7 +12283,7 @@ impl AperCodec for RrcEstablishmentCause {
 }
 
 // RrcInactiveTransitionReportRequest
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RrcInactiveTransitionReportRequest {
     SubsequentStateTransitionReport,
@@ -12302,7 +12303,7 @@ impl AperCodec for RrcInactiveTransitionReportRequest {
 }
 
 // RrcState
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RrcState {
     Inactive,
@@ -12321,7 +12322,7 @@ impl AperCodec for RrcState {
 }
 
 // Rsn
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Rsn {
     V1,
@@ -12340,7 +12341,7 @@ impl AperCodec for Rsn {
 }
 
 // RimInformationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RimInformationTransfer {
     pub target_ran_node_id: TargetRanNodeId,
     pub source_ran_node_id: SourceRanNodeId,
@@ -12365,7 +12366,7 @@ impl AperCodec for RimInformationTransfer {
 }
 
 // RimInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RimInformation {
     pub target_gnb_set_id: GnbSetId,
     pub rim_rs_detection: RimRsDetection,
@@ -12387,7 +12388,7 @@ impl AperCodec for RimInformation {
 }
 
 // GnbSetId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbSetId(pub BitString);
 
 impl AperCodec for GnbSetId {
@@ -12403,7 +12404,7 @@ impl AperCodec for GnbSetId {
 }
 
 // ScheduledCommunicationTime
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ScheduledCommunicationTime {
     pub dayof_week: Option<BitString>,
     pub timeof_day_start: Option<u32>,
@@ -12444,7 +12445,7 @@ impl AperCodec for ScheduledCommunicationTime {
 }
 
 // SctpTlAs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SctpTlAs(pub Vec<TransportLayerAddress>);
 
 impl AperCodec for SctpTlAs {
@@ -12462,7 +12463,7 @@ impl AperCodec for SctpTlAs {
 }
 
 // Sd
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Sd(pub Vec<u8>);
 
 impl AperCodec for Sd {
@@ -12478,7 +12479,7 @@ impl AperCodec for Sd {
 }
 
 // SecondaryRatUsageInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecondaryRatUsageInformation {
     pub pdu_session_usage_report: Option<PduSessionUsageReport>,
     pub qos_flows_usage_report_list: Option<QosFlowsUsageReportList>,
@@ -12507,7 +12508,7 @@ impl AperCodec for SecondaryRatUsageInformation {
 }
 
 // SecondaryRatDataUsageReportTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecondaryRatDataUsageReportTransfer {
     pub secondary_rat_usage_information: Option<SecondaryRatUsageInformation>,
 }
@@ -12529,7 +12530,7 @@ impl AperCodec for SecondaryRatDataUsageReportTransfer {
 }
 
 // SecurityContext
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecurityContext {
     pub next_hop_chaining_count: NextHopChainingCount,
     pub next_hop_nh: SecurityKey,
@@ -12551,7 +12552,7 @@ impl AperCodec for SecurityContext {
 }
 
 // SecurityIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecurityIndication {
     pub integrity_protection_indication: IntegrityProtectionIndication,
     pub confidentiality_protection_indication: ConfidentialityProtectionIndication,
@@ -12580,7 +12581,7 @@ impl AperCodec for SecurityIndication {
 }
 
 // SecurityKey
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecurityKey(pub BitString);
 
 impl AperCodec for SecurityKey {
@@ -12596,7 +12597,7 @@ impl AperCodec for SecurityKey {
 }
 
 // SecurityResult
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecurityResult {
     pub integrity_protection_result: IntegrityProtectionResult,
     pub confidentiality_protection_result: ConfidentialityProtectionResult,
@@ -12618,7 +12619,7 @@ impl AperCodec for SecurityResult {
 }
 
 // SensorMeasurementConfiguration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SensorMeasurementConfiguration {
     pub sensor_meas_config: SensorMeasConfig,
     pub sensor_meas_config_name_list: Option<SensorMeasConfigNameList>,
@@ -12643,7 +12644,7 @@ impl AperCodec for SensorMeasurementConfiguration {
 }
 
 // SensorMeasConfigNameList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SensorMeasConfigNameList(pub Vec<SensorMeasConfigNameItem>);
 
 impl AperCodec for SensorMeasConfigNameList {
@@ -12661,7 +12662,7 @@ impl AperCodec for SensorMeasConfigNameList {
 }
 
 // SensorMeasConfigNameItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SensorMeasConfigNameItem {
     pub sensor_name_config: SensorNameConfig,
 }
@@ -12678,7 +12679,7 @@ impl AperCodec for SensorMeasConfigNameItem {
 }
 
 // SensorMeasConfig
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SensorMeasConfig {
     Setup,
@@ -12696,7 +12697,7 @@ impl AperCodec for SensorMeasConfig {
 }
 
 // SensorNameConfig
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SensorNameConfig {
     UncompensatedBarometricConfig(UncompensatedBarometricConfig),
     UeSpeedConfig(UeSpeedConfig),
@@ -12729,7 +12730,7 @@ impl AperCodec for SensorNameConfig {
 }
 
 // SerialNumber
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SerialNumber(pub BitString);
 
 impl AperCodec for SerialNumber {
@@ -12745,7 +12746,7 @@ impl AperCodec for SerialNumber {
 }
 
 // ServedGuamiList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServedGuamiList(pub Vec<ServedGuamiItem>);
 
 impl AperCodec for ServedGuamiList {
@@ -12763,7 +12764,7 @@ impl AperCodec for ServedGuamiList {
 }
 
 // ServedGuamiItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServedGuamiItem {
     pub guami: Guami,
     pub backup_amf_name: Option<AmfName>,
@@ -12788,7 +12789,7 @@ impl AperCodec for ServedGuamiItem {
 }
 
 // ServiceAreaInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServiceAreaInformation(pub Vec<ServiceAreaInformationItem>);
 
 impl AperCodec for ServiceAreaInformation {
@@ -12806,7 +12807,7 @@ impl AperCodec for ServiceAreaInformation {
 }
 
 // ServiceAreaInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServiceAreaInformationItem {
     pub plmn_identity: PlmnIdentity,
     pub allowed_ta_cs: Option<AllowedTaCs>,
@@ -12838,7 +12839,7 @@ impl AperCodec for ServiceAreaInformationItem {
 }
 
 // SGnbUeX2apId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SGnbUeX2apId(pub u64);
 
 impl AperCodec for SGnbUeX2apId {
@@ -12851,7 +12852,7 @@ impl AperCodec for SGnbUeX2apId {
 }
 
 // SliceOverloadList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SliceOverloadList(pub Vec<SliceOverloadItem>);
 
 impl AperCodec for SliceOverloadList {
@@ -12869,7 +12870,7 @@ impl AperCodec for SliceOverloadList {
 }
 
 // SliceOverloadItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SliceOverloadItem {
     pub s_nssai: SNssai,
 }
@@ -12886,7 +12887,7 @@ impl AperCodec for SliceOverloadItem {
 }
 
 // SliceSupportList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SliceSupportList(pub Vec<SliceSupportItem>);
 
 impl AperCodec for SliceSupportList {
@@ -12904,7 +12905,7 @@ impl AperCodec for SliceSupportList {
 }
 
 // SliceSupportItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SliceSupportItem {
     pub s_nssai: SNssai,
 }
@@ -12921,7 +12922,7 @@ impl AperCodec for SliceSupportItem {
 }
 
 // SnpnMobilityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SnpnMobilityInformation {
     pub serving_nid: Nid,
 }
@@ -12938,7 +12939,7 @@ impl AperCodec for SnpnMobilityInformation {
 }
 
 // SNssai
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SNssai {
     pub sst: Sst,
     pub sd: Option<Sd>,
@@ -12960,7 +12961,7 @@ impl AperCodec for SNssai {
 }
 
 // SonConfigurationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SonConfigurationTransfer {
     pub target_ran_node_id: TargetRanNodeId,
     pub source_ran_node_id: SourceRanNodeId,
@@ -12991,7 +12992,7 @@ impl AperCodec for SonConfigurationTransfer {
 }
 
 // SonInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SonInformation {
     SonInformationRequest(SonInformationRequest),
     SonInformationReply(SonInformationReply),
@@ -13022,7 +13023,7 @@ impl AperCodec for SonInformation {
 }
 
 // SonInformationReply
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SonInformationReply {
     pub xn_tnl_configuration_info: Option<XnTnlConfigurationInfo>,
 }
@@ -13044,7 +13045,7 @@ impl AperCodec for SonInformationReply {
 }
 
 // SonInformationReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SonInformationReport {
     FailureIndicationInformation(FailureIndication),
     HoReportInformation(HoReport),
@@ -13073,7 +13074,7 @@ impl AperCodec for SonInformationReport {
 }
 
 // SonInformationRequest
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SonInformationRequest {
     XnTnlConfigurationInfo,
@@ -13091,7 +13092,7 @@ impl AperCodec for SonInformationRequest {
 }
 
 // SourceNgranNodeToTargetNgranNodeTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SourceNgranNodeToTargetNgranNodeTransparentContainer {
     pub rrc_container: RrcContainer,
     pub pdu_session_resource_information_list: Option<PduSessionResourceInformationList>,
@@ -13136,7 +13137,7 @@ impl AperCodec for SourceNgranNodeToTargetNgranNodeTransparentContainer {
 }
 
 // SourceOfUeActivityBehaviourInformation
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SourceOfUeActivityBehaviourInformation {
     SubscriptionInformation,
@@ -13155,7 +13156,7 @@ impl AperCodec for SourceOfUeActivityBehaviourInformation {
 }
 
 // SourceRanNodeId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SourceRanNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
@@ -13177,7 +13178,7 @@ impl AperCodec for SourceRanNodeId {
 }
 
 // SourceToTargetTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SourceToTargetTransparentContainer(pub Vec<u8>);
 
 impl AperCodec for SourceToTargetTransparentContainer {
@@ -13190,7 +13191,7 @@ impl AperCodec for SourceToTargetTransparentContainer {
 }
 
 // SourceToTargetAmfInformationReroute
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SourceToTargetAmfInformationReroute {
     pub configured_nssai: Option<ConfiguredNssai>,
     pub rejected_nssa_iin_plmn: Option<RejectedNssaIinPlmn>,
@@ -13226,7 +13227,7 @@ impl AperCodec for SourceToTargetAmfInformationReroute {
 }
 
 // SrvccOperationPossible
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SrvccOperationPossible {
     Possible,
@@ -13245,7 +13246,7 @@ impl AperCodec for SrvccOperationPossible {
 }
 
 // ConfiguredNssai
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ConfiguredNssai(pub Vec<u8>);
 
 impl AperCodec for ConfiguredNssai {
@@ -13261,7 +13262,7 @@ impl AperCodec for ConfiguredNssai {
 }
 
 // RejectedNssaIinPlmn
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RejectedNssaIinPlmn(pub Vec<u8>);
 
 impl AperCodec for RejectedNssaIinPlmn {
@@ -13277,7 +13278,7 @@ impl AperCodec for RejectedNssaIinPlmn {
 }
 
 // RejectedNssaIinTa
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RejectedNssaIinTa(pub Vec<u8>);
 
 impl AperCodec for RejectedNssaIinTa {
@@ -13293,7 +13294,7 @@ impl AperCodec for RejectedNssaIinTa {
 }
 
 // Sst
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Sst(pub Vec<u8>);
 
 impl AperCodec for Sst {
@@ -13309,7 +13310,7 @@ impl AperCodec for Sst {
 }
 
 // SupportedTaList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SupportedTaList(pub Vec<SupportedTaItem>);
 
 impl AperCodec for SupportedTaList {
@@ -13327,7 +13328,7 @@ impl AperCodec for SupportedTaList {
 }
 
 // SupportedTaItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SupportedTaItem {
     pub tac: Tac,
     pub broadcast_plmn_list: BroadcastPlmnList,
@@ -13349,7 +13350,7 @@ impl AperCodec for SupportedTaItem {
 }
 
 // SuspendIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SuspendIndicator {
     True,
@@ -13367,7 +13368,7 @@ impl AperCodec for SuspendIndicator {
 }
 
 // SuspendRequestIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SuspendRequestIndication {
     SuspendRequested,
@@ -13385,7 +13386,7 @@ impl AperCodec for SuspendRequestIndication {
 }
 
 // SuspendResponseIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum SuspendResponseIndication {
     SuspendIndicated,
@@ -13403,7 +13404,7 @@ impl AperCodec for SuspendResponseIndication {
 }
 
 // Tac
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Tac(pub Vec<u8>);
 
 impl AperCodec for Tac {
@@ -13419,7 +13420,7 @@ impl AperCodec for Tac {
 }
 
 // Tai
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Tai {
     pub plmn_identity: PlmnIdentity,
     pub tac: Tac,
@@ -13438,7 +13439,7 @@ impl AperCodec for Tai {
 }
 
 // TaiBroadcastEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiBroadcastEutra(pub Vec<TaiBroadcastEutraItem>);
 
 impl AperCodec for TaiBroadcastEutra {
@@ -13457,7 +13458,7 @@ impl AperCodec for TaiBroadcastEutra {
 }
 
 // TaiBroadcastEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiBroadcastEutraItem {
     pub tai: Tai,
     pub completed_cells_in_tai_eutra: CompletedCellsInTaiEutra,
@@ -13479,7 +13480,7 @@ impl AperCodec for TaiBroadcastEutraItem {
 }
 
 // TaiBroadcastNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiBroadcastNr(pub Vec<TaiBroadcastNrItem>);
 
 impl AperCodec for TaiBroadcastNr {
@@ -13498,7 +13499,7 @@ impl AperCodec for TaiBroadcastNr {
 }
 
 // TaiBroadcastNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiBroadcastNrItem {
     pub tai: Tai,
     pub completed_cells_in_tai_nr: CompletedCellsInTaiNr,
@@ -13520,7 +13521,7 @@ impl AperCodec for TaiBroadcastNrItem {
 }
 
 // TaiCancelledEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiCancelledEutra(pub Vec<TaiCancelledEutraItem>);
 
 impl AperCodec for TaiCancelledEutra {
@@ -13539,7 +13540,7 @@ impl AperCodec for TaiCancelledEutra {
 }
 
 // TaiCancelledEutraItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiCancelledEutraItem {
     pub tai: Tai,
     pub cancelled_cells_in_tai_eutra: CancelledCellsInTaiEutra,
@@ -13561,7 +13562,7 @@ impl AperCodec for TaiCancelledEutraItem {
 }
 
 // TaiCancelledNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiCancelledNr(pub Vec<TaiCancelledNrItem>);
 
 impl AperCodec for TaiCancelledNr {
@@ -13580,7 +13581,7 @@ impl AperCodec for TaiCancelledNr {
 }
 
 // TaiCancelledNrItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiCancelledNrItem {
     pub tai: Tai,
     pub cancelled_cells_in_tai_nr: CancelledCellsInTaiNr,
@@ -13602,7 +13603,7 @@ impl AperCodec for TaiCancelledNrItem {
 }
 
 // TaiListForInactive
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListForInactive(pub Vec<TaiListForInactiveItem>);
 
 impl AperCodec for TaiListForInactive {
@@ -13620,7 +13621,7 @@ impl AperCodec for TaiListForInactive {
 }
 
 // TaiListForInactiveItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListForInactiveItem {
     pub tai: Tai,
 }
@@ -13637,7 +13638,7 @@ impl AperCodec for TaiListForInactiveItem {
 }
 
 // TaiListForPaging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListForPaging(pub Vec<TaiListForPagingItem>);
 
 impl AperCodec for TaiListForPaging {
@@ -13655,7 +13656,7 @@ impl AperCodec for TaiListForPaging {
 }
 
 // TaiListForPagingItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListForPagingItem {
     pub tai: Tai,
 }
@@ -13672,7 +13673,7 @@ impl AperCodec for TaiListForPagingItem {
 }
 
 // TaiListForRestart
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListForRestart(pub Vec<Tai>);
 
 impl AperCodec for TaiListForRestart {
@@ -13690,7 +13691,7 @@ impl AperCodec for TaiListForRestart {
 }
 
 // TaiListForWarning
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListForWarning(pub Vec<Tai>);
 
 impl AperCodec for TaiListForWarning {
@@ -13709,7 +13710,7 @@ impl AperCodec for TaiListForWarning {
 }
 
 // TargetEnbId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargetEnbId {
     pub global_enb_id: GlobalNgEnbId,
     pub selected_eps_tai: EpsTai,
@@ -13731,7 +13732,7 @@ impl AperCodec for TargetEnbId {
 }
 
 // TargetId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum TargetId {
     TargetRanNodeId(TargetRanNodeId),
     TargetEnbId(TargetEnbId),
@@ -13758,7 +13759,7 @@ impl AperCodec for TargetId {
 }
 
 // TargetNgranNodeToSourceNgranNodeTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargetNgranNodeToSourceNgranNodeTransparentContainer {
     pub rrc_container: RrcContainer,
 }
@@ -13775,7 +13776,7 @@ impl AperCodec for TargetNgranNodeToSourceNgranNodeTransparentContainer {
 }
 
 // TargetNgranNodeToSourceNgranNodeFailureTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
     pub cell_cag_information: CellCagInformation,
 }
@@ -13794,7 +13795,7 @@ impl AperCodec for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
 }
 
 // TargetRanNodeId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargetRanNodeId {
     pub global_ran_node_id: GlobalRanNodeId,
     pub selected_tai: Tai,
@@ -13816,7 +13817,7 @@ impl AperCodec for TargetRanNodeId {
 }
 
 // TargetRncId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargetRncId {
     pub lai: Lai,
     pub rnc_id: RncId,
@@ -13844,7 +13845,7 @@ impl AperCodec for TargetRncId {
 }
 
 // TargetToSourceTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargetToSourceTransparentContainer(pub Vec<u8>);
 
 impl AperCodec for TargetToSourceTransparentContainer {
@@ -13857,7 +13858,7 @@ impl AperCodec for TargetToSourceTransparentContainer {
 }
 
 // TargettoSourceFailureTransparentContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TargettoSourceFailureTransparentContainer(pub Vec<u8>);
 
 impl AperCodec for TargettoSourceFailureTransparentContainer {
@@ -13870,7 +13871,7 @@ impl AperCodec for TargettoSourceFailureTransparentContainer {
 }
 
 // TimerApproachForGuamiRemoval
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TimerApproachForGuamiRemoval {
     ApplyTimer,
@@ -13888,7 +13889,7 @@ impl AperCodec for TimerApproachForGuamiRemoval {
 }
 
 // TimeStamp
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TimeStamp(pub Vec<u8>);
 
 impl AperCodec for TimeStamp {
@@ -13904,7 +13905,7 @@ impl AperCodec for TimeStamp {
 }
 
 // TimeToWait
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TimeToWait {
     V1s,
@@ -13927,7 +13928,7 @@ impl AperCodec for TimeToWait {
 }
 
 // TimeUeStayedInCell
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TimeUeStayedInCell(pub u16);
 
 impl AperCodec for TimeUeStayedInCell {
@@ -13940,7 +13941,7 @@ impl AperCodec for TimeUeStayedInCell {
 }
 
 // TimeUeStayedInCellEnhancedGranularity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TimeUeStayedInCellEnhancedGranularity(pub u16);
 
 impl AperCodec for TimeUeStayedInCellEnhancedGranularity {
@@ -13953,7 +13954,7 @@ impl AperCodec for TimeUeStayedInCellEnhancedGranularity {
 }
 
 // TnapId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TnapId(pub Vec<u8>);
 
 impl AperCodec for TnapId {
@@ -13966,7 +13967,7 @@ impl AperCodec for TnapId {
 }
 
 // TngfId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum TngfId {
     TngfId(BitString),
 }
@@ -13996,7 +13997,7 @@ impl AperCodec for TngfId {
 }
 
 // TnlAddressWeightFactor
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TnlAddressWeightFactor(pub u8);
 
 impl AperCodec for TnlAddressWeightFactor {
@@ -14009,7 +14010,7 @@ impl AperCodec for TnlAddressWeightFactor {
 }
 
 // TnlAssociationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TnlAssociationList(pub Vec<TnlAssociationItem>);
 
 impl AperCodec for TnlAssociationList {
@@ -14027,7 +14028,7 @@ impl AperCodec for TnlAssociationList {
 }
 
 // TnlAssociationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TnlAssociationItem {
     pub tnl_association_address: CpTransportLayerInformation,
     pub cause: Cause,
@@ -14049,7 +14050,7 @@ impl AperCodec for TnlAssociationItem {
 }
 
 // TnlAssociationUsage
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TnlAssociationUsage {
     Ue,
@@ -14069,7 +14070,7 @@ impl AperCodec for TnlAssociationUsage {
 }
 
 // TooearlyIntersystemHo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TooearlyIntersystemHo {
     pub sourcecell_id: EutraCgi,
     pub failurecell_id: NgranCgi,
@@ -14097,7 +14098,7 @@ impl AperCodec for TooearlyIntersystemHo {
 }
 
 // TraceActivation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TraceActivation {
     pub ngran_trace_id: NgranTraceId,
     pub interfaces_to_trace: InterfacesToTrace,
@@ -14125,7 +14126,7 @@ impl AperCodec for TraceActivation {
 }
 
 // TraceDepth
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TraceDepth {
     Minimum,
@@ -14148,7 +14149,7 @@ impl AperCodec for TraceDepth {
 }
 
 // TrafficLoadReductionIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TrafficLoadReductionIndication(pub u8);
 
 impl AperCodec for TrafficLoadReductionIndication {
@@ -14161,7 +14162,7 @@ impl AperCodec for TrafficLoadReductionIndication {
 }
 
 // TransportLayerAddress
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TransportLayerAddress(pub BitString);
 
 impl AperCodec for TransportLayerAddress {
@@ -14177,7 +14178,7 @@ impl AperCodec for TransportLayerAddress {
 }
 
 // TypeOfError
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TypeOfError {
     NotUnderstood,
@@ -14196,7 +14197,7 @@ impl AperCodec for TypeOfError {
 }
 
 // TaiBasedMdt
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiBasedMdt {
     pub tai_listfor_mdt: TaiListforMdt,
 }
@@ -14213,7 +14214,7 @@ impl AperCodec for TaiBasedMdt {
 }
 
 // TaiListforMdt
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaiListforMdt(pub Vec<Tai>);
 
 impl AperCodec for TaiListforMdt {
@@ -14231,7 +14232,7 @@ impl AperCodec for TaiListforMdt {
 }
 
 // TaBasedMdt
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaBasedMdt {
     pub ta_listfor_mdt: TaListforMdt,
 }
@@ -14248,7 +14249,7 @@ impl AperCodec for TaBasedMdt {
 }
 
 // TaListforMdt
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TaListforMdt(pub Vec<Tac>);
 
 impl AperCodec for TaListforMdt {
@@ -14266,7 +14267,7 @@ impl AperCodec for TaListforMdt {
 }
 
 // ThresholdRsrp
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ThresholdRsrp(pub u8);
 
 impl AperCodec for ThresholdRsrp {
@@ -14279,7 +14280,7 @@ impl AperCodec for ThresholdRsrp {
 }
 
 // ThresholdRsrq
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ThresholdRsrq(pub u8);
 
 impl AperCodec for ThresholdRsrq {
@@ -14292,7 +14293,7 @@ impl AperCodec for ThresholdRsrq {
 }
 
 // ThresholdSinr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ThresholdSinr(pub u8);
 
 impl AperCodec for ThresholdSinr {
@@ -14305,7 +14306,7 @@ impl AperCodec for ThresholdSinr {
 }
 
 // TimeToTrigger
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TimeToTrigger {
     Ms0,
@@ -14338,7 +14339,7 @@ impl AperCodec for TimeToTrigger {
 }
 
 // TwapId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TwapId(pub Vec<u8>);
 
 impl AperCodec for TwapId {
@@ -14351,7 +14352,7 @@ impl AperCodec for TwapId {
 }
 
 // TwifId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum TwifId {
     TwifId(BitString),
 }
@@ -14381,7 +14382,7 @@ impl AperCodec for TwifId {
 }
 
 // TscAssistanceInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TscAssistanceInformation {
     pub periodicity: Periodicity,
     pub burst_arrival_time: Option<BurstArrivalTime>,
@@ -14406,7 +14407,7 @@ impl AperCodec for TscAssistanceInformation {
 }
 
 // TscTrafficCharacteristics
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TscTrafficCharacteristics {
     pub tsc_assistance_information_dl: Option<TscAssistanceInformation>,
     pub tsc_assistance_information_ul: Option<TscAssistanceInformation>,
@@ -14435,7 +14436,7 @@ impl AperCodec for TscTrafficCharacteristics {
 }
 
 // UeAggregateMaximumBitRate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeAggregateMaximumBitRate {
     pub ue_aggregate_maximum_bit_rate_dl: BitRate,
     pub ue_aggregate_maximum_bit_rate_ul: BitRate,
@@ -14457,7 +14458,7 @@ impl AperCodec for UeAggregateMaximumBitRate {
 }
 
 // UeAssociatedLogicalNgConnectionList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeAssociatedLogicalNgConnectionList(pub Vec<UeAssociatedLogicalNgConnectionItem>);
 
 impl AperCodec for UeAssociatedLogicalNgConnectionList {
@@ -14476,7 +14477,7 @@ impl AperCodec for UeAssociatedLogicalNgConnectionList {
 }
 
 // UeAssociatedLogicalNgConnectionItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeAssociatedLogicalNgConnectionItem {
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
     pub ran_ue_ngap_id: Option<RanUeNgapId>,
@@ -14505,7 +14506,7 @@ impl AperCodec for UeAssociatedLogicalNgConnectionItem {
 }
 
 // UeCapabilityInfoRequest
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UeCapabilityInfoRequest {
     Requested,
@@ -14523,7 +14524,7 @@ impl AperCodec for UeCapabilityInfoRequest {
 }
 
 // UeContextRequest
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UeContextRequest {
     Requested,
@@ -14541,7 +14542,7 @@ impl AperCodec for UeContextRequest {
 }
 
 // UeContextResumeRequestTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextResumeRequestTransfer {
     pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
 }
@@ -14563,7 +14564,7 @@ impl AperCodec for UeContextResumeRequestTransfer {
 }
 
 // UeContextResumeResponseTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextResumeResponseTransfer {
     pub qos_flow_failed_to_resume_list: Option<QosFlowListWithCause>,
 }
@@ -14585,7 +14586,7 @@ impl AperCodec for UeContextResumeResponseTransfer {
 }
 
 // UeContextSuspendRequestTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSuspendRequestTransfer {
     pub suspend_indicator: Option<SuspendIndicator>,
 }
@@ -14605,7 +14606,7 @@ impl AperCodec for UeContextSuspendRequestTransfer {
 }
 
 // UeDifferentiationInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeDifferentiationInfo {
     pub periodic_communication_indicator: Option<PeriodicCommunicationIndicator>,
     pub periodic_time: Option<u16>,
@@ -14662,7 +14663,7 @@ impl AperCodec for UeDifferentiationInfo {
 }
 
 // UeHistoryInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeHistoryInformation(pub Vec<LastVisitedCellItem>);
 
 impl AperCodec for UeHistoryInformation {
@@ -14680,7 +14681,7 @@ impl AperCodec for UeHistoryInformation {
 }
 
 // UeHistoryInformationFromTheUe
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UeHistoryInformationFromTheUe {
     Nr(NrMobilityHistoryReport),
 }
@@ -14705,7 +14706,7 @@ impl AperCodec for UeHistoryInformationFromTheUe {
 }
 
 // UeIdentityIndexValue
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UeIdentityIndexValue {
     IndexLength10(BitString),
 }
@@ -14735,7 +14736,7 @@ impl AperCodec for UeIdentityIndexValue {
 }
 
 // UeNgapIDs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UeNgapIDs {
     UeNgapIdPair(UeNgapIdPair),
     AmfUeNgapId(AmfUeNgapId),
@@ -14762,7 +14763,7 @@ impl AperCodec for UeNgapIDs {
 }
 
 // UeNgapIdPair
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeNgapIdPair {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -14784,7 +14785,7 @@ impl AperCodec for UeNgapIdPair {
 }
 
 // UePagingIdentity
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UePagingIdentity {
     FiveGSTmsi(FiveGSTmsi),
 }
@@ -14809,7 +14810,7 @@ impl AperCodec for UePagingIdentity {
 }
 
 // UePresence
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UePresence {
     In,
@@ -14829,7 +14830,7 @@ impl AperCodec for UePresence {
 }
 
 // UePresenceInAreaOfInterestList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UePresenceInAreaOfInterestList(pub Vec<UePresenceInAreaOfInterestItem>);
 
 impl AperCodec for UePresenceInAreaOfInterestList {
@@ -14847,7 +14848,7 @@ impl AperCodec for UePresenceInAreaOfInterestList {
 }
 
 // UePresenceInAreaOfInterestItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UePresenceInAreaOfInterestItem {
     pub location_reporting_reference_id: LocationReportingReferenceId,
     pub ue_presence: UePresence,
@@ -14869,7 +14870,7 @@ impl AperCodec for UePresenceInAreaOfInterestItem {
 }
 
 // UeRadioCapability
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapability(pub Vec<u8>);
 
 impl AperCodec for UeRadioCapability {
@@ -14882,7 +14883,7 @@ impl AperCodec for UeRadioCapability {
 }
 
 // UeRadioCapabilityForPaging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityForPaging {
     pub ue_radio_capability_for_paging_of_nr: Option<UeRadioCapabilityForPagingOfNr>,
     pub ue_radio_capability_for_paging_of_eutra: Option<UeRadioCapabilityForPagingOfEutra>,
@@ -14911,7 +14912,7 @@ impl AperCodec for UeRadioCapabilityForPaging {
 }
 
 // UeRadioCapabilityForPagingOfNbIot
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityForPagingOfNbIot(pub Vec<u8>);
 
 impl AperCodec for UeRadioCapabilityForPagingOfNbIot {
@@ -14924,7 +14925,7 @@ impl AperCodec for UeRadioCapabilityForPagingOfNbIot {
 }
 
 // UeRadioCapabilityForPagingOfNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityForPagingOfNr(pub Vec<u8>);
 
 impl AperCodec for UeRadioCapabilityForPagingOfNr {
@@ -14937,7 +14938,7 @@ impl AperCodec for UeRadioCapabilityForPagingOfNr {
 }
 
 // UeRadioCapabilityForPagingOfEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityForPagingOfEutra(pub Vec<u8>);
 
 impl AperCodec for UeRadioCapabilityForPagingOfEutra {
@@ -14950,7 +14951,7 @@ impl AperCodec for UeRadioCapabilityForPagingOfEutra {
 }
 
 // UeRadioCapabilityId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityId(pub Vec<u8>);
 
 impl AperCodec for UeRadioCapabilityId {
@@ -14963,7 +14964,7 @@ impl AperCodec for UeRadioCapabilityId {
 }
 
 // UeRetentionInformation
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UeRetentionInformation {
     UesRetained,
@@ -14981,7 +14982,7 @@ impl AperCodec for UeRetentionInformation {
 }
 
 // UeRlfReportContainer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UeRlfReportContainer {
     Nr(NrueRlfReportContainer),
     Lte(LteueRlfReportContainer),
@@ -15008,7 +15009,7 @@ impl AperCodec for UeRlfReportContainer {
 }
 
 // UeSecurityCapabilities
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeSecurityCapabilities {
     pub n_rencryption_algorithms: NRencryptionAlgorithms,
     pub n_rintegrity_protection_algorithms: NRintegrityProtectionAlgorithms,
@@ -15037,7 +15038,7 @@ impl AperCodec for UeSecurityCapabilities {
 }
 
 // UeUpCIotSupport
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UeUpCIotSupport {
     Supported,
@@ -15055,7 +15056,7 @@ impl AperCodec for UeUpCIotSupport {
 }
 
 // UlCpSecurityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlCpSecurityInformation {
     pub ul_nas_mac: UlNasMac,
     pub ul_nas_count: UlNasCount,
@@ -15077,7 +15078,7 @@ impl AperCodec for UlCpSecurityInformation {
 }
 
 // UlNasMac
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlNasMac(pub BitString);
 
 impl AperCodec for UlNasMac {
@@ -15093,7 +15094,7 @@ impl AperCodec for UlNasMac {
 }
 
 // UlNasCount
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlNasCount(pub BitString);
 
 impl AperCodec for UlNasCount {
@@ -15109,7 +15110,7 @@ impl AperCodec for UlNasCount {
 }
 
 // UlNguUpTnlModifyList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlNguUpTnlModifyList(pub Vec<UlNguUpTnlModifyItem>);
 
 impl AperCodec for UlNguUpTnlModifyList {
@@ -15127,7 +15128,7 @@ impl AperCodec for UlNguUpTnlModifyList {
 }
 
 // UlNguUpTnlModifyItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlNguUpTnlModifyItem {
     pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
@@ -15149,7 +15150,7 @@ impl AperCodec for UlNguUpTnlModifyItem {
 }
 
 // UnavailableGuamiList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UnavailableGuamiList(pub Vec<UnavailableGuamiItem>);
 
 impl AperCodec for UnavailableGuamiList {
@@ -15167,7 +15168,7 @@ impl AperCodec for UnavailableGuamiList {
 }
 
 // UnavailableGuamiItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UnavailableGuamiItem {
     pub guami: Guami,
     pub timer_approach_for_guami_removal: Option<TimerApproachForGuamiRemoval>,
@@ -15199,7 +15200,7 @@ impl AperCodec for UnavailableGuamiItem {
 }
 
 // UlForwarding
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UlForwarding {
     UlForwardingProposed,
@@ -15217,7 +15218,7 @@ impl AperCodec for UlForwarding {
 }
 
 // UpdateFeedback
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UpdateFeedback(pub BitString);
 
 impl AperCodec for UpdateFeedback {
@@ -15233,7 +15234,7 @@ impl AperCodec for UpdateFeedback {
 }
 
 // UpTransportLayerInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UpTransportLayerInformation {
     GtpTunnel(GtpTunnel),
 }
@@ -15258,7 +15259,7 @@ impl AperCodec for UpTransportLayerInformation {
 }
 
 // UpTransportLayerInformationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UpTransportLayerInformationList(pub Vec<UpTransportLayerInformationItem>);
 
 impl AperCodec for UpTransportLayerInformationList {
@@ -15276,7 +15277,7 @@ impl AperCodec for UpTransportLayerInformationList {
 }
 
 // UpTransportLayerInformationItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UpTransportLayerInformationItem {
     pub ngu_up_tnl_information: UpTransportLayerInformation,
 }
@@ -15295,7 +15296,7 @@ impl AperCodec for UpTransportLayerInformationItem {
 }
 
 // UpTransportLayerInformationPairList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UpTransportLayerInformationPairList(pub Vec<UpTransportLayerInformationPairItem>);
 
 impl AperCodec for UpTransportLayerInformationPairList {
@@ -15313,7 +15314,7 @@ impl AperCodec for UpTransportLayerInformationPairList {
 }
 
 // UpTransportLayerInformationPairItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UpTransportLayerInformationPairItem {
     pub ul_ngu_up_tnl_information: UpTransportLayerInformation,
     pub dl_ngu_up_tnl_information: UpTransportLayerInformation,
@@ -15335,7 +15336,7 @@ impl AperCodec for UpTransportLayerInformationPairItem {
 }
 
 // UriAddress
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UriAddress(pub String);
 
 impl AperCodec for UriAddress {
@@ -15348,7 +15349,7 @@ impl AperCodec for UriAddress {
 }
 
 // UserLocationInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UserLocationInformation {
     UserLocationInformationEutra(UserLocationInformationEutra),
     UserLocationInformationNr(UserLocationInformationNr),
@@ -15383,7 +15384,7 @@ impl AperCodec for UserLocationInformation {
 }
 
 // UserLocationInformationEutra
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UserLocationInformationEutra {
     pub eutra_cgi: EutraCgi,
     pub tai: Tai,
@@ -15411,7 +15412,7 @@ impl AperCodec for UserLocationInformationEutra {
 }
 
 // UserLocationInformationN3Iwf
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UserLocationInformationN3Iwf {
     pub ip_address: TransportLayerAddress,
     pub port_number: PortNumber,
@@ -15433,7 +15434,7 @@ impl AperCodec for UserLocationInformationN3Iwf {
 }
 
 // UserLocationInformationTngf
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UserLocationInformationTngf {
     pub tnap_id: TnapId,
     pub ip_address: TransportLayerAddress,
@@ -15461,7 +15462,7 @@ impl AperCodec for UserLocationInformationTngf {
 }
 
 // UserLocationInformationTwif
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UserLocationInformationTwif {
     pub twap_id: TwapId,
     pub ip_address: TransportLayerAddress,
@@ -15489,7 +15490,7 @@ impl AperCodec for UserLocationInformationTwif {
 }
 
 // UserLocationInformationWAgf
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum UserLocationInformationWAgf {
     GlobalLineId(GlobalLineId),
     HfcNodeId(HfcNodeId),
@@ -15516,7 +15517,7 @@ impl AperCodec for UserLocationInformationWAgf {
 }
 
 // UserLocationInformationNr
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UserLocationInformationNr {
     pub nr_cgi: NrCgi,
     pub tai: Tai,
@@ -15544,7 +15545,7 @@ impl AperCodec for UserLocationInformationNr {
 }
 
 // UserPlaneSecurityInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UserPlaneSecurityInformation {
     pub security_result: SecurityResult,
     pub security_indication: SecurityIndication,
@@ -15566,7 +15567,7 @@ impl AperCodec for UserPlaneSecurityInformation {
 }
 
 // VolumeTimedReportList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VolumeTimedReportList(pub Vec<VolumeTimedReportItem>);
 
 impl AperCodec for VolumeTimedReportList {
@@ -15584,7 +15585,7 @@ impl AperCodec for VolumeTimedReportList {
 }
 
 // VolumeTimedReportItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct VolumeTimedReportItem {
     pub start_time_stamp: Vec<u8>,
     pub end_time_stamp: Vec<u8>,
@@ -15612,7 +15613,7 @@ impl AperCodec for VolumeTimedReportItem {
 }
 
 // WAgfId
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum WAgfId {
     WAgfId(BitString),
 }
@@ -15642,7 +15643,7 @@ impl AperCodec for WAgfId {
 }
 
 // WarningAreaCoordinates
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WarningAreaCoordinates(pub Vec<u8>);
 
 impl AperCodec for WarningAreaCoordinates {
@@ -15658,7 +15659,7 @@ impl AperCodec for WarningAreaCoordinates {
 }
 
 // WarningAreaList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum WarningAreaList {
     EutraCgiListForWarning(EutraCgiListForWarning),
     NrCgiListForWarning(NrCgiListForWarning),
@@ -15695,7 +15696,7 @@ impl AperCodec for WarningAreaList {
 }
 
 // WarningMessageContents
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WarningMessageContents(pub Vec<u8>);
 
 impl AperCodec for WarningMessageContents {
@@ -15711,7 +15712,7 @@ impl AperCodec for WarningMessageContents {
 }
 
 // WarningSecurityInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WarningSecurityInfo(pub Vec<u8>);
 
 impl AperCodec for WarningSecurityInfo {
@@ -15727,7 +15728,7 @@ impl AperCodec for WarningSecurityInfo {
 }
 
 // WarningType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WarningType(pub Vec<u8>);
 
 impl AperCodec for WarningType {
@@ -15743,7 +15744,7 @@ impl AperCodec for WarningType {
 }
 
 // WlanMeasurementConfiguration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_meas_config_name_list: Option<WlanMeasConfigNameList>,
@@ -15782,7 +15783,7 @@ impl AperCodec for WlanMeasurementConfiguration {
 }
 
 // WlanMeasConfigNameList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WlanMeasConfigNameList(pub Vec<WlanMeasConfigNameItem>);
 
 impl AperCodec for WlanMeasConfigNameList {
@@ -15800,7 +15801,7 @@ impl AperCodec for WlanMeasConfigNameList {
 }
 
 // WlanMeasConfigNameItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WlanMeasConfigNameItem {
     pub wlan_name: WlanName,
 }
@@ -15817,7 +15818,7 @@ impl AperCodec for WlanMeasConfigNameItem {
 }
 
 // WlanMeasConfig
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum WlanMeasConfig {
     Setup,
@@ -15835,7 +15836,7 @@ impl AperCodec for WlanMeasConfig {
 }
 
 // WlanName
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WlanName(pub Vec<u8>);
 
 impl AperCodec for WlanName {
@@ -15851,7 +15852,7 @@ impl AperCodec for WlanName {
 }
 
 // WusAssistanceInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WusAssistanceInformation {
     pub paging_probability_information: PagingProbabilityInformation,
 }
@@ -15870,7 +15871,7 @@ impl AperCodec for WusAssistanceInformation {
 }
 
 // XnExtTlAs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct XnExtTlAs(pub Vec<XnExtTlaItem>);
 
 impl AperCodec for XnExtTlAs {
@@ -15888,7 +15889,7 @@ impl AperCodec for XnExtTlAs {
 }
 
 // XnExtTlaItem
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct XnExtTlaItem {
     pub i_psec_tla: Option<TransportLayerAddress>,
     pub gtp_tl_as: Option<XnGtpTlAs>,
@@ -15917,7 +15918,7 @@ impl AperCodec for XnExtTlaItem {
 }
 
 // XnGtpTlAs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct XnGtpTlAs(pub Vec<TransportLayerAddress>);
 
 impl AperCodec for XnGtpTlAs {
@@ -15935,7 +15936,7 @@ impl AperCodec for XnGtpTlAs {
 }
 
 // XnTlAs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct XnTlAs(pub Vec<TransportLayerAddress>);
 
 impl AperCodec for XnTlAs {
@@ -15953,7 +15954,7 @@ impl AperCodec for XnTlAs {
 }
 
 // XnTnlConfigurationInfo
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct XnTnlConfigurationInfo {
     pub xn_transport_layer_addresses: XnTlAs,
     pub xn_extended_transport_layer_addresses: Option<XnExtTlAs>,
@@ -15978,7 +15979,7 @@ impl AperCodec for XnTnlConfigurationInfo {
 }
 
 // PniNpnRestricted
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PniNpnRestricted {
     Restricted,
@@ -15997,7 +15998,7 @@ impl AperCodec for PniNpnRestricted {
 }
 
 // QosFlowMappingIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum QosFlowMappingIndication {
     Ul,
@@ -16016,7 +16017,7 @@ impl AperCodec for QosFlowMappingIndication {
 }
 
 // BtRssi
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum BtRssi {
     True,
@@ -16034,7 +16035,7 @@ impl AperCodec for BtRssi {
 }
 
 // CnType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum CnType {
     EpcForbidden,
@@ -16053,7 +16054,7 @@ impl AperCodec for CnType {
 }
 
 // DapsIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum DapsIndicator {
     DapsHoRequired,
@@ -16071,7 +16072,7 @@ impl AperCodec for DapsIndicator {
 }
 
 // Dapsresponseindicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Dapsresponseindicator {
     DapsHoAccepted,
@@ -16090,7 +16091,7 @@ impl AperCodec for Dapsresponseindicator {
 }
 
 // OutOfCoverage
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum OutOfCoverage {
     True,
@@ -16108,7 +16109,7 @@ impl AperCodec for OutOfCoverage {
 }
 
 // HandoverReportType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum HandoverReportType {
     HoTooEarly,
@@ -16128,7 +16129,7 @@ impl AperCodec for HandoverReportType {
 }
 
 // EarlyIratho
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum EarlyIratho {
     True,
@@ -16147,7 +16148,7 @@ impl AperCodec for EarlyIratho {
 }
 
 // RatType
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RatType {
     Nr,
@@ -16166,7 +16167,7 @@ impl AperCodec for RatType {
 }
 
 // RatType1
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RatType1 {
     Nr,
@@ -16185,7 +16186,7 @@ impl AperCodec for RatType1 {
 }
 
 // RimRsDetection
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum RimRsDetection {
     RsDetected,
@@ -16204,7 +16205,7 @@ impl AperCodec for RimRsDetection {
 }
 
 // UncompensatedBarometricConfig
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UncompensatedBarometricConfig {
     True,
@@ -16222,7 +16223,7 @@ impl AperCodec for UncompensatedBarometricConfig {
 }
 
 // UeSpeedConfig
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UeSpeedConfig {
     True,
@@ -16240,7 +16241,7 @@ impl AperCodec for UeSpeedConfig {
 }
 
 // UeOrientationConfig
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum UeOrientationConfig {
     True,
@@ -16258,7 +16259,7 @@ impl AperCodec for UeOrientationConfig {
 }
 
 // PeriodicCommunicationIndicator
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum PeriodicCommunicationIndicator {
     Periodically,
@@ -16277,7 +16278,7 @@ impl AperCodec for PeriodicCommunicationIndicator {
 }
 
 // StationaryIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum StationaryIndication {
     Stationary,
@@ -16296,7 +16297,7 @@ impl AperCodec for StationaryIndication {
 }
 
 // TrafficProfile
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum TrafficProfile {
     SinglePacket,
@@ -16316,7 +16317,7 @@ impl AperCodec for TrafficProfile {
 }
 
 // BatteryIndication
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum BatteryIndication {
     BatteryPowered,
@@ -16336,7 +16337,7 @@ impl AperCodec for BatteryIndication {
 }
 
 // WlanRssi
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum WlanRssi {
     True,
@@ -16354,7 +16355,7 @@ impl AperCodec for WlanRssi {
 }
 
 // WlanRtt
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum WlanRtt {
     True,

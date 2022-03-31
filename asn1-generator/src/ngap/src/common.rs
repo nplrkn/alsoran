@@ -3,13 +3,14 @@
 use bitvec::prelude::*;
 pub type BitString = BitVec<Msb0, u8>;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
+#[allow(unused_imports)]
 use num_enum::TryFromPrimitive;
 
 
 
 // Criticality
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum Criticality {
     Reject,
     Ignore,
@@ -29,8 +30,8 @@ impl AperCodec for Criticality {
 
 
 // Presence
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum Presence {
     Optional,
     Conditional,
@@ -50,7 +51,7 @@ impl AperCodec for Presence {
 
 
 // PrivateIeId
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
@@ -73,7 +74,7 @@ impl AperCodec for PrivateIeId {
 
 
 // ProcedureCode
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct ProcedureCode(pub u8);
 
 impl AperCodec for ProcedureCode {
@@ -85,7 +86,7 @@ impl AperCodec for ProcedureCode {
 
 
 // ProtocolExtensionId
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct ProtocolExtensionId(pub u16);
 
 impl AperCodec for ProtocolExtensionId {
@@ -97,7 +98,7 @@ impl AperCodec for ProtocolExtensionId {
 
 
 // ProtocolIeId
-#[derive(Clone)]
+# [derive(Clone, Debug)]
 pub struct ProtocolIeId(pub u16);
 
 impl AperCodec for ProtocolIeId {
@@ -109,8 +110,8 @@ impl AperCodec for ProtocolIeId {
 
 
 // TriggeringMessage
-#[derive(Clone, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,

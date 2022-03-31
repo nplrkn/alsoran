@@ -6,9 +6,11 @@ pub type BitString = BitVec<Msb0, u8>;
 use super::common::*;
 use super::ies::*;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
+#[allow(unused_imports)]
+use num_enum::TryFromPrimitive;
 
 // Reset
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Reset {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -68,7 +70,7 @@ impl AperCodec for Reset {
 }
 
 // ResetType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ResetType {
     F1Interface(ResetAll),
     PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes),
@@ -97,7 +99,7 @@ impl AperCodec for ResetType {
 }
 
 // ResetAll
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ResetAll {
     ResetAll,
@@ -115,8 +117,8 @@ impl AperCodec for ResetAll {
 }
 
 // UeAssociatedLogicalF1ConnectionListRes
-#[derive(Clone)]
-pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItemRes>);
+#[derive(Clone, Debug)]
+pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
 
 impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     type Output = Self;
@@ -126,7 +128,10 @@ impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(UeAssociatedLogicalF1ConnectionItemRes::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
             }
             items
         }))
@@ -134,7 +139,7 @@ impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
 }
 
 // ResetAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ResetAcknowledge {
     pub transaction_id: TransactionId,
     pub ue_associated_logical_f1_connection_list_res_ack:
@@ -192,10 +197,8 @@ impl AperCodec for ResetAcknowledge {
 }
 
 // UeAssociatedLogicalF1ConnectionListResAck
-#[derive(Clone)]
-pub struct UeAssociatedLogicalF1ConnectionListResAck(
-    pub Vec<UeAssociatedLogicalF1ConnectionItemResAck>,
-);
+#[derive(Clone, Debug)]
+pub struct UeAssociatedLogicalF1ConnectionListResAck(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
 
 impl AperCodec for UeAssociatedLogicalF1ConnectionListResAck {
     type Output = Self;
@@ -205,7 +208,10 @@ impl AperCodec for UeAssociatedLogicalF1ConnectionListResAck {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(UeAssociatedLogicalF1ConnectionItemResAck::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
             }
             items
         }))
@@ -213,7 +219,7 @@ impl AperCodec for UeAssociatedLogicalF1ConnectionListResAck {
 }
 
 // ErrorIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ErrorIndication {
     pub transaction_id: TransactionId,
     pub gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
@@ -279,7 +285,7 @@ impl AperCodec for ErrorIndication {
 }
 
 // F1SetupRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct F1SetupRequest {
     pub transaction_id: TransactionId,
     pub gnb_du_id: GnbDuId,
@@ -369,7 +375,7 @@ impl AperCodec for F1SetupRequest {
 }
 
 // GnbDuServedCellsList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuServedCellsList(pub Vec<GnbDuServedCellsItem>);
 
 impl AperCodec for GnbDuServedCellsList {
@@ -379,6 +385,9 @@ impl AperCodec for GnbDuServedCellsList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbDuServedCellsItem::decode(data)?);
             }
             items
@@ -387,7 +396,7 @@ impl AperCodec for GnbDuServedCellsList {
 }
 
 // F1SetupResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct F1SetupResponse {
     pub transaction_id: TransactionId,
     pub gnb_cu_name: Option<GnbCuName>,
@@ -474,7 +483,7 @@ impl AperCodec for F1SetupResponse {
 }
 
 // CellsToBeActivatedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellsToBeActivatedList(pub Vec<CellsToBeActivatedListItem>);
 
 impl AperCodec for CellsToBeActivatedList {
@@ -484,6 +493,9 @@ impl AperCodec for CellsToBeActivatedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(CellsToBeActivatedListItem::decode(data)?);
             }
             items
@@ -492,7 +504,7 @@ impl AperCodec for CellsToBeActivatedList {
 }
 
 // F1SetupFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct F1SetupFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -555,7 +567,7 @@ impl AperCodec for F1SetupFailure {
 }
 
 // GnbDuConfigurationUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuConfigurationUpdate {
     pub transaction_id: TransactionId,
     pub served_cells_to_add_list: Option<ServedCellsToAddList>,
@@ -649,7 +661,7 @@ impl AperCodec for GnbDuConfigurationUpdate {
 }
 
 // ServedCellsToAddList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServedCellsToAddList(pub Vec<ServedCellsToAddItem>);
 
 impl AperCodec for ServedCellsToAddList {
@@ -659,6 +671,9 @@ impl AperCodec for ServedCellsToAddList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(ServedCellsToAddItem::decode(data)?);
             }
             items
@@ -667,7 +682,7 @@ impl AperCodec for ServedCellsToAddList {
 }
 
 // ServedCellsToModifyList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServedCellsToModifyList(pub Vec<ServedCellsToModifyItem>);
 
 impl AperCodec for ServedCellsToModifyList {
@@ -677,6 +692,9 @@ impl AperCodec for ServedCellsToModifyList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(ServedCellsToModifyItem::decode(data)?);
             }
             items
@@ -685,7 +703,7 @@ impl AperCodec for ServedCellsToModifyList {
 }
 
 // ServedCellsToDeleteList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServedCellsToDeleteList(pub Vec<ServedCellsToDeleteItem>);
 
 impl AperCodec for ServedCellsToDeleteList {
@@ -695,6 +713,9 @@ impl AperCodec for ServedCellsToDeleteList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(ServedCellsToDeleteItem::decode(data)?);
             }
             items
@@ -703,7 +724,7 @@ impl AperCodec for ServedCellsToDeleteList {
 }
 
 // CellsStatusList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellsStatusList(pub Vec<CellsStatusItem>);
 
 impl AperCodec for CellsStatusList {
@@ -713,6 +734,9 @@ impl AperCodec for CellsStatusList {
             let length = aper::decode::decode_length_determinent(data, Some(0), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(CellsStatusItem::decode(data)?);
             }
             items
@@ -721,7 +745,7 @@ impl AperCodec for CellsStatusList {
 }
 
 // DedicatedSiDeliveryNeededUeList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DedicatedSiDeliveryNeededUeList(pub Vec<DedicatedSiDeliveryNeededUeItem>);
 
 impl AperCodec for DedicatedSiDeliveryNeededUeList {
@@ -732,6 +756,9 @@ impl AperCodec for DedicatedSiDeliveryNeededUeList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DedicatedSiDeliveryNeededUeItem::decode(data)?);
             }
             items
@@ -740,7 +767,7 @@ impl AperCodec for DedicatedSiDeliveryNeededUeList {
 }
 
 // GnbDuTnlAssociationToRemoveList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuTnlAssociationToRemoveList(pub Vec<GnbDuTnlAssociationToRemoveItem>);
 
 impl AperCodec for GnbDuTnlAssociationToRemoveList {
@@ -750,6 +777,9 @@ impl AperCodec for GnbDuTnlAssociationToRemoveList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbDuTnlAssociationToRemoveItem::decode(data)?);
             }
             items
@@ -758,7 +788,7 @@ impl AperCodec for GnbDuTnlAssociationToRemoveList {
 }
 
 // GnbDuConfigurationUpdateAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuConfigurationUpdateAcknowledge {
     pub transaction_id: TransactionId,
     pub cells_to_be_activated_list: Option<CellsToBeActivatedList>,
@@ -836,7 +866,7 @@ impl AperCodec for GnbDuConfigurationUpdateAcknowledge {
 }
 
 // GnbDuConfigurationUpdateFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuConfigurationUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -899,7 +929,7 @@ impl AperCodec for GnbDuConfigurationUpdateFailure {
 }
 
 // GnbCuConfigurationUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuConfigurationUpdate {
     pub transaction_id: TransactionId,
     pub cells_to_be_activated_list: Option<CellsToBeActivatedList>,
@@ -1014,7 +1044,7 @@ impl AperCodec for GnbCuConfigurationUpdate {
 }
 
 // CellsToBeDeactivatedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellsToBeDeactivatedList(pub Vec<CellsToBeDeactivatedListItem>);
 
 impl AperCodec for CellsToBeDeactivatedList {
@@ -1024,6 +1054,9 @@ impl AperCodec for CellsToBeDeactivatedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(CellsToBeDeactivatedListItem::decode(data)?);
             }
             items
@@ -1032,7 +1065,7 @@ impl AperCodec for CellsToBeDeactivatedList {
 }
 
 // GnbCuTnlAssociationToAddList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuTnlAssociationToAddList(pub Vec<GnbCuTnlAssociationToAddItem>);
 
 impl AperCodec for GnbCuTnlAssociationToAddList {
@@ -1042,6 +1075,9 @@ impl AperCodec for GnbCuTnlAssociationToAddList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbCuTnlAssociationToAddItem::decode(data)?);
             }
             items
@@ -1050,7 +1086,7 @@ impl AperCodec for GnbCuTnlAssociationToAddList {
 }
 
 // GnbCuTnlAssociationToRemoveList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuTnlAssociationToRemoveList(pub Vec<GnbCuTnlAssociationToRemoveItem>);
 
 impl AperCodec for GnbCuTnlAssociationToRemoveList {
@@ -1060,6 +1096,9 @@ impl AperCodec for GnbCuTnlAssociationToRemoveList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbCuTnlAssociationToRemoveItem::decode(data)?);
             }
             items
@@ -1068,7 +1107,7 @@ impl AperCodec for GnbCuTnlAssociationToRemoveList {
 }
 
 // GnbCuTnlAssociationToUpdateList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuTnlAssociationToUpdateList(pub Vec<GnbCuTnlAssociationToUpdateItem>);
 
 impl AperCodec for GnbCuTnlAssociationToUpdateList {
@@ -1078,6 +1117,9 @@ impl AperCodec for GnbCuTnlAssociationToUpdateList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbCuTnlAssociationToUpdateItem::decode(data)?);
             }
             items
@@ -1086,7 +1128,7 @@ impl AperCodec for GnbCuTnlAssociationToUpdateList {
 }
 
 // CellsToBeBarredList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellsToBeBarredList(pub Vec<CellsToBeBarredItem>);
 
 impl AperCodec for CellsToBeBarredList {
@@ -1096,6 +1138,9 @@ impl AperCodec for CellsToBeBarredList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(CellsToBeBarredItem::decode(data)?);
             }
             items
@@ -1104,7 +1149,7 @@ impl AperCodec for CellsToBeBarredList {
 }
 
 // ProtectedEutraResourcesList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ProtectedEutraResourcesList(pub Vec<ProtectedEutraResourcesItem>);
 
 impl AperCodec for ProtectedEutraResourcesList {
@@ -1114,6 +1159,9 @@ impl AperCodec for ProtectedEutraResourcesList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(ProtectedEutraResourcesItem::decode(data)?);
             }
             items
@@ -1122,7 +1170,7 @@ impl AperCodec for ProtectedEutraResourcesList {
 }
 
 // NeighbourCellInformationList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NeighbourCellInformationList(pub Vec<NeighbourCellInformationItem>);
 
 impl AperCodec for NeighbourCellInformationList {
@@ -1132,6 +1180,9 @@ impl AperCodec for NeighbourCellInformationList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(NeighbourCellInformationItem::decode(data)?);
             }
             items
@@ -1140,7 +1191,7 @@ impl AperCodec for NeighbourCellInformationList {
 }
 
 // GnbCuConfigurationUpdateAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuConfigurationUpdateAcknowledge {
     pub transaction_id: TransactionId,
     pub cells_failed_to_be_activated_list: Option<CellsFailedToBeActivatedList>,
@@ -1225,7 +1276,7 @@ impl AperCodec for GnbCuConfigurationUpdateAcknowledge {
 }
 
 // CellsFailedToBeActivatedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellsFailedToBeActivatedList(pub Vec<CellsFailedToBeActivatedListItem>);
 
 impl AperCodec for CellsFailedToBeActivatedList {
@@ -1235,6 +1286,9 @@ impl AperCodec for CellsFailedToBeActivatedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(CellsFailedToBeActivatedListItem::decode(data)?);
             }
             items
@@ -1243,7 +1297,7 @@ impl AperCodec for CellsFailedToBeActivatedList {
 }
 
 // GnbCuTnlAssociationSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuTnlAssociationSetupList(pub Vec<GnbCuTnlAssociationSetupItem>);
 
 impl AperCodec for GnbCuTnlAssociationSetupList {
@@ -1253,6 +1307,9 @@ impl AperCodec for GnbCuTnlAssociationSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbCuTnlAssociationSetupItem::decode(data)?);
             }
             items
@@ -1261,7 +1318,7 @@ impl AperCodec for GnbCuTnlAssociationSetupList {
 }
 
 // GnbCuTnlAssociationFailedToSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuTnlAssociationFailedToSetupList(pub Vec<GnbCuTnlAssociationFailedToSetupItem>);
 
 impl AperCodec for GnbCuTnlAssociationFailedToSetupList {
@@ -1271,6 +1328,9 @@ impl AperCodec for GnbCuTnlAssociationFailedToSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(GnbCuTnlAssociationFailedToSetupItem::decode(data)?);
             }
             items
@@ -1279,7 +1339,7 @@ impl AperCodec for GnbCuTnlAssociationFailedToSetupList {
 }
 
 // GnbCuConfigurationUpdateFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbCuConfigurationUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -1342,7 +1402,7 @@ impl AperCodec for GnbCuConfigurationUpdateFailure {
 }
 
 // GnbDuResourceCoordinationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuResourceCoordinationRequest {
     pub transaction_id: TransactionId,
     pub request_type: RequestType,
@@ -1416,7 +1476,7 @@ impl AperCodec for GnbDuResourceCoordinationRequest {
 }
 
 // GnbDuResourceCoordinationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuResourceCoordinationResponse {
     pub transaction_id: TransactionId,
     pub eutra_nr_cell_resource_coordination_req_ack_container:
@@ -1475,7 +1535,7 @@ impl AperCodec for GnbDuResourceCoordinationResponse {
 }
 
 // UeContextSetupRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSetupRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
@@ -1759,7 +1819,7 @@ impl AperCodec for UeContextSetupRequest {
 }
 
 // CandidateSpCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CandidateSpCellList(pub Vec<CandidateSpCellItem>);
 
 impl AperCodec for CandidateSpCellList {
@@ -1769,6 +1829,9 @@ impl AperCodec for CandidateSpCellList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(CandidateSpCellItem::decode(data)?);
             }
             items
@@ -1777,7 +1840,7 @@ impl AperCodec for CandidateSpCellList {
 }
 
 // SCellToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SCellToBeSetupList(pub Vec<SCellToBeSetupItem>);
 
 impl AperCodec for SCellToBeSetupList {
@@ -1787,6 +1850,9 @@ impl AperCodec for SCellToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SCellToBeSetupItem::decode(data)?);
             }
             items
@@ -1795,7 +1861,7 @@ impl AperCodec for SCellToBeSetupList {
 }
 
 // SrBsToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsToBeSetupList(pub Vec<SrBsToBeSetupItem>);
 
 impl AperCodec for SrBsToBeSetupList {
@@ -1805,6 +1871,9 @@ impl AperCodec for SrBsToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsToBeSetupItem::decode(data)?);
             }
             items
@@ -1813,7 +1882,7 @@ impl AperCodec for SrBsToBeSetupList {
 }
 
 // DrBsToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsToBeSetupList(pub Vec<DrBsToBeSetupItem>);
 
 impl AperCodec for DrBsToBeSetupList {
@@ -1823,6 +1892,9 @@ impl AperCodec for DrBsToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsToBeSetupItem::decode(data)?);
             }
             items
@@ -1831,7 +1903,7 @@ impl AperCodec for DrBsToBeSetupList {
 }
 
 // BhChannelsToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsToBeSetupList(pub Vec<BhChannelsToBeSetupItem>);
 
 impl AperCodec for BhChannelsToBeSetupList {
@@ -1842,6 +1914,9 @@ impl AperCodec for BhChannelsToBeSetupList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsToBeSetupItem::decode(data)?);
             }
             items
@@ -1850,7 +1925,7 @@ impl AperCodec for BhChannelsToBeSetupList {
 }
 
 // SldrBsToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsToBeSetupList(pub Vec<SldrBsToBeSetupItem>);
 
 impl AperCodec for SldrBsToBeSetupList {
@@ -1860,6 +1935,9 @@ impl AperCodec for SldrBsToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsToBeSetupItem::decode(data)?);
             }
             items
@@ -1868,7 +1946,7 @@ impl AperCodec for SldrBsToBeSetupList {
 }
 
 // UeContextSetupResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSetupResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -2024,7 +2102,7 @@ impl AperCodec for UeContextSetupResponse {
 }
 
 // DrBsSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsSetupList(pub Vec<DrBsSetupItem>);
 
 impl AperCodec for DrBsSetupList {
@@ -2034,6 +2112,9 @@ impl AperCodec for DrBsSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsSetupItem::decode(data)?);
             }
             items
@@ -2042,7 +2123,7 @@ impl AperCodec for DrBsSetupList {
 }
 
 // SrBsFailedToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsFailedToBeSetupList(pub Vec<SrBsFailedToBeSetupItem>);
 
 impl AperCodec for SrBsFailedToBeSetupList {
@@ -2052,6 +2133,9 @@ impl AperCodec for SrBsFailedToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsFailedToBeSetupItem::decode(data)?);
             }
             items
@@ -2060,7 +2144,7 @@ impl AperCodec for SrBsFailedToBeSetupList {
 }
 
 // DrBsFailedToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsFailedToBeSetupList(pub Vec<DrBsFailedToBeSetupItem>);
 
 impl AperCodec for DrBsFailedToBeSetupList {
@@ -2070,6 +2154,9 @@ impl AperCodec for DrBsFailedToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsFailedToBeSetupItem::decode(data)?);
             }
             items
@@ -2078,7 +2165,7 @@ impl AperCodec for DrBsFailedToBeSetupList {
 }
 
 // SCellFailedtoSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SCellFailedtoSetupList(pub Vec<SCellFailedtoSetupItem>);
 
 impl AperCodec for SCellFailedtoSetupList {
@@ -2088,6 +2175,9 @@ impl AperCodec for SCellFailedtoSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SCellFailedtoSetupItem::decode(data)?);
             }
             items
@@ -2096,7 +2186,7 @@ impl AperCodec for SCellFailedtoSetupList {
 }
 
 // SrBsSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsSetupList(pub Vec<SrBsSetupItem>);
 
 impl AperCodec for SrBsSetupList {
@@ -2106,6 +2196,9 @@ impl AperCodec for SrBsSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsSetupItem::decode(data)?);
             }
             items
@@ -2114,7 +2207,7 @@ impl AperCodec for SrBsSetupList {
 }
 
 // BhChannelsSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsSetupList(pub Vec<BhChannelsSetupItem>);
 
 impl AperCodec for BhChannelsSetupList {
@@ -2125,6 +2218,9 @@ impl AperCodec for BhChannelsSetupList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsSetupItem::decode(data)?);
             }
             items
@@ -2133,7 +2229,7 @@ impl AperCodec for BhChannelsSetupList {
 }
 
 // BhChannelsFailedToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsFailedToBeSetupList(pub Vec<BhChannelsFailedToBeSetupItem>);
 
 impl AperCodec for BhChannelsFailedToBeSetupList {
@@ -2144,6 +2240,9 @@ impl AperCodec for BhChannelsFailedToBeSetupList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsFailedToBeSetupItem::decode(data)?);
             }
             items
@@ -2152,7 +2251,7 @@ impl AperCodec for BhChannelsFailedToBeSetupList {
 }
 
 // SldrBsSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsSetupList(pub Vec<SldrBsSetupItem>);
 
 impl AperCodec for SldrBsSetupList {
@@ -2162,6 +2261,9 @@ impl AperCodec for SldrBsSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsSetupItem::decode(data)?);
             }
             items
@@ -2170,7 +2272,7 @@ impl AperCodec for SldrBsSetupList {
 }
 
 // SldrBsFailedToBeSetupList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsFailedToBeSetupList(pub Vec<SldrBsFailedToBeSetupItem>);
 
 impl AperCodec for SldrBsFailedToBeSetupList {
@@ -2180,6 +2282,9 @@ impl AperCodec for SldrBsFailedToBeSetupList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsFailedToBeSetupItem::decode(data)?);
             }
             items
@@ -2188,7 +2293,7 @@ impl AperCodec for SldrBsFailedToBeSetupList {
 }
 
 // UeContextSetupFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSetupFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
@@ -2263,7 +2368,7 @@ impl AperCodec for UeContextSetupFailure {
 }
 
 // PotentialSpCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PotentialSpCellList(pub Vec<PotentialSpCellItem>);
 
 impl AperCodec for PotentialSpCellList {
@@ -2273,6 +2378,9 @@ impl AperCodec for PotentialSpCellList {
             let length = aper::decode::decode_length_determinent(data, Some(0), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(PotentialSpCellItem::decode(data)?);
             }
             items
@@ -2281,7 +2389,7 @@ impl AperCodec for PotentialSpCellList {
 }
 
 // UeContextReleaseRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextReleaseRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -2347,7 +2455,7 @@ impl AperCodec for UeContextReleaseRequest {
 }
 
 // UeContextReleaseCommand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextReleaseCommand {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -2443,7 +2551,7 @@ impl AperCodec for UeContextReleaseCommand {
 }
 
 // UeContextReleaseComplete
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextReleaseComplete {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -2500,7 +2608,7 @@ impl AperCodec for UeContextReleaseComplete {
 }
 
 // UeContextModificationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -2849,7 +2957,7 @@ impl AperCodec for UeContextModificationRequest {
 }
 
 // SCellToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SCellToBeSetupModList(pub Vec<SCellToBeSetupModItem>);
 
 impl AperCodec for SCellToBeSetupModList {
@@ -2859,6 +2967,9 @@ impl AperCodec for SCellToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SCellToBeSetupModItem::decode(data)?);
             }
             items
@@ -2867,7 +2978,7 @@ impl AperCodec for SCellToBeSetupModList {
 }
 
 // SCellToBeRemovedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SCellToBeRemovedList(pub Vec<SCellToBeRemovedItem>);
 
 impl AperCodec for SCellToBeRemovedList {
@@ -2877,6 +2988,9 @@ impl AperCodec for SCellToBeRemovedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SCellToBeRemovedItem::decode(data)?);
             }
             items
@@ -2885,7 +2999,7 @@ impl AperCodec for SCellToBeRemovedList {
 }
 
 // SrBsToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsToBeSetupModList(pub Vec<SrBsToBeSetupModItem>);
 
 impl AperCodec for SrBsToBeSetupModList {
@@ -2895,6 +3009,9 @@ impl AperCodec for SrBsToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsToBeSetupModItem::decode(data)?);
             }
             items
@@ -2903,7 +3020,7 @@ impl AperCodec for SrBsToBeSetupModList {
 }
 
 // DrBsToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsToBeSetupModList(pub Vec<DrBsToBeSetupModItem>);
 
 impl AperCodec for DrBsToBeSetupModList {
@@ -2913,6 +3030,9 @@ impl AperCodec for DrBsToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsToBeSetupModItem::decode(data)?);
             }
             items
@@ -2921,7 +3041,7 @@ impl AperCodec for DrBsToBeSetupModList {
 }
 
 // BhChannelsToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsToBeSetupModList(pub Vec<BhChannelsToBeSetupModItem>);
 
 impl AperCodec for BhChannelsToBeSetupModList {
@@ -2932,6 +3052,9 @@ impl AperCodec for BhChannelsToBeSetupModList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsToBeSetupModItem::decode(data)?);
             }
             items
@@ -2940,7 +3063,7 @@ impl AperCodec for BhChannelsToBeSetupModList {
 }
 
 // DrBsToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsToBeModifiedList(pub Vec<DrBsToBeModifiedItem>);
 
 impl AperCodec for DrBsToBeModifiedList {
@@ -2950,6 +3073,9 @@ impl AperCodec for DrBsToBeModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsToBeModifiedItem::decode(data)?);
             }
             items
@@ -2958,7 +3084,7 @@ impl AperCodec for DrBsToBeModifiedList {
 }
 
 // BhChannelsToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsToBeModifiedList(pub Vec<BhChannelsToBeModifiedItem>);
 
 impl AperCodec for BhChannelsToBeModifiedList {
@@ -2969,6 +3095,9 @@ impl AperCodec for BhChannelsToBeModifiedList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsToBeModifiedItem::decode(data)?);
             }
             items
@@ -2977,7 +3106,7 @@ impl AperCodec for BhChannelsToBeModifiedList {
 }
 
 // SrBsToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsToBeReleasedList(pub Vec<SrBsToBeReleasedItem>);
 
 impl AperCodec for SrBsToBeReleasedList {
@@ -2987,6 +3116,9 @@ impl AperCodec for SrBsToBeReleasedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsToBeReleasedItem::decode(data)?);
             }
             items
@@ -2995,7 +3127,7 @@ impl AperCodec for SrBsToBeReleasedList {
 }
 
 // DrBsToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsToBeReleasedList(pub Vec<DrBsToBeReleasedItem>);
 
 impl AperCodec for DrBsToBeReleasedList {
@@ -3005,6 +3137,9 @@ impl AperCodec for DrBsToBeReleasedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsToBeReleasedItem::decode(data)?);
             }
             items
@@ -3013,7 +3148,7 @@ impl AperCodec for DrBsToBeReleasedList {
 }
 
 // BhChannelsToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsToBeReleasedList(pub Vec<BhChannelsToBeReleasedItem>);
 
 impl AperCodec for BhChannelsToBeReleasedList {
@@ -3024,6 +3159,9 @@ impl AperCodec for BhChannelsToBeReleasedList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsToBeReleasedItem::decode(data)?);
             }
             items
@@ -3032,7 +3170,7 @@ impl AperCodec for BhChannelsToBeReleasedList {
 }
 
 // SldrBsToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsToBeSetupModList(pub Vec<SldrBsToBeSetupModItem>);
 
 impl AperCodec for SldrBsToBeSetupModList {
@@ -3042,6 +3180,9 @@ impl AperCodec for SldrBsToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsToBeSetupModItem::decode(data)?);
             }
             items
@@ -3050,7 +3191,7 @@ impl AperCodec for SldrBsToBeSetupModList {
 }
 
 // SldrBsToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsToBeModifiedList(pub Vec<SldrBsToBeModifiedItem>);
 
 impl AperCodec for SldrBsToBeModifiedList {
@@ -3060,6 +3201,9 @@ impl AperCodec for SldrBsToBeModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsToBeModifiedItem::decode(data)?);
             }
             items
@@ -3068,7 +3212,7 @@ impl AperCodec for SldrBsToBeModifiedList {
 }
 
 // SldrBsToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsToBeReleasedList(pub Vec<SldrBsToBeReleasedItem>);
 
 impl AperCodec for SldrBsToBeReleasedList {
@@ -3078,6 +3222,9 @@ impl AperCodec for SldrBsToBeReleasedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsToBeReleasedItem::decode(data)?);
             }
             items
@@ -3086,7 +3233,7 @@ impl AperCodec for SldrBsToBeReleasedList {
 }
 
 // UeContextModificationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3294,7 +3441,7 @@ impl AperCodec for UeContextModificationResponse {
 }
 
 // DrBsSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsSetupModList(pub Vec<DrBsSetupModItem>);
 
 impl AperCodec for DrBsSetupModList {
@@ -3304,6 +3451,9 @@ impl AperCodec for DrBsSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsSetupModItem::decode(data)?);
             }
             items
@@ -3312,7 +3462,7 @@ impl AperCodec for DrBsSetupModList {
 }
 
 // DrBsModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsModifiedList(pub Vec<DrBsModifiedItem>);
 
 impl AperCodec for DrBsModifiedList {
@@ -3322,6 +3472,9 @@ impl AperCodec for DrBsModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsModifiedItem::decode(data)?);
             }
             items
@@ -3330,7 +3483,7 @@ impl AperCodec for DrBsModifiedList {
 }
 
 // SrBsSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsSetupModList(pub Vec<SrBsSetupModItem>);
 
 impl AperCodec for SrBsSetupModList {
@@ -3340,6 +3493,9 @@ impl AperCodec for SrBsSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsSetupModItem::decode(data)?);
             }
             items
@@ -3348,7 +3504,7 @@ impl AperCodec for SrBsSetupModList {
 }
 
 // SrBsModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsModifiedList(pub Vec<SrBsModifiedItem>);
 
 impl AperCodec for SrBsModifiedList {
@@ -3358,6 +3514,9 @@ impl AperCodec for SrBsModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsModifiedItem::decode(data)?);
             }
             items
@@ -3366,7 +3525,7 @@ impl AperCodec for SrBsModifiedList {
 }
 
 // DrBsFailedToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsFailedToBeModifiedList(pub Vec<DrBsFailedToBeModifiedItem>);
 
 impl AperCodec for DrBsFailedToBeModifiedList {
@@ -3376,6 +3535,9 @@ impl AperCodec for DrBsFailedToBeModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsFailedToBeModifiedItem::decode(data)?);
             }
             items
@@ -3384,7 +3546,7 @@ impl AperCodec for DrBsFailedToBeModifiedList {
 }
 
 // SrBsFailedToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsFailedToBeSetupModList(pub Vec<SrBsFailedToBeSetupModItem>);
 
 impl AperCodec for SrBsFailedToBeSetupModList {
@@ -3394,6 +3556,9 @@ impl AperCodec for SrBsFailedToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsFailedToBeSetupModItem::decode(data)?);
             }
             items
@@ -3402,7 +3567,7 @@ impl AperCodec for SrBsFailedToBeSetupModList {
 }
 
 // DrBsFailedToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsFailedToBeSetupModList(pub Vec<DrBsFailedToBeSetupModItem>);
 
 impl AperCodec for DrBsFailedToBeSetupModList {
@@ -3412,6 +3577,9 @@ impl AperCodec for DrBsFailedToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsFailedToBeSetupModItem::decode(data)?);
             }
             items
@@ -3420,7 +3588,7 @@ impl AperCodec for DrBsFailedToBeSetupModList {
 }
 
 // SCellFailedtoSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SCellFailedtoSetupModList(pub Vec<SCellFailedtoSetupModItem>);
 
 impl AperCodec for SCellFailedtoSetupModList {
@@ -3430,6 +3598,9 @@ impl AperCodec for SCellFailedtoSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SCellFailedtoSetupModItem::decode(data)?);
             }
             items
@@ -3438,7 +3609,7 @@ impl AperCodec for SCellFailedtoSetupModList {
 }
 
 // BhChannelsSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsSetupModList(pub Vec<BhChannelsSetupModItem>);
 
 impl AperCodec for BhChannelsSetupModList {
@@ -3449,6 +3620,9 @@ impl AperCodec for BhChannelsSetupModList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsSetupModItem::decode(data)?);
             }
             items
@@ -3457,7 +3631,7 @@ impl AperCodec for BhChannelsSetupModList {
 }
 
 // BhChannelsModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsModifiedList(pub Vec<BhChannelsModifiedItem>);
 
 impl AperCodec for BhChannelsModifiedList {
@@ -3468,6 +3642,9 @@ impl AperCodec for BhChannelsModifiedList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsModifiedItem::decode(data)?);
             }
             items
@@ -3476,7 +3653,7 @@ impl AperCodec for BhChannelsModifiedList {
 }
 
 // BhChannelsFailedToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsFailedToBeModifiedList(pub Vec<BhChannelsFailedToBeModifiedItem>);
 
 impl AperCodec for BhChannelsFailedToBeModifiedList {
@@ -3487,6 +3664,9 @@ impl AperCodec for BhChannelsFailedToBeModifiedList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsFailedToBeModifiedItem::decode(data)?);
             }
             items
@@ -3495,7 +3675,7 @@ impl AperCodec for BhChannelsFailedToBeModifiedList {
 }
 
 // BhChannelsFailedToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsFailedToBeSetupModList(pub Vec<BhChannelsFailedToBeSetupModItem>);
 
 impl AperCodec for BhChannelsFailedToBeSetupModList {
@@ -3506,6 +3686,9 @@ impl AperCodec for BhChannelsFailedToBeSetupModList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsFailedToBeSetupModItem::decode(data)?);
             }
             items
@@ -3514,7 +3697,7 @@ impl AperCodec for BhChannelsFailedToBeSetupModList {
 }
 
 // AssociatedSCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AssociatedSCellList(pub Vec<AssociatedSCellItem>);
 
 impl AperCodec for AssociatedSCellList {
@@ -3524,6 +3707,9 @@ impl AperCodec for AssociatedSCellList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(AssociatedSCellItem::decode(data)?);
             }
             items
@@ -3532,7 +3718,7 @@ impl AperCodec for AssociatedSCellList {
 }
 
 // SldrBsSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsSetupModList(pub Vec<SldrBsSetupModItem>);
 
 impl AperCodec for SldrBsSetupModList {
@@ -3542,6 +3728,9 @@ impl AperCodec for SldrBsSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsSetupModItem::decode(data)?);
             }
             items
@@ -3550,7 +3739,7 @@ impl AperCodec for SldrBsSetupModList {
 }
 
 // SldrBsModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsModifiedList(pub Vec<SldrBsModifiedItem>);
 
 impl AperCodec for SldrBsModifiedList {
@@ -3560,6 +3749,9 @@ impl AperCodec for SldrBsModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsModifiedItem::decode(data)?);
             }
             items
@@ -3568,7 +3760,7 @@ impl AperCodec for SldrBsModifiedList {
 }
 
 // SldrBsFailedToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsFailedToBeModifiedList(pub Vec<SldrBsFailedToBeModifiedItem>);
 
 impl AperCodec for SldrBsFailedToBeModifiedList {
@@ -3578,6 +3770,9 @@ impl AperCodec for SldrBsFailedToBeModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsFailedToBeModifiedItem::decode(data)?);
             }
             items
@@ -3586,7 +3781,7 @@ impl AperCodec for SldrBsFailedToBeModifiedList {
 }
 
 // SldrBsFailedToBeSetupModList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsFailedToBeSetupModList(pub Vec<SldrBsFailedToBeSetupModItem>);
 
 impl AperCodec for SldrBsFailedToBeSetupModList {
@@ -3596,6 +3791,9 @@ impl AperCodec for SldrBsFailedToBeSetupModList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsFailedToBeSetupModItem::decode(data)?);
             }
             items
@@ -3604,7 +3802,7 @@ impl AperCodec for SldrBsFailedToBeSetupModList {
 }
 
 // UeContextModificationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3676,7 +3874,7 @@ impl AperCodec for UeContextModificationFailure {
 }
 
 // UeContextModificationRequired
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationRequired {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -3801,7 +3999,7 @@ impl AperCodec for UeContextModificationRequired {
 }
 
 // DrBsRequiredToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsRequiredToBeModifiedList(pub Vec<DrBsRequiredToBeModifiedItem>);
 
 impl AperCodec for DrBsRequiredToBeModifiedList {
@@ -3811,6 +4009,9 @@ impl AperCodec for DrBsRequiredToBeModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsRequiredToBeModifiedItem::decode(data)?);
             }
             items
@@ -3819,7 +4020,7 @@ impl AperCodec for DrBsRequiredToBeModifiedList {
 }
 
 // DrBsRequiredToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsRequiredToBeReleasedList(pub Vec<DrBsRequiredToBeReleasedItem>);
 
 impl AperCodec for DrBsRequiredToBeReleasedList {
@@ -3829,6 +4030,9 @@ impl AperCodec for DrBsRequiredToBeReleasedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsRequiredToBeReleasedItem::decode(data)?);
             }
             items
@@ -3837,7 +4041,7 @@ impl AperCodec for DrBsRequiredToBeReleasedList {
 }
 
 // SrBsRequiredToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SrBsRequiredToBeReleasedList(pub Vec<SrBsRequiredToBeReleasedItem>);
 
 impl AperCodec for SrBsRequiredToBeReleasedList {
@@ -3847,6 +4051,9 @@ impl AperCodec for SrBsRequiredToBeReleasedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SrBsRequiredToBeReleasedItem::decode(data)?);
             }
             items
@@ -3855,7 +4062,7 @@ impl AperCodec for SrBsRequiredToBeReleasedList {
 }
 
 // BhChannelsRequiredToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhChannelsRequiredToBeReleasedList(pub Vec<BhChannelsRequiredToBeReleasedItem>);
 
 impl AperCodec for BhChannelsRequiredToBeReleasedList {
@@ -3866,6 +4073,9 @@ impl AperCodec for BhChannelsRequiredToBeReleasedList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65536), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhChannelsRequiredToBeReleasedItem::decode(data)?);
             }
             items
@@ -3874,7 +4084,7 @@ impl AperCodec for BhChannelsRequiredToBeReleasedList {
 }
 
 // SldrBsRequiredToBeModifiedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsRequiredToBeModifiedList(pub Vec<SldrBsRequiredToBeModifiedItem>);
 
 impl AperCodec for SldrBsRequiredToBeModifiedList {
@@ -3884,6 +4094,9 @@ impl AperCodec for SldrBsRequiredToBeModifiedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsRequiredToBeModifiedItem::decode(data)?);
             }
             items
@@ -3892,7 +4105,7 @@ impl AperCodec for SldrBsRequiredToBeModifiedList {
 }
 
 // SldrBsRequiredToBeReleasedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsRequiredToBeReleasedList(pub Vec<SldrBsRequiredToBeReleasedItem>);
 
 impl AperCodec for SldrBsRequiredToBeReleasedList {
@@ -3902,6 +4115,9 @@ impl AperCodec for SldrBsRequiredToBeReleasedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsRequiredToBeReleasedItem::decode(data)?);
             }
             items
@@ -3910,7 +4126,7 @@ impl AperCodec for SldrBsRequiredToBeReleasedList {
 }
 
 // UeContextModificationConfirm
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationConfirm {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -4009,7 +4225,7 @@ impl AperCodec for UeContextModificationConfirm {
 }
 
 // DrBsModifiedConfList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrBsModifiedConfList(pub Vec<DrBsModifiedConfItem>);
 
 impl AperCodec for DrBsModifiedConfList {
@@ -4019,6 +4235,9 @@ impl AperCodec for DrBsModifiedConfList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrBsModifiedConfItem::decode(data)?);
             }
             items
@@ -4027,7 +4246,7 @@ impl AperCodec for DrBsModifiedConfList {
 }
 
 // SldrBsModifiedConfList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SldrBsModifiedConfList(pub Vec<SldrBsModifiedConfItem>);
 
 impl AperCodec for SldrBsModifiedConfList {
@@ -4037,6 +4256,9 @@ impl AperCodec for SldrBsModifiedConfList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(SldrBsModifiedConfItem::decode(data)?);
             }
             items
@@ -4045,7 +4267,7 @@ impl AperCodec for SldrBsModifiedConfList {
 }
 
 // UeContextModificationRefuse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationRefuse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -4111,7 +4333,7 @@ impl AperCodec for UeContextModificationRefuse {
 }
 
 // WriteReplaceWarningRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WriteReplaceWarningRequest {
     pub transaction_id: TransactionId,
     pub pws_system_information: PwsSystemInformation,
@@ -4186,8 +4408,8 @@ impl AperCodec for WriteReplaceWarningRequest {
 }
 
 // CellsToBeBroadcastList
-#[derive(Clone)]
-pub struct CellsToBeBroadcastList(pub Vec<CellsToBeBroadcastListItem>);
+#[derive(Clone, Debug)]
+pub struct CellsToBeBroadcastList(pub Vec<CellsToBeBroadcastItem>);
 
 impl AperCodec for CellsToBeBroadcastList {
     type Output = Self;
@@ -4196,7 +4418,10 @@ impl AperCodec for CellsToBeBroadcastList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(CellsToBeBroadcastListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(CellsToBeBroadcastItem::decode(data)?);
             }
             items
         }))
@@ -4204,7 +4429,7 @@ impl AperCodec for CellsToBeBroadcastList {
 }
 
 // WriteReplaceWarningResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WriteReplaceWarningResponse {
     pub transaction_id: TransactionId,
     pub cells_broadcast_completed_list: Option<CellsBroadcastCompletedList>,
@@ -4267,8 +4492,8 @@ impl AperCodec for WriteReplaceWarningResponse {
 }
 
 // CellsBroadcastCompletedList
-#[derive(Clone)]
-pub struct CellsBroadcastCompletedList(pub Vec<CellsBroadcastCompletedListItem>);
+#[derive(Clone, Debug)]
+pub struct CellsBroadcastCompletedList(pub Vec<CellsBroadcastCompletedItem>);
 
 impl AperCodec for CellsBroadcastCompletedList {
     type Output = Self;
@@ -4277,7 +4502,10 @@ impl AperCodec for CellsBroadcastCompletedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(CellsBroadcastCompletedListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(CellsBroadcastCompletedItem::decode(data)?);
             }
             items
         }))
@@ -4285,7 +4513,7 @@ impl AperCodec for CellsBroadcastCompletedList {
 }
 
 // PwsCancelRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsCancelRequest {
     pub transaction_id: TransactionId,
     pub numberof_broadcast_request: NumberofBroadcastRequest,
@@ -4357,8 +4585,8 @@ impl AperCodec for PwsCancelRequest {
 }
 
 // BroadcastToBeCancelledList
-#[derive(Clone)]
-pub struct BroadcastToBeCancelledList(pub Vec<BroadcastToBeCancelledListItem>);
+#[derive(Clone, Debug)]
+pub struct BroadcastToBeCancelledList(pub Vec<BroadcastToBeCancelledItem>);
 
 impl AperCodec for BroadcastToBeCancelledList {
     type Output = Self;
@@ -4367,7 +4595,10 @@ impl AperCodec for BroadcastToBeCancelledList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(BroadcastToBeCancelledListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(BroadcastToBeCancelledItem::decode(data)?);
             }
             items
         }))
@@ -4375,7 +4606,7 @@ impl AperCodec for BroadcastToBeCancelledList {
 }
 
 // PwsCancelResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsCancelResponse {
     pub transaction_id: TransactionId,
     pub cells_broadcast_cancelled_list: Option<CellsBroadcastCancelledList>,
@@ -4430,8 +4661,8 @@ impl AperCodec for PwsCancelResponse {
 }
 
 // CellsBroadcastCancelledList
-#[derive(Clone)]
-pub struct CellsBroadcastCancelledList(pub Vec<CellsBroadcastCancelledListItem>);
+#[derive(Clone, Debug)]
+pub struct CellsBroadcastCancelledList(pub Vec<CellsBroadcastCancelledItem>);
 
 impl AperCodec for CellsBroadcastCancelledList {
     type Output = Self;
@@ -4440,7 +4671,10 @@ impl AperCodec for CellsBroadcastCancelledList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(CellsBroadcastCancelledListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(CellsBroadcastCancelledItem::decode(data)?);
             }
             items
         }))
@@ -4448,7 +4682,7 @@ impl AperCodec for CellsBroadcastCancelledList {
 }
 
 // UeInactivityNotification
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeInactivityNotification {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -4508,7 +4742,7 @@ impl AperCodec for UeInactivityNotification {
 }
 
 // DrbActivityList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbActivityList(pub Vec<DrbActivityItem>);
 
 impl AperCodec for DrbActivityList {
@@ -4518,6 +4752,9 @@ impl AperCodec for DrbActivityList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrbActivityItem::decode(data)?);
             }
             items
@@ -4526,7 +4763,7 @@ impl AperCodec for DrbActivityList {
 }
 
 // InitialUlrrcMessageTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InitialUlrrcMessageTransfer {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub nrcgi: Nrcgi,
@@ -4629,7 +4866,7 @@ impl AperCodec for InitialUlrrcMessageTransfer {
 }
 
 // DlrrcMessageTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DlrrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -4754,7 +4991,7 @@ impl AperCodec for DlrrcMessageTransfer {
 }
 
 // UlrrcMessageTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlrrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -4837,7 +5074,7 @@ impl AperCodec for UlrrcMessageTransfer {
 // PrivateMessage - omitted
 
 // SystemInformationDeliveryCommand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SystemInformationDeliveryCommand {
     pub transaction_id: TransactionId,
     pub nrcgi: Nrcgi,
@@ -4906,7 +5143,7 @@ impl AperCodec for SystemInformationDeliveryCommand {
 }
 
 // Paging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Paging {
     pub ue_identity_index_value: UeIdentityIndexValue,
     pub paging_identity: PagingIdentity,
@@ -4984,7 +5221,7 @@ impl AperCodec for Paging {
 }
 
 // PagingCellList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PagingCellList(pub Vec<PagingCellItem>);
 
 impl AperCodec for PagingCellList {
@@ -4994,6 +5231,9 @@ impl AperCodec for PagingCellList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(PagingCellItem::decode(data)?);
             }
             items
@@ -5002,7 +5242,7 @@ impl AperCodec for PagingCellList {
 }
 
 // Notify
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Notify {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5062,7 +5302,7 @@ impl AperCodec for Notify {
 }
 
 // DrbNotifyList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DrbNotifyList(pub Vec<DrbNotifyItem>);
 
 impl AperCodec for DrbNotifyList {
@@ -5072,6 +5312,9 @@ impl AperCodec for DrbNotifyList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DrbNotifyItem::decode(data)?);
             }
             items
@@ -5080,7 +5323,7 @@ impl AperCodec for DrbNotifyList {
 }
 
 // NetworkAccessRateReduction
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NetworkAccessRateReduction {
     pub transaction_id: TransactionId,
     pub uac_assistance_info: UacAssistanceInfo,
@@ -5131,7 +5374,7 @@ impl AperCodec for NetworkAccessRateReduction {
 }
 
 // PwsRestartIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsRestartIndication {
     pub transaction_id: TransactionId,
     pub nr_cgi_list_for_restart_list: NrCgiListForRestartList,
@@ -5182,8 +5425,8 @@ impl AperCodec for PwsRestartIndication {
 }
 
 // NrCgiListForRestartList
-#[derive(Clone)]
-pub struct NrCgiListForRestartList(pub Vec<NrCgiListForRestartListItem>);
+#[derive(Clone, Debug)]
+pub struct NrCgiListForRestartList(pub Vec<NrCgiListForRestartItem>);
 
 impl AperCodec for NrCgiListForRestartList {
     type Output = Self;
@@ -5192,7 +5435,10 @@ impl AperCodec for NrCgiListForRestartList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(NrCgiListForRestartListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(NrCgiListForRestartItem::decode(data)?);
             }
             items
         }))
@@ -5200,7 +5446,7 @@ impl AperCodec for NrCgiListForRestartList {
 }
 
 // PwsFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsFailureIndication {
     pub transaction_id: TransactionId,
     pub pws_failed_nr_cgi_list: Option<PwsFailedNrCgiList>,
@@ -5248,8 +5494,8 @@ impl AperCodec for PwsFailureIndication {
 }
 
 // PwsFailedNrCgiList
-#[derive(Clone)]
-pub struct PwsFailedNrCgiList(pub Vec<PwsFailedNrCgiListItem>);
+#[derive(Clone, Debug)]
+pub struct PwsFailedNrCgiList(pub Vec<PwsFailedNrCgiItem>);
 
 impl AperCodec for PwsFailedNrCgiList {
     type Output = Self;
@@ -5258,7 +5504,10 @@ impl AperCodec for PwsFailedNrCgiList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(PwsFailedNrCgiListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(PwsFailedNrCgiItem::decode(data)?);
             }
             items
         }))
@@ -5266,7 +5515,7 @@ impl AperCodec for PwsFailedNrCgiList {
 }
 
 // GnbDuStatusIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuStatusIndication {
     pub transaction_id: TransactionId,
     pub gnb_du_overload_information: GnbDuOverloadInformation,
@@ -5317,7 +5566,7 @@ impl AperCodec for GnbDuStatusIndication {
 }
 
 // RrcDeliveryReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RrcDeliveryReport {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5386,7 +5635,7 @@ impl AperCodec for RrcDeliveryReport {
 }
 
 // F1RemovalRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct F1RemovalRequest {
     pub transaction_id: TransactionId,
 }
@@ -5426,7 +5675,7 @@ impl AperCodec for F1RemovalRequest {
 }
 
 // F1RemovalResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct F1RemovalResponse {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -5474,7 +5723,7 @@ impl AperCodec for F1RemovalResponse {
 }
 
 // F1RemovalFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct F1RemovalFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -5531,7 +5780,7 @@ impl AperCodec for F1RemovalFailure {
 }
 
 // TraceStart
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TraceStart {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5591,7 +5840,7 @@ impl AperCodec for TraceStart {
 }
 
 // DeactivateTrace
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DeactivateTrace {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5651,7 +5900,7 @@ impl AperCodec for DeactivateTrace {
 }
 
 // CellTrafficTrace
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellTrafficTrace {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -5733,7 +5982,7 @@ impl AperCodec for CellTrafficTrace {
 }
 
 // DucuRadioInformationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DucuRadioInformationTransfer {
     pub transaction_id: TransactionId,
     pub ducu_radio_information_type: DucuRadioInformationType,
@@ -5784,7 +6033,7 @@ impl AperCodec for DucuRadioInformationTransfer {
 }
 
 // CuduRadioInformationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CuduRadioInformationTransfer {
     pub transaction_id: TransactionId,
     pub cudu_radio_information_type: CuduRadioInformationType,
@@ -5835,7 +6084,7 @@ impl AperCodec for CuduRadioInformationTransfer {
 }
 
 // BapMappingConfiguration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BapMappingConfiguration {
     pub transaction_id: TransactionId,
     pub bh_routing_information_added_list: Option<BhRoutingInformationAddedList>,
@@ -5897,7 +6146,7 @@ impl AperCodec for BapMappingConfiguration {
 }
 
 // BhRoutingInformationAddedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
 
 impl AperCodec for BhRoutingInformationAddedList {
@@ -5907,6 +6156,9 @@ impl AperCodec for BhRoutingInformationAddedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhRoutingInformationAddedListItem::decode(data)?);
             }
             items
@@ -5915,7 +6167,7 @@ impl AperCodec for BhRoutingInformationAddedList {
 }
 
 // BhRoutingInformationRemovedList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BhRoutingInformationRemovedList(pub Vec<BhRoutingInformationRemovedListItem>);
 
 impl AperCodec for BhRoutingInformationRemovedList {
@@ -5925,6 +6177,9 @@ impl AperCodec for BhRoutingInformationRemovedList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhRoutingInformationRemovedListItem::decode(data)?);
             }
             items
@@ -5933,7 +6188,7 @@ impl AperCodec for BhRoutingInformationRemovedList {
 }
 
 // BapMappingConfigurationAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BapMappingConfigurationAcknowledge {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -5981,7 +6236,7 @@ impl AperCodec for BapMappingConfigurationAcknowledge {
 }
 
 // BapMappingConfigurationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BapMappingConfigurationFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -6044,7 +6299,7 @@ impl AperCodec for BapMappingConfigurationFailure {
 }
 
 // GnbDuResourceConfiguration
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuResourceConfiguration {
     pub transaction_id: TransactionId,
     pub activated_cells_to_be_updated_list: Option<ActivatedCellsToBeUpdatedList>,
@@ -6099,7 +6354,7 @@ impl AperCodec for GnbDuResourceConfiguration {
 }
 
 // GnbDuResourceConfigurationAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuResourceConfigurationAcknowledge {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -6147,7 +6402,7 @@ impl AperCodec for GnbDuResourceConfigurationAcknowledge {
 }
 
 // GnbDuResourceConfigurationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GnbDuResourceConfigurationFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -6210,7 +6465,7 @@ impl AperCodec for GnbDuResourceConfigurationFailure {
 }
 
 // IabtnlAddressRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabtnlAddressRequest {
     pub transaction_id: TransactionId,
     pub ia_bv_4_addresses_requested: Option<IaBv4AddressesRequested>,
@@ -6271,7 +6526,7 @@ impl AperCodec for IabtnlAddressRequest {
 }
 
 // IabTnlAddressesToRemoveList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabTnlAddressesToRemoveList(pub Vec<IabTnlAddressesToRemoveItem>);
 
 impl AperCodec for IabTnlAddressesToRemoveList {
@@ -6281,6 +6536,9 @@ impl AperCodec for IabTnlAddressesToRemoveList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(IabTnlAddressesToRemoveItem::decode(data)?);
             }
             items
@@ -6289,7 +6547,7 @@ impl AperCodec for IabTnlAddressesToRemoveList {
 }
 
 // IabtnlAddressResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabtnlAddressResponse {
     pub transaction_id: TransactionId,
     pub iab_allocated_tnl_address_list: IabAllocatedTnlAddressList,
@@ -6342,8 +6600,8 @@ impl AperCodec for IabtnlAddressResponse {
 }
 
 // IabAllocatedTnlAddressList
-#[derive(Clone)]
-pub struct IabAllocatedTnlAddressList(pub Vec<IabAllocatedTnlAddressListItem>);
+#[derive(Clone, Debug)]
+pub struct IabAllocatedTnlAddressList(pub Vec<IabAllocatedTnlAddressItem>);
 
 impl AperCodec for IabAllocatedTnlAddressList {
     type Output = Self;
@@ -6352,7 +6610,10 @@ impl AperCodec for IabAllocatedTnlAddressList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(IabAllocatedTnlAddressListItem::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(IabAllocatedTnlAddressItem::decode(data)?);
             }
             items
         }))
@@ -6360,7 +6621,7 @@ impl AperCodec for IabAllocatedTnlAddressList {
 }
 
 // IabtnlAddressFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabtnlAddressFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -6423,7 +6684,7 @@ impl AperCodec for IabtnlAddressFailure {
 }
 
 // IabupConfigurationUpdateRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabupConfigurationUpdateRequest {
     pub transaction_id: TransactionId,
     pub ul_up_tnl_information_to_update_list: Option<UlUpTnlInformationToUpdateList>,
@@ -6479,7 +6740,7 @@ impl AperCodec for IabupConfigurationUpdateRequest {
 }
 
 // UlUpTnlInformationToUpdateList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlUpTnlInformationToUpdateList(pub Vec<UlUpTnlInformationToUpdateListItem>);
 
 impl AperCodec for UlUpTnlInformationToUpdateList {
@@ -6490,6 +6751,9 @@ impl AperCodec for UlUpTnlInformationToUpdateList {
                 aper::decode::decode_length_determinent(data, Some(1), Some(32678), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UlUpTnlInformationToUpdateListItem::decode(data)?);
             }
             items
@@ -6498,7 +6762,7 @@ impl AperCodec for UlUpTnlInformationToUpdateList {
 }
 
 // UlUpTnlAddressToUpdateList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UlUpTnlAddressToUpdateList(pub Vec<UlUpTnlAddressToUpdateListItem>);
 
 impl AperCodec for UlUpTnlAddressToUpdateList {
@@ -6508,6 +6772,9 @@ impl AperCodec for UlUpTnlAddressToUpdateList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UlUpTnlAddressToUpdateListItem::decode(data)?);
             }
             items
@@ -6516,7 +6783,7 @@ impl AperCodec for UlUpTnlAddressToUpdateList {
 }
 
 // IabupConfigurationUpdateResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabupConfigurationUpdateResponse {
     pub transaction_id: TransactionId,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -6571,7 +6838,7 @@ impl AperCodec for IabupConfigurationUpdateResponse {
 }
 
 // DlUpTnlAddressToUpdateList
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DlUpTnlAddressToUpdateList(pub Vec<DlUpTnlAddressToUpdateListItem>);
 
 impl AperCodec for DlUpTnlAddressToUpdateList {
@@ -6581,6 +6848,9 @@ impl AperCodec for DlUpTnlAddressToUpdateList {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
             let mut items = vec![];
             for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
                 items.push(DlUpTnlAddressToUpdateListItem::decode(data)?);
             }
             items
@@ -6589,7 +6859,7 @@ impl AperCodec for DlUpTnlAddressToUpdateList {
 }
 
 // IabupConfigurationUpdateFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct IabupConfigurationUpdateFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -6652,7 +6922,7 @@ impl AperCodec for IabupConfigurationUpdateFailure {
 }
 
 // ResourceStatusRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ResourceStatusRequest {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -6736,7 +7006,7 @@ impl AperCodec for ResourceStatusRequest {
 }
 
 // ResourceStatusResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ResourceStatusResponse {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -6802,7 +7072,7 @@ impl AperCodec for ResourceStatusResponse {
 }
 
 // ResourceStatusFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ResourceStatusFailure {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -6877,7 +7147,7 @@ impl AperCodec for ResourceStatusFailure {
 }
 
 // ResourceStatusUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ResourceStatusUpdate {
     pub transaction_id: TransactionId,
     pub gnb_cu_measurement_id: GnbCuMeasurementId,
@@ -6955,7 +7225,7 @@ impl AperCodec for ResourceStatusUpdate {
 }
 
 // AccessAndMobilityIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AccessAndMobilityIndication {
     pub transaction_id: TransactionId,
     pub rach_report_information_list: Option<RachReportInformationList>,
@@ -7009,7 +7279,7 @@ impl AperCodec for AccessAndMobilityIndication {
 }
 
 // ReferenceTimeInformationReportingControl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ReferenceTimeInformationReportingControl {
     pub transaction_id: TransactionId,
     pub reporting_request_type: ReportingRequestType,
@@ -7060,7 +7330,7 @@ impl AperCodec for ReferenceTimeInformationReportingControl {
 }
 
 // ReferenceTimeInformationReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ReferenceTimeInformationReport {
     pub transaction_id: TransactionId,
     pub time_reference_information: TimeReferenceInformation,
@@ -7111,7 +7381,7 @@ impl AperCodec for ReferenceTimeInformationReport {
 }
 
 // AccessSuccess
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AccessSuccess {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -7171,7 +7441,7 @@ impl AperCodec for AccessSuccess {
 }
 
 // PositioningAssistanceInformationControl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningAssistanceInformationControl {
     pub transaction_id: TransactionId,
     pub pos_assistance_information: Option<PosAssistanceInformation>,
@@ -7237,7 +7507,7 @@ impl AperCodec for PositioningAssistanceInformationControl {
 }
 
 // PositioningAssistanceInformationFeedback
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningAssistanceInformationFeedback {
     pub transaction_id: TransactionId,
     pub pos_assistance_information_failure_list: Option<PosAssistanceInformationFailureList>,
@@ -7306,7 +7576,7 @@ impl AperCodec for PositioningAssistanceInformationFeedback {
 }
 
 // PositioningMeasurementRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementRequest {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7429,7 +7699,7 @@ impl AperCodec for PositioningMeasurementRequest {
 }
 
 // PositioningMeasurementResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementResponse {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7501,7 +7771,7 @@ impl AperCodec for PositioningMeasurementResponse {
 }
 
 // PositioningMeasurementFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementFailure {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7576,7 +7846,7 @@ impl AperCodec for PositioningMeasurementFailure {
 }
 
 // PositioningMeasurementReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementReport {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7645,7 +7915,7 @@ impl AperCodec for PositioningMeasurementReport {
 }
 
 // PositioningMeasurementAbort
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementAbort {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7705,7 +7975,7 @@ impl AperCodec for PositioningMeasurementAbort {
 }
 
 // PositioningMeasurementFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementFailureIndication {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7774,7 +8044,7 @@ impl AperCodec for PositioningMeasurementFailureIndication {
 }
 
 // PositioningMeasurementUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningMeasurementUpdate {
     pub transaction_id: TransactionId,
     pub lmf_measurement_id: LmfMeasurementId,
@@ -7840,7 +8110,7 @@ impl AperCodec for PositioningMeasurementUpdate {
 }
 
 // TrpInformationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TrpInformationRequest {
     pub transaction_id: TransactionId,
     pub trp_list: Option<TrpList>,
@@ -7899,8 +8169,8 @@ impl AperCodec for TrpInformationRequest {
 }
 
 // TrpInformationTypeListTrpReq
-#[derive(Clone)]
-pub struct TrpInformationTypeListTrpReq(pub Vec<TrpInformationTypeItemTrpReq>);
+#[derive(Clone, Debug)]
+pub struct TrpInformationTypeListTrpReq(pub Vec<TrpInformationTypeItem>);
 
 impl AperCodec for TrpInformationTypeListTrpReq {
     type Output = Self;
@@ -7909,7 +8179,10 @@ impl AperCodec for TrpInformationTypeListTrpReq {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(TrpInformationTypeItemTrpReq::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(TrpInformationTypeItem::decode(data)?);
             }
             items
         }))
@@ -7917,7 +8190,7 @@ impl AperCodec for TrpInformationTypeListTrpReq {
 }
 
 // TrpInformationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TrpInformationResponse {
     pub transaction_id: TransactionId,
     pub trp_information_list_trp_resp: TrpInformationListTrpResp,
@@ -7975,8 +8248,8 @@ impl AperCodec for TrpInformationResponse {
 }
 
 // TrpInformationListTrpResp
-#[derive(Clone)]
-pub struct TrpInformationListTrpResp(pub Vec<TrpInformationItemTrpResp>);
+#[derive(Clone, Debug)]
+pub struct TrpInformationListTrpResp(pub Vec<TrpInformationItem>);
 
 impl AperCodec for TrpInformationListTrpResp {
     type Output = Self;
@@ -7986,7 +8259,10 @@ impl AperCodec for TrpInformationListTrpResp {
                 aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(TrpInformationItemTrpResp::decode(data)?);
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(TrpInformationItem::decode(data)?);
             }
             items
         }))
@@ -7994,7 +8270,7 @@ impl AperCodec for TrpInformationListTrpResp {
 }
 
 // TrpInformationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TrpInformationFailure {
     pub transaction_id: TransactionId,
     pub cause: Cause,
@@ -8051,7 +8327,7 @@ impl AperCodec for TrpInformationFailure {
 }
 
 // PositioningInformationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningInformationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8111,7 +8387,7 @@ impl AperCodec for PositioningInformationRequest {
 }
 
 // PositioningInformationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningInformationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8180,7 +8456,7 @@ impl AperCodec for PositioningInformationResponse {
 }
 
 // PositioningInformationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningInformationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8246,7 +8522,7 @@ impl AperCodec for PositioningInformationFailure {
 }
 
 // PositioningActivationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningActivationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8312,7 +8588,7 @@ impl AperCodec for PositioningActivationRequest {
 }
 
 // SrsType
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SrsType {
     SemipersistentSrs(SemipersistentSrs),
     AperiodicSrs(AperiodicSrs),
@@ -8339,7 +8615,7 @@ impl AperCodec for SrsType {
 }
 
 // SemipersistentSrs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SemipersistentSrs {
     pub srs_resource_set_id: SrsResourceSetId,
     pub srs_spatial_relation: Option<SpatialRelationInfo>,
@@ -8364,7 +8640,7 @@ impl AperCodec for SemipersistentSrs {
 }
 
 // AperiodicSrs
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AperiodicSrs {
     pub aperiodic: Aperiodic,
     pub srs_resource_trigger: Option<SrsResourceTrigger>,
@@ -8389,7 +8665,7 @@ impl AperCodec for AperiodicSrs {
 }
 
 // PositioningActivationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningActivationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8458,7 +8734,7 @@ impl AperCodec for PositioningActivationResponse {
 }
 
 // PositioningActivationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningActivationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8524,7 +8800,7 @@ impl AperCodec for PositioningActivationFailure {
 }
 
 // PositioningDeactivation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningDeactivation {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8584,7 +8860,7 @@ impl AperCodec for PositioningDeactivation {
 }
 
 // PositioningInformationUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PositioningInformationUpdate {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8647,7 +8923,7 @@ impl AperCodec for PositioningInformationUpdate {
 }
 
 // ECidMeasurementInitiationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ECidMeasurementInitiationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8740,7 +9016,7 @@ impl AperCodec for ECidMeasurementInitiationRequest {
 }
 
 // ECidMeasurementInitiationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ECidMeasurementInitiationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8827,7 +9103,7 @@ impl AperCodec for ECidMeasurementInitiationResponse {
 }
 
 // ECidMeasurementInitiationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ECidMeasurementInitiationFailure {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8911,7 +9187,7 @@ impl AperCodec for ECidMeasurementInitiationFailure {
 }
 
 // ECidMeasurementFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ECidMeasurementFailureIndication {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -8989,7 +9265,7 @@ impl AperCodec for ECidMeasurementFailureIndication {
 }
 
 // ECidMeasurementReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ECidMeasurementReport {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -9073,7 +9349,7 @@ impl AperCodec for ECidMeasurementReport {
 }
 
 // ECidMeasurementTerminationCommand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ECidMeasurementTerminationCommand {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
@@ -9142,7 +9418,7 @@ impl AperCodec for ECidMeasurementTerminationCommand {
 }
 
 // Aperiodic
-#[derive(Clone, Copy, TryFromPrimitive)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Aperiodic {
     True,

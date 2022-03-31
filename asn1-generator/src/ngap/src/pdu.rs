@@ -6,9 +6,11 @@ pub type BitString = BitVec<Msb0, u8>;
 use super::common::*;
 use super::ies::*;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
+#[allow(unused_imports)]
+use num_enum::TryFromPrimitive;
 
 // PduSessionResourceSetupRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -89,7 +91,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
 }
 
 // PduSessionResourceSetupResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -164,7 +166,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
 }
 
 // PduSessionResourceReleaseCommand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleaseCommand {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -240,7 +242,7 @@ impl AperCodec for PduSessionResourceReleaseCommand {
 }
 
 // PduSessionResourceReleaseResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceReleaseResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -316,7 +318,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
 }
 
 // PduSessionResourceModifyRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -386,7 +388,7 @@ impl AperCodec for PduSessionResourceModifyRequest {
 }
 
 // PduSessionResourceModifyResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -468,7 +470,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
 }
 
 // PduSessionResourceNotify
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceNotify {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -540,7 +542,7 @@ impl AperCodec for PduSessionResourceNotify {
 }
 
 // PduSessionResourceModifyIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -610,7 +612,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
 }
 
 // PduSessionResourceModifyConfirm
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyConfirm {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -686,7 +688,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
 }
 
 // InitialContextSetupRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InitialContextSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -979,7 +981,7 @@ impl AperCodec for InitialContextSetupRequest {
 }
 
 // InitialContextSetupResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InitialContextSetupResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1054,7 +1056,7 @@ impl AperCodec for InitialContextSetupResponse {
 }
 
 // InitialContextSetupFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InitialContextSetupFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1130,7 +1132,7 @@ impl AperCodec for InitialContextSetupFailure {
 }
 
 // UeContextReleaseRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextReleaseRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1198,7 +1200,7 @@ impl AperCodec for UeContextReleaseRequest {
 }
 
 // UeContextReleaseCommand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextReleaseCommand {
     pub ue_ngap_i_ds: UeNgapIDs,
     pub cause: Cause,
@@ -1249,7 +1251,7 @@ impl AperCodec for UeContextReleaseCommand {
 }
 
 // UeContextReleaseComplete
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextReleaseComplete {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1337,7 +1339,7 @@ impl AperCodec for UeContextReleaseComplete {
 }
 
 // UeContextResumeRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextResumeRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1439,7 +1441,7 @@ impl AperCodec for UeContextResumeRequest {
 }
 
 // UeContextResumeResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextResumeResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1533,7 +1535,7 @@ impl AperCodec for UeContextResumeResponse {
 }
 
 // UeContextResumeFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextResumeFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1599,7 +1601,7 @@ impl AperCodec for UeContextResumeFailure {
 }
 
 // UeContextSuspendRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSuspendRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1676,7 +1678,7 @@ impl AperCodec for UeContextSuspendRequest {
 }
 
 // UeContextSuspendResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSuspendResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1739,7 +1741,7 @@ impl AperCodec for UeContextSuspendResponse {
 }
 
 // UeContextSuspendFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextSuspendFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1805,7 +1807,7 @@ impl AperCodec for UeContextSuspendFailure {
 }
 
 // UeContextModificationRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -1991,7 +1993,7 @@ impl AperCodec for UeContextModificationRequest {
 }
 
 // UeContextModificationResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2060,7 +2062,7 @@ impl AperCodec for UeContextModificationResponse {
 }
 
 // UeContextModificationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeContextModificationFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2126,7 +2128,7 @@ impl AperCodec for UeContextModificationFailure {
 }
 
 // RrcInactiveTransitionReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RrcInactiveTransitionReport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2195,7 +2197,7 @@ impl AperCodec for RrcInactiveTransitionReport {
 }
 
 // RetrieveUeInformation
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RetrieveUeInformation {
     pub five_g_s_tmsi: FiveGSTmsi,
 }
@@ -2235,7 +2237,7 @@ impl AperCodec for RetrieveUeInformation {
 }
 
 // UeInformationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeInformationTransfer {
     pub five_g_s_tmsi: FiveGSTmsi,
     pub nb_iot_ue_priority: Option<NbIotUePriority>,
@@ -2307,7 +2309,7 @@ impl AperCodec for UeInformationTransfer {
 }
 
 // RancpRelocationIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RancpRelocationIndication {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub five_g_s_tmsi: FiveGSTmsi,
@@ -2385,7 +2387,7 @@ impl AperCodec for RancpRelocationIndication {
 }
 
 // HandoverRequired
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverRequired {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2494,7 +2496,7 @@ impl AperCodec for HandoverRequired {
 }
 
 // HandoverCommand
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverCommand {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2595,7 +2597,7 @@ impl AperCodec for HandoverCommand {
 }
 
 // HandoverPreparationFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverPreparationFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -2671,7 +2673,7 @@ impl AperCodec for HandoverPreparationFailure {
 }
 
 // HandoverRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub handover_type: HandoverType,
@@ -2959,7 +2961,7 @@ impl AperCodec for HandoverRequest {
 }
 
 // HandoverRequestAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverRequestAcknowledge {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3049,7 +3051,7 @@ impl AperCodec for HandoverRequestAcknowledge {
 }
 
 // HandoverFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub cause: Cause,
@@ -3116,7 +3118,7 @@ impl AperCodec for HandoverFailure {
 }
 
 // HandoverNotify
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverNotify {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3182,7 +3184,7 @@ impl AperCodec for HandoverNotify {
 }
 
 // PathSwitchRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequest {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub source_amf_ue_ngap_id: AmfUeNgapId,
@@ -3280,7 +3282,7 @@ impl AperCodec for PathSwitchRequest {
 }
 
 // PathSwitchRequestAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequestAcknowledge {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3496,7 +3498,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
 }
 
 // PathSwitchRequestFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PathSwitchRequestFailure {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3566,7 +3568,7 @@ impl AperCodec for PathSwitchRequestFailure {
 }
 
 // HandoverCancel
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverCancel {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3626,7 +3628,7 @@ impl AperCodec for HandoverCancel {
 }
 
 // HandoverCancelAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverCancelAcknowledge {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3683,7 +3685,7 @@ impl AperCodec for HandoverCancelAcknowledge {
 }
 
 // HandoverSuccess
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct HandoverSuccess {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3734,7 +3736,7 @@ impl AperCodec for HandoverSuccess {
 }
 
 // UplinkRanEarlyStatusTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkRanEarlyStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3798,7 +3800,7 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
 }
 
 // DownlinkRanEarlyStatusTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkRanEarlyStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3862,7 +3864,7 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
 }
 
 // UplinkRanStatusTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkRanStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3926,7 +3928,7 @@ impl AperCodec for UplinkRanStatusTransfer {
 }
 
 // DownlinkRanStatusTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkRanStatusTransfer {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -3990,7 +3992,7 @@ impl AperCodec for DownlinkRanStatusTransfer {
 }
 
 // Paging
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Paging {
     pub ue_paging_identity: UePagingIdentity,
     pub paging_drx: Option<PagingDrx>,
@@ -4109,7 +4111,7 @@ impl AperCodec for Paging {
 }
 
 // InitialUeMessage
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InitialUeMessage {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub nas_pdu: NasPdu,
@@ -4253,7 +4255,7 @@ impl AperCodec for InitialUeMessage {
 }
 
 // DownlinkNasTransport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkNasTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -4404,7 +4406,7 @@ impl AperCodec for DownlinkNasTransport {
 }
 
 // UplinkNasTransport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkNasTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -4494,7 +4496,7 @@ impl AperCodec for UplinkNasTransport {
 }
 
 // NasNonDeliveryIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NasNonDeliveryIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -4563,7 +4565,7 @@ impl AperCodec for NasNonDeliveryIndication {
 }
 
 // RerouteNasRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RerouteNasRequest {
     pub ran_ue_ngap_id: RanUeNgapId,
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
@@ -4644,7 +4646,7 @@ impl AperCodec for RerouteNasRequest {
 }
 
 // NgSetupRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgSetupRequest {
     pub global_ran_node_id: GlobalRanNodeId,
     pub ran_node_name: Option<RanNodeName>,
@@ -4728,7 +4730,7 @@ impl AperCodec for NgSetupRequest {
 }
 
 // NgSetupResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgSetupResponse {
     pub amf_name: AmfName,
     pub served_guami_list: ServedGuamiList,
@@ -4821,7 +4823,7 @@ impl AperCodec for NgSetupResponse {
 }
 
 // NgSetupFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgSetupFailure {
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
@@ -4875,7 +4877,7 @@ impl AperCodec for NgSetupFailure {
 }
 
 // RanConfigurationUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanConfigurationUpdate {
     pub ran_node_name: Option<RanNodeName>,
     pub supported_ta_list: Option<SupportedTaList>,
@@ -4952,7 +4954,7 @@ impl AperCodec for RanConfigurationUpdate {
 }
 
 // RanConfigurationUpdateAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanConfigurationUpdateAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
@@ -4991,7 +4993,7 @@ impl AperCodec for RanConfigurationUpdateAcknowledge {
 }
 
 // RanConfigurationUpdateFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RanConfigurationUpdateFailure {
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
@@ -5045,7 +5047,7 @@ impl AperCodec for RanConfigurationUpdateFailure {
 }
 
 // AmfConfigurationUpdate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfConfigurationUpdate {
     pub amf_name: Option<AmfName>,
     pub served_guami_list: Option<ServedGuamiList>,
@@ -5129,7 +5131,7 @@ impl AperCodec for AmfConfigurationUpdate {
 }
 
 // AmfConfigurationUpdateAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfConfigurationUpdateAcknowledge {
     pub amf_tnl_association_setup_list: Option<AmfTnlAssociationSetupList>,
     pub amf_tnl_association_failed_to_setup_list: Option<TnlAssociationList>,
@@ -5182,7 +5184,7 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
 }
 
 // AmfConfigurationUpdateFailure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfConfigurationUpdateFailure {
     pub cause: Cause,
     pub time_to_wait: Option<TimeToWait>,
@@ -5236,7 +5238,7 @@ impl AperCodec for AmfConfigurationUpdateFailure {
 }
 
 // AmfStatusIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfStatusIndication {
     pub unavailable_guami_list: UnavailableGuamiList,
 }
@@ -5278,7 +5280,7 @@ impl AperCodec for AmfStatusIndication {
 }
 
 // NgReset
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgReset {
     pub cause: Cause,
     pub reset_type: ResetType,
@@ -5326,7 +5328,7 @@ impl AperCodec for NgReset {
 }
 
 // NgResetAcknowledge
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NgResetAcknowledge {
     pub ue_associated_logical_ng_connection_list: Option<UeAssociatedLogicalNgConnectionList>,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
@@ -5374,7 +5376,7 @@ impl AperCodec for NgResetAcknowledge {
 }
 
 // ErrorIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ErrorIndication {
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
     pub ran_ue_ngap_id: Option<RanUeNgapId>,
@@ -5437,7 +5439,7 @@ impl AperCodec for ErrorIndication {
 }
 
 // OverloadStart
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct OverloadStart {
     pub amf_overload_response: Option<OverloadResponse>,
     pub amf_traffic_load_reduction_indication: Option<TrafficLoadReductionIndication>,
@@ -5490,7 +5492,7 @@ impl AperCodec for OverloadStart {
 }
 
 // OverloadStop
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct OverloadStop {}
 
 impl AperCodec for OverloadStop {
@@ -5520,7 +5522,7 @@ impl AperCodec for OverloadStop {
 }
 
 // UplinkRanConfigurationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkRanConfigurationTransfer {
     pub son_configuration_transfer_ul: Option<SonConfigurationTransfer>,
     pub endc_son_configuration_transfer_ul: Option<EnDcsonConfigurationTransfer>,
@@ -5575,7 +5577,7 @@ impl AperCodec for UplinkRanConfigurationTransfer {
 }
 
 // DownlinkRanConfigurationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkRanConfigurationTransfer {
     pub son_configuration_transfer_dl: Option<SonConfigurationTransfer>,
     pub endc_son_configuration_transfer_dl: Option<EnDcsonConfigurationTransfer>,
@@ -5630,7 +5632,7 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
 }
 
 // WriteReplaceWarningRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WriteReplaceWarningRequest {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -5744,7 +5746,7 @@ impl AperCodec for WriteReplaceWarningRequest {
 }
 
 // WriteReplaceWarningResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WriteReplaceWarningResponse {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -5807,7 +5809,7 @@ impl AperCodec for WriteReplaceWarningResponse {
 }
 
 // PwsCancelRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsCancelRequest {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -5870,7 +5872,7 @@ impl AperCodec for PwsCancelRequest {
 }
 
 // PwsCancelResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsCancelResponse {
     pub message_identifier: MessageIdentifier,
     pub serial_number: SerialNumber,
@@ -5933,7 +5935,7 @@ impl AperCodec for PwsCancelResponse {
 }
 
 // PwsRestartIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsRestartIndication {
     pub cell_id_list_for_restart: CellIdListForRestart,
     pub global_ran_node_id: GlobalRanNodeId,
@@ -6000,7 +6002,7 @@ impl AperCodec for PwsRestartIndication {
 }
 
 // PwsFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PwsFailureIndication {
     pub pws_failed_cell_id_list: PwsFailedCellIdList,
     pub global_ran_node_id: GlobalRanNodeId,
@@ -6051,7 +6053,7 @@ impl AperCodec for PwsFailureIndication {
 }
 
 // DownlinkUeAssociatedNrpPaTransport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkUeAssociatedNrpPaTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6120,7 +6122,7 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
 }
 
 // UplinkUeAssociatedNrpPaTransport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkUeAssociatedNrpPaTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6189,7 +6191,7 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
 }
 
 // DownlinkNonUeAssociatedNrpPaTransport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkNonUeAssociatedNrpPaTransport {
     pub routing_id: RoutingId,
     pub nrp_pa_pdu: NrpPaPdu,
@@ -6240,7 +6242,7 @@ impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
 }
 
 // UplinkNonUeAssociatedNrpPaTransport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkNonUeAssociatedNrpPaTransport {
     pub routing_id: RoutingId,
     pub nrp_pa_pdu: NrpPaPdu,
@@ -6291,7 +6293,7 @@ impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
 }
 
 // TraceStart
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TraceStart {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6351,7 +6353,7 @@ impl AperCodec for TraceStart {
 }
 
 // TraceFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TraceFailureIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6420,7 +6422,7 @@ impl AperCodec for TraceFailureIndication {
 }
 
 // DeactivateTrace
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DeactivateTrace {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6480,7 +6482,7 @@ impl AperCodec for DeactivateTrace {
 }
 
 // CellTrafficTrace
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CellTrafficTrace {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6571,7 +6573,7 @@ impl AperCodec for CellTrafficTrace {
 }
 
 // LocationReportingControl
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LocationReportingControl {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6633,7 +6635,7 @@ impl AperCodec for LocationReportingControl {
 }
 
 // LocationReportingFailureIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LocationReportingFailureIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6693,7 +6695,7 @@ impl AperCodec for LocationReportingFailureIndication {
 }
 
 // LocationReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LocationReport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6771,7 +6773,7 @@ impl AperCodec for LocationReport {
 }
 
 // UetnlaBindingReleaseRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UetnlaBindingReleaseRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6822,7 +6824,7 @@ impl AperCodec for UetnlaBindingReleaseRequest {
 }
 
 // UeRadioCapabilityInfoIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityInfoIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6895,7 +6897,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
 }
 
 // UeRadioCapabilityCheckRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityCheckRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -6958,7 +6960,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
 }
 
 // UeRadioCapabilityCheckResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityCheckResponse {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -7026,7 +7028,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
 // PrivateMessage - omitted
 
 // SecondaryRatDataUsageReport
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SecondaryRatDataUsageReport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -7102,7 +7104,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
 }
 
 // UplinkRimInformationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UplinkRimInformationTransfer {
     pub rim_information_transfer: Option<RimInformationTransfer>,
 }
@@ -7141,7 +7143,7 @@ impl AperCodec for UplinkRimInformationTransfer {
 }
 
 // DownlinkRimInformationTransfer
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DownlinkRimInformationTransfer {
     pub rim_information_transfer: Option<RimInformationTransfer>,
 }
@@ -7180,7 +7182,7 @@ impl AperCodec for DownlinkRimInformationTransfer {
 }
 
 // ConnectionEstablishmentIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ConnectionEstablishmentIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
@@ -7292,7 +7294,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
 }
 
 // UeRadioCapabilityIdMappingRequest
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityIdMappingRequest {
     pub ue_radio_capability_id: UeRadioCapabilityId,
 }
@@ -7334,7 +7336,7 @@ impl AperCodec for UeRadioCapabilityIdMappingRequest {
 }
 
 // UeRadioCapabilityIdMappingResponse
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct UeRadioCapabilityIdMappingResponse {
     pub ue_radio_capability_id: UeRadioCapabilityId,
     pub ue_radio_capability: UeRadioCapability,
@@ -7391,7 +7393,7 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
 }
 
 // AmfcpRelocationIndication
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AmfcpRelocationIndication {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
