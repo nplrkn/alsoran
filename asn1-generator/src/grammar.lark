@@ -35,7 +35,7 @@ protocol_ies.1:   IDENTIFIER _PROTOCOL_IES "::=" ies
 _items{x}:        "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
 extended_items{x}: _comma_separated{x}
 
-sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | container)
+sequenceof:       "SEQUENCE" [_size] "OF" (IDENTIFIER | single_ie_container)
 sequence:         "SEQUENCE" _items{_fielditem}
 enumerated:       "ENUMERATED" _items{enum_item}
 choice:           "CHOICE" _items{_choiceitem}
@@ -70,8 +70,9 @@ _ie{p}:             "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "E
 _comma_separated{x}: x ("," x)* ","?
 _choiceitem:     choicefield | extension_container
 ie_container.1:     "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
+single_ie_container.1: "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"
 choicefield:      _identifier _fieldtype
-_fielditem:       optional_field | field | extension_container | ie_container
+_fielditem:       optional_field | field | extension_container | ie_container | single_ie_container
 enum_item:        _identifier
 extended_enum_items: enum_item+ -> extended_items
 extension_container.0:  _identifier container "OPTIONAL"? ","?

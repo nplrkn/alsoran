@@ -45,7 +45,9 @@ class TypeNameFinder(Visitor):
         self.ie_dict[tree.children[0]] = tree.children[1]
 
 
-# Convert a structure like
+# Sequence-like IEs containers and Sequence-Of-like containers
+#
+# For Sequence-like IE containers, convert a structure like
 #    sequence
 #      ie_container      PDUSessionResourceSetupRequestIEs
 #      extension_marker
@@ -60,6 +62,23 @@ class TypeNameFinder(Visitor):
 #      ies
 #        ie
 #      extension_marker
+#
+# For Sequence-Of-like IE containers, we convert
+#
+#   sequenceof
+#     1
+#     maxnoofIndividualF1ConnectionsToReset
+#     single_ie_container UE-associatedLogicalF1-ConnectionItemRes
+# protocol_ies
+#   UE-associatedLogicalF1-ConnectionItemRes
+#   ies
+#     ie
+#
+# Into
+#    ie_container_sequence_of
+#      ie
+
+
 @v_args(tree=True)
 class IeContainerMerger(Transformer):
     def __init__(self, ies=dict()):
@@ -73,6 +92,12 @@ class IeContainerMerger(Transformer):
         if tree.children[0].data == "ie_container":
             tree.children[0] = self.ie_dict[tree.children[0].children[0]]
             tree.data = "ie_container_sequence"
+        return tree
+
+    def sequenceof(self, tree):
+        if len(tree.children) == 3 and isinstance(tree.children[2], Tree) and tree.children[2].data == "single_ie_container":
+            tree.children[2] = self.ie_dict[tree.children[2].children[0]].children[0]
+            tree.data = "ie_container_sequence_of"
         return tree
 
     def protocol_ies(self, tree):
@@ -168,15 +193,24 @@ class TypeTransformer(Transformer):
 
         return tree
 
+    def ie_container_sequence_of(self, tree):
+        #item = tree.children[2]
+        self.transform_bounds(tree)
+        #item = self.convert(item)
+        #tree.children[2] = item
+        return Tree("ie_container_sequence_of", tree.children)
+
     def sequenceof(self, tree):
         item = tree.children[2]
         self.transform_bounds(tree)
-        if isinstance(item, Tree):
-            # It must be a container
-            assert(item.data == "container")
-            item = pascal_case(item.children[1].replace("IEs", ""))
-        else:
-            item = self.convert(item)
+        # if isinstance(item, Tree):
+        #     # It must be a container
+        #     assert(item.data == "single_ie_container")
+        #     print("Yay found sequence of ", item)
+        #     #item = pascal_case(item.children[1].replace("IEs", ""))
+        # else:
+        #     item = self.convert(item)
+        item = self.convert(item)
         tree.children[2] = item
         return Tree("sequenceof", tree.children)
         # "Vec<" + self.convert(item) + ">", [tree.children[0], tree.children[1]])
@@ -637,14 +671,14 @@ document
   None
   tuple_struct
     UeAssociatedLogicalF1ConnectionListRes
-    sequenceof
+    ie_container_sequence_of
       1
       63356
       ie
+        ue_associated_logical_f1_connection_item
         80
         reject
-        UEAssociatedLogicalF1ConnectionItem    
-
+        UeAssociatedLogicalF1ConnectionItem
 """, constants={"maxnoofIndividualF1ConnectionsToReset": 63356, "id-UE-associatedLogicalF1-ConnectionItem": 80})
 
 

@@ -15,19 +15,25 @@ def bool_to_rust(b):
     return "true" if b else "false"
 
 
+# TODO - replace with a visitor?
 def type_and_constraints(typ):
     constraints = "None, None, false"
     extra_type = None
-    seqof = False
+    seqof = None
 
     if isinstance(typ, Tree):
+        if typ.data in ["ie", "optional_ie"]:
+            # The ProtocolIE-SingleContainer case where an IE is inside a sequence of.
+            return type_and_constraints(typ.children[3])
+
         bounds = typ.children
         typ = typ.data
         ext = "false"
 
-        if typ == "sequenceof":
-            seqof = True
-            extra_type = type_and_constraints(bounds[-1])[0]
+        if typ in ["sequenceof", "ie_container_sequence_of"]:
+            seqof = typ
+            inner = bounds[-1]
+            extra_type = type_and_constraints(inner)[0]
             bounds = bounds[0: -1]
             typ = f"Vec<{extra_type}>"
 
@@ -64,10 +70,15 @@ def type_and_constraints(typ):
 def decode_expression(tree):
     (typ, constraints, extra_type, seqof) = type_and_constraints(tree)
     if seqof:
+        ie_extra_lines = """
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;""" if seqof == "ie_container_sequence_of" else ""
         return f"""{{
             let length = aper::decode::decode_length_determinent(data, {constraints})?;
             let mut items = vec![];
-            for _ in 0..length {{
+            for _ in 0..length {{\
+{ie_extra_lines}
                 items.push({(decode_expression(tree.children[2]))});
             }}
             items
@@ -1124,7 +1135,90 @@ impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     }
 }
 
-""", constants={"maxnoofIndividualF1ConnectionsToReset": 63356})
+""", constants={"maxnoofIndividualF1ConnectionsToReset": 63356, "id-UE-associatedLogicalF1-ConnectionItem": 80})
+
+    def test_nested_containers(self):
+        self.should_generate("""\
+BAPMappingConfiguration ::= SEQUENCE {
+	protocolIEs			ProtocolIE-Container { {BAPMappingConfiguration-IEs } },
+	...
+ }
+
+BAPMappingConfiguration-IEs F1AP-PROTOCOL-IES ::= {
+	{ ID id-BH-Routing-Information-Added-List		CRITICALITY ignore	TYPE	BH-Routing-Information-Added-List	PRESENCE optional } |
+	...
+}
+
+BH-Routing-Information-Added-List ::= SEQUENCE (SIZE (1.. maxnoofRoutingEntries))	OF ProtocolIE-SingleContainer { { BH-Routing-Information-Added-List-ItemIEs } }
+
+BH-Routing-Information-Added-List-ItemIEs	F1AP-PROTOCOL-IES ::= {
+	{ ID id-BH-Routing-Information-Added-List-Item				CRITICALITY ignore	TYPE BH-Routing-Information-Added-List-Item						PRESENCE optional } ,
+	...
+}
+""", """\
+
+// BapMappingConfiguration
+# [derive(Clone, Debug)]
+pub struct BapMappingConfiguration {
+    pub bh_routing_information_added_list: Option<BhRoutingInformationAddedList>,
+}
+
+impl AperCodec for BapMappingConfiguration {
+    type Output = BapMappingConfiguration;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut bh_routing_information_added_list: Option<BhRoutingInformationAddedList> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let criticality = Criticality::decode(data)?;
+            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                283 => {
+                    bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?);
+                }
+                x => {
+                    if let Criticality::Reject = criticality {
+                        return Err(aper::AperCodecError::new(format!(
+                            "Unrecognised IE type {} with criticality reject",
+                            x
+                        )));
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            bh_routing_information_added_list,
+        })
+    }
+}
+
+
+// BhRoutingInformationAddedList
+# [derive(Clone, Debug)]
+pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
+
+impl AperCodec for BhRoutingInformationAddedList {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                items.push(BhRoutingInformationAddedListItem::decode(data)?);
+            }
+            items
+        }))
+    }
+}
+
+""", constants={"maxnoofRoutingEntries": 1024, "id-BH-Routing-Information-Added-List": 283, "id-BH-Routing-Information-Added-List-Item": 284})
 
 
 if __name__ == '__main__':
