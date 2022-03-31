@@ -300,9 +300,7 @@ class IeFields(Interpreter):
 """
         self.self_fields += f"            {name},\n"
         self.matches += f"""\
-                {id} => {{
-                    {name} = Some({decode_expression(tree.children[3])});
-                }}
+                {id} => {name} = Some({decode_expression(tree.children[3])}),
 """
         self.num_mandatory_fields += 1
         self.mandatory += f"""\
@@ -330,9 +328,7 @@ class IeFields(Interpreter):
 """
         self.self_fields += f"            {name},\n"
         self.matches += f"""\
-                {id} => {{
-                    {name} = Some({decode_expression(tree.children[3])});
-                }}
+                {id} => {name} = Some({decode_expression(tree.children[3])}),
 """
         self.optionals_presence_list += f"self.{name}.is_some(),"
 
@@ -512,25 +508,18 @@ pub struct {name} {{
 impl AperCodec for {orig_name} {{
     type Output = {orig_name};
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
-        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 {field_interpreter.mut_field_vars}
         for _ in 0..len {{
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let criticality = Criticality::decode(data)?;
-            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {field_interpreter.matches}\
-                x => {{
-                    if let Criticality::Reject = criticality {{
-                        return Err(aper::AperCodecError::new(format!(
-                            "Unrecognised IE type {{}} with criticality reject",
-                            x
-                        )));
-                    }}
-                }}
+                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {{}}", x)))
             }}
         }}
 {field_interpreter.mandatory}\
@@ -906,7 +895,7 @@ pub struct PduSessionResourceSetupRequest {
 impl AperCodec for PduSessionResourceSetupRequest {
     type Output = PduSessionResourceSetupRequest;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -915,23 +904,12 @@ impl AperCodec for PduSessionResourceSetupRequest {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let criticality = Criticality::decode(data)?;
-            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                10 => {
-                    amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?);
-                }
-                83 => {
-                    ran_paging_priority = Some(aper::decode::decode_octetstring(data, None, None, false)?);
-                }
-                x => {
-                    if let Criticality::Reject = criticality {
-                        return Err(aper::AperCodecError::new(format!(
-                            "Unrecognised IE type {} with criticality reject",
-                            x
-                        )));
-                    }
-                }
+                10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
+                83 => ran_paging_priority = Some(aper::decode::decode_octetstring(data, None, None, false)?),
+                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
         let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(aper::AperCodecError::new(format!(
@@ -1166,7 +1144,7 @@ pub struct BapMappingConfiguration {
 impl AperCodec for BapMappingConfiguration {
     type Output = BapMappingConfiguration;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1174,20 +1152,11 @@ impl AperCodec for BapMappingConfiguration {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let criticality = Criticality::decode(data)?;
-            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                283 => {
-                    bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?);
-                }
-                x => {
-                    if let Criticality::Reject = criticality {
-                        return Err(aper::AperCodecError::new(format!(
-                            "Unrecognised IE type {} with criticality reject",
-                            x
-                        )));
-                    }
-                }
+                283 => bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?),
+                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
         Ok(Self {

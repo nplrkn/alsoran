@@ -9307,7 +9307,7 @@ pub struct PduSessionResourceModifyRequestTransfer {
 impl AperCodec for PduSessionResourceModifyRequestTransfer {
     type Output = PduSessionResourceModifyRequestTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -9329,54 +9329,42 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let criticality = Criticality::decode(data)?;
-            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 130 => {
                     pdu_session_aggregate_maximum_bit_rate =
-                        Some(PduSessionAggregateMaximumBitRate::decode(data)?);
+                        Some(PduSessionAggregateMaximumBitRate::decode(data)?)
                 }
-                140 => {
-                    ul_ngu_up_tnl_modify_list = Some(UlNguUpTnlModifyList::decode(data)?);
-                }
-                129 => {
-                    network_instance = Some(NetworkInstance::decode(data)?);
-                }
+                140 => ul_ngu_up_tnl_modify_list = Some(UlNguUpTnlModifyList::decode(data)?),
+                129 => network_instance = Some(NetworkInstance::decode(data)?),
                 135 => {
                     qos_flow_add_or_modify_request_list =
-                        Some(QosFlowAddOrModifyRequestList::decode(data)?);
+                        Some(QosFlowAddOrModifyRequestList::decode(data)?)
                 }
-                137 => {
-                    qos_flow_to_release_list = Some(QosFlowListWithCause::decode(data)?);
-                }
+                137 => qos_flow_to_release_list = Some(QosFlowListWithCause::decode(data)?),
                 126 => {
                     additional_ul_ngu_up_tnl_information =
-                        Some(UpTransportLayerInformationList::decode(data)?);
+                        Some(UpTransportLayerInformationList::decode(data)?)
                 }
-                166 => {
-                    common_network_instance = Some(CommonNetworkInstance::decode(data)?);
-                }
+                166 => common_network_instance = Some(CommonNetworkInstance::decode(data)?),
                 186 => {
                     additional_redundant_ul_ngu_up_tnl_information =
-                        Some(UpTransportLayerInformationList::decode(data)?);
+                        Some(UpTransportLayerInformationList::decode(data)?)
                 }
                 190 => {
-                    redundant_common_network_instance = Some(CommonNetworkInstance::decode(data)?);
+                    redundant_common_network_instance = Some(CommonNetworkInstance::decode(data)?)
                 }
                 195 => {
                     redundant_ul_ngu_up_tnl_information =
-                        Some(UpTransportLayerInformation::decode(data)?);
+                        Some(UpTransportLayerInformation::decode(data)?)
                 }
-                138 => {
-                    security_indication = Some(SecurityIndication::decode(data)?);
-                }
+                138 => security_indication = Some(SecurityIndication::decode(data)?),
                 x => {
-                    if let Criticality::Reject = criticality {
-                        return Err(aper::AperCodecError::new(format!(
-                            "Unrecognised IE type {} with criticality reject",
-                            x
-                        )));
-                    }
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
                 }
             }
         }
@@ -10308,7 +10296,7 @@ pub struct PduSessionResourceSetupRequestTransfer {
 impl AperCodec for PduSessionResourceSetupRequestTransfer {
     type Output = PduSessionResourceSetupRequestTransfer;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10334,64 +10322,50 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let criticality = Criticality::decode(data)?;
-            let _length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 130 => {
                     pdu_session_aggregate_maximum_bit_rate =
-                        Some(PduSessionAggregateMaximumBitRate::decode(data)?);
+                        Some(PduSessionAggregateMaximumBitRate::decode(data)?)
                 }
-                139 => {
-                    ul_ngu_up_tnl_information = Some(UpTransportLayerInformation::decode(data)?);
-                }
+                139 => ul_ngu_up_tnl_information = Some(UpTransportLayerInformation::decode(data)?),
                 126 => {
                     additional_ul_ngu_up_tnl_information =
-                        Some(UpTransportLayerInformationList::decode(data)?);
+                        Some(UpTransportLayerInformationList::decode(data)?)
                 }
                 127 => {
-                    data_forwarding_not_possible = Some(DataForwardingNotPossible::decode(data)?);
+                    data_forwarding_not_possible = Some(DataForwardingNotPossible::decode(data)?)
                 }
-                134 => {
-                    pdu_session_type = Some(PduSessionType::decode(data)?);
-                }
-                138 => {
-                    security_indication = Some(SecurityIndication::decode(data)?);
-                }
-                129 => {
-                    network_instance = Some(NetworkInstance::decode(data)?);
-                }
-                136 => {
-                    qos_flow_setup_request_list = Some(QosFlowSetupRequestList::decode(data)?);
-                }
-                166 => {
-                    common_network_instance = Some(CommonNetworkInstance::decode(data)?);
-                }
+                134 => pdu_session_type = Some(PduSessionType::decode(data)?),
+                138 => security_indication = Some(SecurityIndication::decode(data)?),
+                129 => network_instance = Some(NetworkInstance::decode(data)?),
+                136 => qos_flow_setup_request_list = Some(QosFlowSetupRequestList::decode(data)?),
+                166 => common_network_instance = Some(CommonNetworkInstance::decode(data)?),
                 22 => {
                     direct_forwarding_path_availability =
-                        Some(DirectForwardingPathAvailability::decode(data)?);
+                        Some(DirectForwardingPathAvailability::decode(data)?)
                 }
                 195 => {
                     redundant_ul_ngu_up_tnl_information =
-                        Some(UpTransportLayerInformation::decode(data)?);
+                        Some(UpTransportLayerInformation::decode(data)?)
                 }
                 186 => {
                     additional_redundant_ul_ngu_up_tnl_information =
-                        Some(UpTransportLayerInformationList::decode(data)?);
+                        Some(UpTransportLayerInformationList::decode(data)?)
                 }
                 190 => {
-                    redundant_common_network_instance = Some(CommonNetworkInstance::decode(data)?);
+                    redundant_common_network_instance = Some(CommonNetworkInstance::decode(data)?)
                 }
                 197 => {
                     redundant_pdu_session_information =
-                        Some(RedundantPduSessionInformation::decode(data)?);
+                        Some(RedundantPduSessionInformation::decode(data)?)
                 }
                 x => {
-                    if let Criticality::Reject = criticality {
-                        return Err(aper::AperCodecError::new(format!(
-                            "Unrecognised IE type {} with criticality reject",
-                            x
-                        )));
-                    }
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
                 }
             }
         }
