@@ -6,11 +6,9 @@ use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 #[allow(unused_imports)]
 use num_enum::TryFromPrimitive;
 
-
-
 // Criticality
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum Criticality {
     Reject,
     Ignore,
@@ -28,10 +26,9 @@ impl AperCodec for Criticality {
     }
 }
 
-
 // Presence
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum Presence {
     Optional,
     Conditional,
@@ -49,9 +46,8 @@ impl AperCodec for Presence {
     }
 }
 
-
 // PrivateIeId
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
@@ -62,56 +58,64 @@ impl AperCodec for PrivateIeId {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(aper::AperCodecError::new(
+                "CHOICE additions not implemented",
+            ));
         }
         match idx {
-            0 => Ok(Self::Local(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16)),
-            1 => Ok(Self::Global(aper::decode::decode_octetstring(data, None, None, false)?)),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            0 => Ok(Self::Local(
+                aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+            )),
+            1 => Ok(Self::Global(aper::decode::decode_octetstring(
+                data, None, None, false,
+            )?)),
+            _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
 }
 
-
 // ProcedureCode
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ProcedureCode(pub u8);
 
 impl AperCodec for ProcedureCode {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        Ok(Self(aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8))
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8,
+        ))
     }
 }
 
-
 // ProtocolExtensionId
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ProtocolExtensionId(pub u16);
 
 impl AperCodec for ProtocolExtensionId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        Ok(Self(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16))
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+        ))
     }
 }
 
-
 // ProtocolIeId
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ProtocolIeId(pub u16);
 
 impl AperCodec for ProtocolIeId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        Ok(Self(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16))
+        Ok(Self(
+            aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16,
+        ))
     }
 }
 
-
 // TriggeringMessage
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -128,4 +132,3 @@ impl AperCodec for TriggeringMessage {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
 }
-
