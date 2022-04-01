@@ -84,10 +84,6 @@ class IeContainerMerger(Transformer):
     def __init__(self, ies=dict()):
         self.ie_dict = ies
 
-    # def ie_container(self, tree):
-    #     tree.children[0] = self.ie_dict[tree.children[0]]
-    #     return tree
-
     def sequence(self, tree):
         if tree.children[0].data == "ie_container":
             tree.children[0] = self.ie_dict[tree.children[0].children[0]]
@@ -194,26 +190,15 @@ class TypeTransformer(Transformer):
         return tree
 
     def ie_container_sequence_of(self, tree):
-        #item = tree.children[2]
         self.transform_bounds(tree)
-        #item = self.convert(item)
-        #tree.children[2] = item
         return Tree("ie_container_sequence_of", tree.children)
 
     def sequenceof(self, tree):
         item = tree.children[2]
         self.transform_bounds(tree)
-        # if isinstance(item, Tree):
-        #     # It must be a container
-        #     assert(item.data == "single_ie_container")
-        #     print("Yay found sequence of ", item)
-        #     #item = pascal_case(item.children[1].replace("IEs", ""))
-        # else:
-        #     item = self.convert(item)
         item = self.convert(item)
         tree.children[2] = item
         return Tree("sequenceof", tree.children)
-        # "Vec<" + self.convert(item) + ">", [tree.children[0], tree.children[1]])
 
     def transform_bounds(self, tree):
         ub = 18446744073709551615
@@ -281,17 +266,14 @@ class TypeTransformer(Transformer):
 
     def printablestring(self, tree):
         self.transform_bounds(tree)
-        # tree.children.append("PrintableString")
         return Tree("PrintableString", tree.children)
 
     def utf8string(self, tree):
         self.transform_bounds(tree)
-        # tree.children.append("UTF8String")
         return Tree("UTF8String", tree.children)
 
     def visiblestring(self, tree):
         self.transform_bounds(tree)
-        # tree.children.append("VisibleString")
         return Tree("VisibleString", tree.children)
 
     def bytes(self, tree):
@@ -333,7 +315,7 @@ def transform(mut_tree, constants):
         raise e
 
 
-class TestGenerator(unittest.TestCase):
+class TestTransformer(unittest.TestCase):
     maxDiff = None
 
     def should_generate(self, input, expected, constants=dict()):
