@@ -29,13 +29,13 @@ class TypeNameFinder(Visitor):
         print(f"{orig_typename} -> {name}")
         self.convert[orig_typename] = name
 
-    def choicedef(self, tree):
+    def choice_def(self, tree):
         self.add(tree.children[0])
 
     def tuple_struct(self, tree):
         self.add(tree.children[0])
 
-    def enumdef(self, tree):
+    def enum_def(self, tree):
         self.add(tree.children[0])
 
     def struct(self, tree):
@@ -65,7 +65,7 @@ class TypeNameFinder(Visitor):
 #
 # For Sequence-Of-like IE containers, we convert
 #
-#   sequenceof
+#   sequence_of
 #     1
 #     maxnoofIndividualF1ConnectionsToReset
 #     single_ie_container UE-associatedLogicalF1-ConnectionItemRes
@@ -90,7 +90,7 @@ class IeContainerMerger(Transformer):
             tree.data = "ie_container_sequence"
         return tree
 
-    def sequenceof(self, tree):
+    def sequence_of(self, tree):
         if len(tree.children) == 3 and isinstance(tree.children[2], Tree) and tree.children[2].data == "single_ie_container":
             tree.children[2] = self.ie_dict[tree.children[2].children[0]].children[0]
             tree.data = "ie_container_sequence_of"
@@ -102,8 +102,8 @@ class IeContainerMerger(Transformer):
 
 @v_args(tree=True)
 class Remover(Transformer):
-    def objectdef(self, tree):
-        print("Removing objectdef ", tree.children[0])
+    def object_def(self, tree):
+        print("Removing object_def ", tree.children[0])
         return Discard
 
 
@@ -140,7 +140,7 @@ class TypeTransformer(Transformer):
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
-    def choicefield(self, tree):
+    def choice_field(self, tree):
         tree = self.transform_type(tree)
         tree.children[0] = pascal_case(tree.children[0])
         return tree
@@ -154,11 +154,11 @@ class TypeTransformer(Transformer):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
-    def choicedef(self, tree):
+    def choice_def(self, tree):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
-    def enumdef(self, tree):
+    def enum_def(self, tree):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
@@ -174,7 +174,7 @@ class TypeTransformer(Transformer):
             tree.children[type_index] = self.convert(typename)
         elif typ.data == 'enumerated':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('enumdef', [name, typ])
+            new_def = Tree('enum_def', [name, typ])
             self.extra_defs.append(new_def)
             tree.children[type_index] = name
         elif typ.data == 'sequence':
@@ -193,12 +193,12 @@ class TypeTransformer(Transformer):
         self.transform_bounds(tree)
         return Tree("ie_container_sequence_of", tree.children)
 
-    def sequenceof(self, tree):
+    def sequence_of(self, tree):
         item = tree.children[2]
         self.transform_bounds(tree)
         item = self.convert(item)
         tree.children[2] = item
-        return Tree("sequenceof", tree.children)
+        return Tree("sequence_of", tree.children)
 
     def transform_bounds(self, tree):
         ub = 18446744073709551615
@@ -236,7 +236,7 @@ class TypeTransformer(Transformer):
 
         return (lb, ub, extensible)
 
-    def namedvalues(self, tree):
+    def named_values(self, tree):
         return Discard
 
     def integer(self, tree):
@@ -264,15 +264,15 @@ class TypeTransformer(Transformer):
         self.transform_bounds(tree)
         return Tree("BitString", tree.children)
 
-    def printablestring(self, tree):
+    def printable_string(self, tree):
         self.transform_bounds(tree)
         return Tree("PrintableString", tree.children)
 
-    def utf8string(self, tree):
+    def utf8_string(self, tree):
         self.transform_bounds(tree)
         return Tree("UTF8String", tree.children)
 
-    def visiblestring(self, tree):
+    def visible_string(self, tree):
         self.transform_bounds(tree)
         return Tree("VisibleString", tree.children)
 
@@ -297,7 +297,7 @@ class TypeTransformer(Transformer):
 
 def transform(mut_tree, constants):
     try:
-        print("---- Removing ignored objectdefs ----")
+        print("---- Removing ignored object_defs ----")
         mut_tree = Remover().transform(mut_tree)
 
         print("---- Finding typenames ----")
@@ -351,13 +351,13 @@ EventTrigger ::= CHOICE {
 """, """\
 document
   None
-  choicedef
+  choice_def
     EventTrigger
     choice
-      choicefield
+      choice_field
         BlahBla
         null
-      choicefield
+      choice_field
         ShortMacroEnbId
         BitString
           18
@@ -420,7 +420,7 @@ document
           1099511627775
       field
         foo
-        sequenceof
+        sequence_of
           1
           3
           OverloadStartNssaiItem
@@ -436,7 +436,7 @@ document
           ProtocolExtensionContainer
           WLANMeasurementConfiguration-ExtIEs
       extension_marker
-  enumdef
+  enum_def
     WlanRtt
     enumerated
       enum_item\tThing1
@@ -503,7 +503,7 @@ document
       field
         subcarrier_spacing
         SubcarrierSpacing1
-  enumdef
+  enum_def
     SubcarrierSpacing
     enumerated
       enum_item\tKHz15
@@ -515,7 +515,7 @@ document
       enum_item\tSpare2
       enum_item\tSpare1
       extension_marker
-  enumdef
+  enum_def
     SubcarrierSpacing1
     enumerated
       enum_item\tKHz15
@@ -553,13 +553,13 @@ document
         SrsResourceSetList1
   tuple_struct
     SrsResourceSetList
-    sequenceof
+    sequence_of
       1
       2
       Foo
   tuple_struct
     SrsResourceSetList1
-    sequenceof
+    sequence_of
       1
       3
       Foo
@@ -634,7 +634,7 @@ document
   None
   tuple_struct
     ActivatedCellsToBeUpdatedList
-    sequenceof
+    sequence_of
       1
       512
       ActivatedCellsToBeUpdatedListItem

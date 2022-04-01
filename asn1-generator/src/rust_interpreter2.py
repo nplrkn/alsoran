@@ -30,7 +30,7 @@ def type_and_constraints(typ):
         typ = typ.data
         ext = "false"
 
-        if typ in ["sequenceof", "ie_container_sequence_of"]:
+        if typ in ["sequence_of", "ie_container_sequence_of"]:
             seqof = typ
             inner = bounds[-1]
             extra_type = type_and_constraints(inner)[0]
@@ -172,7 +172,7 @@ class ChoiceFields(Interpreter):
     def __init__(self):
         self.choice_fields = ""
 
-    def choicefield(self, tree):
+    def choice_field(self, tree):
         name = tree.children[0]
         typ = tree.children[1]
 
@@ -196,7 +196,7 @@ class ChoiceFields(Interpreter):
 #         self.fields_to = ""
 #         self.field_index = 0
 
-#     def choicefield(self, tree):
+#     def choice_field(self, tree):
 #         name = tree.children[0]
 #         (typ, constraints, _) = type_and_constraints(tree.children[1])
 
@@ -227,7 +227,7 @@ class ChoiceFieldsFrom(Interpreter):
         self.fields_from = ""
         self.field_index = 0
 
-    def choicefield(self, tree):
+    def choice_field(self, tree):
         name = tree.children[0]
         (typ, constraints, _, _) = type_and_constraints(tree.children[1])
 
@@ -378,7 +378,7 @@ class StructInterpreter(Interpreter):
     def extended_items(self, tree):
         pass
 
-    def enumdef(self, tree):
+    def enum_def(self, tree):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
@@ -407,7 +407,7 @@ impl AperCodec for {name} {{
 """
         return name
 
-    def choicedef(self, tree):
+    def choice_def(self, tree):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
@@ -593,8 +593,8 @@ impl AperCodec for {orig_name} {{
             comment = " - " + comment
         self.outfile += "// " + tree.children[0] + comment + "\n"
 
-    def objectdef(self, tree):
-        print("Warning - objectdef not implemented")
+    def object_def(self, tree):
+        print("Warning - object_def not implemented")
 
     def extension_container(self, tree):
         pass

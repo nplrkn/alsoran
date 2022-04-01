@@ -11,7 +11,7 @@ class Constants(Interpreter):
     def __init__(self):
         self.constants = dict()
 
-    def constantdef(self, tree):
+    def constant_def(self, tree):
         key = tree.children[0].value
         int_value = int(tree.children[1].value)
         self.constants[key] = int_value
