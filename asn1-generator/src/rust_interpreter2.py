@@ -152,7 +152,7 @@ class EnumFields(Interpreter):
         self.variants = 0
         self.extensible = False
 
-    def enum_item(self, tree):
+    def enum_field(self, tree):
         self.variants += 1
         self.enum_fields += f"""\
     {tree.children[0]},

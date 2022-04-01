@@ -8,9 +8,9 @@ NEWLINE:                "\n"
 %ignore NEWLINE
 
 IDENTIFIER:             ("a".."z" | "A".."Z" | DIGIT | "-")+
-_IDENTIFIER:             ("a".."z" | "A".."Z" | DIGIT | "-")+
-_identifier:            IDENTIFIER
 INTEGER:                "-"? "0" | "1".."9"("0".."9")*
+_IDENTIFIER:            IDENTIFIER
+_identifier:            IDENTIFIER
 BOUND:                  INTEGER | IDENTIFIER
 _OID:                   /{[^}]+}/
 _PROTOCOL_IES:          /\w+-PROTOCOL-IES/
@@ -22,8 +22,8 @@ extension_marker:       "..." [","]
 document:               [module _OID _begin ["IMPORTS" _IMPORTS]] _definitions ["END"]
 module:                 IDENTIFIER
 _begin:                 "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
-_definitions:           (tuple_struct | struct | enum_def | choice_def | constant_def | object_def | protocol_ies)+
 
+_definitions:           (tuple_struct | struct | enum_def | choice_def | constant_def | object_def | protocol_ies)+
 ?assign:                IDENTIFIER "::="
 tuple_struct:           assign _primitive
 struct:                 assign sequence
@@ -33,17 +33,30 @@ constant_def:           IDENTIFIER _IDENTIFIER "::=" INTEGER
 object_def.0:           IDENTIFIER _identifier "::=" ies
 protocol_ies.1:         IDENTIFIER _PROTOCOL_IES "::=" ies
 
+_comma_separated{x}:    x ("," x)* ","?
+_items{x}:              "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
+extended_items{x}:      _comma_separated{x}
+
 sequence_of:            "SEQUENCE" [_size] "OF" (IDENTIFIER | single_ie_container)
-sequence:               "SEQUENCE" _items{_field_item}
-enumerated:             "ENUMERATED" _items{enum_item}
+sequence:               "SEQUENCE" _items{_sequence_item}
+_sequence_item:         optional_field | field | extension_container | ie_container | single_ie_container
+optional_field.2:       _identifier _field_type "OPTIONAL"
+field.1:                _identifier _field_type
+
+enumerated:             "ENUMERATED" _items{enum_field}
+enum_field:              _identifier
+
 choice:                 "CHOICE" _items{_choice_item}
-integer:                "INTEGER" named_values? ["(" _ranges ")"]
+_choice_item:            choice_field | extension_container
+choice_field:           _identifier _field_type
+
+integer:                "INTEGER" named_values? ["(" _constraints ")"]
 printable_string:       "PrintableString" [_size]
 visible_string:         "VisibleString" [_size]
 utf8_string:            "UTF8String" [_size]
-bits.2:                 "BIT STRING" [_size]
+bit_string.2:           "BIT STRING" [_size]
 null:                   "NULL"
-bytes.2:                ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
+octet_string.2:         ("OCTET STRING" [_size | "(CONTAINING" IDENTIFIER ")"]) | "OBJECT IDENTIFIER"
 boolean:                "BOOLEAN"
 _inttype:               IDENTIFIER
 _objecttype:            IDENTIFIER
@@ -53,37 +66,25 @@ _primitive:             sequence_of
                         | printable_string
                         | visible_string
                         | utf8_string
-                        | bits 
-                        | bytes
+                        | bit_string 
+                        | octet_string
                         | boolean
                         | null
                         | _identifier
-
-
-_comma_separated{x}:    x ("," x)* ","?
-_items{x}:              "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
-extended_items{x}:      _comma_separated{x}
-_choice_item:            choice_field | extension_container
-choice_field:           _identifier _field_type
-_field_item:            optional_field | field | extension_container | ie_container | single_ie_container
-enum_item:              _identifier
-extended_enum_items:    enum_item+ -> extended_items
-optional_field.2:       _identifier _field_type "OPTIONAL"
-field.1:                _identifier _field_type
 _field_type:            _primitive | enumerated | sequence
 
 ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 single_ie_container.1:  "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"
 ies:                    "{" (ie | optional_ie)* [","] extension_marker? "}"
+_ie{p}:                 "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _field_type+ "PRESENCE" p "}" ["|" | ","]
 optional_ie:            _ie{"optional"} | _ie{"conditional"}
 ie:                      _ie{"mandatory"}
-_ie{p}:                 "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _field_type+ "PRESENCE" p "}" ["|" | ","]
 
 container:              _identifier "{" "{" _identifier "}" "}" 
 extension_container.0:  _identifier container "OPTIONAL"? ","?
 
-_size:                  "(" "SIZE" "(" _ranges ")" ")"
-_ranges:                _range_options+
+_size:                  "(" "SIZE" "(" _constraints ")" ")"
+_constraints:           _range_options+
 _range_options:         _range["|" _range] * [","]
 _range:                 extension_marker | (BOUND [".." BOUND])        
 

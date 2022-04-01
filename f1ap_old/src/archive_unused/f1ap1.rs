@@ -2397,7 +2397,7 @@ pub struct FiveGsTac(pub Vec<u8>);
 #[derive(Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE", extensible = false, optional_fields = 1)]
 pub struct FlowsMappedToDrbItem {
-    pub qo_s_flow_identifier: QoSFlowIdentifier,
+    pub qo_s_flow_IDENTIFIER: QoSFlowIdentifier,
     pub qo_s_flow_level_qo_s_parameters: QoSFlowLevelQoSParameters,
     #[asn(optional_idx = 0)]
     pub ie_extensions: Option<FlowsMappedToDrbItemIeExtensions>,
@@ -2410,7 +2410,7 @@ pub struct FlowsMappedToDrbList(pub Vec<FlowsMappedToDrbItem>);
 #[derive(Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE", extensible = true, optional_fields = 1)]
 pub struct FlowsMappedToSldrbItem {
-    pub pc5_qo_s_flow_identifier: Pc5QoSFlowIdentifier,
+    pub pc5_qo_s_flow_IDENTIFIER: Pc5QoSFlowIdentifier,
     #[asn(optional_idx = 0)]
     pub ie_extensions: Option<FlowsMappedToSldrbItemIeExtensions>,
 }
@@ -3963,7 +3963,7 @@ impl NotificationControl {
 #[derive(Clone, Debug, AperCodec)]
 #[asn(type = "SEQUENCE", extensible = true, optional_fields = 1)]
 pub struct NotificationInformation {
-    pub message_identifier: MessageIdentifier,
+    pub message_IDENTIFIER: MessageIdentifier,
     pub serial_number: SerialNumber,
     #[asn(optional_idx = 0)]
     pub ie_extensions: Option<NotificationInformationIeExtensions>,
@@ -4898,7 +4898,7 @@ pub struct RachReportContainer(pub Vec<u8>);
 pub struct RachReportInformationItem {
     pub rach_report_container: RachReportContainer,
     #[asn(optional_idx = 0)]
-    pub ue_assitant_identifier: Option<GnbDuUeF1apId>,
+    pub ue_assitant_IDENTIFIER: Option<GnbDuUeF1apId>,
     #[asn(optional_idx = 1)]
     pub ie_extensions: Option<RachReportInformationItemIeExtensions>,
 }
@@ -5007,7 +5007,7 @@ impl RlcMode {
 pub struct RlfReportInformationItem {
     pub nruerlf_report_container: NruerlfReportContainer,
     #[asn(optional_idx = 0)]
-    pub ue_assitant_identifier: Option<GnbDuUeF1apId>,
+    pub ue_assitant_IDENTIFIER: Option<GnbDuUeF1apId>,
     #[asn(optional_idx = 1)]
     pub ie_extensions: Option<RlfReportInformationItemIeExtensions>,
 }

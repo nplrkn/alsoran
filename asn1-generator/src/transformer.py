@@ -131,7 +131,7 @@ class TypeTransformer(Transformer):
         tree.children += self.extra_defs
         return tree
 
-    def enum_item(self, tree):
+    def enum_field(self, tree):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
@@ -260,7 +260,7 @@ class TypeTransformer(Transformer):
                 t = "u64"
         return Tree(t, tree.children)
 
-    def bits(self, tree):
+    def bit_string(self, tree):
         self.transform_bounds(tree)
         return Tree("BitString", tree.children)
 
@@ -276,7 +276,7 @@ class TypeTransformer(Transformer):
         self.transform_bounds(tree)
         return Tree("VisibleString", tree.children)
 
-    def bytes(self, tree):
+    def octet_string(self, tree):
         if tree.children != None:
             self.transform_bounds(tree)
         return Tree("Vec<u8>", tree.children)
@@ -439,10 +439,10 @@ document
   enum_def
     WlanRtt
     enumerated
-      enum_item\tThing1
+      enum_field\tThing1
       extension_marker
       extended_items
-        enum_item\tThing2
+        enum_field\tThing2
   struct
     N2
     sequence
@@ -506,22 +506,22 @@ document
   enum_def
     SubcarrierSpacing
     enumerated
-      enum_item\tKHz15
-      enum_item\tKHz30
-      enum_item\tKHz60
-      enum_item\tKHz120
-      enum_item\tKHz240
-      enum_item\tSpare3
-      enum_item\tSpare2
-      enum_item\tSpare1
+      enum_field\tKHz15
+      enum_field\tKHz30
+      enum_field\tKHz60
+      enum_field\tKHz120
+      enum_field\tKHz240
+      enum_field\tSpare3
+      enum_field\tSpare2
+      enum_field\tSpare1
       extension_marker
   enum_def
     SubcarrierSpacing1
     enumerated
-      enum_item\tKHz15
-      enum_item\tKHz30
-      enum_item\tKHz60
-      enum_item\tKHz120
+      enum_field\tKHz15
+      enum_field\tKHz30
+      enum_field\tKHz60
+      enum_field\tKHz120
       extension_marker
 """)
 
