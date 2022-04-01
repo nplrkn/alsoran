@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from rust_interpreter2 import generate_structs
+from rust_interpreter import generate_structs
 from constants import get_constants_from_file
 
 COPYRIGHT = "// Copyright (c) Nicholas Larkin\n"

@@ -5,7 +5,7 @@ from lark.visitors import Transformer, Visitor, Discard
 from case import pascal_case, snake_case
 from lark.lexer import Token
 from lark import Tree, v_args
-from parser import parse_string, parse_file
+from parser import parse_string
 
 
 # Add a new type name and ensure it is unique

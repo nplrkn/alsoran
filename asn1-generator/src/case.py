@@ -33,8 +33,3 @@ def pascal_case(s):
     words = [word.capitalize() for word in split_words(s)]
     s = ''.join(words)
     return s
-
-
-# def camel_case(s):
-#     s = pascal_case(s)
-#     return s[0].lower() + s[1:]

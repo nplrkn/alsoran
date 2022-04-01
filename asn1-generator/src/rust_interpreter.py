@@ -4,9 +4,8 @@ import sys
 from pickle import FALSE
 import unittest
 from lark.visitors import Interpreter
-from case import pascal_case, snake_case
-from lark.lexer import Token
-from lark import Tree, Lark
+from case import snake_case
+from lark import Tree
 from parser import parse_string, parse_file
 from transformer import transform
 
@@ -160,9 +159,6 @@ class EnumFields(Interpreter):
 
     def extension_marker(self, _tree):
         self.extensible = True
-#         self.enum_fields += f"""\
-#     _Extended,
-# """
 
     def extended_items(self, _tree):
         pass
@@ -181,11 +177,6 @@ class ChoiceFields(Interpreter):
         self.choice_fields += f"""\
     {name}{"("+typ+")" if typ != "null" else ""},
 """
-
-#     def extension_container(self, tree):
-#         self.choice_fields += f"""\
-#     _Extended,
-# """
 
     def extension_marker(self, tree):
         print("Warning - extensible CHOICE not implemented")
@@ -368,7 +359,7 @@ class IeFields(Interpreter):
 MUT_OPTIONALS = """let mut optionals = BitString::with_len({num_optionals});"""
 
 
-class StructInterpreter(Interpreter):
+class RustInterpreter(Interpreter):
 
     def __init__(self):
         # self.output = ""
@@ -447,16 +438,6 @@ impl AperCodec for {name} {{
         print(orig_name)
         name = orig_name
         inner = type_and_constraints(tree.children[1])[0]
-        # # inner = tree.children[1].data
-        # ub = None
-        # lb = None
-        # if len(tree.children[1].children) > 2:
-        #     ub = tree.children[1].children[1]
-        # if len(tree.children[1].children) > 1:
-        #     lb = tree.children[1].children[0]
-        # if ub == None:
-        #     ub = lb
-
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone, Debug)]
@@ -473,11 +454,6 @@ impl AperCodec for {name} {{
 
     def ie(self, tree):
         pass
-        # name = snake_case(tree.children[0])
-        # self.output += "  pub " + name + ": "
-        # s = StructInterpreter()
-        # self.output += s.get_type(tree) + ",\n"
-        # assert(s.outfile == "")  # Can't handle inline enum here
 
     def pdu(self, tree):
         orig_name = tree.children[0]
@@ -593,8 +569,8 @@ impl AperCodec for {orig_name} {{
             comment = " - " + comment
         self.outfile += "// " + tree.children[0] + comment + "\n"
 
-    def object_def(self, tree):
-        print("Warning - object_def not implemented")
+    # def object_def(self, tree):
+    #     print("Warning - object_def not implemented")
 
     def extension_container(self, tree):
         pass
@@ -607,13 +583,13 @@ def generate(tree, constants=dict(), verbose=False):
     tree = transform(tree, constants)
     if verbose:
         print(tree.pretty())
-    visited = StructInterpreter()
+    visited = RustInterpreter()
     print("---- Generating ----")
     visited.visit(tree)
     return visited.outfile
 
 
-def generate_structs(input_file="f1ap/asn1/F1AP-PDU-Contents.asn", constants=dict(), verbose=False):
+def generate_structs(input_file, constants=dict(), verbose=False):
     tree = parse_file(input_file)
     if verbose:
         print(tree.pretty())

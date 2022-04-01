@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
-import unittest
 from lark.visitors import Interpreter
-from lark.lexer import Token
-from lark import Tree, v_args
-from parser import parse_string, parse_file
+from parser import parse_file
 
 
 class Constants(Interpreter):
