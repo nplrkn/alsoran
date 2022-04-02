@@ -14,11 +14,17 @@ def bool_to_rust(b):
     return "true" if b else "false"
 
 
+class TypeInfo:
+    def __init__(self):
+        self.constraints = "None, None, false"
+        self.extra_type = None
+        self.seqof = None
+        self.typ = None
+
+
 # TODO - replace with a visitor?
 def type_and_constraints(typ):
-    constraints = "None, None, false"
-    extra_type = None
-    seqof = None
+    type_info = TypeInfo()
 
     if isinstance(typ, Tree):
         if typ.data in ["ie", "optional_ie"]:
@@ -26,15 +32,15 @@ def type_and_constraints(typ):
             return type_and_constraints(typ.children[3])
 
         bounds = typ.children
-        typ = typ.data
+        type_info.typ = typ.data
         ext = "false"
 
         if typ in ["sequence_of", "ie_container_sequence_of"]:
-            seqof = typ
+            type_info.seqof = typ
             inner = bounds[-1]
-            extra_type = type_and_constraints(inner)[0]
+            type_info.extra_type = type_and_constraints(inner).typ
             bounds = bounds[0: -1]
-            typ = f"Vec<{extra_type}>"
+            type_info.typ = f"Vec<{type_info.extra_type}>"
 
         if len(bounds) > 1:
             MAX_U64 = 18446744073709551615
@@ -57,24 +63,24 @@ def type_and_constraints(typ):
             else:
                 ub = f"Some({ub})"
 
-            constraints = f"Some({lb}), {ub}, {ext}"
+            type_info.constraints = f"Some({lb}), {ub}, {ext}"
 
     if typ in ["VisibleString", "PrintableString", "UTF8String"]:
-        extra_type = snake_case(typ)
-        typ = "String"
+        type_info.extra_type = snake_case(typ)
+        type_info.typ = "String"
 
-    return (typ, constraints, extra_type, seqof)
+    return type_info
 
 
 def decode_expression(tree):
-    (typ, constraints, extra_type, seqof) = type_and_constraints(tree)
-    if seqof:
+    type_info = type_and_constraints(tree)
+    if type_info.seqof:
         ie_extra_lines = """
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;""" if seqof == "ie_container_sequence_of" else ""
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;""" if type_info.seqof == "ie_container_sequence_of" else ""
         return f"""{{
-            let length = aper::decode::decode_length_determinent(data, {constraints})?;
+            let length = aper::decode::decode_length_determinent(data, {type_info.constraints})?;
             let mut items = vec![];
             for _ in 0..length {{\
 {ie_extra_lines}
@@ -82,20 +88,58 @@ def decode_expression(tree):
             }}
             items
         }}"""
-    elif typ == "Vec<u8>":
-        return f"aper::decode::decode_octetstring(data, {constraints})?"
-    elif typ == "BitString":
-        return f"aper::decode::decode_bitstring(data, {constraints})?"
-    elif typ == "String":
-        return f"aper::decode::decode_{extra_type}(data, {constraints})?"
-    elif typ == "i128":
-        return f"aper::decode::decode_integer(data, {constraints})?.0"
-    elif typ in ["u8", "u16", "u32", "u64"]:
-        return f"aper::decode::decode_integer(data, {constraints})?.0 as {typ}"
-    elif typ == "bool":
+    elif type_info.typ == "Vec<u8>":
+        return f"aper::decode::decode_octetstring(data, {type_info.constraints})?"
+    elif type_info.typ == "BitString":
+        return f"aper::decode::decode_bitstring(data, {type_info.constraints})?"
+    elif type_info.typ == "String":
+        return f"aper::decode::decode_{type_info.extra_type}(data, {type_info.constraints})?"
+    elif type_info.typ == "i128":
+        return f"aper::decode::decode_integer(data, {type_info.constraints})?.0"
+    elif type_info.typ in ["u8", "u16", "u32", "u64"]:
+        return f"aper::decode::decode_integer(data, {type_info.constraints})?.0 as {type_info.typ}"
+    elif type_info.typ == "bool":
         return f"aper::decode::decode_bool(data)?"
     else:
-        return f"""{typ}::decode(data)?"""
+        return f"""{type_info.typ}::decode(data)?"""
+
+
+def encode_expression_fn(tree):
+    type_info = type_and_constraints(tree)
+    if type_info.seqof == "ie_container_sequence_of":
+        return lambda x, data="data": f"""\
+aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.len())?;
+        for x in {x} {{
+            let ie = &mut AperCodecData::new();
+            {encode_expression_fn(tree.children[2])("x", "ie")}?;
+            aper::encode::encode_integer({data}, Some(0), Some(65535), false, (111, false))?;
+            Criticality::Ignore.encode({data})?;
+            aper::encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
+            {data}.append_aligned(ie)?;
+        }}"""
+    elif type_info.seqof:
+        return lambda x, data="data": f"""\
+aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.len())?;
+        for x in {x} {{
+            {encode_expression_fn(tree.children[2])("x", "ie")}?;
+        }}"""
+
+    if type_info.typ == "Vec<u8>":
+        format_string = f"aper::encode::encode_octetstring({{data}}, {type_info.constraints}, {{value}})"
+    elif type_info.typ == "BitString":
+        format_string = f"aper::encode::encode_bitstring({{data}}, {type_info.constraints}, {{value}})"
+    elif type_info.typ == "String":
+        format_string = f"aper::encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, {{value}})"
+    elif type_info.typ == "i128":
+        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, ({{value}}, false))"
+    elif type_info.typ in ["u8", "u16", "u32", "u64"]:
+        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, ({{value}}, false))"
+    elif type_info.typ == "bool":
+        format_string = f"aper::encode::encode_bool({{data}}, {{value}})"
+    else:
+        format_string = f"""{{value}}.encode({{data}})"""
+
+    return lambda x, data="data": format_string.format(value=x, data=data)
 
 
 class StructFieldsFrom(Interpreter):
@@ -167,6 +211,7 @@ class EnumFields(Interpreter):
 class ChoiceFields(Interpreter):
     def __init__(self):
         self.choice_fields = ""
+        self.extensible = False
 
     def choice_field(self, tree):
         name = tree.children[0]
@@ -179,38 +224,30 @@ class ChoiceFields(Interpreter):
 """
 
     def extension_marker(self, tree):
-        print("Warning - extensible CHOICE not implemented")
+        self.extensible = True
 
 
-# class ChoiceFieldsTo(Interpreter):
-#     def __init__(self):
-#         self.fields_to = ""
-#         self.field_index = 0
+class ChoiceFieldsTo(Interpreter):
+    def __init__(self, num_choices, extensible):
+        self.fields_to = ""
+        self.field_index = 0
+        self.num_choices = num_choices
+        self.extensible = extensible
 
-#     def choice_field(self, tree):
-#         name = tree.children[0]
-#         (typ, constraints, _) = type_and_constraints(tree.children[1])
+    def choice_field(self, tree):
+        name = tree.children[0]
+        type_info = type_and_constraints(tree.children[1])
 
-#         if typ != "null":
-#             self.fields_to += f"""\
-#             Self::{name}(x) => {{
-#                 {to_aper_unconstrained(f"({self.field_index} as u8)")}?;
-#                 {to_aper("x", constraints)}?;
-#             }}
-# """
-#         else:
-#             self.fields_to += f"""\
-#             Self::{name} => {{
-#                 {to_aper_unconstrained(f"({self.field_index} as u8)")}?;
-#             }}
-# """
-#         self.field_index += 1
+        self.fields_to += f"""\
+            Self::{name}(x) => {{
+                aper::encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, ({self.field_index}, false))?;
+                {encode_expression_fn(tree.children[1])("x") if type_info.typ != "null" else ""}
+            }}
+"""
+        self.field_index += 1
 
-#     def extension_container(self, tree):
-#         #         self.fields_to += f"""\
-#         #             Self::_Extended => return Err(EncodeError::NotImplemented),
-#         # """
-#         self.field_index += 1
+    def extension_container(self, tree):
+        self.field_index += 1
 
 
 class ChoiceFieldsFrom(Interpreter):
@@ -220,7 +257,7 @@ class ChoiceFieldsFrom(Interpreter):
 
     def choice_field(self, tree):
         name = tree.children[0]
-        (typ, constraints, _, _) = type_and_constraints(tree.children[1])
+        typ = type_and_constraints(tree.children[1]).typ
 
         if typ != "null":
             self.fields_from += f"""\
@@ -282,7 +319,7 @@ class IeFields(Interpreter):
         name = tree.children[0]
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
-        (typ, constraints, _, _) = type_and_constraints(tree.children[3])
+        typ = type_and_constraints(tree.children[3]).typ
         self.struct_fields += f"""\
     pub {name}: {typ},
 """
@@ -310,7 +347,7 @@ class IeFields(Interpreter):
         id = tree.children[1]
         criticality = tree.children[2].capitalize()
         typ = tree.children[3]
-        (typ, constraints, _, _) = type_and_constraints(tree.children[3])
+        typ = type_and_constraints(tree.children[3]).typ
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
@@ -393,6 +430,9 @@ impl AperCodec for {name} {{
         }}
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }}
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+        aper::encode::encode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)}, (*self as i128, false))
+    }}
 }}
 
 """
@@ -407,8 +447,9 @@ impl AperCodec for {name} {{
 
         fields_from_interpreter = ChoiceFieldsFrom()
         fields_from_interpreter.visit(tree.children[1])
-        # fields_to_interpreter = ChoiceFieldsTo()
-        # fields_to_interpreter.visit(tree.children[1])
+        fields_to_interpreter = ChoiceFieldsTo(
+            fields_from_interpreter.field_index - 1, field_interpreter.extensible)
+        fields_to_interpreter.visit(tree.children[1])
 
         self.outfile += f"""
 // {orig_name}
@@ -420,13 +461,18 @@ pub enum {name} {{
 impl AperCodec for {name} {{
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
         }}
         match idx {{
 {fields_from_interpreter.fields_from}\
             _ => Err(AperCodecError::new("Unknown choice idx"))
+        }}
+    }}
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+        match self {{
+{fields_to_interpreter.fields_to}\
         }}
     }}
 }}
@@ -437,7 +483,7 @@ impl AperCodec for {name} {{
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
-        inner = type_and_constraints(tree.children[1])[0]
+        inner = type_and_constraints(tree.children[1]).typ
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone, Debug)]
@@ -447,6 +493,9 @@ impl AperCodec for {name} {{
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
         Ok(Self({decode_expression(tree.children[1])}))
+    }}
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+        {encode_expression_fn(tree.children[1])("self.0")}
     }}
 }}
 
@@ -634,6 +683,9 @@ impl AperCodec for TriggeringMessage {
         }
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_enumerated(data, Some(0), Some(2), false, (*self as i128, false))
+    }
 }
 
 """
@@ -675,6 +727,17 @@ impl AperCodec for WlanMeasurementConfiguration {
             wlan_rtt,
         })
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(self.wlan_rtt.is_some());
+        optionals.push(false);
+        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        self.wlan_meas_config.encode(data)?;
+        if let Some(x) = &self.wlan_rtt {
+            x.encode(data)?;
+        }
+        Ok(())
+    }
 }
 
 
@@ -693,6 +756,9 @@ impl AperCodec for WlanRtt {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
     }
 }
 
@@ -714,6 +780,9 @@ impl AperCodec for LteueRlfReportContainer {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(data, None, None, false)?))
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_octetstring(data, None, None, false, self.0)
+    }
 }
 
 """
@@ -734,6 +803,9 @@ impl AperCodec for MaximumDataBurstVolume {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(0), Some(4095), true)?.0))
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_integer(data, Some(0), Some(4095), true, (self.0, false))
+    }
 }
 
 """
@@ -753,6 +825,9 @@ impl AperCodec for MobilityInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_bitstring(data, Some(16), Some(16), false)?))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, self.0)
     }
 }
 
@@ -785,6 +860,9 @@ impl AperCodec for MaximumIntegrityProtectedDataRate {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
     }
 }
 
@@ -824,8 +902,23 @@ impl AperCodec for EventTrigger {
             _ => Err(AperCodecError::new("Unknown choice idx"))
         }
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::OutOfCoverage(x) => {
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0)?;
+                x.encode(data)
+            },
+            Self::EventL1LoggedMdtConfig => {
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1)?
+                Ok(())
+            },
+            Self::ShortMacroEnbId(x) => {
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2)?;
+                aper::encode::encode_bitstring(data, Some(18), Some(18), false, x)
+            }
+        }
+    }
 }
-
 
 // OutOfCoverage
 # [derive(Clone, Debug, Copy, TryFromPrimitive)]
@@ -842,6 +935,9 @@ impl AperCodec for OutOfCoverage {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
     }
 }
 
@@ -896,6 +992,37 @@ impl AperCodec for PduSessionResourceSetupRequest {
             ran_paging_priority,
         })
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let len = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.amf_ue_ngap_id.encode(&mut ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        Criticality::Reject.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie)?;
+        num_ies += 1;
+
+        if let Some(x) = &self.ran_paging_priority {
+            let ie = &mut AperCodecData::new();
+            aper::encode::encode_octetstring(ie, None, None, false, x)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (83, false))?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie)?;
+            num_ies += 1;
+        }
+
+        let container = &mut AperCodecData::new();
+        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(),false))?;
+        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
+        container.append_aligned(ies)?;
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, container.length_in_bytes())?;
+        data.append_aligned(container)
+    }
 }
 
 """, constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
@@ -927,11 +1054,19 @@ impl AperCodec for GnbId {
             _ => Err(AperCodecError::new("Unknown choice idx"))
         }
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::GnbId(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_bitstring(data, Some(22), Some(32), false, x)
+            }
+        }
+    }
 }
 
 """)
 
-    def test_bug(self):
+    def test_choice(self):
         self.should_generate("""\
 PrivateIE-ID	::= CHOICE {
 	local				INTEGER (0..65535),
@@ -959,6 +1094,18 @@ impl AperCodec for PrivateIeId {
             _ => Err(AperCodecError::new("Unknown choice idx"))
         }
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::Local(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_integer(data, Some(0), Some(65535), false, (x, false))
+            }
+            Self::Global(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, (1, false))?;
+                aper::encode::encode_octetstring(data, None, None, false, x)
+            }
+        }
+    }
 }
 
 """)
@@ -977,6 +1124,9 @@ impl AperCodec for ExpectedActivityPeriod {
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(1), Some(50), true)?.0))
     }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_integer(data, Some(1), Some(50), true, (self.0, false))
+    }
 }
 
 """)
@@ -994,6 +1144,9 @@ impl AperCodec for UriAddress {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
         Ok(Self(aper::decode::decode_visible_string(data, None, None, false)?))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_visible_string(data, None, None, false, &self.0)
     }
 }
 
@@ -1018,6 +1171,13 @@ impl AperCodec for AdditionalDluptnlInformationForHoList {
             }
             items
         }))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_length_determinent(data, Some(1), Some(50), false, self.0.len())?;
+        for x in self.0 {
+            x.encode(data)?;
+        }
+        Ok(())
     }
 }
 
@@ -1053,6 +1213,8 @@ impl AperCodec for DlprsResourceCoordinates {
         Ok(Self {
             listof_dl_prs_resource_set_arp,
         })
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
     }
 }
 
@@ -1160,6 +1322,18 @@ impl AperCodec for BhRoutingInformationAddedList {
             }
             items
         }))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
+        for x in self.0 {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(data, Some(0), Some(65535), false, (284, false))?;
+            Criticality::Ignore.encode(data)?;
+            aper::encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+            data.append_aligned(ie)?;
+        }
+        Ok(())
     }
 }
 
