@@ -244,20 +244,28 @@ class TypeTransformer(Transformer):
 
         if extensible:
             t = "i128"
-        else:
-            try:
-                range = ub-lb
-            except:
-                print("Warning: unable to determine size - using u8")
-                range = 255
-            if range < 256:
-                t = "u8"
-            elif range < 65536:
-                t = "u16"
-            elif range < 4294967295:
-                t = "u32"
+        elif lb < 0:
+            if lb >= -128 and ub <= 127:
+                t = "i8"
+            elif lb >= -32768 and ub <= 32767:
+                t = "i16"
+            elif lb >= -2147483648 and ub <= 2147483647:
+                t = "i32"
+            elif lb >= -9223372036854775808 and ub <= 9223372036854775807:
+                t = "i64"
             else:
-                t = "u64"
+                t = "i128"
+        elif ub < 256:
+            t = "u8"
+        elif ub < 65536:
+            t = "u16"
+        elif ub < 4294967295:
+            t = "u32"
+        elif ub <= 18446744073709551615:
+            t = "u64"
+        else:
+            t = "i128"
+
         return Tree(t, tree.children)
 
     def bit_string(self, tree):
@@ -662,6 +670,19 @@ document
         reject
         UeAssociatedLogicalF1ConnectionItem
 """, constants={"maxnoofIndividualF1ConnectionsToReset": 63356, "id-UE-associatedLogicalF1-ConnectionItem": 80})
+
+    def test_negative_integer(self):
+        self.should_generate("""\
+foo ::= INTEGER(-1..0)
+""", """\
+document
+  None
+  tuple_struct
+    Foo
+    i8
+      -1
+      0
+""")
 
 
 if __name__ == '__main__':

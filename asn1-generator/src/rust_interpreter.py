@@ -104,7 +104,7 @@ def decode_expression(tree):
         return f"aper::decode::decode_{type_info.extra_type}(data, {type_info.constraints})?"
     elif type_info.typ == "i128":
         return f"aper::decode::decode_integer(data, {type_info.constraints})?.0"
-    elif type_info.typ in ["u8", "u16", "u32", "u64"]:
+    elif is_non_i128_int_type(type_info.typ):
         return f"aper::decode::decode_integer(data, {type_info.constraints})?.0 as {type_info.typ}"
     elif type_info.typ == "bool":
         return f"aper::decode::decode_bool(data)?"
@@ -115,9 +115,9 @@ def decode_expression(tree):
 def encode_expression_fn(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof == "ie_container_sequence_of":
-        return lambda x, data="data": f"""\
+        return lambda x, data="data", _copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.len())?;
-        for x in {x} {{
+        for x in &{x} {{
             let ie = &mut AperCodecData::new();
             {encode_expression_fn(tree.children[2])("x", "ie")}?;
             aper::encode::encode_integer({data}, Some(0), Some(65535), false, ({type_info.inner_type_info.code}, false))?;
@@ -127,9 +127,9 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.
         }}
         Ok(())"""
     elif type_info.seqof:
-        return lambda x, data="data": f"""\
+        return lambda x, data="data", _copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.len())?;
-        for x in {x} {{
+        for x in &{x} {{
             {encode_expression_fn(tree.children[2])("x", data)}?;
         }}
         Ok(())"""
@@ -142,14 +142,14 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.
         format_string = f"aper::encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, &{{value}})"
     elif type_info.typ == "i128":
         format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, ({{value}}, false))"
-    elif type_info.typ in ["u8", "u16", "u32", "u64"]:
-        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, ({{value}}, false))"
+    elif is_non_i128_int_type(type_info.typ):
+        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, ({{copy_type_deref}}{{value}} as i128, false))"
     elif type_info.typ == "bool":
         format_string = f"aper::encode::encode_bool({{data}}, {{value}})"
     else:
         format_string = f"""{{value}}.encode({{data}})"""
 
-    return lambda x, data="data": format_string.format(value=x, data=data)
+    return lambda x, data="data", copy_type_deref="": format_string.format(value=x, data=data, copy_type_deref=copy_type_deref)
 
 
 class StructFieldsFrom(Interpreter):
@@ -249,9 +249,9 @@ class ChoiceFieldsTo(Interpreter):
         type_info = type_and_constraints(tree.children[1])
 
         self.fields_to += f"""\
-            Self::{name}(x) => {{
+            Self::{name}{"(x)" if type_info.typ != "null" else ""} => {{
                 aper::encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, ({self.field_index}, false))?;
-                {encode_expression_fn(tree.children[1])("x") if type_info.typ != "null" else ""}
+                {encode_expression_fn(tree.children[1])("x",copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
             }}
 """
         self.field_index += 1
@@ -349,7 +349,7 @@ class IeFields(Interpreter):
 """
         self.fields_to += f"""
         let ie = &mut AperCodecData::new();
-        self.{name}.encode(&mut ie)?;
+        {encode_expression_fn(tree.children[3])("self."+ name, "ie")}?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, ({id}, false))?;
         Criticality::{criticality.title()}.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -387,6 +387,14 @@ class IeFields(Interpreter):
 """
 
 
+def is_non_i128_int_type(t):
+    return t in ["i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"]
+
+
+def is_copy_type(t):
+    return is_non_i128_int_type(t) or t in ["i128", "bool"]
+
+
 class StructFieldsTo(Interpreter):
     def __init__(self):
         self.fields_to = ""
@@ -405,9 +413,12 @@ class StructFieldsTo(Interpreter):
         self.optional_bitfield += f"""\
         optionals.push(self.{name}.is_some());
 """
+        # as_ref = "" if is_copy_type(type_and_constraints(
+        #     tree.children[1]).typ) else "&"
+        as_ref = "&"
         self.fields_to += f"""\
-        if let Some(x) = &self.{name} {{
-            {encode_expression_fn(tree.children[1])("x", "data")}?;
+        if let Some(x) = {as_ref}self.{name} {{
+            {encode_expression_fn(tree.children[1])("x", "data", "*")}?;
         }}
 """
 
@@ -704,6 +715,27 @@ class TestGenerator(unittest.TestCase):
             if output != expected:
                 print(tree.pretty())
 
+    def test_simple_integer(self):
+        self.should_generate("""\
+ProcedureCode		::= INTEGER (0..255)
+""", """\
+
+// ProcedureCode
+# [derive(Clone, Debug)]
+pub struct ProcedureCode(pub u8);
+
+impl AperCodec for ProcedureCode {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        Ok(Self(aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        aper::encode::encode_integer(data, Some(0), Some(255), false, (self.0 as i128, false))
+    }
+}
+
+""")
+
     def test_enum_unextensible(self):
         input = """\
 TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuccessful-outcome }
@@ -956,7 +988,7 @@ impl AperCodec for EventTrigger {
                 x.encode(data)
             },
             Self::EventL1LoggedMdtConfig => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 1)?
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1)?;
                 Ok(())
             },
             Self::ShortMacroEnbId(x) => {
@@ -1045,7 +1077,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
-        self.amf_ue_ngap_id.encode(&mut ie)?;
+        self.amf_ue_ngap_id.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -1144,7 +1176,7 @@ impl AperCodec for PrivateIeId {
         match self {
             Self::Local(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_integer(data, Some(0), Some(65535), false, (x, false))
+                aper::encode::encode_integer(data, Some(0), Some(65535), false, (*x as i128, false))
             }
             Self::Global(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, (1, false))?;
@@ -1220,7 +1252,7 @@ impl AperCodec for AdditionalDluptnlInformationForHoList {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         aper::encode::encode_length_determinent(data, Some(1), Some(50), false, self.0.len())?;
-        for x in self.0 {
+        for x in &self.0 {
             x.encode(data)?;
         }
         Ok(())
@@ -1233,6 +1265,7 @@ impl AperCodec for AdditionalDluptnlInformationForHoList {
         self.should_generate("""\
 DLPRSResourceCoordinates ::= SEQUENCE {
 	listofDL-PRSResourceSetARP		SEQUENCE (SIZE (1.. maxnoofPRS-ResourceSets)) OF DLPRSResourceSetARP,
+    foo                             INTEGER (-5..5) OPTIONAL,
 	iE-Extensions					ProtocolExtensionContainer { { DLPRSResourceCoordinates-ExtIEs } } OPTIONAL
 }
 """, """\
@@ -1241,12 +1274,13 @@ DLPRSResourceCoordinates ::= SEQUENCE {
 # [derive(Clone, Debug)]
 pub struct DlprsResourceCoordinates {
     pub listof_dl_prs_resource_set_arp: Vec<DlprsResourceSetArp>,
+    pub foo: Option<i8>,
 }
 
 impl AperCodec for DlprsResourceCoordinates {
     type Output = DlprsResourceCoordinates;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 2)?;
         let listof_dl_prs_resource_set_arp = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
@@ -1255,20 +1289,32 @@ impl AperCodec for DlprsResourceCoordinates {
             }
             items
         };
+        let foo = if optionals[0] {
+            Some(aper::decode::decode_integer(data, Some(-5), Some(5), false)?.0 as i8)
+        } else {
+            None
+        };
 
         Ok(Self {
             listof_dl_prs_resource_set_arp,
+            foo,
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
+        optionals.push(self.foo.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, false, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, false, 2, (optionals, false))?;
         aper::encode::encode_length_determinent(data, Some(1), Some(2), false, self.0.len())?;
-        for x in self.listof_dl_prs_resource_set_arp {
+        for x in &self.listof_dl_prs_resource_set_arp {
             x.encode(data)?;
         }
+        Ok(())?;
+        if let Some(x) = &self.foo {
+            aper::encode::encode_integer(data, Some(-5), Some(5), false, (*x as i128, false))?;
+        }
+
         Ok(())
     }
 }
@@ -1306,7 +1352,7 @@ impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         aper::encode::encode_length_determinent(data, Some(1), Some(63356), false, self.0.len())?;
-        for x in self.0 {
+        for x in &self.0 {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(data, Some(0), Some(65535), false, (80, false))?;
@@ -1414,7 +1460,7 @@ impl AperCodec for BhRoutingInformationAddedList {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         aper::encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
-        for x in self.0 {
+        for x in &self.0 {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(data, Some(0), Some(65535), false, (284, false))?;
