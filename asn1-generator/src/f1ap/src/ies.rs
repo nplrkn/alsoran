@@ -17881,7 +17881,7 @@ impl AperCodec for SldrbInformation {
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, true, 0, (optionals, false))?;
         self.sldrb_qos.encode(data)?;
@@ -24680,7 +24680,7 @@ impl AperCodec for N2 {
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, 0, (optionals, false))?;
         aper::encode::encode_integer(
@@ -24724,7 +24724,7 @@ impl AperCodec for N4 {
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, 0, (optionals, false))?;
         aper::encode::encode_integer(
@@ -24767,7 +24767,7 @@ impl AperCodec for N21 {
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, 0, (optionals, false))?;
         aper::encode::encode_integer(
@@ -24811,7 +24811,7 @@ impl AperCodec for N41 {
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, 0, (optionals, false))?;
         aper::encode::encode_integer(
@@ -24854,7 +24854,7 @@ impl AperCodec for N8 {
         })
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, 0, (optionals, false))?;
         aper::encode::encode_integer(

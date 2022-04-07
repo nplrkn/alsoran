@@ -399,8 +399,20 @@ def is_copy_type(t):
 class StructFieldsTo(Interpreter):
     def __init__(self):
         self.fields_to = ""
+        self.found_optionals = False
         self.optional_bitfield = """\
+        let optionals = BitVec::new();
+"""
+
+    def add_optional_to_bitfield(self, expression):
+        if not self.found_optionals:
+            self.optional_bitfield = """\
         let mut optionals = BitVec::new();
+"""
+            self.found_optionals = True
+
+        self.optional_bitfield += f"""\
+        optionals.push({expression});
 """
 
     def field(self, tree):
@@ -411,29 +423,15 @@ class StructFieldsTo(Interpreter):
 
     def optional_field(self, tree):
         name = tree.children[0]
-        self.optional_bitfield += f"""\
-        optionals.push(self.{name}.is_some());
-"""
-        # as_ref = "" if is_copy_type(type_and_constraints(
-        #     tree.children[1]).typ) else "&"
-        as_ref = "&"
+        self.add_optional_to_bitfield(f"self.{name}.is_some()")
         self.fields_to += f"""\
-        if let Some(x) = {as_ref}self.{name} {{
+        if let Some(x) = &self.{name} {{
             {encode_expression_fn(tree.children[1])("x", "data", "*")}?;
         }}
 """
 
     def extension_container(self, tree):
-        self.optional_bitfield += f"""\
-        optionals.push(false);
-"""
-
-        # class IeFieldsTo(Interpreter):
-        #     def field(self, tree):
-        #         pass
-
-
-MUT_OPTIONALS = """let mut optionals = BitVec::new();"""
+        self.add_optional_to_bitfield("false")
 
 
 class RustInterpreter(Interpreter):
@@ -563,6 +561,8 @@ impl AperCodec for {name} {{
         # 	value			NGAP-PROTOCOL-IES.&Value			({IEsSetParam}{@id})
         # }
 
+        mut = "" if field_interpreter.struct_fields == "" else "mut "
+
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone, Debug)]
@@ -593,7 +593,7 @@ impl AperCodec for {orig_name} {{
         }})
     }}
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
-        let mut num_ies = 0;
+        let {mut}num_ies = 0;
         let ies = &mut AperCodecData::new();
 {field_interpreter.fields_to}
         let container = &mut AperCodecData::new();
@@ -1520,6 +1520,57 @@ impl AperCodec for GnbCuSystemInformation {
 }
 
 """, constants={"maxnoofSIBTypes": 32})
+
+    def test_empty_pdu(self):
+        self.should_generate("""\
+OverloadStop ::= SEQUENCE {
+	protocolIEs		ProtocolIE-Container		{ {OverloadStopIEs} },
+	...
+}
+
+OverloadStopIEs NGAP-PROTOCOL-IES ::= {	
+	...
+}
+""", """\
+
+// OverloadStop
+# [derive(Clone, Debug)]
+pub struct OverloadStop {
+}
+
+impl AperCodec for OverloadStop {
+    type Output = OverloadStop;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = aper::decode::decode_sequence_header(data, true, 0)?;
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+            }
+        }
+        Ok(Self {
+        })
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let container = &mut AperCodecData::new();
+        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(),false))?;
+        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
+        container.append_aligned(ies)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, container.length_in_bytes())?;
+        data.append_aligned(container)
+    }
+}
+
+""")
 
 
 if __name__ == '__main__':

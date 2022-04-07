@@ -9786,7 +9786,7 @@ impl AperCodec for OverloadStop {
         Ok(Self {})
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut num_ies = 0;
+        let num_ies = 0;
         let ies = &mut AperCodecData::new();
 
         let container = &mut AperCodecData::new();
