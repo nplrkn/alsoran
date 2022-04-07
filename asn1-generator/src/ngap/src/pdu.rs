@@ -79,7 +79,6 @@ impl AperCodec for PduSessionResourceSetupRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -218,7 +217,6 @@ impl AperCodec for PduSessionResourceSetupResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -348,7 +346,6 @@ impl AperCodec for PduSessionResourceReleaseCommand {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -477,7 +474,6 @@ impl AperCodec for PduSessionResourceReleaseResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -601,7 +597,6 @@ impl AperCodec for PduSessionResourceModifyRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -725,7 +720,6 @@ impl AperCodec for PduSessionResourceModifyResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -863,7 +857,6 @@ impl AperCodec for PduSessionResourceNotify {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -989,7 +982,6 @@ impl AperCodec for PduSessionResourceModifyIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -1109,7 +1101,6 @@ impl AperCodec for PduSessionResourceModifyConfirm {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -1410,7 +1401,6 @@ impl AperCodec for InitialContextSetupRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -1853,7 +1843,6 @@ impl AperCodec for InitialContextSetupResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -1983,7 +1972,6 @@ impl AperCodec for InitialContextSetupFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2105,7 +2093,6 @@ impl AperCodec for UeContextReleaseRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2202,7 +2189,6 @@ impl AperCodec for UeContextReleaseCommand {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2314,7 +2300,6 @@ impl AperCodec for UeContextReleaseComplete {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2490,7 +2475,6 @@ impl AperCodec for UeContextResumeRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2662,7 +2646,6 @@ impl AperCodec for UeContextResumeResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2812,7 +2795,6 @@ impl AperCodec for UeContextResumeFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -2935,7 +2917,6 @@ impl AperCodec for UeContextSuspendRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3052,7 +3033,6 @@ impl AperCodec for UeContextSuspendResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3162,7 +3142,6 @@ impl AperCodec for UeContextSuspendFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3368,7 +3347,6 @@ impl AperCodec for UeContextModificationRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3659,7 +3637,6 @@ impl AperCodec for UeContextModificationResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3779,7 +3756,6 @@ impl AperCodec for UeContextModificationFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3890,7 +3866,6 @@ impl AperCodec for RrcInactiveTransitionReport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -3976,7 +3951,6 @@ impl AperCodec for RetrieveUeInformation {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -4060,7 +4034,6 @@ impl AperCodec for UeInformationTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -4202,7 +4175,6 @@ impl AperCodec for RancpRelocationIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -4357,7 +4329,6 @@ impl AperCodec for HandoverRequired {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -4532,7 +4503,6 @@ impl AperCodec for HandoverCommand {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -4688,7 +4658,6 @@ impl AperCodec for HandoverPreparationFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -4985,7 +4954,6 @@ impl AperCodec for HandoverRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -5405,7 +5373,6 @@ impl AperCodec for HandoverRequestAcknowledge {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -5534,7 +5501,6 @@ impl AperCodec for HandoverFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -5644,7 +5610,6 @@ impl AperCodec for HandoverNotify {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -5782,7 +5747,6 @@ impl AperCodec for PathSwitchRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6038,7 +6002,6 @@ impl AperCodec for PathSwitchRequestAcknowledge {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6358,7 +6321,6 @@ impl AperCodec for PathSwitchRequestFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6462,7 +6424,6 @@ impl AperCodec for HandoverCancel {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6553,7 +6514,6 @@ impl AperCodec for HandoverCancelAcknowledge {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6642,7 +6602,6 @@ impl AperCodec for HandoverSuccess {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6734,7 +6693,6 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6835,7 +6793,6 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -6936,7 +6893,6 @@ impl AperCodec for UplinkRanStatusTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -7036,7 +6992,6 @@ impl AperCodec for DownlinkRanStatusTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -7171,7 +7126,6 @@ impl AperCodec for Paging {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -7427,7 +7381,6 @@ impl AperCodec for InitialUeMessage {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -7713,7 +7666,6 @@ impl AperCodec for DownlinkNasTransport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -7985,7 +7937,6 @@ impl AperCodec for UplinkNasTransport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -8124,7 +8075,6 @@ impl AperCodec for NasNonDeliveryIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -8245,7 +8195,6 @@ impl AperCodec for RerouteNasRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -8385,7 +8334,6 @@ impl AperCodec for NgSetupRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -8542,7 +8490,6 @@ impl AperCodec for NgSetupResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -8678,7 +8625,6 @@ impl AperCodec for NgSetupFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -8787,7 +8733,6 @@ impl AperCodec for RanConfigurationUpdate {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.ran_node_name {
@@ -8910,7 +8855,6 @@ impl AperCodec for RanConfigurationUpdateAcknowledge {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.criticality_diagnostics {
@@ -8984,7 +8928,6 @@ impl AperCodec for RanConfigurationUpdateFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -9102,7 +9045,6 @@ impl AperCodec for AmfConfigurationUpdate {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.amf_name {
@@ -9248,7 +9190,6 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.amf_tnl_association_setup_list {
@@ -9342,7 +9283,6 @@ impl AperCodec for AmfConfigurationUpdateFailure {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -9426,7 +9366,6 @@ impl AperCodec for AmfStatusIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -9494,7 +9433,6 @@ impl AperCodec for NgReset {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -9572,7 +9510,6 @@ impl AperCodec for NgResetAcknowledge {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.ue_associated_logical_ng_connection_list {
@@ -9661,7 +9598,6 @@ impl AperCodec for ErrorIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.amf_ue_ngap_id {
@@ -9776,7 +9712,6 @@ impl AperCodec for OverloadStart {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.amf_overload_response {
@@ -9852,7 +9787,6 @@ impl AperCodec for OverloadStop {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let container = &mut AperCodecData::new();
@@ -9921,7 +9855,6 @@ impl AperCodec for UplinkRanConfigurationTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.son_configuration_transfer_ul {
@@ -10020,7 +9953,6 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.son_configuration_transfer_dl {
@@ -10162,7 +10094,6 @@ impl AperCodec for WriteReplaceWarningRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10337,7 +10268,6 @@ impl AperCodec for WriteReplaceWarningResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10444,7 +10374,6 @@ impl AperCodec for PwsCancelRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10553,7 +10482,6 @@ impl AperCodec for PwsCancelResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10666,7 +10594,6 @@ impl AperCodec for PwsRestartIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10763,7 +10690,6 @@ impl AperCodec for PwsFailureIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10856,7 +10782,6 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -10965,7 +10890,6 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11060,7 +10984,6 @@ impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11139,7 +11062,6 @@ impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11225,7 +11147,6 @@ impl AperCodec for TraceStart {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11326,7 +11247,6 @@ impl AperCodec for TraceFailureIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11428,7 +11348,6 @@ impl AperCodec for DeactivateTrace {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11547,7 +11466,6 @@ impl AperCodec for CellTrafficTrace {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11681,7 +11599,6 @@ impl AperCodec for LocationReportingControl {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11775,7 +11692,6 @@ impl AperCodec for LocationReportingFailureIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11887,7 +11803,6 @@ impl AperCodec for LocationReport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -11992,7 +11907,6 @@ impl AperCodec for UetnlaBindingReleaseRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12088,7 +12002,6 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12203,7 +12116,6 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12313,7 +12225,6 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12433,7 +12344,6 @@ impl AperCodec for SecondaryRatDataUsageReport {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12531,7 +12441,6 @@ impl AperCodec for UplinkRimInformationTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.rim_information_transfer {
@@ -12594,7 +12503,6 @@ impl AperCodec for DownlinkRimInformationTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.rim_information_transfer {
@@ -12709,7 +12617,6 @@ impl AperCodec for ConnectionEstablishmentIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12881,7 +12788,6 @@ impl AperCodec for UeRadioCapabilityIdMappingRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -12956,7 +12862,6 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -13053,7 +12958,6 @@ impl AperCodec for AmfcpRelocationIndication {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();

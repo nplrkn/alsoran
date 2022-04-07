@@ -116,7 +116,7 @@ def encode_expression_fn(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof == "ie_container_sequence_of":
         return lambda x, data="data", _copy_type_deref="": f"""\
-aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.len())?;
+aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             let ie = &mut AperCodecData::new();
             {encode_expression_fn(tree.children[2])("x", "ie")}?;
@@ -128,7 +128,7 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.
         Ok(())"""
     elif type_info.seqof:
         return lambda x, data="data", _copy_type_deref="": f"""\
-aper::encode::encode_length_determinent({data}, {type_info.constraints}, self.0.len())?;
+aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             {encode_expression_fn(tree.children[2])("x", data)}?;
         }}
@@ -251,7 +251,8 @@ class ChoiceFieldsTo(Interpreter):
         self.fields_to += f"""\
             Self::{name}{"(x)" if type_info.typ != "null" else ""} => {{
                 aper::encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, ({self.field_index}, false))?;
-                {encode_expression_fn(tree.children[1])("x",copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
+                {encode_expression_fn(tree.children[1])(
+                    "x",copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
             }}
 """
         self.field_index += 1
@@ -593,7 +594,6 @@ impl AperCodec for {orig_name} {{
     }}
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 {field_interpreter.fields_to}
         let container = &mut AperCodecData::new();
@@ -1073,7 +1073,6 @@ impl AperCodec for PduSessionResourceSetupRequest {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         let ie = &mut AperCodecData::new();
@@ -1306,7 +1305,7 @@ impl AperCodec for DlprsResourceCoordinates {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, 2, (optionals, false))?;
-        aper::encode::encode_length_determinent(data, Some(1), Some(2), false, self.0.len())?;
+        aper::encode::encode_length_determinent(data, Some(1), Some(2), false, self.listof_dl_prs_resource_set_arp.len())?;
         for x in &self.listof_dl_prs_resource_set_arp {
             x.encode(data)?;
         }
@@ -1416,7 +1415,6 @@ impl AperCodec for BapMappingConfiguration {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.bh_routing_information_added_list {
@@ -1473,6 +1471,55 @@ impl AperCodec for BhRoutingInformationAddedList {
 }
 
 """, constants={"maxnoofRoutingEntries": 1024, "id-BH-Routing-Information-Added-List": 283, "id-BH-Routing-Information-Added-List-Item": 284})
+
+    def test_(self):
+        self.should_generate("""\
+GNB-CUSystemInformation ::= SEQUENCE {
+	sibtypetobeupdatedlist	SEQUENCE (SIZE (1.. maxnoofSIBTypes)) OF SibtypetobeupdatedListItem,
+	iE-Extensions					ProtocolExtensionContainer { { GNB-CUSystemInformation-ExtIEs } } OPTIONAL,
+	...
+}
+""", """\
+
+// GnbCuSystemInformation
+# [derive(Clone, Debug)]
+pub struct GnbCuSystemInformation {
+    pub sibtypetobeupdatedlist: Vec<SibtypetobeupdatedListItem>,
+}
+
+impl AperCodec for GnbCuSystemInformation {
+    type Output = GnbCuSystemInformation;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
+        let sibtypetobeupdatedlist = {
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SibtypetobeupdatedListItem::decode(data)?);
+            }
+            items
+        };
+
+        Ok(Self {
+            sibtypetobeupdatedlist,
+        })
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(false);
+
+        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_length_determinent(data, Some(1), Some(32), false, self.sibtypetobeupdatedlist.len())?;
+        for x in &self.sibtypetobeupdatedlist {
+            x.encode(data)?;
+        }
+        Ok(())?;
+
+        Ok(())
+    }
+}
+
+""", constants={"maxnoofSIBTypes": 32})
 
 
 if __name__ == '__main__':

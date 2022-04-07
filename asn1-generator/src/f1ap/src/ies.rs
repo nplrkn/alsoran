@@ -4140,7 +4140,13 @@ impl AperCodec for DlprsResourceCoordinates {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, 1, (optionals, false))?;
-        aper::encode::encode_length_determinent(data, Some(1), Some(2), false, self.0.len())?;
+        aper::encode::encode_length_determinent(
+            data,
+            Some(1),
+            Some(2),
+            false,
+            self.listof_dl_prs_resource_set_arp.len(),
+        )?;
         for x in &self.listof_dl_prs_resource_set_arp {
             x.encode(data)?;
         }
@@ -4187,7 +4193,13 @@ impl AperCodec for DlprsResourceSetArp {
         aper::encode::encode_sequence_header(data, false, 1, (optionals, false))?;
         self.dl_prs_resource_set_id.encode(data)?;
         self.dl_prs_resource_set_arp_location.encode(data)?;
-        aper::encode::encode_length_determinent(data, Some(1), Some(64), false, self.0.len())?;
+        aper::encode::encode_length_determinent(
+            data,
+            Some(1),
+            Some(64),
+            false,
+            self.listof_dl_prs_resource_arp.len(),
+        )?;
         for x in &self.listof_dl_prs_resource_arp {
             x.encode(data)?;
         }
@@ -7217,7 +7229,13 @@ impl AperCodec for FreqBandNrItem {
             true,
             (self.freq_band_indicator_nr as i128, false),
         )?;
-        aper::encode::encode_length_determinent(data, Some(0), Some(32), false, self.0.len())?;
+        aper::encode::encode_length_determinent(
+            data,
+            Some(0),
+            Some(32),
+            false,
+            self.supported_sul_band_list.len(),
+        )?;
         for x in &self.supported_sul_band_list {
             x.encode(data)?;
         }
@@ -7579,7 +7597,13 @@ impl AperCodec for GnbCuSystemInformation {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
-        aper::encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
+        aper::encode::encode_length_determinent(
+            data,
+            Some(1),
+            Some(32),
+            false,
+            self.sibtypetobeupdatedlist.len(),
+        )?;
         for x in &self.sibtypetobeupdatedlist {
             x.encode(data)?;
         }
@@ -11852,7 +11876,13 @@ impl AperCodec for NrFreqInfo {
         if let Some(x) = &self.sul_information {
             x.encode(data)?;
         }
-        aper::encode::encode_length_determinent(data, Some(1), Some(32), false, self.0.len())?;
+        aper::encode::encode_length_determinent(
+            data,
+            Some(1),
+            Some(32),
+            false,
+            self.freq_band_list_nr.len(),
+        )?;
         for x in &self.freq_band_list_nr {
             x.encode(data)?;
         }

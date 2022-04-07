@@ -13029,7 +13029,6 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
@@ -14658,7 +14657,6 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
-        let len = 0;
         let ies = &mut AperCodecData::new();
 
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
