@@ -63,7 +63,7 @@ impl AperCodec for AdditionalDluptnlInformationForHoItem {
         optionals.push(self.additional_dl_forwarding_uptnl_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.additional_dl_ngu_up_tnl_information.encode(data)?;
         self.additional_qos_flow_setup_response_list.encode(data)?;
         if let Some(x) = &self.additional_dl_forwarding_uptnl_information {
@@ -91,7 +91,7 @@ impl AperCodec for AdditionalQosFlowInformation {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -122,7 +122,7 @@ impl AperCodec for AllocationAndRetentionPriority {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.priority_level_arp.encode(data)?;
         self.pre_emption_capability.encode(data)?;
         self.pre_emption_vulnerability.encode(data)?;
@@ -200,7 +200,7 @@ impl AperCodec for AllowedNssaiItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.s_nssai.encode(data)?;
 
         Ok(())
@@ -259,7 +259,7 @@ impl AperCodec for AllowedPniNpnItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.pni_npn_restricted.encode(data)?;
         self.allowed_cag_list_per_plmn.encode(data)?;
@@ -305,7 +305,7 @@ impl AperCodec for AlternativeQosParaSetIndex {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(8), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(8), true, self.0 as i128, false)
     }
 }
 
@@ -321,7 +321,7 @@ impl AperCodec for AlternativeQosParaSetNotifyIndex {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(8), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(8), true, self.0 as i128, false)
     }
 }
 
@@ -402,7 +402,7 @@ impl AperCodec for AlternativeQosParaSetItem {
         optionals.push(self.packet_error_rate.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.alternative_qos_para_set_index.encode(data)?;
         if let Some(x) = &self.guaranteed_flow_bit_rate_dl {
             x.encode(data)?;
@@ -436,7 +436,7 @@ impl AperCodec for AmfName {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_printable_string(data, Some(1), Some(150), true, &self.0)
+        aper::encode::encode_printable_string(data, Some(1), Some(150), true, &self.0, false)
     }
 }
 
@@ -455,7 +455,7 @@ impl AperCodec for AmfNameVisibleString {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_visible_string(data, Some(1), Some(150), true, &self.0)
+        aper::encode::encode_visible_string(data, Some(1), Some(150), true, &self.0, false)
     }
 }
 
@@ -474,7 +474,7 @@ impl AperCodec for AmfNameUtf8String {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_utf8_string(data, Some(1), Some(150), true, &self.0)
+        aper::encode::encode_utf8_string(data, Some(1), Some(150), true, &self.0, false)
     }
 }
 
@@ -506,11 +506,11 @@ impl AperCodec for AmfPagingTarget {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::GlobalRanNodeId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::Tai(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -532,7 +532,7 @@ impl AperCodec for AmfPointer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(6), Some(6), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(6), Some(6), false, &self.0, false)
     }
 }
 
@@ -551,7 +551,7 @@ impl AperCodec for AmfRegionId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -570,7 +570,7 @@ impl AperCodec for AmfSetId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(10), Some(10), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(10), Some(10), false, &self.0, false)
     }
 }
 
@@ -620,7 +620,7 @@ impl AperCodec for AmfTnlAssociationSetupItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_tnl_association_address.encode(data)?;
 
         Ok(())
@@ -683,7 +683,7 @@ impl AperCodec for AmfTnlAssociationToAddItem {
         optionals.push(self.tnl_association_usage.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_tnl_association_address.encode(data)?;
         if let Some(x) = &self.tnl_association_usage {
             x.encode(data)?;
@@ -740,7 +740,7 @@ impl AperCodec for AmfTnlAssociationToRemoveItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_tnl_association_address.encode(data)?;
 
         Ok(())
@@ -808,7 +808,7 @@ impl AperCodec for AmfTnlAssociationToUpdateItem {
         optionals.push(self.tnl_address_weight_factor.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_tnl_association_address.encode(data)?;
         if let Some(x) = &self.tnl_association_usage {
             x.encode(data)?;
@@ -838,7 +838,8 @@ impl AperCodec for AmfUeNgapId {
             Some(0),
             Some(1099511627775),
             false,
-            (self.0 as i128, false),
+            self.0 as i128,
+            false,
         )
     }
 }
@@ -884,7 +885,7 @@ impl AperCodec for AreaOfInterest {
         optionals.push(self.area_of_interest_ran_node_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.area_of_interest_tai_list {
             x.encode(data)?;
         }
@@ -943,7 +944,7 @@ impl AperCodec for AreaOfInterestCellItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ngran_cgi.encode(data)?;
 
         Ok(())
@@ -999,7 +1000,7 @@ impl AperCodec for AreaOfInterestItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.area_of_interest.encode(data)?;
         self.location_reporting_reference_id.encode(data)?;
 
@@ -1051,7 +1052,7 @@ impl AperCodec for AreaOfInterestRanNodeItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_ran_node_id.encode(data)?;
 
         Ok(())
@@ -1102,7 +1103,7 @@ impl AperCodec for AreaOfInterestTaiItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
 
         Ok(())
@@ -1142,7 +1143,7 @@ impl AperCodec for AssistanceDataForPaging {
         optionals.push(self.paging_attempt_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.assistance_data_for_recommended_cells {
             x.encode(data)?;
         }
@@ -1175,7 +1176,7 @@ impl AperCodec for AssistanceDataForRecommendedCells {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.recommended_cells_for_paging.encode(data)?;
 
         Ok(())
@@ -1235,7 +1236,7 @@ impl AperCodec for AssociatedQosFlowItem {
         optionals.push(self.qos_flow_mapping_indication.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         if let Some(x) = &self.qos_flow_mapping_indication {
             x.encode(data)?;
@@ -1262,7 +1263,7 @@ impl AperCodec for AuthenticatedIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -1278,7 +1279,7 @@ impl AperCodec for AveragingWindow {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(4095), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(4095), true, self.0 as i128, false)
     }
 }
 
@@ -1314,19 +1315,19 @@ impl AperCodec for AreaScopeOfMdtNr {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::CellBased(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 x.encode(data)
             }
             Self::TaBased(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 x.encode(data)
             }
             Self::PlmnWide => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 Ok(())
             }
             Self::TaiBased(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 x.encode(data)
             }
         }
@@ -1365,19 +1366,19 @@ impl AperCodec for AreaScopeOfMdtEutra {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::CellBased(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 x.encode(data)
             }
             Self::TaBased(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 x.encode(data)
             }
             Self::PlmnWide => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 Ok(())
             }
             Self::TaiBased(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 x.encode(data)
             }
         }
@@ -1437,7 +1438,7 @@ impl AperCodec for AreaScopeOfNeighCellsItem {
         optionals.push(self.pci_list_for_mdt.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_frequency_info.encode(data)?;
         if let Some(x) = &self.pci_list_for_mdt {
             x.encode(data)?;
@@ -1464,7 +1465,8 @@ impl AperCodec for BitRate {
             Some(0),
             Some(4000000000000),
             true,
-            (self.0 as i128, false),
+            self.0 as i128,
+            false,
         )
     }
 }
@@ -1511,27 +1513,27 @@ impl AperCodec for BroadcastCancelledAreaList {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::CellIdCancelledEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 0, false)?;
                 x.encode(data)
             }
             Self::TaiCancelledEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 1, false)?;
                 x.encode(data)
             }
             Self::EmergencyAreaIdCancelledEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 2, false)?;
                 x.encode(data)
             }
             Self::CellIdCancelledNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 3, false)?;
                 x.encode(data)
             }
             Self::TaiCancelledNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (4, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 4, false)?;
                 x.encode(data)
             }
             Self::EmergencyAreaIdCancelledNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (5, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 5, false)?;
                 x.encode(data)
             }
         }
@@ -1580,27 +1582,27 @@ impl AperCodec for BroadcastCompletedAreaList {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::CellIdBroadcastEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 0, false)?;
                 x.encode(data)
             }
             Self::TaiBroadcastEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 1, false)?;
                 x.encode(data)
             }
             Self::EmergencyAreaIdBroadcastEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 2, false)?;
                 x.encode(data)
             }
             Self::CellIdBroadcastNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 3, false)?;
                 x.encode(data)
             }
             Self::TaiBroadcastNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (4, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 4, false)?;
                 x.encode(data)
             }
             Self::EmergencyAreaIdBroadcastNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 6, false, (5, false))?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 5, false)?;
                 x.encode(data)
             }
         }
@@ -1656,7 +1658,7 @@ impl AperCodec for BroadcastPlmnItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.tai_slice_support_list.encode(data)?;
 
@@ -1700,7 +1702,7 @@ impl AperCodec for BluetoothMeasurementConfiguration {
         optionals.push(self.bt_rssi.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.bluetooth_meas_config.encode(data)?;
         if let Some(x) = &self.bluetooth_meas_config_name_list {
             x.encode(data)?;
@@ -1757,7 +1759,7 @@ impl AperCodec for BluetoothMeasConfigNameItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.bluetooth_name.encode(data)?;
 
         Ok(())
@@ -1781,7 +1783,7 @@ impl AperCodec for BluetoothMeasConfig {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -1800,7 +1802,7 @@ impl AperCodec for BluetoothName {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(1), Some(248), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(1), Some(248), false, &self.0, false)
     }
 }
 
@@ -1816,7 +1818,7 @@ impl AperCodec for BurstArrivalTime {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -1835,7 +1837,7 @@ impl AperCodec for CagId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(32), Some(32), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(32), Some(32), false, &self.0, false)
     }
 }
 
@@ -1856,7 +1858,7 @@ impl AperCodec for CancelAllWarningMessages {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -1910,7 +1912,7 @@ impl AperCodec for CancelledCellsInEaiEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
@@ -1968,7 +1970,7 @@ impl AperCodec for CancelledCellsInEaiNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
@@ -2026,7 +2028,7 @@ impl AperCodec for CancelledCellsInTaiEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
@@ -2084,7 +2086,7 @@ impl AperCodec for CancelledCellsInTaiNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
@@ -2136,7 +2138,7 @@ impl AperCodec for CandidateCellItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.candidate_cell.encode(data)?;
 
         Ok(())
@@ -2171,11 +2173,11 @@ impl AperCodec for CandidateCell {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::CandidateCgi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::CandidatePci(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -2201,7 +2203,7 @@ impl AperCodec for CandidateCellId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.candidate_cell_id.encode(data)?;
 
         Ok(())
@@ -2233,20 +2235,22 @@ impl AperCodec for CandidatePci {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(1007),
             true,
-            (self.candidate_pci as i128, false),
+            self.candidate_pci as i128,
+            false,
         )?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(3279165),
             false,
-            (self.candidate_nrarfcn as i128, false),
+            self.candidate_nrarfcn as i128,
+            false,
         )?;
 
         Ok(())
@@ -2287,23 +2291,23 @@ impl AperCodec for Cause {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::RadioNetwork(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 0, false)?;
                 x.encode(data)
             }
             Self::Transport(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 1, false)?;
                 x.encode(data)
             }
             Self::Nas(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 2, false)?;
                 x.encode(data)
             }
             Self::Protocol(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 3, false)?;
                 x.encode(data)
             }
             Self::Misc(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, (4, false))?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 4, false)?;
                 x.encode(data)
             }
         }
@@ -2332,7 +2336,7 @@ impl AperCodec for CauseMisc {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(5), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(5), true, *self as i128, false)
     }
 }
 
@@ -2356,7 +2360,7 @@ impl AperCodec for CauseNas {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(3), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(3), true, *self as i128, false)
     }
 }
 
@@ -2383,7 +2387,7 @@ impl AperCodec for CauseProtocol {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(6), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(6), true, *self as i128, false)
     }
 }
 
@@ -2448,7 +2452,7 @@ impl AperCodec for CauseRadioNetwork {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(44), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(44), true, *self as i128, false)
     }
 }
 
@@ -2470,7 +2474,7 @@ impl AperCodec for CauseTransport {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -2498,7 +2502,7 @@ impl AperCodec for CellCagInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ngran_cgi.encode(data)?;
         self.cell_cag_list.encode(data)?;
 
@@ -2576,7 +2580,7 @@ impl AperCodec for CellIdBroadcastEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
 
         Ok(())
@@ -2628,7 +2632,7 @@ impl AperCodec for CellIdBroadcastNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
 
         Ok(())
@@ -2685,7 +2689,7 @@ impl AperCodec for CellIdCancelledEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
@@ -2743,7 +2747,7 @@ impl AperCodec for CellIdCancelledNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
@@ -2779,11 +2783,11 @@ impl AperCodec for CellIdListForRestart {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutraCgiListforRestart(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::NrCgiListforRestart(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -2810,7 +2814,7 @@ impl AperCodec for CellSize {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(3), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(3), true, *self as i128, false)
     }
 }
 
@@ -2833,7 +2837,7 @@ impl AperCodec for CellType {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cell_size.encode(data)?;
 
         Ok(())
@@ -2857,7 +2861,7 @@ impl AperCodec for CEmodeBSupportIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -2879,7 +2883,7 @@ impl AperCodec for CEmodeBrestricted {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -2908,7 +2912,7 @@ impl AperCodec for CnAssistedRanTuning {
         optionals.push(self.expected_ue_behaviour.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.expected_ue_behaviour {
             x.encode(data)?;
         }
@@ -2966,7 +2970,7 @@ impl AperCodec for CnTypeRestrictionsForEquivalentItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.cn_type.encode(data)?;
 
@@ -2991,7 +2995,7 @@ impl AperCodec for CnTypeRestrictionsForServing {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -3007,7 +3011,7 @@ impl AperCodec for CommonNetworkInstance {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -3056,7 +3060,7 @@ impl AperCodec for CompletedCellsInEaiEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
 
         Ok(())
@@ -3108,7 +3112,7 @@ impl AperCodec for CompletedCellsInEaiNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
 
         Ok(())
@@ -3160,7 +3164,7 @@ impl AperCodec for CompletedCellsInTaiEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
 
         Ok(())
@@ -3212,7 +3216,7 @@ impl AperCodec for CompletedCellsInTaiNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
 
         Ok(())
@@ -3236,7 +3240,7 @@ impl AperCodec for ConcurrentWarningMessageInd {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -3259,7 +3263,7 @@ impl AperCodec for ConfidentialityProtectionIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -3281,7 +3285,7 @@ impl AperCodec for ConfidentialityProtectionResult {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -3302,7 +3306,7 @@ impl AperCodec for ConfiguredTacIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -3356,7 +3360,7 @@ impl AperCodec for CoreNetworkAssistanceInformationForInactive {
         optionals.push(self.expected_ue_behaviour.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ue_identity_index_value.encode(data)?;
         if let Some(x) = &self.ue_specific_drx {
             x.encode(data)?;
@@ -3399,20 +3403,22 @@ impl AperCodec for CountValueForPdcpSn12 {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(4095),
             false,
-            (self.pdcp_sn12 as i128, false),
+            self.pdcp_sn12 as i128,
+            false,
         )?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(1048575),
             false,
-            (self.hfn_pdcp_sn12 as i128, false),
+            self.hfn_pdcp_sn12 as i128,
+            false,
         )?;
 
         Ok(())
@@ -3444,20 +3450,22 @@ impl AperCodec for CountValueForPdcpSn18 {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(262143),
             false,
-            (self.pdcp_sn18 as i128, false),
+            self.pdcp_sn18 as i128,
+            false,
         )?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(16383),
             false,
-            (self.hfn_pdcp_sn18 as i128, false),
+            self.hfn_pdcp_sn18 as i128,
+            false,
         )?;
 
         Ok(())
@@ -3476,7 +3484,7 @@ impl AperCodec for CoverageEnhancementLevel {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -3508,7 +3516,7 @@ impl AperCodec for CpTransportLayerInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EndpointIpAddress(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -3564,7 +3572,7 @@ impl AperCodec for CriticalityDiagnostics {
         optionals.push(self.i_es_criticality_diagnostics.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.procedure_code {
             x.encode(data)?;
         }
@@ -3634,7 +3642,7 @@ impl AperCodec for CriticalityDiagnosticsIeItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ie_criticality.encode(data)?;
         self.ie_id.encode(data)?;
         self.type_of_error.encode(data)?;
@@ -3664,7 +3672,7 @@ impl AperCodec for CellBasedMdtNr {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cell_id_listfor_mdt.encode(data)?;
 
         Ok(())
@@ -3717,7 +3725,7 @@ impl AperCodec for CellBasedMdtEutra {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cell_id_listfor_mdt.encode(data)?;
 
         Ok(())
@@ -3764,7 +3772,7 @@ impl AperCodec for DataCodingScheme {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -3785,7 +3793,7 @@ impl AperCodec for DataForwardingAccepted {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -3806,7 +3814,7 @@ impl AperCodec for DataForwardingNotPossible {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -3871,7 +3879,7 @@ impl AperCodec for DataForwardingResponseDrbItem {
         optionals.push(self.ul_forwarding_up_tnl_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         if let Some(x) = &self.dl_forwarding_up_tnl_information {
             x.encode(data)?;
@@ -3903,7 +3911,7 @@ impl AperCodec for DapsRequestInfo {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.daps_indicator.encode(data)?;
 
         Ok(())
@@ -3959,7 +3967,7 @@ impl AperCodec for DapsResponseInfoItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         self.daps_response_info.encode(data)?;
 
@@ -3988,7 +3996,7 @@ impl AperCodec for DapsResponseInfo {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dapsresponseindicator.encode(data)?;
 
         Ok(())
@@ -4044,7 +4052,7 @@ impl AperCodec for DataForwardingResponseErabListItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.e_rab_id.encode(data)?;
         self.dl_forwarding_up_tnl_information.encode(data)?;
 
@@ -4070,7 +4078,7 @@ impl AperCodec for DelayCritical {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -4093,7 +4101,7 @@ impl AperCodec for DlCpSecurityInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_nas_mac.encode(data)?;
 
         Ok(())
@@ -4115,7 +4123,7 @@ impl AperCodec for DlNasMac {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -4136,7 +4144,7 @@ impl AperCodec for DlForwarding {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -4157,7 +4165,7 @@ impl AperCodec for DlNguTnlInformationReused {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -4178,7 +4186,7 @@ impl AperCodec for DirectForwardingPathAvailability {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -4194,7 +4202,7 @@ impl AperCodec for DrbId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(32), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(32), true, self.0 as i128, false)
     }
 }
 
@@ -4250,7 +4258,7 @@ impl AperCodec for DrBsSubjectToStatusTransferItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         self.drb_status_ul.encode(data)?;
         self.drb_status_dl.encode(data)?;
@@ -4287,11 +4295,11 @@ impl AperCodec for DrbStatusDl {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::DrbStatusDl12(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::DrbStatusDl18(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -4317,7 +4325,7 @@ impl AperCodec for DrbStatusDl12 {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_count_value.encode(data)?;
 
         Ok(())
@@ -4343,7 +4351,7 @@ impl AperCodec for DrbStatusDl18 {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_count_value.encode(data)?;
 
         Ok(())
@@ -4378,11 +4386,11 @@ impl AperCodec for DrbStatusUl {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::DrbStatusUl12(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::DrbStatusUl18(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -4422,10 +4430,10 @@ impl AperCodec for DrbStatusUl12 {
         optionals.push(self.receive_status_of_ul_pdcp_sd_us.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_count_value.encode(data)?;
         if let Some(x) = &self.receive_status_of_ul_pdcp_sd_us {
-            aper::encode::encode_bitstring(data, Some(1), Some(2048), false, &x)?;
+            aper::encode::encode_bitstring(data, Some(1), Some(2048), false, &x, false)?;
         }
 
         Ok(())
@@ -4465,10 +4473,10 @@ impl AperCodec for DrbStatusUl18 {
         optionals.push(self.receive_status_of_ul_pdcp_sd_us.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_count_value.encode(data)?;
         if let Some(x) = &self.receive_status_of_ul_pdcp_sd_us {
-            aper::encode::encode_bitstring(data, Some(1), Some(131072), false, &x)?;
+            aper::encode::encode_bitstring(data, Some(1), Some(131072), false, &x, false)?;
         }
 
         Ok(())
@@ -4524,7 +4532,7 @@ impl AperCodec for DrBsToQosFlowsMappingItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         self.associated_qos_flow_list.encode(data)?;
 
@@ -4590,7 +4598,7 @@ impl AperCodec for Dynamic5qiDescriptor {
         optionals.push(self.maximum_data_burst_volume.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.priority_level_qos.encode(data)?;
         self.packet_delay_budget.encode(data)?;
         self.packet_error_rate.encode(data)?;
@@ -4630,7 +4638,7 @@ impl AperCodec for EarlyStatusTransferTransparentContainer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.procedure_stage.encode(data)?;
 
         Ok(())
@@ -4663,7 +4671,7 @@ impl AperCodec for ProcedureStageChoice {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::FirstDlCount(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -4692,7 +4700,7 @@ impl AperCodec for FirstDlCount {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dr_bs_subject_to_early_status_transfer.encode(data)?;
 
         Ok(())
@@ -4748,7 +4756,7 @@ impl AperCodec for DrBsSubjectToEarlyStatusTransferItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.drb_id.encode(data)?;
         self.first_dlcount.encode(data)?;
 
@@ -4773,7 +4781,7 @@ impl AperCodec for EdtSession {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -4792,7 +4800,7 @@ impl AperCodec for EmergencyAreaId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
     }
 }
 
@@ -4846,7 +4854,7 @@ impl AperCodec for EmergencyAreaIdBroadcastEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.emergency_area_id.encode(data)?;
         self.completed_cells_in_eai_eutra.encode(data)?;
 
@@ -4904,7 +4912,7 @@ impl AperCodec for EmergencyAreaIdBroadcastNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.emergency_area_id.encode(data)?;
         self.completed_cells_in_eai_nr.encode(data)?;
 
@@ -4962,7 +4970,7 @@ impl AperCodec for EmergencyAreaIdCancelledEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.emergency_area_id.encode(data)?;
         self.cancelled_cells_in_eai_eutra.encode(data)?;
 
@@ -5020,7 +5028,7 @@ impl AperCodec for EmergencyAreaIdCancelledNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.emergency_area_id.encode(data)?;
         self.cancelled_cells_in_eai_nr.encode(data)?;
 
@@ -5107,7 +5115,7 @@ impl AperCodec for EmergencyFallbackIndicator {
         optionals.push(self.emergency_service_target_cn.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.emergency_fallback_request_indicator.encode(data)?;
         if let Some(x) = &self.emergency_service_target_cn {
             x.encode(data)?;
@@ -5134,7 +5142,7 @@ impl AperCodec for EmergencyFallbackRequestIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -5156,7 +5164,7 @@ impl AperCodec for EmergencyServiceTargetCn {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -5212,20 +5220,20 @@ impl AperCodec for EnbId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::MacroEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(20), Some(20), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(20), Some(20), false, &x, false)
             }
             Self::HomeEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (1, false))?;
-                aper::encode::encode_bitstring(data, Some(28), Some(28), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
+                aper::encode::encode_bitstring(data, Some(28), Some(28), false, &x, false)
             }
             Self::ShortMacroEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (2, false))?;
-                aper::encode::encode_bitstring(data, Some(18), Some(18), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
+                aper::encode::encode_bitstring(data, Some(18), Some(18), false, &x, false)
             }
             Self::LongMacroEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (3, false))?;
-                aper::encode::encode_bitstring(data, Some(21), Some(21), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
+                aper::encode::encode_bitstring(data, Some(21), Some(21), false, &x, false)
             }
         }
     }
@@ -5248,7 +5256,7 @@ impl AperCodec for EnhancedCoverageRestriction {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -5264,7 +5272,7 @@ impl AperCodec for ExtendedConnectedTime {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
@@ -5280,7 +5288,7 @@ impl AperCodec for EnDcsonConfigurationTransfer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -5308,7 +5316,7 @@ impl AperCodec for EndpointIpAddressAndPort {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, false, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         self.endpoint_ip_address.encode(data)?;
         self.port_number.encode(data)?;
 
@@ -5334,7 +5342,7 @@ impl AperCodec for EndIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -5378,7 +5386,7 @@ impl AperCodec for EpsTac {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
     }
 }
 
@@ -5406,7 +5414,7 @@ impl AperCodec for EpsTai {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.eps_tac.encode(data)?;
 
@@ -5426,7 +5434,7 @@ impl AperCodec for ERabId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(15), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(15), true, self.0 as i128, false)
     }
 }
 
@@ -5483,7 +5491,7 @@ impl AperCodec for ERabInformationItem {
         optionals.push(self.dl_forwarding.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.e_rab_id.encode(data)?;
         if let Some(x) = &self.dl_forwarding {
             x.encode(data)?;
@@ -5508,7 +5516,7 @@ impl AperCodec for EutraCellIdentity {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(28), Some(28), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(28), Some(28), false, &self.0, false)
     }
 }
 
@@ -5536,7 +5544,7 @@ impl AperCodec for EutraCgi {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.eutra_cell_identity.encode(data)?;
 
@@ -5610,7 +5618,7 @@ impl AperCodec for EutrAencryptionAlgorithms {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0, false)
     }
 }
 
@@ -5629,7 +5637,7 @@ impl AperCodec for EutrAintegrityProtectionAlgorithms {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0, false)
     }
 }
 
@@ -5655,7 +5663,7 @@ impl AperCodec for EventType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(5), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(5), true, *self as i128, false)
     }
 }
 
@@ -5671,7 +5679,7 @@ impl AperCodec for ExpectedActivityPeriod {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(181), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(181), true, self.0 as i128, false)
     }
 }
 
@@ -5698,7 +5706,7 @@ impl AperCodec for ExpectedHoInterval {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(6), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(6), true, *self as i128, false)
     }
 }
 
@@ -5714,7 +5722,7 @@ impl AperCodec for ExpectedIdlePeriod {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(181), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(181), true, self.0 as i128, false)
     }
 }
 
@@ -5759,7 +5767,7 @@ impl AperCodec for ExpectedUeActivityBehaviour {
         optionals.push(self.source_of_ue_activity_behaviour_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.expected_activity_period {
             x.encode(data)?;
         }
@@ -5823,7 +5831,7 @@ impl AperCodec for ExpectedUeBehaviour {
         optionals.push(self.expected_ue_moving_trajectory.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.expected_ue_activity_behaviour {
             x.encode(data)?;
         }
@@ -5859,7 +5867,7 @@ impl AperCodec for ExpectedUeMobility {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -5916,10 +5924,10 @@ impl AperCodec for ExpectedUeMovingTrajectoryItem {
         optionals.push(self.time_stayed_in_cell.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ngran_cgi.encode(data)?;
         if let Some(x) = &self.time_stayed_in_cell {
-            aper::encode::encode_integer(data, Some(0), Some(4095), false, (*x as i128, false))?;
+            aper::encode::encode_integer(data, Some(0), Some(4095), false, *x as i128, false)?;
         }
 
         Ok(())
@@ -5959,7 +5967,7 @@ impl AperCodec for ExtendedAmfName {
         optionals.push(self.amf_name_utf8_string.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.amf_name_visible_string {
             x.encode(data)?;
         }
@@ -5983,7 +5991,7 @@ impl AperCodec for ExtendedPacketDelayBudget {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(65535), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(65535), true, self.0 as i128, false)
     }
 }
 
@@ -6020,7 +6028,7 @@ impl AperCodec for ExtendedRanNodeName {
         optionals.push(self.ran_node_name_utf8_string.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.ran_node_name_visible_string {
             x.encode(data)?;
         }
@@ -6057,13 +6065,14 @@ impl AperCodec for ExtendedRatRestrictionInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         aper::encode::encode_bitstring(
             data,
             Some(8),
             Some(8),
             true,
             &self.primary_rat_restriction,
+            false,
         )?;
         aper::encode::encode_bitstring(
             data,
@@ -6071,6 +6080,7 @@ impl AperCodec for ExtendedRatRestrictionInformation {
             Some(8),
             true,
             &self.secondary_rat_restriction,
+            false,
         )?;
 
         Ok(())
@@ -6089,13 +6099,7 @@ impl AperCodec for ExtendedRncId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(
-            data,
-            Some(4096),
-            Some(65535),
-            false,
-            (self.0 as i128, false),
-        )
+        aper::encode::encode_integer(data, Some(4096), Some(65535), false, self.0 as i128, false)
     }
 }
 
@@ -6140,7 +6144,7 @@ impl AperCodec for ExtendedUeIdentityIndexValue {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -6174,11 +6178,11 @@ impl AperCodec for EventTrigger {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::OutOfCoverage(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::EventL1LoggedMdtConfig(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -6212,7 +6216,7 @@ impl AperCodec for EventL1LoggedMdtConfig {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.l1_threshold.encode(data)?;
         self.hysteresis.encode(data)?;
         self.time_to_trigger.encode(data)?;
@@ -6249,11 +6253,11 @@ impl AperCodec for MeasurementThresholdL1LoggedMdt {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::ThresholdRsrp(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::ThresholdRsrq(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -6281,7 +6285,7 @@ impl AperCodec for FailureIndication {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ue_rlf_report_container.encode(data)?;
 
         Ok(())
@@ -6315,7 +6319,7 @@ impl AperCodec for FiveGSTmsi {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_set_id.encode(data)?;
         self.amf_pointer.encode(data)?;
         self.five_g_tmsi.encode(data)?;
@@ -6339,7 +6343,7 @@ impl AperCodec for FiveGTmsi {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.0, false)
     }
 }
 
@@ -6355,7 +6359,7 @@ impl AperCodec for FiveQi {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), true, self.0 as i128, false)
     }
 }
 
@@ -6408,7 +6412,7 @@ impl AperCodec for ForbiddenAreaInformationItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.forbidden_ta_cs.encode(data)?;
 
@@ -6465,7 +6469,7 @@ impl AperCodec for FromEutranToNgran {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, false, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         self.source_enb_id.encode(data)?;
         self.target_ngran_node_id.encode(data)?;
 
@@ -6497,7 +6501,7 @@ impl AperCodec for FromNgranToEutran {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, false, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         self.source_ngran_node_id.encode(data)?;
         self.target_enb_id.encode(data)?;
 
@@ -6558,7 +6562,7 @@ impl AperCodec for GbrQosInformation {
         optionals.push(self.maximum_packet_loss_rate_ul.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.maximum_flow_bit_rate_dl.encode(data)?;
         self.maximum_flow_bit_rate_ul.encode(data)?;
         self.guaranteed_flow_bit_rate_dl.encode(data)?;
@@ -6589,7 +6593,7 @@ impl AperCodec for GlobalCableId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -6617,7 +6621,7 @@ impl AperCodec for GlobalEnbId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.enb_id.encode(data)?;
 
@@ -6649,7 +6653,7 @@ impl AperCodec for GlobalGnbId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.gnb_id.encode(data)?;
 
@@ -6681,7 +6685,7 @@ impl AperCodec for GlobalN3IwfId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.n3_iwf_id.encode(data)?;
 
@@ -6717,7 +6721,7 @@ impl AperCodec for GlobalLineId {
         optionals.push(self.line_type.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_line_identity.encode(data)?;
         if let Some(x) = &self.line_type {
             x.encode(data)?;
@@ -6739,7 +6743,7 @@ impl AperCodec for GlobalLineIdentity {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -6767,7 +6771,7 @@ impl AperCodec for GlobalNgEnbId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.ng_enb_id.encode(data)?;
 
@@ -6805,15 +6809,15 @@ impl AperCodec for GlobalRanNodeId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::GlobalGnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.encode(data)
             }
             Self::GlobalNgEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.encode(data)
             }
             Self::GlobalN3IwfId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.encode(data)
             }
         }
@@ -6844,7 +6848,7 @@ impl AperCodec for GlobalTngfId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.tngf_id.encode(data)?;
 
@@ -6876,7 +6880,7 @@ impl AperCodec for GlobalTwifId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.twif_id.encode(data)?;
 
@@ -6908,7 +6912,7 @@ impl AperCodec for GlobalWAgfId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.w_agf_id.encode(data)?;
 
@@ -6947,8 +6951,8 @@ impl AperCodec for GnbId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::GnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(22), Some(32), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(22), Some(32), false, &x, false)
             }
         }
     }
@@ -6969,7 +6973,7 @@ impl AperCodec for GtpTeid {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.0, false)
     }
 }
 
@@ -6997,7 +7001,7 @@ impl AperCodec for GtpTunnel {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.transport_layer_address.encode(data)?;
         self.gtp_teid.encode(data)?;
 
@@ -7035,7 +7039,7 @@ impl AperCodec for Guami {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.amf_region_id.encode(data)?;
         self.amf_set_id.encode(data)?;
@@ -7063,7 +7067,7 @@ impl AperCodec for GuamiType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -7108,7 +7112,7 @@ impl AperCodec for HandoverCommandTransfer {
         optionals.push(self.data_forwarding_response_drb_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.dl_forwarding_up_tnl_information {
             x.encode(data)?;
         }
@@ -7140,7 +7144,7 @@ impl AperCodec for HandoverFlag {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -7163,7 +7167,7 @@ impl AperCodec for HandoverPreparationUnsuccessfulTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -7225,7 +7229,7 @@ impl AperCodec for HandoverRequestAcknowledgeTransfer {
         optionals.push(self.data_forwarding_response_drb_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_ngu_up_tnl_information.encode(data)?;
         if let Some(x) = &self.dl_forwarding_up_tnl_information {
             x.encode(data)?;
@@ -7270,7 +7274,7 @@ impl AperCodec for HandoverRequiredTransfer {
         optionals.push(self.direct_forwarding_path_availability.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.direct_forwarding_path_availability {
             x.encode(data)?;
         }
@@ -7307,7 +7311,7 @@ impl AperCodec for HandoverResourceAllocationUnsuccessfulTransfer {
         optionals.push(self.criticality_diagnostics.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
         if let Some(x) = &self.criticality_diagnostics {
             x.encode(data)?;
@@ -7336,7 +7340,7 @@ impl AperCodec for HandoverType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -7352,7 +7356,7 @@ impl AperCodec for HfcNodeId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -7430,7 +7434,7 @@ impl AperCodec for HoReport {
         optionals.push(self.ue_rlf_report_container.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 6, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.handover_report_type.encode(data)?;
         self.handover_cause.encode(data)?;
         self.sourcecell_cgi.encode(data)?;
@@ -7439,7 +7443,7 @@ impl AperCodec for HoReport {
             x.encode(data)?;
         }
         if let Some(x) = &self.sourcecell_c_rnti {
-            aper::encode::encode_bitstring(data, Some(16), Some(16), false, &x)?;
+            aper::encode::encode_bitstring(data, Some(16), Some(16), false, &x, false)?;
         }
         if let Some(x) = &self.targetcellin_e_utran {
             x.encode(data)?;
@@ -7467,7 +7471,7 @@ impl AperCodec for Hysteresis {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(30), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(30), false, self.0 as i128, false)
     }
 }
 
@@ -7489,7 +7493,7 @@ impl AperCodec for IabAuthorized {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -7510,7 +7514,7 @@ impl AperCodec for IabSupported {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -7531,7 +7535,7 @@ impl AperCodec for IabNodeIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -7553,7 +7557,7 @@ impl AperCodec for ImsVoiceSupportIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -7569,7 +7573,7 @@ impl AperCodec for IndexToRfsp {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(256), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(256), true, self.0 as i128, false)
     }
 }
 
@@ -7597,7 +7601,7 @@ impl AperCodec for InfoOnRecommendedCellsAndRanNodesForPaging {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.recommended_cells_for_paging.encode(data)?;
         self.recommend_ran_nodes_for_paging.encode(data)?;
 
@@ -7624,7 +7628,7 @@ impl AperCodec for IntegrityProtectionIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -7646,7 +7650,7 @@ impl AperCodec for IntegrityProtectionResult {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -7662,7 +7666,7 @@ impl AperCodec for IntendedNumberOfPagingAttempts {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(16), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(16), true, self.0 as i128, false)
     }
 }
 
@@ -7681,7 +7685,7 @@ impl AperCodec for InterfacesToTrace {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -7778,7 +7782,7 @@ impl AperCodec for ImmediateMdtNr {
         optionals.push(self.sensor_measurement_configuration.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 10, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.measurements_to_activate.encode(data)?;
         if let Some(x) = &self.m1_configuration {
             x.encode(data)?;
@@ -7837,7 +7841,7 @@ impl AperCodec for InterSystemFailureIndication {
         optionals.push(self.ue_rlf_report_container.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.ue_rlf_report_container {
             x.encode(data)?;
         }
@@ -7870,7 +7874,7 @@ impl AperCodec for IntersystemSonConfigurationTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.transfer_type.encode(data)?;
         self.intersystem_son_information.encode(data)?;
 
@@ -7906,11 +7910,11 @@ impl AperCodec for IntersystemSonTransferType {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::FromEutranToNgran(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::FromNgranToEutran(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -7941,7 +7945,7 @@ impl AperCodec for IntersystemSonEnbId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_enb_id.encode(data)?;
         self.selected_epstai.encode(data)?;
 
@@ -7973,7 +7977,7 @@ impl AperCodec for IntersystemSonNgranNodeId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_ran_node_id.encode(data)?;
         self.selected_tai.encode(data)?;
 
@@ -8009,7 +8013,7 @@ impl AperCodec for IntersystemSonInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::IntersystemSonInformationReport(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -8048,11 +8052,11 @@ impl AperCodec for IntersystemSonInformationReport {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::HoReportInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::FailureIndicationInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -8080,7 +8084,7 @@ impl AperCodec for InterSystemHoReport {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.handover_report_type.encode(data)?;
 
         Ok(())
@@ -8119,11 +8123,11 @@ impl AperCodec for InterSystemHandoverReportType {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::TooearlyIntersystemHo(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::IntersystemUnnecessaryHo(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -8160,7 +8164,7 @@ impl AperCodec for IntersystemUnnecessaryHo {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.sourcecell_id.encode(data)?;
         self.targetcell_id.encode(data)?;
         self.early_iratho.encode(data)?;
@@ -8185,7 +8189,7 @@ impl AperCodec for Lac {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
     }
 }
 
@@ -8210,7 +8214,7 @@ impl AperCodec for Lai {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.lac.encode(data)?;
 
@@ -8258,19 +8262,19 @@ impl AperCodec for LastVisitedCellInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::NgranCell(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 x.encode(data)
             }
             Self::EutranCell(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 x.encode(data)
             }
             Self::UtranCell(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 x.encode(data)
             }
             Self::GeranCell(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 x.encode(data)
             }
         }
@@ -8298,7 +8302,7 @@ impl AperCodec for LastVisitedCellItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.last_visited_cell_information.encode(data)?;
 
         Ok(())
@@ -8317,7 +8321,7 @@ impl AperCodec for LastVisitedEutranCellInformation {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -8333,7 +8337,7 @@ impl AperCodec for LastVisitedGeranCellInformation {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -8379,7 +8383,7 @@ impl AperCodec for LastVisitedNgranCellInformation {
         optionals.push(self.ho_cause_value.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_cell_id.encode(data)?;
         self.cell_type.encode(data)?;
         self.time_ue_stayed_in_cell.encode(data)?;
@@ -8406,7 +8410,7 @@ impl AperCodec for LastVisitedUtranCellInformation {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -8428,7 +8432,7 @@ impl AperCodec for LineType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -8449,7 +8453,7 @@ impl AperCodec for LocationReportingAdditionalInfo {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -8465,7 +8469,7 @@ impl AperCodec for LocationReportingReferenceId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(64), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(64), true, self.0 as i128, false)
     }
 }
 
@@ -8511,7 +8515,7 @@ impl AperCodec for LocationReportingRequestType {
         );
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.event_type.encode(data)?;
         self.report_area.encode(data)?;
         if let Some(x) = &self.area_of_interest_list {
@@ -8583,7 +8587,7 @@ impl AperCodec for LoggedMdtNr {
         optionals.push(self.area_scope_of_neigh_cells_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.logging_interval.encode(data)?;
         self.logging_duration.encode(data)?;
         self.logged_mdt_trigger.encode(data)?;
@@ -8631,7 +8635,7 @@ impl AperCodec for LoggingInterval {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(10), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(10), true, *self as i128, false)
     }
 }
 
@@ -8657,7 +8661,7 @@ impl AperCodec for LoggingDuration {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(5), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(5), true, *self as i128, false)
     }
 }
 
@@ -8680,7 +8684,7 @@ impl AperCodec for LinksToLog {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -8712,11 +8716,11 @@ impl AperCodec for LoggedMdtTrigger {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Periodical => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 Ok(())
             }
             Self::EventTrigger(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -8740,7 +8744,7 @@ impl AperCodec for LtemIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -8756,7 +8760,7 @@ impl AperCodec for LteueRlfReportContainer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -8793,7 +8797,7 @@ impl AperCodec for Ltev2xServicesAuthorized {
         optionals.push(self.pedestrian_ue.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.vehicle_ue {
             x.encode(data)?;
         }
@@ -8826,7 +8830,7 @@ impl AperCodec for LteueSidelinkAggregateMaximumBitrate {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ue_sidelink_aggregate_maximum_bit_rate.encode(data)?;
 
         Ok(())
@@ -8848,7 +8852,7 @@ impl AperCodec for MaskedImeisv {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(64), Some(64), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(64), Some(64), false, &self.0, false)
     }
 }
 
@@ -8864,7 +8868,7 @@ impl AperCodec for MaximumDataBurstVolume {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(4095), true, (self.0, false))
+        aper::encode::encode_integer(data, Some(0), Some(4095), true, self.0, false)
     }
 }
 
@@ -8883,7 +8887,7 @@ impl AperCodec for MessageIdentifier {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -8905,7 +8909,7 @@ impl AperCodec for MaximumIntegrityProtectedDataRate {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -8926,7 +8930,7 @@ impl AperCodec for MicoModeIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -8945,7 +8949,7 @@ impl AperCodec for MobilityInformation {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -9001,7 +9005,7 @@ impl AperCodec for MobilityRestrictionList {
         optionals.push(self.service_area_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 5, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.serving_plmn.encode(data)?;
         if let Some(x) = &self.equivalent_plmn_s {
             x.encode(data)?;
@@ -9078,7 +9082,7 @@ impl AperCodec for MdtConfiguration {
         optionals.push(self.mdt_config_eutra.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.mdt_config_nr {
             x.encode(data)?;
         }
@@ -9124,7 +9128,7 @@ impl AperCodec for MdtConfigurationNr {
         optionals.push(self.signalling_based_mdt_plmn_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.mdt_activation.encode(data)?;
         self.area_scope_of_mdt.encode(data)?;
         self.mdt_mode_nr.encode(data)?;
@@ -9170,7 +9174,7 @@ impl AperCodec for MdtConfigurationEutra {
         optionals.push(self.signalling_based_mdt_plmn_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.mdt_activation.encode(data)?;
         self.area_scope_of_mdt.encode(data)?;
         self.mdt_mode.encode(data)?;
@@ -9201,7 +9205,7 @@ impl AperCodec for MdtActivation {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -9233,11 +9237,11 @@ impl AperCodec for MdtModeNr {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::ImmediateMdtNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::LoggedMdtNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -9256,7 +9260,7 @@ impl AperCodec for MdtModeEutra {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -9275,7 +9279,7 @@ impl AperCodec for MeasurementsToActivate {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -9315,7 +9319,7 @@ impl AperCodec for M1Configuration {
         optionals.push(self.m1periodic_reporting.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.m1reporting_trigger.encode(data)?;
         if let Some(x) = &self.m1threshold_event_a2 {
             x.encode(data)?;
@@ -9347,7 +9351,7 @@ impl AperCodec for M1ReportingTrigger {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -9370,7 +9374,7 @@ impl AperCodec for M1ThresholdEventA2 {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.m1_threshold_type.encode(data)?;
 
         Ok(())
@@ -9407,15 +9411,15 @@ impl AperCodec for M1ThresholdType {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::ThresholdRsrp(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.encode(data)
             }
             Self::ThresholdRsrq(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.encode(data)
             }
             Self::ThresholdSinr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.encode(data)
             }
         }
@@ -9446,7 +9450,7 @@ impl AperCodec for M1PeriodicReporting {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.report_interval.encode(data)?;
         self.report_amount.encode(data)?;
 
@@ -9478,7 +9482,7 @@ impl AperCodec for M4Configuration {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.m4period.encode(data)?;
         self.m4_links_to_log.encode(data)?;
 
@@ -9507,7 +9511,7 @@ impl AperCodec for M4period {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(4), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(4), true, *self as i128, false)
     }
 }
 
@@ -9535,7 +9539,7 @@ impl AperCodec for M5Configuration {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.m5period.encode(data)?;
         self.m5_links_to_log.encode(data)?;
 
@@ -9564,7 +9568,7 @@ impl AperCodec for M5period {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(4), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(4), true, *self as i128, false)
     }
 }
 
@@ -9592,7 +9596,7 @@ impl AperCodec for M6Configuration {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.m6report_interval.encode(data)?;
         self.m6_links_to_log.encode(data)?;
 
@@ -9630,7 +9634,7 @@ impl AperCodec for M6reportInterval {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(13), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(13), true, *self as i128, false)
     }
 }
 
@@ -9658,7 +9662,7 @@ impl AperCodec for M7Configuration {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.m7period.encode(data)?;
         self.m7_links_to_log.encode(data)?;
 
@@ -9678,7 +9682,7 @@ impl AperCodec for M7period {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(60), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(60), true, self.0 as i128, false)
     }
 }
 
@@ -9703,7 +9707,7 @@ impl AperCodec for MdtLocationInfo {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.mdt_location_information.encode(data)?;
 
         Ok(())
@@ -9725,7 +9729,7 @@ impl AperCodec for MdtLocationInformation {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -9760,8 +9764,8 @@ impl AperCodec for N3IwfId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::N3IwfId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(16), Some(16), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(16), Some(16), false, &x, false)
             }
         }
     }
@@ -9779,7 +9783,7 @@ impl AperCodec for NasPdu {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -9795,7 +9799,7 @@ impl AperCodec for NasSecurityParametersFromNgran {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -9819,7 +9823,7 @@ impl AperCodec for NbIotDefaultPagingDrx {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(3), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(3), true, *self as i128, false)
     }
 }
 
@@ -9845,7 +9849,7 @@ impl AperCodec for NbIotPagingDrx {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(5), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(5), true, *self as i128, false)
     }
 }
 
@@ -9879,7 +9883,7 @@ impl AperCodec for NbIotPagingEDrxCycle {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(13), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(13), true, *self as i128, false)
     }
 }
 
@@ -9915,7 +9919,7 @@ impl AperCodec for NbIotPagingTimeWindow {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(15), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(15), true, *self as i128, false)
     }
 }
 
@@ -9947,7 +9951,7 @@ impl AperCodec for NbIotPagingEDrxInfo {
         optionals.push(self.nb_iot_paging_time_window.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nb_iot_paging_e_drx_cycle.encode(data)?;
         if let Some(x) = &self.nb_iot_paging_time_window {
             x.encode(data)?;
@@ -9969,7 +9973,7 @@ impl AperCodec for NbIotUePriority {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), true, self.0 as i128, false)
     }
 }
 
@@ -9985,7 +9989,7 @@ impl AperCodec for NetworkInstance {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(256), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(256), true, self.0 as i128, false)
     }
 }
 
@@ -10006,7 +10010,7 @@ impl AperCodec for NewSecurityContextInd {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -10022,7 +10026,7 @@ impl AperCodec for NextHopChainingCount {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(7), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(7), false, self.0 as i128, false)
     }
 }
 
@@ -10044,7 +10048,7 @@ impl AperCodec for NextPagingAreaScope {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -10093,16 +10097,16 @@ impl AperCodec for NgEnbId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::MacroNgEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(20), Some(20), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(20), Some(20), false, &x, false)
             }
             Self::ShortMacroNgEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (1, false))?;
-                aper::encode::encode_bitstring(data, Some(18), Some(18), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
+                aper::encode::encode_bitstring(data, Some(18), Some(18), false, &x, false)
             }
             Self::LongMacroNgEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (2, false))?;
-                aper::encode::encode_bitstring(data, Some(21), Some(21), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
+                aper::encode::encode_bitstring(data, Some(21), Some(21), false, &x, false)
             }
         }
     }
@@ -10125,7 +10129,7 @@ impl AperCodec for NotifySourceNgranNode {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -10157,11 +10161,11 @@ impl AperCodec for NgranCgi {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::NrCgi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::EutraCgi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -10222,7 +10226,7 @@ impl AperCodec for NgranTnlAssociationToRemoveItem {
         optionals.push(self.tnl_association_transport_layer_address_amf.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, false, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         self.tnl_association_transport_layer_address.encode(data)?;
         if let Some(x) = &self.tnl_association_transport_layer_address_amf {
             x.encode(data)?;
@@ -10247,7 +10251,7 @@ impl AperCodec for NgranTraceId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -10266,7 +10270,7 @@ impl AperCodec for Nid {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(44), Some(44), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(44), Some(44), false, &self.0, false)
     }
 }
 
@@ -10314,7 +10318,7 @@ impl AperCodec for NonDynamic5qiDescriptor {
         optionals.push(self.maximum_data_burst_volume.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.five_qi.encode(data)?;
         if let Some(x) = &self.priority_level_qos {
             x.encode(data)?;
@@ -10373,7 +10377,7 @@ impl AperCodec for NotificationCause {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -10394,7 +10398,7 @@ impl AperCodec for NotificationControl {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -10424,7 +10428,7 @@ impl AperCodec for NpnAccessInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::PniNpnAccessInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -10463,11 +10467,11 @@ impl AperCodec for NpnMobilityInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::SnpnMobilityInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::PniNpnMobilityInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -10502,7 +10506,7 @@ impl AperCodec for NpnPagingAssistanceInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::PniNpnPagingAssistance(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -10535,7 +10539,7 @@ impl AperCodec for NpnSupport {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Snpn(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -10557,7 +10561,7 @@ impl AperCodec for NrCellIdentity {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(36), Some(36), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(36), Some(36), false, &self.0, false)
     }
 }
 
@@ -10585,7 +10589,7 @@ impl AperCodec for NrCgi {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.nr_cell_identity.encode(data)?;
 
@@ -10660,7 +10664,7 @@ impl AperCodec for NRencryptionAlgorithms {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0, false)
     }
 }
 
@@ -10679,7 +10683,7 @@ impl AperCodec for NRintegrityProtectionAlgorithms {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), true, &self.0, false)
     }
 }
 
@@ -10695,7 +10699,7 @@ impl AperCodec for NrMobilityHistoryReport {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -10711,7 +10715,7 @@ impl AperCodec for NrpPaPdu {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -10727,7 +10731,7 @@ impl AperCodec for NrueRlfReportContainer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -10743,7 +10747,7 @@ impl AperCodec for NumberOfBroadcasts {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(65535), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(65535), false, self.0 as i128, false)
     }
 }
 
@@ -10759,7 +10763,7 @@ impl AperCodec for NumberOfBroadcastsRequested {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(65535), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(65535), false, self.0 as i128, false)
     }
 }
 
@@ -10775,7 +10779,7 @@ impl AperCodec for Nrarfcn {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(3279165), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(3279165), false, self.0 as i128, false)
     }
 }
 
@@ -10791,7 +10795,7 @@ impl AperCodec for NrFrequencyBand {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(1024), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(1024), true, self.0 as i128, false)
     }
 }
 
@@ -10839,7 +10843,7 @@ impl AperCodec for NrFrequencyBandItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_frequency_band.encode(data)?;
 
         Ok(())
@@ -10870,7 +10874,7 @@ impl AperCodec for NrFrequencyInfo {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_arfcn.encode(data)?;
         self.frequency_band_list.encode(data)?;
 
@@ -10890,7 +10894,7 @@ impl AperCodec for NrPci {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(1007), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(1007), true, self.0 as i128, false)
     }
 }
 
@@ -10927,7 +10931,7 @@ impl AperCodec for Nrv2xServicesAuthorized {
         optionals.push(self.pedestrian_ue.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.vehicle_ue {
             x.encode(data)?;
         }
@@ -10957,7 +10961,7 @@ impl AperCodec for VehicleUe {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -10979,7 +10983,7 @@ impl AperCodec for PedestrianUe {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -11004,7 +11008,7 @@ impl AperCodec for NrueSidelinkAggregateMaximumBitrate {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ue_sidelink_aggregate_maximum_bit_rate.encode(data)?;
 
         Ok(())
@@ -11031,7 +11035,7 @@ impl AperCodec for OverloadAction {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(3), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(3), true, *self as i128, false)
     }
 }
 
@@ -11061,7 +11065,7 @@ impl AperCodec for OverloadResponse {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::OverloadAction(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -11129,7 +11133,7 @@ impl AperCodec for OverloadStartNssaiItem {
         optionals.push(self.slice_traffic_load_reduction_indication.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.slice_overload_list.encode(data)?;
         if let Some(x) = &self.slice_overload_response {
             x.encode(data)?;
@@ -11154,7 +11158,7 @@ impl AperCodec for PacketDelayBudget {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(1023), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(1023), true, self.0 as i128, false)
     }
 }
 
@@ -11182,20 +11186,15 @@ impl AperCodec for PacketErrorRate {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
+        aper::encode::encode_integer(data, Some(0), Some(9), true, self.per_scalar as i128, false)?;
         aper::encode::encode_integer(
             data,
             Some(0),
             Some(9),
             true,
-            (self.per_scalar as i128, false),
-        )?;
-        aper::encode::encode_integer(
-            data,
-            Some(0),
-            Some(9),
-            true,
-            (self.per_exponent as i128, false),
+            self.per_exponent as i128,
+            false,
         )?;
 
         Ok(())
@@ -11214,7 +11213,7 @@ impl AperCodec for PacketLossRate {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(1000), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(1000), true, self.0 as i128, false)
     }
 }
 
@@ -11242,7 +11241,7 @@ impl AperCodec for PagingAssisDataforCEcapabUe {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
         self.coverage_enhancement_level.encode(data)?;
 
@@ -11281,7 +11280,7 @@ impl AperCodec for PagingAttemptInformation {
         optionals.push(self.next_paging_area_scope.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.paging_attempt_count.encode(data)?;
         self.intended_number_of_paging_attempts.encode(data)?;
         if let Some(x) = &self.next_paging_area_scope {
@@ -11304,7 +11303,7 @@ impl AperCodec for PagingAttemptCount {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(16), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(16), true, self.0 as i128, false)
     }
 }
 
@@ -11328,7 +11327,7 @@ impl AperCodec for PagingDrx {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(3), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(3), true, *self as i128, false)
     }
 }
 
@@ -11349,7 +11348,7 @@ impl AperCodec for PagingOrigin {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -11377,7 +11376,7 @@ impl AperCodec for PagingPriority {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(7), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(7), true, *self as i128, false)
     }
 }
 
@@ -11409,7 +11408,7 @@ impl AperCodec for PagingeDrxInformation {
         optionals.push(self.paging_time_window.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.paging_e_drx_cycle.encode(data)?;
         if let Some(x) = &self.paging_time_window {
             x.encode(data)?;
@@ -11449,7 +11448,7 @@ impl AperCodec for PagingEDrxCycle {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(13), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(13), true, *self as i128, false)
     }
 }
 
@@ -11485,7 +11484,7 @@ impl AperCodec for PagingTimeWindow {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(15), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(15), true, *self as i128, false)
     }
 }
 
@@ -11526,7 +11525,7 @@ impl AperCodec for PagingProbabilityInformation {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(20), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(20), true, *self as i128, false)
     }
 }
 
@@ -11563,7 +11562,7 @@ impl AperCodec for PathSwitchRequestAcknowledgeTransfer {
         optionals.push(self.security_indication.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.ul_ngu_up_tnl_information {
             x.encode(data)?;
         }
@@ -11594,7 +11593,7 @@ impl AperCodec for PathSwitchRequestSetupFailedTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -11640,7 +11639,7 @@ impl AperCodec for PathSwitchRequestTransfer {
         optionals.push(self.user_plane_security_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_ngu_up_tnl_information.encode(data)?;
         if let Some(x) = &self.dl_ngu_tnl_information_reused {
             x.encode(data)?;
@@ -11673,7 +11672,7 @@ impl AperCodec for PathSwitchRequestUnsuccessfulTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -11708,7 +11707,7 @@ impl AperCodec for Pc5QosParameters {
         optionals.push(self.pc_5_link_aggregate_bit_rates.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pc_5_qos_flow_list.encode(data)?;
         if let Some(x) = &self.pc_5_link_aggregate_bit_rates {
             x.encode(data)?;
@@ -11779,7 +11778,7 @@ impl AperCodec for Pc5QosFlowItem {
         optionals.push(self.range.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pqi.encode(data)?;
         if let Some(x) = &self.pc_5_flow_bit_rates {
             x.encode(data)?;
@@ -11816,7 +11815,7 @@ impl AperCodec for Pc5FlowBitRates {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.guaranteed_flow_bit_rate.encode(data)?;
         self.maximum_flow_bit_rate.encode(data)?;
 
@@ -11867,7 +11866,7 @@ impl AperCodec for PrivacyIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -11895,7 +11894,7 @@ impl AperCodec for PduSessionAggregateMaximumBitRate {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_aggregate_maximum_bit_rate_dl
             .encode(data)?;
         self.pdu_session_aggregate_maximum_bit_rate_ul
@@ -11917,7 +11916,7 @@ impl AperCodec for PduSessionId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
@@ -11971,7 +11970,7 @@ impl AperCodec for PduSessionResourceAdmittedItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -11979,6 +11978,7 @@ impl AperCodec for PduSessionResourceAdmittedItem {
             None,
             false,
             &self.handover_request_acknowledge_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12037,7 +12037,7 @@ impl AperCodec for PduSessionResourceFailedToModifyItemModCfm {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12045,6 +12045,7 @@ impl AperCodec for PduSessionResourceFailedToModifyItemModCfm {
             None,
             false,
             &self.pdu_session_resource_modify_indication_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12103,7 +12104,7 @@ impl AperCodec for PduSessionResourceFailedToModifyItemModRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12111,6 +12112,7 @@ impl AperCodec for PduSessionResourceFailedToModifyItemModRes {
             None,
             false,
             &self.pdu_session_resource_modify_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12168,7 +12170,7 @@ impl AperCodec for PduSessionResourceFailedToResumeItemResReq {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         self.cause.encode(data)?;
 
@@ -12227,7 +12229,7 @@ impl AperCodec for PduSessionResourceFailedToResumeItemResRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         self.cause.encode(data)?;
 
@@ -12287,7 +12289,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemCxtFail {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12295,6 +12297,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemCxtFail {
             None,
             false,
             &self.pdu_session_resource_setup_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12353,7 +12356,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemCxtRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12361,6 +12364,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemCxtRes {
             None,
             false,
             &self.pdu_session_resource_setup_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12419,7 +12423,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemHoAck {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12427,6 +12431,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemHoAck {
             None,
             false,
             &self.handover_resource_allocation_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12485,7 +12490,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemPsReq {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12493,6 +12498,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemPsReq {
             None,
             false,
             &self.path_switch_request_setup_failed_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12551,7 +12557,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemSuRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12559,6 +12565,7 @@ impl AperCodec for PduSessionResourceFailedToSetupItemSuRes {
             None,
             false,
             &self.pdu_session_resource_setup_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12614,9 +12621,16 @@ impl AperCodec for PduSessionResourceHandoverItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
-        aper::encode::encode_octetstring(data, None, None, false, &self.handover_command_transfer)?;
+        aper::encode::encode_octetstring(
+            data,
+            None,
+            None,
+            false,
+            &self.handover_command_transfer,
+            false,
+        )?;
 
         Ok(())
     }
@@ -12678,7 +12692,7 @@ impl AperCodec for PduSessionResourceInformationItem {
         optionals.push(self.dr_bs_to_qos_flows_mapping_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         self.qos_flow_information_list.encode(data)?;
         if let Some(x) = &self.dr_bs_to_qos_flows_mapping_list {
@@ -12733,7 +12747,7 @@ impl AperCodec for PduSessionResourceItemCxtRelCpl {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
 
         Ok(())
@@ -12784,7 +12798,7 @@ impl AperCodec for PduSessionResourceItemCxtRelReq {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
 
         Ok(())
@@ -12840,7 +12854,7 @@ impl AperCodec for PduSessionResourceItemHoRqd {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -12848,6 +12862,7 @@ impl AperCodec for PduSessionResourceItemHoRqd {
             None,
             false,
             &self.handover_required_transfer,
+            false,
         )?;
 
         Ok(())
@@ -12893,7 +12908,7 @@ impl AperCodec for PduSessionResourceModifyConfirmTransfer {
         optionals.push(self.qos_flow_failed_to_modify_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_modify_confirm_list.encode(data)?;
         self.ulngu_up_tnl_information.encode(data)?;
         if let Some(x) = &self.additional_ng_uuptnl_information {
@@ -12926,7 +12941,7 @@ impl AperCodec for PduSessionResourceModifyIndicationUnsuccessfulTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -13034,7 +13049,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (130, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13044,7 +13059,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.ul_ngu_up_tnl_modify_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (140, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 140, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13054,7 +13069,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.network_instance {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (129, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13064,7 +13079,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.qos_flow_add_or_modify_request_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (135, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 135, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13074,7 +13089,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.qos_flow_to_release_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (137, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 137, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13084,7 +13099,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (126, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13094,7 +13109,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.common_network_instance {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (166, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13104,7 +13119,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (186, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13114,7 +13129,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.redundant_common_network_instance {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (190, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13124,7 +13139,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (195, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13134,7 +13149,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         if let Some(x) = &self.security_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (138, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -13142,7 +13157,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -13213,7 +13228,7 @@ impl AperCodec for PduSessionResourceModifyResponseTransfer {
         optionals.push(self.qos_flow_failed_to_add_or_modify_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 6, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.dl_ngu_up_tnl_information {
             x.encode(data)?;
         }
@@ -13262,7 +13277,7 @@ impl AperCodec for PduSessionResourceModifyIndicationTransfer {
         optionals.push(self.additional_dl_qos_flow_per_tnl_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_qos_flow_per_tnl_information.encode(data)?;
         if let Some(x) = &self.additional_dl_qos_flow_per_tnl_information {
             x.encode(data)?;
@@ -13322,7 +13337,7 @@ impl AperCodec for PduSessionResourceModifyItemModCfm {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13330,6 +13345,7 @@ impl AperCodec for PduSessionResourceModifyItemModCfm {
             None,
             false,
             &self.pdu_session_resource_modify_confirm_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13386,7 +13402,7 @@ impl AperCodec for PduSessionResourceModifyItemModInd {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13394,6 +13410,7 @@ impl AperCodec for PduSessionResourceModifyItemModInd {
             None,
             false,
             &self.pdu_session_resource_modify_indication_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13457,7 +13474,7 @@ impl AperCodec for PduSessionResourceModifyItemModReq {
         optionals.push(self.nas_pdu.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         if let Some(x) = &self.nas_pdu {
             x.encode(data)?;
@@ -13468,6 +13485,7 @@ impl AperCodec for PduSessionResourceModifyItemModReq {
             None,
             false,
             &self.pdu_session_resource_modify_request_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13524,7 +13542,7 @@ impl AperCodec for PduSessionResourceModifyItemModRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13532,6 +13550,7 @@ impl AperCodec for PduSessionResourceModifyItemModRes {
             None,
             false,
             &self.pdu_session_resource_modify_response_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13566,7 +13585,7 @@ impl AperCodec for PduSessionResourceModifyUnsuccessfulTransfer {
         optionals.push(self.criticality_diagnostics.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
         if let Some(x) = &self.criticality_diagnostics {
             x.encode(data)?;
@@ -13626,7 +13645,7 @@ impl AperCodec for PduSessionResourceNotifyItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13634,6 +13653,7 @@ impl AperCodec for PduSessionResourceNotifyItem {
             None,
             false,
             &self.pdu_session_resource_notify_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13659,7 +13679,7 @@ impl AperCodec for PduSessionResourceNotifyReleasedTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -13699,7 +13719,7 @@ impl AperCodec for PduSessionResourceNotifyTransfer {
         optionals.push(self.qos_flow_released_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.qos_flow_notify_list {
             x.encode(data)?;
         }
@@ -13730,7 +13750,7 @@ impl AperCodec for PduSessionResourceReleaseCommandTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -13787,7 +13807,7 @@ impl AperCodec for PduSessionResourceReleasedItemNot {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13795,6 +13815,7 @@ impl AperCodec for PduSessionResourceReleasedItemNot {
             None,
             false,
             &self.pdu_session_resource_notify_released_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13851,7 +13872,7 @@ impl AperCodec for PduSessionResourceReleasedItemPsAck {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13859,6 +13880,7 @@ impl AperCodec for PduSessionResourceReleasedItemPsAck {
             None,
             false,
             &self.path_switch_request_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13915,7 +13937,7 @@ impl AperCodec for PduSessionResourceReleasedItemPsFail {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13923,6 +13945,7 @@ impl AperCodec for PduSessionResourceReleasedItemPsFail {
             None,
             false,
             &self.path_switch_request_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -13979,7 +14002,7 @@ impl AperCodec for PduSessionResourceReleasedItemRelRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -13987,6 +14010,7 @@ impl AperCodec for PduSessionResourceReleasedItemRelRes {
             None,
             false,
             &self.pdu_session_resource_release_response_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14045,7 +14069,7 @@ impl AperCodec for PduSessionResourceResumeItemResReq {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -14053,6 +14077,7 @@ impl AperCodec for PduSessionResourceResumeItemResReq {
             None,
             false,
             &self.ue_context_resume_request_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14109,7 +14134,7 @@ impl AperCodec for PduSessionResourceResumeItemResRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -14117,6 +14142,7 @@ impl AperCodec for PduSessionResourceResumeItemResRes {
             None,
             false,
             &self.ue_context_resume_response_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14175,7 +14201,7 @@ impl AperCodec for PduSessionResourceSecondaryRatUsageItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -14183,6 +14209,7 @@ impl AperCodec for PduSessionResourceSecondaryRatUsageItem {
             None,
             false,
             &self.secondary_rat_data_usage_report_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14249,7 +14276,7 @@ impl AperCodec for PduSessionResourceSetupItemCxtReq {
         optionals.push(self.nas_pdu.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         if let Some(x) = &self.nas_pdu {
             x.encode(data)?;
@@ -14261,6 +14288,7 @@ impl AperCodec for PduSessionResourceSetupItemCxtReq {
             None,
             false,
             &self.pdu_session_resource_setup_request_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14317,7 +14345,7 @@ impl AperCodec for PduSessionResourceSetupItemCxtRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -14325,6 +14353,7 @@ impl AperCodec for PduSessionResourceSetupItemCxtRes {
             None,
             false,
             &self.pdu_session_resource_setup_response_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14383,10 +14412,17 @@ impl AperCodec for PduSessionResourceSetupItemHoReq {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         self.s_nssai.encode(data)?;
-        aper::encode::encode_octetstring(data, None, None, false, &self.handover_request_transfer)?;
+        aper::encode::encode_octetstring(
+            data,
+            None,
+            None,
+            false,
+            &self.handover_request_transfer,
+            false,
+        )?;
 
         Ok(())
     }
@@ -14452,7 +14488,7 @@ impl AperCodec for PduSessionResourceSetupItemSuReq {
         optionals.push(self.pdu_session_nas_pdu.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         if let Some(x) = &self.pdu_session_nas_pdu {
             x.encode(data)?;
@@ -14464,6 +14500,7 @@ impl AperCodec for PduSessionResourceSetupItemSuReq {
             None,
             false,
             &self.pdu_session_resource_setup_request_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14520,7 +14557,7 @@ impl AperCodec for PduSessionResourceSetupItemSuRes {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -14528,6 +14565,7 @@ impl AperCodec for PduSessionResourceSetupItemSuRes {
             None,
             false,
             &self.pdu_session_resource_setup_response_transfer,
+            false,
         )?;
 
         Ok(())
@@ -14662,7 +14700,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.pdu_session_aggregate_maximum_bit_rate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (130, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14671,7 +14709,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ul_ngu_up_tnl_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (139, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 139, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -14680,7 +14718,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (126, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14690,7 +14728,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.data_forwarding_not_possible {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (127, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 127, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14699,7 +14737,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (134, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 134, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -14708,7 +14746,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.security_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (138, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14718,7 +14756,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.network_instance {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (129, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14727,7 +14765,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
 
         let ie = &mut AperCodecData::new();
         self.qos_flow_setup_request_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (136, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 136, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -14736,7 +14774,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.common_network_instance {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (166, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14746,7 +14784,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.direct_forwarding_path_availability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (22, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 22, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14756,7 +14794,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.redundant_ul_ngu_up_tnl_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (195, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14766,7 +14804,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.additional_redundant_ul_ngu_up_tnl_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (186, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14776,7 +14814,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.redundant_common_network_instance {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (190, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14786,7 +14824,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         if let Some(x) = &self.redundant_pdu_session_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (197, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 197, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -14794,7 +14832,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -14852,7 +14890,7 @@ impl AperCodec for PduSessionResourceSetupResponseTransfer {
         optionals.push(self.qos_flow_failed_to_setup_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dl_qos_flow_per_tnl_information.encode(data)?;
         if let Some(x) = &self.additional_dl_qos_flow_per_tnl_information {
             x.encode(data)?;
@@ -14896,7 +14934,7 @@ impl AperCodec for PduSessionResourceSetupUnsuccessfulTransfer {
         optionals.push(self.criticality_diagnostics.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cause.encode(data)?;
         if let Some(x) = &self.criticality_diagnostics {
             x.encode(data)?;
@@ -14956,7 +14994,7 @@ impl AperCodec for PduSessionResourceSuspendItemSusReq {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -14964,6 +15002,7 @@ impl AperCodec for PduSessionResourceSuspendItemSusReq {
             None,
             false,
             &self.ue_context_suspend_request_transfer,
+            false,
         )?;
 
         Ok(())
@@ -15020,7 +15059,7 @@ impl AperCodec for PduSessionResourceSwitchedItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -15028,6 +15067,7 @@ impl AperCodec for PduSessionResourceSwitchedItem {
             None,
             false,
             &self.path_switch_request_acknowledge_transfer,
+            false,
         )?;
 
         Ok(())
@@ -15084,7 +15124,7 @@ impl AperCodec for PduSessionResourceToBeSwitchedDlItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -15092,6 +15132,7 @@ impl AperCodec for PduSessionResourceToBeSwitchedDlItem {
             None,
             false,
             &self.path_switch_request_transfer,
+            false,
         )?;
 
         Ok(())
@@ -15148,7 +15189,7 @@ impl AperCodec for PduSessionResourceToReleaseItemHoCmd {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -15156,6 +15197,7 @@ impl AperCodec for PduSessionResourceToReleaseItemHoCmd {
             None,
             false,
             &self.handover_preparation_unsuccessful_transfer,
+            false,
         )?;
 
         Ok(())
@@ -15212,7 +15254,7 @@ impl AperCodec for PduSessionResourceToReleaseItemRelCmd {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         aper::encode::encode_octetstring(
             data,
@@ -15220,6 +15262,7 @@ impl AperCodec for PduSessionResourceToReleaseItemRelCmd {
             None,
             false,
             &self.pdu_session_resource_release_command_transfer,
+            false,
         )?;
 
         Ok(())
@@ -15247,7 +15290,7 @@ impl AperCodec for PduSessionType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(4), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(4), true, *self as i128, false)
     }
 }
 
@@ -15275,7 +15318,7 @@ impl AperCodec for PduSessionUsageReport {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.rat_type.encode(data)?;
         self.pdu_session_timed_report_list.encode(data)?;
 
@@ -15295,7 +15338,7 @@ impl AperCodec for Periodicity {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(640000), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(640000), true, self.0 as i128, false)
     }
 }
 
@@ -15314,7 +15357,7 @@ impl AperCodec for PeriodicRegistrationUpdateTimer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), false, &self.0, false)
     }
 }
 
@@ -15333,7 +15376,7 @@ impl AperCodec for PlmnIdentity {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
     }
 }
 
@@ -15386,7 +15429,7 @@ impl AperCodec for PlmnSupportItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.slice_support_list.encode(data)?;
 
@@ -15415,7 +15458,7 @@ impl AperCodec for PniNpnMobilityInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.allowed_pni_npi_list.encode(data)?;
 
         Ok(())
@@ -15437,7 +15480,7 @@ impl AperCodec for PortNumber {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
     }
 }
 
@@ -15459,7 +15502,7 @@ impl AperCodec for PreEmptionCapability {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -15481,7 +15524,7 @@ impl AperCodec for PreEmptionVulnerability {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -15497,7 +15540,7 @@ impl AperCodec for PriorityLevelArp {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(15), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(15), false, self.0 as i128, false)
     }
 }
 
@@ -15513,7 +15556,7 @@ impl AperCodec for PriorityLevelQos {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(127), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(127), true, self.0 as i128, false)
     }
 }
 
@@ -15545,11 +15588,11 @@ impl AperCodec for PwsFailedCellIdList {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutraCgiPwsFailedList(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::NrCgiPwsFailedList(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -15584,11 +15627,11 @@ impl AperCodec for QosCharacteristics {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::NonDynamic5qi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::Dynamic5qi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -15641,7 +15684,7 @@ impl AperCodec for QosFlowAcceptedItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
 
         Ok(())
@@ -15709,7 +15752,7 @@ impl AperCodec for QosFlowAddOrModifyRequestItem {
         optionals.push(self.e_rab_id.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         if let Some(x) = &self.qos_flow_level_qos_parameters {
             x.encode(data)?;
@@ -15768,7 +15811,7 @@ impl AperCodec for QosFlowAddOrModifyResponseItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
 
         Ok(())
@@ -15844,7 +15887,7 @@ impl AperCodec for QosFlowFeedbackItem {
         optionals.push(self.c_npacket_delay_budget_ul.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         if let Some(x) = &self.update_feedback {
             x.encode(data)?;
@@ -15872,7 +15915,7 @@ impl AperCodec for QosFlowIdentifier {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(63), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(63), true, self.0 as i128, false)
     }
 }
 
@@ -15929,7 +15972,7 @@ impl AperCodec for QosFlowInformationItem {
         optionals.push(self.dl_forwarding.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         if let Some(x) = &self.dl_forwarding {
             x.encode(data)?;
@@ -15986,7 +16029,7 @@ impl AperCodec for QosFlowLevelQosParameters {
         optionals.push(self.additional_qos_flow_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_characteristics.encode(data)?;
         self.allocation_and_retention_priority.encode(data)?;
         if let Some(x) = &self.gbr_qos_information {
@@ -16022,7 +16065,7 @@ impl AperCodec for QosMonitoringRequest {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -16038,7 +16081,7 @@ impl AperCodec for QosMonitoringReportingFrequency {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(1800), true, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(1800), true, self.0 as i128, false)
     }
 }
 
@@ -16091,7 +16134,7 @@ impl AperCodec for QosFlowWithCauseItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         self.cause.encode(data)?;
 
@@ -16145,7 +16188,7 @@ impl AperCodec for QosFlowModifyConfirmItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
 
         Ok(())
@@ -16201,7 +16244,7 @@ impl AperCodec for QosFlowNotifyItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         self.notification_cause.encode(data)?;
 
@@ -16262,7 +16305,7 @@ impl AperCodec for QosFlowParametersItem {
         optionals.push(self.alternative_qos_para_set_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         if let Some(x) = &self.alternative_qos_para_set_list {
             x.encode(data)?;
@@ -16296,7 +16339,7 @@ impl AperCodec for QosFlowPerTnlInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.up_transport_layer_information.encode(data)?;
         self.associated_qos_flow_list.encode(data)?;
 
@@ -16350,7 +16393,7 @@ impl AperCodec for QosFlowPerTnlInformationItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_per_tnl_information.encode(data)?;
 
         Ok(())
@@ -16413,7 +16456,7 @@ impl AperCodec for QosFlowSetupRequestItem {
         optionals.push(self.e_rab_id.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         self.qos_flow_level_qos_parameters.encode(data)?;
         if let Some(x) = &self.e_rab_id {
@@ -16477,7 +16520,7 @@ impl AperCodec for QosFlowItemWithDataForwarding {
         optionals.push(self.data_forwarding_accepted.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         if let Some(x) = &self.data_forwarding_accepted {
             x.encode(data)?;
@@ -16533,7 +16576,7 @@ impl AperCodec for QosFlowToBeForwardedItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
 
         Ok(())
@@ -16592,7 +16635,7 @@ impl AperCodec for QosFlowsUsageReportItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.qos_flow_identifier.encode(data)?;
         self.rat_type.encode(data)?;
         self.qos_flows_timed_report_list.encode(data)?;
@@ -16626,7 +16669,7 @@ impl AperCodec for Range {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(8), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(8), true, *self as i128, false)
     }
 }
 
@@ -16645,7 +16688,7 @@ impl AperCodec for RanNodeName {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_printable_string(data, Some(1), Some(150), true, &self.0)
+        aper::encode::encode_printable_string(data, Some(1), Some(150), true, &self.0, false)
     }
 }
 
@@ -16664,7 +16707,7 @@ impl AperCodec for RanNodeNameVisibleString {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_visible_string(data, Some(1), Some(150), true, &self.0)
+        aper::encode::encode_visible_string(data, Some(1), Some(150), true, &self.0, false)
     }
 }
 
@@ -16683,7 +16726,7 @@ impl AperCodec for RanNodeNameUtf8String {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_utf8_string(data, Some(1), Some(150), true, &self.0)
+        aper::encode::encode_utf8_string(data, Some(1), Some(150), true, &self.0, false)
     }
 }
 
@@ -16699,7 +16742,7 @@ impl AperCodec for RanPagingPriority {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(256), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(256), false, self.0 as i128, false)
     }
 }
 
@@ -16724,7 +16767,7 @@ impl AperCodec for RanStatusTransferTransparentContainer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.dr_bs_subject_to_status_transfer_list.encode(data)?;
 
         Ok(())
@@ -16748,7 +16791,8 @@ impl AperCodec for RanUeNgapId {
             Some(0),
             Some(4294967295),
             false,
-            (self.0 as i128, false),
+            self.0 as i128,
+            false,
         )
     }
 }
@@ -16771,7 +16815,7 @@ impl AperCodec for RatInformation {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -16824,7 +16868,7 @@ impl AperCodec for RatRestrictionsItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.rat_restriction_information.encode(data)?;
 
@@ -16847,7 +16891,7 @@ impl AperCodec for RatRestrictionInformation {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), true, &self.0, false)
     }
 }
 
@@ -16872,7 +16916,7 @@ impl AperCodec for RecommendedCellsForPaging {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.recommended_cell_list.encode(data)?;
 
         Ok(())
@@ -16932,10 +16976,10 @@ impl AperCodec for RecommendedCellItem {
         optionals.push(self.time_stayed_in_cell.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ngran_cgi.encode(data)?;
         if let Some(x) = &self.time_stayed_in_cell {
-            aper::encode::encode_integer(data, Some(0), Some(4095), false, (*x as i128, false))?;
+            aper::encode::encode_integer(data, Some(0), Some(4095), false, *x as i128, false)?;
         }
 
         Ok(())
@@ -16963,7 +17007,7 @@ impl AperCodec for RecommendedRanNodesForPaging {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.recommended_ran_node_list.encode(data)?;
 
         Ok(())
@@ -17014,7 +17058,7 @@ impl AperCodec for RecommendedRanNodeItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_paging_target.encode(data)?;
 
         Ok(())
@@ -17039,7 +17083,7 @@ impl AperCodec for RedirectionVoiceFallback {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -17062,7 +17106,7 @@ impl AperCodec for RedundantPduSessionInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.rsn.encode(data)?;
 
         Ok(())
@@ -17087,7 +17131,7 @@ impl AperCodec for RedundantQosFlowIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), false, *self as i128, false)
     }
 }
 
@@ -17108,7 +17152,7 @@ impl AperCodec for ReflectiveQosAttribute {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -17124,7 +17168,7 @@ impl AperCodec for RelativeAmfCapacity {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
@@ -17145,7 +17189,7 @@ impl AperCodec for ReportArea {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -17161,7 +17205,7 @@ impl AperCodec for RepetitionPeriod {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(131071), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(131071), false, self.0 as i128, false)
     }
 }
 
@@ -17182,7 +17226,7 @@ impl AperCodec for ResetAll {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -17210,7 +17254,7 @@ impl AperCodec for ReportAmountMdt {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(7), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(7), false, *self as i128, false)
     }
 }
 
@@ -17243,7 +17287,7 @@ impl AperCodec for ReportIntervalMdt {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(12), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(12), false, *self as i128, false)
     }
 }
 
@@ -17277,11 +17321,11 @@ impl AperCodec for ResetType {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::NgInterface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::PartOfNgInterface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -17300,7 +17344,7 @@ impl AperCodec for RgLevelWirelineAccessCharacteristics {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -17316,7 +17360,7 @@ impl AperCodec for RncId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(4095), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(4095), false, self.0 as i128, false)
     }
 }
 
@@ -17332,7 +17376,7 @@ impl AperCodec for RoutingId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -17348,7 +17392,7 @@ impl AperCodec for RrcContainer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -17378,7 +17422,7 @@ impl AperCodec for RrcEstablishmentCause {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(9), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(9), true, *self as i128, false)
     }
 }
 
@@ -17401,7 +17445,7 @@ impl AperCodec for RrcInactiveTransitionReportRequest {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -17423,7 +17467,7 @@ impl AperCodec for RrcState {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -17445,7 +17489,7 @@ impl AperCodec for Rsn {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -17476,7 +17520,7 @@ impl AperCodec for RimInformationTransfer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.target_ran_node_id.encode(data)?;
         self.source_ran_node_id.encode(data)?;
         self.rim_information.encode(data)?;
@@ -17509,7 +17553,7 @@ impl AperCodec for RimInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.target_gnb_set_id.encode(data)?;
         self.rim_rs_detection.encode(data)?;
 
@@ -17532,7 +17576,7 @@ impl AperCodec for GnbSetId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(22), Some(22), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(22), Some(22), false, &self.0, false)
     }
 }
 
@@ -17582,15 +17626,15 @@ impl AperCodec for ScheduledCommunicationTime {
         optionals.push(self.timeof_day_end.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.dayof_week {
-            aper::encode::encode_bitstring(data, Some(7), Some(7), false, &x)?;
+            aper::encode::encode_bitstring(data, Some(7), Some(7), false, &x, false)?;
         }
         if let Some(x) = &self.timeof_day_start {
-            aper::encode::encode_integer(data, Some(0), Some(86399), true, (*x as i128, false))?;
+            aper::encode::encode_integer(data, Some(0), Some(86399), true, *x as i128, false)?;
         }
         if let Some(x) = &self.timeof_day_end {
-            aper::encode::encode_integer(data, Some(0), Some(86399), true, (*x as i128, false))?;
+            aper::encode::encode_integer(data, Some(0), Some(86399), true, *x as i128, false)?;
         }
 
         Ok(())
@@ -17637,7 +17681,7 @@ impl AperCodec for Sd {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
     }
 }
 
@@ -17674,7 +17718,7 @@ impl AperCodec for SecondaryRatUsageInformation {
         optionals.push(self.qos_flows_usage_report_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.pdu_session_usage_report {
             x.encode(data)?;
         }
@@ -17711,7 +17755,7 @@ impl AperCodec for SecondaryRatDataUsageReportTransfer {
         optionals.push(self.secondary_rat_usage_information.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.secondary_rat_usage_information {
             x.encode(data)?;
         }
@@ -17744,7 +17788,7 @@ impl AperCodec for SecurityContext {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.next_hop_chaining_count.encode(data)?;
         self.next_hop_nh.encode(data)?;
 
@@ -17784,7 +17828,7 @@ impl AperCodec for SecurityIndication {
         optionals.push(self.maximum_integrity_protected_data_rate_ul.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.integrity_protection_indication.encode(data)?;
         self.confidentiality_protection_indication.encode(data)?;
         if let Some(x) = &self.maximum_integrity_protected_data_rate_ul {
@@ -17810,7 +17854,7 @@ impl AperCodec for SecurityKey {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(256), Some(256), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(256), Some(256), false, &self.0, false)
     }
 }
 
@@ -17838,7 +17882,7 @@ impl AperCodec for SecurityResult {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.integrity_protection_result.encode(data)?;
         self.confidentiality_protection_result.encode(data)?;
 
@@ -17874,7 +17918,7 @@ impl AperCodec for SensorMeasurementConfiguration {
         optionals.push(self.sensor_meas_config_name_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.sensor_meas_config.encode(data)?;
         if let Some(x) = &self.sensor_meas_config_name_list {
             x.encode(data)?;
@@ -17928,7 +17972,7 @@ impl AperCodec for SensorMeasConfigNameItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.sensor_name_config.encode(data)?;
 
         Ok(())
@@ -17952,7 +17996,7 @@ impl AperCodec for SensorMeasConfig {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -17990,15 +18034,15 @@ impl AperCodec for SensorNameConfig {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::UncompensatedBarometricConfig(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.encode(data)
             }
             Self::UeSpeedConfig(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.encode(data)
             }
             Self::UeOrientationConfig(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.encode(data)
             }
         }
@@ -18020,7 +18064,7 @@ impl AperCodec for SerialNumber {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -18077,7 +18121,7 @@ impl AperCodec for ServedGuamiItem {
         optionals.push(self.backup_amf_name.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.guami.encode(data)?;
         if let Some(x) = &self.backup_amf_name {
             x.encode(data)?;
@@ -18148,7 +18192,7 @@ impl AperCodec for ServiceAreaInformationItem {
         optionals.push(self.not_allowed_ta_cs.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         if let Some(x) = &self.allowed_ta_cs {
             x.encode(data)?;
@@ -18178,7 +18222,8 @@ impl AperCodec for SGnbUeX2apId {
             Some(0),
             Some(4294967295),
             false,
-            (self.0 as i128, false),
+            self.0 as i128,
+            false,
         )
     }
 }
@@ -18227,7 +18272,7 @@ impl AperCodec for SliceOverloadItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.s_nssai.encode(data)?;
 
         Ok(())
@@ -18278,7 +18323,7 @@ impl AperCodec for SliceSupportItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.s_nssai.encode(data)?;
 
         Ok(())
@@ -18304,7 +18349,7 @@ impl AperCodec for SnpnMobilityInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.serving_nid.encode(data)?;
 
         Ok(())
@@ -18336,7 +18381,7 @@ impl AperCodec for SNssai {
         optionals.push(self.sd.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.sst.encode(data)?;
         if let Some(x) = &self.sd {
             x.encode(data)?;
@@ -18380,7 +18425,7 @@ impl AperCodec for SonConfigurationTransfer {
         optionals.push(self.xn_tnl_configuration_info.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.target_ran_node_id.encode(data)?;
         self.source_ran_node_id.encode(data)?;
         self.son_information.encode(data)?;
@@ -18424,11 +18469,11 @@ impl AperCodec for SonInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::SonInformationRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::SonInformationReply(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -18460,7 +18505,7 @@ impl AperCodec for SonInformationReply {
         optionals.push(self.xn_tnl_configuration_info.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.xn_tnl_configuration_info {
             x.encode(data)?;
         }
@@ -18499,11 +18544,11 @@ impl AperCodec for SonInformationReport {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::FailureIndicationInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::HoReportInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -18527,7 +18572,7 @@ impl AperCodec for SonInformationRequest {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -18581,7 +18626,7 @@ impl AperCodec for SourceNgranNodeToTargetNgranNodeTransparentContainer {
         optionals.push(self.index_to_rfsp.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.rrc_container.encode(data)?;
         if let Some(x) = &self.pdu_session_resource_information_list {
             x.encode(data)?;
@@ -18617,7 +18662,7 @@ impl AperCodec for SourceOfUeActivityBehaviourInformation {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -18645,7 +18690,7 @@ impl AperCodec for SourceRanNodeId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_ran_node_id.encode(data)?;
         self.selected_tai.encode(data)?;
 
@@ -18665,7 +18710,7 @@ impl AperCodec for SourceToTargetTransparentContainer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -18710,7 +18755,7 @@ impl AperCodec for SourceToTargetAmfInformationReroute {
         optionals.push(self.rejected_nssa_iin_ta.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.configured_nssai {
             x.encode(data)?;
         }
@@ -18743,7 +18788,7 @@ impl AperCodec for SrvccOperationPossible {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -18762,7 +18807,7 @@ impl AperCodec for ConfiguredNssai {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(128), Some(128), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(128), Some(128), false, &self.0, false)
     }
 }
 
@@ -18781,7 +18826,7 @@ impl AperCodec for RejectedNssaIinPlmn {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(32), Some(32), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(32), Some(32), false, &self.0, false)
     }
 }
 
@@ -18800,7 +18845,7 @@ impl AperCodec for RejectedNssaIinTa {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(32), Some(32), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(32), Some(32), false, &self.0, false)
     }
 }
 
@@ -18819,7 +18864,7 @@ impl AperCodec for Sst {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(1), Some(1), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(1), Some(1), false, &self.0, false)
     }
 }
 
@@ -18872,7 +18917,7 @@ impl AperCodec for SupportedTaItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tac.encode(data)?;
         self.broadcast_plmn_list.encode(data)?;
 
@@ -18897,7 +18942,7 @@ impl AperCodec for SuspendIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -18918,7 +18963,7 @@ impl AperCodec for SuspendRequestIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -18939,7 +18984,7 @@ impl AperCodec for SuspendResponseIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -18958,7 +19003,7 @@ impl AperCodec for Tac {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(3), Some(3), false, &self.0, false)
     }
 }
 
@@ -18983,7 +19028,7 @@ impl AperCodec for Tai {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.plmn_identity.encode(data)?;
         self.tac.encode(data)?;
 
@@ -19041,7 +19086,7 @@ impl AperCodec for TaiBroadcastEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
         self.completed_cells_in_tai_eutra.encode(data)?;
 
@@ -19099,7 +19144,7 @@ impl AperCodec for TaiBroadcastNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
         self.completed_cells_in_tai_nr.encode(data)?;
 
@@ -19157,7 +19202,7 @@ impl AperCodec for TaiCancelledEutraItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
         self.cancelled_cells_in_tai_eutra.encode(data)?;
 
@@ -19215,7 +19260,7 @@ impl AperCodec for TaiCancelledNrItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
         self.cancelled_cells_in_tai_nr.encode(data)?;
 
@@ -19267,7 +19312,7 @@ impl AperCodec for TaiListForInactiveItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
 
         Ok(())
@@ -19318,7 +19363,7 @@ impl AperCodec for TaiListForPagingItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai.encode(data)?;
 
         Ok(())
@@ -19400,7 +19445,7 @@ impl AperCodec for TargetEnbId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_enb_id.encode(data)?;
         self.selected_eps_tai.encode(data)?;
 
@@ -19436,11 +19481,11 @@ impl AperCodec for TargetId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::TargetRanNodeId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::TargetEnbId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -19466,7 +19511,7 @@ impl AperCodec for TargetNgranNodeToSourceNgranNodeTransparentContainer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.rrc_container.encode(data)?;
 
         Ok(())
@@ -19494,7 +19539,7 @@ impl AperCodec for TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cell_cag_information.encode(data)?;
 
         Ok(())
@@ -19525,7 +19570,7 @@ impl AperCodec for TargetRanNodeId {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.global_ran_node_id.encode(data)?;
         self.selected_tai.encode(data)?;
 
@@ -19564,7 +19609,7 @@ impl AperCodec for TargetRncId {
         optionals.push(self.extended_rnc_id.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.lai.encode(data)?;
         self.rnc_id.encode(data)?;
         if let Some(x) = &self.extended_rnc_id {
@@ -19587,7 +19632,7 @@ impl AperCodec for TargetToSourceTransparentContainer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -19603,7 +19648,7 @@ impl AperCodec for TargettoSourceFailureTransparentContainer {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -19624,7 +19669,7 @@ impl AperCodec for TimerApproachForGuamiRemoval {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -19643,7 +19688,7 @@ impl AperCodec for TimeStamp {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.0, false)
     }
 }
 
@@ -19669,7 +19714,7 @@ impl AperCodec for TimeToWait {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(5), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(5), true, *self as i128, false)
     }
 }
 
@@ -19685,7 +19730,7 @@ impl AperCodec for TimeUeStayedInCell {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(4095), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(4095), false, self.0 as i128, false)
     }
 }
 
@@ -19701,7 +19746,7 @@ impl AperCodec for TimeUeStayedInCellEnhancedGranularity {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(40950), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(40950), false, self.0 as i128, false)
     }
 }
 
@@ -19717,7 +19762,7 @@ impl AperCodec for TnapId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -19752,8 +19797,8 @@ impl AperCodec for TngfId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::TngfId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(32), Some(32), true, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(32), Some(32), true, &x, false)
             }
         }
     }
@@ -19771,7 +19816,7 @@ impl AperCodec for TnlAddressWeightFactor {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
@@ -19824,7 +19869,7 @@ impl AperCodec for TnlAssociationItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tnl_association_address.encode(data)?;
         self.cause.encode(data)?;
 
@@ -19851,7 +19896,7 @@ impl AperCodec for TnlAssociationUsage {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -19886,7 +19931,7 @@ impl AperCodec for TooearlyIntersystemHo {
         optionals.push(self.ue_rlf_report_container.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.sourcecell_id.encode(data)?;
         self.failurecell_id.encode(data)?;
         if let Some(x) = &self.ue_rlf_report_container {
@@ -19927,7 +19972,7 @@ impl AperCodec for TraceActivation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ngran_trace_id.encode(data)?;
         self.interfaces_to_trace.encode(data)?;
         self.trace_depth.encode(data)?;
@@ -19959,7 +20004,7 @@ impl AperCodec for TraceDepth {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(5), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(5), true, *self as i128, false)
     }
 }
 
@@ -19975,7 +20020,7 @@ impl AperCodec for TrafficLoadReductionIndication {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(1), Some(99), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(1), Some(99), false, self.0 as i128, false)
     }
 }
 
@@ -19994,7 +20039,7 @@ impl AperCodec for TransportLayerAddress {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(1), Some(160), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(1), Some(160), true, &self.0, false)
     }
 }
 
@@ -20016,7 +20061,7 @@ impl AperCodec for TypeOfError {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -20039,7 +20084,7 @@ impl AperCodec for TaiBasedMdt {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tai_listfor_mdt.encode(data)?;
 
         Ok(())
@@ -20090,7 +20135,7 @@ impl AperCodec for TaBasedMdt {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ta_listfor_mdt.encode(data)?;
 
         Ok(())
@@ -20134,7 +20179,7 @@ impl AperCodec for ThresholdRsrp {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(127), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(127), false, self.0 as i128, false)
     }
 }
 
@@ -20150,7 +20195,7 @@ impl AperCodec for ThresholdRsrq {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(127), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(127), false, self.0 as i128, false)
     }
 }
 
@@ -20166,7 +20211,7 @@ impl AperCodec for ThresholdSinr {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(127), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(127), false, self.0 as i128, false)
     }
 }
 
@@ -20202,7 +20247,7 @@ impl AperCodec for TimeToTrigger {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(15), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(15), false, *self as i128, false)
     }
 }
 
@@ -20218,7 +20263,7 @@ impl AperCodec for TwapId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -20253,8 +20298,8 @@ impl AperCodec for TwifId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::TwifId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(32), Some(32), true, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(32), Some(32), true, &x, false)
             }
         }
     }
@@ -20288,7 +20333,7 @@ impl AperCodec for TscAssistanceInformation {
         optionals.push(self.burst_arrival_time.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.periodicity.encode(data)?;
         if let Some(x) = &self.burst_arrival_time {
             x.encode(data)?;
@@ -20331,7 +20376,7 @@ impl AperCodec for TscTrafficCharacteristics {
         optionals.push(self.tsc_assistance_information_ul.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.tsc_assistance_information_dl {
             x.encode(data)?;
         }
@@ -20367,7 +20412,7 @@ impl AperCodec for UeAggregateMaximumBitRate {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ue_aggregate_maximum_bit_rate_dl.encode(data)?;
         self.ue_aggregate_maximum_bit_rate_ul.encode(data)?;
 
@@ -20434,7 +20479,7 @@ impl AperCodec for UeAssociatedLogicalNgConnectionItem {
         optionals.push(self.ran_ue_ngap_id.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.amf_ue_ngap_id {
             x.encode(data)?;
         }
@@ -20463,7 +20508,7 @@ impl AperCodec for UeCapabilityInfoRequest {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -20484,7 +20529,7 @@ impl AperCodec for UeContextRequest {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -20513,7 +20558,7 @@ impl AperCodec for UeContextResumeRequestTransfer {
         optionals.push(self.qos_flow_failed_to_resume_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.qos_flow_failed_to_resume_list {
             x.encode(data)?;
         }
@@ -20547,7 +20592,7 @@ impl AperCodec for UeContextResumeResponseTransfer {
         optionals.push(self.qos_flow_failed_to_resume_list.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.qos_flow_failed_to_resume_list {
             x.encode(data)?;
         }
@@ -20579,7 +20624,7 @@ impl AperCodec for UeContextSuspendRequestTransfer {
         optionals.push(self.suspend_indicator.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.suspend_indicator {
             x.encode(data)?;
         }
@@ -20653,12 +20698,12 @@ impl AperCodec for UeDifferentiationInfo {
         optionals.push(self.battery_indication.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 7, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.periodic_communication_indicator {
             x.encode(data)?;
         }
         if let Some(x) = &self.periodic_time {
-            aper::encode::encode_integer(data, Some(1), Some(3600), true, (*x as i128, false))?;
+            aper::encode::encode_integer(data, Some(1), Some(3600), true, *x as i128, false)?;
         }
         if let Some(x) = &self.scheduled_communication_time {
             x.encode(data)?;
@@ -20728,7 +20773,7 @@ impl AperCodec for UeHistoryInformationFromTheUe {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Nr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -20766,8 +20811,8 @@ impl AperCodec for UeIdentityIndexValue {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::IndexLength10(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(10), Some(10), false, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(10), Some(10), false, &x, false)
             }
         }
     }
@@ -20801,11 +20846,11 @@ impl AperCodec for UeNgapIDs {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::UeNgapIdPair(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::AmfUeNgapId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -20836,7 +20881,7 @@ impl AperCodec for UeNgapIdPair {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.amf_ue_ngap_id.encode(data)?;
         self.ran_ue_ngap_id.encode(data)?;
 
@@ -20870,7 +20915,7 @@ impl AperCodec for UePagingIdentity {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::FiveGSTmsi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -20896,7 +20941,7 @@ impl AperCodec for UePresence {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -20949,7 +20994,7 @@ impl AperCodec for UePresenceInAreaOfInterestItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.location_reporting_reference_id.encode(data)?;
         self.ue_presence.encode(data)?;
 
@@ -20969,7 +21014,7 @@ impl AperCodec for UeRadioCapability {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -21006,7 +21051,7 @@ impl AperCodec for UeRadioCapabilityForPaging {
         optionals.push(self.ue_radio_capability_for_paging_of_eutra.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.ue_radio_capability_for_paging_of_nr {
             x.encode(data)?;
         }
@@ -21030,7 +21075,7 @@ impl AperCodec for UeRadioCapabilityForPagingOfNbIot {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -21046,7 +21091,7 @@ impl AperCodec for UeRadioCapabilityForPagingOfNr {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -21062,7 +21107,7 @@ impl AperCodec for UeRadioCapabilityForPagingOfEutra {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -21078,7 +21123,7 @@ impl AperCodec for UeRadioCapabilityId {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, None, None, false, &self.0)
+        aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -21099,7 +21144,7 @@ impl AperCodec for UeRetentionInformation {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -21131,11 +21176,11 @@ impl AperCodec for UeRlfReportContainer {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Nr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::Lte(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -21173,7 +21218,7 @@ impl AperCodec for UeSecurityCapabilities {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.n_rencryption_algorithms.encode(data)?;
         self.n_rintegrity_protection_algorithms.encode(data)?;
         self.eutr_aencryption_algorithms.encode(data)?;
@@ -21200,7 +21245,7 @@ impl AperCodec for UeUpCIotSupport {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -21228,7 +21273,7 @@ impl AperCodec for UlCpSecurityInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_nas_mac.encode(data)?;
         self.ul_nas_count.encode(data)?;
 
@@ -21251,7 +21296,7 @@ impl AperCodec for UlNasMac {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -21270,7 +21315,7 @@ impl AperCodec for UlNasCount {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(5), Some(5), false, &self.0)
+        aper::encode::encode_bitstring(data, Some(5), Some(5), false, &self.0, false)
     }
 }
 
@@ -21323,7 +21368,7 @@ impl AperCodec for UlNguUpTnlModifyItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_ngu_up_tnl_information.encode(data)?;
         self.dl_ngu_up_tnl_information.encode(data)?;
 
@@ -21392,7 +21437,7 @@ impl AperCodec for UnavailableGuamiItem {
         optionals.push(self.backup_amf_name.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.guami.encode(data)?;
         if let Some(x) = &self.timer_approach_for_guami_removal {
             x.encode(data)?;
@@ -21422,7 +21467,7 @@ impl AperCodec for UlForwarding {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -21441,7 +21486,7 @@ impl AperCodec for UpdateFeedback {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_bitstring(data, Some(8), Some(8), true, &self.0)
+        aper::encode::encode_bitstring(data, Some(8), Some(8), true, &self.0, false)
     }
 }
 
@@ -21471,7 +21516,7 @@ impl AperCodec for UpTransportLayerInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::GtpTunnel(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -21524,7 +21569,7 @@ impl AperCodec for UpTransportLayerInformationItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ngu_up_tnl_information.encode(data)?;
 
         Ok(())
@@ -21580,7 +21625,7 @@ impl AperCodec for UpTransportLayerInformationPairItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_ngu_up_tnl_information.encode(data)?;
         self.dl_ngu_up_tnl_information.encode(data)?;
 
@@ -21600,7 +21645,7 @@ impl AperCodec for UriAddress {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_visible_string(data, None, None, false, &self.0)
+        aper::encode::encode_visible_string(data, None, None, false, &self.0, false)
     }
 }
 
@@ -21640,15 +21685,15 @@ impl AperCodec for UserLocationInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::UserLocationInformationEutra(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.encode(data)
             }
             Self::UserLocationInformationNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.encode(data)
             }
             Self::UserLocationInformationN3Iwf(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.encode(data)
             }
         }
@@ -21686,7 +21731,7 @@ impl AperCodec for UserLocationInformationEutra {
         optionals.push(self.time_stamp.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.eutra_cgi.encode(data)?;
         self.tai.encode(data)?;
         if let Some(x) = &self.time_stamp {
@@ -21721,7 +21766,7 @@ impl AperCodec for UserLocationInformationN3Iwf {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ip_address.encode(data)?;
         self.port_number.encode(data)?;
 
@@ -21760,7 +21805,7 @@ impl AperCodec for UserLocationInformationTngf {
         optionals.push(self.port_number.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.tnap_id.encode(data)?;
         self.ip_address.encode(data)?;
         if let Some(x) = &self.port_number {
@@ -21802,7 +21847,7 @@ impl AperCodec for UserLocationInformationTwif {
         optionals.push(self.port_number.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.twap_id.encode(data)?;
         self.ip_address.encode(data)?;
         if let Some(x) = &self.port_number {
@@ -21841,11 +21886,11 @@ impl AperCodec for UserLocationInformationWAgf {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::GlobalLineId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::HfcNodeId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -21883,7 +21928,7 @@ impl AperCodec for UserLocationInformationNr {
         optionals.push(self.time_stamp.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.nr_cgi.encode(data)?;
         self.tai.encode(data)?;
         if let Some(x) = &self.time_stamp {
@@ -21918,7 +21963,7 @@ impl AperCodec for UserPlaneSecurityInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.security_result.encode(data)?;
         self.security_indication.encode(data)?;
 
@@ -21981,22 +22026,38 @@ impl AperCodec for VolumeTimedReportItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
-        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.start_time_stamp)?;
-        aper::encode::encode_octetstring(data, Some(4), Some(4), false, &self.end_time_stamp)?;
-        aper::encode::encode_integer(
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
+        aper::encode::encode_octetstring(
             data,
-            Some(0),
-            None,
+            Some(4),
+            Some(4),
             false,
-            (self.usage_count_ul as i128, false),
+            &self.start_time_stamp,
+            false,
+        )?;
+        aper::encode::encode_octetstring(
+            data,
+            Some(4),
+            Some(4),
+            false,
+            &self.end_time_stamp,
+            false,
         )?;
         aper::encode::encode_integer(
             data,
             Some(0),
             None,
             false,
-            (self.usage_count_dl as i128, false),
+            self.usage_count_ul as i128,
+            false,
+        )?;
+        aper::encode::encode_integer(
+            data,
+            Some(0),
+            None,
+            false,
+            self.usage_count_dl as i128,
+            false,
         )?;
 
         Ok(())
@@ -22034,8 +22095,8 @@ impl AperCodec for WAgfId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::WAgfId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_bitstring(data, Some(16), Some(16), true, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_bitstring(data, Some(16), Some(16), true, &x, false)
             }
         }
     }
@@ -22056,7 +22117,7 @@ impl AperCodec for WarningAreaCoordinates {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(1), Some(1024), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(1), Some(1024), false, &self.0, false)
     }
 }
 
@@ -22098,19 +22159,19 @@ impl AperCodec for WarningAreaList {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutraCgiListForWarning(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (0, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 x.encode(data)
             }
             Self::NrCgiListForWarning(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (1, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 x.encode(data)
             }
             Self::TaiListForWarning(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (2, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 x.encode(data)
             }
             Self::EmergencyAreaIdList(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, (3, false))?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 x.encode(data)
             }
         }
@@ -22132,7 +22193,7 @@ impl AperCodec for WarningMessageContents {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(1), Some(9600), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(1), Some(9600), false, &self.0, false)
     }
 }
 
@@ -22151,7 +22212,7 @@ impl AperCodec for WarningSecurityInfo {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(50), Some(50), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(50), Some(50), false, &self.0, false)
     }
 }
 
@@ -22170,7 +22231,7 @@ impl AperCodec for WarningType {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(2), Some(2), false, &self.0, false)
     }
 }
 
@@ -22218,7 +22279,7 @@ impl AperCodec for WlanMeasurementConfiguration {
         optionals.push(self.wlan_rtt.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 4, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.wlan_meas_config.encode(data)?;
         if let Some(x) = &self.wlan_meas_config_name_list {
             x.encode(data)?;
@@ -22278,7 +22339,7 @@ impl AperCodec for WlanMeasConfigNameItem {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.wlan_name.encode(data)?;
 
         Ok(())
@@ -22302,7 +22363,7 @@ impl AperCodec for WlanMeasConfig {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22321,7 +22382,7 @@ impl AperCodec for WlanName {
         )?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_octetstring(data, Some(1), Some(32), false, &self.0)
+        aper::encode::encode_octetstring(data, Some(1), Some(32), false, &self.0, false)
     }
 }
 
@@ -22346,7 +22407,7 @@ impl AperCodec for WusAssistanceInformation {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 1, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.paging_probability_information.encode(data)?;
 
         Ok(())
@@ -22411,7 +22472,7 @@ impl AperCodec for XnExtTlaItem {
         optionals.push(self.gtp_tl_as.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 3, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         if let Some(x) = &self.i_psec_tla {
             x.encode(data)?;
         }
@@ -22501,7 +22562,7 @@ impl AperCodec for XnTnlConfigurationInfo {
         optionals.push(self.xn_extended_transport_layer_addresses.is_some());
         optionals.push(false);
 
-        aper::encode::encode_sequence_header(data, true, 2, (optionals, false))?;
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.xn_transport_layer_addresses.encode(data)?;
         if let Some(x) = &self.xn_extended_transport_layer_addresses {
             x.encode(data)?;
@@ -22529,7 +22590,7 @@ impl AperCodec for PniNpnRestricted {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22551,7 +22612,7 @@ impl AperCodec for QosFlowMappingIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22572,7 +22633,7 @@ impl AperCodec for BtRssi {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22594,7 +22655,7 @@ impl AperCodec for CnType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22615,7 +22676,7 @@ impl AperCodec for DapsIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22637,7 +22698,7 @@ impl AperCodec for Dapsresponseindicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22658,7 +22719,7 @@ impl AperCodec for OutOfCoverage {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22681,7 +22742,7 @@ impl AperCodec for HandoverReportType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -22703,7 +22764,7 @@ impl AperCodec for EarlyIratho {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22725,7 +22786,7 @@ impl AperCodec for RatType {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22747,7 +22808,7 @@ impl AperCodec for RatType1 {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22769,7 +22830,7 @@ impl AperCodec for RimRsDetection {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22790,7 +22851,7 @@ impl AperCodec for UncompensatedBarometricConfig {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22811,7 +22872,7 @@ impl AperCodec for UeSpeedConfig {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22832,7 +22893,7 @@ impl AperCodec for UeOrientationConfig {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22854,7 +22915,7 @@ impl AperCodec for PeriodicCommunicationIndicator {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22876,7 +22937,7 @@ impl AperCodec for StationaryIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(1), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -22899,7 +22960,7 @@ impl AperCodec for TrafficProfile {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -22922,7 +22983,7 @@ impl AperCodec for BatteryIndication {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), true, *self as i128, false)
     }
 }
 
@@ -22943,7 +23004,7 @@ impl AperCodec for WlanRssi {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -22964,6 +23025,6 @@ impl AperCodec for WlanRtt {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(0), true, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }

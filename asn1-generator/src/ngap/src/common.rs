@@ -25,7 +25,7 @@ impl AperCodec for Criticality {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
     }
 }
 
@@ -48,7 +48,7 @@ impl AperCodec for Presence {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
     }
 }
 
@@ -81,12 +81,12 @@ impl AperCodec for PrivateIeId {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Local(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (0, false))?;
-                aper::encode::encode_integer(data, Some(0), Some(65535), false, (*x as i128, false))
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_integer(data, Some(0), Some(65535), false, *x as i128, false)
             }
             Self::Global(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, (1, false))?;
-                aper::encode::encode_octetstring(data, None, None, false, &x)
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_octetstring(data, None, None, false, &x, false)
             }
         }
     }
@@ -104,7 +104,7 @@ impl AperCodec for ProcedureCode {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(255), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
@@ -120,7 +120,7 @@ impl AperCodec for ProtocolExtensionId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(65535), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(65535), false, self.0 as i128, false)
     }
 }
 
@@ -136,7 +136,7 @@ impl AperCodec for ProtocolIeId {
         ))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_integer(data, Some(0), Some(65535), false, (self.0 as i128, false))
+        aper::encode::encode_integer(data, Some(0), Some(65535), false, self.0 as i128, false)
     }
 }
 
@@ -159,6 +159,6 @@ impl AperCodec for TriggeringMessage {
         Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        aper::encode::encode_enumerated(data, Some(0), Some(2), false, (*self as i128, false))
+        aper::encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
     }
 }

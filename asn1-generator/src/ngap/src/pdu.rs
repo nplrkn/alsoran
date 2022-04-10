@@ -83,7 +83,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -91,7 +91,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -100,7 +100,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (83, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -110,7 +110,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
         if let Some(x) = &self.nas_pdu {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -119,7 +119,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_setup_list_su_req.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (74, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 74, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -128,7 +128,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
         if let Some(x) = &self.ue_aggregate_maximum_bit_rate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (110, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 110, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -136,7 +136,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -221,7 +221,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -229,7 +229,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -238,7 +238,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
         if let Some(x) = &self.pdu_session_resource_setup_list_su_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (75, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 75, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -248,7 +248,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
         if let Some(x) = &self.pdu_session_resource_failed_to_setup_list_su_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (58, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 58, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -258,7 +258,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -266,7 +266,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -350,7 +350,7 @@ impl AperCodec for PduSessionResourceReleaseCommand {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -358,7 +358,7 @@ impl AperCodec for PduSessionResourceReleaseCommand {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -367,7 +367,7 @@ impl AperCodec for PduSessionResourceReleaseCommand {
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (83, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -377,7 +377,7 @@ impl AperCodec for PduSessionResourceReleaseCommand {
         if let Some(x) = &self.nas_pdu {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -387,14 +387,14 @@ impl AperCodec for PduSessionResourceReleaseCommand {
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_to_release_list_rel_cmd
             .encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (79, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 79, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -478,7 +478,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -486,7 +486,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -494,7 +494,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_released_list_rel_res.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (70, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 70, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -503,7 +503,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -513,7 +513,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -521,7 +521,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -601,7 +601,7 @@ impl AperCodec for PduSessionResourceModifyRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -609,7 +609,7 @@ impl AperCodec for PduSessionResourceModifyRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -618,7 +618,7 @@ impl AperCodec for PduSessionResourceModifyRequest {
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (83, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -627,14 +627,14 @@ impl AperCodec for PduSessionResourceModifyRequest {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_modify_list_mod_req.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (64, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -724,7 +724,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -732,7 +732,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -741,7 +741,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
         if let Some(x) = &self.pdu_session_resource_modify_list_mod_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (65, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 65, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -751,7 +751,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
         if let Some(x) = &self.pdu_session_resource_failed_to_modify_list_mod_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (54, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 54, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -761,7 +761,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -771,7 +771,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -779,7 +779,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -861,7 +861,7 @@ impl AperCodec for PduSessionResourceNotify {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -869,7 +869,7 @@ impl AperCodec for PduSessionResourceNotify {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -878,7 +878,7 @@ impl AperCodec for PduSessionResourceNotify {
         if let Some(x) = &self.pdu_session_resource_notify_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (66, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 66, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -888,7 +888,7 @@ impl AperCodec for PduSessionResourceNotify {
         if let Some(x) = &self.pdu_session_resource_released_list_not {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (67, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 67, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -898,7 +898,7 @@ impl AperCodec for PduSessionResourceNotify {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -906,7 +906,7 @@ impl AperCodec for PduSessionResourceNotify {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -986,7 +986,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -994,7 +994,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1002,7 +1002,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_modify_list_mod_ind.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (63, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 63, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1011,7 +1011,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1019,7 +1019,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -1105,7 +1105,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1113,7 +1113,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1122,7 +1122,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
         if let Some(x) = &self.pdu_session_resource_modify_list_mod_cfm {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (62, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 62, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1132,7 +1132,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
         if let Some(x) = &self.pdu_session_resource_failed_to_modify_list_mod_cfm {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (131, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 131, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1142,7 +1142,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1150,7 +1150,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -1405,7 +1405,7 @@ impl AperCodec for InitialContextSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1413,7 +1413,7 @@ impl AperCodec for InitialContextSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1422,7 +1422,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.old_amf {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (48, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 48, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1432,7 +1432,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ue_aggregate_maximum_bit_rate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (110, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 110, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1442,7 +1442,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.core_network_assistance_information_for_inactive {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (18, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 18, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1451,7 +1451,7 @@ impl AperCodec for InitialContextSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.guami.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (28, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 28, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1460,7 +1460,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.pdu_session_resource_setup_list_cxt_req {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (71, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 71, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1469,7 +1469,7 @@ impl AperCodec for InitialContextSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.allowed_nssai.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1477,7 +1477,7 @@ impl AperCodec for InitialContextSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.ue_security_capabilities.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (119, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 119, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1485,7 +1485,7 @@ impl AperCodec for InitialContextSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.security_key.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (94, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 94, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1494,7 +1494,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.trace_activation {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (108, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1504,7 +1504,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.mobility_restriction_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (36, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 36, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1514,7 +1514,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ue_radio_capability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1524,7 +1524,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.index_to_rfsp {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (31, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 31, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1534,7 +1534,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.masked_imeisv {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (34, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 34, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1544,7 +1544,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.nas_pdu {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1554,7 +1554,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.emergency_fallback_indicator {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (24, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 24, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1564,7 +1564,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.rrc_inactive_transition_report_request {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (91, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 91, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1574,7 +1574,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ue_radio_capability_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (118, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 118, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1584,7 +1584,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.redirection_voice_fallback {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (146, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 146, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1594,7 +1594,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.location_reporting_request_type {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (33, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1604,7 +1604,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.cn_assisted_ran_tuning {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (165, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 165, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1614,7 +1614,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.srvcc_operation_possible {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (177, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 177, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1624,7 +1624,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.iab_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (199, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 199, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1634,7 +1634,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.enhanced_coverage_restriction {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (205, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1644,7 +1644,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.extended_connected_time {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (206, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1654,7 +1654,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ue_differentiation_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (209, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 209, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1664,7 +1664,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.nrv2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (216, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1674,7 +1674,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ltev2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (215, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 215, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1684,7 +1684,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (218, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1694,7 +1694,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (217, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1704,7 +1704,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.pc5_qos_parameters {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (219, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 219, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1714,7 +1714,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.c_emode_brestricted {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (222, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1724,7 +1724,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ue_up_c_iot_support {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (234, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 234, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1734,7 +1734,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.rg_level_wireline_access_characteristics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (238, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 238, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1744,7 +1744,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.management_based_mdt_plmn_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (254, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1754,7 +1754,7 @@ impl AperCodec for InitialContextSetupRequest {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1762,7 +1762,7 @@ impl AperCodec for InitialContextSetupRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -1847,7 +1847,7 @@ impl AperCodec for InitialContextSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1855,7 +1855,7 @@ impl AperCodec for InitialContextSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1864,7 +1864,7 @@ impl AperCodec for InitialContextSetupResponse {
         if let Some(x) = &self.pdu_session_resource_setup_list_cxt_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (72, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 72, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1874,7 +1874,7 @@ impl AperCodec for InitialContextSetupResponse {
         if let Some(x) = &self.pdu_session_resource_failed_to_setup_list_cxt_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (55, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 55, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1884,7 +1884,7 @@ impl AperCodec for InitialContextSetupResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -1892,7 +1892,7 @@ impl AperCodec for InitialContextSetupResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -1976,7 +1976,7 @@ impl AperCodec for InitialContextSetupFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1984,7 +1984,7 @@ impl AperCodec for InitialContextSetupFailure {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -1993,7 +1993,7 @@ impl AperCodec for InitialContextSetupFailure {
         if let Some(x) = &self.pdu_session_resource_failed_to_setup_list_cxt_fail {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (132, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 132, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2002,7 +2002,7 @@ impl AperCodec for InitialContextSetupFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2011,7 +2011,7 @@ impl AperCodec for InitialContextSetupFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2019,7 +2019,7 @@ impl AperCodec for InitialContextSetupFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2097,7 +2097,7 @@ impl AperCodec for UeContextReleaseRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2105,7 +2105,7 @@ impl AperCodec for UeContextReleaseRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2114,7 +2114,7 @@ impl AperCodec for UeContextReleaseRequest {
         if let Some(x) = &self.pdu_session_resource_list_cxt_rel_req {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (133, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 133, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2123,14 +2123,14 @@ impl AperCodec for UeContextReleaseRequest {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2193,7 +2193,7 @@ impl AperCodec for UeContextReleaseCommand {
 
         let ie = &mut AperCodecData::new();
         self.ue_ngap_i_ds.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (114, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 114, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2201,14 +2201,14 @@ impl AperCodec for UeContextReleaseCommand {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2304,7 +2304,7 @@ impl AperCodec for UeContextReleaseComplete {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2312,7 +2312,7 @@ impl AperCodec for UeContextReleaseComplete {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2321,7 +2321,7 @@ impl AperCodec for UeContextReleaseComplete {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2331,7 +2331,7 @@ impl AperCodec for UeContextReleaseComplete {
         if let Some(x) = &self.info_on_recommended_cells_and_ran_nodes_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (32, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 32, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2341,7 +2341,7 @@ impl AperCodec for UeContextReleaseComplete {
         if let Some(x) = &self.pdu_session_resource_list_cxt_rel_cpl {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (60, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 60, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2351,7 +2351,7 @@ impl AperCodec for UeContextReleaseComplete {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2361,7 +2361,7 @@ impl AperCodec for UeContextReleaseComplete {
         if let Some(x) = &self.paging_assis_datafor_c_ecapab_ue {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (207, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 207, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2369,7 +2369,7 @@ impl AperCodec for UeContextReleaseComplete {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2479,7 +2479,7 @@ impl AperCodec for UeContextResumeRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2487,7 +2487,7 @@ impl AperCodec for UeContextResumeRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2495,7 +2495,7 @@ impl AperCodec for UeContextResumeRequest {
 
         let ie = &mut AperCodecData::new();
         self.rrc_resume_cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (237, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 237, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2504,7 +2504,7 @@ impl AperCodec for UeContextResumeRequest {
         if let Some(x) = &self.pdu_session_resource_resume_list_res_req {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (232, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 232, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2514,7 +2514,7 @@ impl AperCodec for UeContextResumeRequest {
         if let Some(x) = &self.pdu_session_resource_failed_to_resume_list_res_req {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (229, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 229, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2524,7 +2524,7 @@ impl AperCodec for UeContextResumeRequest {
         if let Some(x) = &self.suspend_request_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (235, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 235, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2534,7 +2534,7 @@ impl AperCodec for UeContextResumeRequest {
         if let Some(x) = &self.info_on_recommended_cells_and_ran_nodes_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (32, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 32, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2544,7 +2544,7 @@ impl AperCodec for UeContextResumeRequest {
         if let Some(x) = &self.paging_assis_datafor_c_ecapab_ue {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (207, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 207, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2552,7 +2552,7 @@ impl AperCodec for UeContextResumeRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2650,7 +2650,7 @@ impl AperCodec for UeContextResumeResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2658,7 +2658,7 @@ impl AperCodec for UeContextResumeResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2667,7 +2667,7 @@ impl AperCodec for UeContextResumeResponse {
         if let Some(x) = &self.pdu_session_resource_resume_list_res_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (233, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 233, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2677,7 +2677,7 @@ impl AperCodec for UeContextResumeResponse {
         if let Some(x) = &self.pdu_session_resource_failed_to_resume_list_res_res {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (230, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 230, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2687,7 +2687,7 @@ impl AperCodec for UeContextResumeResponse {
         if let Some(x) = &self.security_context {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (93, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 93, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2697,7 +2697,7 @@ impl AperCodec for UeContextResumeResponse {
         if let Some(x) = &self.suspend_response_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (236, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 236, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2707,7 +2707,7 @@ impl AperCodec for UeContextResumeResponse {
         if let Some(x) = &self.extended_connected_time {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (206, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2717,7 +2717,7 @@ impl AperCodec for UeContextResumeResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2725,7 +2725,7 @@ impl AperCodec for UeContextResumeResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2799,7 +2799,7 @@ impl AperCodec for UeContextResumeFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2807,7 +2807,7 @@ impl AperCodec for UeContextResumeFailure {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2815,7 +2815,7 @@ impl AperCodec for UeContextResumeFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2824,7 +2824,7 @@ impl AperCodec for UeContextResumeFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2832,7 +2832,7 @@ impl AperCodec for UeContextResumeFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -2921,7 +2921,7 @@ impl AperCodec for UeContextSuspendRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2929,7 +2929,7 @@ impl AperCodec for UeContextSuspendRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -2938,7 +2938,7 @@ impl AperCodec for UeContextSuspendRequest {
         if let Some(x) = &self.info_on_recommended_cells_and_ran_nodes_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (32, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 32, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2948,7 +2948,7 @@ impl AperCodec for UeContextSuspendRequest {
         if let Some(x) = &self.paging_assis_datafor_c_ecapab_ue {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (207, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 207, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2958,7 +2958,7 @@ impl AperCodec for UeContextSuspendRequest {
         if let Some(x) = &self.pdu_session_resource_suspend_list_sus_req {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (231, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 231, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -2966,7 +2966,7 @@ impl AperCodec for UeContextSuspendRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3037,7 +3037,7 @@ impl AperCodec for UeContextSuspendResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3045,7 +3045,7 @@ impl AperCodec for UeContextSuspendResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3054,7 +3054,7 @@ impl AperCodec for UeContextSuspendResponse {
         if let Some(x) = &self.security_context {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (93, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 93, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3064,7 +3064,7 @@ impl AperCodec for UeContextSuspendResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3072,7 +3072,7 @@ impl AperCodec for UeContextSuspendResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3146,7 +3146,7 @@ impl AperCodec for UeContextSuspendFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3154,7 +3154,7 @@ impl AperCodec for UeContextSuspendFailure {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3162,7 +3162,7 @@ impl AperCodec for UeContextSuspendFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3171,7 +3171,7 @@ impl AperCodec for UeContextSuspendFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3179,7 +3179,7 @@ impl AperCodec for UeContextSuspendFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3351,7 +3351,7 @@ impl AperCodec for UeContextModificationRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3359,7 +3359,7 @@ impl AperCodec for UeContextModificationRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3368,7 +3368,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (83, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3378,7 +3378,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.security_key {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (94, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 94, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3388,7 +3388,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.index_to_rfsp {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (31, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 31, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3398,7 +3398,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.ue_aggregate_maximum_bit_rate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (110, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 110, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3408,7 +3408,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.ue_security_capabilities {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (119, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 119, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3418,7 +3418,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.core_network_assistance_information_for_inactive {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (18, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 18, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3428,7 +3428,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.emergency_fallback_indicator {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (24, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 24, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3438,7 +3438,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.new_amf_ue_ngap_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (40, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3448,7 +3448,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.rrc_inactive_transition_report_request {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (91, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 91, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3458,7 +3458,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.new_guami {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (162, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 162, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3468,7 +3468,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.cn_assisted_ran_tuning {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (165, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 165, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3478,7 +3478,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.srvcc_operation_possible {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (177, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 177, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3488,7 +3488,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.iab_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (199, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 199, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3498,7 +3498,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.nrv2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (216, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3508,7 +3508,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.ltev2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (215, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 215, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3518,7 +3518,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (218, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3528,7 +3528,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (217, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3538,7 +3538,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.pc5_qos_parameters {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (219, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 219, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3548,7 +3548,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3558,7 +3558,7 @@ impl AperCodec for UeContextModificationRequest {
         if let Some(x) = &self.rg_level_wireline_access_characteristics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (238, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 238, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3566,7 +3566,7 @@ impl AperCodec for UeContextModificationRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3641,7 +3641,7 @@ impl AperCodec for UeContextModificationResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3649,7 +3649,7 @@ impl AperCodec for UeContextModificationResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3658,7 +3658,7 @@ impl AperCodec for UeContextModificationResponse {
         if let Some(x) = &self.rrc_state {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (92, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 92, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3668,7 +3668,7 @@ impl AperCodec for UeContextModificationResponse {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3678,7 +3678,7 @@ impl AperCodec for UeContextModificationResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3686,7 +3686,7 @@ impl AperCodec for UeContextModificationResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3760,7 +3760,7 @@ impl AperCodec for UeContextModificationFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3768,7 +3768,7 @@ impl AperCodec for UeContextModificationFailure {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3776,7 +3776,7 @@ impl AperCodec for UeContextModificationFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3785,7 +3785,7 @@ impl AperCodec for UeContextModificationFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -3793,7 +3793,7 @@ impl AperCodec for UeContextModificationFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3870,7 +3870,7 @@ impl AperCodec for RrcInactiveTransitionReport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3878,7 +3878,7 @@ impl AperCodec for RrcInactiveTransitionReport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3886,7 +3886,7 @@ impl AperCodec for RrcInactiveTransitionReport {
 
         let ie = &mut AperCodecData::new();
         self.rrc_state.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (92, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 92, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -3894,14 +3894,14 @@ impl AperCodec for RrcInactiveTransitionReport {
 
         let ie = &mut AperCodecData::new();
         self.user_location_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -3955,14 +3955,14 @@ impl AperCodec for RetrieveUeInformation {
 
         let ie = &mut AperCodecData::new();
         self.five_g_s_tmsi.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (26, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 26, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -4038,7 +4038,7 @@ impl AperCodec for UeInformationTransfer {
 
         let ie = &mut AperCodecData::new();
         self.five_g_s_tmsi.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (26, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 26, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4047,7 +4047,7 @@ impl AperCodec for UeInformationTransfer {
         if let Some(x) = &self.nb_iot_ue_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (210, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 210, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4057,7 +4057,7 @@ impl AperCodec for UeInformationTransfer {
         if let Some(x) = &self.ue_radio_capability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4067,7 +4067,7 @@ impl AperCodec for UeInformationTransfer {
         if let Some(x) = &self.s_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (148, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4077,7 +4077,7 @@ impl AperCodec for UeInformationTransfer {
         if let Some(x) = &self.allowed_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4087,7 +4087,7 @@ impl AperCodec for UeInformationTransfer {
         if let Some(x) = &self.ue_differentiation_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (209, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 209, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4095,7 +4095,7 @@ impl AperCodec for UeInformationTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -4179,7 +4179,7 @@ impl AperCodec for RancpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4187,7 +4187,7 @@ impl AperCodec for RancpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.five_g_s_tmsi.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (26, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 26, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4195,7 +4195,7 @@ impl AperCodec for RancpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.eutra_cgi.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (25, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 25, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4203,7 +4203,7 @@ impl AperCodec for RancpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.tai.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (213, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 213, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4211,14 +4211,14 @@ impl AperCodec for RancpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.ul_cp_security_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (211, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 211, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -4333,7 +4333,7 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4341,7 +4341,7 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4349,7 +4349,7 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.handover_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (29, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 29, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4357,7 +4357,7 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4365,7 +4365,7 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.target_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (105, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 105, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4374,7 +4374,7 @@ impl AperCodec for HandoverRequired {
         if let Some(x) = &self.direct_forwarding_path_availability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (22, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 22, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4383,7 +4383,7 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_list_ho_rqd.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (61, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 61, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4391,14 +4391,14 @@ impl AperCodec for HandoverRequired {
 
         let ie = &mut AperCodecData::new();
         self.source_to_target_transparent_container.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (101, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 101, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -4507,7 +4507,7 @@ impl AperCodec for HandoverCommand {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4515,7 +4515,7 @@ impl AperCodec for HandoverCommand {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4523,7 +4523,7 @@ impl AperCodec for HandoverCommand {
 
         let ie = &mut AperCodecData::new();
         self.handover_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (29, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 29, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4532,7 +4532,7 @@ impl AperCodec for HandoverCommand {
         if let Some(x) = &self.nas_security_parameters_from_ngran {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (39, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4542,7 +4542,7 @@ impl AperCodec for HandoverCommand {
         if let Some(x) = &self.pdu_session_resource_handover_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (59, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 59, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4552,7 +4552,7 @@ impl AperCodec for HandoverCommand {
         if let Some(x) = &self.pdu_session_resource_to_release_list_ho_cmd {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (78, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4561,7 +4561,7 @@ impl AperCodec for HandoverCommand {
 
         let ie = &mut AperCodecData::new();
         self.target_to_source_transparent_container.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (106, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 106, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4570,7 +4570,7 @@ impl AperCodec for HandoverCommand {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4578,7 +4578,7 @@ impl AperCodec for HandoverCommand {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -4662,7 +4662,7 @@ impl AperCodec for HandoverPreparationFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4670,7 +4670,7 @@ impl AperCodec for HandoverPreparationFailure {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4678,7 +4678,7 @@ impl AperCodec for HandoverPreparationFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4687,7 +4687,7 @@ impl AperCodec for HandoverPreparationFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4697,7 +4697,7 @@ impl AperCodec for HandoverPreparationFailure {
         if let Some(x) = &self.targetto_source_failure_transparent_container {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (262, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 262, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -4705,7 +4705,7 @@ impl AperCodec for HandoverPreparationFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -4958,7 +4958,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4966,7 +4966,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.handover_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (29, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 29, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4974,7 +4974,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4982,7 +4982,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.ue_aggregate_maximum_bit_rate.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (110, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 110, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -4991,7 +4991,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.core_network_assistance_information_for_inactive {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (18, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 18, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5000,7 +5000,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.ue_security_capabilities.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (119, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 119, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5008,7 +5008,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.security_context.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (93, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 93, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5017,7 +5017,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.new_security_context_ind {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (41, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5027,7 +5027,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.nasc {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (37, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 37, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5036,7 +5036,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_setup_list_ho_req.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (73, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 73, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5044,7 +5044,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.allowed_nssai.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5053,7 +5053,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.trace_activation {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (108, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5063,7 +5063,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.masked_imeisv {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (34, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 34, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5072,7 +5072,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.source_to_target_transparent_container.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (101, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 101, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5081,7 +5081,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.mobility_restriction_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (36, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 36, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5091,7 +5091,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.location_reporting_request_type {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (33, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5101,7 +5101,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.rrc_inactive_transition_report_request {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (91, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 91, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5110,7 +5110,7 @@ impl AperCodec for HandoverRequest {
 
         let ie = &mut AperCodecData::new();
         self.guami.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (28, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 28, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5119,7 +5119,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.redirection_voice_fallback {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (146, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 146, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5129,7 +5129,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.cn_assisted_ran_tuning {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (165, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 165, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5139,7 +5139,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.srvcc_operation_possible {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (177, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 177, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5149,7 +5149,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.iab_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (199, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 199, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5159,7 +5159,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.enhanced_coverage_restriction {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (205, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5169,7 +5169,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.ue_differentiation_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (209, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 209, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5179,7 +5179,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.nrv2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (216, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5189,7 +5189,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.ltev2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (215, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 215, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5199,7 +5199,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (218, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5209,7 +5209,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (217, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5219,7 +5219,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.pc5_qos_parameters {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (219, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 219, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5229,7 +5229,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.c_emode_brestricted {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (222, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5239,7 +5239,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.ue_up_c_iot_support {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (234, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 234, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5249,7 +5249,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.management_based_mdt_plmn_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (254, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 254, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5259,7 +5259,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5269,7 +5269,7 @@ impl AperCodec for HandoverRequest {
         if let Some(x) = &self.extended_connected_time {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (206, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5277,7 +5277,7 @@ impl AperCodec for HandoverRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -5377,7 +5377,7 @@ impl AperCodec for HandoverRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5385,7 +5385,7 @@ impl AperCodec for HandoverRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5393,7 +5393,7 @@ impl AperCodec for HandoverRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_admitted_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (53, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 53, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5402,7 +5402,7 @@ impl AperCodec for HandoverRequestAcknowledge {
         if let Some(x) = &self.pdu_session_resource_failed_to_setup_list_ho_ack {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (56, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 56, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5411,7 +5411,7 @@ impl AperCodec for HandoverRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.target_to_source_transparent_container.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (106, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 106, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5420,7 +5420,7 @@ impl AperCodec for HandoverRequestAcknowledge {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5428,7 +5428,7 @@ impl AperCodec for HandoverRequestAcknowledge {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -5505,7 +5505,7 @@ impl AperCodec for HandoverFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5513,7 +5513,7 @@ impl AperCodec for HandoverFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5522,7 +5522,7 @@ impl AperCodec for HandoverFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5532,7 +5532,7 @@ impl AperCodec for HandoverFailure {
         if let Some(x) = &self.targetto_source_failure_transparent_container {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (262, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 262, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5540,7 +5540,7 @@ impl AperCodec for HandoverFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -5614,7 +5614,7 @@ impl AperCodec for HandoverNotify {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5622,7 +5622,7 @@ impl AperCodec for HandoverNotify {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5630,7 +5630,7 @@ impl AperCodec for HandoverNotify {
 
         let ie = &mut AperCodecData::new();
         self.user_location_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5639,7 +5639,7 @@ impl AperCodec for HandoverNotify {
         if let Some(x) = &self.notify_source_ngran_node {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (269, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 269, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5647,7 +5647,7 @@ impl AperCodec for HandoverNotify {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -5751,7 +5751,7 @@ impl AperCodec for PathSwitchRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5759,7 +5759,7 @@ impl AperCodec for PathSwitchRequest {
 
         let ie = &mut AperCodecData::new();
         self.source_amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (100, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 100, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5767,7 +5767,7 @@ impl AperCodec for PathSwitchRequest {
 
         let ie = &mut AperCodecData::new();
         self.user_location_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5775,7 +5775,7 @@ impl AperCodec for PathSwitchRequest {
 
         let ie = &mut AperCodecData::new();
         self.ue_security_capabilities.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (119, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 119, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5784,7 +5784,7 @@ impl AperCodec for PathSwitchRequest {
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_to_be_switched_dl_list
             .encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (76, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 76, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -5793,7 +5793,7 @@ impl AperCodec for PathSwitchRequest {
         if let Some(x) = &self.pdu_session_resource_failed_to_setup_list_ps_req {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (57, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 57, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5803,7 +5803,7 @@ impl AperCodec for PathSwitchRequest {
         if let Some(x) = &self.rrc_resume_cause {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (237, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 237, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -5811,7 +5811,7 @@ impl AperCodec for PathSwitchRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6006,7 +6006,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6014,7 +6014,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6023,7 +6023,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.ue_security_capabilities {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (119, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 119, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6032,7 +6032,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.security_context.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (93, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 93, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6041,7 +6041,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.new_security_context_ind {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (41, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6050,7 +6050,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_switched_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (77, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 77, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6059,7 +6059,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.pdu_session_resource_released_list_ps_ack {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (68, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 68, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6068,7 +6068,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.allowed_nssai.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6077,7 +6077,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.core_network_assistance_information_for_inactive {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (18, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 18, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6087,7 +6087,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.rrc_inactive_transition_report_request {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (91, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 91, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6097,7 +6097,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6107,7 +6107,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.redirection_voice_fallback {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (146, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 146, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6117,7 +6117,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.cn_assisted_ran_tuning {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (165, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 165, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6127,7 +6127,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.srvcc_operation_possible {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (177, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 177, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6137,7 +6137,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.enhanced_coverage_restriction {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (205, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6147,7 +6147,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.extended_connected_time {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (206, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6157,7 +6157,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.ue_differentiation_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (209, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 209, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6167,7 +6167,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.nrv2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (216, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6177,7 +6177,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.ltev2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (215, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 215, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6187,7 +6187,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (218, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6197,7 +6197,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (217, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6207,7 +6207,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.pc5_qos_parameters {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (219, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 219, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6217,7 +6217,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.c_emode_brestricted {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (222, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6227,7 +6227,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.ue_up_c_iot_support {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (234, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 234, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6237,7 +6237,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6245,7 +6245,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6325,7 +6325,7 @@ impl AperCodec for PathSwitchRequestFailure {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6333,7 +6333,7 @@ impl AperCodec for PathSwitchRequestFailure {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6341,7 +6341,7 @@ impl AperCodec for PathSwitchRequestFailure {
 
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_released_list_ps_fail.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (69, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 69, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6350,7 +6350,7 @@ impl AperCodec for PathSwitchRequestFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6358,7 +6358,7 @@ impl AperCodec for PathSwitchRequestFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6428,7 +6428,7 @@ impl AperCodec for HandoverCancel {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6436,7 +6436,7 @@ impl AperCodec for HandoverCancel {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6444,14 +6444,14 @@ impl AperCodec for HandoverCancel {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6518,7 +6518,7 @@ impl AperCodec for HandoverCancelAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6526,7 +6526,7 @@ impl AperCodec for HandoverCancelAcknowledge {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6535,7 +6535,7 @@ impl AperCodec for HandoverCancelAcknowledge {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -6543,7 +6543,7 @@ impl AperCodec for HandoverCancelAcknowledge {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6606,7 +6606,7 @@ impl AperCodec for HandoverSuccess {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6614,14 +6614,14 @@ impl AperCodec for HandoverSuccess {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6697,7 +6697,7 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6705,7 +6705,7 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6714,14 +6714,14 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
         let ie = &mut AperCodecData::new();
         self.early_status_transfer_transparent_container
             .encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (268, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 268, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6797,7 +6797,7 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6805,7 +6805,7 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6814,14 +6814,14 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
         let ie = &mut AperCodecData::new();
         self.early_status_transfer_transparent_container
             .encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (268, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 268, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6897,7 +6897,7 @@ impl AperCodec for UplinkRanStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6905,7 +6905,7 @@ impl AperCodec for UplinkRanStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -6913,14 +6913,14 @@ impl AperCodec for UplinkRanStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ran_status_transfer_transparent_container.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (84, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 84, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -6996,7 +6996,7 @@ impl AperCodec for DownlinkRanStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7004,7 +7004,7 @@ impl AperCodec for DownlinkRanStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7012,14 +7012,14 @@ impl AperCodec for DownlinkRanStatusTransfer {
 
         let ie = &mut AperCodecData::new();
         self.ran_status_transfer_transparent_container.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (84, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 84, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -7130,7 +7130,7 @@ impl AperCodec for Paging {
 
         let ie = &mut AperCodecData::new();
         self.ue_paging_identity.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (115, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 115, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7139,7 +7139,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.paging_drx {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (50, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7148,7 +7148,7 @@ impl AperCodec for Paging {
 
         let ie = &mut AperCodecData::new();
         self.tai_list_for_paging.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (103, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 103, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7157,7 +7157,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.paging_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (52, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 52, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7167,7 +7167,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.ue_radio_capability_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (118, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 118, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7177,7 +7177,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.paging_origin {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (51, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 51, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7187,7 +7187,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.assistance_data_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (11, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 11, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7197,7 +7197,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.nb_iot_paging_e_drx_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (203, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 203, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7207,7 +7207,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.nb_iot_paging_drx {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (202, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 202, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7217,7 +7217,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.enhanced_coverage_restriction {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (205, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7227,7 +7227,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.wus_assistance_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (208, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 208, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7237,7 +7237,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.paginge_drx_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (223, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 223, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7247,7 +7247,7 @@ impl AperCodec for Paging {
         if let Some(x) = &self.c_emode_brestricted {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (222, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7255,7 +7255,7 @@ impl AperCodec for Paging {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -7385,7 +7385,7 @@ impl AperCodec for InitialUeMessage {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7393,7 +7393,7 @@ impl AperCodec for InitialUeMessage {
 
         let ie = &mut AperCodecData::new();
         self.nas_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7401,7 +7401,7 @@ impl AperCodec for InitialUeMessage {
 
         let ie = &mut AperCodecData::new();
         self.user_location_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7409,7 +7409,7 @@ impl AperCodec for InitialUeMessage {
 
         let ie = &mut AperCodecData::new();
         self.rrc_establishment_cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (90, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 90, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7418,7 +7418,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.five_g_s_tmsi {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (26, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 26, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7428,7 +7428,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.amf_set_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (3, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 3, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7438,7 +7438,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.ue_context_request {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (112, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 112, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7448,7 +7448,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.allowed_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7458,7 +7458,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.source_to_target_amf_information_reroute {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (171, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 171, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7468,7 +7468,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.selected_plmn_identity {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (174, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 174, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7478,7 +7478,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.iab_node_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (201, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 201, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7488,7 +7488,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.c_emode_b_support_indicator {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (224, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 224, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7498,7 +7498,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.ltem_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (225, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 225, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7508,7 +7508,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.edt_session {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (227, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 227, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7518,7 +7518,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.authenticated_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (245, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 245, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7528,7 +7528,7 @@ impl AperCodec for InitialUeMessage {
         if let Some(x) = &self.npn_access_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (259, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 259, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7536,7 +7536,7 @@ impl AperCodec for InitialUeMessage {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -7670,7 +7670,7 @@ impl AperCodec for DownlinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7678,7 +7678,7 @@ impl AperCodec for DownlinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7687,7 +7687,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.old_amf {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (48, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 48, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7697,7 +7697,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (83, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7706,7 +7706,7 @@ impl AperCodec for DownlinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.nas_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7715,7 +7715,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.mobility_restriction_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (36, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 36, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7725,7 +7725,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.index_to_rfsp {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (31, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 31, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7735,7 +7735,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.ue_aggregate_maximum_bit_rate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (110, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 110, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7745,7 +7745,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.allowed_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7755,7 +7755,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.srvcc_operation_possible {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (177, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 177, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7765,7 +7765,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.enhanced_coverage_restriction {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (205, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7775,7 +7775,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.extended_connected_time {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (206, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7785,7 +7785,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.ue_differentiation_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (209, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 209, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7795,7 +7795,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.c_emode_brestricted {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (222, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7805,7 +7805,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.ue_radio_capability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7815,7 +7815,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.ue_capability_info_request {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (228, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 228, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7825,7 +7825,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.end_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (226, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7835,7 +7835,7 @@ impl AperCodec for DownlinkNasTransport {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7843,7 +7843,7 @@ impl AperCodec for DownlinkNasTransport {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -7941,7 +7941,7 @@ impl AperCodec for UplinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7949,7 +7949,7 @@ impl AperCodec for UplinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7957,7 +7957,7 @@ impl AperCodec for UplinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.nas_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7965,7 +7965,7 @@ impl AperCodec for UplinkNasTransport {
 
         let ie = &mut AperCodecData::new();
         self.user_location_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -7973,8 +7973,8 @@ impl AperCodec for UplinkNasTransport {
 
         if let Some(x) = &self.w_agf_identity_information {
             let ie = &mut AperCodecData::new();
-            aper::encode::encode_octetstring(ie, None, None, false, &x)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (239, false))?;
+            aper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 239, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7983,8 +7983,8 @@ impl AperCodec for UplinkNasTransport {
 
         if let Some(x) = &self.tngf_identity_information {
             let ie = &mut AperCodecData::new();
-            aper::encode::encode_octetstring(ie, None, None, false, &x)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (246, false))?;
+            aper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 246, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -7993,8 +7993,8 @@ impl AperCodec for UplinkNasTransport {
 
         if let Some(x) = &self.twif_identity_information {
             let ie = &mut AperCodecData::new();
-            aper::encode::encode_octetstring(ie, None, None, false, &x)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (247, false))?;
+            aper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 247, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8002,7 +8002,7 @@ impl AperCodec for UplinkNasTransport {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8079,7 +8079,7 @@ impl AperCodec for NasNonDeliveryIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8087,7 +8087,7 @@ impl AperCodec for NasNonDeliveryIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8095,7 +8095,7 @@ impl AperCodec for NasNonDeliveryIndication {
 
         let ie = &mut AperCodecData::new();
         self.nas_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (38, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8103,14 +8103,14 @@ impl AperCodec for NasNonDeliveryIndication {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8199,7 +8199,7 @@ impl AperCodec for RerouteNasRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8208,7 +8208,7 @@ impl AperCodec for RerouteNasRequest {
         if let Some(x) = &self.amf_ue_ngap_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8216,8 +8216,8 @@ impl AperCodec for RerouteNasRequest {
         }
 
         let ie = &mut AperCodecData::new();
-        aper::encode::encode_octetstring(ie, None, None, false, &self.ngap_message)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (42, false))?;
+        aper::encode::encode_octetstring(ie, None, None, false, &self.ngap_message, false)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 42, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8225,7 +8225,7 @@ impl AperCodec for RerouteNasRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_set_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (3, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 3, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8234,7 +8234,7 @@ impl AperCodec for RerouteNasRequest {
         if let Some(x) = &self.allowed_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8244,7 +8244,7 @@ impl AperCodec for RerouteNasRequest {
         if let Some(x) = &self.source_to_target_amf_information_reroute {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (171, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 171, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8252,7 +8252,7 @@ impl AperCodec for RerouteNasRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8338,7 +8338,7 @@ impl AperCodec for NgSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.global_ran_node_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (27, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 27, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8347,7 +8347,7 @@ impl AperCodec for NgSetupRequest {
         if let Some(x) = &self.ran_node_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (82, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 82, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8356,7 +8356,7 @@ impl AperCodec for NgSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.supported_ta_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (102, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 102, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8364,7 +8364,7 @@ impl AperCodec for NgSetupRequest {
 
         let ie = &mut AperCodecData::new();
         self.default_paging_drx.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (21, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 21, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8373,7 +8373,7 @@ impl AperCodec for NgSetupRequest {
         if let Some(x) = &self.ue_retention_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (147, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 147, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8383,7 +8383,7 @@ impl AperCodec for NgSetupRequest {
         if let Some(x) = &self.nb_iot_default_paging_drx {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (204, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 204, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8393,7 +8393,7 @@ impl AperCodec for NgSetupRequest {
         if let Some(x) = &self.extended_ran_node_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (273, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 273, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8401,7 +8401,7 @@ impl AperCodec for NgSetupRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8494,7 +8494,7 @@ impl AperCodec for NgSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_name.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (1, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 1, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8502,7 +8502,7 @@ impl AperCodec for NgSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.served_guami_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (96, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8510,7 +8510,7 @@ impl AperCodec for NgSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.relative_amf_capacity.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (86, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 86, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8518,7 +8518,7 @@ impl AperCodec for NgSetupResponse {
 
         let ie = &mut AperCodecData::new();
         self.plmn_support_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (80, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 80, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8527,7 +8527,7 @@ impl AperCodec for NgSetupResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8537,7 +8537,7 @@ impl AperCodec for NgSetupResponse {
         if let Some(x) = &self.ue_retention_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (147, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 147, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8547,7 +8547,7 @@ impl AperCodec for NgSetupResponse {
         if let Some(x) = &self.iab_supported {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (200, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 200, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8557,7 +8557,7 @@ impl AperCodec for NgSetupResponse {
         if let Some(x) = &self.extended_amf_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (274, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 274, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8565,7 +8565,7 @@ impl AperCodec for NgSetupResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8629,7 +8629,7 @@ impl AperCodec for NgSetupFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8638,7 +8638,7 @@ impl AperCodec for NgSetupFailure {
         if let Some(x) = &self.time_to_wait {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (107, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 107, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8648,7 +8648,7 @@ impl AperCodec for NgSetupFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8656,7 +8656,7 @@ impl AperCodec for NgSetupFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8738,7 +8738,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.ran_node_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (82, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 82, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8748,7 +8748,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.supported_ta_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (102, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 102, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8758,7 +8758,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.default_paging_drx {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (21, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 21, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8768,7 +8768,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.global_ran_node_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (27, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 27, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8778,7 +8778,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.ngran_tnl_association_to_remove_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (167, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 167, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8788,7 +8788,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.nb_iot_default_paging_drx {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (204, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 204, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8798,7 +8798,7 @@ impl AperCodec for RanConfigurationUpdate {
         if let Some(x) = &self.extended_ran_node_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (273, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 273, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8806,7 +8806,7 @@ impl AperCodec for RanConfigurationUpdate {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8860,7 +8860,7 @@ impl AperCodec for RanConfigurationUpdateAcknowledge {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8868,7 +8868,7 @@ impl AperCodec for RanConfigurationUpdateAcknowledge {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -8932,7 +8932,7 @@ impl AperCodec for RanConfigurationUpdateFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -8941,7 +8941,7 @@ impl AperCodec for RanConfigurationUpdateFailure {
         if let Some(x) = &self.time_to_wait {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (107, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 107, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8951,7 +8951,7 @@ impl AperCodec for RanConfigurationUpdateFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -8959,7 +8959,7 @@ impl AperCodec for RanConfigurationUpdateFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9050,7 +9050,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.amf_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (1, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 1, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9060,7 +9060,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.served_guami_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (96, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 96, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9070,7 +9070,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.relative_amf_capacity {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (86, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 86, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9080,7 +9080,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.plmn_support_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (80, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 80, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9090,7 +9090,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.amf_tnl_association_to_add_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (6, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 6, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9100,7 +9100,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.amf_tnl_association_to_remove_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (7, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 7, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9110,7 +9110,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.amf_tnl_association_to_update_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (8, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 8, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9120,7 +9120,7 @@ impl AperCodec for AmfConfigurationUpdate {
         if let Some(x) = &self.extended_amf_name {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (274, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 274, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9128,7 +9128,7 @@ impl AperCodec for AmfConfigurationUpdate {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9195,7 +9195,7 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
         if let Some(x) = &self.amf_tnl_association_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (5, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 5, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9205,7 +9205,7 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
         if let Some(x) = &self.amf_tnl_association_failed_to_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (4, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 4, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9215,7 +9215,7 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9223,7 +9223,7 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9287,7 +9287,7 @@ impl AperCodec for AmfConfigurationUpdateFailure {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -9296,7 +9296,7 @@ impl AperCodec for AmfConfigurationUpdateFailure {
         if let Some(x) = &self.time_to_wait {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (107, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 107, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9306,7 +9306,7 @@ impl AperCodec for AmfConfigurationUpdateFailure {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9314,7 +9314,7 @@ impl AperCodec for AmfConfigurationUpdateFailure {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9370,14 +9370,14 @@ impl AperCodec for AmfStatusIndication {
 
         let ie = &mut AperCodecData::new();
         self.unavailable_guami_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (120, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 120, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9437,7 +9437,7 @@ impl AperCodec for NgReset {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -9445,14 +9445,14 @@ impl AperCodec for NgReset {
 
         let ie = &mut AperCodecData::new();
         self.reset_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (88, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 88, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9515,7 +9515,7 @@ impl AperCodec for NgResetAcknowledge {
         if let Some(x) = &self.ue_associated_logical_ng_connection_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (111, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9525,7 +9525,7 @@ impl AperCodec for NgResetAcknowledge {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9533,7 +9533,7 @@ impl AperCodec for NgResetAcknowledge {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9603,7 +9603,7 @@ impl AperCodec for ErrorIndication {
         if let Some(x) = &self.amf_ue_ngap_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9613,7 +9613,7 @@ impl AperCodec for ErrorIndication {
         if let Some(x) = &self.ran_ue_ngap_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9623,7 +9623,7 @@ impl AperCodec for ErrorIndication {
         if let Some(x) = &self.cause {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9633,7 +9633,7 @@ impl AperCodec for ErrorIndication {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9643,7 +9643,7 @@ impl AperCodec for ErrorIndication {
         if let Some(x) = &self.five_g_s_tmsi {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (26, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 26, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9651,7 +9651,7 @@ impl AperCodec for ErrorIndication {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9717,7 +9717,7 @@ impl AperCodec for OverloadStart {
         if let Some(x) = &self.amf_overload_response {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (2, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 2, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9727,7 +9727,7 @@ impl AperCodec for OverloadStart {
         if let Some(x) = &self.amf_traffic_load_reduction_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (9, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9737,7 +9737,7 @@ impl AperCodec for OverloadStart {
         if let Some(x) = &self.overload_start_nssai_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (49, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9745,7 +9745,7 @@ impl AperCodec for OverloadStart {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9790,7 +9790,7 @@ impl AperCodec for OverloadStop {
         let ies = &mut AperCodecData::new();
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9860,7 +9860,7 @@ impl AperCodec for UplinkRanConfigurationTransfer {
         if let Some(x) = &self.son_configuration_transfer_ul {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (99, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 99, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9870,7 +9870,7 @@ impl AperCodec for UplinkRanConfigurationTransfer {
         if let Some(x) = &self.endc_son_configuration_transfer_ul {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (158, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 158, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9880,7 +9880,7 @@ impl AperCodec for UplinkRanConfigurationTransfer {
         if let Some(x) = &self.intersystem_son_configuration_transfer_ul {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (251, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 251, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9888,7 +9888,7 @@ impl AperCodec for UplinkRanConfigurationTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -9958,7 +9958,7 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
         if let Some(x) = &self.son_configuration_transfer_dl {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (98, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 98, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9968,7 +9968,7 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
         if let Some(x) = &self.endc_son_configuration_transfer_dl {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (157, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 157, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9978,7 +9978,7 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
         if let Some(x) = &self.intersystem_son_configuration_transfer_dl {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (250, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 250, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -9986,7 +9986,7 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10098,7 +10098,7 @@ impl AperCodec for WriteReplaceWarningRequest {
 
         let ie = &mut AperCodecData::new();
         self.message_identifier.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (35, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10106,7 +10106,7 @@ impl AperCodec for WriteReplaceWarningRequest {
 
         let ie = &mut AperCodecData::new();
         self.serial_number.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (95, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10115,7 +10115,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.warning_area_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (122, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 122, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10124,7 +10124,7 @@ impl AperCodec for WriteReplaceWarningRequest {
 
         let ie = &mut AperCodecData::new();
         self.repetition_period.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (87, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 87, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10132,7 +10132,7 @@ impl AperCodec for WriteReplaceWarningRequest {
 
         let ie = &mut AperCodecData::new();
         self.number_of_broadcasts_requested.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (47, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 47, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10141,7 +10141,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.warning_type {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (125, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 125, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10151,7 +10151,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.warning_security_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (124, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 124, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10161,7 +10161,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.data_coding_scheme {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (20, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 20, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10171,7 +10171,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.warning_message_contents {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (123, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 123, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10181,7 +10181,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.concurrent_warning_message_ind {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (17, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 17, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10191,7 +10191,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         if let Some(x) = &self.warning_area_coordinates {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (141, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 141, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10199,7 +10199,7 @@ impl AperCodec for WriteReplaceWarningRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10272,7 +10272,7 @@ impl AperCodec for WriteReplaceWarningResponse {
 
         let ie = &mut AperCodecData::new();
         self.message_identifier.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (35, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10280,7 +10280,7 @@ impl AperCodec for WriteReplaceWarningResponse {
 
         let ie = &mut AperCodecData::new();
         self.serial_number.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (95, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10289,7 +10289,7 @@ impl AperCodec for WriteReplaceWarningResponse {
         if let Some(x) = &self.broadcast_completed_area_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (13, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 13, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10299,7 +10299,7 @@ impl AperCodec for WriteReplaceWarningResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10307,7 +10307,7 @@ impl AperCodec for WriteReplaceWarningResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10378,7 +10378,7 @@ impl AperCodec for PwsCancelRequest {
 
         let ie = &mut AperCodecData::new();
         self.message_identifier.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (35, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10386,7 +10386,7 @@ impl AperCodec for PwsCancelRequest {
 
         let ie = &mut AperCodecData::new();
         self.serial_number.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (95, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10395,7 +10395,7 @@ impl AperCodec for PwsCancelRequest {
         if let Some(x) = &self.warning_area_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (122, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 122, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10405,7 +10405,7 @@ impl AperCodec for PwsCancelRequest {
         if let Some(x) = &self.cancel_all_warning_messages {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (14, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 14, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10413,7 +10413,7 @@ impl AperCodec for PwsCancelRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10486,7 +10486,7 @@ impl AperCodec for PwsCancelResponse {
 
         let ie = &mut AperCodecData::new();
         self.message_identifier.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (35, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10494,7 +10494,7 @@ impl AperCodec for PwsCancelResponse {
 
         let ie = &mut AperCodecData::new();
         self.serial_number.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (95, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 95, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10503,7 +10503,7 @@ impl AperCodec for PwsCancelResponse {
         if let Some(x) = &self.broadcast_cancelled_area_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (12, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 12, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10513,7 +10513,7 @@ impl AperCodec for PwsCancelResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10521,7 +10521,7 @@ impl AperCodec for PwsCancelResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10598,7 +10598,7 @@ impl AperCodec for PwsRestartIndication {
 
         let ie = &mut AperCodecData::new();
         self.cell_id_list_for_restart.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (16, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 16, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10606,7 +10606,7 @@ impl AperCodec for PwsRestartIndication {
 
         let ie = &mut AperCodecData::new();
         self.global_ran_node_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (27, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 27, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10614,7 +10614,7 @@ impl AperCodec for PwsRestartIndication {
 
         let ie = &mut AperCodecData::new();
         self.tai_list_for_restart.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (104, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 104, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10623,7 +10623,7 @@ impl AperCodec for PwsRestartIndication {
         if let Some(x) = &self.emergency_area_id_list_for_restart {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (23, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 23, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -10631,7 +10631,7 @@ impl AperCodec for PwsRestartIndication {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10694,7 +10694,7 @@ impl AperCodec for PwsFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.pws_failed_cell_id_list.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (81, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 81, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10702,14 +10702,14 @@ impl AperCodec for PwsFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.global_ran_node_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (27, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 27, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10786,7 +10786,7 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10794,7 +10794,7 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10802,7 +10802,7 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.routing_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (89, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 89, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10810,14 +10810,14 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.nrp_pa_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (46, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10894,7 +10894,7 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10902,7 +10902,7 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10910,7 +10910,7 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.routing_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (89, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 89, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10918,14 +10918,14 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.nrp_pa_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (46, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -10988,7 +10988,7 @@ impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.routing_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (89, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 89, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -10996,14 +10996,14 @@ impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.nrp_pa_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (46, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11066,7 +11066,7 @@ impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.routing_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (89, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 89, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11074,14 +11074,14 @@ impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
 
         let ie = &mut AperCodecData::new();
         self.nrp_pa_pdu.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (46, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11151,7 +11151,7 @@ impl AperCodec for TraceStart {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11159,7 +11159,7 @@ impl AperCodec for TraceStart {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11167,14 +11167,14 @@ impl AperCodec for TraceStart {
 
         let ie = &mut AperCodecData::new();
         self.trace_activation.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (108, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 108, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11251,7 +11251,7 @@ impl AperCodec for TraceFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11259,7 +11259,7 @@ impl AperCodec for TraceFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11267,7 +11267,7 @@ impl AperCodec for TraceFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.ngran_trace_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (44, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 44, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11275,14 +11275,14 @@ impl AperCodec for TraceFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11352,7 +11352,7 @@ impl AperCodec for DeactivateTrace {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11360,7 +11360,7 @@ impl AperCodec for DeactivateTrace {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11368,14 +11368,14 @@ impl AperCodec for DeactivateTrace {
 
         let ie = &mut AperCodecData::new();
         self.ngran_trace_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (44, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 44, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11470,7 +11470,7 @@ impl AperCodec for CellTrafficTrace {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11478,7 +11478,7 @@ impl AperCodec for CellTrafficTrace {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11486,7 +11486,7 @@ impl AperCodec for CellTrafficTrace {
 
         let ie = &mut AperCodecData::new();
         self.ngran_trace_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (44, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 44, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11494,7 +11494,7 @@ impl AperCodec for CellTrafficTrace {
 
         let ie = &mut AperCodecData::new();
         self.ngran_cgi.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (43, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11502,7 +11502,7 @@ impl AperCodec for CellTrafficTrace {
 
         let ie = &mut AperCodecData::new();
         self.trace_collection_entity_ip_address.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (109, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 109, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11511,7 +11511,7 @@ impl AperCodec for CellTrafficTrace {
         if let Some(x) = &self.privacy_indicator {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (256, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 256, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -11521,7 +11521,7 @@ impl AperCodec for CellTrafficTrace {
         if let Some(x) = &self.trace_collection_entity_uri {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (257, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 257, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -11529,7 +11529,7 @@ impl AperCodec for CellTrafficTrace {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11603,7 +11603,7 @@ impl AperCodec for LocationReportingControl {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11611,7 +11611,7 @@ impl AperCodec for LocationReportingControl {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11619,14 +11619,14 @@ impl AperCodec for LocationReportingControl {
 
         let ie = &mut AperCodecData::new();
         self.location_reporting_request_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (33, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11696,7 +11696,7 @@ impl AperCodec for LocationReportingFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11704,7 +11704,7 @@ impl AperCodec for LocationReportingFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11712,14 +11712,14 @@ impl AperCodec for LocationReportingFailureIndication {
 
         let ie = &mut AperCodecData::new();
         self.cause.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (15, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11807,7 +11807,7 @@ impl AperCodec for LocationReport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11815,7 +11815,7 @@ impl AperCodec for LocationReport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11823,7 +11823,7 @@ impl AperCodec for LocationReport {
 
         let ie = &mut AperCodecData::new();
         self.user_location_information.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11832,7 +11832,7 @@ impl AperCodec for LocationReport {
         if let Some(x) = &self.ue_presence_in_area_of_interest_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (116, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 116, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -11841,14 +11841,14 @@ impl AperCodec for LocationReport {
 
         let ie = &mut AperCodecData::new();
         self.location_reporting_request_type.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (33, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -11911,7 +11911,7 @@ impl AperCodec for UetnlaBindingReleaseRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -11919,14 +11919,14 @@ impl AperCodec for UetnlaBindingReleaseRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12006,7 +12006,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12014,7 +12014,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12022,7 +12022,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
 
         let ie = &mut AperCodecData::new();
         self.ue_radio_capability.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12031,7 +12031,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
         if let Some(x) = &self.ue_radio_capability_for_paging {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (118, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 118, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12041,7 +12041,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
         if let Some(x) = &self.ue_radio_capability_eutra_format {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (265, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 265, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12049,7 +12049,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12120,7 +12120,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12128,7 +12128,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12137,7 +12137,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
         if let Some(x) = &self.ue_radio_capability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12147,7 +12147,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12155,7 +12155,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12229,7 +12229,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12237,7 +12237,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12245,7 +12245,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
 
         let ie = &mut AperCodecData::new();
         self.ims_voice_support_indicator.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (30, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 30, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12254,7 +12254,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12262,7 +12262,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12348,7 +12348,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12356,7 +12356,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12365,7 +12365,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
         let ie = &mut AperCodecData::new();
         self.pdu_session_resource_secondary_rat_usage_list
             .encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (142, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 142, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12374,7 +12374,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
         if let Some(x) = &self.handover_flag {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (143, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 143, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12384,7 +12384,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
         if let Some(x) = &self.user_location_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (121, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 121, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12392,7 +12392,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12446,7 +12446,7 @@ impl AperCodec for UplinkRimInformationTransfer {
         if let Some(x) = &self.rim_information_transfer {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (175, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 175, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12454,7 +12454,7 @@ impl AperCodec for UplinkRimInformationTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12508,7 +12508,7 @@ impl AperCodec for DownlinkRimInformationTransfer {
         if let Some(x) = &self.rim_information_transfer {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (175, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 175, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12516,7 +12516,7 @@ impl AperCodec for DownlinkRimInformationTransfer {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12621,7 +12621,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12629,7 +12629,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12638,7 +12638,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.ue_radio_capability {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12648,7 +12648,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.end_indication {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (226, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12658,7 +12658,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.s_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (148, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12668,7 +12668,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.allowed_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12678,7 +12678,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.ue_differentiation_info {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (209, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 209, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12688,7 +12688,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.dl_cp_security_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (212, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 212, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12698,7 +12698,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.nb_iot_ue_priority {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (210, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 210, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12708,7 +12708,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.enhanced_coverage_restriction {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (205, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 205, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12718,7 +12718,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.c_emode_brestricted {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (222, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 222, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12728,7 +12728,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         if let Some(x) = &self.ue_radio_capability_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12736,7 +12736,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12792,14 +12792,14 @@ impl AperCodec for UeRadioCapabilityIdMappingRequest {
 
         let ie = &mut AperCodecData::new();
         self.ue_radio_capability_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
         num_ies += 1;
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12866,7 +12866,7 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
 
         let ie = &mut AperCodecData::new();
         self.ue_radio_capability_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (264, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 264, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12874,7 +12874,7 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
 
         let ie = &mut AperCodecData::new();
         self.ue_radio_capability.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (117, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 117, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12883,7 +12883,7 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
         if let Some(x) = &self.criticality_diagnostics {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (19, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12891,7 +12891,7 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
@@ -12962,7 +12962,7 @@ impl AperCodec for AmfcpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.amf_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (10, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12970,7 +12970,7 @@ impl AperCodec for AmfcpRelocationIndication {
 
         let ie = &mut AperCodecData::new();
         self.ran_ue_ngap_id.encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, (85, false))?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie)?;
@@ -12979,7 +12979,7 @@ impl AperCodec for AmfcpRelocationIndication {
         if let Some(x) = &self.s_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (148, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 148, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12989,7 +12989,7 @@ impl AperCodec for AmfcpRelocationIndication {
         if let Some(x) = &self.allowed_nssai {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
-            aper::encode::encode_integer(ies, Some(0), Some(65535), false, (0, false))?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 0, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie)?;
@@ -12997,7 +12997,7 @@ impl AperCodec for AmfcpRelocationIndication {
         }
 
         let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, 0, (BitVec::new(), false))?;
+        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(

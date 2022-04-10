@@ -37,5 +37,8 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
     let ng_setup_2 = NgSetupRequest::decode(&mut data)?;
     println!("Yay {:?}", ng_setup_2);
     //assert!(ng_setup_2 == ng_setup);
+
+    let encoded = &mut AperCodecData::new();
+    ng_setup_2.encode(encoded)?;
     Ok(())
 }
