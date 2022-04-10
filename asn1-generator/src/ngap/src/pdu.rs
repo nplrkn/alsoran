@@ -8406,8 +8406,8 @@ impl AperCodec for NgSetupRequest {
         container.append_aligned(ies)?;
         aper::encode::encode_length_determinent(
             data,
-            Some(0),
-            Some(65535),
+            None,
+            None,
             false,
             container.length_in_bytes(),
         )?;

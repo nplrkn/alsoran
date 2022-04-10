@@ -600,7 +600,7 @@ impl AperCodec for {orig_name} {{
         aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
         container.append_aligned(ies)?;
-        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, container.length_in_bytes())?;
+        aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
         data.append_aligned(container)
     }}
 }}

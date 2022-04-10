@@ -15,7 +15,7 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {
             tac: Tac(vec![0, 0, 1]),
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
-                plmn_identity: plmn_identity,
+                plmn_identity: plmn_identity.clone(),
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
                     s_nssai: SNssai {
                         sst: Sst(vec![0x01]),
@@ -32,13 +32,16 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
 
     // This starts at the open type encoding of the NG Setup initiating message.
 
-    let bytes = hex::decode("35000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140").unwrap();
+    let input_hex = "35000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
+
+    let bytes = hex::decode(input_hex).unwrap();
     let mut data = AperCodecData::from_slice(&bytes);
     let ng_setup_2 = NgSetupRequest::decode(&mut data)?;
-    println!("Yay {:?}", ng_setup_2);
-    //assert!(ng_setup_2 == ng_setup);
 
-    let encoded = &mut AperCodecData::new();
-    ng_setup_2.encode(encoded)?;
+    let mut encoded = AperCodecData::new();
+    ng_setup_2.encode(&mut encoded)?;
+    let output_hex = hex::encode(encoded.into_bytes());
+    assert_eq!(input_hex, output_hex);
+
     Ok(())
 }
