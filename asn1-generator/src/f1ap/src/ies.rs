@@ -5835,7 +5835,7 @@ impl AperCodec for ECidMeasurementQuantities {
             aper::encode::encode_integer(data, Some(0), Some(65535), false, 415, false)?;
             Criticality::Reject.encode(data)?;
             aper::encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
-            data.append_aligned(ie)?;
+            data.append_aligned(ie);
         }
         Ok(())
     }

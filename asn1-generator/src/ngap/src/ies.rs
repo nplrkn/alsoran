@@ -13052,7 +13052,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13062,7 +13062,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 140, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13072,7 +13072,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13082,7 +13082,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 135, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13092,7 +13092,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 137, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13102,7 +13102,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13112,7 +13112,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13122,7 +13122,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13132,7 +13132,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13142,7 +13142,7 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -13152,22 +13152,23 @@ impl AperCodec for PduSessionResourceModifyRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
         let container = &mut AperCodecData::new();
         aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies)?;
+        container.append_aligned(ies);
         aper::encode::encode_length_determinent(
             data,
-            Some(0),
-            Some(65535),
+            None,
+            None,
             false,
             container.length_in_bytes(),
         )?;
-        data.append_aligned(container)
+        data.append_aligned(container);
+        Ok(())
     }
 }
 
@@ -14703,7 +14704,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 130, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14712,7 +14713,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 139, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-        ies.append_aligned(ie)?;
+        ies.append_aligned(ie);
         num_ies += 1;
 
         if let Some(x) = &self.additional_ul_ngu_up_tnl_information {
@@ -14721,7 +14722,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 126, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14731,7 +14732,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 127, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14740,7 +14741,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 134, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-        ies.append_aligned(ie)?;
+        ies.append_aligned(ie);
         num_ies += 1;
 
         if let Some(x) = &self.security_indication {
@@ -14749,7 +14750,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 138, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14759,7 +14760,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 129, false)?;
             Criticality::Reject.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14768,7 +14769,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 136, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-        ies.append_aligned(ie)?;
+        ies.append_aligned(ie);
         num_ies += 1;
 
         if let Some(x) = &self.common_network_instance {
@@ -14777,7 +14778,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 166, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14787,7 +14788,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 22, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14797,7 +14798,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 195, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14807,7 +14808,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 186, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14817,7 +14818,7 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 190, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
@@ -14827,22 +14828,23 @@ impl AperCodec for PduSessionResourceSetupRequestTransfer {
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 197, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-            ies.append_aligned(ie)?;
+            ies.append_aligned(ie);
             num_ies += 1;
         }
 
         let container = &mut AperCodecData::new();
         aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies)?;
+        container.append_aligned(ies);
         aper::encode::encode_length_determinent(
             data,
-            Some(0),
-            Some(65535),
+            None,
+            None,
             false,
             container.length_in_bytes(),
         )?;
-        data.append_aligned(container)
+        data.append_aligned(container);
+        Ok(())
     }
 }
 
