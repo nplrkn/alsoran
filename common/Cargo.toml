@@ -26,7 +26,6 @@ futures = "0.3.19"
 futures-lite = "1.12.0"
 bitvec = {version = "0.22", features = ["serde"] }
 asn1-codecs = "0.1.2"
-asn1_codecs_derive = "0.1.2"
 log = "0.4.3"
 errno = "0.2.8"
 stop-token = "0.6.1"
