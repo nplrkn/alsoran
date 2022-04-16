@@ -23,7 +23,17 @@ document:               [module _OID _begin ["IMPORTS" _IMPORTS]] _definitions [
 module:                 IDENTIFIER
 _begin:                 "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
 
-_definitions:           (tuple_struct | struct | enum_def | choice_def | constant_def | object_def | protocol_ies)+
+_definitions:           ( tuple_struct 
+                        | struct 
+                        | enum_def 
+                        | choice_def 
+                        | constant_def 
+                        | object_def 
+                        | protocol_ies 
+                        | procedure_def 
+                        | class_def
+                        | top_level_enum_def
+                        | class_instance)+
 ?assign:                IDENTIFIER "::="
 tuple_struct:           assign _primitive
 struct:                 assign sequence
@@ -91,4 +101,15 @@ _range:                 extension_marker | (BOUND [".." BOUND])
 named_values:           _nested_braces
 _nested_braces:         "{" (_nested_braces|/[^\{\}]+/) * "}"
 
+_PROCEDURE:             /.*-ELEMENTARY-PROCEDURE/
+procedure_def.2:        procedure_name _PROCEDURE "::=" "{" initiating successful? unsuccessful? procedure_code criticality "}"
+procedure_name:         IDENTIFIER
+initiating:             "INITIATING MESSAGE" IDENTIFIER
+successful:             "SUCCESSFUL OUTCOME" IDENTIFIER
+unsuccessful:           "UNSUCCESSFUL OUTCOME" IDENTIFIER
+procedure_code:         "PROCEDURE CODE" IDENTIFIER
+criticality:            "CRITICALITY" IDENTIFIER 
 
+class_def:              IDENTIFIER "::=" "CLASS" _nested_braces "WITH SYNTAX" _nested_braces
+top_level_enum_def.2:   ("InitiatingMessage" | "SuccessfulOutcome" | "UnsuccessfulOutcome") "::=" "SEQUENCE" _nested_braces 
+class_instance:         IDENTIFIER IDENTIFIER "::=" _nested_braces

@@ -17,6 +17,7 @@ use num_enum::TryFromPrimitive;
 """
 USE_COMMON = "use super::common::*;\n"
 USE_IES = "use super::ies::*;\n"
+USE_PDUS = "use super::pdu::*;\n"
 
 
 def generate(protocol):
@@ -44,6 +45,8 @@ def generate(protocol):
         f.close()
         os.system('rustfmt ' + out)
 
+    generate_file("top_pdu.rs", "PDU-Descriptions",
+                  USE_ASN1 + USE_PDUS)
     generate_file("common.rs", "CommonDataTypes", USE_ASN1 + USE_NUM_ENUM)
     generate_file("ies.rs", "IEs", USE_COMMON + USE_ASN1 + USE_NUM_ENUM)
     generate_file("pdu.rs", "PDU-Contents", USE_COMMON +

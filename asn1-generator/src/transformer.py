@@ -166,6 +166,26 @@ class TypeTransformer(Transformer):
         tree.children[0] = self.convert(tree.children[0])
         return tree
 
+    def procedure_name(self, tree):
+        tree.children[0] = self.convert(tree.children[0])
+        return tree
+
+    def initiating(self, tree):
+        tree.children[0] = self.convert(tree.children[0])
+        return tree
+
+    def successful(self, tree):
+        tree.children[0] = self.convert(tree.children[0])
+        return tree
+
+    def unsuccessful(self, tree):
+        tree.children[0] = self.convert(tree.children[0])
+        return tree
+
+    def procedure_code(self, tree):
+        tree.children[0] = self.get_constant(tree.children[0])
+        return tree
+
     def transform_type(self, tree, type_index=1):
         orig_name = tree.children[0]
         typ = tree.children[type_index]
@@ -200,6 +220,13 @@ class TypeTransformer(Transformer):
         tree.children[2] = item
         return Tree("sequence_of", tree.children)
 
+    def get_constant(self, name):
+        c = self.constants.get(name)
+        if c is None:
+            print("Error: unknown constant ", name)
+            return name
+        return c
+
     def transform_bounds(self, tree):
         ub = 18446744073709551615
         lb = 0
@@ -211,9 +238,7 @@ class TypeTransformer(Transformer):
             try:
                 lb = int(lb)
             except:
-                lb = self.constants.get(lb)
-                if lb is None:
-                    print("Error: unknown constant ", tree.children[0])
+                lb = self.get_constant(lb)
 
             ub = tree.children[1]
             if ub is None:
@@ -222,9 +247,7 @@ class TypeTransformer(Transformer):
                 try:
                     ub = int(ub)
                 except:
-                    ub = self.constants.get(ub)
-                    if ub is None:
-                        print("Error: unknown constant ", tree.children[1])
+                    ub = self.get_constant(ub)
 
             for idx in range(2, len(tree.children)-1):
                 item = tree.children[idx]
@@ -683,6 +706,26 @@ document
       -1
       0
 """)
+
+    def test_procedure(self):
+        self.should_generate("""\
+aMFConfigurationUpdate NGAP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		AMFConfigurationUpdate
+	SUCCESSFUL OUTCOME		AMFConfigurationUpdateAcknowledge
+	UNSUCCESSFUL OUTCOME	AMFConfigurationUpdateFailure
+	PROCEDURE CODE			id-AMFConfigurationUpdate
+	CRITICALITY				reject
+}""", """\
+document
+  None
+  procedure_def
+    procedure_name\tAmfConfigurationUpdate
+    initiating\tAmfConfigurationUpdate
+    successful\tAmfConfigurationUpdateAcknowledge
+    unsuccessful\tAmfConfigurationUpdateFailure
+    procedure_code\t0
+    criticality\treject
+""", constants={"id-AMFConfigurationUpdate": 0})
 
 
 if __name__ == '__main__':

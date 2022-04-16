@@ -434,15 +434,78 @@ class StructFieldsTo(Interpreter):
         self.add_optional_to_bitfield("false")
 
 
+class TopLevelEnums:
+    def __init__(self):
+        self.initiating_enum = """\
+#[derive(Clone, Debug)]
+enum InitiatingMessage {
+"""
+        self.successful_enum = """\
+#[derive(Clone, Debug)]
+enum SuccessfulOutcome {
+"""
+        self.unsuccessful_enum = """\
+#[derive(Clone, Debug)]
+enum UnsuccessfulOutcome {
+"""
+
+    def initiating(self, tree):
+        self.initiating_enum += added_variant(tree.children[0])
+
+    def successful(self, tree):
+        self.successful_enum += added_variant(tree.children[0])
+
+    def unsuccessful(self, tree):
+        self.unsuccessful_enum += added_variant(tree.children[0])
+
+    def generate(self):
+        impl = """
+impl AperCodec for {name} {{
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        todo!()
+    }}
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+        todo!()
+    }}
+}}
+"""
+        return f"""\
+{self.initiating_enum}}}
+{impl.format(name="InitiatingMessage")}
+
+{self.successful_enum}}} 
+{impl.format(name="SuccessfulOutcome")}
+
+{self.unsuccessful_enum}}}
+{impl.format(name="UnsuccessfulOutcome")}
+"""
+
+
+def added_variant(name):
+    return f"    {name}({name}),\n"
+
+
 class RustInterpreter(Interpreter):
 
     def __init__(self):
-        # self.output = ""
         self.outfile = ""
-        self.in_enum = False
+        self.top_level_enums = None
 
     def extended_items(self, tree):
         pass
+
+    def initiating(self, tree):
+        self.top_level_enums = self.top_level_enums or TopLevelEnums()
+        self.top_level_enums.initiating(tree)
+
+    def successful(self, tree):
+        self.top_level_enums = self.top_level_enums or TopLevelEnums()
+        self.top_level_enums.successful(tree)
+
+    def unsuccessful(self, tree):
+        self.top_level_enums = self.top_level_enums or TopLevelEnums()
+        self.top_level_enums.unsuccessful(tree)
 
     def enum_def(self, tree):
         orig_name = tree.children[0]
@@ -684,6 +747,10 @@ impl AperCodec for {orig_name} {{
     def extended_item(self, tree):
         assert(False)
 
+    def generate_top_level_enums(self):
+        if self.top_level_enums:
+            self.outfile += self.top_level_enums.generate()
+
 
 def generate(tree, constants=dict(), verbose=False):
     tree = transform(tree, constants)
@@ -692,6 +759,7 @@ def generate(tree, constants=dict(), verbose=False):
     visited = RustInterpreter()
     print("---- Generating ----")
     visited.visit(tree)
+    visited.generate_top_level_enums()
     return visited.outfile
 
 
@@ -715,6 +783,39 @@ class TestGenerator(unittest.TestCase):
         finally:
             if output != expected:
                 print(tree.pretty())
+
+    def test_procedure(self):
+        self.should_generate("""\
+aMFConfigurationUpdate NGAP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		AMFConfigurationUpdate
+	SUCCESSFUL OUTCOME		AMFConfigurationUpdateAcknowledge
+	UNSUCCESSFUL OUTCOME	AMFConfigurationUpdateFailure
+	PROCEDURE CODE			id-AMFConfigurationUpdate
+	CRITICALITY				reject
+}
+
+handoverNotification NGAP-ELEMENTARY-PROCEDURE ::= {
+	INITIATING MESSAGE		HandoverNotify
+	PROCEDURE CODE			id-HandoverNotification
+	CRITICALITY				ignore
+}
+""", """\
+#[derive(Clone, Debug)]
+enum InitiatingMessage {
+    AmfConfigurationUpdate(AmfConfigurationUpdate),
+    HandoverNotify(HandoverNotify),
+}
+
+#[derive(Clone, Debug)]
+enum SuccessfulOutcome {
+    AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
+} 
+
+#[derive(Clone, Debug)]
+enum UnsuccessfulOutcome {
+    AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure),
+}
+""")
 
     def test_simple_integer(self):
         self.should_generate("""\
