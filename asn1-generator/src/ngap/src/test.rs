@@ -1,5 +1,6 @@
 use super::ies::*;
 use super::pdu::*;
+use super::top_pdu::*;
 use asn1_codecs::aper::*;
 use bitvec::prelude::*;
 
@@ -42,6 +43,17 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
     ng_setup_2.encode(&mut encoded)?;
     let output_hex = hex::encode(encoded.into_bytes());
     assert_eq!(input_hex, output_hex);
+
+    Ok(())
+}
+
+#[test]
+fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
+    let input_hex = "00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
+    let bytes = hex::decode(input_hex).unwrap();
+    let mut data = AperCodecData::from_slice(&bytes);
+    let ngap_pdu = NgapPdu::decode(&mut data)?;
+    println!("Yay {:?}", ngap_pdu);
 
     Ok(())
 }
