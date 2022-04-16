@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-from pickle import FALSE
 import unittest
 from lark.visitors import Interpreter
 from case import snake_case
@@ -438,15 +437,15 @@ class TopLevelEnums:
     def __init__(self):
         self.initiating_enum = """\
 #[derive(Clone, Debug)]
-enum InitiatingMessage {
+pub enum InitiatingMessage {
 """
         self.successful_enum = """\
 #[derive(Clone, Debug)]
-enum SuccessfulOutcome {
+pub enum SuccessfulOutcome {
 """
         self.unsuccessful_enum = """\
 #[derive(Clone, Debug)]
-enum UnsuccessfulOutcome {
+pub enum UnsuccessfulOutcome {
 """
 
     def initiating(self, tree):
@@ -468,8 +467,7 @@ impl AperCodec for {name} {{
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
         todo!()
     }}
-}}
-"""
+}}"""
         return f"""\
 {self.initiating_enum}}}
 {impl.format(name="InitiatingMessage")}
@@ -483,7 +481,12 @@ impl AperCodec for {name} {{
 
 
 def added_variant(name):
-    return f"    {name}({name}),\n"
+    if name == "PrivateMessage":
+        # Since we don't generate structs for empty containers we use
+        # this hack to avoid referencing a non-existent type.
+        return f"    //{name}({name}),\n"
+    else:
+        return f"    {name}({name}),\n"
 
 
 class RustInterpreter(Interpreter):
@@ -801,19 +804,49 @@ handoverNotification NGAP-ELEMENTARY-PROCEDURE ::= {
 }
 """, """\
 #[derive(Clone, Debug)]
-enum InitiatingMessage {
+pub enum InitiatingMessage {
     AmfConfigurationUpdate(AmfConfigurationUpdate),
     HandoverNotify(HandoverNotify),
 }
 
+impl AperCodec for InitiatingMessage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        todo!()
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        todo!()
+    }
+}
+
 #[derive(Clone, Debug)]
-enum SuccessfulOutcome {
+pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
 } 
 
+impl AperCodec for SuccessfulOutcome {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        todo!()
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        todo!()
+    }
+}
+
 #[derive(Clone, Debug)]
-enum UnsuccessfulOutcome {
+pub enum UnsuccessfulOutcome {
     AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure),
+}
+
+impl AperCodec for UnsuccessfulOutcome {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+        todo!()
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        todo!()
+    }
 }
 """)
 

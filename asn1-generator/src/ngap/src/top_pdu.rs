@@ -50,7 +50,7 @@ impl AperCodec for NgapPdu {
 }
 
 #[derive(Clone, Debug)]
-enum InitiatingMessage {
+pub enum InitiatingMessage {
     AmfConfigurationUpdate(AmfConfigurationUpdate),
     AmfcpRelocationIndication(AmfcpRelocationIndication),
     AmfStatusIndication(AmfStatusIndication),
@@ -86,7 +86,7 @@ enum InitiatingMessage {
     PduSessionResourceNotify(PduSessionResourceNotify),
     PduSessionResourceReleaseCommand(PduSessionResourceReleaseCommand),
     PduSessionResourceSetupRequest(PduSessionResourceSetupRequest),
-    PrivateMessage(PrivateMessage),
+    //PrivateMessage(PrivateMessage),
     PwsCancelRequest(PwsCancelRequest),
     PwsFailureIndication(PwsFailureIndication),
     PwsRestartIndication(PwsRestartIndication),
@@ -130,7 +130,7 @@ impl AperCodec for InitiatingMessage {
 }
 
 #[derive(Clone, Debug)]
-enum SuccessfulOutcome {
+pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
     HandoverCancelAcknowledge(HandoverCancelAcknowledge),
     HandoverCommand(HandoverCommand),
@@ -165,7 +165,7 @@ impl AperCodec for SuccessfulOutcome {
 }
 
 #[derive(Clone, Debug)]
-enum UnsuccessfulOutcome {
+pub enum UnsuccessfulOutcome {
     AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure),
     HandoverPreparationFailure(HandoverPreparationFailure),
     HandoverFailure(HandoverFailure),

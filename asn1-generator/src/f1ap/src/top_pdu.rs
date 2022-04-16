@@ -53,7 +53,7 @@ impl AperCodec for F1apPdu {
 }
 
 #[derive(Clone, Debug)]
-enum InitiatingMessage {
+pub enum InitiatingMessage {
     Reset(Reset),
     F1SetupRequest(F1SetupRequest),
     GnbDuConfigurationUpdate(GnbDuConfigurationUpdate),
@@ -71,7 +71,7 @@ enum InitiatingMessage {
     UlrrcMessageTransfer(UlrrcMessageTransfer),
     UeInactivityNotification(UeInactivityNotification),
     GnbDuResourceCoordinationRequest(GnbDuResourceCoordinationRequest),
-    PrivateMessage(PrivateMessage),
+    //PrivateMessage(PrivateMessage),
     SystemInformationDeliveryCommand(SystemInformationDeliveryCommand),
     Paging(Paging),
     Notify(Notify),
@@ -125,7 +125,7 @@ impl AperCodec for InitiatingMessage {
 }
 
 #[derive(Clone, Debug)]
-enum SuccessfulOutcome {
+pub enum SuccessfulOutcome {
     ResetAcknowledge(ResetAcknowledge),
     F1SetupResponse(F1SetupResponse),
     GnbDuConfigurationUpdateAcknowledge(GnbDuConfigurationUpdateAcknowledge),
@@ -161,7 +161,7 @@ impl AperCodec for SuccessfulOutcome {
 }
 
 #[derive(Clone, Debug)]
-enum UnsuccessfulOutcome {
+pub enum UnsuccessfulOutcome {
     F1SetupFailure(F1SetupFailure),
     GnbDuConfigurationUpdateFailure(GnbDuConfigurationUpdateFailure),
     GnbCuConfigurationUpdateFailure(GnbCuConfigurationUpdateFailure),
