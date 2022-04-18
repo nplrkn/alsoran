@@ -432,51 +432,128 @@ class StructFieldsTo(Interpreter):
     def extension_container(self, tree):
         self.add_optional_to_bitfield("false")
 
+# class ProcedureVisitor(Visitor):
+#     def __init__(self):
+#         self.code = None
+#         self.initiating = ""
+#         self.successful = None
+#         self.unsuccessful = None
+#         self.criticality = None
+
+#     def initiating(self, tree):
+#         self.initiating = tree.children[0]
+#     def successful(self, tree):
+#         self.successful = tree.children[0]
+#     def unsuccessful(self, tree):
+#         self.unsuccessful = tree.children[0]
+#     def procedure_code(self, tree):
+#         self.procedure_code = tree.children[0]
+#     def criticality(self, tree):
+#         self.criticality = tree.children[0]
+
 
 class TopLevelEnums:
     def __init__(self):
+        self.initiating_encode_matches = ""
+        self.initiating_decode_matches = ""
         self.initiating_enum = """\
 #[derive(Clone, Debug)]
 pub enum InitiatingMessage {
 """
+        self.successful_encode_matches = ""
+        self.successful_decode_matches = ""
         self.successful_enum = """\
 #[derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
 """
+        self.unsuccessful_encode_matches = ""
+        self.unsuccessful_decode_matches = ""
         self.unsuccessful_enum = """\
 #[derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
 """
 
-    def initiating(self, tree):
-        self.initiating_enum += added_variant(tree.children[0])
+    # def initiating(self, tree):
+    #     self.initiating_enum += added_variant(tree.children[0])
 
-    def successful(self, tree):
-        self.successful_enum += added_variant(tree.children[0])
+    def procedure_def(self, tree):
+        code = next(tree.find_data("procedure_code")).children[0]
+        successful = next(tree.find_data("successful"), None)
+        successful = successful and successful.children[0]
+        unsuccessful = next(tree.find_data("unsuccessful"), None)
+        unsuccessful = unsuccessful and unsuccessful.children[0]
+        initiating = next(tree.find_data("initiating")).children[0]
+        criticality = next(tree.find_data("criticality")).children[0]
+        self.initiating_enum += added_variant(initiating)
+        self.initiating_decode_matches += f"""\
+            {code} => Ok(Self::{initiating}({initiating}::decode(data)?)),
+"""
+        self.initiating_encode_matches += f"""\
+            Self::{initiating}(x) => {{
+                aper::encode::encode_integer(data, Some(0), Some(255), false, {code}, false)?;
+                Criticality::{criticality.title()}.encode(data)?;
+                x.encode(data)?;
+            }}
+"""
+        if successful:
+            self.successful_enum += added_variant(successful)
+            self.successful_decode_matches += f"""\
+            {code} => Ok(Self::{successful}({successful}::decode(data)?)),
+"""
+            self.successful_encode_matches += f"""\
+            Self::{successful}(x) => {{
+                aper::encode::encode_integer(data, Some(0), Some(255), false, {code}, false)?;
+                Criticality::{criticality.title()}.encode(data)?;
+                x.encode(data)?;
+            }}
+"""
+        if unsuccessful:
+            self.unsuccessful_enum += added_variant(unsuccessful)
+            self.unsuccessful_decode_matches += f"""\
+            {code} => Ok(Self::{unsuccessful}({unsuccessful}::decode(data)?)),
+"""
+            self.unsuccessful_encode_matches += f"""\
+            Self::{unsuccessful}(x) => {{
+                aper::encode::encode_integer(data, Some(0), Some(255), false, {code}, false)?;
+                Criticality::{criticality.title()}.encode(data)?;
+                x.encode(data)?;
+            }}
+"""
 
-    def unsuccessful(self, tree):
-        self.unsuccessful_enum += added_variant(tree.children[0])
+    # def successful(self, tree):
+    #     self.successful_enum += added_variant(tree.children[0])
+
+    # def unsuccessful(self, tree):
+    #     self.unsuccessful_enum += added_variant(tree.children[0])
 
     def generate(self):
         impl = """
 impl AperCodec for {name} {{
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {{
+{decode_matches}\
+            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {{}}", x)))
+        }}
     }}
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
-        todo!()
+        match self {{
+{encode_matches}\
+        }}
+        Ok(())
     }}
 }}"""
         return f"""\
 {self.initiating_enum}}}
-{impl.format(name="InitiatingMessage")}
+{impl.format(name="InitiatingMessage",decode_matches=self.initiating_decode_matches, encode_matches=self.initiating_encode_matches)}
 
-{self.successful_enum}}} 
-{impl.format(name="SuccessfulOutcome")}
+{self.successful_enum}}}
+{impl.format(name="SuccessfulOutcome", decode_matches=self.successful_decode_matches, encode_matches=self.successful_encode_matches)}
 
 {self.unsuccessful_enum}}}
-{impl.format(name="UnsuccessfulOutcome")}
+{impl.format(name="UnsuccessfulOutcome",decode_matches=self.unsuccessful_decode_matches, encode_matches=self.unsuccessful_encode_matches)}
 """
 
 
@@ -509,6 +586,10 @@ class RustInterpreter(Interpreter):
     def unsuccessful(self, tree):
         self.top_level_enums = self.top_level_enums or TopLevelEnums()
         self.top_level_enums.unsuccessful(tree)
+
+    def procedure_def(self, tree):
+        self.top_level_enums = self.top_level_enums or TopLevelEnums()
+        self.top_level_enums.procedure_def(tree)
 
     def enum_def(self, tree):
         orig_name = tree.children[0]
@@ -812,25 +893,55 @@ pub enum InitiatingMessage {
 impl AperCodec for InitiatingMessage {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {
+            0 => Ok(Self::AmfConfigurationUpdate(AmfConfigurationUpdate::decode(data)?)),
+            11 => Ok(Self::HandoverNotify(HandoverNotify::decode(data)?)),
+            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {}", x)))
+        }
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        todo!()
+        match self {
+            Self::AmfConfigurationUpdate(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::HandoverNotify(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+        }
+        Ok(())
     }
 }
 
 #[derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
-} 
+}
 
 impl AperCodec for SuccessfulOutcome {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {
+            0 => Ok(Self::AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge::decode(data)?)),
+            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {}", x)))
+        }
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        todo!()
+        match self {
+            Self::AmfConfigurationUpdateAcknowledge(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+        }
+        Ok(())
     }
 }
 
@@ -842,13 +953,25 @@ pub enum UnsuccessfulOutcome {
 impl AperCodec for UnsuccessfulOutcome {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {
+            0 => Ok(Self::AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure::decode(data)?)),
+            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {}", x)))
+        }
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        todo!()
+        match self {
+            Self::AmfConfigurationUpdateFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+        }
+        Ok(())
     }
 }
-""")
+""", constants={"id-AMFConfigurationUpdate": 0, "id-HandoverNotification": 11})
 
     def test_simple_integer(self):
         self.should_generate("""\

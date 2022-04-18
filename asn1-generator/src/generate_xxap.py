@@ -19,7 +19,7 @@ USE_COMMON = "use super::common::*;\n"
 USE_IES = "use super::ies::*;\n"
 USE_PDUS = """\
 use crate::common::Criticality;
-use super::pdu::*;\n"
+use super::pdu::*;
 """
 
 

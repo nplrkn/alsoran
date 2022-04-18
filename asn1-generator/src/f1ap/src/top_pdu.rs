@@ -3,6 +3,7 @@
 use bitvec::prelude::*;
 pub type BitString = BitVec<Msb0, u8>;
 use super::pdu::*;
+use crate::common::Criticality;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 
 // F1apPdu
@@ -117,10 +118,459 @@ pub enum InitiatingMessage {
 impl AperCodec for InitiatingMessage {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {
+            0 => Ok(Self::Reset(Reset::decode(data)?)),
+            1 => Ok(Self::F1SetupRequest(F1SetupRequest::decode(data)?)),
+            3 => Ok(Self::GnbDuConfigurationUpdate(
+                GnbDuConfigurationUpdate::decode(data)?,
+            )),
+            4 => Ok(Self::GnbCuConfigurationUpdate(
+                GnbCuConfigurationUpdate::decode(data)?,
+            )),
+            5 => Ok(Self::UeContextSetupRequest(UeContextSetupRequest::decode(
+                data,
+            )?)),
+            6 => Ok(Self::UeContextReleaseCommand(
+                UeContextReleaseCommand::decode(data)?,
+            )),
+            7 => Ok(Self::UeContextModificationRequest(
+                UeContextModificationRequest::decode(data)?,
+            )),
+            8 => Ok(Self::UeContextModificationRequired(
+                UeContextModificationRequired::decode(data)?,
+            )),
+            20 => Ok(Self::WriteReplaceWarningRequest(
+                WriteReplaceWarningRequest::decode(data)?,
+            )),
+            21 => Ok(Self::PwsCancelRequest(PwsCancelRequest::decode(data)?)),
+            2 => Ok(Self::ErrorIndication(ErrorIndication::decode(data)?)),
+            10 => Ok(Self::UeContextReleaseRequest(
+                UeContextReleaseRequest::decode(data)?,
+            )),
+            11 => Ok(Self::InitialUlrrcMessageTransfer(
+                InitialUlrrcMessageTransfer::decode(data)?,
+            )),
+            12 => Ok(Self::DlrrcMessageTransfer(DlrrcMessageTransfer::decode(
+                data,
+            )?)),
+            13 => Ok(Self::UlrrcMessageTransfer(UlrrcMessageTransfer::decode(
+                data,
+            )?)),
+            15 => Ok(Self::UeInactivityNotification(
+                UeInactivityNotification::decode(data)?,
+            )),
+            16 => Ok(Self::GnbDuResourceCoordinationRequest(
+                GnbDuResourceCoordinationRequest::decode(data)?,
+            )),
+            14 => Ok(Self::PrivateMessage(PrivateMessage::decode(data)?)),
+            17 => Ok(Self::SystemInformationDeliveryCommand(
+                SystemInformationDeliveryCommand::decode(data)?,
+            )),
+            18 => Ok(Self::Paging(Paging::decode(data)?)),
+            19 => Ok(Self::Notify(Notify::decode(data)?)),
+            27 => Ok(Self::NetworkAccessRateReduction(
+                NetworkAccessRateReduction::decode(data)?,
+            )),
+            22 => Ok(Self::PwsRestartIndication(PwsRestartIndication::decode(
+                data,
+            )?)),
+            23 => Ok(Self::PwsFailureIndication(PwsFailureIndication::decode(
+                data,
+            )?)),
+            24 => Ok(Self::GnbDuStatusIndication(GnbDuStatusIndication::decode(
+                data,
+            )?)),
+            25 => Ok(Self::RrcDeliveryReport(RrcDeliveryReport::decode(data)?)),
+            26 => Ok(Self::F1RemovalRequest(F1RemovalRequest::decode(data)?)),
+            28 => Ok(Self::TraceStart(TraceStart::decode(data)?)),
+            29 => Ok(Self::DeactivateTrace(DeactivateTrace::decode(data)?)),
+            30 => Ok(Self::DucuRadioInformationTransfer(
+                DucuRadioInformationTransfer::decode(data)?,
+            )),
+            31 => Ok(Self::CuduRadioInformationTransfer(
+                CuduRadioInformationTransfer::decode(data)?,
+            )),
+            32 => Ok(Self::BapMappingConfiguration(
+                BapMappingConfiguration::decode(data)?,
+            )),
+            33 => Ok(Self::GnbDuResourceConfiguration(
+                GnbDuResourceConfiguration::decode(data)?,
+            )),
+            34 => Ok(Self::IabtnlAddressRequest(IabtnlAddressRequest::decode(
+                data,
+            )?)),
+            35 => Ok(Self::IabupConfigurationUpdateRequest(
+                IabupConfigurationUpdateRequest::decode(data)?,
+            )),
+            36 => Ok(Self::ResourceStatusRequest(ResourceStatusRequest::decode(
+                data,
+            )?)),
+            37 => Ok(Self::ResourceStatusUpdate(ResourceStatusUpdate::decode(
+                data,
+            )?)),
+            38 => Ok(Self::AccessAndMobilityIndication(
+                AccessAndMobilityIndication::decode(data)?,
+            )),
+            58 => Ok(Self::ReferenceTimeInformationReportingControl(
+                ReferenceTimeInformationReportingControl::decode(data)?,
+            )),
+            57 => Ok(Self::ReferenceTimeInformationReport(
+                ReferenceTimeInformationReport::decode(data)?,
+            )),
+            39 => Ok(Self::AccessSuccess(AccessSuccess::decode(data)?)),
+            40 => Ok(Self::CellTrafficTrace(CellTrafficTrace::decode(data)?)),
+            42 => Ok(Self::PositioningAssistanceInformationControl(
+                PositioningAssistanceInformationControl::decode(data)?,
+            )),
+            43 => Ok(Self::PositioningAssistanceInformationFeedback(
+                PositioningAssistanceInformationFeedback::decode(data)?,
+            )),
+            41 => Ok(Self::PositioningMeasurementRequest(
+                PositioningMeasurementRequest::decode(data)?,
+            )),
+            44 => Ok(Self::PositioningMeasurementReport(
+                PositioningMeasurementReport::decode(data)?,
+            )),
+            45 => Ok(Self::PositioningMeasurementAbort(
+                PositioningMeasurementAbort::decode(data)?,
+            )),
+            46 => Ok(Self::PositioningMeasurementFailureIndication(
+                PositioningMeasurementFailureIndication::decode(data)?,
+            )),
+            47 => Ok(Self::PositioningMeasurementUpdate(
+                PositioningMeasurementUpdate::decode(data)?,
+            )),
+            48 => Ok(Self::TrpInformationRequest(TrpInformationRequest::decode(
+                data,
+            )?)),
+            49 => Ok(Self::PositioningInformationRequest(
+                PositioningInformationRequest::decode(data)?,
+            )),
+            50 => Ok(Self::PositioningActivationRequest(
+                PositioningActivationRequest::decode(data)?,
+            )),
+            51 => Ok(Self::PositioningDeactivation(
+                PositioningDeactivation::decode(data)?,
+            )),
+            52 => Ok(Self::ECidMeasurementInitiationRequest(
+                ECidMeasurementInitiationRequest::decode(data)?,
+            )),
+            53 => Ok(Self::ECidMeasurementFailureIndication(
+                ECidMeasurementFailureIndication::decode(data)?,
+            )),
+            54 => Ok(Self::ECidMeasurementReport(ECidMeasurementReport::decode(
+                data,
+            )?)),
+            55 => Ok(Self::ECidMeasurementTerminationCommand(
+                ECidMeasurementTerminationCommand::decode(data)?,
+            )),
+            56 => Ok(Self::PositioningInformationUpdate(
+                PositioningInformationUpdate::decode(data)?,
+            )),
+            x => {
+                return Err(aper::AperCodecError::new(format!(
+                    "Unrecognised procedure code {}",
+                    x
+                )))
+            }
+        }
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        todo!()
+        match self {
+            Self::Reset(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::F1SetupRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuConfigurationUpdate(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbCuConfigurationUpdate(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextSetupRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextReleaseCommand(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextModificationRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextModificationRequired(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::WriteReplaceWarningRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 20, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PwsCancelRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ErrorIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 2, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextReleaseRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::InitialUlrrcMessageTransfer(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::DlrrcMessageTransfer(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UlrrcMessageTransfer(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeInactivityNotification(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 15, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuResourceCoordinationRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 16, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PrivateMessage(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 14, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::SystemInformationDeliveryCommand(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 17, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::Paging(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 18, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::Notify(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 19, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::NetworkAccessRateReduction(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 27, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PwsRestartIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PwsFailureIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 23, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuStatusIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::RrcDeliveryReport(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 25, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::F1RemovalRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::TraceStart(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 28, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::DeactivateTrace(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 29, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::DucuRadioInformationTransfer(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 30, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::CuduRadioInformationTransfer(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 31, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::BapMappingConfiguration(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 32, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuResourceConfiguration(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 33, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::IabtnlAddressRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 34, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::IabupConfigurationUpdateRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 35, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ResourceStatusRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 36, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ResourceStatusUpdate(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 37, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::AccessAndMobilityIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 38, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ReferenceTimeInformationReportingControl(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 58, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ReferenceTimeInformationReport(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 57, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::AccessSuccess(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 39, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::CellTrafficTrace(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 40, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningAssistanceInformationControl(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 42, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningAssistanceInformationFeedback(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 43, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 41, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementReport(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 44, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementAbort(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 45, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementFailureIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 46, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementUpdate(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 47, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::TrpInformationRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 48, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningInformationRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 49, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningActivationRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 50, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningDeactivation(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 51, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ECidMeasurementInitiationRequest(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 52, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ECidMeasurementFailureIndication(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 53, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ECidMeasurementReport(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 54, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ECidMeasurementTerminationCommand(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 55, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningInformationUpdate(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 56, false)?;
+                Criticality::Ignore.encode(data)?;
+                x.encode(data)?;
+            }
+        }
+        Ok(())
     }
 }
 
@@ -153,10 +603,189 @@ pub enum SuccessfulOutcome {
 impl AperCodec for SuccessfulOutcome {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {
+            0 => Ok(Self::ResetAcknowledge(ResetAcknowledge::decode(data)?)),
+            1 => Ok(Self::F1SetupResponse(F1SetupResponse::decode(data)?)),
+            3 => Ok(Self::GnbDuConfigurationUpdateAcknowledge(
+                GnbDuConfigurationUpdateAcknowledge::decode(data)?,
+            )),
+            4 => Ok(Self::GnbCuConfigurationUpdateAcknowledge(
+                GnbCuConfigurationUpdateAcknowledge::decode(data)?,
+            )),
+            5 => Ok(Self::UeContextSetupResponse(
+                UeContextSetupResponse::decode(data)?,
+            )),
+            6 => Ok(Self::UeContextReleaseComplete(
+                UeContextReleaseComplete::decode(data)?,
+            )),
+            7 => Ok(Self::UeContextModificationResponse(
+                UeContextModificationResponse::decode(data)?,
+            )),
+            8 => Ok(Self::UeContextModificationConfirm(
+                UeContextModificationConfirm::decode(data)?,
+            )),
+            20 => Ok(Self::WriteReplaceWarningResponse(
+                WriteReplaceWarningResponse::decode(data)?,
+            )),
+            21 => Ok(Self::PwsCancelResponse(PwsCancelResponse::decode(data)?)),
+            16 => Ok(Self::GnbDuResourceCoordinationResponse(
+                GnbDuResourceCoordinationResponse::decode(data)?,
+            )),
+            26 => Ok(Self::F1RemovalResponse(F1RemovalResponse::decode(data)?)),
+            32 => Ok(Self::BapMappingConfigurationAcknowledge(
+                BapMappingConfigurationAcknowledge::decode(data)?,
+            )),
+            33 => Ok(Self::GnbDuResourceConfigurationAcknowledge(
+                GnbDuResourceConfigurationAcknowledge::decode(data)?,
+            )),
+            34 => Ok(Self::IabtnlAddressResponse(IabtnlAddressResponse::decode(
+                data,
+            )?)),
+            35 => Ok(Self::IabupConfigurationUpdateResponse(
+                IabupConfigurationUpdateResponse::decode(data)?,
+            )),
+            36 => Ok(Self::ResourceStatusResponse(
+                ResourceStatusResponse::decode(data)?,
+            )),
+            41 => Ok(Self::PositioningMeasurementResponse(
+                PositioningMeasurementResponse::decode(data)?,
+            )),
+            48 => Ok(Self::TrpInformationResponse(
+                TrpInformationResponse::decode(data)?,
+            )),
+            49 => Ok(Self::PositioningInformationResponse(
+                PositioningInformationResponse::decode(data)?,
+            )),
+            50 => Ok(Self::PositioningActivationResponse(
+                PositioningActivationResponse::decode(data)?,
+            )),
+            52 => Ok(Self::ECidMeasurementInitiationResponse(
+                ECidMeasurementInitiationResponse::decode(data)?,
+            )),
+            x => {
+                return Err(aper::AperCodecError::new(format!(
+                    "Unrecognised procedure code {}",
+                    x
+                )))
+            }
+        }
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        todo!()
+        match self {
+            Self::ResetAcknowledge(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::F1SetupResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuConfigurationUpdateAcknowledge(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbCuConfigurationUpdateAcknowledge(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextSetupResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextReleaseComplete(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextModificationResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextModificationConfirm(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::WriteReplaceWarningResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 20, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PwsCancelResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuResourceCoordinationResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 16, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::F1RemovalResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::BapMappingConfigurationAcknowledge(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 32, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuResourceConfigurationAcknowledge(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 33, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::IabtnlAddressResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 34, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::IabupConfigurationUpdateResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 35, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ResourceStatusResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 36, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 41, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::TrpInformationResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 48, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningInformationResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 49, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningActivationResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 50, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ECidMeasurementInitiationResponse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 52, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+        }
+        Ok(())
     }
 }
 
@@ -184,9 +813,152 @@ pub enum UnsuccessfulOutcome {
 impl AperCodec for UnsuccessfulOutcome {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
-        todo!()
+        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        match id {
+            1 => Ok(Self::F1SetupFailure(F1SetupFailure::decode(data)?)),
+            3 => Ok(Self::GnbDuConfigurationUpdateFailure(
+                GnbDuConfigurationUpdateFailure::decode(data)?,
+            )),
+            4 => Ok(Self::GnbCuConfigurationUpdateFailure(
+                GnbCuConfigurationUpdateFailure::decode(data)?,
+            )),
+            5 => Ok(Self::UeContextSetupFailure(UeContextSetupFailure::decode(
+                data,
+            )?)),
+            7 => Ok(Self::UeContextModificationFailure(
+                UeContextModificationFailure::decode(data)?,
+            )),
+            8 => Ok(Self::UeContextModificationRefuse(
+                UeContextModificationRefuse::decode(data)?,
+            )),
+            26 => Ok(Self::F1RemovalFailure(F1RemovalFailure::decode(data)?)),
+            32 => Ok(Self::BapMappingConfigurationFailure(
+                BapMappingConfigurationFailure::decode(data)?,
+            )),
+            33 => Ok(Self::GnbDuResourceConfigurationFailure(
+                GnbDuResourceConfigurationFailure::decode(data)?,
+            )),
+            34 => Ok(Self::IabtnlAddressFailure(IabtnlAddressFailure::decode(
+                data,
+            )?)),
+            35 => Ok(Self::IabupConfigurationUpdateFailure(
+                IabupConfigurationUpdateFailure::decode(data)?,
+            )),
+            36 => Ok(Self::ResourceStatusFailure(ResourceStatusFailure::decode(
+                data,
+            )?)),
+            41 => Ok(Self::PositioningMeasurementFailure(
+                PositioningMeasurementFailure::decode(data)?,
+            )),
+            48 => Ok(Self::TrpInformationFailure(TrpInformationFailure::decode(
+                data,
+            )?)),
+            49 => Ok(Self::PositioningInformationFailure(
+                PositioningInformationFailure::decode(data)?,
+            )),
+            50 => Ok(Self::PositioningActivationFailure(
+                PositioningActivationFailure::decode(data)?,
+            )),
+            52 => Ok(Self::ECidMeasurementInitiationFailure(
+                ECidMeasurementInitiationFailure::decode(data)?,
+            )),
+            x => {
+                return Err(aper::AperCodecError::new(format!(
+                    "Unrecognised procedure code {}",
+                    x
+                )))
+            }
+        }
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        todo!()
+        match self {
+            Self::F1SetupFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuConfigurationUpdateFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbCuConfigurationUpdateFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextSetupFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextModificationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::UeContextModificationRefuse(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::F1RemovalFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::BapMappingConfigurationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 32, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::GnbDuResourceConfigurationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 33, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::IabtnlAddressFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 34, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::IabupConfigurationUpdateFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 35, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ResourceStatusFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 36, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningMeasurementFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 41, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::TrpInformationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 48, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningInformationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 49, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::PositioningActivationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 50, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+            Self::ECidMeasurementInitiationFailure(x) => {
+                aper::encode::encode_integer(data, Some(0), Some(255), false, 52, false)?;
+                Criticality::Reject.encode(data)?;
+                x.encode(data)?;
+            }
+        }
+        Ok(())
     }
 }

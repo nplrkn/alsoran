@@ -4,19 +4,18 @@ use super::top_pdu::*;
 use asn1_codecs::aper::*;
 use bitvec::prelude::*;
 
-#[test]
-fn test_ng_setup_coding() -> Result<(), AperCodecError> {
+fn make_ng_setup() -> NgSetupRequest {
     let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);
-    let _ng_setup = NgSetupRequest {
+    NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
             plmn_identity: plmn_identity.clone(),
-            gnb_id: GnbId::GnbId(bitvec![Msb0, u8; 0x00, 0x01, 0x02]),
+            gnb_id: GnbId::GnbId(vec![0x00, 0x01, 0x02].view_bits::<Msb0>().into()),
         }),
-        ran_node_name: Some(RanNodeName("free5GC".to_string())),
+        ran_node_name: Some(RanNodeName("free5gc".to_string())),
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {
             tac: Tac(vec![0, 0, 1]),
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
-                plmn_identity: plmn_identity.clone(),
+                plmn_identity: plmn_identity,
                 tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
                     s_nssai: SNssai {
                         sst: Sst(vec![0x01]),
@@ -29,8 +28,11 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
         ue_retention_information: None,
         nb_iot_default_paging_drx: None,
         extended_ran_node_name: None,
-    };
+    }
+}
 
+#[test]
+fn test_ng_setup_coding() -> Result<(), AperCodecError> {
     // This starts at the open type encoding of the NG Setup initiating message.
 
     let input_hex = "35000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
@@ -40,7 +42,9 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
     let ng_setup_2 = NgSetupRequest::decode(&mut data)?;
 
     let mut encoded = AperCodecData::new();
-    ng_setup_2.encode(&mut encoded)?;
+    //ng_setup_2.encode(&mut encoded)?;
+    make_ng_setup().encode(&mut encoded)?;
+
     let output_hex = hex::encode(encoded.into_bytes());
     assert_eq!(input_hex, output_hex);
 
@@ -49,7 +53,15 @@ fn test_ng_setup_coding() -> Result<(), AperCodecError> {
 
 #[test]
 fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
+    let ng_setup = make_ng_setup();
+    let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
+    let mut encoded = AperCodecData::new();
+    ngap_pdu.encode(&mut encoded)?;
+    let output_hex = hex::encode(encoded.into_bytes());
+
     let input_hex = "00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
+    assert_eq!(input_hex, output_hex);
+
     let bytes = hex::decode(input_hex).unwrap();
     let mut data = AperCodecData::from_slice(&bytes);
     let ngap_pdu = NgapPdu::decode(&mut data)?;
