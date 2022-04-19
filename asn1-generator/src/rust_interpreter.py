@@ -432,25 +432,6 @@ class StructFieldsTo(Interpreter):
     def extension_container(self, tree):
         self.add_optional_to_bitfield("false")
 
-# class ProcedureVisitor(Visitor):
-#     def __init__(self):
-#         self.code = None
-#         self.initiating = ""
-#         self.successful = None
-#         self.unsuccessful = None
-#         self.criticality = None
-
-#     def initiating(self, tree):
-#         self.initiating = tree.children[0]
-#     def successful(self, tree):
-#         self.successful = tree.children[0]
-#     def unsuccessful(self, tree):
-#         self.unsuccessful = tree.children[0]
-#     def procedure_code(self, tree):
-#         self.procedure_code = tree.children[0]
-#     def criticality(self, tree):
-#         self.criticality = tree.children[0]
-
 
 class TopLevelEnums:
     def __init__(self):
@@ -477,14 +458,16 @@ pub enum UnsuccessfulOutcome {
     #     self.initiating_enum += added_variant(tree.children[0])
 
     def procedure_def(self, tree):
+        initiating = next(tree.find_data("initiating")).children[0]
+        if initiating == "PrivateMessage":
+            return
         code = next(tree.find_data("procedure_code")).children[0]
         successful = next(tree.find_data("successful"), None)
         successful = successful and successful.children[0]
         unsuccessful = next(tree.find_data("unsuccessful"), None)
         unsuccessful = unsuccessful and unsuccessful.children[0]
-        initiating = next(tree.find_data("initiating")).children[0]
         criticality = next(tree.find_data("criticality")).children[0]
-        self.initiating_enum += added_variant(initiating)
+        self.initiating_enum += f"    {initiating}({initiating}),\n"
         self.initiating_decode_matches += f"""\
             {code} => Ok(Self::{initiating}({initiating}::decode(data)?)),
 """
@@ -496,7 +479,7 @@ pub enum UnsuccessfulOutcome {
             }}
 """
         if successful:
-            self.successful_enum += added_variant(successful)
+            self.successful_enum += f"    {successful}({successful}),\n"
             self.successful_decode_matches += f"""\
             {code} => Ok(Self::{successful}({successful}::decode(data)?)),
 """
@@ -508,7 +491,7 @@ pub enum UnsuccessfulOutcome {
             }}
 """
         if unsuccessful:
-            self.unsuccessful_enum += added_variant(unsuccessful)
+            self.unsuccessful_enum += f"    {unsuccessful}({unsuccessful}),\n"
             self.unsuccessful_decode_matches += f"""\
             {code} => Ok(Self::{unsuccessful}({unsuccessful}::decode(data)?)),
 """
@@ -575,17 +558,17 @@ class RustInterpreter(Interpreter):
     def extended_items(self, tree):
         pass
 
-    def initiating(self, tree):
-        self.top_level_enums = self.top_level_enums or TopLevelEnums()
-        self.top_level_enums.initiating(tree)
+    # def initiating(self, tree):
+    #     self.top_level_enums = self.top_level_enums or TopLevelEnums()
+    #     self.top_level_enums.initiating(tree)
 
-    def successful(self, tree):
-        self.top_level_enums = self.top_level_enums or TopLevelEnums()
-        self.top_level_enums.successful(tree)
+    # def successful(self, tree):
+    #     self.top_level_enums = self.top_level_enums or TopLevelEnums()
+    #     self.top_level_enums.successful(tree)
 
-    def unsuccessful(self, tree):
-        self.top_level_enums = self.top_level_enums or TopLevelEnums()
-        self.top_level_enums.unsuccessful(tree)
+    # def unsuccessful(self, tree):
+    #     self.top_level_enums = self.top_level_enums or TopLevelEnums()
+    #     self.top_level_enums.unsuccessful(tree)
 
     def procedure_def(self, tree):
         self.top_level_enums = self.top_level_enums or TopLevelEnums()

@@ -33,45 +33,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "also-net"
-version = "0.1.0"
-dependencies = [
- "also-sctp",
- "anyhow",
- "async-channel",
- "async-io",
- "async-net",
- "async-std",
- "async-stream",
- "async-trait",
- "errno",
- "futures",
- "futures-core",
- "futures-lite",
- "hex",
- "log",
- "serde",
- "serde_json",
- "slog",
- "sloggers",
- "stop-token",
-]
-
-[[package]]
-name = "also-sctp"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-io",
- "async-stream",
- "errno",
- "futures-core",
- "libc",
- "os_socketaddr",
- "slog",
-]
-
-[[package]]
 name = "ansi_term"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -101,16 +62,6 @@ checksum = "c5d78ce20460b82d3fa150275ed9d55e21064fc7951177baacf86a145c4a4b1f"
 [[package]]
 name = "asn1-codecs"
 version = "0.1.3"
-dependencies = [
- "bitvec",
- "log",
- "proc-macro2 1.0.37",
- "syn 1.0.91",
-]
-
-[[package]]
-name = "asn1-codecs"
-version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6b6d37e64f221985f1cd3b0b56785e1e2e75998f19465ced7fea9b1ad465c9e"
 dependencies = [
@@ -123,7 +74,7 @@ dependencies = [
 [[package]]
 name = "asn1-codecs"
 version = "0.1.3"
-source = "git+https://github.com/nplrkn/hampi#64475ac4b4ec42b45f9ecd55ff511c4325620aea"
+source = "git+https://github.com/nplrkn/hampi?branch=fix-range-256-int#a2288fd4aa5cd3f423a64461470068bcf7ad402b"
 dependencies = [
  "bitvec",
  "log",
@@ -475,16 +426,13 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
- "also-sctp",
  "anyhow",
- "asn1-codecs 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-channel",
  "async-io",
  "async-net",
  "async-std",
  "async-stream",
  "async-trait",
- "bitvec",
  "errno",
  "futures",
  "futures-core",
@@ -492,9 +440,6 @@ dependencies = [
  "hex",
  "libc",
  "log",
- "os_socketaddr",
- "serde",
- "serde_json",
  "signal-hook",
  "signal-hook-async-std",
  "slog",
@@ -666,7 +611,7 @@ checksum = "77f3309417938f28bf8228fcff79a4a37103981e3e186d2ccd19c74b38f4eb71"
 name = "f1ap"
 version = "0.1.0"
 dependencies = [
- "asn1-codecs 0.1.3 (git+https://github.com/nplrkn/hampi)",
+ "asn1-codecs 0.1.3 (git+https://github.com/nplrkn/hampi?branch=fix-range-256-int)",
  "bitvec",
  "hex",
  "num_enum",
@@ -1165,7 +1110,6 @@ dependencies = [
 name = "integration-tests"
 version = "0.1.0"
 dependencies = [
- "also-net",
  "anyhow",
  "async-channel",
  "async-std",
@@ -1176,6 +1120,8 @@ dependencies = [
  "coordinator",
  "f1ap",
  "hex",
+ "net",
+ "ngap",
  "serde_json",
  "slog",
  "stop-token",
@@ -1390,6 +1336,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "net"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "asn1-codecs 0.1.3 (git+https://github.com/nplrkn/hampi?branch=fix-range-256-int)",
+ "async-channel",
+ "async-io",
+ "async-net",
+ "async-std",
+ "async-stream",
+ "async-trait",
+ "errno",
+ "futures",
+ "futures-core",
+ "futures-lite",
+ "hex",
+ "log",
+ "sctp",
+ "serde",
+ "serde_json",
+ "slog",
+ "sloggers",
+ "stop-token",
+]
+
+[[package]]
 name = "net2"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1404,7 +1376,7 @@ dependencies = [
 name = "ngap"
 version = "0.1.0"
 dependencies = [
- "asn1-codecs 0.1.3",
+ "asn1-codecs 0.1.3 (git+https://github.com/nplrkn/hampi?branch=fix-range-256-int)",
  "bitvec",
  "hex",
  "num_enum",
@@ -1567,14 +1539,6 @@ name = "parking"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "427c3892f9e783d91cc128285287e70a59e206ca452770ece88a76f7a3eddd72"
-
-[[package]]
-name = "pdu-convert-derive"
-version = "0.1.0"
-dependencies = [
- "quote 1.0.18",
- "syn 1.0.91",
-]
 
 [[package]]
 name = "percent-encoding"
@@ -1811,6 +1775,20 @@ checksum = "8f05ba609c234e60bee0d547fe94a4c7e9da733d1c962cf6e59efa4cd9c8bc75"
 dependencies = [
  "lazy_static",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "sctp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-io",
+ "async-stream",
+ "errno",
+ "futures-core",
+ "libc",
+ "os_socketaddr",
+ "slog",
 ]
 
 [[package]]
@@ -2652,7 +2630,6 @@ dependencies = [
 name = "worker"
 version = "0.1.0"
 dependencies = [
- "also-net",
  "anyhow",
  "asn1-codecs 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-channel",
@@ -2664,6 +2641,8 @@ dependencies = [
  "f1ap",
  "hex",
  "hyper",
+ "net",
+ "ngap",
  "node-control-api",
  "os_socketaddr",
  "slog",

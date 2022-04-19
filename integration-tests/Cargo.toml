@@ -7,10 +7,11 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../common" }
-also-net = { path = "../also-net" }
+net = { path = "../net" }
 worker = { path = "../worker" }
 coordinator = { path = "../coordinator" }
-f1ap = {path = "../asn1-generator/src/f1ap" }
+f1ap = {path = "../f1ap" }
+ngap = {path = "../ngap" }
 async-std = { version = "1.10.0", features = ["attributes","tokio02"] }
 async-trait = "0.1.51"
 slog = "2.7.0"

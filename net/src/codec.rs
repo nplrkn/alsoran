@@ -45,13 +45,15 @@ where
     }
 }
 
+use asn1_codecs::aper::{AperCodec, AperCodecData};
+
 #[derive(Clone)]
 pub struct Asn1PerCodec<P>(pub PhantomData<P>)
 where
-    P: Send + Sync + Clone;
+    P: Send + Sync + Clone + AperCodec;
 impl<P> Asn1PerCodec<P>
 where
-    P: Send + Sync + Clone,
+    P: Send + Sync + Clone + AperCodec,
 {
     pub fn new() -> Asn1PerCodec<P> {
         Asn1PerCodec(PhantomData)
@@ -60,7 +62,7 @@ where
 
 impl<P> Default for Asn1PerCodec<P>
 where
-    P: Send + Sync + Clone,
+    P: Send + Sync + Clone + AperCodec,
 {
     fn default() -> Self {
         Self::new()
@@ -69,13 +71,17 @@ where
 
 impl<P> Codec for Asn1PerCodec<P>
 where
-    P: Send + Sync + Clone,
+    P: Send + Sync + Clone + AperCodec<Output = P>,
 {
     type Pdu = P;
-    fn to_wire(&self, _pdu: Self::Pdu) -> Result<Vec<u8>> {
-        Ok(hex::decode("00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140")?)
+    fn to_wire(&self, pdu: Self::Pdu) -> Result<Vec<u8>> {
+        let mut data = AperCodecData::new();
+        pdu.encode(&mut data)?;
+        Ok(data.into_bytes())
     }
-    fn from_wire(&self, _message: Vec<u8>) -> Result<Self::Pdu> {
-        unimplemented!()
+    fn from_wire(&self, message: Vec<u8>) -> Result<Self::Pdu> {
+        let mut data = AperCodecData::from_slice(&message);
+        let pdu = Self::Pdu::decode(&mut data)?;
+        Ok(pdu)
     }
 }

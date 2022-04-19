@@ -1,7 +1,7 @@
 use super::mock_amf::MockAmf;
 use super::mock_du::MockDu;
-use also_net::JsonCodec;
 use async_std::task::JoinHandle;
+use net::Asn1PerCodec;
 use slog::{info, o, Logger};
 use std::{panic, process};
 use stop_token::StopSource;
@@ -76,8 +76,8 @@ impl TestContext {
         let (stop_source, task) = worker::spawn(
             config.clone(),
             self.logger.new(o!("cu-w"=> worker_number)),
-            JsonCodec::new(),
-            JsonCodec::new(),
+            Asn1PerCodec::new(),
+            Asn1PerCodec::new(),
         )
         .unwrap();
         self.workers.push(InternalWorkerInfo {

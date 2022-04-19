@@ -6,9 +6,8 @@ members = [
     "coordinator",
     "common",
     "integration-tests",
-    "also-sctp",
-    "also-net",
-    "pdu-convert-derive",
-    "asn1-generator/src/ngap",
-    "asn1-generator/src/f1ap"
+    "sctp",
+    "net",
+    "ngap",
+    "f1ap"
 ]

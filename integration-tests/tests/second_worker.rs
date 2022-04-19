@@ -4,7 +4,7 @@ use async_std;
 pub use test::*;
 
 #[async_std::test]
-async fn second_worker_INCOMPLETE() -> Result<()> {
+async fn second_worker_incomplete() -> Result<()> {
     let mut tc = TestContext::new().await;
 
     // The first worker initializes the NG interface.

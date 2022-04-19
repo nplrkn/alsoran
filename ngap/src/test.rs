@@ -32,26 +32,6 @@ fn make_ng_setup() -> NgSetupRequest {
 }
 
 #[test]
-fn test_ng_setup_coding() -> Result<(), AperCodecError> {
-    // This starts at the open type encoding of the NG Setup initiating message.
-
-    let input_hex = "35000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
-
-    let bytes = hex::decode(input_hex).unwrap();
-    let mut data = AperCodecData::from_slice(&bytes);
-    let ng_setup_2 = NgSetupRequest::decode(&mut data)?;
-
-    let mut encoded = AperCodecData::new();
-    //ng_setup_2.encode(&mut encoded)?;
-    make_ng_setup().encode(&mut encoded)?;
-
-    let output_hex = hex::encode(encoded.into_bytes());
-    assert_eq!(input_hex, output_hex);
-
-    Ok(())
-}
-
-#[test]
 fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
     let ng_setup = make_ng_setup();
     let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
@@ -59,13 +39,16 @@ fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
     ngap_pdu.encode(&mut encoded)?;
     let output_hex = hex::encode(encoded.into_bytes());
 
-    let input_hex = "00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
-    assert_eq!(input_hex, output_hex);
+    let reference = "00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
+    assert_eq!(reference, output_hex);
 
-    let bytes = hex::decode(input_hex).unwrap();
+    let bytes = hex::decode(reference).unwrap();
     let mut data = AperCodecData::from_slice(&bytes);
     let ngap_pdu = NgapPdu::decode(&mut data)?;
-    println!("Yay {:?}", ngap_pdu);
+    let mut encoded = AperCodecData::new();
+    ngap_pdu.encode(&mut encoded)?;
+    let output_hex = hex::encode(encoded.into_bytes());
+    assert_eq!(reference, output_hex);
 
     Ok(())
 }

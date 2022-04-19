@@ -3,15 +3,15 @@ pub mod config;
 mod gnbcu;
 #[cfg(test)]
 mod mock_coordinator;
-use also_net::{
+use anyhow::Result;
+use async_std::task::JoinHandle;
+pub use config::Config;
+use f1ap::F1apPdu;
+use net::{
     ClientTransportProvider, Codec, MockTransportProvider, SctpTransportProvider,
     ServerTransportProvider, TransportProvider,
 };
-use anyhow::Result;
-use async_std::task::JoinHandle;
-use common::ngap::NgapPdu;
-pub use config::Config;
-use f1ap::F1apPdu;
+use ngap::NgapPdu;
 use node_control_api::Client;
 use slog::{info, Logger};
 use stop_token::StopSource;
