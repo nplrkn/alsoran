@@ -2,6 +2,7 @@
 
 
 ## TO DO
+- Add error messages to ASN.1 library
 - Design sequencing of interface startup with multiple workers in Connection Management.md
 - F1 connection management with 2nd worker
 - TODOs
@@ -11,7 +12,6 @@
 - regression test connection failures and retries
 - pass logger in context
 - regression testing of maintain and retry scenarios
-- hope that [https://github.com/gabhijit/hampi] gets an encode function.
 
 ## DONE
 - Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 

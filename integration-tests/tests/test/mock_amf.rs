@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use bitvec::prelude::BitVec;
+use bitvec::prelude::*;
 use net::TransportProvider;
 use net::{
     Asn1PerCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
@@ -87,13 +87,13 @@ impl MockAmf {
         }?;
 
         //let amf_name = AmfName("MockAmf".to_string());
-        let plmn_identity = PlmnIdentity(vec![0, 0, 1, 0, 1]);
+        let plmn_identity = PlmnIdentity(vec![2, 3, 2]);
         let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
             guami: Guami {
                 plmn_identity,
-                amf_region_id: AmfRegionId(BitVec::new()),
-                amf_set_id: AmfSetId(BitVec::new()),
-                amf_pointer: AmfPointer(BitVec::new()),
+                amf_region_id: AmfRegionId(bitvec![Msb0,u8;1;8]),
+                amf_set_id: AmfSetId(bitvec![Msb0,u8;1;10]),
+                amf_pointer: AmfPointer(bitvec![Msb0,u8;1;6]),
             },
             backup_amf_name: None,
         }]);
@@ -103,7 +103,15 @@ impl MockAmf {
                 amf_name: AmfName("MockAmf".to_string()),
                 served_guami_list,
                 relative_amf_capacity: RelativeAmfCapacity(100),
-                plmn_support_list: PlmnSupportList(vec![]),
+                plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
+                    plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                    slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                        s_nssai: SNssai {
+                            sst: Sst(vec![0x01]),
+                            sd: None,
+                        },
+                    }]),
+                }]),
                 criticality_diagnostics: None,
                 ue_retention_information: None,
                 iab_supported: None,

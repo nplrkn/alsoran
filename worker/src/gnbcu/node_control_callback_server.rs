@@ -4,7 +4,7 @@ use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvide
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use bitvec::vec::BitVec;
+use bitvec::prelude::*;
 use ngap::*;
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, CallbackApi, TriggerInterfaceManagementResponse};
@@ -151,7 +151,18 @@ where
         NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
             global_ran_node_id: self.global_ran_node_id(),
             ran_node_name: None,
-            supported_ta_list: SupportedTaList(vec![]),
+            supported_ta_list: SupportedTaList(vec![SupportedTaItem {
+                tac: Tac(vec![0, 1, 2]),
+                broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
+                    plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                    tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                        s_nssai: SNssai {
+                            sst: Sst(vec![0x01]),
+                            sd: None,
+                        },
+                    }]),
+                }]),
+            }]),
             default_paging_drx: PagingDrx::V128,
             ue_retention_information: None,
             nb_iot_default_paging_drx: None,
@@ -175,8 +186,8 @@ where
 
     fn global_ran_node_id(&self) -> GlobalRanNodeId {
         GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
-            plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
-            gnb_id: GnbId::GnbId(BitVec::from_element(0x10)),
+            plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+            gnb_id: GnbId::GnbId(bitvec![Msb0,u8; 1; 22]),
         })
     }
 }

@@ -52,3 +52,38 @@ fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
 
     Ok(())
 }
+
+#[test]
+fn test_ng_setup() -> Result<(), AperCodecError> {
+    let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
+        global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
+            plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+            gnb_id: GnbId::GnbId(bitvec![Msb0,u8; 1; 22]),
+        }),
+        ran_node_name: None,
+        supported_ta_list: SupportedTaList(vec![SupportedTaItem {
+            tac: Tac(vec![0, 1, 2]),
+            broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
+                plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                    s_nssai: SNssai {
+                        sst: Sst(vec![0x01]),
+                        sd: None,
+                    },
+                }]),
+            }]),
+        }]),
+        default_paging_drx: PagingDrx::V128,
+        ue_retention_information: None,
+        nb_iot_default_paging_drx: None,
+        extended_ran_node_name: None,
+    }));
+    let mut encoded = AperCodecData::new();
+    pdu.encode(&mut encoded)?;
+    let output_hex = hex::encode(encoded.into_bytes());
+    println!("Output of encode is {}", output_hex);
+
+    //let _pdu = NgapPdu::decode(&mut encoded)?;
+    //Error: Error { msg: "3 Padding bits at Offset 125 not all '0'." }
+    Ok(())
+}
