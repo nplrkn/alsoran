@@ -3,6 +3,7 @@ use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvide
 use anyhow::Result;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use bitvec::prelude::*;
 use f1ap::*;
 use net::{TnlaEvent, TnlaEventHandler, TransactionReceiver};
 use node_control_api::Api;
@@ -77,7 +78,7 @@ impl<
         F1SetupResponse {
             transaction_id: message.transaction_id,
             gnb_cu_rrc_version: RrcVersion {
-                latest_rrc_version: BitString::new(),
+                latest_rrc_version: bitvec![Msb0, u8;0, 0, 0],
             },
             gnb_cu_name: None,
             cells_to_be_activated_list: None,
