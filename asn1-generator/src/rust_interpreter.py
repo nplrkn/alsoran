@@ -433,6 +433,18 @@ class StructFieldsTo(Interpreter):
         self.add_optional_to_bitfield("false")
 
 
+APER_CODEC_IMPL_FORMAT = """
+impl AperCodec for {name} {{
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
+        {name}::decode_inner(data).map_err(|e: AperCodecError| e.push_context("{name}"))
+    }}
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("{name}"))
+    }}
+}}"""
+
+
 class TopLevelEnums:
     def __init__(self):
         self.initiating_encode_matches = ""
@@ -510,10 +522,9 @@ pub enum UnsuccessfulOutcome {
     #     self.unsuccessful_enum += added_variant(tree.children[0])
 
     def generate(self):
-        impl = """
-impl AperCodec for {name} {{
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+        impl = APER_CODEC_IMPL_FORMAT + """
+impl {name} {{
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {{
@@ -589,9 +600,8 @@ pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
 
-impl AperCodec for {name} {{
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+impl {name} {{
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
@@ -603,7 +613,7 @@ impl AperCodec for {name} {{
     }}
 }}
 
-"""
+""" + APER_CODEC_IMPL_FORMAT.format(name=name)
         return name
 
     def choice_def(self, tree):
@@ -626,9 +636,8 @@ pub enum {name} {{
 {field_interpreter.choice_fields}\
 }}
 
-impl AperCodec for {name} {{
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+impl {name} {{
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
@@ -645,7 +654,7 @@ impl AperCodec for {name} {{
     }}
 }}
 
-"""
+""" + APER_CODEC_IMPL_FORMAT.format(name=name)
 
     def tuple_struct(self, tree):
         orig_name = tree.children[0]
@@ -657,9 +666,8 @@ impl AperCodec for {name} {{
 # [derive(Clone, Debug)]
 pub struct {name}(pub {inner});
 
-impl AperCodec for {name} {{
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+impl {name} {{
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
         Ok(Self({decode_expression(tree.children[1])}))
     }}
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
@@ -667,7 +675,7 @@ impl AperCodec for {name} {{
     }}
 }}
 
-"""
+""" + APER_CODEC_IMPL_FORMAT.format(name=name)
 
     def ie(self, tree):
         pass
@@ -700,9 +708,8 @@ pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
 
-impl AperCodec for {orig_name} {{
-    type Output = {orig_name};
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+impl {orig_name} {{
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -736,7 +743,7 @@ impl AperCodec for {orig_name} {{
     }}
 }}
 
-"""
+""" + APER_CODEC_IMPL_FORMAT.format(name=name)
 
     def struct(self, tree):
         if tree.children[1].data == "ie_container_sequence":
@@ -780,9 +787,8 @@ pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
 
-impl AperCodec for {orig_name} {{
-    type Output = {orig_name};
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {{
+impl {orig_name} {{
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
         let ({optionals_var}, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
 {fields_from_interpreter.fields_from}
         Ok(Self {{
@@ -797,7 +803,8 @@ impl AperCodec for {orig_name} {{
     }}
 }}
 
-"""
+""" + APER_CODEC_IMPL_FORMAT.format(name=name)
+
         return name
 
     def comment(self, tree, comment=""):
@@ -873,9 +880,8 @@ pub enum InitiatingMessage {
     HandoverNotify(HandoverNotify),
 }
 
-impl AperCodec for InitiatingMessage {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl InitiatingMessage {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {
@@ -906,9 +912,8 @@ pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
 }
 
-impl AperCodec for SuccessfulOutcome {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl SuccessfulOutcome {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {
@@ -934,8 +939,7 @@ pub enum UnsuccessfulOutcome {
 }
 
 impl AperCodec for UnsuccessfulOutcome {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {
@@ -966,8 +970,7 @@ ProcedureCode		::= INTEGER (0..255)
 pub struct ProcedureCode(pub u8);
 
 impl AperCodec for ProcedureCode {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -992,9 +995,8 @@ pub enum TriggeringMessage {
     UnsuccessfulOutcome,
 }
 
-impl AperCodec for TriggeringMessage {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl TriggeringMessage {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), false)?;
         if extended {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
@@ -1029,9 +1031,8 @@ pub struct WlanMeasurementConfiguration {
     pub wlan_rtt: Option<WlanRtt>,
 }
 
-impl AperCodec for WlanMeasurementConfiguration {
-    type Output = WlanMeasurementConfiguration;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl WlanMeasurementConfiguration {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
         let wlan_meas_config = WlanMeasConfig::decode(data)?;
         let wlan_rtt = if optionals[0] {
@@ -1068,9 +1069,8 @@ pub enum WlanRtt {
     Thing1,
 }
 
-impl AperCodec for WlanRtt {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl WlanRtt {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
         if extended {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
@@ -1095,9 +1095,8 @@ LTEUERLFReportContainer::= OCTET STRING
 # [derive(Clone, Debug)]
 pub struct LteueRlfReportContainer(pub Vec<u8>);
 
-impl AperCodec for LteueRlfReportContainer {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl LteueRlfReportContainer {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(data, None, None, false)?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1120,7 +1119,7 @@ pub struct MaximumDataBurstVolume(pub i128);
 
 impl AperCodec for MaximumDataBurstVolume {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(0), Some(4095), true)?.0))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1143,7 +1142,7 @@ pub struct MobilityInformation(pub BitString);
 
 impl AperCodec for MobilityInformation {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_bitstring(data, Some(16), Some(16), false)?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1174,7 +1173,7 @@ pub enum MaximumIntegrityProtectedDataRate {
 
 impl AperCodec for MaximumIntegrityProtectedDataRate {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
         if extended {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
@@ -1209,7 +1208,7 @@ pub enum EventTrigger {
 
 impl AperCodec for EventTrigger {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
@@ -1249,7 +1248,7 @@ pub enum OutOfCoverage {
 
 impl AperCodec for OutOfCoverage {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
         if extended {
             return Err(aper::AperCodecError::new("Extended enum not implemented"));
@@ -1286,7 +1285,7 @@ pub struct PduSessionResourceSetupRequest {
 
 impl AperCodec for PduSessionResourceSetupRequest {
     type Output = PduSessionResourceSetupRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -1362,7 +1361,7 @@ pub enum GnbId {
 
 impl AperCodec for GnbId {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
@@ -1402,7 +1401,7 @@ pub enum PrivateIeId {
 
 impl AperCodec for PrivateIeId {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
@@ -1440,7 +1439,7 @@ pub struct ExpectedActivityPeriod(pub i128);
 
 impl AperCodec for ExpectedActivityPeriod {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(1), Some(50), true)?.0))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1461,7 +1460,7 @@ pub struct UriAddress(pub String);
 
 impl AperCodec for UriAddress {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_visible_string(data, None, None, false)?))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1481,7 +1480,7 @@ pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInform
 
 impl AperCodec for AdditionalDluptnlInformationForHoList {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(50), false)?;
             let mut items = vec![];
@@ -1520,7 +1519,7 @@ pub struct DlprsResourceCoordinates {
 
 impl AperCodec for DlprsResourceCoordinates {
     type Output = DlprsResourceCoordinates;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 2)?;
         let listof_dl_prs_resource_set_arp = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
@@ -1578,7 +1577,7 @@ pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1C
 
 impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(63356), false)?;
             let mut items = vec![];
@@ -1635,7 +1634,7 @@ pub struct BapMappingConfiguration {
 
 impl AperCodec for BapMappingConfiguration {
     type Output = BapMappingConfiguration;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -1686,7 +1685,7 @@ pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListIt
 
 impl AperCodec for BhRoutingInformationAddedList {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
@@ -1732,7 +1731,7 @@ pub struct GnbCuSystemInformation {
 
 impl AperCodec for GnbCuSystemInformation {
     type Output = GnbCuSystemInformation;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let sibtypetobeupdatedlist = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
@@ -1783,7 +1782,7 @@ pub struct OverloadStop {
 
 impl AperCodec for OverloadStop {
     type Output = OverloadStop;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
