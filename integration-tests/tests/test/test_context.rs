@@ -90,6 +90,8 @@ impl TestContext {
     pub async fn terminate(self) {
         info!(self.logger, "Terminate coordinator");
         drop(self.coord_stop_source);
+        self.coord_task.await;
+        self.control_task.await;
 
         info!(self.logger, "Terminate workers");
         for worker in self.workers {
@@ -108,13 +110,9 @@ impl TestContext {
 
         info!(self.logger, "Terminate mock AMF");
         drop(self.amf.stop_source);
+        self.amf.task.await;
 
         info!(self.logger, "Terminate mock DU");
         drop(self.du_stop_source);
-
-        info!(self.logger, "Wait for all tasks to terminate cleanly");
-        self.coord_task.await;
-        self.control_task.await;
-        self.amf.task.await;
     }
 }
