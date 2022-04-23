@@ -12,9 +12,8 @@ pub enum F1apPdu {
     UnsuccessfulOutcome(UnsuccessfulOutcome),
 }
 
-impl AperCodec for F1apPdu {
-    type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl F1apPdu {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
@@ -33,7 +32,7 @@ impl AperCodec for F1apPdu {
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::InitiatingMessage(x) => {
                 aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
@@ -51,6 +50,16 @@ impl AperCodec for F1apPdu {
     }
 }
 
+impl AperCodec for F1apPdu {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        F1apPdu::decode_inner(data).map_err(|e: AperCodecError| e.push_context("F1apPdu"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("F1apPdu"))
+    }
+}
 #[derive(Clone, Debug)]
 pub enum InitiatingMessage {
     Reset(Reset),
@@ -114,7 +123,17 @@ pub enum InitiatingMessage {
 
 impl AperCodec for InitiatingMessage {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        InitiatingMessage::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitiatingMessage"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitiatingMessage"))
+    }
+}
+impl InitiatingMessage {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {
@@ -273,7 +292,7 @@ impl AperCodec for InitiatingMessage {
             }
         }
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Reset(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
@@ -593,7 +612,17 @@ pub enum SuccessfulOutcome {
 
 impl AperCodec for SuccessfulOutcome {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SuccessfulOutcome::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SuccessfulOutcome"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SuccessfulOutcome"))
+    }
+}
+impl SuccessfulOutcome {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {
@@ -663,7 +692,7 @@ impl AperCodec for SuccessfulOutcome {
             }
         }
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::ResetAcknowledge(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
@@ -803,7 +832,17 @@ pub enum UnsuccessfulOutcome {
 
 impl AperCodec for UnsuccessfulOutcome {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UnsuccessfulOutcome::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UnsuccessfulOutcome"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UnsuccessfulOutcome"))
+    }
+}
+impl UnsuccessfulOutcome {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
         match id {
@@ -862,7 +901,7 @@ impl AperCodec for UnsuccessfulOutcome {
             }
         }
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::F1SetupFailure(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;

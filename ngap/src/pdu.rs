@@ -19,9 +19,8 @@ pub struct PduSessionResourceSetupRequest {
     pub ue_aggregate_maximum_bit_rate: Option<UeAggregateMaximumBitRate>,
 }
 
-impl AperCodec for PduSessionResourceSetupRequest {
-    type Output = PduSessionResourceSetupRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -77,7 +76,7 @@ impl AperCodec for PduSessionResourceSetupRequest {
             ue_aggregate_maximum_bit_rate,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -151,6 +150,17 @@ impl AperCodec for PduSessionResourceSetupRequest {
     }
 }
 
+impl AperCodec for PduSessionResourceSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceSetupRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceSetupRequest"))
+    }
+}
 // PduSessionResourceSetupResponse
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupResponse {
@@ -162,9 +172,8 @@ pub struct PduSessionResourceSetupResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for PduSessionResourceSetupResponse {
-    type Output = PduSessionResourceSetupResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceSetupResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -216,7 +225,7 @@ impl AperCodec for PduSessionResourceSetupResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -282,6 +291,17 @@ impl AperCodec for PduSessionResourceSetupResponse {
     }
 }
 
+impl AperCodec for PduSessionResourceSetupResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceSetupResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceSetupResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceSetupResponse"))
+    }
+}
 // PduSessionResourceReleaseCommand
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceReleaseCommand {
@@ -292,9 +312,8 @@ pub struct PduSessionResourceReleaseCommand {
     pub pdu_session_resource_to_release_list_rel_cmd: PduSessionResourceToReleaseListRelCmd,
 }
 
-impl AperCodec for PduSessionResourceReleaseCommand {
-    type Output = PduSessionResourceReleaseCommand;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceReleaseCommand {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -346,7 +365,7 @@ impl AperCodec for PduSessionResourceReleaseCommand {
             pdu_session_resource_to_release_list_rel_cmd,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -411,6 +430,17 @@ impl AperCodec for PduSessionResourceReleaseCommand {
     }
 }
 
+impl AperCodec for PduSessionResourceReleaseCommand {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceReleaseCommand::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceReleaseCommand"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceReleaseCommand"))
+    }
+}
 // PduSessionResourceReleaseResponse
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceReleaseResponse {
@@ -421,9 +451,8 @@ pub struct PduSessionResourceReleaseResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for PduSessionResourceReleaseResponse {
-    type Output = PduSessionResourceReleaseResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceReleaseResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -475,7 +504,7 @@ impl AperCodec for PduSessionResourceReleaseResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -539,6 +568,17 @@ impl AperCodec for PduSessionResourceReleaseResponse {
     }
 }
 
+impl AperCodec for PduSessionResourceReleaseResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceReleaseResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceReleaseResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceReleaseResponse"))
+    }
+}
 // PduSessionResourceModifyRequest
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyRequest {
@@ -548,9 +588,8 @@ pub struct PduSessionResourceModifyRequest {
     pub pdu_session_resource_modify_list_mod_req: PduSessionResourceModifyListModReq,
 }
 
-impl AperCodec for PduSessionResourceModifyRequest {
-    type Output = PduSessionResourceModifyRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceModifyRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -599,7 +638,7 @@ impl AperCodec for PduSessionResourceModifyRequest {
             pdu_session_resource_modify_list_mod_req,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -653,6 +692,17 @@ impl AperCodec for PduSessionResourceModifyRequest {
     }
 }
 
+impl AperCodec for PduSessionResourceModifyRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceModifyRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyRequest"))
+    }
+}
 // PduSessionResourceModifyResponse
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyResponse {
@@ -665,9 +715,8 @@ pub struct PduSessionResourceModifyResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for PduSessionResourceModifyResponse {
-    type Output = PduSessionResourceModifyResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceModifyResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -723,7 +772,7 @@ impl AperCodec for PduSessionResourceModifyResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -799,6 +848,17 @@ impl AperCodec for PduSessionResourceModifyResponse {
     }
 }
 
+impl AperCodec for PduSessionResourceModifyResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceModifyResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyResponse"))
+    }
+}
 // PduSessionResourceNotify
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceNotify {
@@ -809,9 +869,8 @@ pub struct PduSessionResourceNotify {
     pub user_location_information: Option<UserLocationInformation>,
 }
 
-impl AperCodec for PduSessionResourceNotify {
-    type Output = PduSessionResourceNotify;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceNotify {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -861,7 +920,7 @@ impl AperCodec for PduSessionResourceNotify {
             user_location_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -927,6 +986,17 @@ impl AperCodec for PduSessionResourceNotify {
     }
 }
 
+impl AperCodec for PduSessionResourceNotify {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceNotify::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceNotify"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceNotify"))
+    }
+}
 // PduSessionResourceModifyIndication
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyIndication {
@@ -936,9 +1006,8 @@ pub struct PduSessionResourceModifyIndication {
     pub user_location_information: Option<UserLocationInformation>,
 }
 
-impl AperCodec for PduSessionResourceModifyIndication {
-    type Output = PduSessionResourceModifyIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceModifyIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -987,7 +1056,7 @@ impl AperCodec for PduSessionResourceModifyIndication {
             user_location_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -1041,6 +1110,17 @@ impl AperCodec for PduSessionResourceModifyIndication {
     }
 }
 
+impl AperCodec for PduSessionResourceModifyIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceModifyIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyIndication"))
+    }
+}
 // PduSessionResourceModifyConfirm
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceModifyConfirm {
@@ -1052,9 +1132,8 @@ pub struct PduSessionResourceModifyConfirm {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for PduSessionResourceModifyConfirm {
-    type Output = PduSessionResourceModifyConfirm;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PduSessionResourceModifyConfirm {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -1107,7 +1186,7 @@ impl AperCodec for PduSessionResourceModifyConfirm {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -1173,6 +1252,17 @@ impl AperCodec for PduSessionResourceModifyConfirm {
     }
 }
 
+impl AperCodec for PduSessionResourceModifyConfirm {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceModifyConfirm::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyConfirm"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PduSessionResourceModifyConfirm"))
+    }
+}
 // InitialContextSetupRequest
 #[derive(Clone, Debug)]
 pub struct InitialContextSetupRequest {
@@ -1216,9 +1306,8 @@ pub struct InitialContextSetupRequest {
     pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
 }
 
-impl AperCodec for InitialContextSetupRequest {
-    type Output = InitialContextSetupRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl InitialContextSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -1408,7 +1497,7 @@ impl AperCodec for InitialContextSetupRequest {
             ue_radio_capability_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -1786,6 +1875,17 @@ impl AperCodec for InitialContextSetupRequest {
     }
 }
 
+impl AperCodec for InitialContextSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        InitialContextSetupRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialContextSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialContextSetupRequest"))
+    }
+}
 // InitialContextSetupResponse
 #[derive(Clone, Debug)]
 pub struct InitialContextSetupResponse {
@@ -1797,9 +1897,8 @@ pub struct InitialContextSetupResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for InitialContextSetupResponse {
-    type Output = InitialContextSetupResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl InitialContextSetupResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -1851,7 +1950,7 @@ impl AperCodec for InitialContextSetupResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -1917,6 +2016,17 @@ impl AperCodec for InitialContextSetupResponse {
     }
 }
 
+impl AperCodec for InitialContextSetupResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        InitialContextSetupResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialContextSetupResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialContextSetupResponse"))
+    }
+}
 // InitialContextSetupFailure
 #[derive(Clone, Debug)]
 pub struct InitialContextSetupFailure {
@@ -1928,9 +2038,8 @@ pub struct InitialContextSetupFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for InitialContextSetupFailure {
-    type Output = InitialContextSetupFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl InitialContextSetupFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -1981,7 +2090,7 @@ impl AperCodec for InitialContextSetupFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2045,6 +2154,17 @@ impl AperCodec for InitialContextSetupFailure {
     }
 }
 
+impl AperCodec for InitialContextSetupFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        InitialContextSetupFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialContextSetupFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialContextSetupFailure"))
+    }
+}
 // UeContextReleaseRequest
 #[derive(Clone, Debug)]
 pub struct UeContextReleaseRequest {
@@ -2054,9 +2174,8 @@ pub struct UeContextReleaseRequest {
     pub cause: Cause,
 }
 
-impl AperCodec for UeContextReleaseRequest {
-    type Output = UeContextReleaseRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextReleaseRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2103,7 +2222,7 @@ impl AperCodec for UeContextReleaseRequest {
             cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2157,6 +2276,17 @@ impl AperCodec for UeContextReleaseRequest {
     }
 }
 
+impl AperCodec for UeContextReleaseRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextReleaseRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextReleaseRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextReleaseRequest"))
+    }
+}
 // UeContextReleaseCommand
 #[derive(Clone, Debug)]
 pub struct UeContextReleaseCommand {
@@ -2164,9 +2294,8 @@ pub struct UeContextReleaseCommand {
     pub cause: Cause,
 }
 
-impl AperCodec for UeContextReleaseCommand {
-    type Output = UeContextReleaseCommand;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextReleaseCommand {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2200,7 +2329,7 @@ impl AperCodec for UeContextReleaseCommand {
             cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2236,6 +2365,17 @@ impl AperCodec for UeContextReleaseCommand {
     }
 }
 
+impl AperCodec for UeContextReleaseCommand {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextReleaseCommand::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextReleaseCommand"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextReleaseCommand"))
+    }
+}
 // UeContextReleaseComplete
 #[derive(Clone, Debug)]
 pub struct UeContextReleaseComplete {
@@ -2249,9 +2389,8 @@ pub struct UeContextReleaseComplete {
     pub paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe>,
 }
 
-impl AperCodec for UeContextReleaseComplete {
-    type Output = UeContextReleaseComplete;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextReleaseComplete {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2312,7 +2451,7 @@ impl AperCodec for UeContextReleaseComplete {
             paging_assis_datafor_c_ecapab_ue,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2398,6 +2537,17 @@ impl AperCodec for UeContextReleaseComplete {
     }
 }
 
+impl AperCodec for UeContextReleaseComplete {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextReleaseComplete::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextReleaseComplete"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextReleaseComplete"))
+    }
+}
 // UeContextResumeRequest
 #[derive(Clone, Debug)]
 pub struct UeContextResumeRequest {
@@ -2413,9 +2563,8 @@ pub struct UeContextResumeRequest {
     pub paging_assis_datafor_c_ecapab_ue: Option<PagingAssisDataforCEcapabUe>,
 }
 
-impl AperCodec for UeContextResumeRequest {
-    type Output = UeContextResumeRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextResumeRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2488,7 +2637,7 @@ impl AperCodec for UeContextResumeRequest {
             paging_assis_datafor_c_ecapab_ue,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2582,6 +2731,17 @@ impl AperCodec for UeContextResumeRequest {
     }
 }
 
+impl AperCodec for UeContextResumeRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextResumeRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextResumeRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextResumeRequest"))
+    }
+}
 // UeContextResumeResponse
 #[derive(Clone, Debug)]
 pub struct UeContextResumeResponse {
@@ -2596,9 +2756,8 @@ pub struct UeContextResumeResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeContextResumeResponse {
-    type Output = UeContextResumeResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextResumeResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2660,7 +2819,7 @@ impl AperCodec for UeContextResumeResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2756,6 +2915,17 @@ impl AperCodec for UeContextResumeResponse {
     }
 }
 
+impl AperCodec for UeContextResumeResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextResumeResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextResumeResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextResumeResponse"))
+    }
+}
 // UeContextResumeFailure
 #[derive(Clone, Debug)]
 pub struct UeContextResumeFailure {
@@ -2765,9 +2935,8 @@ pub struct UeContextResumeFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeContextResumeFailure {
-    type Output = UeContextResumeFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextResumeFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2810,7 +2979,7 @@ impl AperCodec for UeContextResumeFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2864,6 +3033,17 @@ impl AperCodec for UeContextResumeFailure {
     }
 }
 
+impl AperCodec for UeContextResumeFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextResumeFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextResumeFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextResumeFailure"))
+    }
+}
 // UeContextSuspendRequest
 #[derive(Clone, Debug)]
 pub struct UeContextSuspendRequest {
@@ -2875,9 +3055,8 @@ pub struct UeContextSuspendRequest {
     pub pdu_session_resource_suspend_list_sus_req: Option<PduSessionResourceSuspendListSusReq>,
 }
 
-impl AperCodec for UeContextSuspendRequest {
-    type Output = UeContextSuspendRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextSuspendRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -2933,7 +3112,7 @@ impl AperCodec for UeContextSuspendRequest {
             pdu_session_resource_suspend_list_sus_req,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -2999,6 +3178,17 @@ impl AperCodec for UeContextSuspendRequest {
     }
 }
 
+impl AperCodec for UeContextSuspendRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextSuspendRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextSuspendRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextSuspendRequest"))
+    }
+}
 // UeContextSuspendResponse
 #[derive(Clone, Debug)]
 pub struct UeContextSuspendResponse {
@@ -3008,9 +3198,8 @@ pub struct UeContextSuspendResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeContextSuspendResponse {
-    type Output = UeContextSuspendResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextSuspendResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3050,7 +3239,7 @@ impl AperCodec for UeContextSuspendResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -3106,6 +3295,17 @@ impl AperCodec for UeContextSuspendResponse {
     }
 }
 
+impl AperCodec for UeContextSuspendResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextSuspendResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextSuspendResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextSuspendResponse"))
+    }
+}
 // UeContextSuspendFailure
 #[derive(Clone, Debug)]
 pub struct UeContextSuspendFailure {
@@ -3115,9 +3315,8 @@ pub struct UeContextSuspendFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeContextSuspendFailure {
-    type Output = UeContextSuspendFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextSuspendFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3160,7 +3359,7 @@ impl AperCodec for UeContextSuspendFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -3214,6 +3413,17 @@ impl AperCodec for UeContextSuspendFailure {
     }
 }
 
+impl AperCodec for UeContextSuspendFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextSuspendFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextSuspendFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextSuspendFailure"))
+    }
+}
 // UeContextModificationRequest
 #[derive(Clone, Debug)]
 pub struct UeContextModificationRequest {
@@ -3242,9 +3452,8 @@ pub struct UeContextModificationRequest {
     pub rg_level_wireline_access_characteristics: Option<RgLevelWirelineAccessCharacteristics>,
 }
 
-impl AperCodec for UeContextModificationRequest {
-    type Output = UeContextModificationRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextModificationRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3366,7 +3575,7 @@ impl AperCodec for UeContextModificationRequest {
             rg_level_wireline_access_characteristics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -3602,6 +3811,17 @@ impl AperCodec for UeContextModificationRequest {
     }
 }
 
+impl AperCodec for UeContextModificationRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextModificationRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextModificationRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextModificationRequest"))
+    }
+}
 // UeContextModificationResponse
 #[derive(Clone, Debug)]
 pub struct UeContextModificationResponse {
@@ -3612,9 +3832,8 @@ pub struct UeContextModificationResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeContextModificationResponse {
-    type Output = UeContextModificationResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextModificationResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3657,7 +3876,7 @@ impl AperCodec for UeContextModificationResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -3723,6 +3942,17 @@ impl AperCodec for UeContextModificationResponse {
     }
 }
 
+impl AperCodec for UeContextModificationResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextModificationResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextModificationResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextModificationResponse"))
+    }
+}
 // UeContextModificationFailure
 #[derive(Clone, Debug)]
 pub struct UeContextModificationFailure {
@@ -3732,9 +3962,8 @@ pub struct UeContextModificationFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeContextModificationFailure {
-    type Output = UeContextModificationFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeContextModificationFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3777,7 +4006,7 @@ impl AperCodec for UeContextModificationFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -3831,6 +4060,17 @@ impl AperCodec for UeContextModificationFailure {
     }
 }
 
+impl AperCodec for UeContextModificationFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeContextModificationFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextModificationFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeContextModificationFailure"))
+    }
+}
 // RrcInactiveTransitionReport
 #[derive(Clone, Debug)]
 pub struct RrcInactiveTransitionReport {
@@ -3840,9 +4080,8 @@ pub struct RrcInactiveTransitionReport {
     pub user_location_information: UserLocationInformation,
 }
 
-impl AperCodec for RrcInactiveTransitionReport {
-    type Output = RrcInactiveTransitionReport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RrcInactiveTransitionReport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3888,7 +4127,7 @@ impl AperCodec for RrcInactiveTransitionReport {
             user_location_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -3940,15 +4179,25 @@ impl AperCodec for RrcInactiveTransitionReport {
     }
 }
 
+impl AperCodec for RrcInactiveTransitionReport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RrcInactiveTransitionReport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RrcInactiveTransitionReport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RrcInactiveTransitionReport"))
+    }
+}
 // RetrieveUeInformation
 #[derive(Clone, Debug)]
 pub struct RetrieveUeInformation {
     pub five_g_s_tmsi: FiveGSTmsi,
 }
 
-impl AperCodec for RetrieveUeInformation {
-    type Output = RetrieveUeInformation;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RetrieveUeInformation {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -3974,7 +4223,7 @@ impl AperCodec for RetrieveUeInformation {
         )))?;
         Ok(Self { five_g_s_tmsi })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -4002,6 +4251,17 @@ impl AperCodec for RetrieveUeInformation {
     }
 }
 
+impl AperCodec for RetrieveUeInformation {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RetrieveUeInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RetrieveUeInformation"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RetrieveUeInformation"))
+    }
+}
 // UeInformationTransfer
 #[derive(Clone, Debug)]
 pub struct UeInformationTransfer {
@@ -4013,9 +4273,8 @@ pub struct UeInformationTransfer {
     pub ue_differentiation_info: Option<UeDifferentiationInfo>,
 }
 
-impl AperCodec for UeInformationTransfer {
-    type Output = UeInformationTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeInformationTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -4058,7 +4317,7 @@ impl AperCodec for UeInformationTransfer {
             ue_differentiation_info,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -4136,6 +4395,17 @@ impl AperCodec for UeInformationTransfer {
     }
 }
 
+impl AperCodec for UeInformationTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeInformationTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeInformationTransfer"))
+    }
+}
 // RancpRelocationIndication
 #[derive(Clone, Debug)]
 pub struct RancpRelocationIndication {
@@ -4146,9 +4416,8 @@ pub struct RancpRelocationIndication {
     pub ul_cp_security_information: UlCpSecurityInformation,
 }
 
-impl AperCodec for RancpRelocationIndication {
-    type Output = RancpRelocationIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RancpRelocationIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -4200,7 +4469,7 @@ impl AperCodec for RancpRelocationIndication {
             ul_cp_security_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -4260,6 +4529,17 @@ impl AperCodec for RancpRelocationIndication {
     }
 }
 
+impl AperCodec for RancpRelocationIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RancpRelocationIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RancpRelocationIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RancpRelocationIndication"))
+    }
+}
 // HandoverRequired
 #[derive(Clone, Debug)]
 pub struct HandoverRequired {
@@ -4273,9 +4553,8 @@ pub struct HandoverRequired {
     pub source_to_target_transparent_container: SourceToTargetTransparentContainer,
 }
 
-impl AperCodec for HandoverRequired {
-    type Output = HandoverRequired;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverRequired {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -4355,7 +4634,7 @@ impl AperCodec for HandoverRequired {
             source_to_target_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -4441,6 +4720,17 @@ impl AperCodec for HandoverRequired {
     }
 }
 
+impl AperCodec for HandoverRequired {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverRequired::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverRequired"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverRequired"))
+    }
+}
 // HandoverCommand
 #[derive(Clone, Debug)]
 pub struct HandoverCommand {
@@ -4454,9 +4744,8 @@ pub struct HandoverCommand {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for HandoverCommand {
-    type Output = HandoverCommand;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverCommand {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -4530,7 +4819,7 @@ impl AperCodec for HandoverCommand {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -4622,6 +4911,17 @@ impl AperCodec for HandoverCommand {
     }
 }
 
+impl AperCodec for HandoverCommand {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverCommand::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverCommand"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverCommand"))
+    }
+}
 // HandoverPreparationFailure
 #[derive(Clone, Debug)]
 pub struct HandoverPreparationFailure {
@@ -4633,9 +4933,8 @@ pub struct HandoverPreparationFailure {
         Option<TargettoSourceFailureTransparentContainer>,
 }
 
-impl AperCodec for HandoverPreparationFailure {
-    type Output = HandoverPreparationFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverPreparationFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -4686,7 +4985,7 @@ impl AperCodec for HandoverPreparationFailure {
             targetto_source_failure_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -4750,6 +5049,17 @@ impl AperCodec for HandoverPreparationFailure {
     }
 }
 
+impl AperCodec for HandoverPreparationFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverPreparationFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverPreparationFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverPreparationFailure"))
+    }
+}
 // HandoverRequest
 #[derive(Clone, Debug)]
 pub struct HandoverRequest {
@@ -4790,9 +5100,8 @@ pub struct HandoverRequest {
     pub extended_connected_time: Option<ExtendedConnectedTime>,
 }
 
-impl AperCodec for HandoverRequest {
-    type Output = HandoverRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -4983,7 +5292,7 @@ impl AperCodec for HandoverRequest {
             extended_connected_time,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -5323,6 +5632,17 @@ impl AperCodec for HandoverRequest {
     }
 }
 
+impl AperCodec for HandoverRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverRequest"))
+    }
+}
 // HandoverRequestAcknowledge
 #[derive(Clone, Debug)]
 pub struct HandoverRequestAcknowledge {
@@ -5335,9 +5655,8 @@ pub struct HandoverRequestAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for HandoverRequestAcknowledge {
-    type Output = HandoverRequestAcknowledge;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverRequestAcknowledge {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -5403,7 +5722,7 @@ impl AperCodec for HandoverRequestAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -5475,6 +5794,17 @@ impl AperCodec for HandoverRequestAcknowledge {
     }
 }
 
+impl AperCodec for HandoverRequestAcknowledge {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverRequestAcknowledge::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverRequestAcknowledge"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverRequestAcknowledge"))
+    }
+}
 // HandoverFailure
 #[derive(Clone, Debug)]
 pub struct HandoverFailure {
@@ -5485,9 +5815,8 @@ pub struct HandoverFailure {
         Option<TargettoSourceFailureTransparentContainer>,
 }
 
-impl AperCodec for HandoverFailure {
-    type Output = HandoverFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -5532,7 +5861,7 @@ impl AperCodec for HandoverFailure {
             targetto_source_failure_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -5588,6 +5917,17 @@ impl AperCodec for HandoverFailure {
     }
 }
 
+impl AperCodec for HandoverFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverFailure"))
+    }
+}
 // HandoverNotify
 #[derive(Clone, Debug)]
 pub struct HandoverNotify {
@@ -5597,9 +5937,8 @@ pub struct HandoverNotify {
     pub notify_source_ngran_node: Option<NotifySourceNgranNode>,
 }
 
-impl AperCodec for HandoverNotify {
-    type Output = HandoverNotify;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverNotify {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -5642,7 +5981,7 @@ impl AperCodec for HandoverNotify {
             notify_source_ngran_node,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -5696,6 +6035,17 @@ impl AperCodec for HandoverNotify {
     }
 }
 
+impl AperCodec for HandoverNotify {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverNotify::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverNotify"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverNotify"))
+    }
+}
 // PathSwitchRequest
 #[derive(Clone, Debug)]
 pub struct PathSwitchRequest {
@@ -5709,9 +6059,8 @@ pub struct PathSwitchRequest {
     pub rrc_resume_cause: Option<RrcEstablishmentCause>,
 }
 
-impl AperCodec for PathSwitchRequest {
-    type Output = PathSwitchRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PathSwitchRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -5780,7 +6129,7 @@ impl AperCodec for PathSwitchRequest {
             rrc_resume_cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -5861,6 +6210,17 @@ impl AperCodec for PathSwitchRequest {
     }
 }
 
+impl AperCodec for PathSwitchRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PathSwitchRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PathSwitchRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PathSwitchRequest"))
+    }
+}
 // PathSwitchRequestAcknowledge
 #[derive(Clone, Debug)]
 pub struct PathSwitchRequestAcknowledge {
@@ -5892,9 +6252,8 @@ pub struct PathSwitchRequestAcknowledge {
     pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
 }
 
-impl AperCodec for PathSwitchRequestAcknowledge {
-    type Output = PathSwitchRequestAcknowledge;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PathSwitchRequestAcknowledge {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6036,7 +6395,7 @@ impl AperCodec for PathSwitchRequestAcknowledge {
             ue_radio_capability_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6296,6 +6655,17 @@ impl AperCodec for PathSwitchRequestAcknowledge {
     }
 }
 
+impl AperCodec for PathSwitchRequestAcknowledge {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PathSwitchRequestAcknowledge::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PathSwitchRequestAcknowledge"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PathSwitchRequestAcknowledge"))
+    }
+}
 // PathSwitchRequestFailure
 #[derive(Clone, Debug)]
 pub struct PathSwitchRequestFailure {
@@ -6305,9 +6675,8 @@ pub struct PathSwitchRequestFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for PathSwitchRequestFailure {
-    type Output = PathSwitchRequestFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PathSwitchRequestFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6356,7 +6725,7 @@ impl AperCodec for PathSwitchRequestFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6410,6 +6779,17 @@ impl AperCodec for PathSwitchRequestFailure {
     }
 }
 
+impl AperCodec for PathSwitchRequestFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PathSwitchRequestFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PathSwitchRequestFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PathSwitchRequestFailure"))
+    }
+}
 // HandoverCancel
 #[derive(Clone, Debug)]
 pub struct HandoverCancel {
@@ -6418,9 +6798,8 @@ pub struct HandoverCancel {
     pub cause: Cause,
 }
 
-impl AperCodec for HandoverCancel {
-    type Output = HandoverCancel;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverCancel {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6460,7 +6839,7 @@ impl AperCodec for HandoverCancel {
             cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6504,6 +6883,17 @@ impl AperCodec for HandoverCancel {
     }
 }
 
+impl AperCodec for HandoverCancel {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverCancel::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverCancel"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverCancel"))
+    }
+}
 // HandoverCancelAcknowledge
 #[derive(Clone, Debug)]
 pub struct HandoverCancelAcknowledge {
@@ -6512,9 +6902,8 @@ pub struct HandoverCancelAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for HandoverCancelAcknowledge {
-    type Output = HandoverCancelAcknowledge;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverCancelAcknowledge {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6551,7 +6940,7 @@ impl AperCodec for HandoverCancelAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6597,6 +6986,17 @@ impl AperCodec for HandoverCancelAcknowledge {
     }
 }
 
+impl AperCodec for HandoverCancelAcknowledge {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverCancelAcknowledge::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverCancelAcknowledge"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverCancelAcknowledge"))
+    }
+}
 // HandoverSuccess
 #[derive(Clone, Debug)]
 pub struct HandoverSuccess {
@@ -6604,9 +7004,8 @@ pub struct HandoverSuccess {
     pub ran_ue_ngap_id: RanUeNgapId,
 }
 
-impl AperCodec for HandoverSuccess {
-    type Output = HandoverSuccess;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl HandoverSuccess {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6640,7 +7039,7 @@ impl AperCodec for HandoverSuccess {
             ran_ue_ngap_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6676,6 +7075,17 @@ impl AperCodec for HandoverSuccess {
     }
 }
 
+impl AperCodec for HandoverSuccess {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        HandoverSuccess::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverSuccess"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("HandoverSuccess"))
+    }
+}
 // UplinkRanEarlyStatusTransfer
 #[derive(Clone, Debug)]
 pub struct UplinkRanEarlyStatusTransfer {
@@ -6684,9 +7094,8 @@ pub struct UplinkRanEarlyStatusTransfer {
     pub early_status_transfer_transparent_container: EarlyStatusTransferTransparentContainer,
 }
 
-impl AperCodec for UplinkRanEarlyStatusTransfer {
-    type Output = UplinkRanEarlyStatusTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkRanEarlyStatusTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6732,7 +7141,7 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
             early_status_transfer_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6777,6 +7186,17 @@ impl AperCodec for UplinkRanEarlyStatusTransfer {
     }
 }
 
+impl AperCodec for UplinkRanEarlyStatusTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkRanEarlyStatusTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRanEarlyStatusTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRanEarlyStatusTransfer"))
+    }
+}
 // DownlinkRanEarlyStatusTransfer
 #[derive(Clone, Debug)]
 pub struct DownlinkRanEarlyStatusTransfer {
@@ -6785,9 +7205,8 @@ pub struct DownlinkRanEarlyStatusTransfer {
     pub early_status_transfer_transparent_container: EarlyStatusTransferTransparentContainer,
 }
 
-impl AperCodec for DownlinkRanEarlyStatusTransfer {
-    type Output = DownlinkRanEarlyStatusTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkRanEarlyStatusTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6833,7 +7252,7 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
             early_status_transfer_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6878,6 +7297,17 @@ impl AperCodec for DownlinkRanEarlyStatusTransfer {
     }
 }
 
+impl AperCodec for DownlinkRanEarlyStatusTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkRanEarlyStatusTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRanEarlyStatusTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRanEarlyStatusTransfer"))
+    }
+}
 // UplinkRanStatusTransfer
 #[derive(Clone, Debug)]
 pub struct UplinkRanStatusTransfer {
@@ -6886,9 +7316,8 @@ pub struct UplinkRanStatusTransfer {
     pub ran_status_transfer_transparent_container: RanStatusTransferTransparentContainer,
 }
 
-impl AperCodec for UplinkRanStatusTransfer {
-    type Output = UplinkRanStatusTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkRanStatusTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -6934,7 +7363,7 @@ impl AperCodec for UplinkRanStatusTransfer {
             ran_status_transfer_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -6978,6 +7407,17 @@ impl AperCodec for UplinkRanStatusTransfer {
     }
 }
 
+impl AperCodec for UplinkRanStatusTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkRanStatusTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRanStatusTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRanStatusTransfer"))
+    }
+}
 // DownlinkRanStatusTransfer
 #[derive(Clone, Debug)]
 pub struct DownlinkRanStatusTransfer {
@@ -6986,9 +7426,8 @@ pub struct DownlinkRanStatusTransfer {
     pub ran_status_transfer_transparent_container: RanStatusTransferTransparentContainer,
 }
 
-impl AperCodec for DownlinkRanStatusTransfer {
-    type Output = DownlinkRanStatusTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkRanStatusTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -7034,7 +7473,7 @@ impl AperCodec for DownlinkRanStatusTransfer {
             ran_status_transfer_transparent_container,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -7078,6 +7517,17 @@ impl AperCodec for DownlinkRanStatusTransfer {
     }
 }
 
+impl AperCodec for DownlinkRanStatusTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkRanStatusTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRanStatusTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRanStatusTransfer"))
+    }
+}
 // Paging
 #[derive(Clone, Debug)]
 pub struct Paging {
@@ -7096,9 +7546,8 @@ pub struct Paging {
     pub c_emode_brestricted: Option<CEmodeBrestricted>,
 }
 
-impl AperCodec for Paging {
-    type Output = Paging;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl Paging {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -7169,7 +7618,7 @@ impl AperCodec for Paging {
             c_emode_brestricted,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -7315,6 +7764,16 @@ impl AperCodec for Paging {
     }
 }
 
+impl AperCodec for Paging {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        Paging::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Paging"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("Paging"))
+    }
+}
 // InitialUeMessage
 #[derive(Clone, Debug)]
 pub struct InitialUeMessage {
@@ -7336,9 +7795,8 @@ pub struct InitialUeMessage {
     pub npn_access_information: Option<NpnAccessInformation>,
 }
 
-impl AperCodec for InitialUeMessage {
-    type Output = InitialUeMessage;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl InitialUeMessage {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -7425,7 +7883,7 @@ impl AperCodec for InitialUeMessage {
             npn_access_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -7597,6 +8055,17 @@ impl AperCodec for InitialUeMessage {
     }
 }
 
+impl AperCodec for InitialUeMessage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        InitialUeMessage::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialUeMessage"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialUeMessage"))
+    }
+}
 // DownlinkNasTransport
 #[derive(Clone, Debug)]
 pub struct DownlinkNasTransport {
@@ -7620,9 +8089,8 @@ pub struct DownlinkNasTransport {
     pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
 }
 
-impl AperCodec for DownlinkNasTransport {
-    type Output = DownlinkNasTransport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkNasTransport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -7711,7 +8179,7 @@ impl AperCodec for DownlinkNasTransport {
             ue_radio_capability_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -7905,6 +8373,17 @@ impl AperCodec for DownlinkNasTransport {
     }
 }
 
+impl AperCodec for DownlinkNasTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkNasTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkNasTransport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkNasTransport"))
+    }
+}
 // UplinkNasTransport
 #[derive(Clone, Debug)]
 pub struct UplinkNasTransport {
@@ -7917,9 +8396,8 @@ pub struct UplinkNasTransport {
     pub twif_identity_information: Option<Vec<u8>>,
 }
 
-impl AperCodec for UplinkNasTransport {
-    type Output = UplinkNasTransport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkNasTransport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -7983,7 +8461,7 @@ impl AperCodec for UplinkNasTransport {
             twif_identity_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8065,6 +8543,17 @@ impl AperCodec for UplinkNasTransport {
     }
 }
 
+impl AperCodec for UplinkNasTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkNasTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkNasTransport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkNasTransport"))
+    }
+}
 // NasNonDeliveryIndication
 #[derive(Clone, Debug)]
 pub struct NasNonDeliveryIndication {
@@ -8074,9 +8563,8 @@ pub struct NasNonDeliveryIndication {
     pub cause: Cause,
 }
 
-impl AperCodec for NasNonDeliveryIndication {
-    type Output = NasNonDeliveryIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl NasNonDeliveryIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8122,7 +8610,7 @@ impl AperCodec for NasNonDeliveryIndication {
             cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8174,6 +8662,17 @@ impl AperCodec for NasNonDeliveryIndication {
     }
 }
 
+impl AperCodec for NasNonDeliveryIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NasNonDeliveryIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NasNonDeliveryIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NasNonDeliveryIndication"))
+    }
+}
 // RerouteNasRequest
 #[derive(Clone, Debug)]
 pub struct RerouteNasRequest {
@@ -8185,9 +8684,8 @@ pub struct RerouteNasRequest {
     pub source_to_target_amf_information_reroute: Option<SourceToTargetAmfInformationReroute>,
 }
 
-impl AperCodec for RerouteNasRequest {
-    type Output = RerouteNasRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RerouteNasRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8243,7 +8741,7 @@ impl AperCodec for RerouteNasRequest {
             source_to_target_amf_information_reroute,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8317,6 +8815,17 @@ impl AperCodec for RerouteNasRequest {
     }
 }
 
+impl AperCodec for RerouteNasRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RerouteNasRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RerouteNasRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RerouteNasRequest"))
+    }
+}
 // NgSetupRequest
 #[derive(Clone, Debug)]
 pub struct NgSetupRequest {
@@ -8329,9 +8838,8 @@ pub struct NgSetupRequest {
     pub extended_ran_node_name: Option<ExtendedRanNodeName>,
 }
 
-impl AperCodec for NgSetupRequest {
-    type Output = NgSetupRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl NgSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8383,7 +8891,7 @@ impl AperCodec for NgSetupRequest {
             extended_ran_node_name,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8467,6 +8975,17 @@ impl AperCodec for NgSetupRequest {
     }
 }
 
+impl AperCodec for NgSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgSetupRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgSetupRequest"))
+    }
+}
 // NgSetupResponse
 #[derive(Clone, Debug)]
 pub struct NgSetupResponse {
@@ -8480,9 +8999,8 @@ pub struct NgSetupResponse {
     pub extended_amf_name: Option<ExtendedAmfName>,
 }
 
-impl AperCodec for NgSetupResponse {
-    type Output = NgSetupResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl NgSetupResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8540,7 +9058,7 @@ impl AperCodec for NgSetupResponse {
             extended_amf_name,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8632,6 +9150,17 @@ impl AperCodec for NgSetupResponse {
     }
 }
 
+impl AperCodec for NgSetupResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgSetupResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgSetupResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgSetupResponse"))
+    }
+}
 // NgSetupFailure
 #[derive(Clone, Debug)]
 pub struct NgSetupFailure {
@@ -8640,9 +9169,8 @@ pub struct NgSetupFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for NgSetupFailure {
-    type Output = NgSetupFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl NgSetupFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8676,7 +9204,7 @@ impl AperCodec for NgSetupFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8724,6 +9252,17 @@ impl AperCodec for NgSetupFailure {
     }
 }
 
+impl AperCodec for NgSetupFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgSetupFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgSetupFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgSetupFailure"))
+    }
+}
 // RanConfigurationUpdate
 #[derive(Clone, Debug)]
 pub struct RanConfigurationUpdate {
@@ -8736,9 +9275,8 @@ pub struct RanConfigurationUpdate {
     pub extended_ran_node_name: Option<ExtendedRanNodeName>,
 }
 
-impl AperCodec for RanConfigurationUpdate {
-    type Output = RanConfigurationUpdate;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RanConfigurationUpdate {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8785,7 +9323,7 @@ impl AperCodec for RanConfigurationUpdate {
             extended_ran_node_name,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8875,15 +9413,25 @@ impl AperCodec for RanConfigurationUpdate {
     }
 }
 
+impl AperCodec for RanConfigurationUpdate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RanConfigurationUpdate::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanConfigurationUpdate"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanConfigurationUpdate"))
+    }
+}
 // RanConfigurationUpdateAcknowledge
 #[derive(Clone, Debug)]
 pub struct RanConfigurationUpdateAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for RanConfigurationUpdateAcknowledge {
-    type Output = RanConfigurationUpdateAcknowledge;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RanConfigurationUpdateAcknowledge {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8908,7 +9456,7 @@ impl AperCodec for RanConfigurationUpdateAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -8938,6 +9486,17 @@ impl AperCodec for RanConfigurationUpdateAcknowledge {
     }
 }
 
+impl AperCodec for RanConfigurationUpdateAcknowledge {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RanConfigurationUpdateAcknowledge::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanConfigurationUpdateAcknowledge"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanConfigurationUpdateAcknowledge"))
+    }
+}
 // RanConfigurationUpdateFailure
 #[derive(Clone, Debug)]
 pub struct RanConfigurationUpdateFailure {
@@ -8946,9 +9505,8 @@ pub struct RanConfigurationUpdateFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for RanConfigurationUpdateFailure {
-    type Output = RanConfigurationUpdateFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl RanConfigurationUpdateFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -8982,7 +9540,7 @@ impl AperCodec for RanConfigurationUpdateFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9030,6 +9588,17 @@ impl AperCodec for RanConfigurationUpdateFailure {
     }
 }
 
+impl AperCodec for RanConfigurationUpdateFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        RanConfigurationUpdateFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanConfigurationUpdateFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanConfigurationUpdateFailure"))
+    }
+}
 // AmfConfigurationUpdate
 #[derive(Clone, Debug)]
 pub struct AmfConfigurationUpdate {
@@ -9043,9 +9612,8 @@ pub struct AmfConfigurationUpdate {
     pub extended_amf_name: Option<ExtendedAmfName>,
 }
 
-impl AperCodec for AmfConfigurationUpdate {
-    type Output = AmfConfigurationUpdate;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl AmfConfigurationUpdate {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9100,7 +9668,7 @@ impl AperCodec for AmfConfigurationUpdate {
             extended_amf_name,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9200,6 +9768,17 @@ impl AperCodec for AmfConfigurationUpdate {
     }
 }
 
+impl AperCodec for AmfConfigurationUpdate {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AmfConfigurationUpdate::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfConfigurationUpdate"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfConfigurationUpdate"))
+    }
+}
 // AmfConfigurationUpdateAcknowledge
 #[derive(Clone, Debug)]
 pub struct AmfConfigurationUpdateAcknowledge {
@@ -9208,9 +9787,8 @@ pub struct AmfConfigurationUpdateAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for AmfConfigurationUpdateAcknowledge {
-    type Output = AmfConfigurationUpdateAcknowledge;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl AmfConfigurationUpdateAcknowledge {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9246,7 +9824,7 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9296,6 +9874,17 @@ impl AperCodec for AmfConfigurationUpdateAcknowledge {
     }
 }
 
+impl AperCodec for AmfConfigurationUpdateAcknowledge {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AmfConfigurationUpdateAcknowledge::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfConfigurationUpdateAcknowledge"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfConfigurationUpdateAcknowledge"))
+    }
+}
 // AmfConfigurationUpdateFailure
 #[derive(Clone, Debug)]
 pub struct AmfConfigurationUpdateFailure {
@@ -9304,9 +9893,8 @@ pub struct AmfConfigurationUpdateFailure {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for AmfConfigurationUpdateFailure {
-    type Output = AmfConfigurationUpdateFailure;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl AmfConfigurationUpdateFailure {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9340,7 +9928,7 @@ impl AperCodec for AmfConfigurationUpdateFailure {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9388,15 +9976,25 @@ impl AperCodec for AmfConfigurationUpdateFailure {
     }
 }
 
+impl AperCodec for AmfConfigurationUpdateFailure {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AmfConfigurationUpdateFailure::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfConfigurationUpdateFailure"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfConfigurationUpdateFailure"))
+    }
+}
 // AmfStatusIndication
 #[derive(Clone, Debug)]
 pub struct AmfStatusIndication {
     pub unavailable_guami_list: UnavailableGuamiList,
 }
 
-impl AperCodec for AmfStatusIndication {
-    type Output = AmfStatusIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl AmfStatusIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9424,7 +10022,7 @@ impl AperCodec for AmfStatusIndication {
             unavailable_guami_list,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9452,6 +10050,17 @@ impl AperCodec for AmfStatusIndication {
     }
 }
 
+impl AperCodec for AmfStatusIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AmfStatusIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfStatusIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfStatusIndication"))
+    }
+}
 // NgReset
 #[derive(Clone, Debug)]
 pub struct NgReset {
@@ -9459,9 +10068,8 @@ pub struct NgReset {
     pub reset_type: ResetType,
 }
 
-impl AperCodec for NgReset {
-    type Output = NgReset;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl NgReset {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9492,7 +10100,7 @@ impl AperCodec for NgReset {
         )))?;
         Ok(Self { cause, reset_type })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9528,6 +10136,16 @@ impl AperCodec for NgReset {
     }
 }
 
+impl AperCodec for NgReset {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgReset::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NgReset"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgReset"))
+    }
+}
 // NgResetAcknowledge
 #[derive(Clone, Debug)]
 pub struct NgResetAcknowledge {
@@ -9535,9 +10153,8 @@ pub struct NgResetAcknowledge {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for NgResetAcknowledge {
-    type Output = NgResetAcknowledge;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl NgResetAcknowledge {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9570,7 +10187,7 @@ impl AperCodec for NgResetAcknowledge {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9610,6 +10227,17 @@ impl AperCodec for NgResetAcknowledge {
     }
 }
 
+impl AperCodec for NgResetAcknowledge {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgResetAcknowledge::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgResetAcknowledge"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgResetAcknowledge"))
+    }
+}
 // ErrorIndication
 #[derive(Clone, Debug)]
 pub struct ErrorIndication {
@@ -9620,9 +10248,8 @@ pub struct ErrorIndication {
     pub five_g_s_tmsi: Option<FiveGSTmsi>,
 }
 
-impl AperCodec for ErrorIndication {
-    type Output = ErrorIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl ErrorIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9659,7 +10286,7 @@ impl AperCodec for ErrorIndication {
             five_g_s_tmsi,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9729,6 +10356,17 @@ impl AperCodec for ErrorIndication {
     }
 }
 
+impl AperCodec for ErrorIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        ErrorIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ErrorIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ErrorIndication"))
+    }
+}
 // OverloadStart
 #[derive(Clone, Debug)]
 pub struct OverloadStart {
@@ -9737,9 +10375,8 @@ pub struct OverloadStart {
     pub overload_start_nssai_list: Option<OverloadStartNssaiList>,
 }
 
-impl AperCodec for OverloadStart {
-    type Output = OverloadStart;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl OverloadStart {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9774,7 +10411,7 @@ impl AperCodec for OverloadStart {
             overload_start_nssai_list,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9824,13 +10461,23 @@ impl AperCodec for OverloadStart {
     }
 }
 
+impl AperCodec for OverloadStart {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        OverloadStart::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("OverloadStart"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("OverloadStart"))
+    }
+}
 // OverloadStop
 #[derive(Clone, Debug)]
 pub struct OverloadStop {}
 
-impl AperCodec for OverloadStop {
-    type Output = OverloadStop;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl OverloadStop {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9850,7 +10497,7 @@ impl AperCodec for OverloadStop {
         }
         Ok(Self {})
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9870,6 +10517,16 @@ impl AperCodec for OverloadStop {
     }
 }
 
+impl AperCodec for OverloadStop {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        OverloadStop::decode_inner(data).map_err(|e: AperCodecError| e.push_context("OverloadStop"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("OverloadStop"))
+    }
+}
 // UplinkRanConfigurationTransfer
 #[derive(Clone, Debug)]
 pub struct UplinkRanConfigurationTransfer {
@@ -9878,9 +10535,8 @@ pub struct UplinkRanConfigurationTransfer {
     pub intersystem_son_configuration_transfer_ul: Option<IntersystemSonConfigurationTransfer>,
 }
 
-impl AperCodec for UplinkRanConfigurationTransfer {
-    type Output = UplinkRanConfigurationTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkRanConfigurationTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -9919,7 +10575,7 @@ impl AperCodec for UplinkRanConfigurationTransfer {
             intersystem_son_configuration_transfer_ul,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -9969,6 +10625,17 @@ impl AperCodec for UplinkRanConfigurationTransfer {
     }
 }
 
+impl AperCodec for UplinkRanConfigurationTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkRanConfigurationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRanConfigurationTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRanConfigurationTransfer"))
+    }
+}
 // DownlinkRanConfigurationTransfer
 #[derive(Clone, Debug)]
 pub struct DownlinkRanConfigurationTransfer {
@@ -9977,9 +10644,8 @@ pub struct DownlinkRanConfigurationTransfer {
     pub intersystem_son_configuration_transfer_dl: Option<IntersystemSonConfigurationTransfer>,
 }
 
-impl AperCodec for DownlinkRanConfigurationTransfer {
-    type Output = DownlinkRanConfigurationTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkRanConfigurationTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10018,7 +10684,7 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
             intersystem_son_configuration_transfer_dl,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10068,6 +10734,17 @@ impl AperCodec for DownlinkRanConfigurationTransfer {
     }
 }
 
+impl AperCodec for DownlinkRanConfigurationTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkRanConfigurationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRanConfigurationTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRanConfigurationTransfer"))
+    }
+}
 // WriteReplaceWarningRequest
 #[derive(Clone, Debug)]
 pub struct WriteReplaceWarningRequest {
@@ -10084,9 +10761,8 @@ pub struct WriteReplaceWarningRequest {
     pub warning_area_coordinates: Option<WarningAreaCoordinates>,
 }
 
-impl AperCodec for WriteReplaceWarningRequest {
-    type Output = WriteReplaceWarningRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl WriteReplaceWarningRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10160,7 +10836,7 @@ impl AperCodec for WriteReplaceWarningRequest {
             warning_area_coordinates,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10282,6 +10958,17 @@ impl AperCodec for WriteReplaceWarningRequest {
     }
 }
 
+impl AperCodec for WriteReplaceWarningRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        WriteReplaceWarningRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("WriteReplaceWarningRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("WriteReplaceWarningRequest"))
+    }
+}
 // WriteReplaceWarningResponse
 #[derive(Clone, Debug)]
 pub struct WriteReplaceWarningResponse {
@@ -10291,9 +10978,8 @@ pub struct WriteReplaceWarningResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for WriteReplaceWarningResponse {
-    type Output = WriteReplaceWarningResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl WriteReplaceWarningResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10335,7 +11021,7 @@ impl AperCodec for WriteReplaceWarningResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10391,6 +11077,17 @@ impl AperCodec for WriteReplaceWarningResponse {
     }
 }
 
+impl AperCodec for WriteReplaceWarningResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        WriteReplaceWarningResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("WriteReplaceWarningResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("WriteReplaceWarningResponse"))
+    }
+}
 // PwsCancelRequest
 #[derive(Clone, Debug)]
 pub struct PwsCancelRequest {
@@ -10400,9 +11097,8 @@ pub struct PwsCancelRequest {
     pub cancel_all_warning_messages: Option<CancelAllWarningMessages>,
 }
 
-impl AperCodec for PwsCancelRequest {
-    type Output = PwsCancelRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PwsCancelRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10442,7 +11138,7 @@ impl AperCodec for PwsCancelRequest {
             cancel_all_warning_messages,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10498,6 +11194,17 @@ impl AperCodec for PwsCancelRequest {
     }
 }
 
+impl AperCodec for PwsCancelRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PwsCancelRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsCancelRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsCancelRequest"))
+    }
+}
 // PwsCancelResponse
 #[derive(Clone, Debug)]
 pub struct PwsCancelResponse {
@@ -10507,9 +11214,8 @@ pub struct PwsCancelResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for PwsCancelResponse {
-    type Output = PwsCancelResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PwsCancelResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10551,7 +11257,7 @@ impl AperCodec for PwsCancelResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10607,6 +11313,17 @@ impl AperCodec for PwsCancelResponse {
     }
 }
 
+impl AperCodec for PwsCancelResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PwsCancelResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsCancelResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsCancelResponse"))
+    }
+}
 // PwsRestartIndication
 #[derive(Clone, Debug)]
 pub struct PwsRestartIndication {
@@ -10616,9 +11333,8 @@ pub struct PwsRestartIndication {
     pub emergency_area_id_list_for_restart: Option<EmergencyAreaIdListForRestart>,
 }
 
-impl AperCodec for PwsRestartIndication {
-    type Output = PwsRestartIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PwsRestartIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10664,7 +11380,7 @@ impl AperCodec for PwsRestartIndication {
             emergency_area_id_list_for_restart,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10718,6 +11434,17 @@ impl AperCodec for PwsRestartIndication {
     }
 }
 
+impl AperCodec for PwsRestartIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PwsRestartIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsRestartIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsRestartIndication"))
+    }
+}
 // PwsFailureIndication
 #[derive(Clone, Debug)]
 pub struct PwsFailureIndication {
@@ -10725,9 +11452,8 @@ pub struct PwsFailureIndication {
     pub global_ran_node_id: GlobalRanNodeId,
 }
 
-impl AperCodec for PwsFailureIndication {
-    type Output = PwsFailureIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl PwsFailureIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10761,7 +11487,7 @@ impl AperCodec for PwsFailureIndication {
             global_ran_node_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10797,6 +11523,17 @@ impl AperCodec for PwsFailureIndication {
     }
 }
 
+impl AperCodec for PwsFailureIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PwsFailureIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsFailureIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PwsFailureIndication"))
+    }
+}
 // DownlinkUeAssociatedNrpPaTransport
 #[derive(Clone, Debug)]
 pub struct DownlinkUeAssociatedNrpPaTransport {
@@ -10806,9 +11543,8 @@ pub struct DownlinkUeAssociatedNrpPaTransport {
     pub nrp_pa_pdu: NrpPaPdu,
 }
 
-impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
-    type Output = DownlinkUeAssociatedNrpPaTransport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkUeAssociatedNrpPaTransport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10854,7 +11590,7 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
             nrp_pa_pdu,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -10906,6 +11642,17 @@ impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
     }
 }
 
+impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkUeAssociatedNrpPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkUeAssociatedNrpPaTransport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkUeAssociatedNrpPaTransport"))
+    }
+}
 // UplinkUeAssociatedNrpPaTransport
 #[derive(Clone, Debug)]
 pub struct UplinkUeAssociatedNrpPaTransport {
@@ -10915,9 +11662,8 @@ pub struct UplinkUeAssociatedNrpPaTransport {
     pub nrp_pa_pdu: NrpPaPdu,
 }
 
-impl AperCodec for UplinkUeAssociatedNrpPaTransport {
-    type Output = UplinkUeAssociatedNrpPaTransport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkUeAssociatedNrpPaTransport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -10963,7 +11709,7 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
             nrp_pa_pdu,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11015,6 +11761,17 @@ impl AperCodec for UplinkUeAssociatedNrpPaTransport {
     }
 }
 
+impl AperCodec for UplinkUeAssociatedNrpPaTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkUeAssociatedNrpPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkUeAssociatedNrpPaTransport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkUeAssociatedNrpPaTransport"))
+    }
+}
 // DownlinkNonUeAssociatedNrpPaTransport
 #[derive(Clone, Debug)]
 pub struct DownlinkNonUeAssociatedNrpPaTransport {
@@ -11022,9 +11779,8 @@ pub struct DownlinkNonUeAssociatedNrpPaTransport {
     pub nrp_pa_pdu: NrpPaPdu,
 }
 
-impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
-    type Output = DownlinkNonUeAssociatedNrpPaTransport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkNonUeAssociatedNrpPaTransport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11058,7 +11814,7 @@ impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
             nrp_pa_pdu,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11094,6 +11850,17 @@ impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
     }
 }
 
+impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkNonUeAssociatedNrpPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkNonUeAssociatedNrpPaTransport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkNonUeAssociatedNrpPaTransport"))
+    }
+}
 // UplinkNonUeAssociatedNrpPaTransport
 #[derive(Clone, Debug)]
 pub struct UplinkNonUeAssociatedNrpPaTransport {
@@ -11101,9 +11868,8 @@ pub struct UplinkNonUeAssociatedNrpPaTransport {
     pub nrp_pa_pdu: NrpPaPdu,
 }
 
-impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
-    type Output = UplinkNonUeAssociatedNrpPaTransport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkNonUeAssociatedNrpPaTransport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11137,7 +11903,7 @@ impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
             nrp_pa_pdu,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11173,6 +11939,17 @@ impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
     }
 }
 
+impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkNonUeAssociatedNrpPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkNonUeAssociatedNrpPaTransport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkNonUeAssociatedNrpPaTransport"))
+    }
+}
 // TraceStart
 #[derive(Clone, Debug)]
 pub struct TraceStart {
@@ -11181,9 +11958,8 @@ pub struct TraceStart {
     pub trace_activation: TraceActivation,
 }
 
-impl AperCodec for TraceStart {
-    type Output = TraceStart;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl TraceStart {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11223,7 +11999,7 @@ impl AperCodec for TraceStart {
             trace_activation,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11267,6 +12043,16 @@ impl AperCodec for TraceStart {
     }
 }
 
+impl AperCodec for TraceStart {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        TraceStart::decode_inner(data).map_err(|e: AperCodecError| e.push_context("TraceStart"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("TraceStart"))
+    }
+}
 // TraceFailureIndication
 #[derive(Clone, Debug)]
 pub struct TraceFailureIndication {
@@ -11276,9 +12062,8 @@ pub struct TraceFailureIndication {
     pub cause: Cause,
 }
 
-impl AperCodec for TraceFailureIndication {
-    type Output = TraceFailureIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl TraceFailureIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11324,7 +12109,7 @@ impl AperCodec for TraceFailureIndication {
             cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11376,6 +12161,17 @@ impl AperCodec for TraceFailureIndication {
     }
 }
 
+impl AperCodec for TraceFailureIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        TraceFailureIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("TraceFailureIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("TraceFailureIndication"))
+    }
+}
 // DeactivateTrace
 #[derive(Clone, Debug)]
 pub struct DeactivateTrace {
@@ -11384,9 +12180,8 @@ pub struct DeactivateTrace {
     pub ngran_trace_id: NgranTraceId,
 }
 
-impl AperCodec for DeactivateTrace {
-    type Output = DeactivateTrace;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DeactivateTrace {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11426,7 +12221,7 @@ impl AperCodec for DeactivateTrace {
             ngran_trace_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11470,6 +12265,17 @@ impl AperCodec for DeactivateTrace {
     }
 }
 
+impl AperCodec for DeactivateTrace {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DeactivateTrace::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DeactivateTrace"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DeactivateTrace"))
+    }
+}
 // CellTrafficTrace
 #[derive(Clone, Debug)]
 pub struct CellTrafficTrace {
@@ -11482,9 +12288,8 @@ pub struct CellTrafficTrace {
     pub trace_collection_entity_uri: Option<UriAddress>,
 }
 
-impl AperCodec for CellTrafficTrace {
-    type Output = CellTrafficTrace;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl CellTrafficTrace {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11545,7 +12350,7 @@ impl AperCodec for CellTrafficTrace {
             trace_collection_entity_uri,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11625,6 +12430,17 @@ impl AperCodec for CellTrafficTrace {
     }
 }
 
+impl AperCodec for CellTrafficTrace {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        CellTrafficTrace::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CellTrafficTrace"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CellTrafficTrace"))
+    }
+}
 // LocationReportingControl
 #[derive(Clone, Debug)]
 pub struct LocationReportingControl {
@@ -11633,9 +12449,8 @@ pub struct LocationReportingControl {
     pub location_reporting_request_type: LocationReportingRequestType,
 }
 
-impl AperCodec for LocationReportingControl {
-    type Output = LocationReportingControl;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl LocationReportingControl {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11679,7 +12494,7 @@ impl AperCodec for LocationReportingControl {
             location_reporting_request_type,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11723,6 +12538,17 @@ impl AperCodec for LocationReportingControl {
     }
 }
 
+impl AperCodec for LocationReportingControl {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        LocationReportingControl::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LocationReportingControl"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LocationReportingControl"))
+    }
+}
 // LocationReportingFailureIndication
 #[derive(Clone, Debug)]
 pub struct LocationReportingFailureIndication {
@@ -11731,9 +12557,8 @@ pub struct LocationReportingFailureIndication {
     pub cause: Cause,
 }
 
-impl AperCodec for LocationReportingFailureIndication {
-    type Output = LocationReportingFailureIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl LocationReportingFailureIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11773,7 +12598,7 @@ impl AperCodec for LocationReportingFailureIndication {
             cause,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11817,6 +12642,17 @@ impl AperCodec for LocationReportingFailureIndication {
     }
 }
 
+impl AperCodec for LocationReportingFailureIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        LocationReportingFailureIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LocationReportingFailureIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LocationReportingFailureIndication"))
+    }
+}
 // LocationReport
 #[derive(Clone, Debug)]
 pub struct LocationReport {
@@ -11827,9 +12663,8 @@ pub struct LocationReport {
     pub location_reporting_request_type: LocationReportingRequestType,
 }
 
-impl AperCodec for LocationReport {
-    type Output = LocationReport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl LocationReport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11885,7 +12720,7 @@ impl AperCodec for LocationReport {
             location_reporting_request_type,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -11947,6 +12782,17 @@ impl AperCodec for LocationReport {
     }
 }
 
+impl AperCodec for LocationReport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        LocationReport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LocationReport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LocationReport"))
+    }
+}
 // UetnlaBindingReleaseRequest
 #[derive(Clone, Debug)]
 pub struct UetnlaBindingReleaseRequest {
@@ -11954,9 +12800,8 @@ pub struct UetnlaBindingReleaseRequest {
     pub ran_ue_ngap_id: RanUeNgapId,
 }
 
-impl AperCodec for UetnlaBindingReleaseRequest {
-    type Output = UetnlaBindingReleaseRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UetnlaBindingReleaseRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -11990,7 +12835,7 @@ impl AperCodec for UetnlaBindingReleaseRequest {
             ran_ue_ngap_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12026,6 +12871,17 @@ impl AperCodec for UetnlaBindingReleaseRequest {
     }
 }
 
+impl AperCodec for UetnlaBindingReleaseRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UetnlaBindingReleaseRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UetnlaBindingReleaseRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UetnlaBindingReleaseRequest"))
+    }
+}
 // UeRadioCapabilityInfoIndication
 #[derive(Clone, Debug)]
 pub struct UeRadioCapabilityInfoIndication {
@@ -12036,9 +12892,8 @@ pub struct UeRadioCapabilityInfoIndication {
     pub ue_radio_capability_eutra_format: Option<UeRadioCapability>,
 }
 
-impl AperCodec for UeRadioCapabilityInfoIndication {
-    type Output = UeRadioCapabilityInfoIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeRadioCapabilityInfoIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12086,7 +12941,7 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
             ue_radio_capability_eutra_format,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12150,6 +13005,17 @@ impl AperCodec for UeRadioCapabilityInfoIndication {
     }
 }
 
+impl AperCodec for UeRadioCapabilityInfoIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeRadioCapabilityInfoIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityInfoIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityInfoIndication"))
+    }
+}
 // UeRadioCapabilityCheckRequest
 #[derive(Clone, Debug)]
 pub struct UeRadioCapabilityCheckRequest {
@@ -12159,9 +13025,8 @@ pub struct UeRadioCapabilityCheckRequest {
     pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
 }
 
-impl AperCodec for UeRadioCapabilityCheckRequest {
-    type Output = UeRadioCapabilityCheckRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeRadioCapabilityCheckRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12201,7 +13066,7 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
             ue_radio_capability_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12257,6 +13122,17 @@ impl AperCodec for UeRadioCapabilityCheckRequest {
     }
 }
 
+impl AperCodec for UeRadioCapabilityCheckRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeRadioCapabilityCheckRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityCheckRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityCheckRequest"))
+    }
+}
 // UeRadioCapabilityCheckResponse
 #[derive(Clone, Debug)]
 pub struct UeRadioCapabilityCheckResponse {
@@ -12266,9 +13142,8 @@ pub struct UeRadioCapabilityCheckResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeRadioCapabilityCheckResponse {
-    type Output = UeRadioCapabilityCheckResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeRadioCapabilityCheckResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12311,7 +13186,7 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12365,7 +13240,17 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
     }
 }
 
-// PrivateMessage - omitted
+impl AperCodec for UeRadioCapabilityCheckResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeRadioCapabilityCheckResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityCheckResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityCheckResponse"))
+    }
+} // PrivateMessage - omitted
 
 // SecondaryRatDataUsageReport
 #[derive(Clone, Debug)]
@@ -12377,9 +13262,8 @@ pub struct SecondaryRatDataUsageReport {
     pub user_location_information: Option<UserLocationInformation>,
 }
 
-impl AperCodec for SecondaryRatDataUsageReport {
-    type Output = SecondaryRatDataUsageReport;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl SecondaryRatDataUsageReport {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12431,7 +13315,7 @@ impl AperCodec for SecondaryRatDataUsageReport {
             user_location_information,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12496,15 +13380,25 @@ impl AperCodec for SecondaryRatDataUsageReport {
     }
 }
 
+impl AperCodec for SecondaryRatDataUsageReport {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SecondaryRatDataUsageReport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SecondaryRatDataUsageReport"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SecondaryRatDataUsageReport"))
+    }
+}
 // UplinkRimInformationTransfer
 #[derive(Clone, Debug)]
 pub struct UplinkRimInformationTransfer {
     pub rim_information_transfer: Option<RimInformationTransfer>,
 }
 
-impl AperCodec for UplinkRimInformationTransfer {
-    type Output = UplinkRimInformationTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UplinkRimInformationTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12529,7 +13423,7 @@ impl AperCodec for UplinkRimInformationTransfer {
             rim_information_transfer,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12559,15 +13453,25 @@ impl AperCodec for UplinkRimInformationTransfer {
     }
 }
 
+impl AperCodec for UplinkRimInformationTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UplinkRimInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRimInformationTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkRimInformationTransfer"))
+    }
+}
 // DownlinkRimInformationTransfer
 #[derive(Clone, Debug)]
 pub struct DownlinkRimInformationTransfer {
     pub rim_information_transfer: Option<RimInformationTransfer>,
 }
 
-impl AperCodec for DownlinkRimInformationTransfer {
-    type Output = DownlinkRimInformationTransfer;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl DownlinkRimInformationTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12592,7 +13496,7 @@ impl AperCodec for DownlinkRimInformationTransfer {
             rim_information_transfer,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12622,6 +13526,17 @@ impl AperCodec for DownlinkRimInformationTransfer {
     }
 }
 
+impl AperCodec for DownlinkRimInformationTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        DownlinkRimInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRimInformationTransfer"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkRimInformationTransfer"))
+    }
+}
 // ConnectionEstablishmentIndication
 #[derive(Clone, Debug)]
 pub struct ConnectionEstablishmentIndication {
@@ -12639,9 +13554,8 @@ pub struct ConnectionEstablishmentIndication {
     pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
 }
 
-impl AperCodec for ConnectionEstablishmentIndication {
-    type Output = ConnectionEstablishmentIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl ConnectionEstablishmentIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12707,7 +13621,7 @@ impl AperCodec for ConnectionEstablishmentIndication {
             ue_radio_capability_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12843,15 +13757,25 @@ impl AperCodec for ConnectionEstablishmentIndication {
     }
 }
 
+impl AperCodec for ConnectionEstablishmentIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        ConnectionEstablishmentIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ConnectionEstablishmentIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ConnectionEstablishmentIndication"))
+    }
+}
 // UeRadioCapabilityIdMappingRequest
 #[derive(Clone, Debug)]
 pub struct UeRadioCapabilityIdMappingRequest {
     pub ue_radio_capability_id: UeRadioCapabilityId,
 }
 
-impl AperCodec for UeRadioCapabilityIdMappingRequest {
-    type Output = UeRadioCapabilityIdMappingRequest;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeRadioCapabilityIdMappingRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12879,7 +13803,7 @@ impl AperCodec for UeRadioCapabilityIdMappingRequest {
             ue_radio_capability_id,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -12907,6 +13831,17 @@ impl AperCodec for UeRadioCapabilityIdMappingRequest {
     }
 }
 
+impl AperCodec for UeRadioCapabilityIdMappingRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeRadioCapabilityIdMappingRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityIdMappingRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityIdMappingRequest"))
+    }
+}
 // UeRadioCapabilityIdMappingResponse
 #[derive(Clone, Debug)]
 pub struct UeRadioCapabilityIdMappingResponse {
@@ -12915,9 +13850,8 @@ pub struct UeRadioCapabilityIdMappingResponse {
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
 }
 
-impl AperCodec for UeRadioCapabilityIdMappingResponse {
-    type Output = UeRadioCapabilityIdMappingResponse;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl UeRadioCapabilityIdMappingResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -12954,7 +13888,7 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
             criticality_diagnostics,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -13000,6 +13934,17 @@ impl AperCodec for UeRadioCapabilityIdMappingResponse {
     }
 }
 
+impl AperCodec for UeRadioCapabilityIdMappingResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        UeRadioCapabilityIdMappingResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityIdMappingResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityIdMappingResponse"))
+    }
+}
 // AmfcpRelocationIndication
 #[derive(Clone, Debug)]
 pub struct AmfcpRelocationIndication {
@@ -13009,9 +13954,8 @@ pub struct AmfcpRelocationIndication {
     pub allowed_nssai: Option<AllowedNssai>,
 }
 
-impl AperCodec for AmfcpRelocationIndication {
-    type Output = AmfcpRelocationIndication;
-    fn decode(data: &mut AperCodecData) -> Result<Self::Output, AperCodecError> {
+impl AmfcpRelocationIndication {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
@@ -13051,7 +13995,7 @@ impl AperCodec for AmfcpRelocationIndication {
             allowed_nssai,
         })
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut num_ies = 0;
         let ies = &mut AperCodecData::new();
 
@@ -13104,5 +14048,17 @@ impl AperCodec for AmfcpRelocationIndication {
         )?;
         data.append_aligned(container);
         Ok(())
+    }
+}
+
+impl AperCodec for AmfcpRelocationIndication {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AmfcpRelocationIndication::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfcpRelocationIndication"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("AmfcpRelocationIndication"))
     }
 }

@@ -27,7 +27,7 @@ where
     }
 
     async fn handle_message(&self, message: Message, tnla_id: u32, logger: &Logger) {
-        trace!(logger, "Got bytes {:?}", message);
+        trace!(logger, "TNLA {} receives bytes {:?}", tnla_id, message);
         match self.codec.from_wire(message) {
             Ok(converted) => {
                 trace!(logger, "Successful decode");
