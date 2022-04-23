@@ -6,8 +6,8 @@ members = [
     "coordinator",
     "common",
     "integration-tests",
-    "also-sctp",
-    "also-net",
-    "f1ap",
-    "pdu-convert-derive"
+    "sctp",
+    "net",
+    "ngap",
+    "f1ap"
 ]

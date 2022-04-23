@@ -1,12 +1,12 @@
 [package]
-name = "also-net"
+name = "net"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sctp = { package = "also-sctp", path = "../also-sctp" }
+sctp = { path = "../sctp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.51"
 slog = "2.7.0"
@@ -23,5 +23,7 @@ errno = "0.2.8"
 stop-token = "0.6.1"
 async-stream = "0.3.2"
 futures-core = "0.3.19"
-serde = "1.0.133"
-serde_json = "1.0.74"
+#asn1-codecs = { path = "../../hampi/codecs" }
+#asn1-codecs = { git = "https://github.com/nplrkn/hampi/", branch = "fix-range-256-int"  }
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch = "all-fixes" }
+

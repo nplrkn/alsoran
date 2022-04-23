@@ -63,6 +63,7 @@ where
     type Pdu = P;
     async fn send_pdu(&self, pdu: P, logger: &Logger) -> Result<()> {
         let message: Vec<u8> = self.codec.to_wire(pdu)?;
+        trace!(logger, "Sending bytes {:?}", message);
         self.tnla_pool.send_message(message, logger).await
     }
 }

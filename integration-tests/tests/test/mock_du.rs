@@ -1,10 +1,10 @@
-use also_net::{ClientTransportProvider, TransportProvider};
-use also_net::{JsonCodec, SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use anyhow::{anyhow, Result};
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
+use net::{Asn1PerCodec, SctpTransportProvider, TnlaEvent, TnlaEventHandler};
+use net::{ClientTransportProvider, TransportProvider};
 use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};
 
@@ -17,7 +17,7 @@ const F1AP_SCTP_PPID: u32 = 62;
 pub struct MockDu {
     pub stop_token: StopToken,
     pub receiver: Receiver<Option<F1apPdu>>,
-    pub sender: SctpTransportProvider<JsonCodec<F1apPdu>, F1apPdu>,
+    pub sender: SctpTransportProvider<Asn1PerCodec<F1apPdu>, F1apPdu>,
     internal_sender: Sender<Option<F1apPdu>>,
     logger: Logger,
 }
@@ -27,7 +27,7 @@ impl MockDu {
         let logger = logger.new(o!("du" => 1));
         let (internal_sender, receiver) = async_channel::unbounded();
         let stop_source = StopSource::new();
-        let sender = SctpTransportProvider::new(F1AP_SCTP_PPID, JsonCodec::new());
+        let sender = SctpTransportProvider::new(F1AP_SCTP_PPID, Asn1PerCodec::new());
 
         (
             MockDu {
@@ -65,57 +65,19 @@ impl MockDu {
     }
 
     pub async fn perform_f1_setup(&self) -> Result<()> {
-        // From the ASN.1, TransactionID, GNB-DU-ID and RRC-Version are mandatory.
-        // F1SetupRequestIEs F1AP-PROTOCOL-IES ::= {
-        //     { ID id-TransactionID					CRITICALITY reject	TYPE TransactionID						PRESENCE mandatory	}|
-        //     { ID id-gNB-DU-ID						CRITICALITY reject	TYPE GNB-DU-ID							PRESENCE mandatory	}|
-        //     { ID id-gNB-DU-Name						CRITICALITY ignore	TYPE GNB-DU-Name						PRESENCE optional	}|
-        //     { ID id-gNB-DU-Served-Cells-List		CRITICALITY reject	TYPE GNB-DU-Served-Cells-List			PRESENCE optional	}|
-        //     { ID id-GNB-DU-RRC-Version				CRITICALITY reject	TYPE RRC-Version						PRESENCE mandatory	}|
-        //     { ID id-Transport-Layer-Address-Info	CRITICALITY ignore	TYPE Transport-Layer-Address-Info		PRESENCE optional	}|
-        //     { ID id-BAPAddress						CRITICALITY ignore	TYPE BAPAddress							PRESENCE optional	}|
-        //     { ID id-Extended-GNB-CU-Name			CRITICALITY ignore	TYPE Extended-GNB-CU-Name				PRESENCE optional	},
-        //     ...
-        // }
-
-        let pdu = f1ap::F1SetupRequest {
-            transaction_id: TransactionId(0),
-            gnb_du_id: GnbDuId(123),
-            gnb_du_rrc_version: RrcVersion {
-                latest_rrc_version: bitvec![Msb0, u8;0, 0, 0],
-                latest_rrc_version_enhanced: Some([1, 2, 3]),
-            },
-        };
-
-        // let pdu = F1apPdu::InitiatingMessage(InitiatingMessage {
-        //     procedure_code: ProcedureCode(1),
-        //     criticality: Criticality(Criticality::REJECT),
-        //     value: InitiatingMessageValue::IdF1Setup(F1SetupRequest {
-        //         protocol_i_es: F1SetupRequestProtocolIEs(vec![
-        //             F1SetupRequestProtocolIEsEntry {
-        //                 id: ProtocolIeId(78),
-        //                 criticality: Criticality(Criticality::REJECT),
-        //                 value: F1SetupRequestProtocolIEsEntryValue::IdTransactionId(TransactionId(
-        //                     0,
-        //                 )),
-        //             },
-        //             F1SetupRequestProtocolIEsEntry {
-        //                 id: ProtocolIeId(42),
-        //                 criticality: Criticality(Criticality::REJECT),
-        //                 value: F1SetupRequestProtocolIEsEntryValue::IdGNbDuId(GnbDuId(1)),
-        //             },
-        //             F1SetupRequestProtocolIEsEntry {
-        //                 id: ProtocolIeId(171),
-        //                 criticality: Criticality(Criticality::REJECT),
-        //                 value: F1SetupRequestProtocolIEsEntryValue::IdGnbDuRrcVersion(RrcVersion {
-        //                     latest_rrc_version: BitString148(bitvec![Msb0,u8; 0, 0, 0]),
-        //                     ie_extensions: None,
-        //                 }),
-        //             },
-        //         ]),
-        //     }),
-        // });
-
+        let pdu =
+            f1ap::F1apPdu::InitiatingMessage(InitiatingMessage::F1SetupRequest(F1SetupRequest {
+                transaction_id: TransactionId(0),
+                gnb_du_id: GnbDuId(123),
+                gnb_du_rrc_version: RrcVersion {
+                    latest_rrc_version: bitvec![Msb0, u8;0, 0, 0],
+                },
+                gnb_du_name: None,
+                gnb_du_served_cells_list: None,
+                transport_layer_address_info: None,
+                bap_address: None,
+                extended_gnb_cu_name: None,
+            }));
         self.sender.send_pdu(pdu.into(), &self.logger).await?;
         info!(self.logger, "Wait for F1 Setup response from GNB");
 

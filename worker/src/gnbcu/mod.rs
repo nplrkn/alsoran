@@ -5,13 +5,13 @@ use std::sync::Arc;
 
 use crate::config::Config;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
-use also_net::{SharedTransactions, TransactionReceiver, TransactionSender};
 use anyhow::{anyhow, Result};
 use async_std::sync::Mutex;
 use async_std::task::JoinHandle;
-use common::ngap::NgapPdu;
 use f1ap::F1apPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
+use net::{SharedTransactions, TransactionReceiver, TransactionSender};
+use ngap::NgapPdu;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
 use slog::{info, trace, warn};
@@ -171,10 +171,10 @@ impl<
 // #[cfg(test)]
 // mod tests {
 //     use crate::mock_coordinator::{MockCoordinator, NodeControlResponse};
-//     use also_net::MockTransportProvider;
+//     use net::MockTransportProvider;
 //     use anyhow::Result;
 //     use bitvec::vec::BitVec;
-//     use common::ngap::*;
+//     use ngap::*;
 //     use models::RefreshWorkerRsp;
 //     use node_control_api::{models, RefreshWorkerResponse};
 //     use slog::{info, o};

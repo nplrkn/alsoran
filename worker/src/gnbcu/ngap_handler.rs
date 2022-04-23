@@ -1,8 +1,8 @@
 use super::Gnbcu;
 use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
-use also_net::{TnlaEvent, TnlaEventHandler};
 use async_trait::async_trait;
-use common::ngap::NgapPdu;
+use net::{TnlaEvent, TnlaEventHandler};
+use ngap::NgapPdu;
 use node_control_api::Api;
 use slog::{trace, warn, Logger};
 

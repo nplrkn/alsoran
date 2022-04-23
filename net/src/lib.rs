@@ -11,7 +11,7 @@ mod transaction_sender;
 mod transport_provider;
 mod wrapper;
 
-pub use codec::{Asn1PerCodec, Codec, JsonCodec};
+pub use codec::{Asn1PerCodec, Codec};
 pub use mock_transport_provider::MockTransportProvider;
 pub use sctp_transport_provider::SctpTransportProvider;
 pub use tnla_event_handler::{TnlaEvent, TnlaEventHandler};

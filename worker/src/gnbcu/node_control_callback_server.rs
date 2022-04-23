@@ -4,8 +4,8 @@ use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvide
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use bitvec::vec::BitVec;
-use common::ngap::*;
+use bitvec::prelude::*;
+use ngap::*;
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, CallbackApi, TriggerInterfaceManagementResponse};
 use slog::{error, info, trace, warn, Logger};
@@ -100,97 +100,94 @@ where
         procedure: &str,
         logger: &Logger,
     ) -> Result<TriggerInterfaceManagementResponse> {
-        let (pdu, request_procedure_code) = match procedure {
-            "ngsetup" => Ok(self.ng_setup()),
-            "ranconfigurationupdate" => Ok(self.ran_configuration_update()),
+        trace!(logger, "Send request to AMF and wait for response");
+        let logger_clone = logger.clone();
+        let _response = match procedure {
+            "ngsetup" => {
+                let match_fn = Box::new(move |p: &NgapPdu| match p {
+                    NgapPdu::SuccessfulOutcome(SuccessfulOutcome::NgSetupResponse(x)) => {
+                        trace!(logger_clone, "NgSetupResponse {:?}", x);
+                        true
+                    }
+                    NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::NgSetupFailure(x)) => {
+                        trace!(logger_clone, "NgSetupFailure {:?}", x);
+                        true
+                    }
+                    _ => false,
+                });
+
+                self.ngap_transport_provider
+                    .send_request(self.ng_setup(), match_fn, logger)
+                    .await
+            }
+
+            "ranconfigurationupdate" => {
+                let match_fn = Box::new(move |p: &NgapPdu| match p {
+                    NgapPdu::SuccessfulOutcome(
+                        SuccessfulOutcome::RanConfigurationUpdateAcknowledge(x),
+                    ) => {
+                        trace!(logger_clone, "RanConfigurationUpdateAcknowledge {:?}", x);
+                        true
+                    }
+                    NgapPdu::UnsuccessfulOutcome(
+                        UnsuccessfulOutcome::RanConfigurationUpdateFailure(x),
+                    ) => {
+                        trace!(logger_clone, "RanConfigurationUpdateFailure {:?}", x);
+                        true
+                    }
+                    _ => false,
+                });
+                self.ngap_transport_provider
+                    .send_request(self.ran_configuration_update(), match_fn, logger)
+                    .await
+            }
             x => Err(anyhow!(format!("Unknown procedure requested {}", x))),
         }?;
-
-        let logger_clone = logger.clone();
-        let match_fn = move |p: &NgapPdu| match p {
-            NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
-                procedure_code: ProcedureCode(x),
-                ..
-            }) if *x == request_procedure_code => {
-                trace!(
-                    logger_clone,
-                    "Matched an ok response for procedure code {}",
-                    *x
-                );
-                true
-            }
-            NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome {
-                procedure_code: ProcedureCode(x),
-                ..
-            }) if *x == request_procedure_code => {
-                trace!(
-                    logger_clone,
-                    "Matched an unsuccessful response for procedure code {}",
-                    *x
-                );
-                true
-            }
-            _ => false,
-        };
-
-        // TODO use tnla_id
-        trace!(logger, "Send request to AMF and wait for response");
-        let _response = self
-            .ngap_transport_provider
-            .send_request(pdu, Box::new(match_fn), logger)
-            .await?;
         trace!(logger, "Got response from AMF, respond to coordinator");
         Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse)
     }
 
-    fn ng_setup(&self) -> (NgapPdu, u8) {
-        let procedure_code = 21;
-        (
-            NgapPdu::InitiatingMessage(InitiatingMessage {
-                procedure_code: ProcedureCode(procedure_code),
-                criticality: Criticality(Criticality::REJECT),
-                value: InitiatingMessageValue::IdNgSetup(NgSetupRequest {
-                    protocol_i_es: NgSetupRequestProtocolIEs(vec![NgSetupRequestProtocolIEsItem {
-                        id: ProtocolIeId(27),
-                        criticality: Criticality(Criticality::REJECT),
-                        value: NgSetupRequestProtocolIEsItemValue::IdGlobalRanNodeId(
-                            self.global_ran_node_id(),
-                        ),
+    fn ng_setup(&self) -> NgapPdu {
+        NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
+            global_ran_node_id: self.global_ran_node_id(),
+            ran_node_name: None,
+            supported_ta_list: SupportedTaList(vec![SupportedTaItem {
+                tac: Tac(vec![0, 1, 2]),
+                broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
+                    plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                    tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                        s_nssai: SNssai {
+                            sst: Sst(vec![0x01]),
+                            sd: None,
+                        },
                     }]),
-                }),
-            }),
-            procedure_code,
-        )
+                }]),
+            }]),
+            default_paging_drx: PagingDrx::V128,
+            ue_retention_information: None,
+            nb_iot_default_paging_drx: None,
+            extended_ran_node_name: None,
+        }))
     }
 
-    fn ran_configuration_update(&self) -> (NgapPdu, u8) {
-        let procedure_code = 35;
-
-        (
-            NgapPdu::InitiatingMessage(InitiatingMessage {
-                procedure_code: ProcedureCode(procedure_code),
-                criticality: Criticality(Criticality::REJECT),
-                value: InitiatingMessageValue::IdRanConfigurationUpdate(RanConfigurationUpdate {
-                    protocol_i_es: RanConfigurationUpdateProtocolIEs(vec![
-                        RanConfigurationUpdateProtocolIEsItem {
-                            id: ProtocolIeId(27),
-                            criticality: Criticality(Criticality::REJECT),
-                            value: RanConfigurationUpdateProtocolIEsItemValue::IdGlobalRanNodeId(
-                                self.global_ran_node_id(),
-                            ),
-                        },
-                    ]),
-                }),
-            }),
-            procedure_code,
-        )
+    fn ran_configuration_update(&self) -> NgapPdu {
+        NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
+            RanConfigurationUpdate {
+                ran_node_name: None,
+                supported_ta_list: None,
+                default_paging_drx: None,
+                global_ran_node_id: Some(self.global_ran_node_id()),
+                ngran_tnl_association_to_remove_list: None,
+                nb_iot_default_paging_drx: None,
+                extended_ran_node_name: None,
+            },
+        ))
     }
 
     fn global_ran_node_id(&self) -> GlobalRanNodeId {
         GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
-            plmn_identity: PlmnIdentity(vec![2, 3, 2, 1, 5, 6]),
-            gnb_id: GnbId::GnbId(BitString26(BitVec::from_element(0x10))),
-            ie_extensions: None,
+            plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+            gnb_id: GnbId::GnbId(bitvec![Msb0,u8; 1; 22]),
         })
     }
 }

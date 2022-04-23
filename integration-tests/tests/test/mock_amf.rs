@@ -1,14 +1,14 @@
-use also_net::TransportProvider;
-use also_net::{
-    JsonCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
-};
 use anyhow::{anyhow, Result};
 use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use bitvec::prelude::BitVec;
-use common::ngap::NgapPdu;
-use common::ngap::*;
+use bitvec::prelude::*;
+use net::TransportProvider;
+use net::{
+    Asn1PerCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
+};
+use ngap::NgapPdu;
+use ngap::*;
 use slog::info;
 use slog::{o, trace, Logger};
 use std::fmt::Debug;
@@ -20,7 +20,7 @@ const NGAP_SCTP_PPID: u32 = 60;
 pub struct MockAmf {
     pub stop_source: StopSource,
     pub receiver: Receiver<Option<NgapPdu>>,
-    pub sender: SctpTransportProvider<JsonCodec<NgapPdu>, NgapPdu>,
+    pub sender: SctpTransportProvider<Asn1PerCodec<NgapPdu>, NgapPdu>,
     pub task: JoinHandle<()>,
     logger: Logger,
 }
@@ -33,7 +33,7 @@ impl MockAmf {
         let (internal_sender, receiver) = async_channel::unbounded();
         let logger = logger.new(o!("amf" => 1));
         let stop_source = StopSource::new();
-        let server = SctpTransportProvider::new(NGAP_SCTP_PPID, JsonCodec::new());
+        let server = SctpTransportProvider::new(NGAP_SCTP_PPID, Asn1PerCodec::new());
         let task = server
             .clone()
             .serve(
@@ -79,57 +79,44 @@ impl MockAmf {
 
         let pdu = self.receive_ngap_pdu().await;
 
-        if let NgapPdu::InitiatingMessage(InitiatingMessage {
-            value: InitiatingMessageValue::IdNgSetup(_ng_setup),
-            ..
-        }) = pdu
-        {
+        if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
             info!(self.logger, "Got NG Setup, send setup response");
             Ok(())
         } else {
             Err(anyhow!("Not an NG setup"))
         }?;
 
-        // Mandatory fields are
-        //  - AMF Name
-        //  - Served GUAMI List - ServedGuamiItem - GUAMI
-        //  - Relative AMF Capacity
-        //  - PLMN Support List -- PLMN Support Item -- PLMN Identity, Slice Support List, Extended Slice Support List
-        // TODO add the last two
-        let amf_name = AmfName("MockAmf".to_string());
-        let plmn_identity = PlmnIdentity(vec![0, 0, 1, 0, 1]);
+        //let amf_name = AmfName("MockAmf".to_string());
+        let plmn_identity = PlmnIdentity(vec![2, 3, 2]);
         let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
             guami: Guami {
                 plmn_identity,
-                amf_region_id: AmfRegionId(BitVec::new()),
-                amf_set_id: AmfSetId(BitVec::new()),
-                amf_pointer: AmfPointer(BitVec::new()),
-                ie_extensions: None,
+                amf_region_id: AmfRegionId(bitvec![Msb0,u8;1;8]),
+                amf_set_id: AmfSetId(bitvec![Msb0,u8;1;10]),
+                amf_pointer: AmfPointer(bitvec![Msb0,u8;1;6]),
             },
             backup_amf_name: None,
-            ie_extensions: None,
         }]);
 
-        let response = NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
-            procedure_code: ProcedureCode(21),
-            criticality: Criticality(Criticality::REJECT),
-            value: SuccessfulOutcomeValue::IdNgSetup(NgSetupResponse {
-                protocol_i_es: NgSetupResponseProtocolIEs(vec![
-                    NgSetupResponseProtocolIEsItem {
-                        id: ProtocolIeId(1),
-                        criticality: Criticality(Criticality::REJECT),
-                        value: NgSetupResponseProtocolIEsItemValue::IdAmfName(amf_name),
-                    },
-                    NgSetupResponseProtocolIEsItem {
-                        id: ProtocolIeId(96),
-                        criticality: Criticality(Criticality::REJECT),
-                        value: NgSetupResponseProtocolIEsItemValue::IdServedGuamiList(
-                            served_guami_list,
-                        ),
-                    },
-                ]),
-            }),
-        });
+        let response =
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::NgSetupResponse(NgSetupResponse {
+                amf_name: AmfName("MockAmf".to_string()),
+                served_guami_list,
+                relative_amf_capacity: RelativeAmfCapacity(100),
+                plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
+                    plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                    slice_support_list: SliceSupportList(vec![SliceSupportItem {
+                        s_nssai: SNssai {
+                            sst: Sst(vec![0x01]),
+                            sd: None,
+                        },
+                    }]),
+                }]),
+                criticality_diagnostics: None,
+                ue_retention_information: None,
+                iab_supported: None,
+                extended_amf_name: None,
+            }));
 
         self.sender.send_pdu(response, &logger).await?;
 
@@ -141,10 +128,9 @@ impl MockAmf {
 
         let pdu = self.receive_ngap_pdu().await;
 
-        if let NgapPdu::InitiatingMessage(InitiatingMessage {
-            value: InitiatingMessageValue::IdRanConfigurationUpdate(_ran_configuration_update),
-            ..
-        }) = pdu
+        if let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
+            _ran_configuration_update,
+        )) = pdu
         {
             info!(logger, "Got RAN configuration update, send response");
             Ok(())
@@ -152,15 +138,12 @@ impl MockAmf {
             Err(anyhow!("Not a RAN configuration update"))
         }?;
 
-        let response = NgapPdu::SuccessfulOutcome(SuccessfulOutcome {
-            procedure_code: ProcedureCode(35),
-            criticality: Criticality(Criticality::REJECT),
-            value: SuccessfulOutcomeValue::IdRanConfigurationUpdate(
+        let response =
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::RanConfigurationUpdateAcknowledge(
                 RanConfigurationUpdateAcknowledge {
-                    protocol_i_es: RanConfigurationUpdateAcknowledgeProtocolIEs(vec![]),
+                    criticality_diagnostics: None,
                 },
-            ),
-        });
+            ));
 
         self.sender.send_pdu(response, &logger).await?;
 

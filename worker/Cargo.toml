@@ -7,10 +7,11 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../common" }
-also-net = { path = "../also-net" }
+net = { path = "../net" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 node-control-api = { path = "../node-control-api", features = ["client"] }
 f1ap = {path = "../f1ap" }
+ngap = {path = "../ngap" }
 async-trait = "0.1.51"
 async-channel = "1.6.1"
 slog = "2.7.0"
@@ -24,7 +25,8 @@ anyhow = "1.0.52"
 swagger = "5.0.2"
 uuid = {version = "0.8", features = ["serde", "v4"]}
 stop-token = "0.6.1"
-asn1-codecs = "0.1.2"
-asn1_codecs_derive = "0.1.2"
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch = "all-fixes" }
+#asn1-codecs = { path = "../../hampi/codecs" }
+#asn1-codecs = "0.1.2"
 bitvec = {version = "0.22", features = ["serde"] }
 hyper = "0.13"
