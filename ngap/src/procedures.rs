@@ -11,13 +11,13 @@ impl IntoPdu<NgapPdu> for NgSetupRequest {
 
 // Autogen this
 pub struct NgSetupRequestProcedure {}
-impl Procedure<NgapPdu> for NgSetupRequestProcedure {
-    type Request = NgSetupRequest;
-    type Success = NgSetupResponse;
-    type Failure = NgSetupFailure;
-    const CODE: u8 = 21;
-}
-impl Procedure2 for NgSetupRequestProcedure {
+// impl Procedure<NgapPdu> for NgSetupRequestProcedure {
+//     type Request = NgSetupRequest;
+//     type Success = NgSetupResponse;
+//     type Failure = NgSetupFailure;
+//     const CODE: u8 = 21;
+// }
+impl Procedure for NgSetupRequestProcedure {
     type TopPdu = NgapPdu;
     type Request = NgSetupRequest;
     type Success = NgSetupResponse;

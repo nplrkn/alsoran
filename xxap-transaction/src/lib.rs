@@ -3,14 +3,14 @@ use async_trait::async_trait;
 use slog::Logger;
 use std::fmt::Debug;
 
-pub trait Procedure<T: AperCodec> {
-    const CODE: u8;
-    type Request: AperCodec + IntoPdu<T> + Send + Sync + 'static;
-    type Success: AperCodec<Output = Self::Success>;
-    type Failure: AperCodec<Output = Self::Failure>;
-}
+// pub trait Procedure<T: AperCodec> {
+//     const CODE: u8;
+//     type Request: AperCodec + IntoPdu<T> + Send + Sync + 'static;
+//     type Success: AperCodec<Output = Self::Success>;
+//     type Failure: AperCodec<Output = Self::Failure>;
+// }
 
-pub trait Procedure2 {
+pub trait Procedure {
     const CODE: u8;
     type TopPdu: AperCodec;
     type Request: AperCodec + IntoPdu<Self::TopPdu> + Send + Sync + 'static;
@@ -34,7 +34,7 @@ impl<U, D: Debug> From<D> for RequestError<U> {
 }
 
 #[async_trait]
-pub trait RequestProvider<T: AperCodec, P: Procedure<T>> {
+pub trait RequestProvider<P: Procedure> {
     async fn request(
         &self,
         r: P::Request,

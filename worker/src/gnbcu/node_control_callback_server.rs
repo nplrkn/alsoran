@@ -109,13 +109,13 @@ where
 
         match procedure {
             "ngsetup" => {
-                let response = <TransactionSender<N> as RequestProvider<
-                    NgapPdu,
-                    NgSetupRequestProcedure,
-                >>::request(
-                    &self.ngap_transport_provider, self.ng_setup(), logger
-                )
-                .await;
+                let response =
+                    <TransactionSender<N> as RequestProvider<NgSetupRequestProcedure>>::request(
+                        &self.ngap_transport_provider,
+                        self.ng_setup(),
+                        logger,
+                    )
+                    .await;
                 match response {
                     Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
                     Err(RequestError::UnsuccessfulResponse(x)) => {
@@ -127,13 +127,13 @@ where
             }
 
             "ranconfigurationupdate" => {
-                let response = <TransactionSender<N> as RequestProvider<
-                    NgapPdu,
-                    RanConfigurationUpdate,
-                >>::request(
-                    &self.ngap_transport_provider, self.ng_setup(), logger
-                )
-                .await;
+                let response =
+                    <TransactionSender<N> as RequestProvider<NgSetupRequestProcedure>>::request(
+                        &self.ngap_transport_provider,
+                        self.ng_setup(),
+                        logger,
+                    )
+                    .await;
                 match response {
                     Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
                     Err(RequestError::UnsuccessfulResponse(x)) => {

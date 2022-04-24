@@ -29,11 +29,8 @@ where
 }
 
 #[async_trait]
-impl<
-        Top: AperCodec + Clone + Send + Sync + 'static,
-        P: Procedure<Top>,
-        Trans: TransportProvider + Sync + Send,
-    > RequestProvider<Top, P> for TransactionSender<Trans>
+impl<P: Procedure, Trans: TransportProvider + Sync + Send> RequestProvider<P>
+    for TransactionSender<Trans>
 {
     async fn request(
         &self,
