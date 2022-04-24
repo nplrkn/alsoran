@@ -1,6 +1,5 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
-use crate::ServerTransportProvider;
-use crate::{ClientTransportProvider, Codec, TnlaEventHandler, TransportProvider, Wrapper};
+use crate::{TnlaEventHandler, TransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;
@@ -8,7 +7,7 @@ use async_trait::async_trait;
 use futures::future;
 use futures::pin_mut;
 use futures::stream::StreamExt;
-use sctp::SctpAssociation;
+use sctp::{Message, SctpAssociation};
 use slog::{info, o, trace, warn, Logger};
 use std::fmt::Debug;
 use std::net::SocketAddr;
@@ -17,26 +16,16 @@ use stop_token::StopToken;
 use task::JoinHandle;
 
 #[derive(Debug, Clone)]
-pub struct SctpTransportProvider<C, P>
-where
-    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
-    P: Send + Sync + Clone + 'static + Debug,
-{
+pub struct SctpTransportProvider {
     tnla_pool: SctpTnlaPool,
     ppid: u32,
-    codec: C,
 }
 
-impl<C, P> SctpTransportProvider<C, P>
-where
-    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
-    P: Send + Sync + Clone + 'static + Debug,
-{
-    pub fn new(ppid: u32, codec: C) -> SctpTransportProvider<C, P> {
+impl SctpTransportProvider {
+    pub fn new(ppid: u32) -> SctpTransportProvider {
         SctpTransportProvider {
             tnla_pool: SctpTnlaPool::new(),
             ppid,
-            codec,
         }
     }
 }
@@ -55,25 +44,11 @@ async fn resolve_and_connect(
 }
 
 #[async_trait]
-impl<C, P> TransportProvider for SctpTransportProvider<C, P>
-where
-    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
-    P: Send + Sync + Clone + 'static + Debug,
-{
-    type Pdu = P;
-    async fn send_pdu(&self, pdu: P, logger: &Logger) -> Result<()> {
-        let message: Vec<u8> = self.codec.to_wire(pdu)?;
-        trace!(logger, "Sending bytes {:?}", message);
+impl TransportProvider for SctpTransportProvider {
+    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
         self.tnla_pool.send_message(message, logger).await
     }
-}
 
-#[async_trait]
-impl<C, P> ClientTransportProvider<P> for SctpTransportProvider<C, P>
-where
-    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
-    P: Send + Sync + Clone + 'static + Debug,
-{
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
@@ -82,14 +57,9 @@ where
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<P>,
+        H: TnlaEventHandler,
     {
         let assoc_id = 3; // TODO
-        let wrapped_handler = Wrapper {
-            handler,
-            codec: self.codec,
-        };
-
         let task = task::spawn(async move {
             loop {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
@@ -101,7 +71,7 @@ where
                             .add_and_handle_no_spawn(
                                 assoc_id,
                                 Arc::new(assoc),
-                                wrapped_handler.clone(),
+                                handler.clone(),
                                 stop_token.clone(),
                                 logger.clone(),
                             )
@@ -133,16 +103,7 @@ where
     async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
         self.tnla_pool.remote_addresses().await
     }
-}
 
-const MAX_LISTEN_BACKLOG: i32 = 5;
-
-#[async_trait]
-impl<C, P> ServerTransportProvider<P> for SctpTransportProvider<C, P>
-where
-    C: Codec<Pdu = P> + Clone + Send + Sync + 'static,
-    P: Send + Sync + Clone + 'static + Debug,
-{
     async fn serve<H>(
         self,
         listen_addr: String,
@@ -151,14 +112,14 @@ where
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<P>,
+        H: TnlaEventHandler,
     {
         let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
 
-        let wrapped_handler = Wrapper {
-            handler,
-            codec: self.codec,
-        };
+        // let wrapped_handler = Wrapper {
+        //     handler,
+        //     codec: self.codec,
+        // };
 
         let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
         let stream = stream.take_until(stop_token.clone());
@@ -182,7 +143,7 @@ where
                             .add_and_handle(
                                 assoc_id,
                                 Arc::new(assoc),
-                                wrapped_handler.clone(),
+                                handler.clone(),
                                 stop_token.clone(),
                                 logger,
                             )
@@ -203,3 +164,5 @@ where
         }))
     }
 }
+
+const MAX_LISTEN_BACKLOG: i32 = 5;

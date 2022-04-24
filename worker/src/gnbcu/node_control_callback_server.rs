@@ -1,10 +1,11 @@
 //! Main library entry point for node_control_api implementation.
 use crate::gnbcu::Gnbcu;
-use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use crate::ClientContext;
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
+use net::{TransactionSender, TransportProvider};
 use ngap::*;
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, Api, CallbackApi, TriggerInterfaceManagementResponse};
@@ -13,12 +14,13 @@ use stop_token::StopToken;
 use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::ApiError;
 use swagger::EmptyContext;
+use xxap_transaction::{RequestError, RequestProvider};
 
 impl<
-        T: NgapClientTransportProvider,
-        F: F1ServerTransportProvider,
+        N: TransportProvider,
+        F: TransportProvider,
         C: Api<ClientContext> + Send + Sync + Clone + 'static,
-    > Gnbcu<T, F, C>
+    > Gnbcu<N, F, C>
 {
     pub fn start_callback_server(&self, stop_token: StopToken) -> Result<JoinHandle<()>> {
         let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
@@ -41,10 +43,10 @@ impl<
 }
 
 #[async_trait]
-impl<T, F, C, Cx> CallbackApi<Cx> for Gnbcu<T, F, C>
+impl<N, F, C, Cx> CallbackApi<Cx> for Gnbcu<N, F, C>
 where
-    T: NgapClientTransportProvider,
-    F: F1ServerTransportProvider,
+    N: TransportProvider,
+    F: TransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
     Cx: Send + Sync,
 {
@@ -89,10 +91,10 @@ where
 
 // TODO should the following be a separate module.  Unclear to have them in
 // node control callback server.
-impl<T, F, C> Gnbcu<T, F, C>
+impl<N, F, C> Gnbcu<N, F, C>
 where
-    T: NgapClientTransportProvider,
-    F: F1ServerTransportProvider,
+    N: TransportProvider,
+    F: TransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     async fn trigger_procedure(
@@ -102,44 +104,44 @@ where
     ) -> Result<TriggerInterfaceManagementResponse> {
         trace!(logger, "Send request to AMF and wait for response");
         let logger_clone = logger.clone();
-        let _response = match procedure {
-            "ngsetup" => {
-                let match_fn = Box::new(move |p: &NgapPdu| match p {
-                    NgapPdu::SuccessfulOutcome(SuccessfulOutcome::NgSetupResponse(x)) => {
-                        trace!(logger_clone, "NgSetupResponse {:?}", x);
-                        true
-                    }
-                    NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::NgSetupFailure(x)) => {
-                        trace!(logger_clone, "NgSetupFailure {:?}", x);
-                        true
-                    }
-                    _ => false,
-                });
 
-                self.ngap_transport_provider
-                    .send_request(self.ng_setup(), match_fn, logger)
-                    .await
+        // TODO handle errors
+
+        match procedure {
+            "ngsetup" => {
+                let response = <TransactionSender<N> as RequestProvider<
+                    NgapPdu,
+                    NgSetupRequestProcedure,
+                >>::request(
+                    &self.ngap_transport_provider, self.ng_setup(), logger
+                )
+                .await;
+                match response {
+                    Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
+                    Err(RequestError::UnsuccessfulResponse(x)) => {
+                        trace!(logger_clone, "NgSetupFailure {:?}", x)
+                    }
+                    Err(RequestError::Other(s)) => trace!(logger_clone, "Other error {}", s),
+                }
+                Ok(())
             }
 
             "ranconfigurationupdate" => {
-                let match_fn = Box::new(move |p: &NgapPdu| match p {
-                    NgapPdu::SuccessfulOutcome(
-                        SuccessfulOutcome::RanConfigurationUpdateAcknowledge(x),
-                    ) => {
-                        trace!(logger_clone, "RanConfigurationUpdateAcknowledge {:?}", x);
-                        true
+                let response = <TransactionSender<N> as RequestProvider<
+                    NgapPdu,
+                    RanConfigurationUpdate,
+                >>::request(
+                    &self.ngap_transport_provider, self.ng_setup(), logger
+                )
+                .await;
+                match response {
+                    Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
+                    Err(RequestError::UnsuccessfulResponse(x)) => {
+                        trace!(logger_clone, "NgSetupFailure {:?}", x)
                     }
-                    NgapPdu::UnsuccessfulOutcome(
-                        UnsuccessfulOutcome::RanConfigurationUpdateFailure(x),
-                    ) => {
-                        trace!(logger_clone, "RanConfigurationUpdateFailure {:?}", x);
-                        true
-                    }
-                    _ => false,
-                });
-                self.ngap_transport_provider
-                    .send_request(self.ran_configuration_update(), match_fn, logger)
-                    .await
+                    Err(RequestError::Other(s)) => trace!(logger_clone, "Other error {}", s),
+                }
+                Ok(())
             }
             x => Err(anyhow!(format!("Unknown procedure requested {}", x))),
         }?;
@@ -147,8 +149,8 @@ where
         Ok(TriggerInterfaceManagementResponse::InterfaceManagementResponse)
     }
 
-    fn ng_setup(&self) -> NgapPdu {
-        NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
+    fn ng_setup(&self) -> NgSetupRequest {
+        NgSetupRequest {
             global_ran_node_id: self.global_ran_node_id(),
             ran_node_name: None,
             supported_ta_list: SupportedTaList(vec![SupportedTaItem {
@@ -167,7 +169,7 @@ where
             ue_retention_information: None,
             nb_iot_default_paging_drx: None,
             extended_ran_node_name: None,
-        }))
+        }
     }
 
     fn ran_configuration_update(&self) -> NgapPdu {

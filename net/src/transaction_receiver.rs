@@ -1,25 +1,24 @@
 use super::SharedTransactions;
 use super::{TnlaEvent, TnlaEventHandler};
 use async_trait::async_trait;
+use sctp::Message;
 use slog::{trace, warn, Logger};
 
 #[derive(Clone)]
-pub struct TransactionReceiver<R, M>
+pub struct TransactionReceiver<R>
 where
-    R: TnlaEventHandler<M>,
-    M: Clone + Send + Sync + 'static,
+    R: TnlaEventHandler,
 {
     // TODO - we could remove the unneeded clone of this by creating a trait like HasSharedTransactions<M> on <R>
-    pending_requests: SharedTransactions<M>,
+    pending_requests: SharedTransactions,
     receiver: R,
 }
 
-impl<R, M> TransactionReceiver<R, M>
+impl<R> TransactionReceiver<R>
 where
-    R: TnlaEventHandler<M>,
-    M: Clone + Send + Sync + 'static,
+    R: TnlaEventHandler,
 {
-    pub fn new(receiver: R, transactions: SharedTransactions<M>) -> Self {
+    pub fn new(receiver: R, transactions: SharedTransactions) -> Self {
         TransactionReceiver {
             pending_requests: transactions,
             receiver,
@@ -27,17 +26,18 @@ where
     }
 }
 
+// TODO: Right now, this filters out the responses and pass on the requests and events.
+// In future it should spawn requests surely?
 #[async_trait]
-impl<R, M> TnlaEventHandler<M> for TransactionReceiver<R, M>
+impl<R> TnlaEventHandler for TransactionReceiver<R>
 where
-    R: TnlaEventHandler<M>,
-    M: Clone + Send + Sync + 'static,
+    R: TnlaEventHandler,
 {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         self.receiver.handle_event(event, tnla_id, logger).await
     }
 
-    async fn handle_message(&self, message: M, tnla_id: u32, logger: &Logger) {
+    async fn handle_message(&self, message: Message, tnla_id: u32, logger: &Logger) {
         // TODO figure out if it is a response and warn / drop if there are no matches
 
         // If it matches a pending request, route it back over the response channel.

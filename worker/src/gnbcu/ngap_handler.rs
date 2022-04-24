@@ -1,16 +1,26 @@
 use super::Gnbcu;
-use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use crate::ClientContext;
 use async_trait::async_trait;
-use net::{TnlaEvent, TnlaEventHandler};
-use ngap::NgapPdu;
+use net::Message;
+use net::{TnlaEvent, TnlaEventHandler, TransportProvider};
 use node_control_api::Api;
 use slog::{trace, warn, Logger};
 
-#[async_trait]
-impl<T, F, C> TnlaEventHandler<NgapPdu> for Gnbcu<T, F, C>
+#[derive(Clone)]
+struct NgapHandler<N, F, C>
 where
-    T: NgapClientTransportProvider,
-    F: F1ServerTransportProvider,
+    N: TransportProvider,
+    F: TransportProvider,
+    C: Api<ClientContext> + Send + Sync + 'static + Clone,
+{
+    gnbcu: Gnbcu<N, F, C>,
+}
+
+#[async_trait]
+impl<N, F, C> TnlaEventHandler for NgapHandler<N, F, C>
+where
+    N: TransportProvider,
+    F: TransportProvider,
     C: Api<ClientContext> + Send + Sync + 'static + Clone,
 {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
@@ -18,10 +28,10 @@ where
             TnlaEvent::Established => trace!(logger, "NGAP TNLA {} established", tnla_id),
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
         };
-        self.connected_amf_change(logger).await;
+        self.gnbcu.connected_amf_change(logger).await;
     }
 
-    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
+    async fn handle_message(&self, message: Message, _tnla_id: u32, logger: &Logger) {
         trace!(logger, "ngap_pdu: {:?}", message);
     }
 }

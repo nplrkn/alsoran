@@ -4,14 +4,12 @@ mod node_control_callback_server;
 use std::sync::Arc;
 
 use crate::config::Config;
-use crate::{ClientContext, F1ServerTransportProvider, NgapClientTransportProvider};
+use crate::ClientContext;
 use anyhow::{anyhow, Result};
 use async_std::sync::Mutex;
 use async_std::task::JoinHandle;
-use f1ap::F1apPdu;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
-use net::{SharedTransactions, TransactionReceiver, TransactionSender};
-use ngap::NgapPdu;
+use net::{SharedTransactions, TransactionReceiver, TransactionSender, TransportProvider};
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
 use slog::{info, trace, warn};
@@ -21,35 +19,35 @@ use uuid::Uuid;
 
 /// The gNB-CU.
 #[derive(Clone)]
-pub struct Gnbcu<T, F, C>
+pub struct Gnbcu<N, F, C>
 where
-    T: NgapClientTransportProvider,
-    F: F1ServerTransportProvider,
+    N: TransportProvider,
+    F: TransportProvider,
     C: Api<ClientContext> + Clone + Send + Sync + 'static,
 {
     config: Config,
     worker_uuid: Uuid,
-    ngap_transport_provider: TransactionSender<T, NgapPdu>, // TODO rename to ngap?
-    f1ap_transport_provider: TransactionSender<F, F1apPdu>, // TODO rename to f1ap
+    ngap_transport_provider: TransactionSender<N>, // TODO rename to ngap?
+    f1ap_transport_provider: TransactionSender<F>, // TODO rename to f1ap
     coordinator_client: C,
-    ngap_transactions: SharedTransactions<NgapPdu>,
-    f1ap_transactions: SharedTransactions<F1apPdu>,
+    ngap_transactions: SharedTransactions,
+    f1ap_transactions: SharedTransactions,
     logger: Logger,
 }
 
 impl<
-        T: NgapClientTransportProvider,
-        F: F1ServerTransportProvider,
+        N: TransportProvider,
+        F: TransportProvider,
         C: Api<ClientContext> + Send + Sync + Clone + 'static,
-    > Gnbcu<T, F, C>
+    > Gnbcu<N, F, C>
 {
     pub fn new(
         config: Config,
-        ngap_transport_provider: T,
+        ngap_transport_provider: N,
         f1ap_transport_provider: F,
         coordinator_client: C,
         logger: &Logger,
-    ) -> Gnbcu<T, F, C> {
+    ) -> Gnbcu<N, F, C> {
         let ngap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
         let ngap_transport_provider =
             TransactionSender::new(ngap_transport_provider, ngap_transactions.clone());

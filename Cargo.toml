@@ -9,5 +9,6 @@ members = [
     "sctp",
     "net",
     "ngap",
-    "f1ap"
+    "f1ap",
+    "xxap-transaction"
 ]

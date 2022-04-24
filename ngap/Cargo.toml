@@ -13,3 +13,4 @@ hex = "0.4.3"
 num_enum = "0.5.7"
 bitvec = { version = "0.22" }
 async-trait = "0.1.51"
+xxap-transaction = { path = "../xxap-transaction" }

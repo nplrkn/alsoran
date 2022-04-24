@@ -1,27 +1,21 @@
 use crate::tnla_event_handler::TnlaEventHandler;
 use anyhow::Result;
+use async_net::SocketAddr;
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use sctp::Message;
 use slog::Logger;
-use std::net::SocketAddr;
 use stop_token::StopToken;
 
 //pub struct Binding;
 
-/// The TransportProvider trait allows the user to send UE and non-UE-associated messages over
-/// some reference point without needing to understand the details of transport connections.  
-// Rename PduSender ?
-#[async_trait]
-pub trait TransportProvider: 'static + Send + Sync + Clone {
-    type Pdu;
-    async fn send_pdu(&self, pdu: Self::Pdu, logger: &Logger) -> Result<()>;
-}
+// TODO: Message should be a byte array slice or a Vec<u8>?
 
-/// The ServerTransportProvider trait provides the functions needed on the passive
-/// side of the reference point (which accepts connections from the active side).
-// TODO - change this to not need handler as a parameter but have self impl handler?
+/// The TransportProvider trait abstracts the transport, for example, to allow a non-SCTP test transport to be used.
 #[async_trait]
-pub trait ServerTransportProvider<P>: TransportProvider {
+pub trait TransportProvider: Clone + Send + Sync + 'static {
+    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()>;
+
     async fn serve<H>(
         self,
         listen_addr: String,
@@ -30,14 +24,8 @@ pub trait ServerTransportProvider<P>: TransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<P>;
-}
+        H: TnlaEventHandler;
 
-/// The ClientTransportProvider trait provides the functions needed on the active
-/// side of the reference point (which initiates connections towards the passive side).
-#[async_trait]
-pub trait ClientTransportProvider<Pdu>: TransportProvider {
-    // TODO Eventually this will evolve into add_tnla_address (?)
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
@@ -46,7 +34,7 @@ pub trait ClientTransportProvider<Pdu>: TransportProvider {
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where
-        H: TnlaEventHandler<Pdu>;
+        H: TnlaEventHandler;
 
     // Return the set of TNLA remote address to which we are currently connected
     async fn remote_tnla_addresses(&self) -> Vec<SocketAddr>;

@@ -42,7 +42,7 @@ impl SctpTnlaPool {
         stop_token: StopToken,
         logger: Logger,
     ) where
-        H: TnlaEventHandler<Message>,
+        H: TnlaEventHandler,
     {
         trace!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
         self.assocs.lock().await.insert(assoc_id, assoc.clone());
@@ -83,7 +83,7 @@ impl SctpTnlaPool {
         logger: Logger,
     ) -> JoinHandle<()>
     where
-        H: TnlaEventHandler<Message>,
+        H: TnlaEventHandler,
     {
         async_std::task::spawn(async move {
             self.add_and_handle_no_spawn(assoc_id, assoc, handler, stop_token, logger)
