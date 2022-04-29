@@ -1,45 +1,36 @@
 use super::Gnbcu;
-use crate::ClientContext;
 use anyhow::Result;
-use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{Message, TnlaEvent, TnlaEventHandler, TransactionReceiver, TransportProvider};
-use node_control_api::Api;
+use net::{Application, Message, TnlaEvent};
 use slog::{trace, warn, Logger};
-use stop_token::StopToken;
+use xxap_transaction::*;
 
-impl<
-        N: TransportProvider,
-        F: TransportProvider,
-        C: Api<ClientContext> + Send + Sync + Clone + 'static,
-    > Gnbcu<N, F, C>
-{
-    pub async fn start_f1ap_handler(&self, stop_token: StopToken) -> Result<JoinHandle<()>> {
-        let addr = format!("0.0.0.0:{}", self.config.f1ap_bind_port);
-        let task = self
-            .f1ap_transport_provider
-            .transport_provider
-            .clone()
-            .serve(
-                addr.to_string(),
-                stop_token,
-                TransactionReceiver::new(self.clone(), self.f1ap_transactions.clone()),
-                self.logger.clone(),
-            )
-            .await?;
-        Ok(task)
+#[derive(Clone)]
+pub struct F1apHandler {
+    gnbcu: Gnbcu,
+}
+
+impl F1apHandler {
+    pub fn new(gnbcu: Gnbcu) -> Self {
+        Self { gnbcu }
     }
 }
 
 #[async_trait]
-impl<N, F, C> TnlaEventHandler for Gnbcu<N, F, C>
-where
-    N: TransportProvider,
-    F: TransportProvider,
-    C: Api<ClientContext> + Send + Sync + 'static + Clone,
-{
+impl RequestProvider<F1SetupProcedure> for F1apHandler {
+    async fn request(
+        &self,
+        r: F1SetupRequest,
+        logger: &Logger,
+    ) -> Result<F1SetupResponse, RequestError<F1SetupFailure>> {
+        todo!()
+    }
+}
+
+#[async_trait]
+impl Application for F1apHandler {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established => trace!(logger, "F1AP TNLA {} established", tnla_id),
@@ -47,20 +38,27 @@ where
         };
     }
 
-    async fn handle_message(&self, message: Message, _tnla_id: u32, logger: &Logger) {
-        trace!(logger, "f1ap_pdu: {:?}", message);
+    async fn handle_request(
+        &self,
+        message: Message,
+        _tnla_id: u32,
+        logger: &Logger,
+    ) -> Result<Message> {
+        let pdu = F1apPdu::from_bytes(&message).unwrap(); // TODO
+        trace!(logger, "f1ap_pdu: {:?}", pdu);
         todo!()
-        // if let Some(response) = match message {
+        // if let Some(response) = match pdu {
         //     F1apPdu::InitiatingMessage(InitiatingMessage::F1SetupRequest(x)) => {
         //         Some(self.f1_setup(x, logger).await)
         //     }
         //     x => {
-        //         warn!(self.logger, "Unexpected or unhandled PDU {:?}", x);
+        //         warn!(logger, "Unexpected or unhandled PDU {:?}", x);
         //         None
         //     }
         // } {
         //     let response = F1apPdu::SuccessfulOutcome(SuccessfulOutcome::F1SetupResponse(response));
-        //     self.f1ap_transport_provider
+        //     self.gnbcu
+        //         .f1ap
         //         .transport_provider
         //         .send_pdu(response, logger) // include tnla id in future
         //         .await

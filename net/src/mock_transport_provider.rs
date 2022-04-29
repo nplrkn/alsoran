@@ -46,8 +46,8 @@ impl TransportProvider for MockTransportProvider {
     async fn maintain_connection<H>(
         self,
         _connect_addr_string: String,
-        handler: H,
         stop_token: StopToken,
+        handler: H,
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where

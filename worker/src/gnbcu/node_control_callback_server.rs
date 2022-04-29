@@ -1,14 +1,13 @@
 //! Main library entry point for node_control_api implementation.
 use crate::gnbcu::Gnbcu;
-use crate::ClientContext;
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
-use net::{TransactionSender, TransportProvider};
+use net::Stack;
 use ngap::*;
 use node_control_api::client::callbacks::MakeService;
-use node_control_api::{models, Api, CallbackApi, TriggerInterfaceManagementResponse};
+use node_control_api::{models, CallbackApi, TriggerInterfaceManagementResponse};
 use slog::{error, info, trace, warn, Logger};
 use stop_token::StopToken;
 use swagger::auth::MakeAllowAllAuthenticator;
@@ -16,12 +15,7 @@ use swagger::ApiError;
 use swagger::EmptyContext;
 use xxap_transaction::{RequestError, RequestProvider};
 
-impl<
-        N: TransportProvider,
-        F: TransportProvider,
-        C: Api<ClientContext> + Send + Sync + Clone + 'static,
-    > Gnbcu<N, F, C>
-{
+impl Gnbcu {
     pub fn start_callback_server(&self, stop_token: StopToken) -> Result<JoinHandle<()>> {
         let addr = format!("0.0.0.0:{}", self.config.callback_server_bind_port).parse()?;
         let service = MakeService::new(self.clone());
@@ -43,13 +37,7 @@ impl<
 }
 
 #[async_trait]
-impl<N, F, C, Cx> CallbackApi<Cx> for Gnbcu<N, F, C>
-where
-    N: TransportProvider,
-    F: TransportProvider,
-    C: Api<ClientContext> + Send + Sync + 'static + Clone,
-    Cx: Send + Sync,
-{
+impl<Cx: Send + Sync> CallbackApi<Cx> for Gnbcu {
     /// A worker is instructed to trigger an interface management procedure on the given TNLA.
     async fn trigger_interface_management(
         &self,
@@ -91,12 +79,7 @@ where
 
 // TODO should the following be a separate module.  Unclear to have them in
 // node control callback server.
-impl<N, F, C> Gnbcu<N, F, C>
-where
-    N: TransportProvider,
-    F: TransportProvider,
-    C: Api<ClientContext> + Send + Sync + 'static + Clone,
-{
+impl Gnbcu {
     async fn trigger_procedure(
         &self,
         procedure: &str,
@@ -109,16 +92,15 @@ where
 
         match procedure {
             "ngsetup" => {
-                let response =
-                    <TransactionSender<N> as RequestProvider<NgSetupRequestProcedure>>::request(
-                        &self.ngap_transport_provider,
-                        self.ng_setup(),
-                        logger,
-                    )
-                    .await;
+                let response = <Stack as RequestProvider<NgSetupRequestProcedure>>::request(
+                    &self.ngap,
+                    self.ng_setup(),
+                    logger,
+                )
+                .await;
                 match response {
                     Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
-                    Err(RequestError::UnsuccessfulResponse(x)) => {
+                    Err(RequestError::UnsuccessfulOutcome(x)) => {
                         trace!(logger_clone, "NgSetupFailure {:?}", x)
                     }
                     Err(RequestError::Other(s)) => trace!(logger_clone, "Other error {}", s),
@@ -127,16 +109,15 @@ where
             }
 
             "ranconfigurationupdate" => {
-                let response =
-                    <TransactionSender<N> as RequestProvider<NgSetupRequestProcedure>>::request(
-                        &self.ngap_transport_provider,
-                        self.ng_setup(),
-                        logger,
-                    )
-                    .await;
+                let response = <Stack as RequestProvider<NgSetupRequestProcedure>>::request(
+                    &self.ngap,
+                    self.ng_setup(),
+                    logger,
+                )
+                .await;
                 match response {
                     Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
-                    Err(RequestError::UnsuccessfulResponse(x)) => {
+                    Err(RequestError::UnsuccessfulOutcome(x)) => {
                         trace!(logger_clone, "NgSetupFailure {:?}", x)
                     }
                     Err(RequestError::Other(s)) => trace!(logger_clone, "Other error {}", s),

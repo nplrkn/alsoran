@@ -1,29 +1,39 @@
-use asn1_codecs::aper::AperCodec;
+use asn1_codecs::aper;
 use async_trait::async_trait;
-use slog::Logger;
+use slog::{trace, Logger};
 use std::fmt::Debug;
-
-// pub trait Procedure<T: AperCodec> {
-//     const CODE: u8;
-//     type Request: AperCodec + IntoPdu<T> + Send + Sync + 'static;
-//     type Success: AperCodec<Output = Self::Success>;
-//     type Failure: AperCodec<Output = Self::Failure>;
-// }
 
 pub trait Procedure {
     const CODE: u8;
     type TopPdu: AperCodec;
-    type Request: AperCodec + IntoPdu<Self::TopPdu> + Send + Sync + 'static;
-    type Success: AperCodec<Output = Self::Success>;
-    type Failure: AperCodec<Output = Self::Failure>;
+    type Request: AperCodec + Into<Self::TopPdu> + Send + Sync + 'static + Debug;
+    type Success: AperCodec;
+    type Failure: AperCodec;
 }
 
-pub trait IntoPdu<P> {
-    fn into_pdu(self) -> P;
+// This replaces AperCodec from the asn1_codecs crate with a more ergonomic version.
+pub trait AperCodec: Sized {
+    fn into_bytes(self) -> Result<Vec<u8>, AperCodecError>;
+    fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError>;
 }
+pub use aper::AperCodecError;
+
+impl<T: aper::AperCodec> AperCodec for T {
+    fn into_bytes(self) -> Result<Vec<u8>, AperCodecError> {
+        todo!()
+    }
+
+    fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError> {
+        todo!()
+    }
+}
+
+// pub trait IntoPduBytes<P> {
+//     fn into_pdu_bytes(self) -> Result<Vec<u8>, AperCodecError>;
+// }
 
 pub enum RequestError<U> {
-    UnsuccessfulResponse(U),
+    UnsuccessfulOutcome(U),
     Other(String),
 }
 
@@ -39,5 +49,8 @@ pub trait RequestProvider<P: Procedure> {
         &self,
         r: P::Request,
         logger: &Logger,
-    ) -> Result<P::Success, RequestError<P::Failure>>;
+    ) -> Result<P::Success, RequestError<P::Failure>> {
+        trace!(logger, "Received unimplemented request {:?}", r);
+        Err(RequestError::Other("Not implemented".to_string()))
+    }
 }

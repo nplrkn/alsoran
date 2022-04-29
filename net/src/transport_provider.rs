@@ -13,7 +13,7 @@ use stop_token::StopToken;
 
 /// The TransportProvider trait abstracts the transport, for example, to allow a non-SCTP test transport to be used.
 #[async_trait]
-pub trait TransportProvider: Clone + Send + Sync + 'static {
+pub trait TransportProvider: Send + Sync + 'static {
     async fn send_message(&self, message: Message, logger: &Logger) -> Result<()>;
 
     async fn serve<H>(
@@ -29,8 +29,8 @@ pub trait TransportProvider: Clone + Send + Sync + 'static {
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
-        handler: H,
         stop_token: StopToken,
+        handler: H,
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where

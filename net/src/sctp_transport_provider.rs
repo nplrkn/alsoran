@@ -52,8 +52,8 @@ impl TransportProvider for SctpTransportProvider {
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
-        handler: H,
         stop_token: StopToken,
+        handler: H,
         logger: Logger,
     ) -> Result<JoinHandle<()>>
     where

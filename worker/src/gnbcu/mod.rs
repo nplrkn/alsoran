@@ -1,79 +1,74 @@
 mod f1ap_handler;
 mod ngap_handler;
 mod node_control_callback_server;
-use std::sync::Arc;
 
 use crate::config::Config;
-use crate::ClientContext;
 use anyhow::{anyhow, Result};
-use async_std::sync::Mutex;
 use async_std::task::JoinHandle;
+use f1ap_handler::F1apHandler;
+use hyper::Body;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
-use net::{SharedTransactions, TransactionReceiver, TransactionSender, TransportProvider};
+use net::{SctpTransportProvider, Stack};
+use ngap_handler::NgapHandler;
+use node_control_api::Client;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
 use slog::{info, trace, warn};
 use stop_token::{StopSource, StopToken};
-use swagger::{ApiError, AuthData, EmptyContext, Push, XSpanIdString};
+use swagger::{
+    ApiError, AuthData, ContextBuilder, DropContextService, EmptyContext, Push, XSpanIdString,
+};
 use uuid::Uuid;
+
+pub type ClientContext = swagger::make_context_ty!(
+    ContextBuilder,
+    EmptyContext,
+    Option<AuthData>,
+    XSpanIdString
+);
 
 /// The gNB-CU.
 #[derive(Clone)]
-pub struct Gnbcu<N, F, C>
-where
-    N: TransportProvider,
-    F: TransportProvider,
-    C: Api<ClientContext> + Clone + Send + Sync + 'static,
-{
+pub struct Gnbcu {
     config: Config,
     worker_uuid: Uuid,
-    ngap_transport_provider: TransactionSender<N>, // TODO rename to ngap?
-    f1ap_transport_provider: TransactionSender<F>, // TODO rename to f1ap
-    coordinator_client: C,
-    ngap_transactions: SharedTransactions,
-    f1ap_transactions: SharedTransactions,
+    ngap: Stack,
+    f1ap: Stack,
+    coordinator_client: Client<
+        DropContextService<
+            hyper::client::Client<hyper::client::HttpConnector, Body>,
+            ClientContext,
+        >,
+        ClientContext,
+    >,
     logger: Logger,
 }
 
-impl<
-        N: TransportProvider,
-        F: TransportProvider,
-        C: Api<ClientContext> + Send + Sync + Clone + 'static,
-    > Gnbcu<N, F, C>
-{
-    pub fn new(
+impl Gnbcu {
+    pub fn spawn(
         config: Config,
-        ngap_transport_provider: N,
-        f1ap_transport_provider: F,
-        coordinator_client: C,
+        ngap_transport_provider: SctpTransportProvider,
+        f1ap_transport_provider: SctpTransportProvider,
         logger: &Logger,
-    ) -> Gnbcu<N, F, C> {
-        let ngap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
-        let ngap_transport_provider =
-            TransactionSender::new(ngap_transport_provider, ngap_transactions.clone());
-        let f1ap_transactions = Arc::new(Mutex::new(Box::new(Vec::new())));
-        let f1ap_transport_provider =
-            TransactionSender::new(f1ap_transport_provider, f1ap_transactions.clone());
-        Gnbcu {
-            config,
-            worker_uuid: Uuid::new_v4(),
-            ngap_transport_provider,
-            f1ap_transport_provider,
-            coordinator_client,
-            ngap_transactions,
-            f1ap_transactions,
-            logger: logger.clone(),
-        }
-    }
-
-    pub fn spawn(self) -> (StopSource, JoinHandle<()>) {
+    ) -> Result<(StopSource, JoinHandle<()>)> {
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
+        let gnbcu = Gnbcu {
+            config,
+            worker_uuid: Uuid::new_v4(),
+            ngap: Stack::new(ngap_transport_provider),
+            f1ap: Stack::new(f1ap_transport_provider),
+            coordinator_client: Client::try_new_http("http://127.0.0.1:23156")?,
+            logger: logger.clone(),
+        };
         let task = async_std::task::spawn(async move {
             // Crash if this task exits, because there is no recovery loop.
-            self.serve(stop_token).await.expect("Fatal error in worker");
+            gnbcu
+                .serve(stop_token)
+                .await
+                .expect("Fatal error in worker");
         });
-        (stop_source, task)
+        Ok((stop_source, task))
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
@@ -84,35 +79,40 @@ impl<
         // Start node control callback server in a separate task.
         let callback_server_task = self.start_callback_server(stop_token.clone())?;
 
-        let ok_response = if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
-            trace!(logger, "Received refresh worker response");
-            Ok(response)
-        } else {
-            warn!(logger, "Error response {:?}", response);
-            Err(anyhow!("Coordinator failed request"))
-        }?;
+        let RefreshWorkerRsp { amf_addresses } =
+            if let RefreshWorkerResponse::RefreshWorkerResponse(response) = response {
+                trace!(logger, "Received refresh worker response");
+                Ok(response)
+            } else {
+                warn!(logger, "Error response {:?}", response);
+                Err(anyhow!("Coordinator failed request"))
+            }?;
 
-        let RefreshWorkerRsp { amf_addresses } = ok_response;
-        let amf_address = &amf_addresses[0];
-
-        let address = format!("{}:{}", amf_address.host, amf_address.port.unwrap_or(38212));
-        info!(logger, "Maintain connection to AMF {}", address);
-        let handler = TransactionReceiver::new(self.clone(), self.ngap_transactions.clone());
-        let connection_task = self
-            .ngap_transport_provider
-            .transport_provider // TODO we don't want to reach inside like this
-            .clone()
-            .maintain_connection(address, handler, stop_token.clone(), logger.clone())
+        let amf_address = format!(
+            "{}:{}",
+            amf_addresses[0].host,
+            amf_addresses[0].port.unwrap_or(38212)
+        );
+        info!(logger, "Maintain connection to AMF {}", amf_address);
+        let ngap_transport = self
+            .ngap
+            .connect(amf_address, NgapHandler::new(self.clone()), logger.clone())
+            .await?;
+        let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
+        let f1_transport = self
+            .f1ap
+            .listen(
+                f1_listen_address,
+                F1apHandler::new(self.clone()),
+                logger.clone(),
+            )
             .await?;
 
-        let f1_server_task = self.start_f1ap_handler(stop_token.clone()).await?;
-
-        stop_token.await;
-
         // Wait for our tasks to terminate.
-        connection_task.await;
+        stop_token.await;
+        ngap_transport.graceful_shutdown().await;
+        f1_transport.graceful_shutdown().await;
         callback_server_task.await;
-        f1_server_task.await;
 
         info!(logger, "Stop");
         Ok(())
@@ -132,8 +132,7 @@ impl<
         );
 
         let connected_amfs = self
-            .ngap_transport_provider
-            .transport_provider // TODO we don't want to reach inside like this
+            .ngap
             .remote_tnla_addresses()
             .await
             .iter()

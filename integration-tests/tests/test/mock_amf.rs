@@ -4,9 +4,7 @@ use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use net::TransportProvider;
-use net::{
-    Asn1PerCodec, SctpTransportProvider, ServerTransportProvider, TnlaEvent, TnlaEventHandler,
-};
+use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use ngap::NgapPdu;
 use ngap::*;
 use slog::info;
@@ -20,7 +18,7 @@ const NGAP_SCTP_PPID: u32 = 60;
 pub struct MockAmf {
     pub stop_source: StopSource,
     pub receiver: Receiver<Option<NgapPdu>>,
-    pub sender: SctpTransportProvider<Asn1PerCodec<NgapPdu>, NgapPdu>,
+    pub sender: SctpTransportProvider,
     pub task: JoinHandle<()>,
     logger: Logger,
 }
@@ -33,7 +31,7 @@ impl MockAmf {
         let (internal_sender, receiver) = async_channel::unbounded();
         let logger = logger.new(o!("amf" => 1));
         let stop_source = StopSource::new();
-        let server = SctpTransportProvider::new(NGAP_SCTP_PPID, Asn1PerCodec::new());
+        let server = SctpTransportProvider::new(NGAP_SCTP_PPID);
         let task = server
             .clone()
             .serve(
@@ -118,7 +116,7 @@ impl MockAmf {
                 extended_amf_name: None,
             }));
 
-        self.sender.send_pdu(response, &logger).await?;
+        self.sender.send_message(response, &logger).await?;
 
         Ok(())
     }
@@ -152,7 +150,7 @@ impl MockAmf {
 }
 
 #[async_trait]
-impl TnlaEventHandler<NgapPdu> for Handler {
+impl TnlaEventHandler for Handler {
     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
         self.0.send(None).await.unwrap();
     }

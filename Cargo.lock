@@ -613,6 +613,7 @@ dependencies = [
  "bitvec",
  "hex",
  "num_enum",
+ "xxap-transaction",
 ]
 
 [[package]]
@@ -1371,11 +1372,13 @@ dependencies = [
 name = "ngap"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "asn1-codecs 0.1.3",
  "async-trait",
  "bitvec",
  "hex",
  "num_enum",
+ "slog",
  "xxap-transaction",
 ]
 
