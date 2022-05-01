@@ -5,11 +5,9 @@ mod node_control_callback_server;
 use crate::config::Config;
 use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
-use f1ap_handler::F1apHandler;
 use hyper::Body;
 use models::{RefreshWorkerReq, RefreshWorkerRsp, TransportAddress};
 use net::{SctpTransportProvider, Stack};
-use ngap_handler::NgapHandler;
 use node_control_api::Client;
 use node_control_api::{models, Api, RefreshWorkerResponse};
 use slog::Logger;
@@ -96,14 +94,14 @@ impl Gnbcu {
         info!(logger, "Maintain connection to AMF {}", amf_address);
         let ngap_transport = self
             .ngap
-            .connect(amf_address, NgapHandler::new(self.clone()), logger.clone())
+            .connect(amf_address, ngap_handler::new(self.clone()), logger.clone())
             .await?;
         let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
         let f1_transport = self
             .f1ap
             .listen(
                 f1_listen_address,
-                F1apHandler::new(self.clone()),
+                f1ap_handler::new(self.clone()),
                 logger.clone(),
             )
             .await?;

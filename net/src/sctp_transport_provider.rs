@@ -1,5 +1,6 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
-use crate::{TnlaEventHandler, TransportProvider};
+use super::tnla_event_handler::TnlaEventHandler;
+use crate::TransportProvider;
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;

@@ -12,6 +12,8 @@ asn1-codecs = { path = "../../hampi/codecs" }
 hex = "0.4.3"
 num_enum = "0.5.7"
 bitvec = { version = "0.22" }
-xxap-transaction = { path = "../xxap-transaction" }
-
+net = { path = "../net" }
+async-trait = "0.1.51"
+anyhow = "1.0.52"
+slog = "2.7.0"
 

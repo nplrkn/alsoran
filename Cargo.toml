@@ -10,5 +10,4 @@ members = [
     "net",
     "ngap",
     "f1ap",
-    "xxap-transaction"
 ]

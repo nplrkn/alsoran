@@ -1,3 +1,4 @@
+use anyhow::Result;
 use asn1_codecs::aper;
 use async_trait::async_trait;
 use slog::{trace, Logger};
@@ -23,14 +24,10 @@ impl<T: aper::AperCodec> AperCodec for T {
         todo!()
     }
 
-    fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError> {
+    fn from_bytes(_bytes: &[u8]) -> Result<Self, AperCodecError> {
         todo!()
     }
 }
-
-// pub trait IntoPduBytes<P> {
-//     fn into_pdu_bytes(self) -> Result<Vec<u8>, AperCodecError>;
-// }
 
 pub enum RequestError<U> {
     UnsuccessfulOutcome(U),
@@ -43,6 +40,7 @@ impl<U, D: Debug> From<D> for RequestError<U> {
     }
 }
 
+/// Trait representing the ability to handle a single procedure.
 #[async_trait]
 pub trait RequestProvider<P: Procedure> {
     async fn request(
@@ -52,5 +50,27 @@ pub trait RequestProvider<P: Procedure> {
     ) -> Result<P::Success, RequestError<P::Failure>> {
         trace!(logger, "Received unimplemented request {:?}", r);
         Err(RequestError::Other("Not implemented".to_string()))
+    }
+}
+
+/// Trait representing the ability to handle multiple procedures that use the same top level PDU.
+#[async_trait]
+pub trait InterfaceProvider: Send + Sync {
+    type TopPdu: AperCodec;
+    async fn route_request(&self, p: Self::TopPdu, logger: &Logger) -> Result<Self::TopPdu>;
+}
+
+/// Trait representing the ability to handle and respond to a request in wire format.
+#[async_trait]
+pub trait RequestMessageHandler: Send + Sync {
+    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Result<Vec<u8>>;
+}
+
+// An interface provider is a request message handler.
+#[async_trait]
+impl<T: AperCodec + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
+    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Result<Vec<u8>> {
+        let pdu = T::from_bytes(message)?;
+        Ok(self.route_request(pdu, logger).await?.into_bytes()?)
     }
 }

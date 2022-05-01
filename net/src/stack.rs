@@ -1,17 +1,21 @@
 // NGAP or F1AP stack
 
+use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{
-    Message, SctpTransportProvider, SharedTransactions, TnlaEvent, TnlaEventHandler,
-    TransportProvider,
+    AperCodec, Message, Procedure, RequestError, RequestMessageHandler, RequestProvider,
+    SctpTransportProvider, TnlaEvent, TransportProvider,
 };
 use anyhow::Result;
+use async_channel::Sender;
 use async_net::SocketAddr;
-use async_std::{sync::Mutex, task::JoinHandle};
+use async_std::sync::{Arc, Mutex};
+use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::{trace, warn, Logger};
-use std::sync::Arc;
 use stop_token::StopSource;
-use xxap_transaction::*;
+
+type TransactionMatchFn = Box<dyn Fn(&Message) -> bool + Send + Sync>;
+type SharedTransactions = Arc<Mutex<Box<Vec<(TransactionMatchFn, Sender<Message>)>>>>;
 
 #[derive(Clone)]
 pub struct Stack {
@@ -20,15 +24,11 @@ pub struct Stack {
 }
 
 #[async_trait]
-pub trait Application: Clone + Send + Sync + 'static {
+pub trait EventHandler: Clone + Send + Sync + 'static {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger);
-    async fn handle_request(
-        &self,
-        message: Message,
-        tnla_id: u32,
-        logger: &Logger,
-    ) -> Result<Message>;
 }
+
+pub trait Application: EventHandler + RequestMessageHandler {}
 
 impl Stack {
     pub fn new(transport_provider: SctpTransportProvider) -> Self {
@@ -143,7 +143,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
         self.application.handle_event(event, tnla_id, logger).await
     }
 
-    async fn handle_message(&self, message: Message, tnla_id: u32, logger: &Logger) {
+    async fn handle_message(&self, message: Message, _tnla_id: u32, logger: &Logger) {
         // TODO figure out if it is a response and warn / drop if there are no matches
 
         // If it matches a pending request, route it back over the response channel.
@@ -168,7 +168,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
             }
             _ => {
                 self.application
-                    .handle_request(message, tnla_id, logger)
+                    .handle_request(&message, logger)
                     .await
                     .unwrap(); // TODO
             }

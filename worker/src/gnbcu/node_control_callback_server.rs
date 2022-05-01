@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
-use net::Stack;
+use net::{RequestError, RequestProvider, Stack};
 use ngap::*;
 use node_control_api::client::callbacks::MakeService;
 use node_control_api::{models, CallbackApi, TriggerInterfaceManagementResponse};
@@ -13,7 +13,6 @@ use stop_token::StopToken;
 use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::ApiError;
 use swagger::EmptyContext;
-use xxap_transaction::{RequestError, RequestProvider};
 
 impl Gnbcu {
     pub fn start_callback_server(&self, stop_token: StopToken) -> Result<JoinHandle<()>> {
@@ -109,12 +108,13 @@ impl Gnbcu {
             }
 
             "ranconfigurationupdate" => {
-                let response = <Stack as RequestProvider<NgSetupRequestProcedure>>::request(
-                    &self.ngap,
-                    self.ng_setup(),
-                    logger,
-                )
-                .await;
+                let response =
+                    <Stack as RequestProvider<RanConfigurationUpdateProcedure>>::request(
+                        &self.ngap,
+                        self.ran_configuration_update(),
+                        logger,
+                    )
+                    .await;
                 match response {
                     Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
                     Err(RequestError::UnsuccessfulOutcome(x)) => {
@@ -153,18 +153,16 @@ impl Gnbcu {
         }
     }
 
-    fn ran_configuration_update(&self) -> NgapPdu {
-        NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
-            RanConfigurationUpdate {
-                ran_node_name: None,
-                supported_ta_list: None,
-                default_paging_drx: None,
-                global_ran_node_id: Some(self.global_ran_node_id()),
-                ngran_tnl_association_to_remove_list: None,
-                nb_iot_default_paging_drx: None,
-                extended_ran_node_name: None,
-            },
-        ))
+    fn ran_configuration_update(&self) -> RanConfigurationUpdate {
+        RanConfigurationUpdate {
+            ran_node_name: None,
+            supported_ta_list: None,
+            default_paging_drx: None,
+            global_ran_node_id: Some(self.global_ran_node_id()),
+            ngran_tnl_association_to_remove_list: None,
+            nb_iot_default_paging_drx: None,
+            extended_ran_node_name: None,
+        }
     }
 
     fn global_ran_node_id(&self) -> GlobalRanNodeId {

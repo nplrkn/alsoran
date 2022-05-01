@@ -2,8 +2,14 @@ use crate::pdu::*;
 use crate::top_pdu::*;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
+use net::Application;
+use net::EventHandler;
+use net::InterfaceProvider;
+use net::Procedure;
+use net::RequestError;
+use net::RequestProvider;
+use net::TnlaEvent;
 use slog::Logger;
-use xxap_transaction::*;
 
 // Autogen or derive this
 impl From<NgSetupRequest> for NgapPdu {
@@ -69,21 +75,34 @@ where
         })
 }
 
+pub struct NgapAmf<T>(pub T)
+where
+    T: RequestProvider<NgSetupRequestProcedure> + RequestProvider<RanConfigurationUpdateProcedure>;
+
 #[async_trait]
-pub trait NgapAmfProvider:
-    RequestProvider<NgSetupRequestProcedure> + RequestProvider<RanConfigurationUpdateProcedure>
+impl<T> InterfaceProvider for NgapAmf<T>
+where
+    T: Send
+        + Sync
+        + RequestProvider<NgSetupRequestProcedure>
+        + RequestProvider<RanConfigurationUpdateProcedure>,
 {
-    async fn route_request(&self, p: InitiatingMessage, logger: &Logger) -> Result<NgapPdu> {
-        match p {
-            InitiatingMessage::RanConfigurationUpdate(req) => map(<Self as RequestProvider<
+    type TopPdu = NgapPdu;
+    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Result<NgapPdu> {
+        let initiating_message = match p {
+            NgapPdu::InitiatingMessage(m) => m,
+            _ => return Err(anyhow!("Not a request!")),
+        };
+        match initiating_message {
+            InitiatingMessage::RanConfigurationUpdate(req) => map(<T as RequestProvider<
                 RanConfigurationUpdateProcedure,
             >>::request(
-                self, req, logger
+                &self.0, req, logger
             )
             .await),
             InitiatingMessage::NgSetupRequest(req) => {
                 map(
-                    <Self as RequestProvider<NgSetupRequestProcedure>>::request(self, req, logger)
+                    <T as RequestProvider<NgSetupRequestProcedure>>::request(&self.0, req, logger)
                         .await,
                 )
             }
@@ -92,18 +111,44 @@ pub trait NgapAmfProvider:
     }
 }
 
-// So the Stack should provide this.  And the Gnb biz logic should take one of these.
+#[derive(Clone)]
+pub struct NgapGnb<T>(pub T)
+where
+    T: RequestProvider<NgSetupRequestProcedure>; // TODO
 
 #[async_trait]
-pub trait NgapGnbProvider: RequestProvider<RanConfigurationUpdateProcedure> {
-    async fn route_request(&self, p: InitiatingMessage, logger: &Logger) -> Result<NgapPdu> {
-        match p {
-            InitiatingMessage::RanConfigurationUpdate(req) => map(<Self as RequestProvider<
-                RanConfigurationUpdateProcedure,
-            >>::request(
-                self, req, logger
-            )
-            .await),
+impl<T> EventHandler for NgapGnb<T>
+where
+    T: RequestProvider<NgSetupRequestProcedure> + EventHandler,
+{
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        self.0.handle_event(event, tnla_id, logger).await;
+    }
+}
+
+impl<T> Application for NgapGnb<T> where
+    T: RequestProvider<NgSetupRequestProcedure> + EventHandler + Clone
+{
+}
+
+#[async_trait]
+impl<T> InterfaceProvider for NgapGnb<T>
+where
+    T: Send + Sync + RequestProvider<NgSetupRequestProcedure>,
+{
+    type TopPdu = NgapPdu;
+    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Result<NgapPdu> {
+        let initiating_message = match p {
+            NgapPdu::InitiatingMessage(m) => m,
+            _ => return Err(anyhow!("Not a request!")),
+        };
+        match initiating_message {
+            InitiatingMessage::NgSetupRequest(req) => {
+                map(
+                    <T as RequestProvider<NgSetupRequestProcedure>>::request(&self.0, req, logger)
+                        .await,
+                )
+            }
             _ => todo!(),
         }
     }

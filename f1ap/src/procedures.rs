@@ -1,12 +1,31 @@
 use crate::pdu::*;
 use crate::top_pdu::*;
-use asn1_codecs::aper::{AperCodec, AperCodecData, AperCodecError};
-use xxap_transaction::*;
+use anyhow::{anyhow, Result};
+use async_trait::async_trait;
+use net::Application;
+use net::EventHandler;
+use net::InterfaceProvider;
+use net::Procedure;
+use net::RequestError;
+use net::RequestProvider;
+use net::TnlaEvent;
+use slog::Logger;
 
 // Autogen this
 impl From<F1SetupRequest> for F1apPdu {
     fn from(x: F1SetupRequest) -> Self {
         F1apPdu::InitiatingMessage(InitiatingMessage::F1SetupRequest(x))
+    }
+}
+
+impl From<F1SetupResponse> for SuccessfulOutcome {
+    fn from(x: F1SetupResponse) -> Self {
+        SuccessfulOutcome::F1SetupResponse(x)
+    }
+}
+impl From<F1SetupFailure> for UnsuccessfulOutcome {
+    fn from(x: F1SetupFailure) -> Self {
+        UnsuccessfulOutcome::F1SetupFailure(x)
     }
 }
 
@@ -20,4 +39,59 @@ impl Procedure for F1SetupProcedure {
     const CODE: u8 = 1;
 }
 
-pub struct RanConfigurationUpdateProcedure {}
+fn map<T, E>(r: Result<T, RequestError<E>>) -> Result<F1apPdu>
+where
+    UnsuccessfulOutcome: From<E>,
+    SuccessfulOutcome: From<T>,
+{
+    r.map(|x| F1apPdu::SuccessfulOutcome(x.into()))
+        .or_else(|e| match e {
+            RequestError::UnsuccessfulOutcome(x) => Ok(F1apPdu::UnsuccessfulOutcome(x.into())),
+            RequestError::Other(s) => Err(anyhow!(format!("{}", s))),
+        })
+}
+
+#[derive(Clone)]
+pub struct F1apCu<T>(T)
+where
+    T: RequestProvider<F1SetupProcedure> + EventHandler + Clone;
+
+impl<T> F1apCu<T>
+where
+    T: RequestProvider<F1SetupProcedure> + EventHandler + Clone,
+{
+    pub fn new(inner: T) -> Self {
+        F1apCu(inner)
+    }
+}
+
+#[async_trait]
+impl<T> EventHandler for F1apCu<T>
+where
+    T: RequestProvider<F1SetupProcedure> + EventHandler,
+{
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        self.0.handle_event(event, tnla_id, logger).await;
+    }
+}
+
+impl<T> Application for F1apCu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone {}
+
+#[async_trait]
+impl<T> InterfaceProvider for F1apCu<T>
+where
+    T: Send + Sync + RequestProvider<F1SetupProcedure> + EventHandler,
+{
+    type TopPdu = F1apPdu;
+    async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Result<F1apPdu> {
+        match match p {
+            F1apPdu::InitiatingMessage(m) => m,
+            _ => return Err(anyhow!("Not a request!")),
+        } {
+            InitiatingMessage::F1SetupRequest(req) => {
+                map(<T as RequestProvider<F1SetupProcedure>>::request(&self.0, req, logger).await)
+            }
+            _ => todo!(),
+        }
+    }
+}
