@@ -3,7 +3,7 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{Message, TransportProvider};
+use net::{AperCodec, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};
@@ -47,8 +47,8 @@ impl MockDu {
             .clone()
             .maintain_connection(
                 connect_addr_string,
-                self.clone(),
                 self.stop_token.clone(),
+                self.clone(),
                 self.logger.clone(),
             )
             .await?;
@@ -79,9 +79,9 @@ impl MockDu {
                 extended_gnb_cu_name: None,
             }));
         info!(self.logger, "Wait for F1 Setup response from GNB");
-        let response = 
-        RequestProvider<F1ApPdu>::
-        .send_message(self.sender, f1_setup, &self.logger).await?;
+        self.sender
+            .send_message(pdu.into_bytes()?, &self.logger)
+            .await?;
 
         match self.receiver.recv().await? {
             Some(_response) => {
@@ -105,6 +105,9 @@ impl TnlaEventHandler for MockDu {
 
     async fn handle_message(&self, message: Message, _tnla_id: u32, logger: &Logger) {
         trace!(logger, "Got message from CU");
-        self.internal_sender.send(Some(message)).await.unwrap();
+        self.internal_sender
+            .send(Some(F1apPdu::from_bytes(&message).unwrap()))
+            .await
+            .unwrap();
     }
 }

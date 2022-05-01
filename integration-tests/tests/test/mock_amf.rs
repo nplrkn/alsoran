@@ -3,7 +3,7 @@ use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
-use net::TransportProvider;
+use net::{AperCodec, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use ngap::NgapPdu;
 use ngap::*;
@@ -116,7 +116,9 @@ impl MockAmf {
                 extended_amf_name: None,
             }));
 
-        self.sender.send_message(response, &logger).await?;
+        self.sender
+            .send_message(response.into_bytes()?, &logger)
+            .await?;
 
         Ok(())
     }
@@ -143,7 +145,9 @@ impl MockAmf {
                 },
             ));
 
-        self.sender.send_pdu(response, &logger).await?;
+        self.sender
+            .send_message(response.into_bytes()?, &logger)
+            .await?;
 
         Ok(())
     }
@@ -156,8 +160,11 @@ impl TnlaEventHandler for Handler {
     }
 
     // TODO indicate whether it is UE or non UE associated?
-    async fn handle_message(&self, message: NgapPdu, _tnla_id: u32, logger: &Logger) {
+    async fn handle_message(&self, message: Vec<u8>, _tnla_id: u32, logger: &Logger) {
         trace!(logger, "Got message from GNB");
-        self.0.send(Some(message)).await.unwrap();
+        self.0
+            .send(Some(NgapPdu::from_bytes(&message).unwrap()))
+            .await
+            .unwrap();
     }
 }

@@ -75,10 +75,54 @@ where
     }
 }
 
+#[derive(Clone)]
+pub struct F1apDu<T>(T)
+where
+    T: RequestProvider<F1SetupProcedure> + EventHandler + Clone;
+
+impl<T> F1apDu<T>
+where
+    T: RequestProvider<F1SetupProcedure> + EventHandler + Clone,
+{
+    pub fn new(inner: T) -> Self {
+        F1apDu(inner)
+    }
+}
+
+#[async_trait]
+impl<T> EventHandler for F1apDu<T>
+where
+    T: RequestProvider<F1SetupProcedure> + EventHandler,
+{
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
+        self.0.handle_event(event, tnla_id, logger).await;
+    }
+}
+
 impl<T> Application for F1apCu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone {}
+impl<T> Application for F1apDu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone {}
 
 #[async_trait]
 impl<T> InterfaceProvider for F1apCu<T>
+where
+    T: Send + Sync + RequestProvider<F1SetupProcedure> + EventHandler,
+{
+    type TopPdu = F1apPdu;
+    async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Result<F1apPdu> {
+        match match p {
+            F1apPdu::InitiatingMessage(m) => m,
+            _ => return Err(anyhow!("Not a request!")),
+        } {
+            InitiatingMessage::F1SetupRequest(req) => {
+                map(<T as RequestProvider<F1SetupProcedure>>::request(&self.0, req, logger).await)
+            }
+            _ => todo!(),
+        }
+    }
+}
+
+#[async_trait]
+impl<T> InterfaceProvider for F1apDu<T>
 where
     T: Send + Sync + RequestProvider<F1SetupProcedure> + EventHandler,
 {

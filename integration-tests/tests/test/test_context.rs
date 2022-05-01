@@ -1,7 +1,6 @@
 use super::mock_amf::MockAmf;
 use super::mock_du::MockDu;
 use async_std::task::JoinHandle;
-use net::Asn1PerCodec;
 use slog::{info, o, Logger};
 use std::{panic, process};
 use stop_token::StopSource;
@@ -73,13 +72,8 @@ impl TestContext {
         config.callback_server_bind_port += worker_number;
         config.f1ap_bind_port += worker_number;
 
-        let (stop_source, task) = worker::spawn(
-            config.clone(),
-            self.logger.new(o!("cu-w"=> worker_number)),
-            Asn1PerCodec::new(),
-            Asn1PerCodec::new(),
-        )
-        .unwrap();
+        let (stop_source, task) =
+            worker::spawn(config.clone(), self.logger.new(o!("cu-w"=> worker_number))).unwrap();
         self.workers.push(InternalWorkerInfo {
             stop_source,
             task,

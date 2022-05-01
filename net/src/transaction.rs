@@ -1,5 +1,6 @@
 use anyhow::Result;
 use asn1_codecs::aper;
+use async_channel::RecvError;
 use async_trait::async_trait;
 use slog::{trace, Logger};
 use std::fmt::Debug;
@@ -29,16 +30,35 @@ impl<T: aper::AperCodec> AperCodec for T {
     }
 }
 
+#[derive(Debug)]
 pub enum RequestError<U> {
     UnsuccessfulOutcome(U),
     Other(String),
 }
 
-impl<U, D: Debug> From<D> for RequestError<U> {
-    fn from(e: D) -> Self {
-        RequestError::Other(format!("{:?}", e))
+impl<T> From<AperCodecError> for RequestError<T> {
+    fn from(e: AperCodecError) -> Self {
+        RequestError::Other(format!("Codec error: {:?}", e))
     }
 }
+
+impl<T> From<RecvError> for RequestError<T> {
+    fn from(e: RecvError) -> Self {
+        RequestError::Other(format!("Channel recv error: {:?}", e))
+    }
+}
+
+impl<T> From<anyhow::Error> for RequestError<T> {
+    fn from(e: anyhow::Error) -> Self {
+        RequestError::Other(format!("Transport error: {:?}", e))
+    }
+}
+
+// impl<U, D: Debug> From<D> for RequestError<U> {
+//     fn from(e: D) -> Self {
+//         RequestError::Other(format!("{:?}", e))
+//     }
+// }
 
 /// Trait representing the ability to handle a single procedure.
 #[async_trait]
