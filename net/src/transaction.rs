@@ -1,5 +1,5 @@
 use anyhow::Result;
-use asn1_codecs::aper;
+use asn1_codecs::aper::{self, AperCodecData};
 use async_channel::RecvError;
 use async_trait::async_trait;
 use slog::{trace, Logger};
@@ -7,10 +7,12 @@ use std::fmt::Debug;
 
 pub trait Procedure {
     const CODE: u8;
-    type TopPdu: AperCodec;
-    type Request: AperCodec + Into<Self::TopPdu> + Send + Sync + 'static + Debug;
-    type Success: AperCodec;
-    type Failure: AperCodec;
+    type TopPdu: AperCodec + Send + Sync + 'static;
+    type Request: Send + Sync + 'static + Debug;
+    type Success;
+    type Failure;
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError>;
+    fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>>;
 }
 
 // This replaces AperCodec from the asn1_codecs crate with a more ergonomic version.
@@ -20,13 +22,16 @@ pub trait AperCodec: Sized {
 }
 pub use aper::AperCodecError;
 
-impl<T: aper::AperCodec> AperCodec for T {
+impl<T: aper::AperCodec<Output = T>> AperCodec for T {
     fn into_bytes(self) -> Result<Vec<u8>, AperCodecError> {
-        todo!()
+        let mut d = AperCodecData::new();
+        self.encode(&mut d)?;
+        Ok(d.into_bytes())
     }
 
-    fn from_bytes(_bytes: &[u8]) -> Result<Self, AperCodecError> {
-        todo!()
+    fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError> {
+        let mut d = AperCodecData::from_slice(bytes);
+        Self::decode(&mut d)
     }
 }
 

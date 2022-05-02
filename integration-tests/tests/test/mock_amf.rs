@@ -160,11 +160,17 @@ impl TnlaEventHandler for Handler {
     }
 
     // TODO indicate whether it is UE or non UE associated?
-    async fn handle_message(&self, message: Vec<u8>, _tnla_id: u32, logger: &Logger) {
+    async fn handle_message(
+        &self,
+        message: Vec<u8>,
+        _tnla_id: u32,
+        logger: &Logger,
+    ) -> Option<Vec<u8>> {
         trace!(logger, "Got message from GNB");
         self.0
             .send(Some(NgapPdu::from_bytes(&message).unwrap()))
             .await
             .unwrap();
+        None
     }
 }

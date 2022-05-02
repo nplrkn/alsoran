@@ -66,7 +66,7 @@ impl TransportProvider for SctpTransportProvider {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
                     Ok(assoc) => {
                         let logger = logger.new(o!("connection" => assoc_id));
-                        info!(logger, "Established connection");
+                        trace!(logger, "Established connection");
 
                         self.tnla_pool
                             .add_and_handle_no_spawn(
@@ -126,7 +126,7 @@ impl TransportProvider for SctpTransportProvider {
         let stream = stream.take_until(stop_token.clone());
 
         Ok(task::spawn(async move {
-            info!(logger, "Listening for SCTP connections on {:?}", addr);
+            trace!(logger, "Listening for SCTP connections on {:?}", addr);
             pin_mut!(stream);
             let mut connection_tasks = vec![];
             loop {

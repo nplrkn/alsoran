@@ -103,11 +103,17 @@ impl TnlaEventHandler for MockDu {
         self.internal_sender.send(None).await.unwrap();
     }
 
-    async fn handle_message(&self, message: Message, _tnla_id: u32, logger: &Logger) {
+    async fn handle_message(
+        &self,
+        message: Message,
+        _tnla_id: u32,
+        logger: &Logger,
+    ) -> Option<Message> {
         trace!(logger, "Got message from CU");
         self.internal_sender
             .send(Some(F1apPdu::from_bytes(&message).unwrap()))
             .await
             .unwrap();
+        None
     }
 }

@@ -6,6 +6,7 @@ use async_std::task::JoinHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
+use slog::warn;
 use slog::{trace, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -56,7 +57,11 @@ impl SctpTnlaPool {
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
         pin_mut!(message_stream);
         while let Some(Ok(message)) = message_stream.next().await {
-            handler.handle_message(message, assoc_id, &logger).await;
+            if let Some(response) = handler.handle_message(message, assoc_id, &logger).await {
+                if let Err(e) = assoc.send_msg(response).await {
+                    warn!(logger, "Failed to send response - {}", e)
+                }
+            }
         }
         handler
             .handle_event(TnlaEvent::Terminated, assoc_id, &logger)

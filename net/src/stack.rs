@@ -2,7 +2,7 @@
 
 use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{
-    AperCodec, Message, Procedure, RequestError, RequestMessageHandler, RequestProvider,
+    Message, Procedure, RequestError, RequestMessageHandler, RequestProvider,
     SctpTransportProvider, TnlaEvent, TransportProvider,
 };
 use anyhow::Result;
@@ -108,7 +108,7 @@ impl<P: Procedure> RequestProvider<P> for Stack {
         r: P::Request,
         logger: &Logger,
     ) -> Result<P::Success, RequestError<P::Failure>> {
-        let bytes = r.into_bytes()?;
+        let bytes = P::encode_request(r)?;
 
         // Create a channel to receive the response.
         let (sender, receiver) = async_channel::bounded::<Vec<u8>>(1);
@@ -120,14 +120,7 @@ impl<P: Procedure> RequestProvider<P> for Stack {
 
         self.transport_provider.send_message(bytes, logger).await?;
         let msg = receiver.recv().await?;
-
-        // TODO: encapsulate this in a trait - either the Procedure trait or a new trait similar to
-        // into_pdu_bytes().
-        if msg[0] == 1 {
-            Ok(P::Success::from_bytes(&msg)?)
-        } else {
-            Ok(P::Success::from_bytes(&msg)?) // TODO unsuccess
-        }
+        P::decode_response(&msg)
     }
 }
 
@@ -143,7 +136,12 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
         self.application.handle_event(event, tnla_id, logger).await
     }
 
-    async fn handle_message(&self, message: Message, _tnla_id: u32, logger: &Logger) {
+    async fn handle_message(
+        &self,
+        message: Message,
+        _tnla_id: u32,
+        logger: &Logger,
+    ) -> Option<Message> {
         // TODO figure out if it is a response and warn / drop if there are no matches
 
         // If it matches a pending request, route it back over the response channel.
@@ -165,13 +163,18 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
                     .await
                     .unwrap_or_else(|_| warn!(logger, "Internal response channel down"));
                 // TODO
+                None
             }
-            _ => {
-                self.application
-                    .handle_request(&message, logger)
-                    .await
-                    .unwrap(); // TODO
-            }
-        };
+            _ => match self.application.handle_request(&message, logger).await {
+                Ok(response) => {
+                    trace!(logger, "Sending response to transaction");
+                    Some(response)
+                }
+                Err(s) => {
+                    warn!(logger, "While handling request - {}", s);
+                    None
+                }
+            },
+        }
     }
 }

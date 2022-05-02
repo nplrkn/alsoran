@@ -97,6 +97,10 @@ impl Gnbcu {
             .connect(amf_address, ngap_handler::new(self.clone()), logger.clone())
             .await?;
         let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
+        info!(
+            logger,
+            "Listen for connection from DU on {}", f1_listen_address
+        );
         let f1_transport = self
             .f1ap
             .listen(

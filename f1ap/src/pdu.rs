@@ -550,11 +550,8 @@ impl F1SetupRequest {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            println!("Next ie will be  {}", id);
-            let crit = Criticality::decode(data)?;
-            println!("Crit is {:?}", crit);
-            let ie_len = aper::decode::decode_length_determinent(data, None, None, false)?;
-            println!("YAY got an ie with length {} id {}", ie_len, id);
+            let _crit = Criticality::decode(data)?;
+            let _ie_len = aper::decode::decode_length_determinent(data, None, None, false)?;
             data.decode_align()?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),

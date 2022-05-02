@@ -3,15 +3,16 @@ use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, RequestError, RequestProvider, TnlaEvent};
-use slog::{trace, warn, Logger};
+use slog::{info, warn, Logger};
 
 #[async_trait]
 impl RequestProvider<F1SetupProcedure> for F1apHandler {
     async fn request(
         &self,
         r: F1SetupRequest,
-        _logger: &Logger,
+        logger: &Logger,
     ) -> Result<F1SetupResponse, RequestError<F1SetupFailure>> {
+        info!(logger, "Got F1 setup - send response");
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,
             gnb_cu_rrc_version: RrcVersion {
@@ -39,7 +40,7 @@ pub struct F1apHandler {
 impl EventHandler for F1apHandler {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
-            TnlaEvent::Established => trace!(logger, "F1AP TNLA {} established", tnla_id),
+            TnlaEvent::Established => info!(logger, "F1AP TNLA {} established", tnla_id),
             TnlaEvent::Terminated => warn!(logger, "F1AP TNLA {} closed", tnla_id),
         };
     }

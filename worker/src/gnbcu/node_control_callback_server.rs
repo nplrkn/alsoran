@@ -102,7 +102,7 @@ impl Gnbcu {
                     Err(RequestError::UnsuccessfulOutcome(x)) => {
                         trace!(logger_clone, "NgSetupFailure {:?}", x)
                     }
-                    Err(RequestError::Other(s)) => trace!(logger_clone, "Other error {}", s),
+                    Err(RequestError::Other(s)) => trace!(logger_clone, "{}", s),
                 }
                 Ok(())
             }
@@ -116,11 +116,11 @@ impl Gnbcu {
                     )
                     .await;
                 match response {
-                    Ok(x) => trace!(logger_clone, "NgSetupResponse {:?}", x),
+                    Ok(x) => trace!(logger_clone, "Successful {:?}", x),
                     Err(RequestError::UnsuccessfulOutcome(x)) => {
-                        trace!(logger_clone, "NgSetupFailure {:?}", x)
+                        trace!(logger_clone, "Unsuccessful {:?}", x)
                     }
-                    Err(RequestError::Other(s)) => trace!(logger_clone, "Other error {}", s),
+                    Err(RequestError::Other(s)) => trace!(logger_clone, "{}", s),
                 }
                 Ok(())
             }
