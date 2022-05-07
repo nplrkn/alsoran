@@ -477,8 +477,7 @@ pub enum SuccessfulOutcome {
 pub enum UnsuccessfulOutcome {
 """
 
-    def procedure_def(self, tree):
-        p = Procedure(tree)
+    def add_procedure(self, p):
         if p.initiating == "PrivateMessage":
             return
         self.initiating_enum += f"    {p.initiating}({p.initiating}),\n"
@@ -568,10 +567,12 @@ class RustInterpreter(Interpreter):
         pass
 
     def procedure_def(self, tree):
+        p = Procedure(tree)
+
         # Extend the top level enums (InitiatingMessage, SuccessfulOutcome and UnsuccessfulOutcome)
         # We output them at the end.
         self.top_level_enums = self.top_level_enums or TopLevelEnums()
-        self.top_level_enums.procedure_def(tree)
+        self.top_level_enums.add_procedure(p)
 
         # Output a new struct that impls the Procedure trait.
         # @@@ create a nice class and populate it, then pass it to both
