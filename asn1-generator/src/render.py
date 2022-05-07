@@ -445,6 +445,17 @@ impl AperCodec for {name} {{
 }}"""
 
 
+class Procedure:
+    def __init__(self, tree):
+        self.initiating = next(tree.find_data("initiating")).children[0]
+        self.code = next(tree.find_data("procedure_code")).children[0]
+        successful = next(tree.find_data("successful"), None)
+        self.successful = successful and successful.children[0]
+        unsuccessful = next(tree.find_data("unsuccessful"), None)
+        self.unsuccessful = unsuccessful and unsuccessful.children[0]
+        self.criticality = next(tree.find_data("criticality")).children[0]
+
+
 class TopLevelEnums:
     def __init__(self):
         self.initiating_encode_matches = ""
@@ -467,47 +478,41 @@ pub enum UnsuccessfulOutcome {
 """
 
     def procedure_def(self, tree):
-        initiating = next(tree.find_data("initiating")).children[0]
-        if initiating == "PrivateMessage":
+        p = Procedure(tree)
+        if p.initiating == "PrivateMessage":
             return
-        code = next(tree.find_data("procedure_code")).children[0]
-        successful = next(tree.find_data("successful"), None)
-        successful = successful and successful.children[0]
-        unsuccessful = next(tree.find_data("unsuccessful"), None)
-        unsuccessful = unsuccessful and unsuccessful.children[0]
-        criticality = next(tree.find_data("criticality")).children[0]
-        self.initiating_enum += f"    {initiating}({initiating}),\n"
+        self.initiating_enum += f"    {p.initiating}({p.initiating}),\n"
         self.initiating_decode_matches += f"""\
-            {code} => Ok(Self::{initiating}({initiating}::decode(data)?)),
+            {p.code} => Ok(Self::{p.initiating}({p.initiating}::decode(data)?)),
 """
         self.initiating_encode_matches += f"""\
-            Self::{initiating}(x) => {{
-                aper::encode::encode_integer(data, Some(0), Some(255), false, {code}, false)?;
-                Criticality::{criticality.title()}.encode(data)?;
+            Self::{p.initiating}(x) => {{
+                aper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
+                Criticality::{p.criticality.title()}.encode(data)?;
                 x.encode(data)?;
             }}
 """
-        if successful:
-            self.successful_enum += f"    {successful}({successful}),\n"
+        if p.successful:
+            self.successful_enum += f"    {p.successful}({p.successful}),\n"
             self.successful_decode_matches += f"""\
-            {code} => Ok(Self::{successful}({successful}::decode(data)?)),
+            {p.code} => Ok(Self::{p.successful}({p.successful}::decode(data)?)),
 """
             self.successful_encode_matches += f"""\
-            Self::{successful}(x) => {{
-                aper::encode::encode_integer(data, Some(0), Some(255), false, {code}, false)?;
-                Criticality::{criticality.title()}.encode(data)?;
+            Self::{p.successful}(x) => {{
+                aper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
+                Criticality::{p.criticality.title()}.encode(data)?;
                 x.encode(data)?;
             }}
 """
-        if unsuccessful:
-            self.unsuccessful_enum += f"    {unsuccessful}({unsuccessful}),\n"
+        if p.unsuccessful:
+            self.unsuccessful_enum += f"    {p.unsuccessful}({p.unsuccessful}),\n"
             self.unsuccessful_decode_matches += f"""\
-            {code} => Ok(Self::{unsuccessful}({unsuccessful}::decode(data)?)),
+            {p.code} => Ok(Self::{p.unsuccessful}({p.unsuccessful}::decode(data)?)),
 """
             self.unsuccessful_encode_matches += f"""\
-            Self::{unsuccessful}(x) => {{
-                aper::encode::encode_integer(data, Some(0), Some(255), false, {code}, false)?;
-                Criticality::{criticality.title()}.encode(data)?;
+            Self::{p.unsuccessful}(x) => {{
+                aper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
+                Criticality::{p.criticality.title()}.encode(data)?;
                 x.encode(data)?;
             }}
 """
