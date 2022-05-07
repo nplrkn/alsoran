@@ -1,0 +1,23 @@
+# Run the autogenerator
+
+```
+./generate_xxap.py
+```
+
+The above command reads the NGAP and F1AP ASN.1 files and overwrites various files in the f1ap and ngap Rust projects.
+
+# Test the first phase (ASN.1 syntax transform)
+
+The ASN.1 is parsed and the resulting parse tree is then reorganized into a new simplified tree that is more conducive for Rust rendering.  The folowing command runs the suite of unit tests that focus on this first transform phase. 
+
+```
+./transform.py
+```
+
+# Test the second phase (Rust rendering)
+
+The tree output by the transform phase is then converted to Rust.  The folowing command runs the suite of unit tests that focus on this second rendering phase. 
+
+```
+./render.py
+```

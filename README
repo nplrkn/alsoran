@@ -11,47 +11,12 @@ The CU is a subcomponent of a gNodeB.  It connects to
 The CU control and user plane are interconnected by the E1 interface.
 
 The key 3GPP specifications are
+-  TS38.300 - NR and NG-RAN Overall Description
 -  TS38.401 - NG-RAN; Architecture description 
--  TS38.473 - NG-RAN; F1 Application Protocol (F1AP)
+-  TS38.412 - NG signalling transport 
+-  TS38.413 - NG Application Protocol (NGAP)
+-  TS38.472 - F1 signalling transport
+-  TS38.473 - F1 Application Protocol (F1AP)
 -  TS38.331 - Radio Resource Control (RRC) protocol specification
 
--  TS 38.413 - NGAP
 
-
-Functional Decomposition
-------------------------
--  SCTP in separate tier.  
-   -  All SCTP connections are handled by specialist microservices that convert to HTTP.
-   -  Benefit is that the worker nodes can handle requests interchangeably.
-
--  Single layer of UE associated workers and controller.
-   -  Scales out to large number of signaling traffic.
-   -  Fast - minimal number of hops.
-
-
-
-
-
-Connection management
----------------------
-Create an SCTP association to AMF.  Then do NG Setup.  This initialize the NG-C interface instance.
-
-
-
-When the NG-RAN nodes wants to add endpoints, the RAN configuration update procedure shall be the first NGAP 
-procedure triggered on an additional TNLA of an already setup NG-C interface instance after the TNL association 
-has become operational, and the AMF shall associate the TNLA to the NG-C interface instance using the included 
-Global RAN node ID.
-
-
- and manage N connection to AMF.  
-Maintain mapping of UEs to connections.  If a node fails, backup takes over by reconnecting with same node ID.
-
-
-Can we make this active active?
-  Towards AMF, no (while remaining interoperable).  Because the same connection has to be used for the same UE.
-  Between DU and CU, no, for the same reason.
-
-At least not without a separate tier.
-
-So we can make it restart with same state.  Or have a hot standby.  Concurrent access can only happen in split brain?

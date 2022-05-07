@@ -2,13 +2,13 @@
 
 
 ## TO DO
-- Add error messages to ASN.1 library
+- Autogeneration of procedures etc
+- Add error messages to ASN.1 library + get it upstreamed
+- TODOs
 - Design sequencing of interface startup with multiple workers in Connection Management.md
 - F1 connection management with 2nd worker
-- TODOs
 - test, with a single AMF and DU, all variants of connection ordering and 2nd worker addition
 - make tests time out rather than hang
-- improve integration test logging so it is possible to see what thread is doing what 
 - regression test connection failures and retries
 - pass logger in context
 - regression testing of maintain and retry scenarios
