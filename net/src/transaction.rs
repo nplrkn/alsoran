@@ -15,10 +15,10 @@ pub trait Procedure {
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError>;
     fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>>;
     async fn call_provider<T: RequestProvider<Self>>(
-        &provider: T,
-        req: &[u8],
+        provider: &T,
+        req: Self::Request,
         logger: &Logger,
-    ) -> Result<Self::TopPdu>;
+    ) -> Option<Self::TopPdu>;
 }
 
 pub trait AperSerde: Sized {
@@ -72,7 +72,7 @@ impl<T> From<anyhow::Error> for RequestError<T> {
 
 /// Trait representing the ability to handle a single procedure.
 #[async_trait]
-pub trait RequestProvider<P: Procedure + ?Sized> {
+pub trait RequestProvider<P: Procedure + ?Sized>: Send + Sync {
     async fn request(
         &self,
         r: P::Request,

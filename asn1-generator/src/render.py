@@ -450,6 +450,7 @@ class Procedure:
         self.name = next(tree.find_data("procedure_name")
                          ).children[0] + "Procedure"
         assert(self.name != "Procedure")
+        self.family = next(tree.find_data("family")).children[0]
         self.initiating = next(tree.find_data("initiating")).children[0]
         self.code = next(tree.find_data("procedure_code")).children[0]
         successful = next(tree.find_data("successful"), None)
@@ -464,19 +465,19 @@ class TopLevelEnums:
         self.initiating_encode_matches = ""
         self.initiating_decode_matches = ""
         self.initiating_enum = """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum InitiatingMessage {
 """
         self.successful_encode_matches = ""
         self.successful_decode_matches = ""
         self.successful_enum = """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
 """
         self.unsuccessful_encode_matches = ""
         self.unsuccessful_decode_matches = ""
         self.unsuccessful_enum = """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
 """
 
@@ -541,13 +542,16 @@ impl {name} {{
 """ + APER_CODEC_IMPL_FORMAT
         return f"""\
 {self.initiating_enum}}}
-{impl.format(name="InitiatingMessage",decode_matches=self.initiating_decode_matches, encode_matches=self.initiating_encode_matches)}
+{impl.format(name="InitiatingMessage",decode_matches=self.initiating_decode_matches,
+             encode_matches=self.initiating_encode_matches)}
 
 {self.successful_enum}}}
-{impl.format(name="SuccessfulOutcome", decode_matches=self.successful_decode_matches, encode_matches=self.successful_encode_matches)}
+{impl.format(name="SuccessfulOutcome", decode_matches=self.successful_decode_matches,
+             encode_matches=self.successful_encode_matches)}
 
 {self.unsuccessful_enum}}}
-{impl.format(name="UnsuccessfulOutcome",decode_matches=self.unsuccessful_decode_matches, encode_matches=self.unsuccessful_encode_matches)}
+{impl.format(name="UnsuccessfulOutcome",decode_matches=self.unsuccessful_decode_matches,
+             encode_matches=self.unsuccessful_encode_matches)}
 """
 
 
@@ -579,11 +583,13 @@ class RustInterpreter(Interpreter):
         self.top_level_enums = self.top_level_enums or TopLevelEnums()
         self.top_level_enums.add_procedure(p)
 
+        top_pdu = p.family[0] + p.family[1:4].lower() + "Pdu"
+
         # Output a new struct that impls the Procedure trait.
         # The decode function depends on whether there is a successful and unsuccessful response defined.
         if p.successful:
             unsuccessful_match_arm = f"""\
-            NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::{p.unsuccessful}(x)) => {{
+            {top_pdu}::UnsuccessfulOutcome(UnsuccessfulOutcome::{p.unsuccessful}(x)) => {{
                 Err(RequestError::UnsuccessfulOutcome(x))
             }}""" if p.unsuccessful else ""
 
@@ -591,7 +597,7 @@ class RustInterpreter(Interpreter):
     fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {{
         let response_pdu = Self::TopPdu::from_bytes(bytes)?;
         match response_pdu {{
-            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)) => Ok(x),
+            {top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)) => Ok(x),
 {unsuccessful_match_arm}
             _ => Err(RequestError::Other("Unexpected pdu contents".to_string())),
         }}
@@ -602,16 +608,32 @@ class RustInterpreter(Interpreter):
         Err(RequestError::Other("No response is defined for {p.initiating}!".to_string()))
     }}"""
 
+        successful_outcome = f"Ok(x) => Some({top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)))" if p.successful else "Ok(_) => None"
+
         self.outfile += f"""
 pub struct {p.name} {{}}
+
+# [async_trait]
 impl Procedure for {p.name} {{
-    type TopPdu = NgapPdu;
+    type TopPdu = {top_pdu};
     type Request = {p.initiating};
     type Success = {p.successful or "()"};
     type Failure = {p.unsuccessful or "()"};
     const CODE: u8 = {p.code};
+
+    async fn call_provider<T: RequestProvider<Self>>(
+        provider: &T,
+        req: {p.initiating},
+        logger: &Logger,
+    ) -> Option<{top_pdu}> {{
+        match <T as RequestProvider<{p.name}>>::request(provider, req, logger).await {{
+            {successful_outcome},
+            Err(_) => todo!(),
+        }}
+    }}
+
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {{
-        NgapPdu::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
+        {top_pdu}::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
     }}
 {decode_response}
 }}
@@ -907,7 +929,7 @@ handoverNotification NGAP-ELEMENTARY-PROCEDURE ::= {
 	CRITICALITY				ignore
 }
 """, """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum InitiatingMessage {
     AmfConfigurationUpdate(AmfConfigurationUpdate),
     HandoverNotify(HandoverNotify),
@@ -950,7 +972,7 @@ impl AperCodec for InitiatingMessage {
     }
 }
 
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
 }
@@ -986,7 +1008,7 @@ impl AperCodec for SuccessfulOutcome {
     }
 }
 
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
     AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure),
 }
@@ -1969,7 +1991,7 @@ OverloadStop ::= SEQUENCE {
 	...
 }
 
-OverloadStopIEs NGAP-PROTOCOL-IES ::= {	
+OverloadStopIEs NGAP-PROTOCOL-IES ::= {
 	...
 }
 """, """\

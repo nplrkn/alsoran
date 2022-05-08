@@ -1,4 +1,4 @@
-use super::procedures::*;
+use super::top_pdu::*;
 use crate::{InitiatingMessage, NgapPdu, SuccessfulOutcome};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
@@ -7,14 +7,14 @@ use slog::Logger;
 
 pub struct NgapAmf<T>(pub T)
 where
-    T: RequestProvider<NgSetupRequestProcedure> + RequestProvider<RanConfigurationUpdateProcedure>;
+    T: RequestProvider<NgSetupProcedure> + RequestProvider<RanConfigurationUpdateProcedure>;
 
 #[async_trait]
 impl<T> InterfaceProvider for NgapAmf<T>
 where
     T: Send
         + Sync
-        + RequestProvider<NgSetupRequestProcedure>
+        + RequestProvider<NgSetupProcedure>
         + RequestProvider<RanConfigurationUpdateProcedure>,
 {
     type TopPdu = NgapPdu;
@@ -36,8 +36,7 @@ where
                 }
             }
             InitiatingMessage::NgSetupRequest(req) => {
-                match <T as RequestProvider<NgSetupRequestProcedure>>::request(&self.0, req, logger)
-                    .await
+                match <T as RequestProvider<NgSetupProcedure>>::request(&self.0, req, logger).await
                 {
                     Ok(x) => Ok(NgapPdu::SuccessfulOutcome(
                         SuccessfulOutcome::NgSetupResponse(x),

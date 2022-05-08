@@ -22,7 +22,10 @@ USE_IES = "use super::ies::*;\n"
 USE_PDUS = """\
 use crate::common::Criticality;
 use super::pdu::*;
-use net::{Procedure, RequestError, AperSerde};
+use net::{Procedure, RequestError, AperSerde, RequestProvider};
+use async_trait::async_trait;
+use slog::Logger;
+use anyhow::Result;
 """
 
 
@@ -49,7 +52,7 @@ def generate(protocol):
         f.write(header + "\n\n")
         f.write(generate_structs(input_file_path(i), constants))
         f.close()
-        os.system('rustfmt ' + out)
+        os.system('rustfmt --edition 2021 ' + out)
 
     generate_file("top_pdu.rs", "PDU-Descriptions",
                   USE_ASN1 + USE_PDUS)

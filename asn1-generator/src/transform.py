@@ -720,6 +720,7 @@ document
   None
   procedure_def
     procedure_name\tAmfConfigurationUpdate
+    family\tNGAP-ELEMENTARY-PROCEDURE
     initiating\tAmfConfigurationUpdate
     successful\tAmfConfigurationUpdateAcknowledge
     unsuccessful\tAmfConfigurationUpdateFailure
