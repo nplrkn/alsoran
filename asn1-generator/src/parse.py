@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 from lark import Lark
+import sys
 
 
 def parse_string(s, grammar='grammar.lark'):
@@ -15,3 +17,8 @@ def parse_file(f, grammar='grammar.lark'):
     input = file.read()
     file.close()
     return parse_string(input, grammar)
+
+
+if __name__ == '__main__':
+    file = sys.argv[1]
+    print(parse_file(file).pretty())

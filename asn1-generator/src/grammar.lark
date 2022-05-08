@@ -1,7 +1,7 @@
 %import common.WS
 %import common.DIGIT
 
-COMMENT:                (/--[^\n]*--/ | /--[^\n]*\n/) 
+COMMENT.99:             (/--[^\n]*--/ | /--[^\n]*\n/) 
 NEWLINE:                "\n"
 %ignore WS
 %ignore COMMENT

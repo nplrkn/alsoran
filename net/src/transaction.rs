@@ -5,24 +5,29 @@ use async_trait::async_trait;
 use slog::{trace, Logger};
 use std::fmt::Debug;
 
+#[async_trait]
 pub trait Procedure {
     const CODE: u8;
-    type TopPdu: AperCodec + Send + Sync + 'static;
+    type TopPdu: AperSerde + Send + Sync + 'static;
     type Request: Send + Sync + 'static + Debug;
     type Success;
     type Failure;
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError>;
     fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>>;
+    async fn call_provider<T: RequestProvider<Self>>(
+        &provider: T,
+        req: &[u8],
+        logger: &Logger,
+    ) -> Result<Self::TopPdu>;
 }
 
-// This replaces AperCodec from the asn1_codecs crate with a more ergonomic version.
-pub trait AperCodec: Sized {
+pub trait AperSerde: Sized {
     fn into_bytes(self) -> Result<Vec<u8>, AperCodecError>;
     fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError>;
 }
 pub use aper::AperCodecError;
 
-impl<T: aper::AperCodec<Output = T>> AperCodec for T {
+impl<T: aper::AperCodec<Output = T>> AperSerde for T {
     fn into_bytes(self) -> Result<Vec<u8>, AperCodecError> {
         let mut d = AperCodecData::new();
         self.encode(&mut d)?;
@@ -67,7 +72,7 @@ impl<T> From<anyhow::Error> for RequestError<T> {
 
 /// Trait representing the ability to handle a single procedure.
 #[async_trait]
-pub trait RequestProvider<P: Procedure> {
+pub trait RequestProvider<P: Procedure + ?Sized> {
     async fn request(
         &self,
         r: P::Request,
@@ -81,7 +86,7 @@ pub trait RequestProvider<P: Procedure> {
 /// Trait representing the ability to handle multiple procedures that use the same top level PDU.
 #[async_trait]
 pub trait InterfaceProvider: Send + Sync {
-    type TopPdu: AperCodec;
+    type TopPdu: AperSerde;
     async fn route_request(&self, p: Self::TopPdu, logger: &Logger) -> Result<Self::TopPdu>;
 }
 
@@ -93,7 +98,7 @@ pub trait RequestMessageHandler: Send + Sync {
 
 // An interface provider is a request message handler.
 #[async_trait]
-impl<T: AperCodec + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
+impl<T: AperSerde + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
     async fn handle_request(&self, message: &[u8], logger: &Logger) -> Result<Vec<u8>> {
         let pdu = T::from_bytes(message)?;
         Ok(self.route_request(pdu, logger).await?.into_bytes()?)

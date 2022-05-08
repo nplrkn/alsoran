@@ -22,6 +22,7 @@ USE_IES = "use super::ies::*;\n"
 USE_PDUS = """\
 use crate::common::Criticality;
 use super::pdu::*;
+use net::{Procedure, RequestError, AperSerde};
 """
 
 

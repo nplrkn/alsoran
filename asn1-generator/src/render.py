@@ -447,6 +447,9 @@ impl AperCodec for {name} {{
 
 class Procedure:
     def __init__(self, tree):
+        self.name = next(tree.find_data("procedure_name")
+                         ).children[0] + "Procedure"
+        assert(self.name != "Procedure")
         self.initiating = next(tree.find_data("initiating")).children[0]
         self.code = next(tree.find_data("procedure_code")).children[0]
         successful = next(tree.find_data("successful"), None)
@@ -568,6 +571,8 @@ class RustInterpreter(Interpreter):
 
     def procedure_def(self, tree):
         p = Procedure(tree)
+        if p.initiating == "PrivateMessage":
+            return
 
         # Extend the top level enums (InitiatingMessage, SuccessfulOutcome and UnsuccessfulOutcome)
         # We output them at the end.
@@ -575,7 +580,43 @@ class RustInterpreter(Interpreter):
         self.top_level_enums.add_procedure(p)
 
         # Output a new struct that impls the Procedure trait.
-        # @@@ create a nice class and populate it, then pass it to both
+        # The decode function depends on whether there is a successful and unsuccessful response defined.
+        if p.successful:
+            unsuccessful_match_arm = f"""\
+            NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::{p.unsuccessful}(x)) => {{
+                Err(RequestError::UnsuccessfulOutcome(x))
+            }}""" if p.unsuccessful else ""
+
+            decode_response = f"""
+    fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {{
+        let response_pdu = Self::TopPdu::from_bytes(bytes)?;
+        match response_pdu {{
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)) => Ok(x),
+{unsuccessful_match_arm}
+            _ => Err(RequestError::Other("Unexpected pdu contents".to_string())),
+        }}
+    }}"""
+        else:  # this is an indication
+            decode_response = f"""
+    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {{
+        Err(RequestError::Other("No response is defined for {p.initiating}!".to_string()))
+    }}"""
+
+        self.outfile += f"""
+pub struct {p.name} {{}}
+impl Procedure for {p.name} {{
+    type TopPdu = NgapPdu;
+    type Request = {p.initiating};
+    type Success = {p.successful or "()"};
+    type Failure = {p.unsuccessful or "()"};
+    const CODE: u8 = {p.code};
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {{
+        NgapPdu::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
+    }}
+{decode_response}
+}}
+
+"""
 
     def enum_def(self, tree):
         orig_name = tree.children[0]

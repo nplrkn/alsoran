@@ -91,7 +91,7 @@ impl Gnbcu {
 
         match procedure {
             "ngsetup" => {
-                let response = <Stack as RequestProvider<NgSetupRequestProcedure>>::request(
+                let response = <Stack as RequestProvider<NgSetupProcedure>>::request(
                     &self.ngap,
                     self.ng_setup(),
                     logger,

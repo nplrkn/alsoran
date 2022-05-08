@@ -1,10 +1,10 @@
 use super::Gnbcu;
 use async_trait::async_trait;
 use net::{EventHandler, RequestProvider, TnlaEvent};
-use ngap::{NgSetupRequestProcedure, NgapGnb};
+use ngap::{NgSetupProcedure, NgapGnb};
 use slog::{info, warn, Logger};
 
-impl RequestProvider<NgSetupRequestProcedure> for Handler {}
+impl RequestProvider<NgSetupProcedure> for Handler {}
 
 pub fn new(gnbcu: Gnbcu) -> NgapGnb<Handler> {
     NgapGnb(Handler { gnbcu })
