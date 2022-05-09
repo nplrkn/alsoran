@@ -2,7 +2,7 @@
 
 ## Mission
 
-Our long term mission is to reduce the cost of 5G RAN by providing high quality free componentry.
+Our mission is to reduce the cost of 5G RAN by providing high quality free componentry.
 
 ## Who Alsoran is for
 
@@ -17,9 +17,9 @@ Our long term mission is to reduce the cost of 5G RAN by providing high quality 
 - GNB-CU-CP prototype.  No DU, no userplane.
 - Successful PDU session setup against free5GC and Open5GS driven from DU simulator.
 - Quickstart and early design documentation.
-- License text, copyright notices, contributing guide.
+- License text, copyright notices (?), contributing guide.
 
-### Release 0.2 - userplane prototype
+### Release 0.2 - reference userplane
 
 - Userplane prototype - DU simulator sets up a TUN interface per UE. 
 - Linting scripts + release process.
@@ -31,31 +31,43 @@ Our long term mission is to reduce the cost of 5G RAN by providing high quality 
 
 ### Release 0.4 - GNB-CU-CP scale out
 
-- Session context stored separately.
 - Interchangeable workers, each with TNLAs to AMF and DU.
+- Session context in datastore (preferably encrypted).
+- Distributed timers. 
 
-### Release 0.5 - coordinator scale out and state replication
+### Release 0.5 - triangular redirection
 
-### Release 0.6 - user plane fault tolerance and replication
+- Cope with AMF responding to UE associated request on a different TNLA binding.
 
-- Session context replicated and fault tolerant.
-- Switchover of active sessions on failure of UP container.
+### Release 0.6 - connection termination handling
 
-### Release 0.7 - hardening
-
-- Spec compliance document
 - Connection management resilient to variations in startup ordering.
-- Triangular redirection
 - Avoid using unresponsive TNLAs.
-- Clear error logging of unsupported function.
+- Quiesce
+- SCTP backpressure
 
-### Release 0.8 - performance
+### Release 0.7 - performance
 
 - Prometheus integration
 - Control plane performance benchmark
+- Overload work shedding
+- Tuning
+- Balance load across TNLAs.
+
+### Release 0.8 - documentation
+
+- Spec compliance document
+- Quality status (features -> maturity + test coverage) 
+- Dimensioning guidance
+- Code coverage
+- Troubleshooting + diagnostics
 
 ### TBD
 
+- Privacy (redact personal information from diagnostics)
+- Message encryption
+- UP session high availability.
 - OpenTracing
 - Userspace SCTP
-- AMF Set - connect to multiple AMFs, note backups, observe AMF selection rules
+- AMF Set - connect to multiple AMFs + observe AMF selection rules
+- MOCN
