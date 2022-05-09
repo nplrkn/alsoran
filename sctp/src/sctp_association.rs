@@ -56,13 +56,7 @@ impl SctpAssociation {
         async_fd.writable().await?;
         let mut address = unsafe { std::mem::zeroed::<libc::sockaddr>() };
         let mut address_len = std::mem::size_of::<libc::sockaddr>() as socklen_t;
-        let rc = unsafe {
-            getpeername(
-                fd,
-                &mut address as *mut _ as _,
-                &mut address_len as *mut _ as _,
-            )
-        };
+        let rc = unsafe { getpeername(fd, &mut address as _, &mut address_len as *mut _ as _) };
         if rc == 0 {
             assoc.set_sock_opts(logger)?;
             Ok(assoc)

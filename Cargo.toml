@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-    "worker",
-    "node-control-api",
-    "coordinator",
+    "gnbcu/worker",
+    "gnbcu/node-control-api",
+    "gnbcu/coordinator",
     "common",
     "integration-tests",
     "sctp",
