@@ -4,6 +4,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 
 ## TO DO
 - Add error messages to ASN.1 library + get it upstreamed
+- Retire Message and use &[u8] or Vec<u8>
 - Requests should be processed in parallel in separate tasks.
 - GNB-CU code moved to a subdirectory (leaving code shared with DU or AMF at top level).
 - All superfluous code removed
