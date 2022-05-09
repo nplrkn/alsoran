@@ -2,7 +2,7 @@ use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodecData};
 use async_channel::RecvError;
 use async_trait::async_trait;
-use slog::{trace, Logger};
+use slog::{trace, warn, Logger};
 use std::fmt::Debug;
 
 #[async_trait]
@@ -64,12 +64,6 @@ impl<T> From<anyhow::Error> for RequestError<T> {
     }
 }
 
-// impl<U, D: Debug> From<D> for RequestError<U> {
-//     fn from(e: D) -> Self {
-//         RequestError::Other(format!("{:?}", e))
-//     }
-// }
-
 /// Trait representing the ability to handle a single procedure.
 #[async_trait]
 pub trait RequestProvider<P: Procedure + ?Sized>: Send + Sync {
@@ -87,20 +81,37 @@ pub trait RequestProvider<P: Procedure + ?Sized>: Send + Sync {
 #[async_trait]
 pub trait InterfaceProvider: Send + Sync {
     type TopPdu: AperSerde;
-    async fn route_request(&self, p: Self::TopPdu, logger: &Logger) -> Result<Self::TopPdu>;
+    async fn route_request(&self, p: Self::TopPdu, logger: &Logger) -> Option<Self::TopPdu>;
 }
 
 /// Trait representing the ability to handle and respond to a request in wire format.
 #[async_trait]
 pub trait RequestMessageHandler: Send + Sync {
-    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Result<Vec<u8>>;
+    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Option<Vec<u8>>;
 }
 
 // An interface provider is a request message handler.
 #[async_trait]
 impl<T: AperSerde + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
-    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Result<Vec<u8>> {
-        let pdu = T::from_bytes(message)?;
-        Ok(self.route_request(pdu, logger).await?.into_bytes()?)
+    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Option<Vec<u8>> {
+        let pdu = match T::from_bytes(message) {
+            Ok(p) => p,
+            Err(e) => {
+                warn!(logger, "ASN.1 decode failed - {:?}", e);
+                return None;
+            }
+        };
+        match self
+            .route_request(pdu, logger)
+            .await
+            .map(|x| x.into_bytes())
+        {
+            None => None,
+            Some(Ok(bytes)) => Some(bytes),
+            Some(Err(e)) => {
+                warn!(logger, "ASN.1 encode failed - {:?}", e);
+                None
+            }
+        }
     }
 }

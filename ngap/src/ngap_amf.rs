@@ -1,8 +1,7 @@
 use super::top_pdu::*;
-use crate::{InitiatingMessage, NgapPdu, SuccessfulOutcome};
-use anyhow::{anyhow, Result};
+use crate::{InitiatingMessage, NgapPdu};
 use async_trait::async_trait;
-use net::{InterfaceProvider, RequestProvider};
+use net::{InterfaceProvider, Procedure, RequestProvider};
 use slog::Logger;
 
 pub struct NgapAmf<T>(pub T)
@@ -18,33 +17,17 @@ where
         + RequestProvider<RanConfigurationUpdateProcedure>,
 {
     type TopPdu = NgapPdu;
-    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Result<NgapPdu> {
+    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
         match match p {
             NgapPdu::InitiatingMessage(m) => m,
-            _ => return Err(anyhow!("Not a request!")),
+            _ => return None,
         } {
             InitiatingMessage::RanConfigurationUpdate(req) => {
-                match <T as RequestProvider<RanConfigurationUpdateProcedure>>::request(
-                    &self.0, req, logger,
-                )
-                .await
-                {
-                    Ok(x) => Ok(NgapPdu::SuccessfulOutcome(
-                        SuccessfulOutcome::RanConfigurationUpdateAcknowledge(x),
-                    )),
-                    Err(_) => todo!(),
-                }
+                RanConfigurationUpdateProcedure::call_provider(&self.0, req, logger).await
             }
             InitiatingMessage::NgSetupRequest(req) => {
-                match <T as RequestProvider<NgSetupProcedure>>::request(&self.0, req, logger).await
-                {
-                    Ok(x) => Ok(NgapPdu::SuccessfulOutcome(
-                        SuccessfulOutcome::NgSetupResponse(x),
-                    )),
-                    Err(_) => todo!(),
-                }
+                NgSetupProcedure::call_provider(&self.0, req, logger).await
             }
-
             _ => todo!(),
         }
     }

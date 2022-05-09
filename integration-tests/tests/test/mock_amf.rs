@@ -3,12 +3,9 @@ use async_channel::{Receiver, Sender};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use bitvec::prelude::*;
-use net::{AperCodec, TransportProvider};
-use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
-use ngap::NgapPdu;
+use net::{AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider};
 use ngap::*;
-use slog::info;
-use slog::{o, trace, Logger};
+use slog::{info, o, trace, Logger};
 use std::fmt::Debug;
 use stop_token::StopSource;
 

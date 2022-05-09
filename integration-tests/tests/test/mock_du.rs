@@ -3,7 +3,7 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperCodec, Message, TransportProvider};
+use net::{AperSerde, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};

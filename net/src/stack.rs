@@ -165,16 +165,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
                 // TODO
                 None
             }
-            _ => match self.application.handle_request(&message, logger).await {
-                Ok(response) => {
-                    trace!(logger, "Sending response to transaction");
-                    Some(response)
-                }
-                Err(s) => {
-                    warn!(logger, "While handling request - {}", s);
-                    None
-                }
-            },
+            _ => self.application.handle_request(&message, logger).await,
         }
     }
 }

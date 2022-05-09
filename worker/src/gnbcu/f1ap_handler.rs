@@ -29,7 +29,7 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
 }
 
 pub fn new(gnbcu: Gnbcu) -> F1apCu<F1apHandler> {
-    F1apCu::new(F1apHandler { gnbcu })
+    F1apCu(F1apHandler { gnbcu })
 }
 #[derive(Clone)]
 pub struct F1apHandler {

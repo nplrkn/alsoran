@@ -1,9 +1,8 @@
 use super::top_pdu::*;
-use crate::{InitiatingMessage, NgapPdu, SuccessfulOutcome};
-use anyhow::{anyhow, Result};
+use crate::{InitiatingMessage, NgapPdu};
 use async_trait::async_trait;
 use net::{Application, EventHandler, InterfaceProvider, Procedure, RequestProvider, TnlaEvent};
-use slog::Logger;
+use slog::{error, Logger};
 
 #[derive(Clone)]
 pub struct NgapGnb<T>(pub T)
@@ -28,16 +27,17 @@ where
     T: Send + Sync + RequestProvider<NgSetupProcedure>,
 {
     type TopPdu = NgapPdu;
-    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Result<NgapPdu> {
+    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
         let initiating_message = match p {
             NgapPdu::InitiatingMessage(m) => m,
-            _ => return Err(anyhow!("Not a request!")),
+            _ => {
+                error!(logger, "Not a request!");
+                return None;
+            }
         };
         match initiating_message {
             InitiatingMessage::NgSetupRequest(req) => {
-                NgSetupProcedure::call_provider(&self.0, req, logger)
-                    .await
-                    .ok_or(anyhow!("No response received"))
+                NgSetupProcedure::call_provider(&self.0, req, logger).await
             }
             _ => todo!(),
         }
