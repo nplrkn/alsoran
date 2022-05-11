@@ -1,5 +1,3 @@
-extern crate slog;
-
 use slog::Logger;
 use sloggers::terminal::{Destination, TerminalLoggerBuilder};
 use sloggers::types::{Format, Severity};

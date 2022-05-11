@@ -1,8 +1,8 @@
 use super::ies::*;
 use super::pdu::*;
 use super::top_pdu::*;
-use asn1_codecs::aper::*;
 use bitvec::prelude::*;
+use net::{AperCodecError, AperSerde};
 
 fn make_ng_setup() -> NgSetupRequest {
     let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);
@@ -35,19 +35,15 @@ fn make_ng_setup() -> NgSetupRequest {
 fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
     let ng_setup = make_ng_setup();
     let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
-    let mut encoded = AperCodecData::new();
-    ngap_pdu.encode(&mut encoded)?;
-    let output_hex = hex::encode(encoded.into_bytes());
+    let bytes = ngap_pdu.into_bytes()?;
+    let output_hex = hex::encode(bytes);
 
     let reference = "00150035000004001b00080002f83910000102005240090300667265653567630066001000000000010002f839000010080102030015400140";
     assert_eq!(reference, output_hex);
 
     let bytes = hex::decode(reference).unwrap();
-    let mut data = AperCodecData::from_slice(&bytes);
-    let ngap_pdu = NgapPdu::decode(&mut data)?;
-    let mut encoded = AperCodecData::new();
-    ngap_pdu.encode(&mut encoded)?;
-    let output_hex = hex::encode(encoded.into_bytes());
+    let bytes = NgapPdu::from_bytes(&bytes)?.into_bytes()?;
+    let output_hex = hex::encode(bytes);
     assert_eq!(reference, output_hex);
 
     Ok(())
@@ -78,12 +74,11 @@ fn test_ng_setup() -> Result<(), AperCodecError> {
         nb_iot_default_paging_drx: None,
         extended_ran_node_name: None,
     }));
-    let mut encoded = AperCodecData::new();
-    pdu.encode(&mut encoded)?;
-    let output_hex = hex::encode(encoded.into_bytes());
+    let bytes = pdu.into_bytes()?;
+    let output_hex = hex::encode(bytes.clone());
     println!("Output of encode is {}", output_hex);
 
-    //let _pdu = NgapPdu::decode(&mut encoded)?;
+    let _pdu = NgapPdu::from_bytes(&bytes)?;
     //Error: Error { msg: "3 Padding bits at Offset 125 not all '0'." }
     Ok(())
 }

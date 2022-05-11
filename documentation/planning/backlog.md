@@ -4,13 +4,15 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 
 ## TO DO
 - Add error messages to ASN.1 library + get it upstreamed
+- Retire Message and use &[u8] or Vec<u8>
 - Requests should be processed in parallel in separate tasks.
-- GNB-CU code moved to a subdirectory (leaving code shared with DU or AMF at top level).
-- All superfluous code removed
+- Superfluous code removed
 - Maybe multi worker code (including coordinator??) moved to a branch leaving remaining code super simple
 - Review TODOs
+- Enforce Rust docs (see .cargo/config commented out compiler option)
 
 ## DONE
+- GNB-CU code moved to a subdirectory (leaving code shared with DU or AMF at top level).
 - Autogeneration of procedures etc
 - Fix Address already in use warning seen in tests.  Refactor so that the listen() fails more obviously. 
 - Test should fail if the F1AP SCTP bind fails 

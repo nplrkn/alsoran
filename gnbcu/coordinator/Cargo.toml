@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-common = { path = "../common" }
+common = { path = "../../common" }
 node-control-api = { path = "../node-control-api", features = ["server"] }
 hyper = "0.13"
 serde_ignored = "0.1.1"
