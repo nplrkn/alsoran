@@ -28,5 +28,6 @@ stop-token = "0.6.1"
 asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch = "all-fixes" }
 #asn1-codecs = { path = "../../hampi/codecs" }
 #asn1-codecs = "0.1.2"
-bitvec = {version = "0.22", features = ["serde"] }
+bitvec = {version = "0.22" }
 hyper = "0.13"
+

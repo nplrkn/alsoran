@@ -1,1 +1,0 @@
-Cloned https://github.com/gabhijit/hampi and followed the instructions to build NGAP.rs.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from lark.visitors import Interpreter
-from parser import parse_file
+from parse import parse_file
 
 
 class Constants(Interpreter):

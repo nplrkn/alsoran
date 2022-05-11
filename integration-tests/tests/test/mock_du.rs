@@ -3,8 +3,8 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{Asn1PerCodec, SctpTransportProvider, TnlaEvent, TnlaEventHandler};
-use net::{ClientTransportProvider, TransportProvider};
+use net::{AperSerde, Message, TransportProvider};
+use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};
 
@@ -17,7 +17,7 @@ const F1AP_SCTP_PPID: u32 = 62;
 pub struct MockDu {
     pub stop_token: StopToken,
     pub receiver: Receiver<Option<F1apPdu>>,
-    pub sender: SctpTransportProvider<Asn1PerCodec<F1apPdu>, F1apPdu>,
+    pub sender: SctpTransportProvider,
     internal_sender: Sender<Option<F1apPdu>>,
     logger: Logger,
 }
@@ -27,7 +27,7 @@ impl MockDu {
         let logger = logger.new(o!("du" => 1));
         let (internal_sender, receiver) = async_channel::unbounded();
         let stop_source = StopSource::new();
-        let sender = SctpTransportProvider::new(F1AP_SCTP_PPID, Asn1PerCodec::new());
+        let sender = SctpTransportProvider::new(F1AP_SCTP_PPID);
 
         (
             MockDu {
@@ -47,8 +47,8 @@ impl MockDu {
             .clone()
             .maintain_connection(
                 connect_addr_string,
-                self.clone(),
                 self.stop_token.clone(),
+                self.clone(),
                 self.logger.clone(),
             )
             .await?;
@@ -78,8 +78,10 @@ impl MockDu {
                 bap_address: None,
                 extended_gnb_cu_name: None,
             }));
-        self.sender.send_pdu(pdu.into(), &self.logger).await?;
         info!(self.logger, "Wait for F1 Setup response from GNB");
+        self.sender
+            .send_message(pdu.into_bytes()?, &self.logger)
+            .await?;
 
         match self.receiver.recv().await? {
             Some(_response) => {
@@ -96,13 +98,22 @@ impl MockDu {
 }
 
 #[async_trait]
-impl TnlaEventHandler<F1apPdu> for MockDu {
+impl TnlaEventHandler for MockDu {
     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
         self.internal_sender.send(None).await.unwrap();
     }
 
-    async fn handle_message(&self, message: F1apPdu, _tnla_id: u32, logger: &Logger) {
+    async fn handle_message(
+        &self,
+        message: Message,
+        _tnla_id: u32,
+        logger: &Logger,
+    ) -> Option<Message> {
         trace!(logger, "Got message from CU");
-        self.internal_sender.send(Some(message)).await.unwrap();
+        self.internal_sender
+            .send(Some(F1apPdu::from_bytes(&message).unwrap()))
+            .await
+            .unwrap();
+        None
     }
 }

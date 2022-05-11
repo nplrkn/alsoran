@@ -2,7 +2,7 @@
 
 Instead of plumbing down the logger everywhere - e.g. to low level SCTP function - the alternative is to capture enough context in the Result / Err and then log higher up.
 
-This is important given that those low level components do not know what log level to use because they don't know how important / recoverage their operation is.
+This is important given that those low level components do not know what log level to use because they don't know how important / recoverable their operation is.
 
 However,
   

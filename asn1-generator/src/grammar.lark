@@ -101,8 +101,8 @@ _range:                 extension_marker | (BOUND [".." BOUND])
 named_values:           _nested_braces
 _nested_braces:         "{" (_nested_braces|/[^\{\}]+/) * "}"
 
-_PROCEDURE:             /.*-ELEMENTARY-PROCEDURE/
-procedure_def.2:        procedure_name _PROCEDURE "::=" "{" initiating successful? unsuccessful? procedure_code criticality "}"
+family:                 /\w*-ELEMENTARY-PROCEDURE/
+procedure_def.2:        procedure_name family "::=" "{" initiating successful? unsuccessful? procedure_code criticality "}"
 procedure_name:         IDENTIFIER
 initiating:             "INITIATING MESSAGE" IDENTIFIER
 successful:             "SUCCESSFUL OUTCOME" IDENTIFIER
