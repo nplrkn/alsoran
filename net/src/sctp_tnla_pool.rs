@@ -46,10 +46,14 @@ impl SctpTnlaPool {
         trace!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
         self.assocs.lock().await.insert(assoc_id, assoc.clone());
 
+        // TODO - this should spawn a task.  For example, it could lead to a NG Setup exchange.
         trace!(logger, "Notify TNLA established");
-        handler
-            .handle_event(TnlaEvent::Established, assoc_id, &logger)
-            .await;
+        spawn_handle_event(
+            handler.clone(),
+            TnlaEvent::Established,
+            assoc_id,
+            logger.clone(),
+        );
 
         trace!(logger, "Start TNLA event loop");
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
@@ -61,9 +65,13 @@ impl SctpTnlaPool {
                 }
             }
         }
-        handler
-            .handle_event(TnlaEvent::Terminated, assoc_id, &logger)
-            .await;
+
+        spawn_handle_event(
+            handler.clone(),
+            TnlaEvent::Terminated,
+            assoc_id,
+            logger.clone(),
+        );
 
         trace!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
         self.assocs.lock().await.remove(&assoc_id);
@@ -93,4 +101,13 @@ impl SctpTnlaPool {
                 .await;
         })
     }
+}
+
+fn spawn_handle_event<H: TnlaEventHandler>(
+    handler: H,
+    event: TnlaEvent,
+    tnla_id: u32,
+    logger: Logger,
+) {
+    async_std::task::spawn(async move { handler.handle_event(event, tnla_id, &logger).await });
 }
