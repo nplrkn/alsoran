@@ -19,7 +19,7 @@ extension_marker:       "..." [","]
 
 // For testability, we make the parts before and after the definitions optional
 // This means we can just run small fragments through the grammar.
-document:               [module _OID _begin ["IMPORTS" _IMPORTS]] _definitions ["END"]
+document:               [module [_OID] _begin ["IMPORTS" _IMPORTS]] _definitions ["END"]
 module:                 IDENTIFIER
 _begin:                 "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
 
@@ -81,7 +81,8 @@ _primitive:             sequence_of
                         | boolean
                         | null
                         | _identifier
-_field_type:            _primitive | enumerated | sequence
+_field_type:            _primitive type_parameter? | enumerated | sequence | choice
+type_parameter:         "{" _identifier "}"
 
 ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 single_ie_container.1:  "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"
