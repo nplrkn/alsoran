@@ -119,7 +119,7 @@ dependencies = [
  "futures-lite",
  "num_cpus",
  "once_cell",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -286,9 +286,9 @@ dependencies = [
 
 [[package]]
 name = "base64"
-version = "0.12.3"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3441f0f7b02788e948e47f457ca01f1d7e6d92c693bc132c22b087d3141c03ff"
+checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "bitflags"
@@ -457,7 +457,7 @@ dependencies = [
  "chrono",
  "common",
  "futures",
- "hyper",
+ "hyper 0.13.10",
  "log",
  "mime",
  "node-control-api",
@@ -466,7 +466,7 @@ dependencies = [
  "slog",
  "stop-token",
  "swagger",
- "tokio",
+ "tokio 0.2.25",
  "tokio-openssl",
  "url",
  "uuid",
@@ -941,7 +941,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio",
+ "tokio 0.2.25",
  "tokio-util",
  "tracing",
  "tracing-futures",
@@ -990,6 +990,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "http-body"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ff4f84919677303da5f147645dbea6b1881f368d03ac84e1dc09031ebd7b2c6"
+dependencies = [
+ "bytes 1.1.0",
+ "http",
+ "pin-project-lite 0.2.8",
+]
+
+[[package]]
 name = "httparse"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1000,6 +1011,12 @@ name = "httpdate"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "494b4d60369511e7dea41cf646832512a94e542f68bb9c49e54518e0f468eb47"
+
+[[package]]
+name = "httpdate"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c4a1e36c821dbe04574f602848a19f742f4fb3c98d40449f11bcad18d6b17421"
 
 [[package]]
 name = "humantime"
@@ -1022,13 +1039,35 @@ dependencies = [
  "futures-util",
  "h2",
  "http",
- "http-body",
+ "http-body 0.3.1",
  "httparse",
- "httpdate",
+ "httpdate 0.3.2",
  "itoa 0.4.8",
  "pin-project",
  "socket2 0.3.19",
- "tokio",
+ "tokio 0.2.25",
+ "tower-service",
+ "tracing",
+ "want",
+]
+
+[[package]]
+name = "hyper"
+version = "0.14.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b26ae0a80afebe130861d90abf98e3814a4f28a4c6ffeb5ab8ebb2be311e0ef2"
+dependencies = [
+ "bytes 1.1.0",
+ "futures-channel",
+ "futures-core",
+ "futures-util",
+ "http",
+ "http-body 0.4.4",
+ "httparse",
+ "httpdate 1.0.2",
+ "itoa 1.0.1",
+ "pin-project-lite 0.2.8",
+ "tokio 1.18.2",
  "tower-service",
  "tracing",
  "want",
@@ -1060,12 +1099,12 @@ dependencies = [
  "antidote",
  "bytes 0.5.6",
  "http",
- "hyper",
+ "hyper 0.13.10",
  "linked_hash_set",
  "once_cell",
  "openssl",
  "openssl-sys",
- "tokio",
+ "tokio 0.2.25",
  "tokio-openssl",
  "tower-layer",
 ]
@@ -1077,9 +1116,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d979acc56dcb5b8dddba3917601745e877576475aa046df3226eabdecef78eed"
 dependencies = [
  "bytes 0.5.6",
- "hyper",
+ "hyper 0.13.10",
  "native-tls",
- "tokio",
+ "tokio 0.2.25",
  "tokio-tls",
 ]
 
@@ -1403,7 +1442,7 @@ dependencies = [
  "frunk_core",
  "frunk_derives",
  "futures",
- "hyper",
+ "hyper 0.13.10",
  "hyper-openssl",
  "hyper-tls",
  "lazy_static",
@@ -1417,7 +1456,7 @@ dependencies = [
  "serde_ignored",
  "serde_json",
  "swagger",
- "tokio",
+ "tokio 0.2.25",
  "tokio-openssl",
  "tokio-tls",
  "url",
@@ -2058,19 +2097,14 @@ checksum = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 
 [[package]]
 name = "swagger"
-version = "5.1.0"
+version = "6.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a8319c088311a63b8f8442157bc0b0c0e41ee0e48eb59447e4d3173d49392e1"
+checksum = "70f34e56e162807394d6da66ace2f77d1dd45907037d80aeb7c4633c05fc1553"
 dependencies = [
- "base64 0.12.3",
- "chrono",
+ "base64 0.13.0",
  "futures",
- "hyper",
+ "hyper 0.14.18",
  "hyper-old-types",
- "hyper-openssl",
- "hyper-tls",
- "native-tls",
- "openssl",
  "serde",
  "serde_json",
  "slog",
@@ -2246,6 +2280,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio"
+version = "1.18.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4903bf0427cf68dddd5aa6a93220756f8be0c34fcfa9f5e6191e103e15a31395"
+dependencies = [
+ "pin-project-lite 0.2.8",
+]
+
+[[package]]
 name = "tokio-macros"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2263,7 +2306,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c4b08c5f4208e699ede3df2520aca2e82401b2de33f45e96696a074480be594"
 dependencies = [
  "openssl",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -2273,7 +2316,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a70f4fcd7b3b24fb194f837560168208f669ca8cb70d0c4b862944452396343"
 dependencies = [
  "native-tls",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -2287,7 +2330,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project-lite 0.1.12",
- "tokio",
+ "tokio 0.2.25",
 ]
 
 [[package]]
@@ -2647,7 +2690,7 @@ dependencies = [
  "common",
  "f1ap",
  "hex",
- "hyper",
+ "hyper 0.13.10",
  "net",
  "ngap",
  "node-control-api",
