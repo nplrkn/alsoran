@@ -759,6 +759,23 @@ document
         null
 """)
 
+    def test_sequence_with_empty_sequence(self):
+        self.should_generate("""\
+UECapabilityInformationSidelink-IEs-r16 ::= SEQUENCE {
+    accessStratumReleaseSidelink-r16            AccessStratumReleaseSidelink-r16,
+    nonCriticalExtension                        SEQUENCE{}                                                              OPTIONAL
+}
+""", """\
+document
+  struct
+    UeCapabilityInformationSidelinkIEsR16
+    sequence
+      field
+        access_stratum_release_sidelink_r_16
+        AccessStratumReleaseSidelinkR16
+      extension_container\tnonCriticalExtension
+""")
+
 
 if __name__ == '__main__':
     unittest.main(failfast=True)

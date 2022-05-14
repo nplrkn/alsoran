@@ -52,7 +52,7 @@ _bracketed_group{x}:    ("[[" _comma_separated{x} "]]") | x
 
 sequence_of:            "SEQUENCE" [_size] "OF" (_field_type | single_ie_container)
 sequence:               "SEQUENCE" _items{_sequence_item}
-_sequence_item:         optional_field | field | extension_container | ie_container | single_ie_container
+_sequence_item:         optional_field | field | extension_container | ie_container | single_ie_container | (empty_sequence "OPTIONAL")
 optional_field.2:       _identifier _field_type ("OPTIONAL" | "DEFAULT" _identifier)
 field.1:                _identifier _field_type
 
