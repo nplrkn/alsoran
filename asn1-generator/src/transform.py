@@ -365,7 +365,6 @@ class TestTransformer(unittest.TestCase):
         PriorityLevel ::= INTEGER { spare (0), highest (1), lowest (14), no-priority (15) } (0..15)
 """, """\
 document
-  None
   tuple_struct
     PriorityLevel
     u8
@@ -381,7 +380,6 @@ EventTrigger ::= CHOICE {
 }
 """, """\
 document
-  None
   choice_def
     EventTrigger
     choice
@@ -401,7 +399,6 @@ MaximumDataBurstVolume::= INTEGER(-234..maxFoo, ..., 4096.. 2000000)
 """
         output = """\
 document
-  None
   tuple_struct
     MaximumDataBurstVolume
     i128
@@ -431,7 +428,6 @@ WLANMeasurementConfiguration ::= SEQUENCE {
 """
         output = """\
 document
-  None
   struct
     WlanMeasurementConfiguration
     sequence
@@ -501,7 +497,6 @@ Child-Node-Cells-List-Item ::= SEQUENCE {
 }
 """, """\
 document
-  None
   struct
     ChildNodeCellsListItem
     sequence
@@ -527,7 +522,6 @@ ActiveULBWP ::= SEQUENCE {
 SubcarrierSpacing ::= ENUMERATED { kHz15, kHz30, kHz60, kHz120, kHz240, spare3, spare2, spare1, ... }
 """, """\
 document
-  None
   struct
     ActiveUlbwp
     sequence
@@ -567,7 +561,6 @@ SRSResourceSet-List ::= SEQUENCE (SIZE (1..2)) OF Foo
 SRSResourceSetList ::= SEQUENCE (SIZE (1.. 3)) OF Foo
 """, """\
 document
-  None
   tuple_struct
     Foo
     u8
@@ -610,7 +603,6 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 }
 """, """\
 document
-  None
   struct
     PduSessionResourceSetupRequest
     ie_container_sequence
@@ -633,7 +625,6 @@ document
         self.should_generate(
             "URI-address ::= VisibleString", """\
 document
-  None
   tuple_struct
     UriAddress
     VisibleString
@@ -646,7 +637,6 @@ SNSSAI ::= SEQUENCE {
 }
 """, """\
 document
-  None
   struct
     Snssai
     sequence
@@ -662,7 +652,6 @@ document
 Activated-Cells-to-be-Updated-List ::= SEQUENCE (SIZE (1..maxnoofServedCellsIAB)) OF Activated-Cells-to-be-Updated-List-Item
 """, """\
 document
-  None
   tuple_struct
     ActivatedCellsToBeUpdatedList
     sequence_of
@@ -681,7 +670,6 @@ UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
 }
 """, """\
 document
-  None
   tuple_struct
     UeAssociatedLogicalF1ConnectionListRes
     ie_container_sequence_of
@@ -699,7 +687,6 @@ document
 foo ::= INTEGER(-1..0)
 """, """\
 document
-  None
   tuple_struct
     Foo
     i8
@@ -717,7 +704,6 @@ aMFConfigurationUpdate NGAP-ELEMENTARY-PROCEDURE ::= {
 	CRITICALITY				reject
 }""", """\
 document
-  None
   procedure_def
     procedure_name\tAmfConfigurationUpdate
     family\tNGAP-ELEMENTARY-PROCEDURE

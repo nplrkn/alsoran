@@ -19,8 +19,10 @@ extension_marker:       "..." [","]
 
 // For testability, we make the parts before and after the definitions optional
 // This means we can just run small fragments through the grammar.
-document:               [module [_OID] _begin ["IMPORTS" _IMPORTS]] _definitions ["END"]
-module:                 IDENTIFIER
+document:               _modules | _fragment
+_modules.1:             (module_name [_OID] _begin ["IMPORTS" _IMPORTS] _definitions "END")+       
+_fragment:              _definitions  
+module_name:            IDENTIFIER
 _begin:                 "DEFINITIONS AUTOMATIC TAGS ::=" "BEGIN" 
 
 _definitions:           ( tuple_struct 
@@ -34,7 +36,7 @@ _definitions:           ( tuple_struct
                         | class_def
                         | top_level_enum_def
                         | class_instance)+
-?assign:                IDENTIFIER "::="
+?assign:                IDENTIFIER type_parameter? "::="
 tuple_struct:           assign _primitive
 struct:                 assign sequence
 enum_def:               assign enumerated
@@ -45,12 +47,13 @@ protocol_ies.1:         IDENTIFIER _PROTOCOL_IES "::=" ies
 
 _comma_separated{x}:    x ("," x)* ","?
 _items{x}:              "{" _comma_separated{x}? (extension_marker extended_items{x}?)? "}" 
-extended_items{x}:      _comma_separated{x}
+extended_items{x}:      _comma_separated{_bracketed_group{x}}
+_bracketed_group{x}:    ("[[" _comma_separated{x} "]]") | x
 
-sequence_of:            "SEQUENCE" [_size] "OF" (IDENTIFIER | single_ie_container)
+sequence_of:            "SEQUENCE" [_size] "OF" (_field_type | single_ie_container)
 sequence:               "SEQUENCE" _items{_sequence_item}
 _sequence_item:         optional_field | field | extension_container | ie_container | single_ie_container
-optional_field.2:       _identifier _field_type "OPTIONAL"
+optional_field.2:       _identifier _field_type ("OPTIONAL" | "DEFAULT" _identifier)
 field.1:                _identifier _field_type
 
 enumerated:             "ENUMERATED" _items{enum_field}
@@ -80,8 +83,8 @@ _primitive:             sequence_of
                         | octet_string
                         | boolean
                         | null
-                        | _identifier
-_field_type:            _primitive type_parameter? | enumerated | sequence | choice
+                        | _identifier type_parameter? 
+_field_type:            _primitive | enumerated | sequence | choice
 type_parameter:         "{" _identifier "}"
 
 ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
