@@ -2053,10 +2053,100 @@ impl AperCodec for GnbCuSystemInformation {
     }
 }""", constants={"maxnoofSIBTypes": 32})
 
+    def test_inline_choice(self):
+        self.should_generate("""\
+SBCCH-SL-BCH-MessageType::=     CHOICE {
+    c1                              CHOICE {
+        masterInformationBlockSidelink              MasterInformationBlockSidelink,
+        spare1 NULL
+    },
+    messageClassExtension   SEQUENCE {}
+}""", """\
+
+// SbcchSlBchMessageType
+# [derive(Clone, Debug)]
+pub enum SbcchSlBchMessageType {
+    C1(C1),
+}
+
+impl SbcchSlBchMessageType {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::C1(C1::decode(data)?)),
+            1 => Err(AperCodecError::new("Choice extension container not implemented")),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::C1(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl AperCodec for SbcchSlBchMessageType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SbcchSlBchMessageType::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SbcchSlBchMessageType"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SbcchSlBchMessageType"))
+    }
+}
+// C1
+# [derive(Clone, Debug)]
+pub enum C1 {
+    MasterInformationBlockSidelink(MasterInformationBlockSidelink),
+    Spare1,
+}
+
+impl C1 {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::MasterInformationBlockSidelink(MasterInformationBlockSidelink::decode(data)?)),
+            1 => Ok(Self::Spare1),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::MasterInformationBlockSidelink(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::Spare1 => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                Ok(())
+            }
+        }
+    }
+}
+
+impl AperCodec for C1 {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        C1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("C1"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("C1"))
+    }
+}""")
+
     def test_empty_pdu(self):
         self.should_generate("""\
 OverloadStop ::= SEQUENCE {
-	protocolIEs		ProtocolIE-Container		{ {OverloadStopIEs} },
+    protocolIEs		ProtocolIE-Container		{ {OverloadStopIEs} },
 	...
 }
 

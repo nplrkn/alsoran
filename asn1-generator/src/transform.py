@@ -85,7 +85,7 @@ class IeContainerMerger(Transformer):
         self.ie_dict = ies
 
     def sequence(self, tree):
-        if tree.children[0].data == "ie_container":
+        if len(tree.children) > 0 and tree.children[0].data == "ie_container":
             tree.children[0] = self.ie_dict[tree.children[0].children[0]]
             tree.data = "ie_container_sequence"
         return tree
@@ -204,6 +204,12 @@ class TypeTransformer(Transformer):
             tree.children[type_index] = name
         elif typ.data == 'null':
             tree.children[type_index] = 'null'
+        elif typ.data == 'choice':
+            name = self.unique_type_name(orig_name)
+            new_def = Tree('choice_def', [name, typ])
+            self.extra_defs.append(new_def)
+            tree.children[type_index] = name
+            # assert(False)
         else:
             pass
 
@@ -723,6 +729,34 @@ document
     TimeInformationType
     enumerated
       enum_field\tLocalClock
+""")
+
+    def test_inline_choice(self):
+        self.should_generate("""\
+SBCCH-SL-BCH-MessageType::=     CHOICE {
+    c1                              CHOICE {
+        masterInformationBlockSidelink              MasterInformationBlockSidelink,
+        spare1 NULL
+    },
+    messageClassExtension   SEQUENCE {}
+}""", """\
+document
+  choice_def
+    SbcchSlBchMessageType
+    choice
+      choice_field
+        C1
+        C1
+      extension_container\tmessageClassExtension
+  choice_def
+    C1
+    choice
+      choice_field
+        MasterInformationBlockSidelink
+        MasterInformationBlockSidelink
+      choice_field
+        Spare1
+        null
 """)
 
 
