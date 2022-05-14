@@ -25,8 +25,8 @@ anyhow = "1.0.52"
 swagger = "5.0.2"
 uuid = {version = "0.8", features = ["serde", "v4"]}
 stop-token = "0.6.1"
-asn1-codecs = { git = "https://github.com/nplrkn/hampi" }
-#asn1-codecs = { path = "../../hampi/codecs" }
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="all-fixes" }
+#asn1-codecs = { path = "../../../hampi/codecs" }
 bitvec = {version = "0.22" }
 hyper = "0.13"
 
