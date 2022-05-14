@@ -714,6 +714,17 @@ document
     criticality\treject
 """, constants={"id-AMFConfigurationUpdate": 0})
 
+    def test_single_option_enum(self):
+        self.should_generate("""\
+    TimeInformationType ::= ENUMERATED { localClock }
+    """, """\
+document
+  enum_def
+    TimeInformationType
+    enumerated
+      enum_field\tLocalClock
+""")
+
 
 if __name__ == '__main__':
     unittest.main(failfast=True)

@@ -56,7 +56,7 @@ _sequence_item:         optional_field | field | extension_container | ie_contai
 optional_field.2:       _identifier _field_type ("OPTIONAL" | "DEFAULT" _identifier)
 field.1:                _identifier _field_type
 
-enumerated:             "ENUMERATED" _items{enum_field}
+enumerated.1:             "ENUMERATED" _items{enum_field}
 enum_field:              _identifier
 
 choice:                 "CHOICE" _items{_choice_item}
