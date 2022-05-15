@@ -929,6 +929,75 @@ handoverNotification NGAP-ELEMENTARY-PROCEDURE ::= {
 	CRITICALITY				ignore
 }
 """, """\
+
+pub struct AmfConfigurationUpdateProcedure {}
+
+# [async_trait]
+impl Procedure for AmfConfigurationUpdateProcedure {
+    type TopPdu = NgapPdu;
+    type Request = AmfConfigurationUpdate;
+    type Success = AmfConfigurationUpdateAcknowledge;
+    type Failure = AmfConfigurationUpdateFailure;
+    const CODE: u8 = 0;
+
+    async fn call_provider<T: RequestProvider<Self>>(
+        provider: &T,
+        req: AmfConfigurationUpdate,
+        logger: &Logger,
+    ) -> Option<NgapPdu> {
+        match <T as RequestProvider<AmfConfigurationUpdateProcedure>>::request(provider, req, logger).await {
+            Ok(x) => Some(NgapPdu::SuccessfulOutcome(SuccessfulOutcome::AmfConfigurationUpdateAcknowledge(x))),
+            Err(_) => todo!(),
+        }
+    }
+
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
+        NgapPdu::InitiatingMessage(InitiatingMessage::AmfConfigurationUpdate(r)).into_bytes()
+    }
+
+    fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
+        let response_pdu = Self::TopPdu::from_bytes(bytes)?;
+        match response_pdu {
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::AmfConfigurationUpdateAcknowledge(x)) => Ok(x),
+            NgapPdu::UnsuccessfulOutcome(UnsuccessfulOutcome::AmfConfigurationUpdateFailure(x)) => {
+                Err(RequestError::UnsuccessfulOutcome(x))
+            }
+            _ => Err(RequestError::Other("Unexpected pdu contents".to_string())),
+        }
+    }
+}
+
+
+pub struct HandoverNotificationProcedure {}
+
+# [async_trait]
+impl Procedure for HandoverNotificationProcedure {
+    type TopPdu = NgapPdu;
+    type Request = HandoverNotify;
+    type Success = ();
+    type Failure = ();
+    const CODE: u8 = 11;
+
+    async fn call_provider<T: RequestProvider<Self>>(
+        provider: &T,
+        req: HandoverNotify,
+        logger: &Logger,
+    ) -> Option<NgapPdu> {
+        match <T as RequestProvider<HandoverNotificationProcedure>>::request(provider, req, logger).await {
+            Ok(_) => None,
+            Err(_) => todo!(),
+        }
+    }
+
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
+        NgapPdu::InitiatingMessage(InitiatingMessage::HandoverNotify(r)).into_bytes()
+    }
+
+    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
+        Err(RequestError::Other("No response is defined for HandoverNotify!".to_string()))
+    }
+}
+
 # [derive(Clone, Debug)]
 pub enum InitiatingMessage {
     AmfConfigurationUpdate(AmfConfigurationUpdate),

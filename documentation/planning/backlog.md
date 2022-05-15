@@ -3,7 +3,6 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Multi worker code (including coordinator) moved to a branch leaving remaining code super simple
 - Requests should be processed in parallel in separate tasks.
 - Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
 - Session setup (23.502, figure 4.3.2.2.1-1).  (Requires N2 PDU Session Request/Response.)
@@ -14,6 +13,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## DONE
+- Multi worker code (including coordinator) moved to a 'prototype' version leaving remaining code super simple
 - NG Setup working again against free5GC using the instructions in [the free5gc howto](../howto/free5GC-testing.md).
 - Add error messages to ASN.1 library + get it upstreamed
 - GNB-CU code moved to a subdirectory (leaving code shared with DU or AMF at top level).
