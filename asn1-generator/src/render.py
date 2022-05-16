@@ -1273,7 +1273,7 @@ impl AperCodec for WlanRtt {
 
     def test_unbounded_octet_string(self):
         input = """\
-LTEUERLFReportContainer::= OCTET STRING
+LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
 """
         output = """\
 
@@ -2199,6 +2199,50 @@ impl AperCodec for OverloadStop {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("OverloadStop"))
+    }
+}""")
+
+    def test_rrc_setup_release(self):
+        self.should_generate("""\
+LocationMeasurementIndication-IEs ::=       SEQUENCE {
+    measurementIndication                       SetupRelease {LocationMeasurementInfo},
+    nonCriticalExtension                        SEQUENCE{}                                                              OPTIONAL
+}
+""", """\
+
+// LocationMeasurementIndicationIEs
+# [derive(Clone, Debug)]
+pub struct LocationMeasurementIndicationIEs {
+    pub measurement_indication: SetupRelease<LocationMeasurementInfo>,
+}
+
+impl LocationMeasurementIndicationIEs {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
+        let measurement_indication = SetupRelease<LocationMeasurementInfo>::decode(data)?;
+
+        Ok(Self {
+            measurement_indication,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(false);
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        self.measurement_indication.encode(data)?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for LocationMeasurementIndicationIEs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        LocationMeasurementIndicationIEs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LocationMeasurementIndicationIEs"))
     }
 }""")
 

@@ -192,6 +192,11 @@ class TypeTransformer(Transformer):
         if isinstance(typ, Token):
             typename = tree.children[type_index].value
             tree.children[type_index] = self.convert(typename)
+            if len(tree.children) >= 3:
+                node = tree.children[2]
+                if isinstance(node, Tree) and node.data == "type_parameter":
+                    tree.children[type_index] += f"<{node.children[0]}>"
+                    del(tree.children[2])
         elif typ.data == 'enumerated':
             name = self.unique_type_name(orig_name)
             new_def = Tree('enum_def', [name, typ])
@@ -774,6 +779,21 @@ document
         access_stratum_release_sidelink_r_16
         AccessStratumReleaseSidelinkR16
       extension_container\tnonCriticalExtension
+""")
+
+    def test_rrc_setup_release(self):
+        self.should_generate("""\
+LocationMeasurementIndication-IEs ::=       SEQUENCE {
+    measurementIndication                       SetupRelease {LocationMeasurementInfo},
+}
+""", """\
+document
+  struct
+    LocationMeasurementIndicationIEs
+    sequence
+      field
+        measurement_indication
+        SetupRelease<LocationMeasurementInfo>
 """)
 
 
