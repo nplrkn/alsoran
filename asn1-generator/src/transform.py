@@ -796,6 +796,26 @@ document
         SetupRelease<LocationMeasurementInfo>
 """)
 
+    def test_parameterized_choice_def(self):
+        self.should_generate("""\
+SetupRelease { ElementTypeParam } ::= CHOICE {
+    release         NULL,
+    setup           ElementTypeParam
+}
+""", """\
+document
+  generic_choice_def
+    SetupRelease
+    type_parameter\tElementTypeParam
+    choice
+      choice_field
+        Release
+        null
+      choice_field
+        Setup
+        ElementTypeParam
+""")
+
 
 if __name__ == '__main__':
     unittest.main(failfast=True)

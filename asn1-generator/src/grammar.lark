@@ -29,6 +29,7 @@ _definitions:           ( tuple_struct
                         | struct 
                         | enum_def 
                         | choice_def 
+                        | generic_choice_def
                         | constant_def 
                         | object_def 
                         | protocol_ies 
@@ -36,11 +37,12 @@ _definitions:           ( tuple_struct
                         | class_def
                         | top_level_enum_def
                         | class_instance)+
-?assign:                IDENTIFIER type_parameter? "::="
+?assign:                IDENTIFIER "::="
 tuple_struct:           assign _primitive
 struct:                 assign sequence
 enum_def:               assign enumerated
 choice_def:             assign choice
+generic_choice_def:     IDENTIFIER type_parameter "::=" choice
 constant_def:           IDENTIFIER _IDENTIFIER "::=" INTEGER
 object_def.0:           IDENTIFIER _identifier "::=" ies
 protocol_ies.1:         IDENTIFIER _PROTOCOL_IES "::=" ies
