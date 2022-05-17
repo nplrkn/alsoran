@@ -892,11 +892,11 @@ def generate(tree, constants=dict(), verbose=False):
     return visited.outfile
 
 
-def generate_structs(input_file, constants=dict(), verbose=False):
-    tree = parse_file(input_file)
-    if verbose:
-        print(tree.pretty())
-    return generate(tree, constants, print)
+# def generate_structs(input_file, constants=dict(), verbose=False):
+#     tree = parse_file(input_file)
+#     if verbose:
+#         print(tree.pretty())
+#     return generate(tree, constants, print)
 
 
 class TestGenerator(unittest.TestCase):
