@@ -5,7 +5,8 @@ from lark.visitors import Transformer, Visitor, Discard
 from case import pascal_case, snake_case
 from lark.lexer import Token
 from lark import Tree, v_args
-from parse import parse_string
+from parse import parse_string, parse_file
+import sys
 
 
 # Add a new type name and ensure it is unique
@@ -227,8 +228,8 @@ class TypeTransformer(Transformer):
     def sequence_of(self, tree):
         item = tree.children[2]
         self.transform_bounds(tree)
-        item = self.convert(item)
-        tree.children[2] = item
+        if isinstance(item, Token):
+            tree.children[2] = self.convert(item)
         return Tree("sequence_of", tree.children)
 
     def get_constant(self, name):
@@ -355,6 +356,11 @@ def transform(mut_tree, constants):
     except Exception as e:
         print(mut_tree.pretty())
         raise e
+
+
+def transform_from_file(input_file):
+    tree = parse_file(input_file)
+    return transform(tree, dict())
 
 
 class TestTransformer(unittest.TestCase):
@@ -816,6 +822,33 @@ document
         ElementTypeParam
 """)
 
+    def test_seq_of_constrained_int(self):
+        self.should_generate("""\
+AvailabilityCombination-r16 ::=         SEQUENCE {
+    availabilityCombinationId-r16           AvailabilityCombinationId-r16,
+    resourceAvailability-r16                SEQUENCE (SIZE (1..maxNrofResourceAvailabilityPerCombination-r16)) OF INTEGER (0..7)
+}
+""", """\
+document
+  struct
+    AvailabilityCombinationR16
+    sequence
+      field
+        availability_combination_id_r_16
+        AvailabilityCombinationIdR16
+      field
+        resource_availability_r_16
+        sequence_of
+          1
+          maxNrofResourceAvailabilityPerCombination-r16
+          u8
+            0
+            7
+""")
+
 
 if __name__ == '__main__':
-    unittest.main(failfast=True)
+    if len(sys.argv) == 2:
+        print(transform_from_file(sys.argv[1]))
+    else:
+        unittest.main(failfast=True)

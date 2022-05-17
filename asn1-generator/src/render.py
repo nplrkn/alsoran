@@ -892,11 +892,11 @@ def generate(tree, constants=dict(), verbose=False):
     return visited.outfile
 
 
-# def generate_structs(input_file, constants=dict(), verbose=False):
-#     tree = parse_file(input_file)
-#     if verbose:
-#         print(tree.pretty())
-#     return generate(tree, constants, print)
+def generate_from_file(input_file, constants=dict(), verbose=False):
+    tree = parse_file(input_file)
+    if verbose:
+        print(tree.pretty())
+    return generate(tree, constants, print)
 
 
 class TestGenerator(unittest.TestCase):
@@ -2246,9 +2246,24 @@ impl AperCodec for LocationMeasurementIndicationIEs {
     }
 }""")
 
+    def test_parameterized_choice_def(self):
+        self.should_generate("""\
+SetupRelease { ElementTypeParam } ::= CHOICE {
+    release         NULL,
+    setup           ElementTypeParam
+}
+""", "")
+
+    def test_seq_of_constrained_int(self):
+        self.should_generate("""\
+AvailabilityCombination-r16 ::=         SEQUENCE {
+    resourceAvailability-r16                SEQUENCE (SIZE (1..maxNrofResourceAvailabilityPerCombination-r16)) OF INTEGER (0..7)
+}
+""", "")
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        print(generate_structs(sys.argv[1], verbose=True))
+        print(generate_from_file(sys.argv[1], verbose=True))
     else:
         unittest.main(failfast=True)
