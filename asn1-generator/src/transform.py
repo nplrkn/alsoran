@@ -136,18 +136,26 @@ class TypeTransformer(Transformer):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
+    def type_parameterized_identifier(self, tree):
+        typ = pascal_case(tree.children[0]) + \
+            f"<{self.convert(tree.children[1].children[0])}>"
+        return Token('', typ)
+
     def field(self, tree):
-        tree = self.transform_type(tree)
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
     def choice_field(self, tree):
-        tree = self.transform_type(tree)
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
     def optional_field(self, tree):
-        tree = self.transform_type(tree)
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
@@ -187,35 +195,27 @@ class TypeTransformer(Transformer):
         tree.children[0] = self.get_constant(tree.children[0])
         return tree
 
-    def transform_type(self, tree, type_index=1):
-        orig_name = tree.children[0]
-        typ = tree.children[type_index]
-        if isinstance(typ, Token):
-            typename = tree.children[type_index].value
-            tree.children[type_index] = self.convert(typename)
-            if len(tree.children) >= 3:
-                node = tree.children[2]
-                if isinstance(node, Tree) and node.data == "type_parameter":
-                    tree.children[type_index] += f"<{node.children[0]}>"
-                    del(tree.children[2])
-        elif typ.data == 'enumerated':
+    def transform_type(self, tree, orig_name):
+        if isinstance(tree, Token):
+            typename = tree.value
+            tree = self.convert(typename)
+        elif tree.data == 'enumerated':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('enum_def', [name, typ])
+            new_def = Tree('enum_def', [name, tree])
             self.extra_defs.append(new_def)
-            tree.children[type_index] = name
-        elif typ.data == 'sequence':
+            tree = name
+        elif tree.data == 'sequence':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('struct', [name, typ])
+            new_def = Tree('struct', [name, tree])
             self.extra_defs.append(new_def)
-            tree.children[type_index] = name
-        elif typ.data == 'null':
-            tree.children[type_index] = 'null'
-        elif typ.data == 'choice':
+            tree = name
+        elif tree.data == 'null':
+            tree = 'null'
+        elif tree.data == 'choice':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('choice_def', [name, typ])
+            new_def = Tree('choice_def', [name, tree])
             self.extra_defs.append(new_def)
-            tree.children[type_index] = name
-            # assert(False)
+            tree = name
         else:
             pass
 
@@ -277,7 +277,7 @@ class TypeTransformer(Transformer):
     def integer(self, tree):
         (lb, ub, extensible) = self.transform_bounds(tree)
 
-        if extensible:
+        if extensible or ((lb, ub) == (None, None)):
             t = "i128"
         elif lb < 0:
             if lb >= -128 and ub <= 127:
@@ -331,7 +331,8 @@ class TypeTransformer(Transformer):
         id = tree.children[0].value
         tree.children[0] = snake_case(id.replace("id-", ""))
         tree.children.insert(1, self.constants[id])
-        self.transform_type(tree, 3)
+        tree.children[3] = self.transform_type(
+            tree.children[3], tree.children[0])
         return tree
 
     def optional_ie(self, tree):
@@ -844,6 +845,20 @@ document
           u8
             0
             7
+""")
+
+    def test_unbounded_integer(self):
+        self.should_generate("""\
+VarMeasReportSL-r16 ::=                   SEQUENCE {
+    sl-NumberOfReportsSent-r16                INTEGER
+}""", """\
+document
+  struct
+    VarMeasReportSlR16
+    sequence
+      field
+        sl_number_of_reports_sent_r_16
+        i128
 """)
 
 

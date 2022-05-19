@@ -86,9 +86,11 @@ _primitive:             sequence_of
                         | octet_string
                         | boolean
                         | null
-                        | _identifier type_parameter? 
+                        | _identifier 
+                        | type_parameterized_identifier? 
 _field_type:            _primitive | enumerated | sequence | choice
 type_parameter:         "{" _identifier "}"
+type_parameterized_identifier: _identifier type_parameter
 
 ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 single_ie_container.1:  "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"

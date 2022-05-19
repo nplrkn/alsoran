@@ -2259,6 +2259,64 @@ SetupRelease { ElementTypeParam } ::= CHOICE {
 AvailabilityCombination-r16 ::=         SEQUENCE {
     resourceAvailability-r16                SEQUENCE (SIZE (1..maxNrofResourceAvailabilityPerCombination-r16)) OF INTEGER (0..7)
 }
+""", """\
+
+// AvailabilityCombinationR16
+# [derive(Clone, Debug)]
+pub struct AvailabilityCombinationR16 {
+    pub resource_availability_r_16: Vec<u8>,
+}
+
+impl AvailabilityCombinationR16 {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
+        let resource_availability_r_16 = {
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(5), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(aper::decode::decode_integer(data, Some(0), Some(7), false)?.0 as u8);
+            }
+            items
+        };
+
+        Ok(Self {
+            resource_availability_r_16,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let optionals = BitVec::new();
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        aper::encode::encode_length_determinent(data, Some(1), Some(5), false, self.resource_availability_r_16.len())?;
+        for x in &self.resource_availability_r_16 {
+            aper::encode::encode_integer(data, Some(0), Some(7), false, x as i128, false)?;
+        }
+        Ok(())?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for AvailabilityCombinationR16 {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AvailabilityCombinationR16::decode_inner(data).map_err(|e: AperCodecError| e.push_context("AvailabilityCombinationR16"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("AvailabilityCombinationR16"))
+    }
+}""", constants={"maxNrofResourceAvailabilityPerCombination-r16": 5})
+
+    def test_seq_of_choice(self):
+        self.should_generate("""\
+SystemInformation-IEs ::=           SEQUENCE {
+    sib-TypeAndInfo                     SEQUENCE (SIZE (1..3)) OF CHOICE {
+        sib2                                SIB2,
+        sib3                                SIB3,
+        ...,
+        sib10-v1610                         SIB10-r16,
+    },
+}
 """, "")
 
 
