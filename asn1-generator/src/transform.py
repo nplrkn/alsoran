@@ -107,6 +107,10 @@ class Remover(Transformer):
         print("Removing object_def ", tree.children[0])
         return Discard
 
+    def extended_items(self, tree):
+        print("Removing extended items")
+        return Discard
+
 
 @v_args(tree=True)
 class TypeTransformer(Transformer):
@@ -161,6 +165,8 @@ class TypeTransformer(Transformer):
 
     def tuple_struct(self, tree):
         tree.children[0] = self.convert(tree.children[0])
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         return tree
 
     def choice_def(self, tree):
@@ -199,6 +205,10 @@ class TypeTransformer(Transformer):
         if isinstance(tree, Token):
             typename = tree.value
             tree = self.convert(typename)
+        elif tree.data == 'sequence_of':
+            print("tree at start:", tree)
+            tree.children[2] = self.transform_type(tree.children[2], orig_name)
+            print("tree after:", tree)
         elif tree.data == 'enumerated':
             name = self.unique_type_name(orig_name)
             new_def = Tree('enum_def', [name, tree])
@@ -226,10 +236,7 @@ class TypeTransformer(Transformer):
         return Tree("ie_container_sequence_of", tree.children)
 
     def sequence_of(self, tree):
-        item = tree.children[2]
         self.transform_bounds(tree)
-        if isinstance(item, Token):
-            tree.children[2] = self.convert(item)
         return Tree("sequence_of", tree.children)
 
     def get_constant(self, name):
@@ -486,8 +493,6 @@ document
     enumerated
       enum_field\tThing1
       extension_marker
-      extended_items
-        enum_field\tThing2
   struct
     N2
     sequence

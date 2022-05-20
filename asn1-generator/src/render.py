@@ -2317,7 +2317,95 @@ SystemInformation-IEs ::=           SEQUENCE {
         sib10-v1610                         SIB10-r16,
     },
 }
-""", "")
+""", """\
+
+// SystemInformationIEs
+# [derive(Clone, Debug)]
+pub struct SystemInformationIEs {
+    pub sib_type_and_info: Vec<SibTypeAndInfo>,
+}
+
+impl SystemInformationIEs {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
+        let sib_type_and_info = {
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SibTypeAndInfo::decode(data)?);
+            }
+            items
+        };
+
+        Ok(Self {
+            sib_type_and_info,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let optionals = BitVec::new();
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        aper::encode::encode_length_determinent(data, Some(1), Some(3), false, self.sib_type_and_info.len())?;
+        for x in &self.sib_type_and_info {
+            x.encode(data)?;
+        }
+        Ok(())?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for SystemInformationIEs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SystemInformationIEs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemInformationIEs"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemInformationIEs"))
+    }
+}
+// SibTypeAndInfo
+# [derive(Clone, Debug)]
+pub enum SibTypeAndInfo {
+    Sib2(Sib2),
+    Sib3(Sib3),
+}
+
+impl SibTypeAndInfo {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::Sib2(Sib2::decode(data)?)),
+            1 => Ok(Self::Sib3(Sib3::decode(data)?)),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::Sib2(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, true, 0, false)?;
+                x.encode(data)
+            }
+            Self::Sib3(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, true, 1, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl AperCodec for SibTypeAndInfo {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SibTypeAndInfo::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    }
+}""")
 
 
 if __name__ == '__main__':
