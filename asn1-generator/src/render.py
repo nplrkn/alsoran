@@ -114,7 +114,7 @@ def decode_expression(tree):
 def encode_expression_fn(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof == "ie_container_sequence_of":
-        return lambda x, data="data", _copy_type_deref="": f"""\
+        return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             let ie = &mut AperCodecData::new();
@@ -126,7 +126,7 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
         }}
         Ok(())"""
     elif type_info.seqof:
-        return lambda x, data="data", _copy_type_deref="": f"""\
+        return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             {encode_expression_fn(tree.children[2])("x", data)}?;
