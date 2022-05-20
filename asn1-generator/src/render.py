@@ -108,7 +108,7 @@ def decode_expression(tree):
     elif type_info.typ == "bool":
         return f"aper::decode::decode_bool(data)?"
     else:
-        return f"""{type_info.typ}::decode(data)?"""
+        return f"""{type_info.typ.replace("<", "::<")}::decode(data)?"""
 
 
 def encode_expression_fn(tree):
@@ -2219,7 +2219,7 @@ pub struct LocationMeasurementIndicationIEs {
 impl LocationMeasurementIndicationIEs {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
-        let measurement_indication = SetupRelease<LocationMeasurementInfo>::decode(data)?;
+        let measurement_indication = SetupRelease::<LocationMeasurementInfo>::decode(data)?;
 
         Ok(Self {
             measurement_indication,
