@@ -206,9 +206,7 @@ class TypeTransformer(Transformer):
             typename = tree.value
             tree = self.convert(typename)
         elif tree.data == 'sequence_of':
-            print("tree at start:", tree)
             tree.children[2] = self.transform_type(tree.children[2], orig_name)
-            print("tree after:", tree)
         elif tree.data == 'enumerated':
             name = self.unique_type_name(orig_name)
             new_def = Tree('enum_def', [name, tree])

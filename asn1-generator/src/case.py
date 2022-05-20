@@ -6,6 +6,10 @@ KNOWN_WORDS = [(re.compile(x, re.IGNORECASE), "-"+x+"-")
 ACRONYMS = re.compile(r"([A-Z,0-9]*)(?=(?=[A-Z][a-z]*)|$|-|_)")
 
 
+def replace_rust_keywords(s):
+    return 'typ' if s == 'type' else s
+
+
 def capitalize_first_only(s):
     return s[0].capitalize() + s[1:]
 
@@ -22,6 +26,7 @@ def split_words(s):
 
 
 def snake_case(s):
+    s = replace_rust_keywords(s)
     s = capitalize_first_only(s)
     words = [word.lower() for word in split_words(s)]
     s = '_'.join(words)
