@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from itertools import permutations, takewhile
 import unittest
 from lark.visitors import Transformer, Visitor, Discard
 from case import pascal_case, snake_case
@@ -12,10 +13,12 @@ import sys
 # Add a new type name and ensure it is unique
 def add_type_name(orig_typename, name_dict):
     name = pascal_case(orig_typename)
-    existing = name_dict.get(name)
-    name_dict[name] = (existing or 0) + 1
-    if existing:
-        name = name + str(existing)
+    if name_dict.get(name):
+        suffix = 1
+        while name_dict.get(name + str(suffix)):
+            suffix += 1
+        name = name + str(suffix)
+    name_dict[name] = True
     return name
 
 
@@ -110,6 +113,27 @@ class Remover(Transformer):
     def extended_items(self, tree):
         print("Removing extended items")
         return Discard
+
+
+@v_args(tree=True)
+class EnumDeDuplicator(Transformer):
+    # If we find two enum variants with the same name after converting to pascal case
+    # this is because of an RRC construct like Q-OffsetRange which contains both
+    # "dB-24" AND "db24".  (Thanks, RRC).  We convert the dash to the word 'Dash' to
+    # dismabiguate.
+    def enumerated(self, tree):
+        for i1 in range(len(tree.children) - 1):
+            item1 = tree.children[i1]
+            if isinstance(item1, Token) or len(item1.children) == 0:
+                continue
+            for i2 in range(i1 + 1, len(tree.children)):
+                item2 = tree.children[i2]
+                if isinstance(item2, Token) or len(item2.children) == 0:
+                    continue
+                if pascal_case(item1.children[0]) == pascal_case(item2.children[0]):
+                    item1.children[0] = item1.children[0].replace('-', 'Dash')
+                    item2.children[0] = item2.children[0].replace('-', 'Dash')
+        return tree
 
 
 @v_args(tree=True)
@@ -348,6 +372,9 @@ def transform(mut_tree, constants):
     try:
         print("---- Removing ignored object_defs ----")
         mut_tree = Remover().transform(mut_tree)
+
+        print("---- Deduplicate enum variants ----")
+        mut_tree = EnumDeDuplicator().transform(mut_tree)
 
         print("---- Finding typenames ----")
         tnf = TypeNameFinder()
@@ -863,6 +890,38 @@ document
         sl_number_of_reports_sent_r_16
         i128
 """)
+
+    def test_dup_extra_defs(self):
+        self.should_generate("""\
+FeatureSetUplink-v1540 ::=           SEQUENCE {
+    zeroSlotOffsetAperiodicSRS           ENUMERATED {supported}                     OPTIONAL,
+    pa-PhaseDiscontinuityImpacts         ENUMERATED {supported}                     OPTIONAL,
+}
+""", """\
+document
+  struct
+    FeatureSetUplinkV1540
+    sequence
+      optional_field
+        zero_slot_offset_aperiodic_srs
+        ZeroSlotOffsetAperiodicSrs
+      optional_field
+        pa_phase_discontinuity_impacts
+        PaPhaseDiscontinuityImpacts
+  enum_def
+    ZeroSlotOffsetAperiodicSrs
+    enumerated
+      enum_field\tSupported
+  enum_def
+    PaPhaseDiscontinuityImpacts
+    enumerated
+      enum_field\tSupported
+""")
+
+    def test_enum_with_duplicate_pascal_case_mappings(self):
+        self.should_generate("""\
+Q-OffsetRange ::=                   ENUMERATED {dB-24, something-else, dB24}
+""", "")
 
 
 if __name__ == '__main__':

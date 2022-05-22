@@ -28,6 +28,9 @@ use async_trait::async_trait;
 use slog::Logger;
 use anyhow::Result;
 """
+USE_RRC_SETUP_RELEASE = """\
+use crate::SetupRelease;
+"""
 
 
 def output_filename(protocol, filename):
@@ -77,7 +80,7 @@ def generate_rrc():
     constants = get_constants(parse_tree)
 
     generate_file(protocol, "rrc.rs", "All", USE_ASN1 +
-                  USE_BITSTRING + USE_NUM_ENUM, constants, parse_tree)
+                  USE_BITSTRING + USE_RRC_SETUP_RELEASE + USE_NUM_ENUM, constants, parse_tree)
 
 
 generate_rrc()

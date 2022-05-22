@@ -128,7 +128,7 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
     elif type_info.seqof:
         return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
-        for x in &{x} {{
+        for x in {copy_type_deref}&{x} {{
             {encode_expression_fn(tree.children[2])("x", data)}?;
         }}
         Ok(())"""
@@ -2404,6 +2404,102 @@ impl AperCodec for SibTypeAndInfo {
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    }
+}""")
+
+    def test_seq_of_copy_type(self):
+        self.should_generate("""\
+CSI-AssociatedReportConfigInfo ::=  SEQUENCE {
+    nzp-CSI-RS                          SEQUENCE {
+        qcl-info                            SEQUENCE (SIZE(1..2)) OF TCI-StateId OPTIONAL
+    },
+}
+""", """\
+
+// CsiAssociatedReportConfigInfo
+# [derive(Clone, Debug)]
+pub struct CsiAssociatedReportConfigInfo {
+    pub nzp_csi_rs: NzpCsiRs,
+}
+
+impl CsiAssociatedReportConfigInfo {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
+        let nzp_csi_rs = NzpCsiRs::decode(data)?;
+
+        Ok(Self {
+            nzp_csi_rs,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let optionals = BitVec::new();
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        self.nzp_csi_rs.encode(data)?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for CsiAssociatedReportConfigInfo {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        CsiAssociatedReportConfigInfo::decode_inner(data).map_err(|e: AperCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+    }
+}
+// NzpCsiRs
+# [derive(Clone, Debug)]
+pub struct NzpCsiRs {
+    pub qcl_info: Option<Vec<TciStateId>>,
+}
+
+impl NzpCsiRs {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
+        let qcl_info = if optionals[0] {
+            Some({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TciStateId::decode(data)?);
+            }
+            items
+        })
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qcl_info,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(self.qcl_info.is_some());
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        if let Some(x) = &self.qcl_info {
+            aper::encode::encode_length_determinent(data, Some(1), Some(2), false, x.len())?;
+        for x in *&x {
+            x.encode(data)?;
+        }
+        Ok(())?;
+        }
+
+        Ok(())
+    }
+}
+
+impl AperCodec for NzpCsiRs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NzpCsiRs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
     }
 }""")
 
