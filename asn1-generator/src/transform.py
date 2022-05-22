@@ -472,7 +472,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
             combOffset-n2              INTEGER (0..1),
             cyclicShift-n2             INTEGER (0..7)
         },
-	iE-Extensions		ProtocolExtensionContainer {{WLANMeasurementConfiguration-ExtIEs}} 	OPTIONAL,
+	iE-Extensions		ProtocolExtensionContainer {{WLANMeasurementConfiguration-ExtIEs}} 	OPTIONAL, --Need R
 	...
 }
 """
@@ -921,7 +921,15 @@ document
     def test_enum_with_duplicate_pascal_case_mappings(self):
         self.should_generate("""\
 Q-OffsetRange ::=                   ENUMERATED {dB-24, something-else, dB24}
-""", "")
+""", """\
+document
+  enum_def
+    QOffsetRange
+    enumerated
+      enum_field\tDbDash24
+      enum_field\tSomethingElse
+      enum_field\tDb24
+""")
 
 
 if __name__ == '__main__':

@@ -84,5 +84,5 @@ def generate_rrc():
 
 
 generate_rrc()
-# generate_xxap("ngap")
-# generate_xxap("f1ap")
+generate_xxap("ngap")
+generate_xxap("f1ap")

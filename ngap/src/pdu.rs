@@ -13250,8 +13250,39 @@ impl AperCodec for UeRadioCapabilityCheckResponse {
         self.encode_inner(data)
             .map_err(|e: AperCodecError| e.push_context("UeRadioCapabilityCheckResponse"))
     }
-} // PrivateMessage - omitted
+}
+// PrivateMessage
+#[derive(Clone, Debug)]
+pub struct PrivateMessage {}
 
+impl PrivateMessage {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+
+        Ok(Self {})
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(false);
+
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for PrivateMessage {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PrivateMessage::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PrivateMessage"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("PrivateMessage"))
+    }
+}
 // SecondaryRatDataUsageReport
 #[derive(Clone, Debug)]
 pub struct SecondaryRatDataUsageReport {

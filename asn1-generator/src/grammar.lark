@@ -7,8 +7,9 @@ NEWLINE:                "\n"
 %ignore COMMENT
 %ignore NEWLINE
 
-IDENTIFIER:             ("a".."z" | "A".."Z" | DIGIT | "-")+
-INTEGER:                "-"? "0" | "1".."9"("0".."9")*
+IDENTIFIER:             NONHYPHEN (NONHYPHEN|"-")*
+NONHYPHEN:              ("a".."z" | "A".."Z" | DIGIT)
+INTEGER:                "0" | "-"? "1".."9"("0".."9")*
 _IDENTIFIER:            IDENTIFIER
 _identifier:            IDENTIFIER
 BOUND:                  INTEGER | IDENTIFIER

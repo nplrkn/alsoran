@@ -129,7 +129,7 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
         return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in {copy_type_deref}&{x} {{
-            {encode_expression_fn(tree.children[2])("x", data)}?;
+            {encode_expression_fn(tree.children[2])("x", data, "*")}?;
         }}
         Ok(())"""
 
@@ -140,11 +140,11 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
     elif type_info.typ == "String":
         format_string = f"aper::encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, &{{value}}, false)"
     elif type_info.typ == "i128":
-        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, {{value}}, false)"
+        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}}, false)"
     elif is_non_i128_int_type(type_info.typ):
         format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}} as i128, false)"
     elif type_info.typ == "bool":
-        format_string = f"aper::encode::encode_bool({{data}}, {{value}})"
+        format_string = f"aper::encode::encode_bool({{data}}, {{copy_type_deref}}{{value}})"
     else:
         format_string = f"""{{value}}.encode({{data}})"""
 
@@ -224,10 +224,7 @@ class ChoiceFields(Interpreter):
 
     def choice_field(self, tree):
         name = tree.children[0]
-        typ = tree.children[1]
-
-        if isinstance(typ, Tree):
-            typ = typ.data
+        typ = type_and_constraints(tree.children[1]).typ
         self.choice_fields += f"""\
     {name}{"("+typ+")" if typ != "null" else ""},
 """
@@ -813,9 +810,9 @@ impl {orig_name} {{
             child for child in tree.children[1].children if child.data in ["field", "optional_field"]]
 
         # Omit if there are 0 fields, as is normally the case for extension IEs
-        if len(fields) == 0:
-            self.comment(tree, "omitted\n")
-            return
+        # if len(fields) == 0:
+        #     self.comment(tree, "omitted\n")
+        #     return
 
         field_interpreter = StructFields()
         fields_from_interpreter = StructFieldsFrom()
@@ -2289,7 +2286,7 @@ impl AvailabilityCombinationR16 {
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         aper::encode::encode_length_determinent(data, Some(1), Some(5), false, self.resource_availability_r_16.len())?;
         for x in &self.resource_availability_r_16 {
-            aper::encode::encode_integer(data, Some(0), Some(7), false, x as i128, false)?;
+            aper::encode::encode_integer(data, Some(0), Some(7), false, *x as i128, false)?;
         }
         Ok(())?;
 
