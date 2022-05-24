@@ -95,6 +95,23 @@ impl MockDu {
 
         Ok(())
     }
+
+    pub async fn perform_rrc_setup(&self) -> Result<()> {
+        // Build RRC Setup Request
+        unimplemented!()
+
+        // Wrap it in an Initial UL Rrc Message Transfer
+
+        // Send
+
+        // Receive DL Rrc Message Transfer and extract RRC Setup
+
+        // Build RRC Setup Response
+
+        // Wrap it in an UL Rrc Message Transfer
+
+        // Send
+    }
 }
 
 #[async_trait]

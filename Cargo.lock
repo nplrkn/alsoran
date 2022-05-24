@@ -928,6 +928,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "gnbdu-sim"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "common",
+ "mocks",
+ "slog",
+]
+
+[[package]]
 name = "h2"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1125,10 +1136,9 @@ dependencies = [
  "bitvec",
  "common",
  "coordinator",
- "f1ap",
  "hex",
+ "mocks",
  "net",
- "ngap",
  "slog",
  "stop-token",
  "worker",
@@ -1320,6 +1330,22 @@ dependencies = [
  "net2",
  "winapi 0.2.8",
  "ws2_32-sys",
+]
+
+[[package]]
+name = "mocks"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-channel",
+ "async-std",
+ "async-trait",
+ "bitvec",
+ "f1ap",
+ "net",
+ "ngap",
+ "slog",
+ "stop-token",
 ]
 
 [[package]]

@@ -7,9 +7,11 @@ members = [
     "common",
     "integration-tests",
     "sctp",
+    "mocks",
     "net",
     "ngap",
     "f1ap",
     "gnbcu",
+    "gnbdu-sim",
     "rrc"
 ]
