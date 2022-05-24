@@ -3882,7 +3882,7 @@ impl AperCodec for SldrBsToBeSetupList {
 pub struct UeContextSetupResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub d_uto_cu_rrc_information: DUtoCuRrcInformation,
+    pub du_to_cu_rrc_information: DuToCuRrcInformation,
     pub c_rnti: Option<CRnti>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
     pub full_configuration: Option<FullConfiguration>,
@@ -3908,7 +3908,7 @@ impl UeContextSetupResponse {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut d_uto_cu_rrc_information: Option<DUtoCuRrcInformation> = None;
+        let mut du_to_cu_rrc_information: Option<DuToCuRrcInformation> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
@@ -3934,7 +3934,7 @@ impl UeContextSetupResponse {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                39 => d_uto_cu_rrc_information = Some(DUtoCuRrcInformation::decode(data)?),
+                39 => du_to_cu_rrc_information = Some(DuToCuRrcInformation::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 49 => {
                     resource_coordination_transfer_container =
@@ -3975,13 +3975,13 @@ impl UeContextSetupResponse {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let d_uto_cu_rrc_information = d_uto_cu_rrc_information.ok_or(
-            aper::AperCodecError::new(format!("Missing mandatory IE d_uto_cu_rrc_information")),
+        let du_to_cu_rrc_information = du_to_cu_rrc_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE du_to_cu_rrc_information")),
         )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
-            d_uto_cu_rrc_information,
+            du_to_cu_rrc_information,
             c_rnti,
             resource_coordination_transfer_container,
             full_configuration,
@@ -4020,7 +4020,7 @@ impl UeContextSetupResponse {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.d_uto_cu_rrc_information.encode(ie)?;
+        self.du_to_cu_rrc_information.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -6533,7 +6533,7 @@ pub struct UeContextModificationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub d_uto_cu_rrc_information: Option<DUtoCuRrcInformation>,
+    pub du_to_cu_rrc_information: Option<DuToCuRrcInformation>,
     pub dr_bs_setup_mod_list: Option<DrBsSetupModList>,
     pub dr_bs_modified_list: Option<DrBsModifiedList>,
     pub sr_bs_failed_to_be_setup_mod_list: Option<SrBsFailedToBeSetupModList>,
@@ -6569,7 +6569,7 @@ impl UeContextModificationResponse {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut d_uto_cu_rrc_information: Option<DUtoCuRrcInformation> = None;
+        let mut du_to_cu_rrc_information: Option<DuToCuRrcInformation> = None;
         let mut dr_bs_setup_mod_list: Option<DrBsSetupModList> = None;
         let mut dr_bs_modified_list: Option<DrBsModifiedList> = None;
         let mut sr_bs_failed_to_be_setup_mod_list: Option<SrBsFailedToBeSetupModList> = None;
@@ -6606,7 +6606,7 @@ impl UeContextModificationResponse {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                39 => d_uto_cu_rrc_information = Some(DUtoCuRrcInformation::decode(data)?),
+                39 => du_to_cu_rrc_information = Some(DuToCuRrcInformation::decode(data)?),
                 29 => dr_bs_setup_mod_list = Some(DrBsSetupModList::decode(data)?),
                 21 => dr_bs_modified_list = Some(DrBsModifiedList::decode(data)?),
                 68 => {
@@ -6673,7 +6673,7 @@ impl UeContextModificationResponse {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            d_uto_cu_rrc_information,
+            du_to_cu_rrc_information,
             dr_bs_setup_mod_list,
             dr_bs_modified_list,
             sr_bs_failed_to_be_setup_mod_list,
@@ -6728,7 +6728,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.d_uto_cu_rrc_information {
+        if let Some(x) = &self.du_to_cu_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
@@ -7858,7 +7858,7 @@ pub struct UeContextModificationRequired {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub d_uto_cu_rrc_information: Option<DUtoCuRrcInformation>,
+    pub du_to_cu_rrc_information: Option<DuToCuRrcInformation>,
     pub dr_bs_required_to_be_modified_list: Option<DrBsRequiredToBeModifiedList>,
     pub sr_bs_required_to_be_released_list: Option<SrBsRequiredToBeReleasedList>,
     pub dr_bs_required_to_be_released_list: Option<DrBsRequiredToBeReleasedList>,
@@ -7880,7 +7880,7 @@ impl UeContextModificationRequired {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut d_uto_cu_rrc_information: Option<DUtoCuRrcInformation> = None;
+        let mut du_to_cu_rrc_information: Option<DuToCuRrcInformation> = None;
         let mut dr_bs_required_to_be_modified_list: Option<DrBsRequiredToBeModifiedList> = None;
         let mut sr_bs_required_to_be_released_list: Option<SrBsRequiredToBeReleasedList> = None;
         let mut dr_bs_required_to_be_released_list: Option<DrBsRequiredToBeReleasedList> = None;
@@ -7903,7 +7903,7 @@ impl UeContextModificationRequired {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                39 => d_uto_cu_rrc_information = Some(DUtoCuRrcInformation::decode(data)?),
+                39 => du_to_cu_rrc_information = Some(DuToCuRrcInformation::decode(data)?),
                 23 => {
                     dr_bs_required_to_be_modified_list =
                         Some(DrBsRequiredToBeModifiedList::decode(data)?)
@@ -7951,7 +7951,7 @@ impl UeContextModificationRequired {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            d_uto_cu_rrc_information,
+            du_to_cu_rrc_information,
             dr_bs_required_to_be_modified_list,
             sr_bs_required_to_be_released_list,
             dr_bs_required_to_be_released_list,
@@ -7992,7 +7992,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.d_uto_cu_rrc_information {
+        if let Some(x) = &self.du_to_cu_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
@@ -9591,7 +9591,7 @@ pub struct InitialUlRrcMessageTransfer {
     pub nr_cgi: NrCgi,
     pub c_rnti: CRnti,
     pub rrc_container: RrcContainer,
-    pub d_uto_cu_rrc_container: Option<DUtoCuRrcContainer>,
+    pub du_to_cu_rrc_container: Option<DuToCuRrcContainer>,
     pub sul_access_indication: Option<SulAccessIndication>,
     pub transaction_id: TransactionId,
     pub ran_ue_id: Option<RanUeId>,
@@ -9608,7 +9608,7 @@ impl InitialUlRrcMessageTransfer {
         let mut nr_cgi: Option<NrCgi> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut rrc_container: Option<RrcContainer> = None;
-        let mut d_uto_cu_rrc_container: Option<DUtoCuRrcContainer> = None;
+        let mut du_to_cu_rrc_container: Option<DuToCuRrcContainer> = None;
         let mut sul_access_indication: Option<SulAccessIndication> = None;
         let mut transaction_id: Option<TransactionId> = None;
         let mut ran_ue_id: Option<RanUeId> = None;
@@ -9623,7 +9623,7 @@ impl InitialUlRrcMessageTransfer {
                 111 => nr_cgi = Some(NrCgi::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
-                128 => d_uto_cu_rrc_container = Some(DUtoCuRrcContainer::decode(data)?),
+                128 => du_to_cu_rrc_container = Some(DuToCuRrcContainer::decode(data)?),
                 178 => sul_access_indication = Some(SulAccessIndication::decode(data)?),
                 78 => transaction_id = Some(TransactionId::decode(data)?),
                 226 => ran_ue_id = Some(RanUeId::decode(data)?),
@@ -9659,7 +9659,7 @@ impl InitialUlRrcMessageTransfer {
             nr_cgi,
             c_rnti,
             rrc_container,
-            d_uto_cu_rrc_container,
+            du_to_cu_rrc_container,
             sul_access_indication,
             transaction_id,
             ran_ue_id,
@@ -9702,7 +9702,7 @@ impl InitialUlRrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.d_uto_cu_rrc_container {
+        if let Some(x) = &self.du_to_cu_rrc_container {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 128, false)?;

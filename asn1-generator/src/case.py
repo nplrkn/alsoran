@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+import unittest
 import re
 
 KNOWN_WORDS = [(re.compile(x, re.IGNORECASE), "-"+x+"-")
@@ -7,6 +9,8 @@ ACRONYMS = re.compile(r"([A-Z,0-9]*)(?=(?=[A-Z][a-z]*)|$|-|_)")
 
 KNOWN_WORDS_CASE_SENSITIVE = [(re.compile(x), "-"+x+"-")
                               for x in ["NR", "CU", "UE"]]
+
+SPECIALS = [(re.compile("^DU"), "DU-"), (re.compile("\([^P]\)DU"), "-\1DU-")]
 
 
 def replace_rust_keywords(s):
@@ -20,7 +24,7 @@ def capitalize_first_only(s):
 def split_words(s):
     # Find the known words.  These are the cases where the ACRONYMS
     # regex isn't smart enough to identify the word.
-    for (regex, replace) in KNOWN_WORDS + KNOWN_WORDS_CASE_SENSITIVE:
+    for (regex, replace) in KNOWN_WORDS + KNOWN_WORDS_CASE_SENSITIVE + SPECIALS:
         s = regex.sub(replace, s)
 
     return [word for word in
@@ -41,3 +45,18 @@ def pascal_case(s):
     words = [word.capitalize() for word in split_words(s)]
     s = ''.join(words)
     return s
+
+
+class TestCase(unittest.TestCase):
+    maxDiff = None
+
+    def test_du(self):
+        self.assertEqual(pascal_case("PDU"), "Pdu")
+        self.assertEqual(pascal_case("DUtoCURRCContainer"),
+                         "DuToCuRrcContainer")
+        self.assertEqual(pascal_case("SomethingDU"),
+                         "SomethingDu")
+
+
+if __name__ == '__main__':
+    unittest.main(failfast=True)

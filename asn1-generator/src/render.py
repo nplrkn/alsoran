@@ -1274,11 +1274,11 @@ LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
 """
         output = """\
 
-// LteueRlfReportContainer
+// LteUeRlfReportContainer
 # [derive(Clone, Debug)]
-pub struct LteueRlfReportContainer(pub Vec<u8>);
+pub struct LteUeRlfReportContainer(pub Vec<u8>);
 
-impl LteueRlfReportContainer {
+impl LteUeRlfReportContainer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(data, None, None, false)?))
     }
@@ -1287,13 +1287,13 @@ impl LteueRlfReportContainer {
     }
 }
 
-impl AperCodec for LteueRlfReportContainer {
+impl AperCodec for LteUeRlfReportContainer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        LteueRlfReportContainer::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LteueRlfReportContainer"))
+        LteUeRlfReportContainer::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LteUeRlfReportContainer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LteueRlfReportContainer"))
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LteUeRlfReportContainer"))
     }
 }"""
         self.should_generate(input, output)

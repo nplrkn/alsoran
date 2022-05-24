@@ -6779,11 +6779,11 @@ impl AperCodec for Dscp {
             .map_err(|e: AperCodecError| e.push_context("Dscp"))
     }
 }
-// DUtoCuRrcContainer
+// DuToCuRrcContainer
 #[derive(Clone, Debug)]
-pub struct DUtoCuRrcContainer(pub Vec<u8>);
+pub struct DuToCuRrcContainer(pub Vec<u8>);
 
-impl DUtoCuRrcContainer {
+impl DuToCuRrcContainer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(
             data, None, None, false,
@@ -6794,15 +6794,15 @@ impl DUtoCuRrcContainer {
     }
 }
 
-impl AperCodec for DUtoCuRrcContainer {
+impl AperCodec for DuToCuRrcContainer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DUtoCuRrcContainer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCuRrcContainer"))
+        DuToCuRrcContainer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcContainer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCuRrcContainer"))
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcContainer"))
     }
 }
 // DuCuRadioInformationType
@@ -6894,14 +6894,14 @@ impl AperCodec for DuCuRimInformation {
             .map_err(|e: AperCodecError| e.push_context("DuCuRimInformation"))
     }
 }
-// DufSlotConfigItem
+// DuFSlotConfigItem
 #[derive(Clone, Debug)]
-pub enum DufSlotConfigItem {
+pub enum DuFSlotConfigItem {
     ExplicitFormat(ExplicitFormat),
     ImplicitFormat(ImplicitFormat),
 }
 
-impl DufSlotConfigItem {
+impl DuFSlotConfigItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
@@ -6932,28 +6932,28 @@ impl DufSlotConfigItem {
     }
 }
 
-impl AperCodec for DufSlotConfigItem {
+impl AperCodec for DuFSlotConfigItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufSlotConfigItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigItem"))
+        DuFSlotConfigItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigItem"))
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigItem"))
     }
 }
-// DufSlotConfigList
+// DuFSlotConfigList
 #[derive(Clone, Debug)]
-pub struct DufSlotConfigList(pub Vec<DufSlotConfigItem>);
+pub struct DuFSlotConfigList(pub Vec<DuFSlotConfigItem>);
 
-impl DufSlotConfigList {
+impl DuFSlotConfigList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(320), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DufSlotConfigItem::decode(data)?);
+                items.push(DuFSlotConfigItem::decode(data)?);
             }
             items
         }))
@@ -6967,22 +6967,22 @@ impl DufSlotConfigList {
     }
 }
 
-impl AperCodec for DufSlotConfigList {
+impl AperCodec for DuFSlotConfigList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufSlotConfigList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigList"))
+        DuFSlotConfigList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigList"))
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigList"))
     }
 }
-// DufSlotformatIndex
+// DuFSlotformatIndex
 #[derive(Clone, Debug)]
-pub struct DufSlotformatIndex(pub u8);
+pub struct DuFSlotformatIndex(pub u8);
 
-impl DufSlotformatIndex {
+impl DuFSlotformatIndex {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(254), false)?.0 as u8,
@@ -6993,21 +6993,21 @@ impl DufSlotformatIndex {
     }
 }
 
-impl AperCodec for DufSlotformatIndex {
+impl AperCodec for DuFSlotformatIndex {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufSlotformatIndex::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotformatIndex"))
+        DuFSlotformatIndex::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotformatIndex"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotformatIndex"))
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotformatIndex"))
     }
 }
-// DufTransmissionPeriodicity
+// DuFTransmissionPeriodicity
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum DufTransmissionPeriodicity {
+pub enum DuFTransmissionPeriodicity {
     Ms0p5,
     Ms0p625,
     Ms1,
@@ -7018,7 +7018,7 @@ pub enum DufTransmissionPeriodicity {
     Ms10,
 }
 
-impl DufTransmissionPeriodicity {
+impl DuFTransmissionPeriodicity {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(7), true)?;
         if extended {
@@ -7031,15 +7031,15 @@ impl DufTransmissionPeriodicity {
     }
 }
 
-impl AperCodec for DufTransmissionPeriodicity {
+impl AperCodec for DuFTransmissionPeriodicity {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufTransmissionPeriodicity::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufTransmissionPeriodicity"))
+        DuFTransmissionPeriodicity::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFTransmissionPeriodicity"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufTransmissionPeriodicity"))
+            .map_err(|e: AperCodecError| e.push_context("DuFTransmissionPeriodicity"))
     }
 }
 // DuRxMtRx
@@ -7166,15 +7166,15 @@ impl AperCodec for DuTxMtRx {
             .map_err(|e: AperCodecError| e.push_context("DuTxMtRx"))
     }
 }
-// DUtoCuRrcInformation
+// DuToCuRrcInformation
 #[derive(Clone, Debug)]
-pub struct DUtoCuRrcInformation {
+pub struct DuToCuRrcInformation {
     pub cell_group_config: CellGroupConfig,
     pub meas_gap_config: Option<MeasGapConfig>,
     pub requested_p_max_fr1: Option<Vec<u8>>,
 }
 
-impl DUtoCuRrcInformation {
+impl DuToCuRrcInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
         let cell_group_config = CellGroupConfig::decode(data)?;
@@ -7214,15 +7214,15 @@ impl DUtoCuRrcInformation {
     }
 }
 
-impl AperCodec for DUtoCuRrcInformation {
+impl AperCodec for DuToCuRrcInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DUtoCuRrcInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCuRrcInformation"))
+        DuToCuRrcInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCuRrcInformation"))
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcInformation"))
     }
 }
 // DuplicationActivation
@@ -10169,8 +10169,8 @@ impl AperCodec for GnbCuUeF1apId {
 #[derive(Clone, Debug)]
 pub struct GnbDuCellResourceConfiguration {
     pub subcarrier_spacing: SubcarrierSpacing,
-    pub duf_transmission_periodicity: Option<DufTransmissionPeriodicity>,
-    pub duf_slot_config_list: Option<DufSlotConfigList>,
+    pub du_f_transmission_periodicity: Option<DuFTransmissionPeriodicity>,
+    pub du_f_slot_config_list: Option<DuFSlotConfigList>,
     pub hsna_transmission_periodicity: HsnaTransmissionPeriodicity,
     pub hnsa_slot_config_list: Option<HsnaSlotConfigList>,
 }
@@ -10180,13 +10180,13 @@ impl GnbDuCellResourceConfiguration {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 4)?;
         let subcarrier_spacing = SubcarrierSpacing::decode(data)?;
-        let duf_transmission_periodicity = if optionals[0] {
-            Some(DufTransmissionPeriodicity::decode(data)?)
+        let du_f_transmission_periodicity = if optionals[0] {
+            Some(DuFTransmissionPeriodicity::decode(data)?)
         } else {
             None
         };
-        let duf_slot_config_list = if optionals[1] {
-            Some(DufSlotConfigList::decode(data)?)
+        let du_f_slot_config_list = if optionals[1] {
+            Some(DuFSlotConfigList::decode(data)?)
         } else {
             None
         };
@@ -10199,25 +10199,25 @@ impl GnbDuCellResourceConfiguration {
 
         Ok(Self {
             subcarrier_spacing,
-            duf_transmission_periodicity,
-            duf_slot_config_list,
+            du_f_transmission_periodicity,
+            du_f_slot_config_list,
             hsna_transmission_periodicity,
             hnsa_slot_config_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.duf_transmission_periodicity.is_some());
-        optionals.push(self.duf_slot_config_list.is_some());
+        optionals.push(self.du_f_transmission_periodicity.is_some());
+        optionals.push(self.du_f_slot_config_list.is_some());
         optionals.push(self.hnsa_slot_config_list.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         self.subcarrier_spacing.encode(data)?;
-        if let Some(x) = &self.duf_transmission_periodicity {
+        if let Some(x) = &self.du_f_transmission_periodicity {
             x.encode(data)?;
         }
-        if let Some(x) = &self.duf_slot_config_list {
+        if let Some(x) = &self.du_f_slot_config_list {
             x.encode(data)?;
         }
         self.hsna_transmission_periodicity.encode(data)?;
@@ -12256,17 +12256,17 @@ impl AperCodec for IaBv4AddressesRequested {
 // ImplicitFormat
 #[derive(Clone, Debug)]
 pub struct ImplicitFormat {
-    pub duf_slotformat_index: DufSlotformatIndex,
+    pub du_f_slotformat_index: DuFSlotformatIndex,
 }
 
 impl ImplicitFormat {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let duf_slotformat_index = DufSlotformatIndex::decode(data)?;
+        let du_f_slotformat_index = DuFSlotformatIndex::decode(data)?;
 
         Ok(Self {
-            duf_slotformat_index,
+            du_f_slotformat_index,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -12274,7 +12274,7 @@ impl ImplicitFormat {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.duf_slotformat_index.encode(data)?;
+        self.du_f_slotformat_index.encode(data)?;
 
         Ok(())
     }
