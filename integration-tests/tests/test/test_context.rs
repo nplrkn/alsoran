@@ -1,6 +1,6 @@
-use super::mock_amf::MockAmf;
-use super::mock_du::MockDu;
 use async_std::task::JoinHandle;
+use mocks::MockAmf;
+use mocks::MockDu;
 use slog::{info, o, Logger};
 use std::{panic, process};
 use stop_token::StopSource;
