@@ -28122,8 +28122,8 @@ impl AperCodec for TransmissionComb {
 // TransmissionCombPos
 #[derive(Clone, Debug)]
 pub enum TransmissionCombPos {
-    N2(N21),
-    N4(N41),
+    N2(N2_1),
+    N4(N4_1),
     N8(N8),
 }
 
@@ -28136,8 +28136,8 @@ impl TransmissionCombPos {
             ));
         }
         match idx {
-            0 => Ok(Self::N2(N21::decode(data)?)),
-            1 => Ok(Self::N4(N41::decode(data)?)),
+            0 => Ok(Self::N2(N2_1::decode(data)?)),
+            1 => Ok(Self::N4(N4_1::decode(data)?)),
             2 => Ok(Self::N8(N8::decode(data)?)),
             3 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -32507,14 +32507,14 @@ impl AperCodec for N4 {
             .map_err(|e: AperCodecError| e.push_context("N4"))
     }
 }
-// N21
+// N2_1
 #[derive(Clone, Debug)]
-pub struct N21 {
+pub struct N2_1 {
     pub comb_offset_n_2: u8,
     pub cyclic_shift_n_2: u8,
 }
 
-impl N21 {
+impl N2_1 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 0)?;
@@ -32551,24 +32551,24 @@ impl N21 {
     }
 }
 
-impl AperCodec for N21 {
+impl AperCodec for N2_1 {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        N21::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N21"))
+        N2_1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N2_1"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("N21"))
+            .map_err(|e: AperCodecError| e.push_context("N2_1"))
     }
 }
-// N41
+// N4_1
 #[derive(Clone, Debug)]
-pub struct N41 {
+pub struct N4_1 {
     pub comb_offset_n_4: u8,
     pub cyclic_shift_n_4: u8,
 }
 
-impl N41 {
+impl N4_1 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 0)?;
@@ -32606,14 +32606,14 @@ impl N41 {
     }
 }
 
-impl AperCodec for N41 {
+impl AperCodec for N4_1 {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        N41::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N41"))
+        N4_1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N4_1"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("N41"))
+            .map_err(|e: AperCodecError| e.push_context("N4_1"))
     }
 }
 // N8
