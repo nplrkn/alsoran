@@ -1,9 +1,12 @@
 import re
 
 KNOWN_WORDS = [(re.compile(x, re.IGNORECASE), "-"+x+"-")
-               for x in ["ngran", "enb", "gnb", "eutran", "plmn", "qos", "rlf", "iwf", "iot"]]
+               for x in ["ngran", "enb", "gnb", "eutran", "plmn", "qos", "rlf", "iwf", "iot", "rrc"]]
 
 ACRONYMS = re.compile(r"([A-Z,0-9]*)(?=(?=[A-Z][a-z]*)|$|-|_)")
+
+KNOWN_WORDS_CASE_SENSITIVE = [(re.compile(x), "-"+x+"-")
+                              for x in ["NR", "CU", "UE"]]
 
 
 def replace_rust_keywords(s):
@@ -17,7 +20,7 @@ def capitalize_first_only(s):
 def split_words(s):
     # Find the known words.  These are the cases where the ACRONYMS
     # regex isn't smart enough to identify the word.
-    for (regex, replace) in KNOWN_WORDS:
+    for (regex, replace) in KNOWN_WORDS + KNOWN_WORDS_CASE_SENSITIVE:
         s = regex.sub(replace, s)
 
     return [word for word in

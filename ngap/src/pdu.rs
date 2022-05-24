@@ -1294,10 +1294,10 @@ pub struct InitialContextSetupRequest {
     pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
     pub extended_connected_time: Option<ExtendedConnectedTime>,
     pub ue_differentiation_info: Option<UeDifferentiationInfo>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_qos_parameters: Option<Pc5QosParameters>,
     pub c_emode_brestricted: Option<CEmodeBrestricted>,
     pub ue_up_c_iot_support: Option<UeUpCIotSupport>,
@@ -1343,13 +1343,13 @@ impl InitialContextSetupRequest {
         let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
         let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
         let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
         let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
@@ -1412,15 +1412,15 @@ impl InitialContextSetupRequest {
                 }
                 206 => extended_connected_time = Some(ExtendedConnectedTime::decode(data)?),
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
-                216 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                216 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 215 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 218 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 217 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 219 => pc5_qos_parameters = Some(Pc5QosParameters::decode(data)?),
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
@@ -1485,10 +1485,10 @@ impl InitialContextSetupRequest {
             enhanced_coverage_restriction,
             extended_connected_time,
             ue_differentiation_info,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_qos_parameters,
             c_emode_brestricted,
             ue_up_c_iot_support,
@@ -1759,7 +1759,7 @@ impl InitialContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
@@ -1779,7 +1779,7 @@ impl InitialContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
@@ -1789,7 +1789,7 @@ impl InitialContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
@@ -3443,10 +3443,10 @@ pub struct UeContextModificationRequest {
     pub cn_assisted_ran_tuning: Option<CnAssistedRanTuning>,
     pub srvcc_operation_possible: Option<SrvccOperationPossible>,
     pub iab_authorized: Option<IabAuthorized>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_qos_parameters: Option<Pc5QosParameters>,
     pub ue_radio_capability_id: Option<UeRadioCapabilityId>,
     pub rg_level_wireline_access_characteristics: Option<RgLevelWirelineAccessCharacteristics>,
@@ -3476,13 +3476,13 @@ impl UeContextModificationRequest {
         let mut cn_assisted_ran_tuning: Option<CnAssistedRanTuning> = None;
         let mut srvcc_operation_possible: Option<SrvccOperationPossible> = None;
         let mut iab_authorized: Option<IabAuthorized> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
         let mut ue_radio_capability_id: Option<UeRadioCapabilityId> = None;
@@ -3520,15 +3520,15 @@ impl UeContextModificationRequest {
                 165 => cn_assisted_ran_tuning = Some(CnAssistedRanTuning::decode(data)?),
                 177 => srvcc_operation_possible = Some(SrvccOperationPossible::decode(data)?),
                 199 => iab_authorized = Some(IabAuthorized::decode(data)?),
-                216 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                216 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 215 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 218 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 217 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 219 => pc5_qos_parameters = Some(Pc5QosParameters::decode(data)?),
                 264 => ue_radio_capability_id = Some(UeRadioCapabilityId::decode(data)?),
@@ -3566,10 +3566,10 @@ impl UeContextModificationRequest {
             cn_assisted_ran_tuning,
             srvcc_operation_possible,
             iab_authorized,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_qos_parameters,
             ue_radio_capability_id,
             rg_level_wireline_access_characteristics,
@@ -3725,7 +3725,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
@@ -3745,7 +3745,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
@@ -3755,7 +3755,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
@@ -5088,10 +5088,10 @@ pub struct HandoverRequest {
     pub iab_authorized: Option<IabAuthorized>,
     pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
     pub ue_differentiation_info: Option<UeDifferentiationInfo>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_qos_parameters: Option<Pc5QosParameters>,
     pub c_emode_brestricted: Option<CEmodeBrestricted>,
     pub ue_up_c_iot_support: Option<UeUpCIotSupport>,
@@ -5135,13 +5135,13 @@ impl HandoverRequest {
         let mut iab_authorized: Option<IabAuthorized> = None;
         let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
         let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
         let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
@@ -5198,15 +5198,15 @@ impl HandoverRequest {
                     enhanced_coverage_restriction = Some(EnhancedCoverageRestriction::decode(data)?)
                 }
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
-                216 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                216 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 215 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 218 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 217 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 219 => pc5_qos_parameters = Some(Pc5QosParameters::decode(data)?),
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
@@ -5280,10 +5280,10 @@ impl HandoverRequest {
             iab_authorized,
             enhanced_coverage_restriction,
             ue_differentiation_info,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_qos_parameters,
             c_emode_brestricted,
             ue_up_c_iot_support,
@@ -5516,7 +5516,7 @@ impl HandoverRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
@@ -5536,7 +5536,7 @@ impl HandoverRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
@@ -5546,7 +5546,7 @@ impl HandoverRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
@@ -6242,10 +6242,10 @@ pub struct PathSwitchRequestAcknowledge {
     pub enhanced_coverage_restriction: Option<EnhancedCoverageRestriction>,
     pub extended_connected_time: Option<ExtendedConnectedTime>,
     pub ue_differentiation_info: Option<UeDifferentiationInfo>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_qos_parameters: Option<Pc5QosParameters>,
     pub c_emode_brestricted: Option<CEmodeBrestricted>,
     pub ue_up_c_iot_support: Option<UeUpCIotSupport>,
@@ -6280,13 +6280,13 @@ impl PathSwitchRequestAcknowledge {
         let mut enhanced_coverage_restriction: Option<EnhancedCoverageRestriction> = None;
         let mut extended_connected_time: Option<ExtendedConnectedTime> = None;
         let mut ue_differentiation_info: Option<UeDifferentiationInfo> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_qos_parameters: Option<Pc5QosParameters> = None;
         let mut c_emode_brestricted: Option<CEmodeBrestricted> = None;
@@ -6329,15 +6329,15 @@ impl PathSwitchRequestAcknowledge {
                 }
                 206 => extended_connected_time = Some(ExtendedConnectedTime::decode(data)?),
                 209 => ue_differentiation_info = Some(UeDifferentiationInfo::decode(data)?),
-                216 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                216 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 215 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 218 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 217 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 219 => pc5_qos_parameters = Some(Pc5QosParameters::decode(data)?),
                 222 => c_emode_brestricted = Some(CEmodeBrestricted::decode(data)?),
@@ -6385,10 +6385,10 @@ impl PathSwitchRequestAcknowledge {
             enhanced_coverage_restriction,
             extended_connected_time,
             ue_differentiation_info,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_qos_parameters,
             c_emode_brestricted,
             ue_up_c_iot_support,
@@ -6559,7 +6559,7 @@ impl PathSwitchRequestAcknowledge {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 216, false)?;
@@ -6579,7 +6579,7 @@ impl PathSwitchRequestAcknowledge {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
@@ -6589,7 +6589,7 @@ impl PathSwitchRequestAcknowledge {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 217, false)?;
@@ -11534,16 +11534,16 @@ impl AperCodec for PwsFailureIndication {
             .map_err(|e: AperCodecError| e.push_context("PwsFailureIndication"))
     }
 }
-// DownlinkUeAssociatedNrpPaTransport
+// DownlinkUeAssociatedNrPPaTransport
 #[derive(Clone, Debug)]
-pub struct DownlinkUeAssociatedNrpPaTransport {
+pub struct DownlinkUeAssociatedNrPPaTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
     pub routing_id: RoutingId,
-    pub nrp_pa_pdu: NrpPaPdu,
+    pub nr_p_pa_pdu: NrPPaPdu,
 }
 
-impl DownlinkUeAssociatedNrpPaTransport {
+impl DownlinkUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -11552,7 +11552,7 @@ impl DownlinkUeAssociatedNrpPaTransport {
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut routing_id: Option<RoutingId> = None;
-        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+        let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11562,7 +11562,7 @@ impl DownlinkUeAssociatedNrpPaTransport {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 89 => routing_id = Some(RoutingId::decode(data)?),
-                46 => nrp_pa_pdu = Some(NrpPaPdu::decode(data)?),
+                46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11580,14 +11580,14 @@ impl DownlinkUeAssociatedNrpPaTransport {
         let routing_id = routing_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nrp_pa_pdu = nrp_pa_pdu.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrp_pa_pdu"
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
             routing_id,
-            nrp_pa_pdu,
+            nr_p_pa_pdu,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11619,7 +11619,7 @@ impl DownlinkUeAssociatedNrpPaTransport {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrp_pa_pdu.encode(ie)?;
+        self.nr_p_pa_pdu.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11642,27 +11642,27 @@ impl DownlinkUeAssociatedNrpPaTransport {
     }
 }
 
-impl AperCodec for DownlinkUeAssociatedNrpPaTransport {
+impl AperCodec for DownlinkUeAssociatedNrPPaTransport {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DownlinkUeAssociatedNrpPaTransport::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DownlinkUeAssociatedNrpPaTransport"))
+        DownlinkUeAssociatedNrPPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkUeAssociatedNrPPaTransport"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DownlinkUeAssociatedNrpPaTransport"))
+            .map_err(|e: AperCodecError| e.push_context("DownlinkUeAssociatedNrPPaTransport"))
     }
 }
-// UplinkUeAssociatedNrpPaTransport
+// UplinkUeAssociatedNrPPaTransport
 #[derive(Clone, Debug)]
-pub struct UplinkUeAssociatedNrpPaTransport {
+pub struct UplinkUeAssociatedNrPPaTransport {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
     pub routing_id: RoutingId,
-    pub nrp_pa_pdu: NrpPaPdu,
+    pub nr_p_pa_pdu: NrPPaPdu,
 }
 
-impl UplinkUeAssociatedNrpPaTransport {
+impl UplinkUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -11671,7 +11671,7 @@ impl UplinkUeAssociatedNrpPaTransport {
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_ue_ngap_id: Option<RanUeNgapId> = None;
         let mut routing_id: Option<RoutingId> = None;
-        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+        let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11681,7 +11681,7 @@ impl UplinkUeAssociatedNrpPaTransport {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
                 85 => ran_ue_ngap_id = Some(RanUeNgapId::decode(data)?),
                 89 => routing_id = Some(RoutingId::decode(data)?),
-                46 => nrp_pa_pdu = Some(NrpPaPdu::decode(data)?),
+                46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11699,14 +11699,14 @@ impl UplinkUeAssociatedNrpPaTransport {
         let routing_id = routing_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nrp_pa_pdu = nrp_pa_pdu.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrp_pa_pdu"
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
             amf_ue_ngap_id,
             ran_ue_ngap_id,
             routing_id,
-            nrp_pa_pdu,
+            nr_p_pa_pdu,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11738,7 +11738,7 @@ impl UplinkUeAssociatedNrpPaTransport {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrp_pa_pdu.encode(ie)?;
+        self.nr_p_pa_pdu.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11761,32 +11761,32 @@ impl UplinkUeAssociatedNrpPaTransport {
     }
 }
 
-impl AperCodec for UplinkUeAssociatedNrpPaTransport {
+impl AperCodec for UplinkUeAssociatedNrPPaTransport {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UplinkUeAssociatedNrpPaTransport::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UplinkUeAssociatedNrpPaTransport"))
+        UplinkUeAssociatedNrPPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkUeAssociatedNrPPaTransport"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UplinkUeAssociatedNrpPaTransport"))
+            .map_err(|e: AperCodecError| e.push_context("UplinkUeAssociatedNrPPaTransport"))
     }
 }
-// DownlinkNonUeAssociatedNrpPaTransport
+// DownlinkNonUeAssociatedNrPPaTransport
 #[derive(Clone, Debug)]
-pub struct DownlinkNonUeAssociatedNrpPaTransport {
+pub struct DownlinkNonUeAssociatedNrPPaTransport {
     pub routing_id: RoutingId,
-    pub nrp_pa_pdu: NrpPaPdu,
+    pub nr_p_pa_pdu: NrPPaPdu,
 }
 
-impl DownlinkNonUeAssociatedNrpPaTransport {
+impl DownlinkNonUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut routing_id: Option<RoutingId> = None;
-        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+        let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11794,7 +11794,7 @@ impl DownlinkNonUeAssociatedNrpPaTransport {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 89 => routing_id = Some(RoutingId::decode(data)?),
-                46 => nrp_pa_pdu = Some(NrpPaPdu::decode(data)?),
+                46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11806,12 +11806,12 @@ impl DownlinkNonUeAssociatedNrpPaTransport {
         let routing_id = routing_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nrp_pa_pdu = nrp_pa_pdu.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrp_pa_pdu"
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
             routing_id,
-            nrp_pa_pdu,
+            nr_p_pa_pdu,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11827,7 +11827,7 @@ impl DownlinkNonUeAssociatedNrpPaTransport {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrp_pa_pdu.encode(ie)?;
+        self.nr_p_pa_pdu.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11850,32 +11850,32 @@ impl DownlinkNonUeAssociatedNrpPaTransport {
     }
 }
 
-impl AperCodec for DownlinkNonUeAssociatedNrpPaTransport {
+impl AperCodec for DownlinkNonUeAssociatedNrPPaTransport {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DownlinkNonUeAssociatedNrpPaTransport::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DownlinkNonUeAssociatedNrpPaTransport"))
+        DownlinkNonUeAssociatedNrPPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DownlinkNonUeAssociatedNrPPaTransport"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DownlinkNonUeAssociatedNrpPaTransport"))
+            .map_err(|e: AperCodecError| e.push_context("DownlinkNonUeAssociatedNrPPaTransport"))
     }
 }
-// UplinkNonUeAssociatedNrpPaTransport
+// UplinkNonUeAssociatedNrPPaTransport
 #[derive(Clone, Debug)]
-pub struct UplinkNonUeAssociatedNrpPaTransport {
+pub struct UplinkNonUeAssociatedNrPPaTransport {
     pub routing_id: RoutingId,
-    pub nrp_pa_pdu: NrpPaPdu,
+    pub nr_p_pa_pdu: NrPPaPdu,
 }
 
-impl UplinkNonUeAssociatedNrpPaTransport {
+impl UplinkNonUeAssociatedNrPPaTransport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut routing_id: Option<RoutingId> = None;
-        let mut nrp_pa_pdu: Option<NrpPaPdu> = None;
+        let mut nr_p_pa_pdu: Option<NrPPaPdu> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11883,7 +11883,7 @@ impl UplinkNonUeAssociatedNrpPaTransport {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 89 => routing_id = Some(RoutingId::decode(data)?),
-                46 => nrp_pa_pdu = Some(NrpPaPdu::decode(data)?),
+                46 => nr_p_pa_pdu = Some(NrPPaPdu::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11895,12 +11895,12 @@ impl UplinkNonUeAssociatedNrpPaTransport {
         let routing_id = routing_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE routing_id"
         )))?;
-        let nrp_pa_pdu = nrp_pa_pdu.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrp_pa_pdu"
+        let nr_p_pa_pdu = nr_p_pa_pdu.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_p_pa_pdu"
         )))?;
         Ok(Self {
             routing_id,
-            nrp_pa_pdu,
+            nr_p_pa_pdu,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11916,7 +11916,7 @@ impl UplinkNonUeAssociatedNrpPaTransport {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrp_pa_pdu.encode(ie)?;
+        self.nr_p_pa_pdu.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11939,15 +11939,15 @@ impl UplinkNonUeAssociatedNrpPaTransport {
     }
 }
 
-impl AperCodec for UplinkNonUeAssociatedNrpPaTransport {
+impl AperCodec for UplinkNonUeAssociatedNrPPaTransport {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UplinkNonUeAssociatedNrpPaTransport::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UplinkNonUeAssociatedNrpPaTransport"))
+        UplinkNonUeAssociatedNrPPaTransport::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UplinkNonUeAssociatedNrPPaTransport"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UplinkNonUeAssociatedNrpPaTransport"))
+            .map_err(|e: AperCodecError| e.push_context("UplinkNonUeAssociatedNrPPaTransport"))
     }
 }
 // TraceStart
@@ -12793,14 +12793,14 @@ impl AperCodec for LocationReport {
             .map_err(|e: AperCodecError| e.push_context("LocationReport"))
     }
 }
-// UetnlaBindingReleaseRequest
+// UeTnlaBindingReleaseRequest
 #[derive(Clone, Debug)]
-pub struct UetnlaBindingReleaseRequest {
+pub struct UeTnlaBindingReleaseRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_ue_ngap_id: RanUeNgapId,
 }
 
-impl UetnlaBindingReleaseRequest {
+impl UeTnlaBindingReleaseRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -12871,15 +12871,15 @@ impl UetnlaBindingReleaseRequest {
     }
 }
 
-impl AperCodec for UetnlaBindingReleaseRequest {
+impl AperCodec for UeTnlaBindingReleaseRequest {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UetnlaBindingReleaseRequest::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UetnlaBindingReleaseRequest"))
+        UeTnlaBindingReleaseRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UeTnlaBindingReleaseRequest"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UetnlaBindingReleaseRequest"))
+            .map_err(|e: AperCodecError| e.push_context("UeTnlaBindingReleaseRequest"))
     }
 }
 // UeRadioCapabilityInfoIndication

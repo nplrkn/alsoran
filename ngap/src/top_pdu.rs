@@ -313,22 +313,22 @@ impl Procedure for DownlinkNasTransportProcedure {
     }
 }
 
-pub struct DownlinkNonUeAssociatedNrpPaTransportProcedure {}
+pub struct DownlinkNonUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkNonUeAssociatedNrpPaTransportProcedure {
+impl Procedure for DownlinkNonUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = DownlinkNonUeAssociatedNrpPaTransport;
+    type Request = DownlinkNonUeAssociatedNrPPaTransport;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 5;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: DownlinkNonUeAssociatedNrpPaTransport,
+        req: DownlinkNonUeAssociatedNrPPaTransport,
         logger: &Logger,
     ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkNonUeAssociatedNrpPaTransportProcedure>>::request(
+        match <T as RequestProvider<DownlinkNonUeAssociatedNrPPaTransportProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -339,13 +339,13 @@ impl Procedure for DownlinkNonUeAssociatedNrpPaTransportProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkNonUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkNonUeAssociatedNrPPaTransport(r))
             .into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for DownlinkNonUeAssociatedNrpPaTransport!".to_string(),
+            "No response is defined for DownlinkNonUeAssociatedNrPPaTransport!".to_string(),
         ))
     }
 }
@@ -460,22 +460,22 @@ impl Procedure for DownlinkRanStatusTransferProcedure {
     }
 }
 
-pub struct DownlinkUeAssociatedNrpPaTransportProcedure {}
+pub struct DownlinkUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkUeAssociatedNrpPaTransportProcedure {
+impl Procedure for DownlinkUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = DownlinkUeAssociatedNrpPaTransport;
+    type Request = DownlinkUeAssociatedNrPPaTransport;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 8;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: DownlinkUeAssociatedNrpPaTransport,
+        req: DownlinkUeAssociatedNrPPaTransport,
         logger: &Logger,
     ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkUeAssociatedNrpPaTransportProcedure>>::request(
+        match <T as RequestProvider<DownlinkUeAssociatedNrPPaTransportProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -486,13 +486,13 @@ impl Procedure for DownlinkUeAssociatedNrpPaTransportProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkUeAssociatedNrPPaTransport(r))
             .into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for DownlinkUeAssociatedNrpPaTransport!".to_string(),
+            "No response is defined for DownlinkUeAssociatedNrPPaTransport!".to_string(),
         ))
     }
 }
@@ -2112,22 +2112,22 @@ impl Procedure for UeRadioCapabilityInfoIndicationProcedure {
     }
 }
 
-pub struct UetnlaBindingReleaseProcedure {}
+pub struct UeTnlaBindingReleaseProcedure {}
 
 #[async_trait]
-impl Procedure for UetnlaBindingReleaseProcedure {
+impl Procedure for UeTnlaBindingReleaseProcedure {
     type TopPdu = NgapPdu;
-    type Request = UetnlaBindingReleaseRequest;
+    type Request = UeTnlaBindingReleaseRequest;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 45;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: UetnlaBindingReleaseRequest,
+        req: UeTnlaBindingReleaseRequest,
         logger: &Logger,
     ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UetnlaBindingReleaseProcedure>>::request(provider, req, logger)
+        match <T as RequestProvider<UeTnlaBindingReleaseProcedure>>::request(provider, req, logger)
             .await
         {
             Ok(_) => None,
@@ -2136,12 +2136,12 @@ impl Procedure for UetnlaBindingReleaseProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::UetnlaBindingReleaseRequest(r)).into_bytes()
+        NgapPdu::InitiatingMessage(InitiatingMessage::UeTnlaBindingReleaseRequest(r)).into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for UetnlaBindingReleaseRequest!".to_string(),
+            "No response is defined for UeTnlaBindingReleaseRequest!".to_string(),
         ))
     }
 }
@@ -2180,22 +2180,22 @@ impl Procedure for UplinkNasTransportProcedure {
     }
 }
 
-pub struct UplinkNonUeAssociatedNrpPaTransportProcedure {}
+pub struct UplinkNonUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkNonUeAssociatedNrpPaTransportProcedure {
+impl Procedure for UplinkNonUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = UplinkNonUeAssociatedNrpPaTransport;
+    type Request = UplinkNonUeAssociatedNrPPaTransport;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 47;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: UplinkNonUeAssociatedNrpPaTransport,
+        req: UplinkNonUeAssociatedNrPPaTransport,
         logger: &Logger,
     ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkNonUeAssociatedNrpPaTransportProcedure>>::request(
+        match <T as RequestProvider<UplinkNonUeAssociatedNrPPaTransportProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -2206,13 +2206,13 @@ impl Procedure for UplinkNonUeAssociatedNrpPaTransportProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNonUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNonUeAssociatedNrPPaTransport(r))
             .into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for UplinkNonUeAssociatedNrpPaTransport!".to_string(),
+            "No response is defined for UplinkNonUeAssociatedNrPPaTransport!".to_string(),
         ))
     }
 }
@@ -2326,22 +2326,22 @@ impl Procedure for UplinkRanStatusTransferProcedure {
     }
 }
 
-pub struct UplinkUeAssociatedNrpPaTransportProcedure {}
+pub struct UplinkUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkUeAssociatedNrpPaTransportProcedure {
+impl Procedure for UplinkUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = UplinkUeAssociatedNrpPaTransport;
+    type Request = UplinkUeAssociatedNrPPaTransport;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 50;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: UplinkUeAssociatedNrpPaTransport,
+        req: UplinkUeAssociatedNrPPaTransport,
         logger: &Logger,
     ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkUeAssociatedNrpPaTransportProcedure>>::request(
+        match <T as RequestProvider<UplinkUeAssociatedNrPPaTransportProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -2352,13 +2352,13 @@ impl Procedure for UplinkUeAssociatedNrpPaTransportProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkUeAssociatedNrPPaTransport(r))
             .into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for UplinkUeAssociatedNrpPaTransport!".to_string(),
+            "No response is defined for UplinkUeAssociatedNrPPaTransport!".to_string(),
         ))
     }
 }
@@ -2484,11 +2484,11 @@ pub enum InitiatingMessage {
     ConnectionEstablishmentIndication(ConnectionEstablishmentIndication),
     DeactivateTrace(DeactivateTrace),
     DownlinkNasTransport(DownlinkNasTransport),
-    DownlinkNonUeAssociatedNrpPaTransport(DownlinkNonUeAssociatedNrpPaTransport),
+    DownlinkNonUeAssociatedNrPPaTransport(DownlinkNonUeAssociatedNrPPaTransport),
     DownlinkRanConfigurationTransfer(DownlinkRanConfigurationTransfer),
     DownlinkRanEarlyStatusTransfer(DownlinkRanEarlyStatusTransfer),
     DownlinkRanStatusTransfer(DownlinkRanStatusTransfer),
-    DownlinkUeAssociatedNrpPaTransport(DownlinkUeAssociatedNrpPaTransport),
+    DownlinkUeAssociatedNrPPaTransport(DownlinkUeAssociatedNrPPaTransport),
     ErrorIndication(ErrorIndication),
     HandoverCancel(HandoverCancel),
     HandoverNotify(HandoverNotify),
@@ -2532,13 +2532,13 @@ pub enum InitiatingMessage {
     UeRadioCapabilityCheckRequest(UeRadioCapabilityCheckRequest),
     UeRadioCapabilityIdMappingRequest(UeRadioCapabilityIdMappingRequest),
     UeRadioCapabilityInfoIndication(UeRadioCapabilityInfoIndication),
-    UetnlaBindingReleaseRequest(UetnlaBindingReleaseRequest),
+    UeTnlaBindingReleaseRequest(UeTnlaBindingReleaseRequest),
     UplinkNasTransport(UplinkNasTransport),
-    UplinkNonUeAssociatedNrpPaTransport(UplinkNonUeAssociatedNrpPaTransport),
+    UplinkNonUeAssociatedNrPPaTransport(UplinkNonUeAssociatedNrPPaTransport),
     UplinkRanConfigurationTransfer(UplinkRanConfigurationTransfer),
     UplinkRanEarlyStatusTransfer(UplinkRanEarlyStatusTransfer),
     UplinkRanStatusTransfer(UplinkRanStatusTransfer),
-    UplinkUeAssociatedNrpPaTransport(UplinkUeAssociatedNrpPaTransport),
+    UplinkUeAssociatedNrPPaTransport(UplinkUeAssociatedNrPPaTransport),
     WriteReplaceWarningRequest(WriteReplaceWarningRequest),
     UplinkRimInformationTransfer(UplinkRimInformationTransfer),
     DownlinkRimInformationTransfer(DownlinkRimInformationTransfer),
@@ -2566,8 +2566,8 @@ impl InitiatingMessage {
             4 => Ok(Self::DownlinkNasTransport(DownlinkNasTransport::decode(
                 data,
             )?)),
-            5 => Ok(Self::DownlinkNonUeAssociatedNrpPaTransport(
-                DownlinkNonUeAssociatedNrpPaTransport::decode(data)?,
+            5 => Ok(Self::DownlinkNonUeAssociatedNrPPaTransport(
+                DownlinkNonUeAssociatedNrPPaTransport::decode(data)?,
             )),
             6 => Ok(Self::DownlinkRanConfigurationTransfer(
                 DownlinkRanConfigurationTransfer::decode(data)?,
@@ -2578,8 +2578,8 @@ impl InitiatingMessage {
             7 => Ok(Self::DownlinkRanStatusTransfer(
                 DownlinkRanStatusTransfer::decode(data)?,
             )),
-            8 => Ok(Self::DownlinkUeAssociatedNrpPaTransport(
-                DownlinkUeAssociatedNrpPaTransport::decode(data)?,
+            8 => Ok(Self::DownlinkUeAssociatedNrPPaTransport(
+                DownlinkUeAssociatedNrPPaTransport::decode(data)?,
             )),
             9 => Ok(Self::ErrorIndication(ErrorIndication::decode(data)?)),
             10 => Ok(Self::HandoverCancel(HandoverCancel::decode(data)?)),
@@ -2676,12 +2676,12 @@ impl InitiatingMessage {
             44 => Ok(Self::UeRadioCapabilityInfoIndication(
                 UeRadioCapabilityInfoIndication::decode(data)?,
             )),
-            45 => Ok(Self::UetnlaBindingReleaseRequest(
-                UetnlaBindingReleaseRequest::decode(data)?,
+            45 => Ok(Self::UeTnlaBindingReleaseRequest(
+                UeTnlaBindingReleaseRequest::decode(data)?,
             )),
             46 => Ok(Self::UplinkNasTransport(UplinkNasTransport::decode(data)?)),
-            47 => Ok(Self::UplinkNonUeAssociatedNrpPaTransport(
-                UplinkNonUeAssociatedNrpPaTransport::decode(data)?,
+            47 => Ok(Self::UplinkNonUeAssociatedNrPPaTransport(
+                UplinkNonUeAssociatedNrPPaTransport::decode(data)?,
             )),
             48 => Ok(Self::UplinkRanConfigurationTransfer(
                 UplinkRanConfigurationTransfer::decode(data)?,
@@ -2692,8 +2692,8 @@ impl InitiatingMessage {
             49 => Ok(Self::UplinkRanStatusTransfer(
                 UplinkRanStatusTransfer::decode(data)?,
             )),
-            50 => Ok(Self::UplinkUeAssociatedNrpPaTransport(
-                UplinkUeAssociatedNrpPaTransport::decode(data)?,
+            50 => Ok(Self::UplinkUeAssociatedNrPPaTransport(
+                UplinkUeAssociatedNrPPaTransport::decode(data)?,
             )),
             51 => Ok(Self::WriteReplaceWarningRequest(
                 WriteReplaceWarningRequest::decode(data)?,
@@ -2749,7 +2749,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::DownlinkNonUeAssociatedNrpPaTransport(x) => {
+            Self::DownlinkNonUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2769,7 +2769,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::DownlinkUeAssociatedNrpPaTransport(x) => {
+            Self::DownlinkUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2989,7 +2989,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UetnlaBindingReleaseRequest(x) => {
+            Self::UeTnlaBindingReleaseRequest(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 45, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2999,7 +2999,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UplinkNonUeAssociatedNrpPaTransport(x) => {
+            Self::UplinkNonUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 47, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -3019,7 +3019,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UplinkUeAssociatedNrpPaTransport(x) => {
+            Self::UplinkUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 50, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;

@@ -3010,10 +3010,10 @@ impl AperCodec for GnbDuResourceCoordinationResponse {
 pub struct UeContextSetupRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
-    pub sp_cell_id: Nrcgi,
+    pub sp_cell_id: NrCgi,
     pub serv_cell_index: ServCellIndex,
     pub sp_cell_ul_configured: Option<CellUlConfigured>,
-    pub c_uto_durrc_information: CUtoDurrcInformation,
+    pub cu_to_du_rrc_information: CuToDuRrcInformation,
     pub candidate_sp_cell_list: Option<CandidateSpCellList>,
     pub drx_cycle: Option<DrxCycle>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
@@ -3030,15 +3030,15 @@ pub struct UeContextSetupRequest {
     pub resource_coordination_transfer_information: Option<ResourceCoordinationTransferInformation>,
     pub serving_cell_mo: Option<ServingCellMo>,
     pub new_gnb_cu_ue_f1ap_id: Option<GnbDuUeF1apId>,
-    pub ranueid: Option<Ranueid>,
+    pub ran_ue_id: Option<RanUeId>,
     pub trace_activation: Option<TraceActivation>,
     pub additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex>,
     pub bh_channels_to_be_setup_list: Option<BhChannelsToBeSetupList>,
     pub configured_bap_address: Option<BapAddress>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_link_ambr: Option<BitRate>,
     pub sldr_bs_to_be_setup_list: Option<SldrBsToBeSetupList>,
     pub conditional_inter_du_mobility_information: Option<ConditionalInterDuMobilityInformation>,
@@ -3055,10 +3055,10 @@ impl UeContextSetupRequest {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut sp_cell_id: Option<Nrcgi> = None;
+        let mut sp_cell_id: Option<NrCgi> = None;
         let mut serv_cell_index: Option<ServCellIndex> = None;
         let mut sp_cell_ul_configured: Option<CellUlConfigured> = None;
-        let mut c_uto_durrc_information: Option<CUtoDurrcInformation> = None;
+        let mut cu_to_du_rrc_information: Option<CuToDuRrcInformation> = None;
         let mut candidate_sp_cell_list: Option<CandidateSpCellList> = None;
         let mut drx_cycle: Option<DrxCycle> = None;
         let mut resource_coordination_transfer_container: Option<
@@ -3079,18 +3079,18 @@ impl UeContextSetupRequest {
         > = None;
         let mut serving_cell_mo: Option<ServingCellMo> = None;
         let mut new_gnb_cu_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut ranueid: Option<Ranueid> = None;
+        let mut ran_ue_id: Option<RanUeId> = None;
         let mut trace_activation: Option<TraceActivation> = None;
         let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
         let mut bh_channels_to_be_setup_list: Option<BhChannelsToBeSetupList> = None;
         let mut configured_bap_address: Option<BapAddress> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_link_ambr: Option<BitRate> = None;
         let mut sldr_bs_to_be_setup_list: Option<SldrBsToBeSetupList> = None;
@@ -3108,10 +3108,10 @@ impl UeContextSetupRequest {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                63 => sp_cell_id = Some(Nrcgi::decode(data)?),
+                63 => sp_cell_id = Some(NrCgi::decode(data)?),
                 107 => serv_cell_index = Some(ServCellIndex::decode(data)?),
                 96 => sp_cell_ul_configured = Some(CellUlConfigured::decode(data)?),
-                9 => c_uto_durrc_information = Some(CUtoDurrcInformation::decode(data)?),
+                9 => cu_to_du_rrc_information = Some(CuToDuRrcInformation::decode(data)?),
                 90 => candidate_sp_cell_list = Some(CandidateSpCellList::decode(data)?),
                 38 => drx_cycle = Some(DrxCycle::decode(data)?),
                 49 => {
@@ -3139,22 +3139,22 @@ impl UeContextSetupRequest {
                 }
                 182 => serving_cell_mo = Some(ServingCellMo::decode(data)?),
                 217 => new_gnb_cu_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                226 => ranueid = Some(Ranueid::decode(data)?),
+                226 => ran_ue_id = Some(RanUeId::decode(data)?),
                 242 => trace_activation = Some(TraceActivation::decode(data)?),
                 248 => {
                     additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?)
                 }
                 258 => bh_channels_to_be_setup_list = Some(BhChannelsToBeSetupList::decode(data)?),
                 282 => configured_bap_address = Some(BapAddress::decode(data)?),
-                306 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                306 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 307 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 308 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 309 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 340 => pc5_link_ambr = Some(BitRate::decode(data)?),
                 330 => sldr_bs_to_be_setup_list = Some(SldrBsToBeSetupList::decode(data)?),
@@ -3182,16 +3182,16 @@ impl UeContextSetupRequest {
         let serv_cell_index = serv_cell_index.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE serv_cell_index"
         )))?;
-        let c_uto_durrc_information = c_uto_durrc_information.ok_or(aper::AperCodecError::new(
-            format!("Missing mandatory IE c_uto_durrc_information"),
-        ))?;
+        let cu_to_du_rrc_information = cu_to_du_rrc_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE cu_to_du_rrc_information")),
+        )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             sp_cell_id,
             serv_cell_index,
             sp_cell_ul_configured,
-            c_uto_durrc_information,
+            cu_to_du_rrc_information,
             candidate_sp_cell_list,
             drx_cycle,
             resource_coordination_transfer_container,
@@ -3208,15 +3208,15 @@ impl UeContextSetupRequest {
             resource_coordination_transfer_information,
             serving_cell_mo,
             new_gnb_cu_ue_f1ap_id,
-            ranueid,
+            ran_ue_id,
             trace_activation,
             additional_rrm_priority_index,
             bh_channels_to_be_setup_list,
             configured_bap_address,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_link_ambr,
             sldr_bs_to_be_setup_list,
             conditional_inter_du_mobility_information,
@@ -3274,7 +3274,7 @@ impl UeContextSetupRequest {
         }
 
         let ie = &mut AperCodecData::new();
-        self.c_uto_durrc_information.encode(ie)?;
+        self.cu_to_du_rrc_information.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -3441,7 +3441,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.ranueid {
+        if let Some(x) = &self.ran_ue_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
@@ -3491,7 +3491,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 306, false)?;
@@ -3511,7 +3511,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 308, false)?;
@@ -3521,7 +3521,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 309, false)?;
@@ -3882,7 +3882,7 @@ impl AperCodec for SldrBsToBeSetupList {
 pub struct UeContextSetupResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub d_uto_currc_information: DUtoCurrcInformation,
+    pub d_uto_cu_rrc_information: DUtoCuRrcInformation,
     pub c_rnti: Option<CRnti>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
     pub full_configuration: Option<FullConfiguration>,
@@ -3897,7 +3897,7 @@ pub struct UeContextSetupResponse {
     pub bh_channels_failed_to_be_setup_list: Option<BhChannelsFailedToBeSetupList>,
     pub sldr_bs_setup_list: Option<SldrBsSetupList>,
     pub sldr_bs_failed_to_be_setup_list: Option<SldrBsFailedToBeSetupList>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextSetupResponse {
@@ -3908,7 +3908,7 @@ impl UeContextSetupResponse {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
+        let mut d_uto_cu_rrc_information: Option<DUtoCuRrcInformation> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
@@ -3925,7 +3925,7 @@ impl UeContextSetupResponse {
         let mut bh_channels_failed_to_be_setup_list: Option<BhChannelsFailedToBeSetupList> = None;
         let mut sldr_bs_setup_list: Option<SldrBsSetupList> = None;
         let mut sldr_bs_failed_to_be_setup_list: Option<SldrBsFailedToBeSetupList> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -3934,7 +3934,7 @@ impl UeContextSetupResponse {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                39 => d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?),
+                39 => d_uto_cu_rrc_information = Some(DUtoCuRrcInformation::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 49 => {
                     resource_coordination_transfer_container =
@@ -3960,7 +3960,7 @@ impl UeContextSetupResponse {
                 316 => {
                     sldr_bs_failed_to_be_setup_list = Some(SldrBsFailedToBeSetupList::decode(data)?)
                 }
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -3975,13 +3975,13 @@ impl UeContextSetupResponse {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let d_uto_currc_information = d_uto_currc_information.ok_or(aper::AperCodecError::new(
-            format!("Missing mandatory IE d_uto_currc_information"),
-        ))?;
+        let d_uto_cu_rrc_information = d_uto_cu_rrc_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE d_uto_cu_rrc_information")),
+        )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
-            d_uto_currc_information,
+            d_uto_cu_rrc_information,
             c_rnti,
             resource_coordination_transfer_container,
             full_configuration,
@@ -4020,7 +4020,7 @@ impl UeContextSetupResponse {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.d_uto_currc_information.encode(ie)?;
+        self.d_uto_cu_rrc_information.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -4601,7 +4601,7 @@ pub struct UeContextSetupFailure {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
     pub potential_sp_cell_list: Option<PotentialSpCellList>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextSetupFailure {
@@ -4615,7 +4615,7 @@ impl UeContextSetupFailure {
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut potential_sp_cell_list: Option<PotentialSpCellList> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -4627,7 +4627,7 @@ impl UeContextSetupFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 92 => potential_sp_cell_list = Some(PotentialSpCellList::decode(data)?),
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -5195,11 +5195,11 @@ impl AperCodec for UeContextReleaseComplete {
 pub struct UeContextModificationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub sp_cell_id: Option<Nrcgi>,
+    pub sp_cell_id: Option<NrCgi>,
     pub serv_cell_index: Option<ServCellIndex>,
     pub sp_cell_ul_configured: Option<CellUlConfigured>,
     pub drx_cycle: Option<DrxCycle>,
-    pub c_uto_durrc_information: Option<CUtoDurrcInformation>,
+    pub cu_to_du_rrc_information: Option<CuToDuRrcInformation>,
     pub transmission_action_indicator: Option<TransmissionActionIndicator>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
     pub rrc_reconfiguration_complete_indicator: Option<RrcReconfigurationCompleteIndicator>,
@@ -5229,10 +5229,10 @@ pub struct UeContextModificationRequest {
     pub bh_channels_to_be_setup_mod_list: Option<BhChannelsToBeSetupModList>,
     pub bh_channels_to_be_modified_list: Option<BhChannelsToBeModifiedList>,
     pub bh_channels_to_be_released_list: Option<BhChannelsToBeReleasedList>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_link_ambr: Option<BitRate>,
     pub sldr_bs_to_be_setup_mod_list: Option<SldrBsToBeSetupModList>,
     pub sldr_bs_to_be_modified_list: Option<SldrBsToBeModifiedList>,
@@ -5250,11 +5250,11 @@ impl UeContextModificationRequest {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut sp_cell_id: Option<Nrcgi> = None;
+        let mut sp_cell_id: Option<NrCgi> = None;
         let mut serv_cell_index: Option<ServCellIndex> = None;
         let mut sp_cell_ul_configured: Option<CellUlConfigured> = None;
         let mut drx_cycle: Option<DrxCycle> = None;
-        let mut c_uto_durrc_information: Option<CUtoDurrcInformation> = None;
+        let mut cu_to_du_rrc_information: Option<CuToDuRrcInformation> = None;
         let mut transmission_action_indicator: Option<TransmissionActionIndicator> = None;
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
@@ -5292,13 +5292,13 @@ impl UeContextModificationRequest {
         let mut bh_channels_to_be_setup_mod_list: Option<BhChannelsToBeSetupModList> = None;
         let mut bh_channels_to_be_modified_list: Option<BhChannelsToBeModifiedList> = None;
         let mut bh_channels_to_be_released_list: Option<BhChannelsToBeReleasedList> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_link_ambr: Option<BitRate> = None;
         let mut sldr_bs_to_be_setup_mod_list: Option<SldrBsToBeSetupModList> = None;
@@ -5317,11 +5317,11 @@ impl UeContextModificationRequest {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                63 => sp_cell_id = Some(Nrcgi::decode(data)?),
+                63 => sp_cell_id = Some(NrCgi::decode(data)?),
                 107 => serv_cell_index = Some(ServCellIndex::decode(data)?),
                 96 => sp_cell_ul_configured = Some(CellUlConfigured::decode(data)?),
                 38 => drx_cycle = Some(DrxCycle::decode(data)?),
-                9 => c_uto_durrc_information = Some(CUtoDurrcInformation::decode(data)?),
+                9 => cu_to_du_rrc_information = Some(CuToDuRrcInformation::decode(data)?),
                 79 => {
                     transmission_action_indicator = Some(TransmissionActionIndicator::decode(data)?)
                 }
@@ -5384,15 +5384,15 @@ impl UeContextModificationRequest {
                     bh_channels_to_be_released_list =
                         Some(BhChannelsToBeReleasedList::decode(data)?)
                 }
-                306 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                306 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 307 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 308 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 309 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 340 => pc5_link_ambr = Some(BitRate::decode(data)?),
                 332 => sldr_bs_to_be_setup_mod_list = Some(SldrBsToBeSetupModList::decode(data)?),
@@ -5425,7 +5425,7 @@ impl UeContextModificationRequest {
             serv_cell_index,
             sp_cell_ul_configured,
             drx_cycle,
-            c_uto_durrc_information,
+            cu_to_du_rrc_information,
             transmission_action_indicator,
             resource_coordination_transfer_container,
             rrc_reconfiguration_complete_indicator,
@@ -5455,10 +5455,10 @@ impl UeContextModificationRequest {
             bh_channels_to_be_setup_mod_list,
             bh_channels_to_be_modified_list,
             bh_channels_to_be_released_list,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_link_ambr,
             sldr_bs_to_be_setup_mod_list,
             sldr_bs_to_be_modified_list,
@@ -5528,7 +5528,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.c_uto_durrc_information {
+        if let Some(x) = &self.cu_to_du_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
@@ -5828,7 +5828,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 306, false)?;
@@ -5848,7 +5848,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 308, false)?;
@@ -5858,7 +5858,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 309, false)?;
@@ -6533,7 +6533,7 @@ pub struct UeContextModificationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub d_uto_currc_information: Option<DUtoCurrcInformation>,
+    pub d_uto_cu_rrc_information: Option<DUtoCuRrcInformation>,
     pub dr_bs_setup_mod_list: Option<DrBsSetupModList>,
     pub dr_bs_modified_list: Option<DrBsModifiedList>,
     pub sr_bs_failed_to_be_setup_mod_list: Option<SrBsFailedToBeSetupModList>,
@@ -6555,7 +6555,7 @@ pub struct UeContextModificationResponse {
     pub sldr_bs_modified_list: Option<SldrBsModifiedList>,
     pub sldr_bs_failed_to_be_setup_mod_list: Option<SldrBsFailedToBeSetupModList>,
     pub sldr_bs_failed_to_be_modified_list: Option<SldrBsFailedToBeModifiedList>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextModificationResponse {
@@ -6569,7 +6569,7 @@ impl UeContextModificationResponse {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
+        let mut d_uto_cu_rrc_information: Option<DUtoCuRrcInformation> = None;
         let mut dr_bs_setup_mod_list: Option<DrBsSetupModList> = None;
         let mut dr_bs_modified_list: Option<DrBsModifiedList> = None;
         let mut sr_bs_failed_to_be_setup_mod_list: Option<SrBsFailedToBeSetupModList> = None;
@@ -6593,7 +6593,7 @@ impl UeContextModificationResponse {
         let mut sldr_bs_modified_list: Option<SldrBsModifiedList> = None;
         let mut sldr_bs_failed_to_be_setup_mod_list: Option<SldrBsFailedToBeSetupModList> = None;
         let mut sldr_bs_failed_to_be_modified_list: Option<SldrBsFailedToBeModifiedList> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -6606,7 +6606,7 @@ impl UeContextModificationResponse {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                39 => d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?),
+                39 => d_uto_cu_rrc_information = Some(DUtoCuRrcInformation::decode(data)?),
                 29 => dr_bs_setup_mod_list = Some(DrBsSetupModList::decode(data)?),
                 21 => dr_bs_modified_list = Some(DrBsModifiedList::decode(data)?),
                 68 => {
@@ -6654,7 +6654,7 @@ impl UeContextModificationResponse {
                     sldr_bs_failed_to_be_modified_list =
                         Some(SldrBsFailedToBeModifiedList::decode(data)?)
                 }
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -6673,7 +6673,7 @@ impl UeContextModificationResponse {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            d_uto_currc_information,
+            d_uto_cu_rrc_information,
             dr_bs_setup_mod_list,
             dr_bs_modified_list,
             sr_bs_failed_to_be_setup_mod_list,
@@ -6728,7 +6728,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.d_uto_currc_information {
+        if let Some(x) = &self.d_uto_cu_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
@@ -7727,7 +7727,7 @@ pub struct UeContextModificationFailure {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextModificationFailure {
@@ -7740,7 +7740,7 @@ impl UeContextModificationFailure {
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -7751,7 +7751,7 @@ impl UeContextModificationFailure {
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -7858,7 +7858,7 @@ pub struct UeContextModificationRequired {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub d_uto_currc_information: Option<DUtoCurrcInformation>,
+    pub d_uto_cu_rrc_information: Option<DUtoCuRrcInformation>,
     pub dr_bs_required_to_be_modified_list: Option<DrBsRequiredToBeModifiedList>,
     pub sr_bs_required_to_be_released_list: Option<SrBsRequiredToBeReleasedList>,
     pub dr_bs_required_to_be_released_list: Option<DrBsRequiredToBeReleasedList>,
@@ -7880,7 +7880,7 @@ impl UeContextModificationRequired {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
+        let mut d_uto_cu_rrc_information: Option<DUtoCuRrcInformation> = None;
         let mut dr_bs_required_to_be_modified_list: Option<DrBsRequiredToBeModifiedList> = None;
         let mut sr_bs_required_to_be_released_list: Option<SrBsRequiredToBeReleasedList> = None;
         let mut dr_bs_required_to_be_released_list: Option<DrBsRequiredToBeReleasedList> = None;
@@ -7903,7 +7903,7 @@ impl UeContextModificationRequired {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                39 => d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?),
+                39 => d_uto_cu_rrc_information = Some(DUtoCuRrcInformation::decode(data)?),
                 23 => {
                     dr_bs_required_to_be_modified_list =
                         Some(DrBsRequiredToBeModifiedList::decode(data)?)
@@ -7951,7 +7951,7 @@ impl UeContextModificationRequired {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            d_uto_currc_information,
+            d_uto_cu_rrc_information,
             dr_bs_required_to_be_modified_list,
             sr_bs_required_to_be_released_list,
             dr_bs_required_to_be_released_list,
@@ -7992,7 +7992,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.d_uto_currc_information {
+        if let Some(x) = &self.d_uto_cu_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
@@ -9584,34 +9584,34 @@ impl AperCodec for DrbActivityList {
             .map_err(|e: AperCodecError| e.push_context("DrbActivityList"))
     }
 }
-// InitialUlrrcMessageTransfer
+// InitialUlRrcMessageTransfer
 #[derive(Clone, Debug)]
-pub struct InitialUlrrcMessageTransfer {
+pub struct InitialUlRrcMessageTransfer {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub c_rnti: CRnti,
     pub rrc_container: RrcContainer,
-    pub d_uto_currc_container: Option<DUtoCurrcContainer>,
+    pub d_uto_cu_rrc_container: Option<DUtoCuRrcContainer>,
     pub sul_access_indication: Option<SulAccessIndication>,
     pub transaction_id: TransactionId,
-    pub ranueid: Option<Ranueid>,
+    pub ran_ue_id: Option<RanUeId>,
     pub rrc_container_rrc_setup_complete: Option<RrcContainerRrcSetupComplete>,
 }
 
-impl InitialUlrrcMessageTransfer {
+impl InitialUlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut nrcgi: Option<Nrcgi> = None;
+        let mut nr_cgi: Option<NrCgi> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut rrc_container: Option<RrcContainer> = None;
-        let mut d_uto_currc_container: Option<DUtoCurrcContainer> = None;
+        let mut d_uto_cu_rrc_container: Option<DUtoCuRrcContainer> = None;
         let mut sul_access_indication: Option<SulAccessIndication> = None;
         let mut transaction_id: Option<TransactionId> = None;
-        let mut ranueid: Option<Ranueid> = None;
+        let mut ran_ue_id: Option<RanUeId> = None;
         let mut rrc_container_rrc_setup_complete: Option<RrcContainerRrcSetupComplete> = None;
 
         for _ in 0..len {
@@ -9620,13 +9620,13 @@ impl InitialUlrrcMessageTransfer {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                111 => nrcgi = Some(Nrcgi::decode(data)?),
+                111 => nr_cgi = Some(NrCgi::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
-                128 => d_uto_currc_container = Some(DUtoCurrcContainer::decode(data)?),
+                128 => d_uto_cu_rrc_container = Some(DUtoCuRrcContainer::decode(data)?),
                 178 => sul_access_indication = Some(SulAccessIndication::decode(data)?),
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                226 => ranueid = Some(Ranueid::decode(data)?),
+                226 => ran_ue_id = Some(RanUeId::decode(data)?),
                 241 => {
                     rrc_container_rrc_setup_complete =
                         Some(RrcContainerRrcSetupComplete::decode(data)?)
@@ -9642,8 +9642,8 @@ impl InitialUlrrcMessageTransfer {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrcgi"
+        let nr_cgi = nr_cgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_cgi"
         )))?;
         let c_rnti = c_rnti.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE c_rnti"
@@ -9656,13 +9656,13 @@ impl InitialUlrrcMessageTransfer {
         )))?;
         Ok(Self {
             gnb_du_ue_f1ap_id,
-            nrcgi,
+            nr_cgi,
             c_rnti,
             rrc_container,
-            d_uto_currc_container,
+            d_uto_cu_rrc_container,
             sul_access_indication,
             transaction_id,
-            ranueid,
+            ran_ue_id,
             rrc_container_rrc_setup_complete,
         })
     }
@@ -9679,7 +9679,7 @@ impl InitialUlrrcMessageTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrcgi.encode(ie)?;
+        self.nr_cgi.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -9702,7 +9702,7 @@ impl InitialUlrrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.d_uto_currc_container {
+        if let Some(x) = &self.d_uto_cu_rrc_container {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 128, false)?;
@@ -9730,7 +9730,7 @@ impl InitialUlrrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.ranueid {
+        if let Some(x) = &self.ran_ue_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
@@ -9766,20 +9766,20 @@ impl InitialUlrrcMessageTransfer {
     }
 }
 
-impl AperCodec for InitialUlrrcMessageTransfer {
+impl AperCodec for InitialUlRrcMessageTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        InitialUlrrcMessageTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("InitialUlrrcMessageTransfer"))
+        InitialUlRrcMessageTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialUlRrcMessageTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("InitialUlrrcMessageTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("InitialUlRrcMessageTransfer"))
     }
 }
-// DlrrcMessageTransfer
+// DlRrcMessageTransfer
 #[derive(Clone, Debug)]
-pub struct DlrrcMessageTransfer {
+pub struct DlRrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub old_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
@@ -9789,13 +9789,13 @@ pub struct DlrrcMessageTransfer {
     pub rat_frequency_priority_information: Option<RatFrequencyPriorityInformation>,
     pub rrc_delivery_status_request: Option<RrcDeliveryStatusRequest>,
     pub ue_context_not_retrievable: Option<UeContextNotRetrievable>,
-    pub redirected_rr_cmessage: Option<Vec<u8>>,
+    pub redirected_rrc_message: Option<Vec<u8>>,
     pub plmn_assistance_info_for_net_shar: Option<PlmnIdentity>,
     pub new_gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
     pub additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex>,
 }
 
-impl DlrrcMessageTransfer {
+impl DlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -9810,7 +9810,7 @@ impl DlrrcMessageTransfer {
         let mut rat_frequency_priority_information: Option<RatFrequencyPriorityInformation> = None;
         let mut rrc_delivery_status_request: Option<RrcDeliveryStatusRequest> = None;
         let mut ue_context_not_retrievable: Option<UeContextNotRetrievable> = None;
-        let mut redirected_rr_cmessage: Option<Vec<u8>> = None;
+        let mut redirected_rrc_message: Option<Vec<u8>> = None;
         let mut plmn_assistance_info_for_net_shar: Option<PlmnIdentity> = None;
         let mut new_gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
@@ -9833,7 +9833,7 @@ impl DlrrcMessageTransfer {
                 184 => rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?),
                 222 => ue_context_not_retrievable = Some(UeContextNotRetrievable::decode(data)?),
                 218 => {
-                    redirected_rr_cmessage =
+                    redirected_rrc_message =
                         Some(aper::decode::decode_octetstring(data, None, None, false)?)
                 }
                 221 => plmn_assistance_info_for_net_shar = Some(PlmnIdentity::decode(data)?),
@@ -9871,7 +9871,7 @@ impl DlrrcMessageTransfer {
             rat_frequency_priority_information,
             rrc_delivery_status_request,
             ue_context_not_retrievable,
-            redirected_rr_cmessage,
+            redirected_rrc_message,
             plmn_assistance_info_for_net_shar,
             new_gnb_cu_ue_f1ap_id,
             additional_rrm_priority_index,
@@ -9963,7 +9963,7 @@ impl DlrrcMessageTransfer {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.redirected_rr_cmessage {
+        if let Some(x) = &self.redirected_rrc_message {
             let ie = &mut AperCodecData::new();
             aper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
@@ -10019,20 +10019,20 @@ impl DlrrcMessageTransfer {
     }
 }
 
-impl AperCodec for DlrrcMessageTransfer {
+impl AperCodec for DlRrcMessageTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DlrrcMessageTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DlrrcMessageTransfer"))
+        DlRrcMessageTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DlRrcMessageTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DlrrcMessageTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("DlRrcMessageTransfer"))
     }
 }
-// UlrrcMessageTransfer
+// UlRrcMessageTransfer
 #[derive(Clone, Debug)]
-pub struct UlrrcMessageTransfer {
+pub struct UlRrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub srbid: Srbid,
@@ -10041,7 +10041,7 @@ pub struct UlrrcMessageTransfer {
     pub new_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
 }
 
-impl UlrrcMessageTransfer {
+impl UlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -10166,15 +10166,15 @@ impl UlrrcMessageTransfer {
     }
 }
 
-impl AperCodec for UlrrcMessageTransfer {
+impl AperCodec for UlRrcMessageTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UlrrcMessageTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UlrrcMessageTransfer"))
+        UlRrcMessageTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UlRrcMessageTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UlrrcMessageTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("UlRrcMessageTransfer"))
     }
 }
 // PrivateMessage
@@ -10213,9 +10213,9 @@ impl AperCodec for PrivateMessage {
 #[derive(Clone, Debug)]
 pub struct SystemInformationDeliveryCommand {
     pub transaction_id: TransactionId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub s_itype_list: SItypeList,
-    pub confirmed_ueid: GnbDuUeF1apId,
+    pub confirmed_ue_id: GnbDuUeF1apId,
 }
 
 impl SystemInformationDeliveryCommand {
@@ -10225,9 +10225,9 @@ impl SystemInformationDeliveryCommand {
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut nrcgi: Option<Nrcgi> = None;
+        let mut nr_cgi: Option<NrCgi> = None;
         let mut s_itype_list: Option<SItypeList> = None;
-        let mut confirmed_ueid: Option<GnbDuUeF1apId> = None;
+        let mut confirmed_ue_id: Option<GnbDuUeF1apId> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -10235,9 +10235,9 @@ impl SystemInformationDeliveryCommand {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                111 => nrcgi = Some(Nrcgi::decode(data)?),
+                111 => nr_cgi = Some(NrCgi::decode(data)?),
                 116 => s_itype_list = Some(SItypeList::decode(data)?),
-                156 => confirmed_ueid = Some(GnbDuUeF1apId::decode(data)?),
+                156 => confirmed_ue_id = Some(GnbDuUeF1apId::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -10249,20 +10249,20 @@ impl SystemInformationDeliveryCommand {
         let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrcgi"
+        let nr_cgi = nr_cgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_cgi"
         )))?;
         let s_itype_list = s_itype_list.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE s_itype_list"
         )))?;
-        let confirmed_ueid = confirmed_ueid.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE confirmed_ueid"
+        let confirmed_ue_id = confirmed_ue_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE confirmed_ue_id"
         )))?;
         Ok(Self {
             transaction_id,
-            nrcgi,
+            nr_cgi,
             s_itype_list,
-            confirmed_ueid,
+            confirmed_ue_id,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10278,7 +10278,7 @@ impl SystemInformationDeliveryCommand {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrcgi.encode(ie)?;
+        self.nr_cgi.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -10294,7 +10294,7 @@ impl SystemInformationDeliveryCommand {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.confirmed_ueid.encode(ie)?;
+        self.confirmed_ue_id.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 156, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11842,21 +11842,21 @@ impl AperCodec for CellTrafficTrace {
             .map_err(|e: AperCodecError| e.push_context("CellTrafficTrace"))
     }
 }
-// DucuRadioInformationTransfer
+// DuCuRadioInformationTransfer
 #[derive(Clone, Debug)]
-pub struct DucuRadioInformationTransfer {
+pub struct DuCuRadioInformationTransfer {
     pub transaction_id: TransactionId,
-    pub ducu_radio_information_type: DucuRadioInformationType,
+    pub du_cu_radio_information_type: DuCuRadioInformationType,
 }
 
-impl DucuRadioInformationTransfer {
+impl DuCuRadioInformationTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut ducu_radio_information_type: Option<DucuRadioInformationType> = None;
+        let mut du_cu_radio_information_type: Option<DuCuRadioInformationType> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11864,7 +11864,7 @@ impl DucuRadioInformationTransfer {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                249 => ducu_radio_information_type = Some(DucuRadioInformationType::decode(data)?),
+                249 => du_cu_radio_information_type = Some(DuCuRadioInformationType::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11876,12 +11876,12 @@ impl DucuRadioInformationTransfer {
         let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let ducu_radio_information_type = ducu_radio_information_type.ok_or(
-            aper::AperCodecError::new(format!("Missing mandatory IE ducu_radio_information_type")),
+        let du_cu_radio_information_type = du_cu_radio_information_type.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE du_cu_radio_information_type")),
         )?;
         Ok(Self {
             transaction_id,
-            ducu_radio_information_type,
+            du_cu_radio_information_type,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11897,7 +11897,7 @@ impl DucuRadioInformationTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.ducu_radio_information_type.encode(ie)?;
+        self.du_cu_radio_information_type.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 249, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11920,32 +11920,32 @@ impl DucuRadioInformationTransfer {
     }
 }
 
-impl AperCodec for DucuRadioInformationTransfer {
+impl AperCodec for DuCuRadioInformationTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DucuRadioInformationTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucuRadioInformationTransfer"))
+        DuCuRadioInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuCuRadioInformationTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucuRadioInformationTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("DuCuRadioInformationTransfer"))
     }
 }
-// CuduRadioInformationTransfer
+// CuDuRadioInformationTransfer
 #[derive(Clone, Debug)]
-pub struct CuduRadioInformationTransfer {
+pub struct CuDuRadioInformationTransfer {
     pub transaction_id: TransactionId,
-    pub cudu_radio_information_type: CuduRadioInformationType,
+    pub cu_du_radio_information_type: CuDuRadioInformationType,
 }
 
-impl CuduRadioInformationTransfer {
+impl CuDuRadioInformationTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut cudu_radio_information_type: Option<CuduRadioInformationType> = None;
+        let mut cu_du_radio_information_type: Option<CuDuRadioInformationType> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11953,7 +11953,7 @@ impl CuduRadioInformationTransfer {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                250 => cudu_radio_information_type = Some(CuduRadioInformationType::decode(data)?),
+                250 => cu_du_radio_information_type = Some(CuDuRadioInformationType::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11965,12 +11965,12 @@ impl CuduRadioInformationTransfer {
         let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cudu_radio_information_type = cudu_radio_information_type.ok_or(
-            aper::AperCodecError::new(format!("Missing mandatory IE cudu_radio_information_type")),
+        let cu_du_radio_information_type = cu_du_radio_information_type.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE cu_du_radio_information_type")),
         )?;
         Ok(Self {
             transaction_id,
-            cudu_radio_information_type,
+            cu_du_radio_information_type,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11986,7 +11986,7 @@ impl CuduRadioInformationTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.cudu_radio_information_type.encode(ie)?;
+        self.cu_du_radio_information_type.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 250, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -12009,15 +12009,15 @@ impl CuduRadioInformationTransfer {
     }
 }
 
-impl AperCodec for CuduRadioInformationTransfer {
+impl AperCodec for CuDuRadioInformationTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CuduRadioInformationTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuduRadioInformationTransfer"))
+        CuDuRadioInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuduRadioInformationTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationTransfer"))
     }
 }
 // BapMappingConfiguration
@@ -14463,7 +14463,7 @@ impl AperCodec for ReferenceTimeInformationReport {
 pub struct AccessSuccess {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl AccessSuccess {
@@ -14474,7 +14474,7 @@ impl AccessSuccess {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut nrcgi: Option<Nrcgi> = None;
+        let mut nr_cgi: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -14483,7 +14483,7 @@ impl AccessSuccess {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                111 => nrcgi = Some(Nrcgi::decode(data)?),
+                111 => nr_cgi = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -14498,13 +14498,13 @@ impl AccessSuccess {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrcgi"
+        let nr_cgi = nr_cgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_cgi"
         )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
-            nrcgi,
+            nr_cgi,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -14528,7 +14528,7 @@ impl AccessSuccess {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrcgi.encode(ie)?;
+        self.nr_cgi.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;

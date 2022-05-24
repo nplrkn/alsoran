@@ -539,22 +539,22 @@ impl Procedure for UeContextReleaseRequestProcedure {
     }
 }
 
-pub struct InitialUlrrcMessageTransferProcedure {}
+pub struct InitialUlRrcMessageTransferProcedure {}
 
 #[async_trait]
-impl Procedure for InitialUlrrcMessageTransferProcedure {
+impl Procedure for InitialUlRrcMessageTransferProcedure {
     type TopPdu = F1apPdu;
-    type Request = InitialUlrrcMessageTransfer;
+    type Request = InitialUlRrcMessageTransfer;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 11;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: InitialUlrrcMessageTransfer,
+        req: InitialUlRrcMessageTransfer,
         logger: &Logger,
     ) -> Option<F1apPdu> {
-        match <T as RequestProvider<InitialUlrrcMessageTransferProcedure>>::request(
+        match <T as RequestProvider<InitialUlRrcMessageTransferProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -565,32 +565,32 @@ impl Procedure for InitialUlrrcMessageTransferProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        F1apPdu::InitiatingMessage(InitiatingMessage::InitialUlrrcMessageTransfer(r)).into_bytes()
+        F1apPdu::InitiatingMessage(InitiatingMessage::InitialUlRrcMessageTransfer(r)).into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for InitialUlrrcMessageTransfer!".to_string(),
+            "No response is defined for InitialUlRrcMessageTransfer!".to_string(),
         ))
     }
 }
 
-pub struct DlrrcMessageTransferProcedure {}
+pub struct DlRrcMessageTransferProcedure {}
 
 #[async_trait]
-impl Procedure for DlrrcMessageTransferProcedure {
+impl Procedure for DlRrcMessageTransferProcedure {
     type TopPdu = F1apPdu;
-    type Request = DlrrcMessageTransfer;
+    type Request = DlRrcMessageTransfer;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 12;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: DlrrcMessageTransfer,
+        req: DlRrcMessageTransfer,
         logger: &Logger,
     ) -> Option<F1apPdu> {
-        match <T as RequestProvider<DlrrcMessageTransferProcedure>>::request(provider, req, logger)
+        match <T as RequestProvider<DlRrcMessageTransferProcedure>>::request(provider, req, logger)
             .await
         {
             Ok(_) => None,
@@ -599,32 +599,32 @@ impl Procedure for DlrrcMessageTransferProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        F1apPdu::InitiatingMessage(InitiatingMessage::DlrrcMessageTransfer(r)).into_bytes()
+        F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(r)).into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for DlrrcMessageTransfer!".to_string(),
+            "No response is defined for DlRrcMessageTransfer!".to_string(),
         ))
     }
 }
 
-pub struct UlrrcMessageTransferProcedure {}
+pub struct UlRrcMessageTransferProcedure {}
 
 #[async_trait]
-impl Procedure for UlrrcMessageTransferProcedure {
+impl Procedure for UlRrcMessageTransferProcedure {
     type TopPdu = F1apPdu;
-    type Request = UlrrcMessageTransfer;
+    type Request = UlRrcMessageTransfer;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 13;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: UlrrcMessageTransfer,
+        req: UlRrcMessageTransfer,
         logger: &Logger,
     ) -> Option<F1apPdu> {
-        match <T as RequestProvider<UlrrcMessageTransferProcedure>>::request(provider, req, logger)
+        match <T as RequestProvider<UlRrcMessageTransferProcedure>>::request(provider, req, logger)
             .await
         {
             Ok(_) => None,
@@ -633,12 +633,12 @@ impl Procedure for UlrrcMessageTransferProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        F1apPdu::InitiatingMessage(InitiatingMessage::UlrrcMessageTransfer(r)).into_bytes()
+        F1apPdu::InitiatingMessage(InitiatingMessage::UlRrcMessageTransfer(r)).into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for UlrrcMessageTransfer!".to_string(),
+            "No response is defined for UlRrcMessageTransfer!".to_string(),
         ))
     }
 }
@@ -1100,22 +1100,22 @@ impl Procedure for DeactivateTraceProcedure {
     }
 }
 
-pub struct DucuRadioInformationTransferProcedure {}
+pub struct DuCuRadioInformationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for DucuRadioInformationTransferProcedure {
+impl Procedure for DuCuRadioInformationTransferProcedure {
     type TopPdu = F1apPdu;
-    type Request = DucuRadioInformationTransfer;
+    type Request = DuCuRadioInformationTransfer;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 30;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: DucuRadioInformationTransfer,
+        req: DuCuRadioInformationTransfer,
         logger: &Logger,
     ) -> Option<F1apPdu> {
-        match <T as RequestProvider<DucuRadioInformationTransferProcedure>>::request(
+        match <T as RequestProvider<DuCuRadioInformationTransferProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -1126,32 +1126,32 @@ impl Procedure for DucuRadioInformationTransferProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        F1apPdu::InitiatingMessage(InitiatingMessage::DucuRadioInformationTransfer(r)).into_bytes()
+        F1apPdu::InitiatingMessage(InitiatingMessage::DuCuRadioInformationTransfer(r)).into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for DucuRadioInformationTransfer!".to_string(),
+            "No response is defined for DuCuRadioInformationTransfer!".to_string(),
         ))
     }
 }
 
-pub struct CuduRadioInformationTransferProcedure {}
+pub struct CuDuRadioInformationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for CuduRadioInformationTransferProcedure {
+impl Procedure for CuDuRadioInformationTransferProcedure {
     type TopPdu = F1apPdu;
-    type Request = CuduRadioInformationTransfer;
+    type Request = CuDuRadioInformationTransfer;
     type Success = ();
     type Failure = ();
     const CODE: u8 = 31;
 
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
-        req: CuduRadioInformationTransfer,
+        req: CuDuRadioInformationTransfer,
         logger: &Logger,
     ) -> Option<F1apPdu> {
-        match <T as RequestProvider<CuduRadioInformationTransferProcedure>>::request(
+        match <T as RequestProvider<CuDuRadioInformationTransferProcedure>>::request(
             provider, req, logger,
         )
         .await
@@ -1162,12 +1162,12 @@ impl Procedure for CuduRadioInformationTransferProcedure {
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        F1apPdu::InitiatingMessage(InitiatingMessage::CuduRadioInformationTransfer(r)).into_bytes()
+        F1apPdu::InitiatingMessage(InitiatingMessage::CuDuRadioInformationTransfer(r)).into_bytes()
     }
 
     fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
         Err(RequestError::Other(
-            "No response is defined for CuduRadioInformationTransfer!".to_string(),
+            "No response is defined for CuDuRadioInformationTransfer!".to_string(),
         ))
     }
 }
@@ -2249,9 +2249,9 @@ pub enum InitiatingMessage {
     PwsCancelRequest(PwsCancelRequest),
     ErrorIndication(ErrorIndication),
     UeContextReleaseRequest(UeContextReleaseRequest),
-    InitialUlrrcMessageTransfer(InitialUlrrcMessageTransfer),
-    DlrrcMessageTransfer(DlrrcMessageTransfer),
-    UlrrcMessageTransfer(UlrrcMessageTransfer),
+    InitialUlRrcMessageTransfer(InitialUlRrcMessageTransfer),
+    DlRrcMessageTransfer(DlRrcMessageTransfer),
+    UlRrcMessageTransfer(UlRrcMessageTransfer),
     UeInactivityNotification(UeInactivityNotification),
     GnbDuResourceCoordinationRequest(GnbDuResourceCoordinationRequest),
     SystemInformationDeliveryCommand(SystemInformationDeliveryCommand),
@@ -2265,8 +2265,8 @@ pub enum InitiatingMessage {
     F1RemovalRequest(F1RemovalRequest),
     TraceStart(TraceStart),
     DeactivateTrace(DeactivateTrace),
-    DucuRadioInformationTransfer(DucuRadioInformationTransfer),
-    CuduRadioInformationTransfer(CuduRadioInformationTransfer),
+    DuCuRadioInformationTransfer(DuCuRadioInformationTransfer),
+    CuDuRadioInformationTransfer(CuDuRadioInformationTransfer),
     BapMappingConfiguration(BapMappingConfiguration),
     GnbDuResourceConfiguration(GnbDuResourceConfiguration),
     IabtnlAddressRequest(IabtnlAddressRequest),
@@ -2329,13 +2329,13 @@ impl InitiatingMessage {
             10 => Ok(Self::UeContextReleaseRequest(
                 UeContextReleaseRequest::decode(data)?,
             )),
-            11 => Ok(Self::InitialUlrrcMessageTransfer(
-                InitialUlrrcMessageTransfer::decode(data)?,
+            11 => Ok(Self::InitialUlRrcMessageTransfer(
+                InitialUlRrcMessageTransfer::decode(data)?,
             )),
-            12 => Ok(Self::DlrrcMessageTransfer(DlrrcMessageTransfer::decode(
+            12 => Ok(Self::DlRrcMessageTransfer(DlRrcMessageTransfer::decode(
                 data,
             )?)),
-            13 => Ok(Self::UlrrcMessageTransfer(UlrrcMessageTransfer::decode(
+            13 => Ok(Self::UlRrcMessageTransfer(UlRrcMessageTransfer::decode(
                 data,
             )?)),
             15 => Ok(Self::UeInactivityNotification(
@@ -2365,11 +2365,11 @@ impl InitiatingMessage {
             26 => Ok(Self::F1RemovalRequest(F1RemovalRequest::decode(data)?)),
             28 => Ok(Self::TraceStart(TraceStart::decode(data)?)),
             29 => Ok(Self::DeactivateTrace(DeactivateTrace::decode(data)?)),
-            30 => Ok(Self::DucuRadioInformationTransfer(
-                DucuRadioInformationTransfer::decode(data)?,
+            30 => Ok(Self::DuCuRadioInformationTransfer(
+                DuCuRadioInformationTransfer::decode(data)?,
             )),
-            31 => Ok(Self::CuduRadioInformationTransfer(
-                CuduRadioInformationTransfer::decode(data)?,
+            31 => Ok(Self::CuDuRadioInformationTransfer(
+                CuDuRadioInformationTransfer::decode(data)?,
             )),
             32 => Ok(Self::BapMappingConfiguration(
                 BapMappingConfiguration::decode(data)?,
@@ -2518,17 +2518,17 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::InitialUlrrcMessageTransfer(x) => {
+            Self::InitialUlRrcMessageTransfer(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::DlrrcMessageTransfer(x) => {
+            Self::DlRrcMessageTransfer(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UlrrcMessageTransfer(x) => {
+            Self::UlRrcMessageTransfer(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2598,12 +2598,12 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::DucuRadioInformationTransfer(x) => {
+            Self::DuCuRadioInformationTransfer(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 30, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::CuduRadioInformationTransfer(x) => {
+            Self::CuDuRadioInformationTransfer(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 31, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
