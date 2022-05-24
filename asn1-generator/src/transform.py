@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 
+from itertools import permutations, takewhile
 import unittest
 from lark.visitors import Transformer, Visitor, Discard
 from case import pascal_case, snake_case
 from lark.lexer import Token
 from lark import Tree, v_args
-from parse import parse_string
+from parse import parse_string, parse_file
+import sys
 
 
 # Add a new type name and ensure it is unique
 def add_type_name(orig_typename, name_dict):
     name = pascal_case(orig_typename)
-    existing = name_dict.get(name)
-    name_dict[name] = (existing or 0) + 1
-    if existing:
-        name = name + str(existing)
+    if name_dict.get(name):
+        suffix = 1
+        while name_dict.get(name + str(suffix)):
+            suffix += 1
+        name = name + str(suffix)
+    name_dict[name] = True
     return name
 
 
@@ -85,7 +89,7 @@ class IeContainerMerger(Transformer):
         self.ie_dict = ies
 
     def sequence(self, tree):
-        if tree.children[0].data == "ie_container":
+        if len(tree.children) > 0 and tree.children[0].data == "ie_container":
             tree.children[0] = self.ie_dict[tree.children[0].children[0]]
             tree.data = "ie_container_sequence"
         return tree
@@ -105,6 +109,31 @@ class Remover(Transformer):
     def object_def(self, tree):
         print("Removing object_def ", tree.children[0])
         return Discard
+
+    def extended_items(self, tree):
+        print("Removing extended items")
+        return Discard
+
+
+@v_args(tree=True)
+class EnumDeDuplicator(Transformer):
+    # If we find two enum variants with the same name after converting to pascal case
+    # this is because of an RRC construct like Q-OffsetRange which contains both
+    # "dB-24" AND "db24".  (Thanks, RRC).  We convert the dash to the word 'Dash' to
+    # dismabiguate.
+    def enumerated(self, tree):
+        for i1 in range(len(tree.children) - 1):
+            item1 = tree.children[i1]
+            if isinstance(item1, Token) or len(item1.children) == 0:
+                continue
+            for i2 in range(i1 + 1, len(tree.children)):
+                item2 = tree.children[i2]
+                if isinstance(item2, Token) or len(item2.children) == 0:
+                    continue
+                if pascal_case(item1.children[0]) == pascal_case(item2.children[0]):
+                    item1.children[0] = item1.children[0].replace('-', 'Dash')
+                    item2.children[0] = item2.children[0].replace('-', 'Dash')
+        return tree
 
 
 @v_args(tree=True)
@@ -135,23 +164,33 @@ class TypeTransformer(Transformer):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
+    def type_parameterized_identifier(self, tree):
+        typ = pascal_case(tree.children[0]) + \
+            f"<{self.convert(tree.children[1].children[0])}>"
+        return Token('', typ)
+
     def field(self, tree):
-        tree = self.transform_type(tree)
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
     def choice_field(self, tree):
-        tree = self.transform_type(tree)
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
     def optional_field(self, tree):
-        tree = self.transform_type(tree)
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         tree.children[0] = snake_case(tree.children[0])
         return tree
 
     def tuple_struct(self, tree):
         tree.children[0] = self.convert(tree.children[0])
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
         return tree
 
     def choice_def(self, tree):
@@ -186,24 +225,29 @@ class TypeTransformer(Transformer):
         tree.children[0] = self.get_constant(tree.children[0])
         return tree
 
-    def transform_type(self, tree, type_index=1):
-        orig_name = tree.children[0]
-        typ = tree.children[type_index]
-        if isinstance(typ, Token):
-            typename = tree.children[type_index].value
-            tree.children[type_index] = self.convert(typename)
-        elif typ.data == 'enumerated':
+    def transform_type(self, tree, orig_name):
+        if isinstance(tree, Token):
+            typename = tree.value
+            tree = self.convert(typename)
+        elif tree.data == 'sequence_of':
+            tree.children[2] = self.transform_type(tree.children[2], orig_name)
+        elif tree.data == 'enumerated':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('enum_def', [name, typ])
+            new_def = Tree('enum_def', [name, tree])
             self.extra_defs.append(new_def)
-            tree.children[type_index] = name
-        elif typ.data == 'sequence':
+            tree = name
+        elif tree.data == 'sequence':
             name = self.unique_type_name(orig_name)
-            new_def = Tree('struct', [name, typ])
+            new_def = Tree('struct', [name, tree])
             self.extra_defs.append(new_def)
-            tree.children[type_index] = name
-        elif typ.data == 'null':
-            tree.children[type_index] = 'null'
+            tree = name
+        elif tree.data == 'null':
+            tree = 'null'
+        elif tree.data == 'choice':
+            name = self.unique_type_name(orig_name)
+            new_def = Tree('choice_def', [name, tree])
+            self.extra_defs.append(new_def)
+            tree = name
         else:
             pass
 
@@ -214,10 +258,7 @@ class TypeTransformer(Transformer):
         return Tree("ie_container_sequence_of", tree.children)
 
     def sequence_of(self, tree):
-        item = tree.children[2]
         self.transform_bounds(tree)
-        item = self.convert(item)
-        tree.children[2] = item
         return Tree("sequence_of", tree.children)
 
     def get_constant(self, name):
@@ -265,7 +306,7 @@ class TypeTransformer(Transformer):
     def integer(self, tree):
         (lb, ub, extensible) = self.transform_bounds(tree)
 
-        if extensible:
+        if extensible or ((lb, ub) == (None, None)):
             t = "i128"
         elif lb < 0:
             if lb >= -128 and ub <= 127:
@@ -319,7 +360,8 @@ class TypeTransformer(Transformer):
         id = tree.children[0].value
         tree.children[0] = snake_case(id.replace("id-", ""))
         tree.children.insert(1, self.constants[id])
-        self.transform_type(tree, 3)
+        tree.children[3] = self.transform_type(
+            tree.children[3], tree.children[0])
         return tree
 
     def optional_ie(self, tree):
@@ -330,6 +372,9 @@ def transform(mut_tree, constants):
     try:
         print("---- Removing ignored object_defs ----")
         mut_tree = Remover().transform(mut_tree)
+
+        print("---- Deduplicate enum variants ----")
+        mut_tree = EnumDeDuplicator().transform(mut_tree)
 
         print("---- Finding typenames ----")
         tnf = TypeNameFinder()
@@ -344,6 +389,11 @@ def transform(mut_tree, constants):
     except Exception as e:
         print(mut_tree.pretty())
         raise e
+
+
+def transform_from_file(input_file):
+    tree = parse_file(input_file)
+    return transform(tree, dict())
 
 
 class TestTransformer(unittest.TestCase):
@@ -422,7 +472,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
             combOffset-n2              INTEGER (0..1),
             cyclicShift-n2             INTEGER (0..7)
         },
-	iE-Extensions		ProtocolExtensionContainer {{WLANMeasurementConfiguration-ExtIEs}} 	OPTIONAL,
+	iE-Extensions		ProtocolExtensionContainer {{WLANMeasurementConfiguration-ExtIEs}} 	OPTIONAL, --Need R
 	...
 }
 """
@@ -468,8 +518,6 @@ document
     enumerated
       enum_field\tThing1
       extension_marker
-      extended_items
-        enum_field\tThing2
   struct
     N2
     sequence
@@ -725,6 +773,167 @@ document
       enum_field\tLocalClock
 """)
 
+    def test_inline_choice(self):
+        self.should_generate("""\
+SBCCH-SL-BCH-MessageType::=     CHOICE {
+    c1                              CHOICE {
+        masterInformationBlockSidelink              MasterInformationBlockSidelink,
+        spare1 NULL
+    },
+    messageClassExtension   SEQUENCE {}
+}""", """\
+document
+  choice_def
+    SbcchSlBchMessageType
+    choice
+      choice_field
+        C1
+        C1
+      extension_container\tmessageClassExtension
+  choice_def
+    C1
+    choice
+      choice_field
+        MasterInformationBlockSidelink
+        MasterInformationBlockSidelink
+      choice_field
+        Spare1
+        null
+""")
+
+    def test_sequence_with_empty_sequence(self):
+        self.should_generate("""\
+UECapabilityInformationSidelink-IEs-r16 ::= SEQUENCE {
+    accessStratumReleaseSidelink-r16            AccessStratumReleaseSidelink-r16,
+    nonCriticalExtension                        SEQUENCE{}                                                              OPTIONAL
+}
+""", """\
+document
+  struct
+    UeCapabilityInformationSidelinkIEsR16
+    sequence
+      field
+        access_stratum_release_sidelink_r_16
+        AccessStratumReleaseSidelinkR16
+      extension_container\tnonCriticalExtension
+""")
+
+    def test_rrc_setup_release(self):
+        self.should_generate("""\
+LocationMeasurementIndication-IEs ::=       SEQUENCE {
+    measurementIndication                       SetupRelease {LocationMeasurementInfo},
+}
+""", """\
+document
+  struct
+    LocationMeasurementIndicationIEs
+    sequence
+      field
+        measurement_indication
+        SetupRelease<LocationMeasurementInfo>
+""")
+
+    def test_parameterized_choice_def(self):
+        self.should_generate("""\
+SetupRelease { ElementTypeParam } ::= CHOICE {
+    release         NULL,
+    setup           ElementTypeParam
+}
+""", """\
+document
+  generic_choice_def
+    SetupRelease
+    type_parameter\tElementTypeParam
+    choice
+      choice_field
+        Release
+        null
+      choice_field
+        Setup
+        ElementTypeParam
+""")
+
+    def test_seq_of_constrained_int(self):
+        self.should_generate("""\
+AvailabilityCombination-r16 ::=         SEQUENCE {
+    availabilityCombinationId-r16           AvailabilityCombinationId-r16,
+    resourceAvailability-r16                SEQUENCE (SIZE (1..maxNrofResourceAvailabilityPerCombination-r16)) OF INTEGER (0..7)
+}
+""", """\
+document
+  struct
+    AvailabilityCombinationR16
+    sequence
+      field
+        availability_combination_id_r_16
+        AvailabilityCombinationIdR16
+      field
+        resource_availability_r_16
+        sequence_of
+          1
+          maxNrofResourceAvailabilityPerCombination-r16
+          u8
+            0
+            7
+""")
+
+    def test_unbounded_integer(self):
+        self.should_generate("""\
+VarMeasReportSL-r16 ::=                   SEQUENCE {
+    sl-NumberOfReportsSent-r16                INTEGER
+}""", """\
+document
+  struct
+    VarMeasReportSlR16
+    sequence
+      field
+        sl_number_of_reports_sent_r_16
+        i128
+""")
+
+    def test_dup_extra_defs(self):
+        self.should_generate("""\
+FeatureSetUplink-v1540 ::=           SEQUENCE {
+    zeroSlotOffsetAperiodicSRS           ENUMERATED {supported}                     OPTIONAL,
+    pa-PhaseDiscontinuityImpacts         ENUMERATED {supported}                     OPTIONAL,
+}
+""", """\
+document
+  struct
+    FeatureSetUplinkV1540
+    sequence
+      optional_field
+        zero_slot_offset_aperiodic_srs
+        ZeroSlotOffsetAperiodicSrs
+      optional_field
+        pa_phase_discontinuity_impacts
+        PaPhaseDiscontinuityImpacts
+  enum_def
+    ZeroSlotOffsetAperiodicSrs
+    enumerated
+      enum_field\tSupported
+  enum_def
+    PaPhaseDiscontinuityImpacts
+    enumerated
+      enum_field\tSupported
+""")
+
+    def test_enum_with_duplicate_pascal_case_mappings(self):
+        self.should_generate("""\
+Q-OffsetRange ::=                   ENUMERATED {dB-24, something-else, dB24}
+""", """\
+document
+  enum_def
+    QOffsetRange
+    enumerated
+      enum_field\tDbDash24
+      enum_field\tSomethingElse
+      enum_field\tDb24
+""")
+
 
 if __name__ == '__main__':
-    unittest.main(failfast=True)
+    if len(sys.argv) == 2:
+        print(transform_from_file(sys.argv[1]))
+    else:
+        unittest.main(failfast=True)

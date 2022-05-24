@@ -18514,8 +18514,41 @@ impl AperCodec for PduSessionResourceReleasedItemRelRes {
         self.encode_inner(data)
             .map_err(|e: AperCodecError| e.push_context("PduSessionResourceReleasedItemRelRes"))
     }
-} // PduSessionResourceReleaseResponseTransfer - omitted
+}
+// PduSessionResourceReleaseResponseTransfer
+#[derive(Clone, Debug)]
+pub struct PduSessionResourceReleaseResponseTransfer {}
 
+impl PduSessionResourceReleaseResponseTransfer {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) =
+            aper::decode::decode_sequence_header(data, true, 1)?;
+
+        Ok(Self {})
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(false);
+
+        aper::encode::encode_sequence_header(data, true, &optionals, false)?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for PduSessionResourceReleaseResponseTransfer {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        PduSessionResourceReleaseResponseTransfer::decode_inner(data).map_err(
+            |e: AperCodecError| e.push_context("PduSessionResourceReleaseResponseTransfer"),
+        )
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| {
+            e.push_context("PduSessionResourceReleaseResponseTransfer")
+        })
+    }
+}
 // PduSessionResourceResumeListResReq
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceResumeListResReq(pub Vec<PduSessionResourceResumeItemResReq>);

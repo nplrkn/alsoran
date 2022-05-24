@@ -7,8 +7,9 @@ NEWLINE:                "\n"
 %ignore COMMENT
 %ignore NEWLINE
 
-IDENTIFIER:             ("a".."z" | "A".."Z" | DIGIT | "-")+
-INTEGER:                "-"? "0" | "1".."9"("0".."9")*
+IDENTIFIER:             NONHYPHEN (NONHYPHEN|"-")*
+NONHYPHEN:              ("a".."z" | "A".."Z" | DIGIT)
+INTEGER:                "0" | "-"? "1".."9"("0".."9")*
 _IDENTIFIER:            IDENTIFIER
 _identifier:            IDENTIFIER
 BOUND:                  INTEGER | IDENTIFIER
@@ -29,6 +30,7 @@ _definitions:           ( tuple_struct
                         | struct 
                         | enum_def 
                         | choice_def 
+                        | generic_choice_def
                         | constant_def 
                         | object_def 
                         | protocol_ies 
@@ -36,11 +38,12 @@ _definitions:           ( tuple_struct
                         | class_def
                         | top_level_enum_def
                         | class_instance)+
-?assign:                IDENTIFIER type_parameter? "::="
+?assign:                IDENTIFIER "::="
 tuple_struct:           assign _primitive
 struct:                 assign sequence
 enum_def:               assign enumerated
 choice_def:             assign choice
+generic_choice_def:     IDENTIFIER type_parameter "::=" choice
 constant_def:           IDENTIFIER _IDENTIFIER "::=" INTEGER
 object_def.0:           IDENTIFIER _identifier "::=" ies
 protocol_ies.1:         IDENTIFIER _PROTOCOL_IES "::=" ies
@@ -52,7 +55,7 @@ _bracketed_group{x}:    ("[[" _comma_separated{x} "]]") | x
 
 sequence_of:            "SEQUENCE" [_size] "OF" (_field_type | single_ie_container)
 sequence:               "SEQUENCE" _items{_sequence_item}
-_sequence_item:         optional_field | field | extension_container | ie_container | single_ie_container
+_sequence_item:         optional_field | field | extension_container | ie_container | single_ie_container | (empty_sequence "OPTIONAL")
 optional_field.2:       _identifier _field_type ("OPTIONAL" | "DEFAULT" _identifier)
 field.1:                _identifier _field_type
 
@@ -60,8 +63,9 @@ enumerated.1:             "ENUMERATED" _items{enum_field}
 enum_field:              _identifier
 
 choice:                 "CHOICE" _items{_choice_item}
-_choice_item:            choice_field | extension_container
+_choice_item:            choice_field | extension_container | empty_sequence
 choice_field:           _identifier _field_type
+empty_sequence.3:       _identifier "SEQUENCE" "{}" -> extension_container
 
 integer:                "INTEGER" named_values? ["(" _constraints ")"]
 printable_string:       "PrintableString" [_size]
@@ -83,9 +87,11 @@ _primitive:             sequence_of
                         | octet_string
                         | boolean
                         | null
-                        | _identifier type_parameter? 
+                        | _identifier 
+                        | type_parameterized_identifier? 
 _field_type:            _primitive | enumerated | sequence | choice
 type_parameter:         "{" _identifier "}"
+type_parameterized_identifier: _identifier type_parameter
 
 ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 single_ie_container.1:  "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"

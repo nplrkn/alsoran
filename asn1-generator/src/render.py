@@ -108,13 +108,13 @@ def decode_expression(tree):
     elif type_info.typ == "bool":
         return f"aper::decode::decode_bool(data)?"
     else:
-        return f"""{type_info.typ}::decode(data)?"""
+        return f"""{type_info.typ.replace("<", "::<")}::decode(data)?"""
 
 
 def encode_expression_fn(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof == "ie_container_sequence_of":
-        return lambda x, data="data", _copy_type_deref="": f"""\
+        return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             let ie = &mut AperCodecData::new();
@@ -126,10 +126,10 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
         }}
         Ok(())"""
     elif type_info.seqof:
-        return lambda x, data="data", _copy_type_deref="": f"""\
+        return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
-        for x in &{x} {{
-            {encode_expression_fn(tree.children[2])("x", data)}?;
+        for x in {copy_type_deref}&{x} {{
+            {encode_expression_fn(tree.children[2])("x", data, "*")}?;
         }}
         Ok(())"""
 
@@ -140,11 +140,11 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
     elif type_info.typ == "String":
         format_string = f"aper::encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, &{{value}}, false)"
     elif type_info.typ == "i128":
-        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, {{value}}, false)"
+        format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}}, false)"
     elif is_non_i128_int_type(type_info.typ):
         format_string = f"aper::encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}} as i128, false)"
     elif type_info.typ == "bool":
-        format_string = f"aper::encode::encode_bool({{data}}, {{value}})"
+        format_string = f"aper::encode::encode_bool({{data}}, {{copy_type_deref}}{{value}})"
     else:
         format_string = f"""{{value}}.encode({{data}})"""
 
@@ -224,10 +224,7 @@ class ChoiceFields(Interpreter):
 
     def choice_field(self, tree):
         name = tree.children[0]
-        typ = tree.children[1]
-
-        if isinstance(typ, Tree):
-            typ = typ.data
+        typ = type_and_constraints(tree.children[1]).typ
         self.choice_fields += f"""\
     {name}{"("+typ+")" if typ != "null" else ""},
 """
@@ -813,9 +810,9 @@ impl {orig_name} {{
             child for child in tree.children[1].children if child.data in ["field", "optional_field"]]
 
         # Omit if there are 0 fields, as is normally the case for extension IEs
-        if len(fields) == 0:
-            self.comment(tree, "omitted\n")
-            return
+        # if len(fields) == 0:
+        #     self.comment(tree, "omitted\n")
+        #     return
 
         field_interpreter = StructFields()
         fields_from_interpreter = StructFieldsFrom()
@@ -892,7 +889,7 @@ def generate(tree, constants=dict(), verbose=False):
     return visited.outfile
 
 
-def generate_structs(input_file, constants=dict(), verbose=False):
+def generate_from_file(input_file, constants=dict(), verbose=False):
     tree = parse_file(input_file)
     if verbose:
         print(tree.pretty())
@@ -1273,7 +1270,7 @@ impl AperCodec for WlanRtt {
 
     def test_unbounded_octet_string(self):
         input = """\
-LTEUERLFReportContainer::= OCTET STRING
+LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
 """
         output = """\
 
@@ -2053,10 +2050,100 @@ impl AperCodec for GnbCuSystemInformation {
     }
 }""", constants={"maxnoofSIBTypes": 32})
 
+    def test_inline_choice(self):
+        self.should_generate("""\
+SBCCH-SL-BCH-MessageType::=     CHOICE {
+    c1                              CHOICE {
+        masterInformationBlockSidelink              MasterInformationBlockSidelink,
+        spare1 NULL
+    },
+    messageClassExtension   SEQUENCE {}
+}""", """\
+
+// SbcchSlBchMessageType
+# [derive(Clone, Debug)]
+pub enum SbcchSlBchMessageType {
+    C1(C1),
+}
+
+impl SbcchSlBchMessageType {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::C1(C1::decode(data)?)),
+            1 => Err(AperCodecError::new("Choice extension container not implemented")),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::C1(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl AperCodec for SbcchSlBchMessageType {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SbcchSlBchMessageType::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SbcchSlBchMessageType"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SbcchSlBchMessageType"))
+    }
+}
+// C1
+# [derive(Clone, Debug)]
+pub enum C1 {
+    MasterInformationBlockSidelink(MasterInformationBlockSidelink),
+    Spare1,
+}
+
+impl C1 {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::MasterInformationBlockSidelink(MasterInformationBlockSidelink::decode(data)?)),
+            1 => Ok(Self::Spare1),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::MasterInformationBlockSidelink(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::Spare1 => {
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                Ok(())
+            }
+        }
+    }
+}
+
+impl AperCodec for C1 {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        C1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("C1"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("C1"))
+    }
+}""")
+
     def test_empty_pdu(self):
         self.should_generate("""\
 OverloadStop ::= SEQUENCE {
-	protocolIEs		ProtocolIE-Container		{ {OverloadStopIEs} },
+    protocolIEs		ProtocolIE-Container		{ {OverloadStopIEs} },
 	...
 }
 
@@ -2112,9 +2199,310 @@ impl AperCodec for OverloadStop {
     }
 }""")
 
+    def test_rrc_setup_release(self):
+        self.should_generate("""\
+LocationMeasurementIndication-IEs ::=       SEQUENCE {
+    measurementIndication                       SetupRelease {LocationMeasurementInfo},
+    nonCriticalExtension                        SEQUENCE{}                                                              OPTIONAL
+}
+""", """\
+
+// LocationMeasurementIndicationIEs
+# [derive(Clone, Debug)]
+pub struct LocationMeasurementIndicationIEs {
+    pub measurement_indication: SetupRelease<LocationMeasurementInfo>,
+}
+
+impl LocationMeasurementIndicationIEs {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
+        let measurement_indication = SetupRelease::<LocationMeasurementInfo>::decode(data)?;
+
+        Ok(Self {
+            measurement_indication,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(false);
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        self.measurement_indication.encode(data)?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for LocationMeasurementIndicationIEs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        LocationMeasurementIndicationIEs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+    }
+}""")
+
+    def test_parameterized_choice_def(self):
+        self.should_generate("""\
+SetupRelease { ElementTypeParam } ::= CHOICE {
+    release         NULL,
+    setup           ElementTypeParam
+}
+""", "")
+
+    def test_seq_of_constrained_int(self):
+        self.should_generate("""\
+AvailabilityCombination-r16 ::=         SEQUENCE {
+    resourceAvailability-r16                SEQUENCE (SIZE (1..maxNrofResourceAvailabilityPerCombination-r16)) OF INTEGER (0..7)
+}
+""", """\
+
+// AvailabilityCombinationR16
+# [derive(Clone, Debug)]
+pub struct AvailabilityCombinationR16 {
+    pub resource_availability_r_16: Vec<u8>,
+}
+
+impl AvailabilityCombinationR16 {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
+        let resource_availability_r_16 = {
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(5), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(aper::decode::decode_integer(data, Some(0), Some(7), false)?.0 as u8);
+            }
+            items
+        };
+
+        Ok(Self {
+            resource_availability_r_16,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let optionals = BitVec::new();
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        aper::encode::encode_length_determinent(data, Some(1), Some(5), false, self.resource_availability_r_16.len())?;
+        for x in &self.resource_availability_r_16 {
+            aper::encode::encode_integer(data, Some(0), Some(7), false, *x as i128, false)?;
+        }
+        Ok(())?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for AvailabilityCombinationR16 {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        AvailabilityCombinationR16::decode_inner(data).map_err(|e: AperCodecError| e.push_context("AvailabilityCombinationR16"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("AvailabilityCombinationR16"))
+    }
+}""", constants={"maxNrofResourceAvailabilityPerCombination-r16": 5})
+
+    def test_seq_of_choice(self):
+        self.should_generate("""\
+SystemInformation-IEs ::=           SEQUENCE {
+    sib-TypeAndInfo                     SEQUENCE (SIZE (1..3)) OF CHOICE {
+        sib2                                SIB2,
+        sib3                                SIB3,
+        ...,
+        sib10-v1610                         SIB10-r16,
+    },
+}
+""", """\
+
+// SystemInformationIEs
+# [derive(Clone, Debug)]
+pub struct SystemInformationIEs {
+    pub sib_type_and_info: Vec<SibTypeAndInfo>,
+}
+
+impl SystemInformationIEs {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
+        let sib_type_and_info = {
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(SibTypeAndInfo::decode(data)?);
+            }
+            items
+        };
+
+        Ok(Self {
+            sib_type_and_info,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let optionals = BitVec::new();
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        aper::encode::encode_length_determinent(data, Some(1), Some(3), false, self.sib_type_and_info.len())?;
+        for x in &self.sib_type_and_info {
+            x.encode(data)?;
+        }
+        Ok(())?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for SystemInformationIEs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SystemInformationIEs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemInformationIEs"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemInformationIEs"))
+    }
+}
+// SibTypeAndInfo
+# [derive(Clone, Debug)]
+pub enum SibTypeAndInfo {
+    Sib2(Sib2),
+    Sib3(Sib3),
+}
+
+impl SibTypeAndInfo {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, true)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::Sib2(Sib2::decode(data)?)),
+            1 => Ok(Self::Sib3(Sib3::decode(data)?)),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::Sib2(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, true, 0, false)?;
+                x.encode(data)
+            }
+            Self::Sib3(x) => {
+                aper::encode::encode_choice_idx(data, 0, 1, true, 1, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl AperCodec for SibTypeAndInfo {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SibTypeAndInfo::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    }
+}""")
+
+    def test_seq_of_copy_type(self):
+        self.should_generate("""\
+CSI-AssociatedReportConfigInfo ::=  SEQUENCE {
+    nzp-CSI-RS                          SEQUENCE {
+        qcl-info                            SEQUENCE (SIZE(1..2)) OF TCI-StateId OPTIONAL
+    },
+}
+""", """\
+
+// CsiAssociatedReportConfigInfo
+# [derive(Clone, Debug)]
+pub struct CsiAssociatedReportConfigInfo {
+    pub nzp_csi_rs: NzpCsiRs,
+}
+
+impl CsiAssociatedReportConfigInfo {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
+        let nzp_csi_rs = NzpCsiRs::decode(data)?;
+
+        Ok(Self {
+            nzp_csi_rs,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let optionals = BitVec::new();
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        self.nzp_csi_rs.encode(data)?;
+
+        Ok(())
+    }
+}
+
+impl AperCodec for CsiAssociatedReportConfigInfo {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        CsiAssociatedReportConfigInfo::decode_inner(data).map_err(|e: AperCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+    }
+}
+// NzpCsiRs
+# [derive(Clone, Debug)]
+pub struct NzpCsiRs {
+    pub qcl_info: Option<Vec<TciStateId>>,
+}
+
+impl NzpCsiRs {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
+        let qcl_info = if optionals[0] {
+            Some({
+            let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let mut items = vec![];
+            for _ in 0..length {
+                items.push(TciStateId::decode(data)?);
+            }
+            items
+        })
+        } else {
+            None
+        };
+
+        Ok(Self {
+            qcl_info,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut optionals = BitVec::new();
+        optionals.push(self.qcl_info.is_some());
+
+        aper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        if let Some(x) = &self.qcl_info {
+            aper::encode::encode_length_determinent(data, Some(1), Some(2), false, x.len())?;
+        for x in *&x {
+            x.encode(data)?;
+        }
+        Ok(())?;
+        }
+
+        Ok(())
+    }
+}
+
+impl AperCodec for NzpCsiRs {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NzpCsiRs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
+    }
+}""")
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        print(generate_structs(sys.argv[1], verbose=True))
+        print(generate_from_file(sys.argv[1], verbose=True))
     else:
         unittest.main(failfast=True)

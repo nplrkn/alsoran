@@ -10,5 +10,6 @@ members = [
     "net",
     "ngap",
     "f1ap",
-    "gnbcu"
+    "gnbcu",
+    "rrc"
 ]
