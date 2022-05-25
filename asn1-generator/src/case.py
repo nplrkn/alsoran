@@ -7,10 +7,14 @@ KNOWN_WORDS = [(re.compile(x, re.IGNORECASE), "-"+x+"-")
 
 ACRONYMS = re.compile(r"([A-Z,0-9]*)(?=(?=[A-Z][a-z]*)|$|-|_)")
 
-KNOWN_WORDS_CASE_SENSITIVE = [(re.compile(x), "-"+x+"-")
-                              for x in ["NR", "CU", "UE"]]
+KNOWN_WORDS_CASE_SENSITIVE = [(re.compile(x), "-"+x+"-") for x in ["NR", "CU"]]
 
-SPECIALS = [(re.compile("^DU"), "DU-"), (re.compile("\([^P]\)DU"), "-\1DU-")]
+SPECIALS = [(re.compile("^DU"), "DU-"),
+            (re.compile(r"([^P])DU"), r"\1-DU-"),
+            (re.compile(r"UE(s?)"), r"-ue\1-"),
+            (re.compile(r"SRB(s?)"), r"-srb\1-"),
+            (re.compile(r"DRB(s?)"), r"-drb\1-"),
+            ]
 
 
 def replace_rust_keywords(s):
@@ -56,6 +60,14 @@ class TestCase(unittest.TestCase):
                          "DuToCuRrcContainer")
         self.assertEqual(pascal_case("SomethingDU"),
                          "SomethingDu")
+
+    def test_ues(self):
+        self.assertEqual(snake_case("numberofActiveUEs"),
+                         "numberof_active_ues")
+
+    def test_srbs(self):
+        self.assertEqual(pascal_case("SRBs-FailedToBeSetup-List"),
+                         "SrbsFailedToBeSetupList")
 
 
 if __name__ == '__main__':

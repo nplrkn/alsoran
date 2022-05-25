@@ -5619,17 +5619,17 @@ impl AperCodec for DrbId {
             .map_err(|e: AperCodecError| e.push_context("DrbId"))
     }
 }
-// DrBsSubjectToStatusTransferList
+// DrbsSubjectToStatusTransferList
 #[derive(Clone, Debug)]
-pub struct DrBsSubjectToStatusTransferList(pub Vec<DrBsSubjectToStatusTransferItem>);
+pub struct DrbsSubjectToStatusTransferList(pub Vec<DrbsSubjectToStatusTransferItem>);
 
-impl DrBsSubjectToStatusTransferList {
+impl DrbsSubjectToStatusTransferList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DrBsSubjectToStatusTransferItem::decode(data)?);
+                items.push(DrbsSubjectToStatusTransferItem::decode(data)?);
             }
             items
         }))
@@ -5643,26 +5643,26 @@ impl DrBsSubjectToStatusTransferList {
     }
 }
 
-impl AperCodec for DrBsSubjectToStatusTransferList {
+impl AperCodec for DrbsSubjectToStatusTransferList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSubjectToStatusTransferList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToStatusTransferList"))
+        DrbsSubjectToStatusTransferList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToStatusTransferList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToStatusTransferList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToStatusTransferList"))
     }
 }
-// DrBsSubjectToStatusTransferItem
+// DrbsSubjectToStatusTransferItem
 #[derive(Clone, Debug)]
-pub struct DrBsSubjectToStatusTransferItem {
+pub struct DrbsSubjectToStatusTransferItem {
     pub drb_id: DrbId,
     pub drb_status_ul: DrbStatusUl,
     pub drb_status_dl: DrbStatusDl,
 }
 
-impl DrBsSubjectToStatusTransferItem {
+impl DrbsSubjectToStatusTransferItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -5689,15 +5689,15 @@ impl DrBsSubjectToStatusTransferItem {
     }
 }
 
-impl AperCodec for DrBsSubjectToStatusTransferItem {
+impl AperCodec for DrbsSubjectToStatusTransferItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSubjectToStatusTransferItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToStatusTransferItem"))
+        DrbsSubjectToStatusTransferItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToStatusTransferItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToStatusTransferItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToStatusTransferItem"))
     }
 }
 // DrbStatusDl
@@ -5872,14 +5872,14 @@ impl AperCodec for DrbStatusUl {
 #[derive(Clone, Debug)]
 pub struct DrbStatusUl12 {
     pub ul_count_value: CountValueForPdcpSn12,
-    pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
+    pub receive_status_of_ul_pdcp_s_du_s: Option<BitString>,
 }
 
 impl DrbStatusUl12 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
         let ul_count_value = CountValueForPdcpSn12::decode(data)?;
-        let receive_status_of_ul_pdcp_sd_us = if optionals[0] {
+        let receive_status_of_ul_pdcp_s_du_s = if optionals[0] {
             Some(aper::decode::decode_bitstring(
                 data,
                 Some(1),
@@ -5892,17 +5892,17 @@ impl DrbStatusUl12 {
 
         Ok(Self {
             ul_count_value,
-            receive_status_of_ul_pdcp_sd_us,
+            receive_status_of_ul_pdcp_s_du_s,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.receive_status_of_ul_pdcp_sd_us.is_some());
+        optionals.push(self.receive_status_of_ul_pdcp_s_du_s.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_count_value.encode(data)?;
-        if let Some(x) = &self.receive_status_of_ul_pdcp_sd_us {
+        if let Some(x) = &self.receive_status_of_ul_pdcp_s_du_s {
             aper::encode::encode_bitstring(data, Some(1), Some(2048), false, &x, false)?;
         }
 
@@ -5925,14 +5925,14 @@ impl AperCodec for DrbStatusUl12 {
 #[derive(Clone, Debug)]
 pub struct DrbStatusUl18 {
     pub ul_count_value: CountValueForPdcpSn18,
-    pub receive_status_of_ul_pdcp_sd_us: Option<BitString>,
+    pub receive_status_of_ul_pdcp_s_du_s: Option<BitString>,
 }
 
 impl DrbStatusUl18 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
         let ul_count_value = CountValueForPdcpSn18::decode(data)?;
-        let receive_status_of_ul_pdcp_sd_us = if optionals[0] {
+        let receive_status_of_ul_pdcp_s_du_s = if optionals[0] {
             Some(aper::decode::decode_bitstring(
                 data,
                 Some(1),
@@ -5945,17 +5945,17 @@ impl DrbStatusUl18 {
 
         Ok(Self {
             ul_count_value,
-            receive_status_of_ul_pdcp_sd_us,
+            receive_status_of_ul_pdcp_s_du_s,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.receive_status_of_ul_pdcp_sd_us.is_some());
+        optionals.push(self.receive_status_of_ul_pdcp_s_du_s.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.ul_count_value.encode(data)?;
-        if let Some(x) = &self.receive_status_of_ul_pdcp_sd_us {
+        if let Some(x) = &self.receive_status_of_ul_pdcp_s_du_s {
             aper::encode::encode_bitstring(data, Some(1), Some(131072), false, &x, false)?;
         }
 
@@ -5974,17 +5974,17 @@ impl AperCodec for DrbStatusUl18 {
             .map_err(|e: AperCodecError| e.push_context("DrbStatusUl18"))
     }
 }
-// DrBsToQosFlowsMappingList
+// DrbsToQosFlowsMappingList
 #[derive(Clone, Debug)]
-pub struct DrBsToQosFlowsMappingList(pub Vec<DrBsToQosFlowsMappingItem>);
+pub struct DrbsToQosFlowsMappingList(pub Vec<DrbsToQosFlowsMappingItem>);
 
-impl DrBsToQosFlowsMappingList {
+impl DrbsToQosFlowsMappingList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DrBsToQosFlowsMappingItem::decode(data)?);
+                items.push(DrbsToQosFlowsMappingItem::decode(data)?);
             }
             items
         }))
@@ -5998,25 +5998,25 @@ impl DrBsToQosFlowsMappingList {
     }
 }
 
-impl AperCodec for DrBsToQosFlowsMappingList {
+impl AperCodec for DrbsToQosFlowsMappingList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToQosFlowsMappingList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToQosFlowsMappingList"))
+        DrbsToQosFlowsMappingList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToQosFlowsMappingList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToQosFlowsMappingList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToQosFlowsMappingList"))
     }
 }
-// DrBsToQosFlowsMappingItem
+// DrbsToQosFlowsMappingItem
 #[derive(Clone, Debug)]
-pub struct DrBsToQosFlowsMappingItem {
+pub struct DrbsToQosFlowsMappingItem {
     pub drb_id: DrbId,
     pub associated_qos_flow_list: AssociatedQosFlowList,
 }
 
-impl DrBsToQosFlowsMappingItem {
+impl DrbsToQosFlowsMappingItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -6040,15 +6040,15 @@ impl DrBsToQosFlowsMappingItem {
     }
 }
 
-impl AperCodec for DrBsToQosFlowsMappingItem {
+impl AperCodec for DrbsToQosFlowsMappingItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToQosFlowsMappingItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToQosFlowsMappingItem"))
+        DrbsToQosFlowsMappingItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToQosFlowsMappingItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToQosFlowsMappingItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToQosFlowsMappingItem"))
     }
 }
 // Dynamic5qiDescriptor
@@ -6222,18 +6222,18 @@ impl AperCodec for ProcedureStageChoice {
 // FirstDlCount
 #[derive(Clone, Debug)]
 pub struct FirstDlCount {
-    pub dr_bs_subject_to_early_status_transfer: DrBsSubjectToEarlyStatusTransferList,
+    pub drbs_subject_to_early_status_transfer: DrbsSubjectToEarlyStatusTransferList,
 }
 
 impl FirstDlCount {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let dr_bs_subject_to_early_status_transfer =
-            DrBsSubjectToEarlyStatusTransferList::decode(data)?;
+        let drbs_subject_to_early_status_transfer =
+            DrbsSubjectToEarlyStatusTransferList::decode(data)?;
 
         Ok(Self {
-            dr_bs_subject_to_early_status_transfer,
+            drbs_subject_to_early_status_transfer,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -6241,7 +6241,7 @@ impl FirstDlCount {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.dr_bs_subject_to_early_status_transfer.encode(data)?;
+        self.drbs_subject_to_early_status_transfer.encode(data)?;
 
         Ok(())
     }
@@ -6257,17 +6257,17 @@ impl AperCodec for FirstDlCount {
             .map_err(|e: AperCodecError| e.push_context("FirstDlCount"))
     }
 }
-// DrBsSubjectToEarlyStatusTransferList
+// DrbsSubjectToEarlyStatusTransferList
 #[derive(Clone, Debug)]
-pub struct DrBsSubjectToEarlyStatusTransferList(pub Vec<DrBsSubjectToEarlyStatusTransferItem>);
+pub struct DrbsSubjectToEarlyStatusTransferList(pub Vec<DrbsSubjectToEarlyStatusTransferItem>);
 
-impl DrBsSubjectToEarlyStatusTransferList {
+impl DrbsSubjectToEarlyStatusTransferList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DrBsSubjectToEarlyStatusTransferItem::decode(data)?);
+                items.push(DrbsSubjectToEarlyStatusTransferItem::decode(data)?);
             }
             items
         }))
@@ -6281,25 +6281,25 @@ impl DrBsSubjectToEarlyStatusTransferList {
     }
 }
 
-impl AperCodec for DrBsSubjectToEarlyStatusTransferList {
+impl AperCodec for DrbsSubjectToEarlyStatusTransferList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSubjectToEarlyStatusTransferList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToEarlyStatusTransferList"))
+        DrbsSubjectToEarlyStatusTransferList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToEarlyStatusTransferList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToEarlyStatusTransferList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToEarlyStatusTransferList"))
     }
 }
-// DrBsSubjectToEarlyStatusTransferItem
+// DrbsSubjectToEarlyStatusTransferItem
 #[derive(Clone, Debug)]
-pub struct DrBsSubjectToEarlyStatusTransferItem {
+pub struct DrbsSubjectToEarlyStatusTransferItem {
     pub drb_id: DrbId,
     pub first_dlcount: DrbStatusDl,
 }
 
-impl DrBsSubjectToEarlyStatusTransferItem {
+impl DrbsSubjectToEarlyStatusTransferItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -6323,15 +6323,15 @@ impl DrBsSubjectToEarlyStatusTransferItem {
     }
 }
 
-impl AperCodec for DrBsSubjectToEarlyStatusTransferItem {
+impl AperCodec for DrbsSubjectToEarlyStatusTransferItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSubjectToEarlyStatusTransferItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToEarlyStatusTransferItem"))
+        DrbsSubjectToEarlyStatusTransferItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToEarlyStatusTransferItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSubjectToEarlyStatusTransferItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSubjectToEarlyStatusTransferItem"))
     }
 }
 // EdtSession
@@ -16815,7 +16815,7 @@ impl AperCodec for PduSessionResourceInformationList {
 pub struct PduSessionResourceInformationItem {
     pub pdu_session_id: PduSessionId,
     pub qos_flow_information_list: QosFlowInformationList,
-    pub dr_bs_to_qos_flows_mapping_list: Option<DrBsToQosFlowsMappingList>,
+    pub drbs_to_qos_flows_mapping_list: Option<DrbsToQosFlowsMappingList>,
 }
 
 impl PduSessionResourceInformationItem {
@@ -16823,8 +16823,8 @@ impl PduSessionResourceInformationItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
         let pdu_session_id = PduSessionId::decode(data)?;
         let qos_flow_information_list = QosFlowInformationList::decode(data)?;
-        let dr_bs_to_qos_flows_mapping_list = if optionals[0] {
-            Some(DrBsToQosFlowsMappingList::decode(data)?)
+        let drbs_to_qos_flows_mapping_list = if optionals[0] {
+            Some(DrbsToQosFlowsMappingList::decode(data)?)
         } else {
             None
         };
@@ -16832,18 +16832,18 @@ impl PduSessionResourceInformationItem {
         Ok(Self {
             pdu_session_id,
             qos_flow_information_list,
-            dr_bs_to_qos_flows_mapping_list,
+            drbs_to_qos_flows_mapping_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.dr_bs_to_qos_flows_mapping_list.is_some());
+        optionals.push(self.drbs_to_qos_flows_mapping_list.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.pdu_session_id.encode(data)?;
         self.qos_flow_information_list.encode(data)?;
-        if let Some(x) = &self.dr_bs_to_qos_flows_mapping_list {
+        if let Some(x) = &self.drbs_to_qos_flows_mapping_list {
             x.encode(data)?;
         }
 
@@ -22097,17 +22097,17 @@ impl AperCodec for RanPagingPriority {
 // RanStatusTransferTransparentContainer
 #[derive(Clone, Debug)]
 pub struct RanStatusTransferTransparentContainer {
-    pub dr_bs_subject_to_status_transfer_list: DrBsSubjectToStatusTransferList,
+    pub drbs_subject_to_status_transfer_list: DrbsSubjectToStatusTransferList,
 }
 
 impl RanStatusTransferTransparentContainer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let dr_bs_subject_to_status_transfer_list = DrBsSubjectToStatusTransferList::decode(data)?;
+        let drbs_subject_to_status_transfer_list = DrbsSubjectToStatusTransferList::decode(data)?;
 
         Ok(Self {
-            dr_bs_subject_to_status_transfer_list,
+            drbs_subject_to_status_transfer_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -22115,7 +22115,7 @@ impl RanStatusTransferTransparentContainer {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.dr_bs_subject_to_status_transfer_list.encode(data)?;
+        self.drbs_subject_to_status_transfer_list.encode(data)?;
 
         Ok(())
     }

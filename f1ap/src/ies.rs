@@ -3362,7 +3362,7 @@ pub struct CellMeasurementResultItem {
     pub radio_resource_status: Option<RadioResourceStatus>,
     pub composite_available_capacity_group: Option<CompositeAvailableCapacityGroup>,
     pub slice_available_capacity: Option<SliceAvailableCapacity>,
-    pub numberof_active_ue_s: Option<NumberofActiveUeS>,
+    pub numberof_active_ues: Option<NumberofActiveUes>,
 }
 
 impl CellMeasurementResultItem {
@@ -3385,8 +3385,8 @@ impl CellMeasurementResultItem {
         } else {
             None
         };
-        let numberof_active_ue_s = if optionals[3] {
-            Some(NumberofActiveUeS::decode(data)?)
+        let numberof_active_ues = if optionals[3] {
+            Some(NumberofActiveUes::decode(data)?)
         } else {
             None
         };
@@ -3396,7 +3396,7 @@ impl CellMeasurementResultItem {
             radio_resource_status,
             composite_available_capacity_group,
             slice_available_capacity,
-            numberof_active_ue_s,
+            numberof_active_ues,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -3404,7 +3404,7 @@ impl CellMeasurementResultItem {
         optionals.push(self.radio_resource_status.is_some());
         optionals.push(self.composite_available_capacity_group.is_some());
         optionals.push(self.slice_available_capacity.is_some());
-        optionals.push(self.numberof_active_ue_s.is_some());
+        optionals.push(self.numberof_active_ues.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
@@ -3418,7 +3418,7 @@ impl CellMeasurementResultItem {
         if let Some(x) = &self.slice_available_capacity {
             x.encode(data)?;
         }
-        if let Some(x) = &self.numberof_active_ue_s {
+        if let Some(x) = &self.numberof_active_ues {
             x.encode(data)?;
         }
 
@@ -4964,7 +4964,7 @@ impl AperCodec for CRnti {
 // CuDuRadioInformationType
 #[derive(Clone, Debug)]
 pub enum CuDuRadioInformationType {
-    Rim(CuDurimInformation),
+    Rim(CuDuRimInformation),
 }
 
 impl CuDuRadioInformationType {
@@ -4976,7 +4976,7 @@ impl CuDuRadioInformationType {
             ));
         }
         match idx {
-            0 => Ok(Self::Rim(CuDurimInformation::decode(data)?)),
+            0 => Ok(Self::Rim(CuDuRimInformation::decode(data)?)),
             1 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
             )),
@@ -5004,14 +5004,14 @@ impl AperCodec for CuDuRadioInformationType {
             .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationType"))
     }
 }
-// CuDurimInformation
+// CuDuRimInformation
 #[derive(Clone, Debug)]
-pub struct CuDurimInformation {
+pub struct CuDuRimInformation {
     pub victim_gnb_set_id: GnbSetId,
     pub rimrs_detection_status: RimrsDetectionStatus,
 }
 
-impl CuDurimInformation {
+impl CuDuRimInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
@@ -5035,15 +5035,15 @@ impl CuDurimInformation {
     }
 }
 
-impl AperCodec for CuDurimInformation {
+impl AperCodec for CuDuRimInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CuDurimInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuDurimInformation"))
+        CuDuRimInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CuDuRimInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuDurimInformation"))
+            .map_err(|e: AperCodecError| e.push_context("CuDuRimInformation"))
     }
 }
 // CuToDuRrcInformation
@@ -5724,14 +5724,14 @@ impl AperCodec for DluptnlInformationToBeSetupItem {
 // DrbActivityItem
 #[derive(Clone, Debug)]
 pub struct DrbActivityItem {
-    pub drbid: Drbid,
+    pub drb_id: DrbId,
     pub drb_activity: Option<DrbActivity>,
 }
 
 impl DrbActivityItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let drb_activity = if optionals[0] {
             Some(DrbActivity::decode(data)?)
         } else {
@@ -5739,7 +5739,7 @@ impl DrbActivityItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             drb_activity,
         })
     }
@@ -5749,7 +5749,7 @@ impl DrbActivityItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.drb_activity {
             x.encode(data)?;
         }
@@ -5800,11 +5800,11 @@ impl AperCodec for DrbActivity {
             .map_err(|e: AperCodecError| e.push_context("DrbActivity"))
     }
 }
-// Drbid
+// DrbId
 #[derive(Clone, Debug)]
-pub struct Drbid(pub u8);
+pub struct DrbId(pub u8);
 
-impl Drbid {
+impl DrbId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(1), Some(32), true)?.0 as u8,
@@ -5815,34 +5815,34 @@ impl Drbid {
     }
 }
 
-impl AperCodec for Drbid {
+impl AperCodec for DrbId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Drbid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Drbid"))
+        DrbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("DrbId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Drbid"))
+            .map_err(|e: AperCodecError| e.push_context("DrbId"))
     }
 }
-// DrBsFailedToBeModifiedItem
+// DrbsFailedToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsFailedToBeModifiedItem {
+    pub drb_id: DrbId,
     pub cause: Option<Cause>,
 }
 
-impl DrBsFailedToBeModifiedItem {
+impl DrbsFailedToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { drbid, cause })
+        Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -5850,7 +5850,7 @@ impl DrBsFailedToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -5859,35 +5859,35 @@ impl DrBsFailedToBeModifiedItem {
     }
 }
 
-impl AperCodec for DrBsFailedToBeModifiedItem {
+impl AperCodec for DrbsFailedToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeModifiedItem"))
+        DrbsFailedToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeModifiedItem"))
     }
 }
-// DrBsFailedToBeSetupItem
+// DrbsFailedToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeSetupItem {
-    pub drbid: Drbid,
+pub struct DrbsFailedToBeSetupItem {
+    pub drb_id: DrbId,
     pub cause: Option<Cause>,
 }
 
-impl DrBsFailedToBeSetupItem {
+impl DrbsFailedToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { drbid, cause })
+        Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -5895,7 +5895,7 @@ impl DrBsFailedToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -5904,35 +5904,35 @@ impl DrBsFailedToBeSetupItem {
     }
 }
 
-impl AperCodec for DrBsFailedToBeSetupItem {
+impl AperCodec for DrbsFailedToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupItem"))
+        DrbsFailedToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupItem"))
     }
 }
-// DrBsFailedToBeSetupModItem
+// DrbsFailedToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeSetupModItem {
-    pub drbid: Drbid,
+pub struct DrbsFailedToBeSetupModItem {
+    pub drb_id: DrbId,
     pub cause: Option<Cause>,
 }
 
-impl DrBsFailedToBeSetupModItem {
+impl DrbsFailedToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { drbid, cause })
+        Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -5940,7 +5940,7 @@ impl DrBsFailedToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -5949,15 +5949,15 @@ impl DrBsFailedToBeSetupModItem {
     }
 }
 
-impl AperCodec for DrBsFailedToBeSetupModItem {
+impl AperCodec for DrbsFailedToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupModItem"))
+        DrbsFailedToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupModItem"))
     }
 }
 // DrbInformation
@@ -6017,18 +6017,18 @@ impl AperCodec for DrbInformation {
             .map_err(|e: AperCodecError| e.push_context("DrbInformation"))
     }
 }
-// DrBsModifiedItem
+// DrbsModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsModifiedItem {
+    pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsModifiedItem {
+impl DrbsModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let lcid = if optionals[0] {
             Some(Lcid::decode(data)?)
         } else {
@@ -6037,7 +6037,7 @@ impl DrBsModifiedItem {
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             lcid,
             dluptnl_information_to_be_setup_list,
         })
@@ -6048,7 +6048,7 @@ impl DrBsModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
@@ -6058,33 +6058,33 @@ impl DrBsModifiedItem {
     }
 }
 
-impl AperCodec for DrBsModifiedItem {
+impl AperCodec for DrbsModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedItem"))
+        DrbsModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedItem"))
     }
 }
-// DrBsModifiedConfItem
+// DrbsModifiedConfItem
 #[derive(Clone, Debug)]
-pub struct DrBsModifiedConfItem {
-    pub drbid: Drbid,
+pub struct DrbsModifiedConfItem {
+    pub drb_id: DrbId,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
 }
 
-impl DrBsModifiedConfItem {
+impl DrbsModifiedConfItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             uluptnl_information_to_be_setup_list,
         })
     }
@@ -6093,28 +6093,28 @@ impl DrBsModifiedConfItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.uluptnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsModifiedConfItem {
+impl AperCodec for DrbsModifiedConfItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsModifiedConfItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedConfItem"))
+        DrbsModifiedConfItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedConfItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedConfItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedConfItem"))
     }
 }
 // DrbNotifyItem
 #[derive(Clone, Debug)]
 pub struct DrbNotifyItem {
-    pub drbid: Drbid,
+    pub drb_id: DrbId,
     pub notification_cause: NotificationCause,
 }
 
@@ -6122,11 +6122,11 @@ impl DrbNotifyItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let notification_cause = NotificationCause::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             notification_cause,
         })
     }
@@ -6135,7 +6135,7 @@ impl DrbNotifyItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.notification_cause.encode(data)?;
 
         Ok(())
@@ -6153,22 +6153,22 @@ impl AperCodec for DrbNotifyItem {
             .map_err(|e: AperCodecError| e.push_context("DrbNotifyItem"))
     }
 }
-// DrBsRequiredToBeModifiedItem
+// DrbsRequiredToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsRequiredToBeModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsRequiredToBeModifiedItem {
+    pub drb_id: DrbId,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsRequiredToBeModifiedItem {
+impl DrbsRequiredToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             dluptnl_information_to_be_setup_list,
         })
     }
@@ -6177,72 +6177,72 @@ impl DrBsRequiredToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.dluptnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsRequiredToBeModifiedItem {
+impl AperCodec for DrbsRequiredToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsRequiredToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeModifiedItem"))
+        DrbsRequiredToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeModifiedItem"))
     }
 }
-// DrBsRequiredToBeReleasedItem
+// DrbsRequiredToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct DrBsRequiredToBeReleasedItem {
-    pub drbid: Drbid,
+pub struct DrbsRequiredToBeReleasedItem {
+    pub drb_id: DrbId,
 }
 
-impl DrBsRequiredToBeReleasedItem {
+impl DrbsRequiredToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
 
-        Ok(Self { drbid })
+        Ok(Self { drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsRequiredToBeReleasedItem {
+impl AperCodec for DrbsRequiredToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsRequiredToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeReleasedItem"))
+        DrbsRequiredToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeReleasedItem"))
     }
 }
-// DrBsSetupItem
+// DrbsSetupItem
 #[derive(Clone, Debug)]
-pub struct DrBsSetupItem {
-    pub drbid: Drbid,
+pub struct DrbsSetupItem {
+    pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsSetupItem {
+impl DrbsSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let lcid = if optionals[0] {
             Some(Lcid::decode(data)?)
         } else {
@@ -6251,7 +6251,7 @@ impl DrBsSetupItem {
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             lcid,
             dluptnl_information_to_be_setup_list,
         })
@@ -6262,7 +6262,7 @@ impl DrBsSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
@@ -6272,29 +6272,29 @@ impl DrBsSetupItem {
     }
 }
 
-impl AperCodec for DrBsSetupItem {
+impl AperCodec for DrbsSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupItem"))
+        DrbsSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupItem"))
     }
 }
-// DrBsSetupModItem
+// DrbsSetupModItem
 #[derive(Clone, Debug)]
-pub struct DrBsSetupModItem {
-    pub drbid: Drbid,
+pub struct DrbsSetupModItem {
+    pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsSetupModItem {
+impl DrbsSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let lcid = if optionals[0] {
             Some(Lcid::decode(data)?)
         } else {
@@ -6303,7 +6303,7 @@ impl DrBsSetupModItem {
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             lcid,
             dluptnl_information_to_be_setup_list,
         })
@@ -6314,7 +6314,7 @@ impl DrBsSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
@@ -6324,30 +6324,30 @@ impl DrBsSetupModItem {
     }
 }
 
-impl AperCodec for DrBsSetupModItem {
+impl AperCodec for DrbsSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupModItem"))
+        DrbsSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupModItem"))
     }
 }
-// DrBsToBeModifiedItem
+// DrbsToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeModifiedItem {
+    pub drb_id: DrbId,
     pub qos_information: Option<QosInformation>,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
     pub ul_configuration: Option<UlConfiguration>,
 }
 
-impl DrBsToBeModifiedItem {
+impl DrbsToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let qos_information = if optionals[0] {
             Some(QosInformation::decode(data)?)
         } else {
@@ -6361,7 +6361,7 @@ impl DrBsToBeModifiedItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             qos_information,
             uluptnl_information_to_be_setup_list,
             ul_configuration,
@@ -6374,7 +6374,7 @@ impl DrBsToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.qos_information {
             x.encode(data)?;
         }
@@ -6387,57 +6387,57 @@ impl DrBsToBeModifiedItem {
     }
 }
 
-impl AperCodec for DrBsToBeModifiedItem {
+impl AperCodec for DrbsToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeModifiedItem"))
+        DrbsToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeModifiedItem"))
     }
 }
-// DrBsToBeReleasedItem
+// DrbsToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeReleasedItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeReleasedItem {
+    pub drb_id: DrbId,
 }
 
-impl DrBsToBeReleasedItem {
+impl DrbsToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
 
-        Ok(Self { drbid })
+        Ok(Self { drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsToBeReleasedItem {
+impl AperCodec for DrbsToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeReleasedItem"))
+        DrbsToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeReleasedItem"))
     }
 }
-// DrBsToBeSetupItem
+// DrbsToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeSetupItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeSetupItem {
+    pub drb_id: DrbId,
     pub qos_information: QosInformation,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
     pub rlc_mode: RlcMode,
@@ -6445,10 +6445,10 @@ pub struct DrBsToBeSetupItem {
     pub duplication_activation: Option<DuplicationActivation>,
 }
 
-impl DrBsToBeSetupItem {
+impl DrbsToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let qos_information = QosInformation::decode(data)?;
         let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
@@ -6464,7 +6464,7 @@ impl DrBsToBeSetupItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             qos_information,
             uluptnl_information_to_be_setup_list,
             rlc_mode,
@@ -6479,7 +6479,7 @@ impl DrBsToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.qos_information.encode(data)?;
         self.uluptnl_information_to_be_setup_list.encode(data)?;
         self.rlc_mode.encode(data)?;
@@ -6494,21 +6494,21 @@ impl DrBsToBeSetupItem {
     }
 }
 
-impl AperCodec for DrBsToBeSetupItem {
+impl AperCodec for DrbsToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupItem"))
+        DrbsToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupItem"))
     }
 }
-// DrBsToBeSetupModItem
+// DrbsToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeSetupModItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeSetupModItem {
+    pub drb_id: DrbId,
     pub qos_information: QosInformation,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
     pub rlc_mode: RlcMode,
@@ -6516,10 +6516,10 @@ pub struct DrBsToBeSetupModItem {
     pub duplication_activation: Option<DuplicationActivation>,
 }
 
-impl DrBsToBeSetupModItem {
+impl DrbsToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let qos_information = QosInformation::decode(data)?;
         let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
@@ -6535,7 +6535,7 @@ impl DrBsToBeSetupModItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             qos_information,
             uluptnl_information_to_be_setup_list,
             rlc_mode,
@@ -6550,7 +6550,7 @@ impl DrBsToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.qos_information.encode(data)?;
         self.uluptnl_information_to_be_setup_list.encode(data)?;
         self.rlc_mode.encode(data)?;
@@ -6565,15 +6565,15 @@ impl DrBsToBeSetupModItem {
     }
 }
 
-impl AperCodec for DrBsToBeSetupModItem {
+impl AperCodec for DrbsToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupModItem"))
+        DrbsToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupModItem"))
     }
 }
 // DrxCycle
@@ -9548,17 +9548,17 @@ impl AperCodec for FullConfiguration {
             .map_err(|e: AperCodecError| e.push_context("FullConfiguration"))
     }
 }
-// FlowsMappedToSldrbList
+// FlowsMappedToSlDrbList
 #[derive(Clone, Debug)]
-pub struct FlowsMappedToSldrbList(pub Vec<FlowsMappedToSldrbItem>);
+pub struct FlowsMappedToSlDrbList(pub Vec<FlowsMappedToSlDrbItem>);
 
-impl FlowsMappedToSldrbList {
+impl FlowsMappedToSlDrbList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(2048), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(FlowsMappedToSldrbItem::decode(data)?);
+                items.push(FlowsMappedToSlDrbItem::decode(data)?);
             }
             items
         }))
@@ -9572,24 +9572,24 @@ impl FlowsMappedToSldrbList {
     }
 }
 
-impl AperCodec for FlowsMappedToSldrbList {
+impl AperCodec for FlowsMappedToSlDrbList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        FlowsMappedToSldrbList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbList"))
+        FlowsMappedToSlDrbList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbList"))
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbList"))
     }
 }
-// FlowsMappedToSldrbItem
+// FlowsMappedToSlDrbItem
 #[derive(Clone, Debug)]
-pub struct FlowsMappedToSldrbItem {
+pub struct FlowsMappedToSlDrbItem {
     pub pc_5_qos_flow_identifier: Pc5QosFlowIdentifier,
 }
 
-impl FlowsMappedToSldrbItem {
+impl FlowsMappedToSlDrbItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -9610,15 +9610,15 @@ impl FlowsMappedToSldrbItem {
     }
 }
 
-impl AperCodec for FlowsMappedToSldrbItem {
+impl AperCodec for FlowsMappedToSlDrbItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        FlowsMappedToSldrbItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbItem"))
+        FlowsMappedToSlDrbItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbItem"))
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbItem"))
     }
 }
 // GbrQosInformation
@@ -15897,11 +15897,11 @@ impl AperCodec for NrUeRlfReportContainer {
             .map_err(|e: AperCodecError| e.push_context("NrUeRlfReportContainer"))
     }
 }
-// NumberofActiveUeS
+// NumberofActiveUes
 #[derive(Clone, Debug)]
-pub struct NumberofActiveUeS(pub u32);
+pub struct NumberofActiveUes(pub u32);
 
-impl NumberofActiveUeS {
+impl NumberofActiveUes {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(16777215), true)?.0 as u32,
@@ -15912,15 +15912,15 @@ impl NumberofActiveUeS {
     }
 }
 
-impl AperCodec for NumberofActiveUeS {
+impl AperCodec for NumberofActiveUes {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NumberofActiveUeS::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUeS"))
+        NumberofActiveUes::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUes"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUeS"))
+            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUes"))
     }
 }
 // NumberOfBroadcasts
@@ -23400,11 +23400,11 @@ impl AperCodec for SibtypetobeupdatedListItem {
             .map_err(|e: AperCodecError| e.push_context("SibtypetobeupdatedListItem"))
     }
 }
-// Sldrbid
+// SlDrbId
 #[derive(Clone, Debug)]
-pub struct Sldrbid(pub u16);
+pub struct SlDrbId(pub u16);
 
-impl Sldrbid {
+impl SlDrbId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(1), Some(512), true)?.0 as u16,
@@ -23415,76 +23415,76 @@ impl Sldrbid {
     }
 }
 
-impl AperCodec for Sldrbid {
+impl AperCodec for SlDrbId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Sldrbid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Sldrbid"))
+        SlDrbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SlDrbId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Sldrbid"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbId"))
     }
 }
-// SldrbInformation
+// SlDrbInformation
 #[derive(Clone, Debug)]
-pub struct SldrbInformation {
-    pub sldrb_qos: Pc5QosParameters,
-    pub flows_mapped_to_sldrb_list: FlowsMappedToSldrbList,
+pub struct SlDrbInformation {
+    pub sl_drb_qos: Pc5QosParameters,
+    pub flows_mapped_to_sl_drb_list: FlowsMappedToSlDrbList,
 }
 
-impl SldrbInformation {
+impl SlDrbInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 0)?;
-        let sldrb_qos = Pc5QosParameters::decode(data)?;
-        let flows_mapped_to_sldrb_list = FlowsMappedToSldrbList::decode(data)?;
+        let sl_drb_qos = Pc5QosParameters::decode(data)?;
+        let flows_mapped_to_sl_drb_list = FlowsMappedToSlDrbList::decode(data)?;
 
         Ok(Self {
-            sldrb_qos,
-            flows_mapped_to_sldrb_list,
+            sl_drb_qos,
+            flows_mapped_to_sl_drb_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.sldrb_qos.encode(data)?;
-        self.flows_mapped_to_sldrb_list.encode(data)?;
+        self.sl_drb_qos.encode(data)?;
+        self.flows_mapped_to_sl_drb_list.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrbInformation {
+impl AperCodec for SlDrbInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrbInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrbInformation"))
+        SlDrbInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrbInformation"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbInformation"))
     }
 }
-// SldrBsFailedToBeModifiedItem
+// SlDrbsFailedToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeModifiedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsFailedToBeModifiedItem {
+    pub sl_drb_id: SlDrbId,
     pub cause: Option<Cause>,
 }
 
-impl SldrBsFailedToBeModifiedItem {
+impl SlDrbsFailedToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { sldrbid, cause })
+        Ok(Self { sl_drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -23492,7 +23492,7 @@ impl SldrBsFailedToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -23501,36 +23501,36 @@ impl SldrBsFailedToBeModifiedItem {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeModifiedItem {
+impl AperCodec for SlDrbsFailedToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeModifiedItem"))
+        SlDrbsFailedToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeModifiedItem"))
     }
 }
-// SldrBsFailedToBeSetupItem
+// SlDrbsFailedToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeSetupItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsFailedToBeSetupItem {
+    pub sl_drb_id: SlDrbId,
     pub cause: Option<Cause>,
 }
 
-impl SldrBsFailedToBeSetupItem {
+impl SlDrbsFailedToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { sldrbid, cause })
+        Ok(Self { sl_drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -23538,7 +23538,7 @@ impl SldrBsFailedToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -23547,36 +23547,36 @@ impl SldrBsFailedToBeSetupItem {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeSetupItem {
+impl AperCodec for SlDrbsFailedToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupItem"))
+        SlDrbsFailedToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupItem"))
     }
 }
-// SldrBsFailedToBeSetupModItem
+// SlDrbsFailedToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeSetupModItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsFailedToBeSetupModItem {
+    pub sl_drb_id: SlDrbId,
     pub cause: Option<Cause>,
 }
 
-impl SldrBsFailedToBeSetupModItem {
+impl SlDrbsFailedToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { sldrbid, cause })
+        Ok(Self { sl_drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -23584,7 +23584,7 @@ impl SldrBsFailedToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -23593,248 +23593,248 @@ impl SldrBsFailedToBeSetupModItem {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeSetupModItem {
+impl AperCodec for SlDrbsFailedToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupModItem"))
+        SlDrbsFailedToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupModItem"))
     }
 }
-// SldrBsModifiedItem
+// SlDrbsModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsModifiedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsModifiedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsModifiedItem {
+impl SlDrbsModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsModifiedItem {
+impl AperCodec for SlDrbsModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedItem"))
+        SlDrbsModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedItem"))
     }
 }
-// SldrBsModifiedConfItem
+// SlDrbsModifiedConfItem
 #[derive(Clone, Debug)]
-pub struct SldrBsModifiedConfItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsModifiedConfItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsModifiedConfItem {
+impl SlDrbsModifiedConfItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsModifiedConfItem {
+impl AperCodec for SlDrbsModifiedConfItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsModifiedConfItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedConfItem"))
+        SlDrbsModifiedConfItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedConfItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedConfItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedConfItem"))
     }
 }
-// SldrBsRequiredToBeModifiedItem
+// SlDrbsRequiredToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsRequiredToBeModifiedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsRequiredToBeModifiedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsRequiredToBeModifiedItem {
+impl SlDrbsRequiredToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsRequiredToBeModifiedItem {
+impl AperCodec for SlDrbsRequiredToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsRequiredToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeModifiedItem"))
+        SlDrbsRequiredToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeModifiedItem"))
     }
 }
-// SldrBsRequiredToBeReleasedItem
+// SlDrbsRequiredToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsRequiredToBeReleasedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsRequiredToBeReleasedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsRequiredToBeReleasedItem {
+impl SlDrbsRequiredToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsRequiredToBeReleasedItem {
+impl AperCodec for SlDrbsRequiredToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsRequiredToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeReleasedItem"))
+        SlDrbsRequiredToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeReleasedItem"))
     }
 }
-// SldrBsSetupItem
+// SlDrbsSetupItem
 #[derive(Clone, Debug)]
-pub struct SldrBsSetupItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsSetupItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsSetupItem {
+impl SlDrbsSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsSetupItem {
+impl AperCodec for SlDrbsSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupItem"))
+        SlDrbsSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupItem"))
     }
 }
-// SldrBsSetupModItem
+// SlDrbsSetupModItem
 #[derive(Clone, Debug)]
-pub struct SldrBsSetupModItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsSetupModItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsSetupModItem {
+impl SlDrbsSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsSetupModItem {
+impl AperCodec for SlDrbsSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupModItem"))
+        SlDrbsSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupModItem"))
     }
 }
-// SldrBsToBeModifiedItem
+// SlDrbsToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeModifiedItem {
-    pub sldrbid: Sldrbid,
-    pub sldrb_information: Option<SldrbInformation>,
+pub struct SlDrbsToBeModifiedItem {
+    pub sl_drb_id: SlDrbId,
+    pub sl_drb_information: Option<SlDrbInformation>,
     pub rlc_mode: Option<RlcMode>,
 }
 
-impl SldrBsToBeModifiedItem {
+impl SlDrbsToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 3)?;
-        let sldrbid = Sldrbid::decode(data)?;
-        let sldrb_information = if optionals[0] {
-            Some(SldrbInformation::decode(data)?)
+        let sl_drb_id = SlDrbId::decode(data)?;
+        let sl_drb_information = if optionals[0] {
+            Some(SlDrbInformation::decode(data)?)
         } else {
             None
         };
@@ -23845,20 +23845,20 @@ impl SldrBsToBeModifiedItem {
         };
 
         Ok(Self {
-            sldrbid,
-            sldrb_information,
+            sl_drb_id,
+            sl_drb_information,
             rlc_mode,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.sldrb_information.is_some());
+        optionals.push(self.sl_drb_information.is_some());
         optionals.push(self.rlc_mode.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
-        if let Some(x) = &self.sldrb_information {
+        self.sl_drb_id.encode(data)?;
+        if let Some(x) = &self.sl_drb_information {
             x.encode(data)?;
         }
         if let Some(x) = &self.rlc_mode {
@@ -23869,72 +23869,72 @@ impl SldrBsToBeModifiedItem {
     }
 }
 
-impl AperCodec for SldrBsToBeModifiedItem {
+impl AperCodec for SlDrbsToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeModifiedItem"))
+        SlDrbsToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeModifiedItem"))
     }
 }
-// SldrBsToBeReleasedItem
+// SlDrbsToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeReleasedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsToBeReleasedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsToBeReleasedItem {
+impl SlDrbsToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsToBeReleasedItem {
+impl AperCodec for SlDrbsToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeReleasedItem"))
+        SlDrbsToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeReleasedItem"))
     }
 }
-// SldrBsToBeSetupItem
+// SlDrbsToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeSetupItem {
-    pub sldrbid: Sldrbid,
-    pub sldrb_information: SldrbInformation,
+pub struct SlDrbsToBeSetupItem {
+    pub sl_drb_id: SlDrbId,
+    pub sl_drb_information: SlDrbInformation,
     pub rlc_mode: RlcMode,
 }
 
-impl SldrBsToBeSetupItem {
+impl SlDrbsToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
-        let sldrb_information = SldrbInformation::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
+        let sl_drb_information = SlDrbInformation::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
 
         Ok(Self {
-            sldrbid,
-            sldrb_information,
+            sl_drb_id,
+            sl_drb_information,
             rlc_mode,
         })
     }
@@ -23943,39 +23943,39 @@ impl SldrBsToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
-        self.sldrb_information.encode(data)?;
+        self.sl_drb_id.encode(data)?;
+        self.sl_drb_information.encode(data)?;
         self.rlc_mode.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsToBeSetupItem {
+impl AperCodec for SlDrbsToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupItem"))
+        SlDrbsToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupItem"))
     }
 }
-// SldrBsToBeSetupModItem
+// SlDrbsToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeSetupModItem {
-    pub sldrbid: Sldrbid,
-    pub sldrb_information: SldrbInformation,
+pub struct SlDrbsToBeSetupModItem {
+    pub sl_drb_id: SlDrbId,
+    pub sl_drb_information: SlDrbInformation,
     pub rlc_mode: Option<RlcMode>,
 }
 
-impl SldrBsToBeSetupModItem {
+impl SlDrbsToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
-        let sldrb_information = SldrbInformation::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
+        let sl_drb_information = SlDrbInformation::decode(data)?;
         let rlc_mode = if optionals[0] {
             Some(RlcMode::decode(data)?)
         } else {
@@ -23983,8 +23983,8 @@ impl SldrBsToBeSetupModItem {
         };
 
         Ok(Self {
-            sldrbid,
-            sldrb_information,
+            sl_drb_id,
+            sl_drb_information,
             rlc_mode,
         })
     }
@@ -23994,8 +23994,8 @@ impl SldrBsToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
-        self.sldrb_information.encode(data)?;
+        self.sl_drb_id.encode(data)?;
+        self.sl_drb_information.encode(data)?;
         if let Some(x) = &self.rlc_mode {
             x.encode(data)?;
         }
@@ -24004,15 +24004,15 @@ impl SldrBsToBeSetupModItem {
     }
 }
 
-impl AperCodec for SldrBsToBeSetupModItem {
+impl AperCodec for SlDrbsToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupModItem"))
+        SlDrbsToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupModItem"))
     }
 }
 // SlPhyMacRlcConfig
@@ -24875,11 +24875,11 @@ impl AperCodec for SpectrumSharingGroupId {
             .map_err(|e: AperCodecError| e.push_context("SpectrumSharingGroupId"))
     }
 }
-// Srbid
+// SrbId
 #[derive(Clone, Debug)]
-pub struct Srbid(pub u8);
+pub struct SrbId(pub u8);
 
-impl Srbid {
+impl SrbId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(3), true)?.0 as u8,
@@ -24890,34 +24890,34 @@ impl Srbid {
     }
 }
 
-impl AperCodec for Srbid {
+impl AperCodec for SrbId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Srbid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Srbid"))
+        SrbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SrbId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Srbid"))
+            .map_err(|e: AperCodecError| e.push_context("SrbId"))
     }
 }
-// SrBsFailedToBeSetupItem
+// SrbsFailedToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SrBsFailedToBeSetupItem {
-    pub srbid: Srbid,
+pub struct SrbsFailedToBeSetupItem {
+    pub srb_id: SrbId,
     pub cause: Option<Cause>,
 }
 
-impl SrBsFailedToBeSetupItem {
+impl SrbsFailedToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { srbid, cause })
+        Ok(Self { srb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -24925,7 +24925,7 @@ impl SrBsFailedToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -24934,35 +24934,35 @@ impl SrBsFailedToBeSetupItem {
     }
 }
 
-impl AperCodec for SrBsFailedToBeSetupItem {
+impl AperCodec for SrbsFailedToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsFailedToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupItem"))
+        SrbsFailedToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupItem"))
     }
 }
-// SrBsFailedToBeSetupModItem
+// SrbsFailedToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SrBsFailedToBeSetupModItem {
-    pub srbid: Srbid,
+pub struct SrbsFailedToBeSetupModItem {
+    pub srb_id: SrbId,
     pub cause: Option<Cause>,
 }
 
-impl SrBsFailedToBeSetupModItem {
+impl SrbsFailedToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { srbid, cause })
+        Ok(Self { srb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -24970,7 +24970,7 @@ impl SrBsFailedToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -24979,217 +24979,217 @@ impl SrBsFailedToBeSetupModItem {
     }
 }
 
-impl AperCodec for SrBsFailedToBeSetupModItem {
+impl AperCodec for SrbsFailedToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsFailedToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupModItem"))
+        SrbsFailedToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupModItem"))
     }
 }
-// SrBsModifiedItem
+// SrbsModifiedItem
 #[derive(Clone, Debug)]
-pub struct SrBsModifiedItem {
-    pub srbid: Srbid,
+pub struct SrbsModifiedItem {
+    pub srb_id: SrbId,
     pub lcid: Lcid,
 }
 
-impl SrBsModifiedItem {
+impl SrbsModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let lcid = Lcid::decode(data)?;
 
-        Ok(Self { srbid, lcid })
+        Ok(Self { srb_id, lcid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         self.lcid.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsModifiedItem {
+impl AperCodec for SrbsModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsModifiedItem"))
+        SrbsModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsModifiedItem"))
     }
 }
-// SrBsRequiredToBeReleasedItem
+// SrbsRequiredToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SrBsRequiredToBeReleasedItem {
-    pub srbid: Srbid,
+pub struct SrbsRequiredToBeReleasedItem {
+    pub srb_id: SrbId,
 }
 
-impl SrBsRequiredToBeReleasedItem {
+impl SrbsRequiredToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
 
-        Ok(Self { srbid })
+        Ok(Self { srb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsRequiredToBeReleasedItem {
+impl AperCodec for SrbsRequiredToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsRequiredToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsRequiredToBeReleasedItem"))
+        SrbsRequiredToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsRequiredToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsRequiredToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsRequiredToBeReleasedItem"))
     }
 }
-// SrBsSetupItem
+// SrbsSetupItem
 #[derive(Clone, Debug)]
-pub struct SrBsSetupItem {
-    pub srbid: Srbid,
+pub struct SrbsSetupItem {
+    pub srb_id: SrbId,
     pub lcid: Lcid,
 }
 
-impl SrBsSetupItem {
+impl SrbsSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let lcid = Lcid::decode(data)?;
 
-        Ok(Self { srbid, lcid })
+        Ok(Self { srb_id, lcid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         self.lcid.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsSetupItem {
+impl AperCodec for SrbsSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupItem"))
+        SrbsSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupItem"))
     }
 }
-// SrBsSetupModItem
+// SrbsSetupModItem
 #[derive(Clone, Debug)]
-pub struct SrBsSetupModItem {
-    pub srbid: Srbid,
+pub struct SrbsSetupModItem {
+    pub srb_id: SrbId,
     pub lcid: Lcid,
 }
 
-impl SrBsSetupModItem {
+impl SrbsSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let lcid = Lcid::decode(data)?;
 
-        Ok(Self { srbid, lcid })
+        Ok(Self { srb_id, lcid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         self.lcid.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsSetupModItem {
+impl AperCodec for SrbsSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupModItem"))
+        SrbsSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupModItem"))
     }
 }
-// SrBsToBeReleasedItem
+// SrbsToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SrBsToBeReleasedItem {
-    pub srbid: Srbid,
+pub struct SrbsToBeReleasedItem {
+    pub srb_id: SrbId,
 }
 
-impl SrBsToBeReleasedItem {
+impl SrbsToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
 
-        Ok(Self { srbid })
+        Ok(Self { srb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsToBeReleasedItem {
+impl AperCodec for SrbsToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeReleasedItem"))
+        SrbsToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeReleasedItem"))
     }
 }
-// SrBsToBeSetupItem
+// SrbsToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SrBsToBeSetupItem {
-    pub srbid: Srbid,
+pub struct SrbsToBeSetupItem {
+    pub srb_id: SrbId,
     pub duplication_indication: Option<DuplicationIndication>,
 }
 
-impl SrBsToBeSetupItem {
+impl SrbsToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let duplication_indication = if optionals[0] {
             Some(DuplicationIndication::decode(data)?)
         } else {
@@ -25197,7 +25197,7 @@ impl SrBsToBeSetupItem {
         };
 
         Ok(Self {
-            srbid,
+            srb_id,
             duplication_indication,
         })
     }
@@ -25207,7 +25207,7 @@ impl SrBsToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.duplication_indication {
             x.encode(data)?;
         }
@@ -25216,28 +25216,28 @@ impl SrBsToBeSetupItem {
     }
 }
 
-impl AperCodec for SrBsToBeSetupItem {
+impl AperCodec for SrbsToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupItem"))
+        SrbsToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupItem"))
     }
 }
-// SrBsToBeSetupModItem
+// SrbsToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SrBsToBeSetupModItem {
-    pub srbid: Srbid,
+pub struct SrbsToBeSetupModItem {
+    pub srb_id: SrbId,
     pub duplication_indication: Option<DuplicationIndication>,
 }
 
-impl SrBsToBeSetupModItem {
+impl SrbsToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let duplication_indication = if optionals[0] {
             Some(DuplicationIndication::decode(data)?)
         } else {
@@ -25245,7 +25245,7 @@ impl SrBsToBeSetupModItem {
         };
 
         Ok(Self {
-            srbid,
+            srb_id,
             duplication_indication,
         })
     }
@@ -25255,7 +25255,7 @@ impl SrBsToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.duplication_indication {
             x.encode(data)?;
         }
@@ -25264,15 +25264,15 @@ impl SrBsToBeSetupModItem {
     }
 }
 
-impl AperCodec for SrBsToBeSetupModItem {
+impl AperCodec for SrbsToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupModItem"))
+        SrbsToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupModItem"))
     }
 }
 // SrsCarrierList
