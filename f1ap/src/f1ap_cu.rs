@@ -19,12 +19,12 @@ where
     }
 }
 
-impl<T> Application for F1apCu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone {}
+impl<T> Application for F1apCu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone + RequestProvider<InitialUlRrcMessageTransferProcedure>{}
 
 #[async_trait]
 impl<T> InterfaceProvider for F1apCu<T>
 where
-    T: Send + Sync + RequestProvider<F1SetupProcedure>,
+    T: Send + Sync + RequestProvider<F1SetupProcedure> + RequestProvider<InitialUlRrcMessageTransferProcedure>,
 {
     type TopPdu = F1apPdu;
     async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Option<F1apPdu> {
@@ -38,7 +38,10 @@ where
         match initiating_message {
             InitiatingMessage::F1SetupRequest(req) => {
                 F1SetupProcedure::call_provider(&self.0, req, logger).await
-            }
+            },
+            InitiatingMessage::InitialUlRrcMessageTransfer(req) => {
+                InitialUlRrcMessageTransferProcedure::call_provider(&self.0, req, logger).await
+            },
             _ => todo!(),
         }
     }

@@ -1,6 +1,8 @@
 mod config;
 mod f1ap_handler;
 mod ngap_handler;
+mod rrc_handler;
+mod ue_context;
 use anyhow::Result;
 use async_std::task::JoinHandle;
 pub use config::Config;
@@ -62,11 +64,12 @@ impl Gnbcu {
             logger,
             "Listen for connection from DU on {}", f1_listen_address
         );
+        let rrc_handler = RrcHandler(self.clone());
         let f1_transport = self
             .f1ap
             .listen(
                 f1_listen_address,
-                f1ap_handler::new(self.clone()),
+                f1ap_handler::new(self.clone(), rrc_handler),
                 logger.clone(),
             )
             .await?;

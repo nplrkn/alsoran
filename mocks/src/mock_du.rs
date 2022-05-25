@@ -65,6 +65,15 @@ impl MockDu {
         }
     }
 
+    /// Receive an F1apPdu from the GNB-CU, with a 0.5s timeout.
+    async fn recv(&self) -> F1apPdu {
+        async_std::future::timeout(std::time::Duration::from_millis(500), self.receiver.recv())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap()
+    }
+
     pub async fn perform_f1_setup(&self) -> Result<()> {
         let pdu =
             f1ap::F1apPdu::InitiatingMessage(InitiatingMessage::F1SetupRequest(F1SetupRequest {
@@ -84,16 +93,8 @@ impl MockDu {
             .send_message(pdu.into_bytes()?, &self.logger)
             .await?;
 
-        match self.receiver.recv().await? {
-            Some(_response) => {
-                info!(self.logger, "Got response from CU");
-                Ok(())
-            }
-            None => Err(anyhow!(
-                "Unexpected empty channel waiting for F1 Setup response"
-            )),
-        }?;
-
+        let _response = self.recv().await;
+        info!(self.logger, "Got response from CU");
         Ok(())
     }
 
@@ -147,12 +148,10 @@ impl MockDu {
 
         self.sender.send_message(f1_indication, logger).await?;
 
-        let message =
-            async_std::future::timeout(std::time::Duration::from_millis(100), self.receiver.recv())
-                .await??;
+        let message = self.recv().await;
 
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let _rrc_setup = match message.unwrap() {
+        let _rrc_setup = match message {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(_)) => {
                 info!(logger, "Received Rrc Setup");
                 Ok(())
