@@ -1,4 +1,4 @@
-use super::{Gnbcu, UeContext, RrcHandler};
+use super::{Gnbcu, RrcHandler, UeContext};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -14,8 +14,6 @@ pub struct F1apHandler {
 pub fn new(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
     F1apCu(F1apHandler { gnbcu, rrc_handler })
 }
-
-
 
 #[async_trait]
 impl RequestProvider<F1SetupProcedure> for F1apHandler {
@@ -49,17 +47,20 @@ impl RequestProvider<InitialUlRrcMessageTransferProcedure> for F1apHandler {
     ) -> Result<(), RequestError<()>> {
         info!(logger, "Got InitialUlRrcMessageTransfer");
 
-        // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER, 
+        // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER,
         // the gNB-CU should reject the UE under the assumption that the gNB-DU is not able to serve such UE."
 
-        // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER, 
+        // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER,
         // the gNB-CU shall take it into account as specified in TS 38.401 [4]."
 
         let ue_context = UeContext {
-            gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id
+            gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
+            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
         };
 
-        self.rrc_handler.dispatch(ue_context, &r.rrc_container.0, logger);
+        self.rrc_handler
+            .dispatch(ue_context, &r.rrc_container.0, logger)
+            .await;
         Ok(())
     }
 }
