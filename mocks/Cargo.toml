@@ -9,6 +9,7 @@ edition = "2021"
 net = { path = "../net" }
 f1ap = {path = "../f1ap" }
 ngap = {path = "../ngap" }
+rrc = {path = "../rrc" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.51"
 slog = "2.7.0"

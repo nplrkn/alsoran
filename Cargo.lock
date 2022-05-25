@@ -1344,6 +1344,7 @@ dependencies = [
  "f1ap",
  "net",
  "ngap",
+ "rrc",
  "slog",
  "stop-token",
 ]

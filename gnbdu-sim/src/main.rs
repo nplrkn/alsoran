@@ -9,7 +9,7 @@ async fn main() -> Result<()> {
     du.establish_connection("127.0.0.1:38472".to_string())
         .await?;
 
-    du.perform_rrc_setup().await?;
+    du.perform_rrc_setup(&logger).await?;
 
     drop(stop_source);
 

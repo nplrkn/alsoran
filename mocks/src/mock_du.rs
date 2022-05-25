@@ -3,8 +3,9 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Message, TransportProvider};
+use net::{AperSerde, Message, Procedure, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
+use rrc::*;
 use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};
 
@@ -96,21 +97,75 @@ impl MockDu {
         Ok(())
     }
 
-    pub async fn perform_rrc_setup(&self) -> Result<()> {
+    pub async fn perform_rrc_setup(&self, logger: &Logger) -> Result<()> {
         // Build RRC Setup Request
-        unimplemented!()
+        let rrc_setup_request = UlCcchMessage {
+            message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(RrcSetupRequest {
+                rrc_setup_request: RrcSetupRequestIEs {
+                    ue_identity: InitialUeIdentity::Ng5gSTmsiPart1(bitvec![Msb0, u8; 0;39]),
+                    establishment_cause: EstablishmentCause::MtAccess,
+                    spare: bitvec![Msb0, u8;0;1],
+                },
+            })),
+        }
+        .into_bytes()?;
 
-        // Wrap it in an Initial UL Rrc Message Transfer
+        // We also need a CellGroupConfig to give to the CU.
+        let cell_group_config_ie = rrc::CellGroupConfig {
+            cell_group_id: CellGroupId(0),
+            rlc_bearer_to_add_mod_list: None,
+            rlc_bearer_to_release_list: None,
+            mac_cell_group_config: None,
+            physical_cell_group_config: None,
+            sp_cell_config: None,
+            s_cell_to_add_mod_list: None,
+            s_cell_to_release_list: None,
+        }
+        .into_bytes()?;
 
-        // Send
+        // Wrap them in an F1 Initial UL Rrc Message Transfer.
+        let f1_indication =
+            InitialUlRrcMessageTransferProcedure::encode_request(InitialUlRrcMessageTransfer {
+                gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+                nr_cgi: NrCgi {
+                    plmn_identity: PlmnIdentity(vec![0, 1, 2]),
+                    nr_cell_identity: NrCellIdentity(bitvec![Msb0,u8;0;36]),
+                },
+                c_rnti: CRnti(14),
+                rrc_container: RrcContainer(rrc_setup_request),
+                du_to_cu_rrc_container: Some(DuToCuRrcContainer(cell_group_config_ie)),
+                sul_access_indication: None,
+                transaction_id: TransactionId(1),
+                ran_ue_id: None,
+                rrc_container_rrc_setup_complete: None,
+            })?;
+
+        info!(
+            &logger,
+            "DU sends InitialUlRrcMessageTransfer containing RrcSetupRequest"
+        );
+
+        self.sender.send_message(f1_indication, logger).await?;
+
+        let message =
+            async_std::future::timeout(std::time::Duration::from_millis(100), self.receiver.recv())
+                .await??;
 
         // Receive DL Rrc Message Transfer and extract RRC Setup
+        let _rrc_setup = match message.unwrap() {
+            F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(_)) => {
+                info!(logger, "Received Rrc Setup");
+                Ok(())
+            }
+            m => Err(anyhow!("Unexpected message {:?}", m)),
+        }?;
 
         // Build RRC Setup Response
 
         // Wrap it in an UL Rrc Message Transfer
 
         // Send
+        unimplemented!()
     }
 }
 
