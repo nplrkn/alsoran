@@ -13,6 +13,7 @@ slog = "2.7.0"
 anyhow = "1.0.52"
 f1ap = {path = "../f1ap" }
 ngap = {path = "../ngap" }
+rrc = {path = "../rrc" }
 async-trait = "0.1.51"
 bitvec = {version = "0.22" }
 common = { path = "../common" }

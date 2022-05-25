@@ -59,7 +59,7 @@ impl RequestProvider<InitialUlRrcMessageTransferProcedure> for F1apHandler {
             gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id
         };
 
-        self.rrc_handler.dispatch(ue_context, &r.rrc_container.0);
+        self.rrc_handler.dispatch(ue_context, &r.rrc_container.0, logger);
         Ok(())
     }
 }
