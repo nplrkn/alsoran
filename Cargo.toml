@@ -1,11 +1,7 @@
 [workspace]
 
 members = [
-    "gnbcu-scaling-prototype/worker",
-    "gnbcu-scaling-prototype/node-control-api",
-    "gnbcu-scaling-prototype/coordinator",
     "common",
-    "integration-tests",
     "sctp",
     "mocks",
     "net",
