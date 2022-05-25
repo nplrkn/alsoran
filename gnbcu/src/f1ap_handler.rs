@@ -1,4 +1,4 @@
-use super::Gnbcu;
+use super::{Gnbcu, UeContext, RrcHandler};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -57,9 +57,9 @@ impl RequestProvider<InitialUlRrcMessageTransferProcedure> for F1apHandler {
 
         let ue_context = UeContext {
             gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id
-        }
+        };
 
-        self.rrc_handler.dispatch(ue_context, r.rrc_container);
+        self.rrc_handler.dispatch(ue_context, &r.rrc_container.0);
         Ok(())
     }
 }
