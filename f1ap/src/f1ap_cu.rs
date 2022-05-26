@@ -1,7 +1,10 @@
 use super::top_pdu::*;
-use crate::{InitiatingMessage, F1apPdu};
+use crate::{F1apPdu, InitiatingMessage};
 use async_trait::async_trait;
-use net::{Application, EventHandler, InterfaceProvider, Procedure, RequestProvider, TnlaEvent};
+use net::{
+    Application, EventHandler, IndicationHandler, InterfaceProvider, Procedure, RequestProvider,
+    TnlaEvent,
+};
 use slog::{error, Logger};
 
 #[derive(Clone)]
@@ -19,12 +22,21 @@ where
     }
 }
 
-impl<T> Application for F1apCu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone + RequestProvider<InitialUlRrcMessageTransferProcedure>{}
+impl<T> Application for F1apCu<T> where
+    T: RequestProvider<F1SetupProcedure>
+        + EventHandler
+        + Clone
+        + IndicationHandler<InitialUlRrcMessageTransferProcedure>
+{
+}
 
 #[async_trait]
 impl<T> InterfaceProvider for F1apCu<T>
 where
-    T: Send + Sync + RequestProvider<F1SetupProcedure> + RequestProvider<InitialUlRrcMessageTransferProcedure>,
+    T: Send
+        + Sync
+        + RequestProvider<F1SetupProcedure>
+        + IndicationHandler<InitialUlRrcMessageTransferProcedure>,
 {
     type TopPdu = F1apPdu;
     async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Option<F1apPdu> {
@@ -38,10 +50,11 @@ where
         match initiating_message {
             InitiatingMessage::F1SetupRequest(req) => {
                 F1SetupProcedure::call_provider(&self.0, req, logger).await
-            },
+            }
             InitiatingMessage::InitialUlRrcMessageTransfer(req) => {
-                InitialUlRrcMessageTransferProcedure::call_provider(&self.0, req, logger).await
-            },
+                InitialUlRrcMessageTransferProcedure::call_provider(&self.0, req, logger).await;
+                None
+            }
             _ => todo!(),
         }
     }

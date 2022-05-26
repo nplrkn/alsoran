@@ -21,6 +21,19 @@ pub trait Procedure {
     ) -> Option<Self::TopPdu>;
 }
 
+#[async_trait]
+pub trait Indication {
+    const CODE: u8;
+    type TopPdu: AperSerde + Send + Sync + 'static;
+    type Request: Send + Sync + 'static + Debug;
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError>;
+    async fn call_provider<T: IndicationHandler<Self>>(
+        provider: &T,
+        req: Self::Request,
+        logger: &Logger,
+    );
+}
+
 pub trait AperSerde: Sized {
     fn into_bytes(self) -> Result<Vec<u8>, AperCodecError>;
     fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError>;
@@ -74,6 +87,14 @@ pub trait RequestProvider<P: Procedure + ?Sized>: Send + Sync {
     ) -> Result<P::Success, RequestError<P::Failure>> {
         trace!(logger, "Received unimplemented request {:?}", r);
         Err(RequestError::Other("Not implemented".to_string()))
+    }
+}
+
+/// Trait representing the ability to handle an indication.
+#[async_trait]
+pub trait IndicationHandler<I: Indication + ?Sized>: Send + Sync {
+    async fn handle(&self, i: I::Request, logger: &Logger) {
+        warn!(logger, "Received unimplemented indication {:?}", i);
     }
 }
 
