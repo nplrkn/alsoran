@@ -2,7 +2,7 @@ use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodecData};
 use async_channel::RecvError;
 use async_trait::async_trait;
-use slog::{trace, warn, Logger};
+use slog::{debug, warn, Logger};
 use std::fmt::Debug;
 
 #[async_trait]
@@ -85,7 +85,7 @@ pub trait RequestProvider<P: Procedure + ?Sized>: Send + Sync {
         r: P::Request,
         logger: &Logger,
     ) -> Result<P::Success, RequestError<P::Failure>> {
-        trace!(logger, "Received unimplemented request {:?}", r);
+        debug!(logger, "Received unimplemented request {:?}", r);
         Err(RequestError::Other("Not implemented".to_string()))
     }
 }

@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use bitvec::prelude::*;
 use net::{AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider};
 use ngap::*;
-use slog::{info, o, trace, Logger};
+use slog::{info, o, debug, Logger};
 use std::fmt::Debug;
 use stop_token::StopSource;
 
@@ -51,7 +51,7 @@ impl MockAmf {
 
     pub async fn expect_connection(&self) {
         // Wait for connection to be established - the mock TNLA event handler sends us an empty message to indicate this.
-        trace!(self.logger, "Wait for connection from worker");
+        debug!(self.logger, "Wait for connection from worker");
         assert!(self
             .receiver
             .recv()
@@ -163,7 +163,7 @@ impl TnlaEventHandler for Handler {
         _tnla_id: u32,
         logger: &Logger,
     ) -> Option<Vec<u8>> {
-        trace!(logger, "Got message from GNB");
+        debug!(logger, "Got message from GNB");
         self.0
             .send(Some(NgapPdu::from_bytes(&message).unwrap()))
             .await

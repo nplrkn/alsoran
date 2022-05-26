@@ -5,7 +5,7 @@ use async_std::task::JoinHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{trace, warn, Logger};
+use slog::{debug, warn, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::StopToken;
@@ -43,11 +43,11 @@ impl SctpTnlaPool {
     ) where
         H: TnlaEventHandler,
     {
-        trace!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
+        debug!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
         self.assocs.lock().await.insert(assoc_id, assoc.clone());
 
         // TODO - this should spawn a task.  For example, it could lead to a NG Setup exchange.
-        trace!(logger, "Notify TNLA established");
+        debug!(logger, "Notify TNLA established");
         spawn_handle_event(
             handler.clone(),
             TnlaEvent::Established,
@@ -55,7 +55,7 @@ impl SctpTnlaPool {
             logger.clone(),
         );
 
-        trace!(logger, "Start TNLA event loop");
+        debug!(logger, "Start TNLA event loop");
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
         pin_mut!(message_stream);
         while let Some(Ok(message)) = message_stream.next().await {
@@ -73,7 +73,7 @@ impl SctpTnlaPool {
             logger.clone(),
         );
 
-        trace!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
+        debug!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
         self.assocs.lock().await.remove(&assoc_id);
     }
 

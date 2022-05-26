@@ -3,10 +3,10 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Message, Procedure, TransportProvider};
+use net::{AperSerde, Indication, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use rrc::*;
-use slog::{info, o, trace, Logger};
+use slog::{debug, info, o, Logger};
 use stop_token::{StopSource, StopToken};
 
 // TS38.472, section 7 - the Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP
@@ -55,7 +55,7 @@ impl MockDu {
             .await?;
 
         // Wait for the connection to be accepted.
-        trace!(self.logger, "Wait for connection to be accepted by CU");
+        debug!(self.logger, "Wait for connection to be accepted by CU");
         match self.receiver.recv().await? {
             None => {
                 info!(self.logger, "Successful connection establishment to CU");
@@ -151,20 +151,57 @@ impl MockDu {
         let message = self.recv().await;
 
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let _rrc_setup = match message {
-            F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(_)) => {
-                info!(logger, "Received Rrc Setup");
-                Ok(())
-            }
-            m => Err(anyhow!("Unexpected message {:?}", m)),
+        let f1_dl_transfer = match message {
+            F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
+            x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
 
+        let rrc_setup =
+            match match DlCcchMessage::from_bytes(&f1_dl_transfer.rrc_container.0)?.message {
+                DlCcchMessageType::C1(x) => x,
+            } {
+                C1_1::RrcSetup(x) => Ok(x),
+                x => Err(anyhow!("Unexpected RRC message {:?}", x)),
+            }?;
+
+        // Create a NAS Registration Request.
+        let nas_message = vec![0];
+
         // Build RRC Setup Response
+        let rrc_setup_complete = UlDcchMessage {
+            message: UlDcchMessageType::C1(C1_6::RrcSetupComplete(RrcSetupComplete {
+                rrc_transaction_identifier: rrc_setup.rrc_transaction_identifier,
+                critical_extensions: CriticalExtensions22::RrcSetupComplete(RrcSetupCompleteIEs {
+                    selected_plmn_identity: 1,
+                    registered_amf: None,
+                    guami_type: None,
+                    s_nssai_list: None,
+                    dedicated_nas_message: DedicatedNasMessage(nas_message),
+                    ng_5g_s_tmsi_value: None,
+                    late_non_critical_extension: None,
+                    non_critical_extension: None,
+                }),
+            })),
+        }
+        .into_bytes()?;
 
         // Wrap it in an UL Rrc Message Transfer
+        let f1_indication = UlRrcMessageTransferProcedure::encode_request(UlRrcMessageTransfer {
+            gnb_cu_ue_f1ap_id: f1_dl_transfer.gnb_cu_ue_f1ap_id,
+            gnb_du_ue_f1ap_id: f1_dl_transfer.gnb_du_ue_f1ap_id,
+            srb_id: f1_dl_transfer.srb_id,
+            rrc_container: RrcContainer(rrc_setup_complete),
+            selected_plmn_id: None,
+            new_gnb_du_ue_f1ap_id: None,
+        })?;
+
+        info!(
+            &logger,
+            "DU sends UlRrcMessageTransfer containing RrcSetupComplete containing NAS Registration Request"
+        );
 
         // Send
-        unimplemented!()
+        self.sender.send_message(f1_indication, logger).await
     }
 }
 
@@ -180,7 +217,7 @@ impl TnlaEventHandler for MockDu {
         _tnla_id: u32,
         logger: &Logger,
     ) -> Option<Message> {
-        trace!(logger, "Got message from CU");
+        debug!(logger, "Got message from CU");
         self.internal_sender
             .send(Some(F1apPdu::from_bytes(&message).unwrap()))
             .await

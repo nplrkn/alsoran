@@ -2,8 +2,8 @@
 
 use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{
-    Message, Procedure, RequestError, RequestMessageHandler, RequestProvider,
-    SctpTransportProvider, TnlaEvent, TransportProvider,
+    Indication, IndicationHandler, Message, Procedure, RequestError, RequestMessageHandler,
+    RequestProvider, SctpTransportProvider, TnlaEvent, TransportProvider,
 };
 use anyhow::Result;
 use async_channel::Sender;
@@ -11,7 +11,7 @@ use async_net::SocketAddr;
 use async_std::sync::{Arc, Mutex};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use slog::{trace, warn, Logger};
+use slog::{debug, warn, Logger};
 use stop_token::StopSource;
 
 type TransactionMatchFn = Box<dyn Fn(&Message) -> bool + Send + Sync>;
@@ -124,6 +124,19 @@ impl<P: Procedure> RequestProvider<P> for Stack {
     }
 }
 
+#[async_trait]
+impl<I: Indication> IndicationHandler<I> for Stack {
+    async fn handle(&self, i: I::Request, logger: &Logger) {
+        match I::encode_request(i) {
+            Ok(m) => match self.transport_provider.send_message(m, logger).await {
+                Ok(()) => (),
+                Err(e) => warn!(logger, "Error sending indication - {:?}", e),
+            },
+            Err(e) => warn!(logger, "Error encoding indication - {:?}", e),
+        }
+    }
+}
+
 #[derive(Clone)]
 struct StackReceiver<A: Application> {
     application: A,
@@ -156,7 +169,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
 
         match position {
             Some(index) => {
-                trace!(logger, "Matched the transaction at position {}", index);
+                debug!(logger, "Matched the transaction at position {}", index);
                 let (_, response_channel) = self.pending_requests.lock().await.swap_remove(index);
                 response_channel
                     .send(message)
