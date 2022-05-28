@@ -9,5 +9,6 @@ members = [
     "f1ap",
     "gnbcu",
     "gnbdu-sim",
-    "rrc"
+    "rrc",
+    "pdcp"
 ]

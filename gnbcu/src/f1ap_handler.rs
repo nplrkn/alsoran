@@ -75,8 +75,16 @@ impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
             gnb_cu_ue_f1ap_id: r.gnb_cu_ue_f1ap_id,
         };
 
+        let rrc_message_bytes = match pdcp::view_inner(&r.rrc_container.0) {
+            Ok(x) => x,
+            Err(e) => {
+                warn!(logger, "Invalid PDCP PDU - {:?}", e);
+                return;
+            }
+        };
+
         self.rrc_handler
-            .dispatch_dcch(ue_context, &r.rrc_container.0, logger)
+            .dispatch_dcch(ue_context, rrc_message_bytes, logger)
             .await;
     }
 }

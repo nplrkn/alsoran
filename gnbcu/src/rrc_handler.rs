@@ -110,8 +110,12 @@ impl RrcHandler {
                 }),
             })),
         };
+
+        // This has to be encapsulated in a PDCP PDU.
+        let pdcp_pdu = pdcp::into_data_pdu(&rrc_setup.into_bytes()?);
+
         debug!(logger, "Send Rrc Setup");
-        self.send_to_ue(ue, rrc_setup.into_bytes()?, logger).await;
+        self.send_to_ue(ue, pdcp_pdu, logger).await;
         Ok(())
     }
 

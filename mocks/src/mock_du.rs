@@ -3,6 +3,7 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
+use hex;
 use net::{AperSerde, Indication, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use rrc::*;
@@ -148,24 +149,23 @@ impl MockDu {
 
         self.sender.send_message(f1_indication, logger).await?;
 
-        let message = self.recv().await;
-
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let f1_dl_transfer = match message {
+        let f1_dl_transfer = match self.recv().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
 
-        let rrc_setup =
-            match match DlCcchMessage::from_bytes(&f1_dl_transfer.rrc_container.0)?.message {
-                DlCcchMessageType::C1(x) => x,
-            } {
-                C1_1::RrcSetup(x) => Ok(x),
-                x => Err(anyhow!("Unexpected RRC message {:?}", x)),
-            }?;
+        let rrc_message_bytes = pdcp::view_inner(&f1_dl_transfer.rrc_container.0)?;
+
+        let rrc_setup = match match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
+            DlCcchMessageType::C1(x) => x,
+        } {
+            C1_1::RrcSetup(x) => Ok(x),
+            x => Err(anyhow!("Unexpected RRC message {:?}", x)),
+        }?;
 
         // Create a NAS Registration Request.
-        let nas_message = vec![0];
+        let nas_message = hex::decode("7e004179000c0102f839f0ff0000000047782e028020")?;
 
         // Build RRC Setup Response
         let rrc_setup_complete = UlDcchMessage {
@@ -185,12 +185,15 @@ impl MockDu {
         }
         .into_bytes()?;
 
+        // Wrap in PDCP PDU.
+        let pdcp_pdu = pdcp::into_data_pdu(&rrc_setup_complete);
+
         // Wrap it in an UL Rrc Message Transfer
         let f1_indication = UlRrcMessageTransferProcedure::encode_request(UlRrcMessageTransfer {
             gnb_cu_ue_f1ap_id: f1_dl_transfer.gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id: f1_dl_transfer.gnb_du_ue_f1ap_id,
             srb_id: f1_dl_transfer.srb_id,
-            rrc_container: RrcContainer(rrc_setup_complete),
+            rrc_container: RrcContainer(pdcp_pdu),
             selected_plmn_id: None,
             new_gnb_du_ue_f1ap_id: None,
         })?;

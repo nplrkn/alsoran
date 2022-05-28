@@ -4,9 +4,9 @@ We use free5GC.  Set up using the instructions at https://www.free5gc.org/instal
 The kernel module, and hence UPF, don't work on WSL.  However, it is still possible to get quite far through session setup.
 
 ## Wireshark
-Capture NGAP to ngap.cap.
+Capture NGAP and F1AP.
 ```
-sudo tcpdump -i lo port 38412 -w ngap.cap
+sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
 ```
 
 ## Test setup

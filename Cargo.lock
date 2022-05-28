@@ -599,6 +599,7 @@ dependencies = [
  "f1ap",
  "net",
  "ngap",
+ "pdcp",
  "rrc",
  "slog",
  "stop-token",
@@ -730,8 +731,10 @@ dependencies = [
  "async-trait",
  "bitvec",
  "f1ap",
+ "hex",
  "net",
  "ngap",
+ "pdcp",
  "rrc",
  "slog",
  "stop-token",
@@ -855,6 +858,13 @@ name = "parking"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "427c3892f9e783d91cc128285287e70a59e206ca452770ece88a76f7a3eddd72"
+
+[[package]]
+name = "pdcp"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "pest"
