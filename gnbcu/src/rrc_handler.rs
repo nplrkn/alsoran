@@ -139,7 +139,7 @@ impl RrcHandler {
 
         // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk-convert?)
         let nr_cgi = ngap::NrCgi {
-            plmn_identity: ngap::PlmnIdentity(vec![0, 1, 2]),
+            plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
             nr_cell_identity: ngap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
         };
 
@@ -151,7 +151,7 @@ impl RrcHandler {
                 UserLocationInformationNr {
                     nr_cgi,
                     tai: Tai {
-                        plmn_identity: ngap::PlmnIdentity(vec![0, 1, 2]),
+                        plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
                         tac: Tac(vec![0, 0, 1]),
                     },
                     time_stamp: None,
@@ -160,7 +160,7 @@ impl RrcHandler {
             rrc_establishment_cause,
             five_g_s_tmsi: None,
             amf_set_id: None,
-            ue_context_request: None,
+            ue_context_request: Some(UeContextRequest::Requested),
             allowed_nssai: None,
             source_to_target_amf_information_reroute: None,
             selected_plmn_identity: None,
