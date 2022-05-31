@@ -4,6 +4,7 @@ use bitvec::prelude::*;
 use f1ap::*;
 use net::{AperSerde, Indication};
 use ngap::*;
+use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, warn, Logger};
 
@@ -68,26 +69,6 @@ impl RrcHandler {
         }
     }
 
-    pub async fn send_to_ue(&self, ue: UeContext, message: Vec<u8>, logger: &Logger) {
-        let dl_message = DlRrcMessageTransfer {
-            gnb_cu_ue_f1ap_id: ue.gnb_cu_ue_f1ap_id,
-            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
-            old_gnb_du_ue_f1ap_id: None,
-            srb_id: SrbId(1),
-            execute_duplication: None,
-            rrc_container: f1ap::RrcContainer(message),
-            rat_frequency_priority_information: None,
-            rrc_delivery_status_request: None,
-            ue_context_not_retrievable: None,
-            redirected_rrc_message: None,
-            plmn_assistance_info_for_net_shar: None,
-            new_gnb_cu_ue_f1ap_id: None,
-            additional_rrm_priority_index: None,
-        };
-
-        DlRrcMessageTransferProcedure::call_provider(&self.0.f1ap, dl_message, logger).await
-    }
-
     async fn rrc_setup_request(
         &self,
         ue: UeContext,
@@ -112,10 +93,10 @@ impl RrcHandler {
         };
 
         // This has to be encapsulated in a PDCP PDU.
-        let pdcp_pdu = pdcp::into_data_pdu(&rrc_setup.into_bytes()?);
+        let pdcp_pdu = PdcpPdu::encode(&rrc_setup.into_bytes()?);
 
         debug!(logger, "Send Rrc Setup");
-        self.send_to_ue(ue, pdcp_pdu, logger).await;
+        self.0.send_rrc_to_ue(ue, pdcp_pdu.bytes(), logger).await;
         Ok(())
     }
 
@@ -175,5 +156,27 @@ impl RrcHandler {
         InitialUeMessageProcedure::call_provider(&self.0.ngap, m, logger).await;
 
         Ok(())
+    }
+}
+
+impl Gnbcu {
+    pub async fn send_rrc_to_ue(&self, ue: UeContext, message: Vec<u8>, logger: &Logger) {
+        let dl_message = DlRrcMessageTransfer {
+            gnb_cu_ue_f1ap_id: ue.gnb_cu_ue_f1ap_id,
+            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
+            old_gnb_du_ue_f1ap_id: None,
+            srb_id: SrbId(1),
+            execute_duplication: None,
+            rrc_container: f1ap::RrcContainer(message),
+            rat_frequency_priority_information: None,
+            rrc_delivery_status_request: None,
+            ue_context_not_retrievable: None,
+            redirected_rrc_message: None,
+            plmn_assistance_info_for_net_shar: None,
+            new_gnb_cu_ue_f1ap_id: None,
+            additional_rrm_priority_index: None,
+        };
+
+        DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
     }
 }

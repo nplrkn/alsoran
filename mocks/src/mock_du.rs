@@ -6,6 +6,7 @@ use f1ap::*;
 use hex;
 use net::{AperSerde, Indication, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
+use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
 use stop_token::{StopSource, StopToken};
@@ -150,12 +151,14 @@ impl MockDu {
         self.sender.send_message(f1_indication, logger).await?;
 
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let f1_dl_transfer = match self.recv().await {
+        let dl_rrc_message_transfer = match self.recv().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
 
-        let rrc_message_bytes = pdcp::view_inner(&f1_dl_transfer.rrc_container.0)?;
+        let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
+
+        let rrc_message_bytes = pdcp_pdu.view_inner()?;
 
         let rrc_setup = match match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
             DlCcchMessageType::C1(x) => x,
@@ -186,14 +189,14 @@ impl MockDu {
         .into_bytes()?;
 
         // Wrap in PDCP PDU.
-        let pdcp_pdu = pdcp::into_data_pdu(&rrc_setup_complete);
+        let pdcp_pdu = PdcpPdu::encode(&rrc_setup_complete);
 
         // Wrap it in an UL Rrc Message Transfer
         let f1_indication = UlRrcMessageTransferProcedure::encode_request(UlRrcMessageTransfer {
-            gnb_cu_ue_f1ap_id: f1_dl_transfer.gnb_cu_ue_f1ap_id,
-            gnb_du_ue_f1ap_id: f1_dl_transfer.gnb_du_ue_f1ap_id,
-            srb_id: f1_dl_transfer.srb_id,
-            rrc_container: RrcContainer(pdcp_pdu),
+            gnb_cu_ue_f1ap_id: dl_rrc_message_transfer.gnb_cu_ue_f1ap_id,
+            gnb_du_ue_f1ap_id: dl_rrc_message_transfer.gnb_du_ue_f1ap_id,
+            srb_id: dl_rrc_message_transfer.srb_id,
+            rrc_container: RrcContainer(pdcp_pdu.bytes()),
             selected_plmn_id: None,
             new_gnb_du_ue_f1ap_id: None,
         })?;
@@ -205,6 +208,30 @@ impl MockDu {
 
         // Send
         self.sender.send_message(f1_indication, logger).await
+    }
+
+    pub async fn receive_nas(&self) -> Result<Vec<u8>> {
+        let dl_rrc_message_transfer = match self.recv().await {
+            F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
+            x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
+        }?;
+        let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
+        let rrc_message_bytes = pdcp_pdu.view_inner()?;
+        let rrc_dl_transfer =
+            match match match DlDcchMessage::from_bytes(rrc_message_bytes)?.message {
+                DlDcchMessageType::C1(x) => x,
+            } {
+                C1_2::DlInformationTransfer(x) => Ok(x),
+                x => Err(anyhow!("Unexpected RRC message {:?}", x)),
+            }?
+            .critical_extensions
+            {
+                CriticalExtensions4::DlInformationTransfer(x) => x,
+            };
+        Ok(rrc_dl_transfer
+            .dedicated_nas_message
+            .ok_or(anyhow!("NAS message not present"))?
+            .0)
     }
 }
 

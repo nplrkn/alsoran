@@ -15,12 +15,13 @@ Our mission is to reduce the cost of 5G RAN by providing high quality free compo
 ### Release 0.1 - NGAP and F1AP basics
 
 - GNB-CU-CP prototype.  No DU, no userplane.
-- Successful PDU session setup against free5GC and Open5GS driven from DU simulator.
+- Successful registration against free5GC.
 - Quickstart and early design documentation.
 - License text, copyright notices (?), contributing guide.
 
 ### Release 0.2 - reference userplane
 
+- Session setup (23.502, figure 4.3.2.2.1-1).
 - Userplane prototype - DU simulator sets up a TUN interface per UE. 
 - Linting scripts + release process.
 

@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
+use pdcp::PdcpPdu;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
@@ -75,7 +76,9 @@ impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
             gnb_cu_ue_f1ap_id: r.gnb_cu_ue_f1ap_id,
         };
 
-        let rrc_message_bytes = match pdcp::view_inner(&r.rrc_container.0) {
+        let pdcp_pdu = PdcpPdu(r.rrc_container.0);
+
+        let rrc_message_bytes = match pdcp_pdu.view_inner() {
             Ok(x) => x,
             Err(e) => {
                 warn!(logger, "Invalid PDCP PDU - {:?}", e);

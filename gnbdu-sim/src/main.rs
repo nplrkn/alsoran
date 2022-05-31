@@ -11,6 +11,9 @@ async fn main() -> Result<()> {
 
     du.perform_rrc_setup(&logger).await?;
 
+    let b = du.receive_nas().await?;
+    println!("yay {:?}", b);
+
     drop(stop_source);
 
     Ok(())
