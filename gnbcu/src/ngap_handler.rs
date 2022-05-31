@@ -1,8 +1,14 @@
 use super::Gnbcu;
+use crate::ue_context::UeContext;
 use async_trait::async_trait;
 use bitvec::prelude::*;
-use net::{EventHandler, RequestProvider, Stack, TnlaEvent};
+use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId};
+use net::{AperSerde, EventHandler, IndicationHandler, RequestProvider, Stack, TnlaEvent};
 use ngap::*;
+use rrc::{
+    CriticalExtensions4, DedicatedNasMessage, DlDcchMessage, DlDcchMessageType,
+    DlInformationTransfer, DlInformationTransferIEs, RrcTransactionIdentifier, C1_2,
+};
 use slog::{info, warn, Logger};
 
 impl RequestProvider<NgSetupProcedure> for Handler {}
@@ -62,5 +68,41 @@ impl EventHandler for Handler {
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
         };
         self.gnbcu.connected_amf_change(logger).await;
+    }
+}
+
+#[async_trait]
+impl IndicationHandler<DownlinkNasTransportProcedure> for Handler {
+    async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
+        // To do - retrieve UE context by ran_ue_ngap_id.
+        let ue = UeContext {
+            gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
+        };
+
+        let rrc = match (DlDcchMessage {
+            message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
+                rrc_transaction_identifier: RrcTransactionIdentifier(2),
+                critical_extensions: CriticalExtensions4::DlInformationTransfer(
+                    DlInformationTransferIEs {
+                        dedicated_nas_message: Some(DedicatedNasMessage(i.nas_pdu.0)),
+                        late_non_critical_extension: None,
+                        non_critical_extension: None,
+                    },
+                ),
+            })),
+        }
+        .into_bytes())
+        {
+            Ok(x) => x,
+            Err(e) => {
+                warn!(
+                    logger,
+                    "Failed to encode Rrc DlInformationTransfer - {:?}", e
+                );
+                return;
+            }
+        };
+        self.gnbcu.send_rrc_to_ue(ue, rrc, logger).await;
     }
 }

@@ -4,8 +4,11 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 
 ## TO DO
 - Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
+- Regression test that avoids the need to run free5GC
+- Timers and timeouts within the procedures we do and testing
+- Handle registration reject (e.g. test with UDM not running)
+- Write up reliable demo instructions starting with download of free5GC
 - Requests should be processed in parallel in separate tasks.
-- Session setup (23.502, figure 4.3.2.2.1-1).  (Requires N2 PDU Session Request/Response.)
 - Review TODOs and remove commented out code
 
 ## MAYBE
@@ -14,6 +17,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## DONE
+- Encapsulate RRC in PDCP PDU
 - gnbdu-sim
 - RRC autogeneration
 - Multi worker code (including coordinator) moved to a 'prototype' version leaving remaining code super simple
