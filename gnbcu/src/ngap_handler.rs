@@ -5,6 +5,7 @@ use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId};
 use net::{AperSerde, EventHandler, IndicationHandler, RequestProvider, Stack, TnlaEvent};
 use ngap::*;
+use pdcp::PdcpPdu;
 use rrc::{
     CriticalExtensions4, DedicatedNasMessage, DlDcchMessage, DlDcchMessageType,
     DlInformationTransfer, DlInformationTransferIEs, RrcTransactionIdentifier, C1_2,
@@ -103,6 +104,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for Handler {
                 return;
             }
         };
-        self.gnbcu.send_rrc_to_ue(ue, rrc, logger).await;
+        let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).bytes());
+        self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
     }
 }

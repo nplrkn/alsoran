@@ -96,7 +96,9 @@ impl RrcHandler {
         let pdcp_pdu = PdcpPdu::encode(&rrc_setup.into_bytes()?);
 
         debug!(logger, "Send Rrc Setup");
-        self.0.send_rrc_to_ue(ue, pdcp_pdu.bytes(), logger).await;
+        self.0
+            .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.bytes()), logger)
+            .await;
         Ok(())
     }
 
@@ -160,14 +162,19 @@ impl RrcHandler {
 }
 
 impl Gnbcu {
-    pub async fn send_rrc_to_ue(&self, ue: UeContext, message: Vec<u8>, logger: &Logger) {
+    pub async fn send_rrc_to_ue(
+        &self,
+        ue: UeContext,
+        rrc_container: f1ap::RrcContainer,
+        logger: &Logger,
+    ) {
         let dl_message = DlRrcMessageTransfer {
             gnb_cu_ue_f1ap_id: ue.gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
             old_gnb_du_ue_f1ap_id: None,
             srb_id: SrbId(1),
             execute_duplication: None,
-            rrc_container: f1ap::RrcContainer(message),
+            rrc_container,
             rat_frequency_priority_information: None,
             rrc_delivery_status_request: None,
             ue_context_not_retrievable: None,
