@@ -11,8 +11,7 @@ async fn main() -> Result<()> {
 
     du.perform_rrc_setup(&logger).await?;
 
-    // Receive authentication request
-    let b = du.receive_nas().await?;
+    let _nas_authentication_request = du.receive_nas().await?;
 
     drop(stop_source);
 
