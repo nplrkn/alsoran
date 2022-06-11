@@ -166,9 +166,6 @@ impl MockDu {
             x => Err(anyhow!("Unexpected RRC message {:?}", x)),
         }?;
 
-        // Create a NAS Registration Request.
-        //let nas_message = hex::decode("7e004179000c0102f839f0ff0000000047782e028020")?;
-
         // Build RRC Setup Response
         let rrc_setup_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcSetupComplete(RrcSetupComplete {
@@ -187,25 +184,40 @@ impl MockDu {
         }
         .into_bytes()?;
 
+        info!(
+            &logger,
+            "DU sends UlRrcMessageTransfer containing RrcSetupComplete containing NAS Registration Request"
+        );
+        self.send_ul_rrc(rrc_setup_complete, logger).await
+    }
+
+    pub async fn send_nas(&self, nas_bytes: Vec<u8>, logger: &Logger) -> Result<()> {
+        let rrc = UlInformationTransfer {
+            critical_extensions: CriticalExtensions37::UlInformationTransfer(
+                UlInformationTransferIEs {
+                    dedicated_nas_message: Some(DedicatedNasMessage(nas_bytes)),
+                    late_non_critical_extension: None,
+                },
+            ),
+        }
+        .into_bytes()?;
+        self.send_ul_rrc(rrc, &logger).await
+    }
+
+    async fn send_ul_rrc(&self, rrc_bytes: Vec<u8>, logger: &Logger) -> Result<()> {
         // Wrap in PDCP PDU.
-        let pdcp_pdu = PdcpPdu::encode(&rrc_setup_complete);
+        let pdcp_pdu = PdcpPdu::encode(&rrc_bytes);
 
         // Wrap it in an UL Rrc Message Transfer
         let f1_indication = UlRrcMessageTransferProcedure::encode_request(UlRrcMessageTransfer {
-            gnb_cu_ue_f1ap_id: dl_rrc_message_transfer.gnb_cu_ue_f1ap_id,
-            gnb_du_ue_f1ap_id: dl_rrc_message_transfer.gnb_du_ue_f1ap_id,
-            srb_id: dl_rrc_message_transfer.srb_id,
+            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
+            gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+            srb_id: SrbId(1),
             rrc_container: RrcContainer(pdcp_pdu.bytes()),
             selected_plmn_id: None,
             new_gnb_du_ue_f1ap_id: None,
         })?;
 
-        info!(
-            &logger,
-            "DU sends UlRrcMessageTransfer containing RrcSetupComplete containing NAS Registration Request"
-        );
-
-        // Send
         self.sender.send_message(f1_indication, logger).await
     }
 

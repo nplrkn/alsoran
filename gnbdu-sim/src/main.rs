@@ -14,15 +14,17 @@ async fn main() -> Result<()> {
 
     let mut ue = Ue::new();
 
-    info!(&logger, "Get NAS registration from UE");
+    info!(&logger, "RRC Setup with NAS Registration Request");
     let nas_message = ue.recv_nas();
-
     du.perform_rrc_setup(nas_message, &logger).await?;
 
     let nas_authentication_request = du.receive_nas().await?;
-    ue.send_nas(nas_authentication_request);
+    info!(&logger, "<- NAS Authentication request --");
+    ue.send_nas(nas_authentication_request, &logger);
+    let nas_message = ue.recv_nas();
+    info!(&logger, "-- NAS Authentication response ->");
+    du.send_nas(nas_message, &logger).await?;
 
-    let _nas_message = ue.recv_nas();
     assert!(false);
 
     drop(stop_source);

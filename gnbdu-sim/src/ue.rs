@@ -1,4 +1,5 @@
 use hex;
+use slog::{debug, Logger};
 use std::{
     io::{Read, Write},
     process::{ChildStdin, ChildStdout, Command, Stdio},
@@ -36,8 +37,9 @@ impl Ue {
         hex::decode(s.clone()).expect(&format!("String {} didn't decode to hex", s))
     }
 
-    pub fn send_nas(&mut self, nas_bytes: Vec<u8>) {
-        let hex_string = hex::encode(nas_bytes);
+    pub fn send_nas(&mut self, nas_bytes: Vec<u8>, logger: &Logger) {
+        let hex_string = hex::encode(nas_bytes) + "\n";
+        debug!(&logger, "Send to ue-sim {}", hex_string);
         self.stdin
             .write_all(hex_string.as_bytes())
             .expect("Lost connection to UE SIM")

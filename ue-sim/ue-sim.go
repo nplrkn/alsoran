@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/free5gc/CommonConsumerTestData/UDM/TestGenAuthData"
 	"github.com/free5gc/MongoDBLibrary"
@@ -58,6 +59,8 @@ func main() {
 	// send NAS Authentication Response
 	authenticationResponse := nasTestpacket.GetAuthenticationResponse(resStat, "")
 	sendNas(authenticationResponse)
+
+	time.Sleep(10 * time.Second)
 }
 
 func recvNas(ue *RanUeContext, stdin *bufio.Reader) (msg *nas.Message) {
