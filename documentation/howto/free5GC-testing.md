@@ -13,6 +13,7 @@ bin/nrf &
 bin/udm &
 bin/udr &
 bin/ausf &
+bin/pcf &
 bin/amf
 ```
 Note the following log line from the AMF

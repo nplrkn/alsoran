@@ -1,4 +1,4 @@
-// Copied from free5GC project, under Apache License 2.0, January 2004.
+// Copied from free5GC project, under Apache License 2.0, January 2004 with minor changes.
 // License file: https://raw.githubusercontent.com/free5gc/free5gc/main/LICENSE
 
 package main
@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/free5gc/nas"
+	"github.com/free5gc/nas/nasMessage"
 	"github.com/free5gc/nas/security"
 )
 
@@ -19,7 +20,7 @@ func NASEncode(ue *RanUeContext, msg *nas.Message, securityContextAvailable bool
 		return
 	}
 	if msg == nil {
-		err = fmt.Errorf("Nas Message is empty")
+		err = fmt.Errorf("NAS Message is empty")
 		return
 	}
 
@@ -77,7 +78,7 @@ func NASDecode(ue *RanUeContext, securityHeaderType uint8, payload []byte) (msg 
 		return
 	}
 	if payload == nil {
-		err = fmt.Errorf("Nas payload is empty")
+		err = fmt.Errorf("NAS payload is empty")
 		return
 	}
 
@@ -87,7 +88,7 @@ func NASDecode(ue *RanUeContext, securityHeaderType uint8, payload []byte) (msg 
 		err = msg.PlainNasDecode(&payload)
 		return
 	} else if ue.IntegrityAlg == security.AlgIntegrity128NIA0 {
-		fmt.Println("decode payload is ", payload)
+		//fmt.Println("decode payload is ", payload)
 		// remove header
 		payload = payload[3:]
 		if err = security.NASEncrypt(ue.CipheringAlg, ue.KnasEnc, ue.DLCount.Get(), ue.GetBearerType(),
@@ -108,19 +109,19 @@ func NASDecode(ue *RanUeContext, securityHeaderType uint8, payload []byte) (msg 
 		ciphered := false
 		switch msg.SecurityHeaderType {
 		case nas.SecurityHeaderTypeIntegrityProtected:
-			fmt.Println("Security header type: Integrity Protected")
+			//fmt.Println("Security header type: Integrity Protected")
 		case nas.SecurityHeaderTypeIntegrityProtectedAndCiphered:
-			fmt.Println("Security header type: Integrity Protected And Ciphered")
+			//fmt.Println("Security header type: Integrity Protected And Ciphered")
 			ciphered = true
 		case nas.SecurityHeaderTypeIntegrityProtectedWithNew5gNasSecurityContext:
-			fmt.Println("Security Header Type Integrity Protected With New 5g Nas Security Context")
+			//fmt.Println("Security Header Type Integrity Protected With New 5g Nas Security Context")
 			ue.DLCount.Set(0, 0)
 		case nas.SecurityHeaderTypeIntegrityProtectedAndCipheredWithNew5gNasSecurityContext:
-			fmt.Println("Security header type: Integrity Protected And Ciphered With New 5G Security Context")
+			//fmt.Println("Security header type: Integrity Protected And Ciphered With New 5G Security Context")
 			ciphered = true
 			ue.DLCount.Set(0, 0)
 		default:
-			return nil, fmt.Errorf("Wrong security header type: 0x%0x", msg.SecurityHeader.SecurityHeaderType)
+			return nil, fmt.Errorf("wrong security header type: 0x%0x", msg.SecurityHeader.SecurityHeaderType)
 		}
 		// Caculate ul count
 		if ue.DLCount.SQN() > sequenceNumber {
@@ -134,10 +135,10 @@ func NASDecode(ue *RanUeContext, securityHeaderType uint8, payload []byte) (msg 
 			return nil, errNas
 		}
 		if !reflect.DeepEqual(mac32, receivedMac32) {
-			fmt.Printf("NAS MAC verification failed(0x%x != 0x%x)", mac32, receivedMac32)
-		} else {
-			fmt.Printf("cmac value: 0x%x\n", mac32)
+			return nil, fmt.Errorf("NAS MAC verification failed(0x%x != 0x%x)", mac32, receivedMac32)
 		}
+
+		// fmt.Printf("cmac value: 0x%x\n", mac32)
 
 		// remove sequece Number
 		payload = payload[1:]
@@ -149,7 +150,20 @@ func NASDecode(ue *RanUeContext, securityHeaderType uint8, payload []byte) (msg 
 		}
 
 		err = msg.PlainNasDecode(&payload)
-		fmt.Println("err", err)
 		return msg, err
 	}
+}
+
+func EncodeNasPduWithSecurity(ue *RanUeContext, pdu []byte, securityHeaderType uint8,
+	securityContextAvailable, newSecurityContext bool) ([]byte, error) {
+	m := nas.NewMessage()
+	err := m.PlainNasDecode(&pdu)
+	if err != nil {
+		return nil, err
+	}
+	m.SecurityHeader = nas.SecurityHeader{
+		ProtocolDiscriminator: nasMessage.Epd5GSMobilityManagementMessage,
+		SecurityHeaderType:    securityHeaderType,
+	}
+	return NASEncode(ue, m, securityContextAvailable, newSecurityContext)
 }

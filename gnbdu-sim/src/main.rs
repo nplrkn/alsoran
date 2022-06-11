@@ -25,6 +25,14 @@ async fn main() -> Result<()> {
     info!(&logger, "-- NAS Authentication response ->");
     du.send_nas(nas_message, &logger).await?;
 
+    info!(&logger, "<- Security mode command --");
+    let nas_security_mode_command = du.receive_nas().await?;
+    ue.send_nas(nas_security_mode_command, &logger);
+    let nas_message = ue.recv_nas();
+
+    info!(&logger, "-- Security mode complete ->");
+    du.send_nas(nas_message, &logger).await?;
+
     assert!(false);
 
     drop(stop_source);

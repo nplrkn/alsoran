@@ -34,7 +34,7 @@ impl Ue {
             }
             s.push(buf[0] as char);
         }
-        hex::decode(s.clone()).expect(&format!("String {} didn't decode to hex", s))
+        hex::decode(s.clone()).expect(&format!("String '{}' didn't decode to hex", s))
     }
 
     pub fn send_nas(&mut self, nas_bytes: Vec<u8>, logger: &Logger) {
