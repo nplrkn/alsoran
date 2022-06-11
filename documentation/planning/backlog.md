@@ -4,6 +4,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 
 ## TO DO
 - Go program that processes NAS information
+- Build go code using cargo build and don't install it in alsoran output directory rather than home.
 - Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
 - Regression test that avoids the need to run free5GC
 - Timers and timeouts within the procedures we do and testing

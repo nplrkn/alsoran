@@ -3,7 +3,6 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use hex;
 use net::{AperSerde, Indication, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use pdcp::PdcpPdu;
@@ -100,7 +99,7 @@ impl MockDu {
         Ok(())
     }
 
-    pub async fn perform_rrc_setup(&self, logger: &Logger) -> Result<()> {
+    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>, logger: &Logger) -> Result<()> {
         // Build RRC Setup Request
         let rrc_setup_request = UlCcchMessage {
             message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(RrcSetupRequest {
@@ -168,7 +167,7 @@ impl MockDu {
         }?;
 
         // Create a NAS Registration Request.
-        let nas_message = hex::decode("7e004179000c0102f839f0ff0000000047782e028020")?;
+        //let nas_message = hex::decode("7e004179000c0102f839f0ff0000000047782e028020")?;
 
         // Build RRC Setup Response
         let rrc_setup_complete = UlDcchMessage {
