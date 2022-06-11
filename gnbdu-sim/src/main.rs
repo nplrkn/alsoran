@@ -22,6 +22,9 @@ async fn main() -> Result<()> {
     let nas_authentication_request = du.receive_nas().await?;
     ue.send_nas(nas_authentication_request);
 
+    let _nas_message = ue.recv_nas();
+    assert!(false);
+
     drop(stop_source);
 
     Ok(())

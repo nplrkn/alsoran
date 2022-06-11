@@ -45,18 +45,22 @@ func main() {
 	registrationRequest := nasTestpacket.GetRegistrationRequest(
 		nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, ueSecurityCapability, nil, nil, nil)
 
-	hexMessage := hex.EncodeToString(registrationRequest)
-	fmt.Println(hexMessage)
-	log.Println(hexMessage)
+	sendNas(registrationRequest)
 
 	// Get authentication request
-	nasPdu := nextNasPdu(ue, stdin)
-	if nasPdu.GmmHeader.GetMessageType() != nas.MsgTypeAuthenticationRequest {
+	authenticationRequest := recvNas(ue, stdin)
+	if authenticationRequest.GmmHeader.GetMessageType() != nas.MsgTypeAuthenticationRequest {
 		log.Fatal("Not an authentication request")
 	}
+	rand := authenticationRequest.AuthenticationRequest.GetRANDValue()
+	resStat := ue.DeriveRESstarAndSetKey(ue.AuthenticationSubs, rand[:], "5G:mnc093.mcc208.3gppnetwork.org")
+
+	// send NAS Authentication Response
+	authenticationResponse := nasTestpacket.GetAuthenticationResponse(resStat, "")
+	sendNas(authenticationResponse)
 }
 
-func nextNasPdu(ue *RanUeContext, stdin *bufio.Reader) (msg *nas.Message) {
+func recvNas(ue *RanUeContext, stdin *bufio.Reader) (msg *nas.Message) {
 	hexString, err := stdin.ReadString('\n')
 	if err != nil {
 		log.Fatal("Stdin closed - exit ue-sim")
@@ -64,6 +68,11 @@ func nextNasPdu(ue *RanUeContext, stdin *bufio.Reader) (msg *nas.Message) {
 	nasBytes, _ := hex.DecodeString(hexString)
 	nasPdu, _ := NASDecode(ue, nas.GetSecurityHeaderType(nasBytes), nasBytes)
 	return nasPdu
+}
+
+func sendNas(msg []byte) {
+	hexMessage := hex.EncodeToString(msg)
+	fmt.Println(hexMessage)
 }
 
 func provisionUeInFree5GC(ue *RanUeContext) {

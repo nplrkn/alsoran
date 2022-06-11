@@ -10,7 +10,7 @@ use rrc::{
     CriticalExtensions4, DedicatedNasMessage, DlDcchMessage, DlDcchMessageType,
     DlInformationTransfer, DlInformationTransferIEs, RrcTransactionIdentifier, C1_2,
 };
-use slog::{info, warn, Logger};
+use slog::{debug, info, warn, Logger};
 
 impl RequestProvider<NgSetupProcedure> for Handler {}
 
@@ -75,6 +75,10 @@ impl EventHandler for Handler {
 #[async_trait]
 impl IndicationHandler<DownlinkNasTransportProcedure> for Handler {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
+        debug!(
+            &logger,
+            "Got Downlink Nas Transport - send RRC to UE via DU"
+        );
         // To do - retrieve UE context by ran_ue_ngap_id.
         let ue = UeContext {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
