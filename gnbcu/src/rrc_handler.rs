@@ -59,11 +59,10 @@ impl RrcHandler {
                 return;
             }
         } {
-            C1_6::RrcSetupComplete(x) => self.rrc_setup_complete(ue, x, logger),
+            C1_6::RrcSetupComplete(x) => self.rrc_setup_complete(ue, x, logger).await,
+            C1_6::UlInformationTransfer(x) => self.ul_information_transfer(ue, x, logger).await,
             _ => todo!(),
-        }
-        .await
-        {
+        } {
             Err(e) => warn!(logger, "Error processing Rrc message {:?}", e),
             _ => (),
         }
@@ -162,6 +161,53 @@ impl RrcHandler {
 
         InitialUeMessageProcedure::call_provider(&self.0.ngap, m, logger).await;
 
+        Ok(())
+    }
+
+    async fn ul_information_transfer(
+        &self,
+        _ue: UeContext,
+        req: UlInformationTransfer,
+        logger: &Logger,
+    ) -> Result<()> {
+        let nas_pdu = match match req.critical_extensions {
+            CriticalExtensions37::UlInformationTransfer(x) => x,
+        }
+        .dedicated_nas_message
+        {
+            None => {
+                debug!(&logger, "No Nas Message present - nothing to do");
+                return Ok(());
+            }
+            Some(x) => NasPdu(x.0),
+        };
+
+        // To do - shoudl be from Ue context
+        let nr_cgi = ngap::NrCgi {
+            plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
+            nr_cell_identity: ngap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
+        };
+
+        let m = UplinkNasTransport {
+            amf_ue_ngap_id: AmfUeNgapId(1),
+            ran_ue_ngap_id: RanUeNgapId(1),
+            nas_pdu,
+            user_location_information: UserLocationInformation::UserLocationInformationNr(
+                UserLocationInformationNr {
+                    nr_cgi,
+                    tai: Tai {
+                        plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
+                        tac: Tac(vec![0, 0, 1]),
+                    },
+                    time_stamp: None,
+                },
+            ),
+            w_agf_identity_information: None,
+            tngf_identity_information: None,
+            twif_identity_information: None,
+        };
+
+        UplinkNasTransportProcedure::call_provider(&self.0.ngap, m, logger).await;
         Ok(())
     }
 }

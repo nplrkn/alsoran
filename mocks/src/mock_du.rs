@@ -181,8 +181,7 @@ impl MockDu {
                     non_critical_extension: None,
                 }),
             })),
-        }
-        .into_bytes()?;
+        };
 
         info!(
             &logger,
@@ -192,20 +191,22 @@ impl MockDu {
     }
 
     pub async fn send_nas(&self, nas_bytes: Vec<u8>, logger: &Logger) -> Result<()> {
-        let rrc = UlInformationTransfer {
-            critical_extensions: CriticalExtensions37::UlInformationTransfer(
-                UlInformationTransferIEs {
-                    dedicated_nas_message: Some(DedicatedNasMessage(nas_bytes)),
-                    late_non_critical_extension: None,
-                },
-            ),
-        }
-        .into_bytes()?;
+        let rrc = UlDcchMessage {
+            message: UlDcchMessageType::C1(C1_6::UlInformationTransfer(UlInformationTransfer {
+                critical_extensions: CriticalExtensions37::UlInformationTransfer(
+                    UlInformationTransferIEs {
+                        dedicated_nas_message: Some(DedicatedNasMessage(nas_bytes)),
+                        late_non_critical_extension: None,
+                    },
+                ),
+            })),
+        };
         self.send_ul_rrc(rrc, &logger).await
     }
 
-    async fn send_ul_rrc(&self, rrc_bytes: Vec<u8>, logger: &Logger) -> Result<()> {
-        // Wrap in PDCP PDU.
+    async fn send_ul_rrc(&self, rrc: UlDcchMessage, logger: &Logger) -> Result<()> {
+        // Encapsulate RRC message in PDCP PDU.
+        let rrc_bytes = rrc.into_bytes()?;
         let pdcp_pdu = PdcpPdu::encode(&rrc_bytes);
 
         // Wrap it in an UL Rrc Message Transfer
