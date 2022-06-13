@@ -14,7 +14,7 @@ anyhow = "1.0.52"
 url = "2.1"
 tokio-openssl = "0.4"
 openssl = "0.10"
-uuid = {version = "0.8", features = ["serde", "v4"]}
+uuid = {version = "1.1", features = ["serde", "v4"]}
 async-trait = "0.1.24"
 chrono = { version = "0.4", features = ["serde"] }
 futures = "0.3"
