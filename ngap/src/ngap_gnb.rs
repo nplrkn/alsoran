@@ -27,6 +27,7 @@ impl<T> Application for NgapGnb<T> where
         + EventHandler
         + Clone
         + IndicationHandler<DownlinkNasTransportProcedure>
+        + RequestProvider<InitialContextSetupProcedure>
 {
 }
 
@@ -36,7 +37,8 @@ where
     T: Send
         + Sync
         + RequestProvider<NgSetupProcedure>
-        + IndicationHandler<DownlinkNasTransportProcedure>,
+        + IndicationHandler<DownlinkNasTransportProcedure>
+        + RequestProvider<InitialContextSetupProcedure>,
 {
     type TopPdu = NgapPdu;
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
@@ -54,6 +56,9 @@ where
             InitiatingMessage::DownlinkNasTransport(req) => {
                 DownlinkNasTransportProcedure::call_provider(&self.0, req, logger).await;
                 None
+            }
+            InitiatingMessage::InitialContextSetupRequest(req) => {
+                InitialContextSetupProcedure::call_provider(&self.0, req, logger).await
             }
             _ => todo!(),
         }

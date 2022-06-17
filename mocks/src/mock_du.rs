@@ -227,26 +227,40 @@ impl MockDu {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
-        let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
-        let rrc_message_bytes = pdcp_pdu.view_inner()?;
-        let rrc_dl_transfer =
-            match match match DlDcchMessage::from_bytes(rrc_message_bytes)?.message {
-                DlDcchMessageType::C1(x) => x,
-            } {
-                C1_2::DlInformationTransfer(x) => Ok(x),
-                x => Err(anyhow!("Unexpected RRC message {:?}", x)),
-            }?
-            .critical_extensions
-            {
-                CriticalExtensions4::DlInformationTransfer(x) => x,
-            };
-        Ok(rrc_dl_transfer
-            .dedicated_nas_message
-            .ok_or(anyhow!("NAS message not present"))?
-            .0)
+        nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
+    }
+
+    pub async fn receive_ue_context_setup_request(&self, _logger: &Logger) -> Result<Vec<u8>> {
+        let ue_context_setup_request = match self.recv().await {
+            F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
+            x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
+        }?;
+        nas_from_dl_transfer_rrc_container(
+            ue_context_setup_request
+                .rrc_container
+                .expect("Expected Rrc Container on UeContextSetupRequest from CU"),
+        )
     }
 }
 
+fn nas_from_dl_transfer_rrc_container(rrc_container: RrcContainer) -> Result<Vec<u8>> {
+    let pdcp_pdu = PdcpPdu(rrc_container.0);
+    let rrc_message_bytes = pdcp_pdu.view_inner()?;
+    let rrc_dl_transfer = match match match DlDcchMessage::from_bytes(rrc_message_bytes)?.message {
+        DlDcchMessageType::C1(x) => x,
+    } {
+        C1_2::DlInformationTransfer(x) => Ok(x),
+        x => Err(anyhow!("Unexpected RRC message {:?}", x)),
+    }?
+    .critical_extensions
+    {
+        CriticalExtensions4::DlInformationTransfer(x) => x,
+    };
+    Ok(rrc_dl_transfer
+        .dedicated_nas_message
+        .ok_or(anyhow!("NAS message not present"))?
+        .0)
+}
 #[async_trait]
 impl TnlaEventHandler for MockDu {
     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {

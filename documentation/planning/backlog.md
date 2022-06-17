@@ -3,23 +3,25 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Build go code using cargo build and don't install it in alsoran output directory rather than home.
 - Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
-- Regression test that avoids the need to run free5GC
-- Timers and timeouts within the procedures we do and testing
-- Handle registration reject (e.g. test with UDM not running)
+- Build go code using cargo build and don't install it in alsoran output directory rather than home.
+- Move procedure implementations in gnbcu into separate modules underneath f1ap_hander etc
+- Regression test that avoids the need to run free5GC - put security mode command in Initial Context Setup Request
 - Bump dependencies
 - Write up reliable demo instructions starting with download of free5GC
-- Review TODOs and remove commented out code
+- Remove commented out code
+- Review TODOs
 
 ## MAYBE
-- Go program that processes NAS information
+- Timers and timeouts within the procedures we do and testing
+- Handle registration reject (e.g. test with UDM not running)
 - Requests should be processed in parallel in separate tasks.
 - Deduplicate inline definitions in RRC autogeneration
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## DONE
+- Go program that processes NAS information
 - Encapsulate RRC in PDCP PDU
 - gnbdu-sim
 - RRC autogeneration

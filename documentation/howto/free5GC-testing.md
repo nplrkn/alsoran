@@ -22,18 +22,13 @@ Note the following log line from the AMF
 2021-11-28T12:45:16+01:00 [INFO][AMF][NGAP] Listen on 127.0.0.1:38412
 ```
 
-## Configure UE using hacked test
-```
-go test . -run TestRegistration noinit
-```
 ## Wireshark
 Capture NGAP and F1AP.
 ```
 sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
 ```
 
-
-
+## Alsoran
 
 Run the alsoran GNB-CU.  It automatically connects to port 38412 on localhost.
 ```
