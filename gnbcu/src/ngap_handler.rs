@@ -1,6 +1,6 @@
 use super::Gnbcu;
 use crate::ue_context::UeContext;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
@@ -9,10 +9,7 @@ use net::{
 };
 use ngap::*;
 use pdcp::PdcpPdu;
-use rrc::{
-    CriticalExtensions4, DedicatedNasMessage, DlDcchMessage, DlDcchMessageType,
-    DlInformationTransfer, DlInformationTransferIEs, RrcTransactionIdentifier, C1_2,
-};
+use rrc::*;
 use slog::{debug, info, warn, Logger};
 
 impl RequestProvider<NgSetupProcedure> for Handler {}
@@ -44,7 +41,7 @@ impl EventHandler for Handler {
                         broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
                             plmn_identity: PlmnIdentity(vec![0x2, 0xf8, 0x39]),
                             tai_slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                                s_nssai: SNssai {
+                                s_nssai: ngap::SNssai {
                                     sst: Sst(vec![0x01]),
                                     sd: Some(Sd(vec![0x1, 0x2, 0x3])),
                                 },
@@ -116,32 +113,30 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for Handler {
     }
 }
 
-fn make_rrc_container_for_nas(
-    _ue: &UeContext,
-    nas: Vec<u8>,
-    _logger: &Logger,
-) -> Result<f1ap::RrcContainer> {
-    match (DlDcchMessage {
-        message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
-            rrc_transaction_identifier: RrcTransactionIdentifier(2),
-            critical_extensions: CriticalExtensions4::DlInformationTransfer(
-                DlInformationTransferIEs {
-                    dedicated_nas_message: Some(DedicatedNasMessage(nas)),
-                    late_non_critical_extension: None,
-                    non_critical_extension: None,
-                },
-            ),
-        })),
-    }
-    .into_bytes())
-    {
-        Ok(x) => Ok(f1ap::RrcContainer(PdcpPdu::encode(&x).bytes())),
-        Err(e) => Err(anyhow!(format!(
-            "Failed to encode Rrc DlInformationTransfer- {:?}",
-            e
-        ))),
-    }
+fn make_rrc_container(rrc: DlDcchMessage) -> Result<f1ap::RrcContainer> {
+    let rrc_bytes = rrc.into_bytes()?;
+    Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).bytes()))
 }
+
+// fn make_rrc_container_for_nas(
+//     _ue: &UeContext,
+//     nas_message: DedicatedNasMessage,
+//     _logger: &Logger,
+// ) -> Result<f1ap::RrcContainer> {
+//     let rrc = DlDcchMessage {
+//         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
+//             rrc_transaction_identifier: RrcTransactionIdentifier(2),
+//             critical_extensions: CriticalExtensions4::DlInformationTransfer(
+//                 DlInformationTransferIEs {
+//                     dedicated_nas_message: Some(nas_message),
+//                     late_non_critical_extension: None,
+//                     non_critical_extension: None,
+//                 },
+//             ),
+//         })),
+//     };
+//     make_rrc_container(rrc)
+// }
 
 #[async_trait]
 impl RequestProvider<InitialContextSetupProcedure> for Handler {
@@ -150,10 +145,14 @@ impl RequestProvider<InitialContextSetupProcedure> for Handler {
         r: InitialContextSetupRequest,
         logger: &Logger,
     ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
-        debug!(
-            logger,
-            "Received NGAP InitialContextSetupRequest, send F1AP UeContextSetupRequest"
-        );
+        debug!(logger, "Initial Context Setup Procedure");
+        // 1.    Ngap Initial Context Setup Request + Nas <-
+        // 2. <- F1ap Ue Context Setup Request + Rrc Security Mode Command
+        // 3. -> F1ap Ue Context Setup Response
+        // 4. -> Rrc Security Mode Complete
+        // 5. <- Rrc Reconfiguration + Nas
+        // 6. -> Rrc Reconfiguration Complete
+        // 7.    Ngap Initial Context Setup Response ->
 
         // To do - retrieve UE context by ran_ue_ngap_id.
         let ue = UeContext {
@@ -161,12 +160,32 @@ impl RequestProvider<InitialContextSetupProcedure> for Handler {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
         };
 
-        // Take the NAS message out and wrap it in an RRC container.
-        let rrc_container = match r.nas_pdu {
-            None => None,
-            Some(x) => Some(make_rrc_container_for_nas(&ue, x.0, logger)?),
-        };
+        // Bind the RRC uplink channel so this task can receive the next Rrc message
+        // from this UE.  This is not a robust long term mechnanism, since really this task is
+        // only interested in the responses to the Rrc transactions it initiates.
+        // TODO
+        let rrc_response_channel = self.gnbcu.bind_rrc_ul_dcch(&ue);
 
+        // Build Security Mode command.
+        let rrc_security_mode_command = DlDcchMessage {
+            message: DlDcchMessageType::C1(C1_2::SecurityModeCommand(rrc::SecurityModeCommand {
+                rrc_transaction_identifier: RrcTransactionIdentifier(2),
+                critical_extensions: CriticalExtensions26::SecurityModeCommand(
+                    SecurityModeCommandIEs {
+                        security_config_smc: SecurityConfigSmc {
+                            security_algorithm_config: SecurityAlgorithmConfig {
+                                ciphering_algorithm: CipheringAlgorithm::Nea0,
+                                integrity_prot_algorithm: None,
+                            },
+                        },
+                        late_non_critical_extension: None,
+                    },
+                ),
+            })),
+        };
+        let rrc_container = Some(make_rrc_container(rrc_security_mode_command)?);
+
+        // Build Ue Context Setup request and include the rrc security mode command.
         // TODO: derive and use frunk for the common ngap / f1ap structures seen here.
         let ue_context_setup_request = UeContextSetupRequest {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
@@ -215,15 +234,60 @@ impl RequestProvider<InitialContextSetupProcedure> for Handler {
             f1c_transfer_path: None,
         };
 
-        match <Stack as RequestProvider<UeContextSetupProcedure>>::request(
-            &self.gnbcu.f1ap,
-            ue_context_setup_request,
-            &logger,
-        )
-        .await
-        {
-            Ok(_x) => todo!(),
-            Err(_) => todo!(),
-        }
+        let _ue_context_setup_response =
+            match <Stack as RequestProvider<UeContextSetupProcedure>>::request(
+                &self.gnbcu.f1ap,
+                ue_context_setup_request,
+                &logger,
+            )
+            .await
+            {
+                Ok(x) => x,
+                Err(_) => todo!(),
+            };
+
+        // Receive security mode complete.
+        let _rrc_security_mode_complete = rrc_response_channel.recv().await?;
+
+        // Send Rrc Reconfiguration with the Nas message from earlier.
+        let rrc_reconfiguration = DlDcchMessage {
+            message: DlDcchMessageType::C1(C1_2::RrcReconfiguration(rrc::RrcReconfiguration {
+                rrc_transaction_identifier: RrcTransactionIdentifier(3),
+                critical_extensions: CriticalExtensions15::RrcReconfiguration(
+                    RrcReconfigurationIEs {
+                        radio_bearer_config: None,
+                        secondary_cell_group: None,
+                        meas_config: None,
+                        late_non_critical_extension: None,
+                        non_critical_extension: Some(RrcReconfigurationV1530IEs {
+                            master_cell_group: None,
+                            full_config: None,
+                            dedicated_nas_message_list: r
+                                .nas_pdu
+                                .map(|x| vec![DedicatedNasMessage(x.0)]),
+                            master_key_update: None,
+                            dedicated_sib1_delivery: None,
+                            dedicated_system_information_delivery: None,
+                            other_config: None,
+                            non_critical_extension: None,
+                        }),
+                    },
+                ),
+            })),
+        };
+        let rrc_container = make_rrc_container(rrc_reconfiguration)?;
+        let rrc_response_channel = self.gnbcu.bind_rrc_ul_dcch(&ue);
+        self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
+
+        // Receive reconfiguration complete.
+        let _rrc_reconfiguration_complete: UlDcchMessage = rrc_response_channel.recv().await?;
+
+        Ok(InitialContextSetupResponse {
+            amf_ue_ngap_id: r.amf_ue_ngap_id,
+            ran_ue_ngap_id: RanUeNgapId(1),
+            pdu_session_resource_setup_list_cxt_res: None,
+            pdu_session_resource_failed_to_setup_list_cxt_res: None,
+            criticality_diagnostics: None,
+        })
     }
 }

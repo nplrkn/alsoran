@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     du.send_security_mode_complete(&logger).await?;
 
     info!(&logger, "< Rrc Reconfiguration (Registration Accept) <");
-    let nas_registration_accept = du.receive_rrc_configuration(&logger).await?;
+    let nas_registration_accept = du.receive_rrc_reconfiguration(&logger).await?;
     ue.send_nas(nas_registration_accept, &logger);
 
     info!(&logger, "> Rrc Reconfiguration Complete >");

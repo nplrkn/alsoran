@@ -284,6 +284,7 @@ impl MockDu {
 
     pub async fn receive_rrc_reconfiguration(&self, _logger: &Logger) -> Result<Vec<u8>> {
         let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
+        // TODO: don't need match match match here or elsewhere
         let mut nas_messages =
             match match match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
                 DlDcchMessageType::C1(x) => x,
@@ -304,6 +305,23 @@ impl MockDu {
             return Err(anyhow!("Expected a single NAS message in list"));
         };
         Ok(nas_messages.remove(0).0)
+    }
+
+    pub async fn send_rrc_reconfiguration_complete(&self, logger: &Logger) -> Result<()> {
+        let security_mode_complete = UlDcchMessage {
+            message: UlDcchMessageType::C1(C1_6::RrcReconfigurationComplete(
+                RrcReconfigurationComplete {
+                    rrc_transaction_identifier: RrcTransactionIdentifier(1),
+                    critical_extensions: CriticalExtensions16::RrcReconfigurationComplete(
+                        RrcReconfigurationCompleteIEs {
+                            late_non_critical_extension: None,
+                            non_critical_extension: None,
+                        },
+                    ),
+                },
+            )),
+        };
+        self.send_ul_rrc(security_mode_complete, logger).await
     }
 }
 

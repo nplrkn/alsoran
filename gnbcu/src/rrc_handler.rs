@@ -61,6 +61,7 @@ impl RrcHandler {
         } {
             C1_6::RrcSetupComplete(x) => self.rrc_setup_complete(ue, x, logger).await,
             C1_6::UlInformationTransfer(x) => self.ul_information_transfer(ue, x, logger).await,
+            //C1_6::SecurityModeComplete(x) => self.rrc_security_mode_complete(ue, x, logger).await,
             _ => todo!(),
         } {
             Err(e) => warn!(logger, "Error processing Rrc message {:?}", e),
@@ -107,10 +108,7 @@ impl RrcHandler {
         req: RrcSetupComplete,
         logger: &Logger,
     ) -> Result<()> {
-        debug!(
-            logger,
-            "Received Rrc Setup Complete - send NGAP initial UE message"
-        );
+        debug!(logger, "Received Rrc Setup Complete");
 
         // TODO: check transaction identifier matches that in UE context?
         let _transaction_id = req.rrc_transaction_identifier;

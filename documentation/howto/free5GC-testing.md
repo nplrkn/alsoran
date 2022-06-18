@@ -39,4 +39,3 @@ cargo run
 cd gnbdu-sim
 cargo run
 ```
-
