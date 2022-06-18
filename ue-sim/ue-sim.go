@@ -59,6 +59,8 @@ func register(ue *RanUeContext, stdin *bufio.Reader, log *log.Logger) {
 		nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, ueSecurityCapability, nil, nil, nil)
 	sendNas(registrationRequest)
 
+	// Identity request would go here
+
 	// Receive Authentication Request
 	authenticationRequest := recvNas(ue, stdin)
 	if authenticationRequest.GmmHeader.GetMessageType() != nas.MsgTypeAuthenticationRequest {

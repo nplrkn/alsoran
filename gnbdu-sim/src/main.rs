@@ -14,38 +14,45 @@ async fn main() -> Result<()> {
 
     let mut ue = Ue::new();
 
-    info!(&logger, "RRC Setup with NAS Registration Request");
+    info!(&logger, "> RRC Setup (NAS Registration Request >");
     let nas_message = ue.recv_nas();
     du.perform_rrc_setup(nas_message, &logger).await?;
 
+    info!(&logger, "< NAS Authentication request <");
     let nas_authentication_request = du.receive_nas().await?;
-    info!(&logger, "<- NAS Authentication request --");
     ue.send_nas(nas_authentication_request, &logger);
+
+    info!(&logger, "> NAS Authentication response >");
     let nas_message = ue.recv_nas();
-    info!(&logger, "-- NAS Authentication response ->");
     du.send_nas(nas_message, &logger).await?;
 
-    info!(&logger, "<- NAS Security mode command --");
+    info!(&logger, "< NAS Security mode command <");
     let nas_security_mode_command = du.receive_nas().await?;
     ue.send_nas(nas_security_mode_command, &logger);
-    let nas_message = ue.recv_nas();
 
-    info!(&logger, "-- NAS Security mode complete ->");
+    info!(&logger, "> NAS Security mode complete >");
+    let nas_message = ue.recv_nas();
     du.send_nas(nas_message, &logger).await?;
 
-    info!(&logger, "-- Omitted RRC security setup here --");
+    info!(&logger, "< UE ctxt setup req (Security mode command) <");
+    du.receive_ue_context_setup_request(&logger).await?;
 
-    info!(
-        &logger,
-        "<- UE Context Setup Request (Registration Accept) --"
-    );
-    let nas_registration_accept = du.receive_ue_context_setup_request(&logger).await?;
+    info!(&logger, "> UE ctxt setup resp >");
+    du.send_ue_context_setup_response(&logger).await?;
+
+    info!(&logger, "> Security mode complete >");
+    du.send_security_mode_complete(&logger).await?;
+
+    info!(&logger, "< Rrc Reconfiguration (Registration Accept) <");
+    let nas_registration_accept = du.receive_rrc_configuration(&logger).await?;
     ue.send_nas(nas_registration_accept, &logger);
-    let _nas_message = ue.recv_nas();
-    info!(
-        &logger,
-        "-- UE Context Setup Response (Registration Complete) ->"
-    );
+
+    info!(&logger, "> Rrc Reconfiguration Complete >");
+    du.send_rrc_reconfiguration_complete(&logger).await?;
+
+    let nas_message = ue.recv_nas();
+    info!(&logger, "> NAS Registration Complete >");
+    du.send_nas(nas_message, &logger).await?;
 
     assert!(false);
 

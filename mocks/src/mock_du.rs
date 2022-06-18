@@ -112,18 +112,7 @@ impl MockDu {
         }
         .into_bytes()?;
 
-        // We also need a CellGroupConfig to give to the CU.
-        let cell_group_config_ie = rrc::CellGroupConfig {
-            cell_group_id: CellGroupId(0),
-            rlc_bearer_to_add_mod_list: None,
-            rlc_bearer_to_release_list: None,
-            mac_cell_group_config: None,
-            physical_cell_group_config: None,
-            sp_cell_config: None,
-            s_cell_to_add_mod_list: None,
-            s_cell_to_release_list: None,
-        }
-        .into_bytes()?;
+        let du_to_cu_rrc_container = Some(make_du_to_cu_rrc_container());
 
         // Wrap them in an F1 Initial UL Rrc Message Transfer.
         let f1_indication =
@@ -135,7 +124,7 @@ impl MockDu {
                 },
                 c_rnti: CRnti(14),
                 rrc_container: RrcContainer(rrc_setup_request),
-                du_to_cu_rrc_container: Some(DuToCuRrcContainer(cell_group_config_ie)),
+                du_to_cu_rrc_container,
                 sul_access_indication: None,
                 transaction_id: TransactionId(1),
                 ran_ue_id: None,
@@ -223,11 +212,15 @@ impl MockDu {
     }
 
     pub async fn receive_nas(&self) -> Result<Vec<u8>> {
-        let dl_rrc_message_transfer = match self.recv().await {
+        let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
+        nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
+    }
+
+    pub async fn receive_dl_rrc(&self) -> Result<DlRrcMessageTransfer> {
+        match self.recv().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
-        }?;
-        nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
+        }
     }
 
     pub async fn receive_ue_context_setup_request(&self, _logger: &Logger) -> Result<Vec<u8>> {
@@ -241,12 +234,105 @@ impl MockDu {
                 .expect("Expected Rrc Container on UeContextSetupRequest from CU"),
         )
     }
+
+    pub async fn send_ue_context_setup_response(&self, logger: &Logger) -> Result<()> {
+        let ue_context_setup_response = F1apPdu::SuccessfulOutcome(
+            SuccessfulOutcome::UeContextSetupResponse(UeContextSetupResponse {
+                gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
+                gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+                du_to_cu_rrc_information: DuToCuRrcInformation {
+                    cell_group_config: CellGroupConfig(Vec::new()),
+                    meas_gap_config: None,
+                    requested_p_max_fr1: None,
+                },
+                c_rnti: None,
+                resource_coordination_transfer_container: None,
+                full_configuration: None,
+                drbs_setup_list: None,
+                srbs_failed_to_be_setup_list: None,
+                drbs_failed_to_be_setup_list: None,
+                s_cell_failedto_setup_list: None,
+                inactivity_monitoring_response: None,
+                criticality_diagnostics: None,
+                srbs_setup_list: None,
+                bh_channels_setup_list: None,
+                bh_channels_failed_to_be_setup_list: None,
+                sl_drbs_setup_list: None,
+                sl_drbs_failed_to_be_setup_list: None,
+                requested_target_cell_global_id: None,
+            }),
+        )
+        .into_bytes()?;
+        self.sender
+            .send_message(ue_context_setup_response, logger)
+            .await
+    }
+
+    pub async fn send_security_mode_complete(&self, logger: &Logger) -> Result<()> {
+        let security_mode_complete = UlDcchMessage {
+            message: UlDcchMessageType::C1(C1_6::SecurityModeComplete(SecurityModeComplete {
+                rrc_transaction_identifier: RrcTransactionIdentifier(1),
+                critical_extensions: CriticalExtensions27::SecurityModeComplete(
+                    SecurityModeCompleteIEs {
+                        late_non_critical_extension: None,
+                    },
+                ),
+            })),
+        };
+        self.send_ul_rrc(security_mode_complete, logger).await
+    }
+
+    pub async fn receive_rrc_reconfiguration(&self, _logger: &Logger) -> Result<Vec<u8>> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
+        let mut nas_messages =
+            match match match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
+                DlDcchMessageType::C1(x) => x,
+            } {
+                C1_2::RrcReconfiguration(x) => Ok(x),
+                x => Err(anyhow!("Unexpected RRC message {:?}", x)),
+            }?
+            .critical_extensions
+            {
+                CriticalExtensions15::RrcReconfiguration(x) => x,
+            }
+            .non_critical_extension
+            .ok_or(anyhow!("Expected non critical extension"))?
+            .dedicated_nas_message_list
+            .ok_or(anyhow!("Expected NAS message list"))?;
+
+        if nas_messages.len() != 1 {
+            return Err(anyhow!("Expected a single NAS message in list"));
+        };
+        Ok(nas_messages.remove(0).0)
+    }
+}
+
+fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
+    // We also need a CellGroupConfig to give to the CU.
+    let cell_group_config_ie = rrc::CellGroupConfig {
+        cell_group_id: CellGroupId(0),
+        rlc_bearer_to_add_mod_list: None,
+        rlc_bearer_to_release_list: None,
+        mac_cell_group_config: None,
+        physical_cell_group_config: None,
+        sp_cell_config: None,
+        s_cell_to_add_mod_list: None,
+        s_cell_to_release_list: None,
+    }
+    .into_bytes()
+    .unwrap();
+    DuToCuRrcContainer(cell_group_config_ie)
+}
+
+fn rrc_from_container(rrc_container: RrcContainer) -> Result<DlDcchMessage> {
+    let pdcp_pdu = PdcpPdu(rrc_container.0);
+    let rrc_message_bytes = pdcp_pdu.view_inner()?;
+    let m = DlDcchMessage::from_bytes(rrc_message_bytes)?;
+    Ok(m)
 }
 
 fn nas_from_dl_transfer_rrc_container(rrc_container: RrcContainer) -> Result<Vec<u8>> {
-    let pdcp_pdu = PdcpPdu(rrc_container.0);
-    let rrc_message_bytes = pdcp_pdu.view_inner()?;
-    let rrc_dl_transfer = match match match DlDcchMessage::from_bytes(rrc_message_bytes)?.message {
+    let rrc_dl_transfer = match match match rrc_from_container(rrc_container)?.message {
         DlDcchMessageType::C1(x) => x,
     } {
         C1_2::DlInformationTransfer(x) => Ok(x),
