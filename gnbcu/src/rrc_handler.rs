@@ -41,15 +41,21 @@ impl RrcHandler {
     }
 
     pub async fn dispatch_dcch(&self, ue: UeContext, message: &[u8], logger: &Logger) {
-        match match match match UlDcchMessage::from_bytes(message) {
+        let message = match UlDcchMessage::from_bytes(message) {
             Err(e) => {
                 warn!(logger, "Failed to decode RRC message: {:?}", e);
                 return;
             }
             Ok(m) => m,
+        };
+
+        // Look for a matching transaction.
+        if let Some(sender) = self.0.match_rrc_transaction(&ue).await {
+            let _ = sender.send(message).await;
+            return;
         }
-        .message
-        {
+
+        match match match message.message {
             UlDcchMessageType::C1(m) => m,
             UlDcchMessageType::MessageClassExtension(_) => {
                 warn!(
@@ -61,7 +67,6 @@ impl RrcHandler {
         } {
             C1_6::RrcSetupComplete(x) => self.rrc_setup_complete(ue, x, logger).await,
             C1_6::UlInformationTransfer(x) => self.ul_information_transfer(ue, x, logger).await,
-            //C1_6::SecurityModeComplete(x) => self.rrc_security_mode_complete(ue, x, logger).await,
             _ => todo!(),
         } {
             Err(e) => warn!(logger, "Error processing Rrc message {:?}", e),

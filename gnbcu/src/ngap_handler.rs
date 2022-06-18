@@ -164,7 +164,7 @@ impl RequestProvider<InitialContextSetupProcedure> for Handler {
         // from this UE.  This is not a robust long term mechnanism, since really this task is
         // only interested in the responses to the Rrc transactions it initiates.
         // TODO
-        let rrc_response_channel = self.gnbcu.bind_rrc_ul_dcch(&ue);
+        let rrc_transaction = self.gnbcu.new_rrc_transaction(&ue).await;
 
         // Build Security Mode command.
         let rrc_security_mode_command = DlDcchMessage {
@@ -247,7 +247,7 @@ impl RequestProvider<InitialContextSetupProcedure> for Handler {
             };
 
         // Receive security mode complete.
-        let _rrc_security_mode_complete = rrc_response_channel.recv().await?;
+        let _rrc_security_mode_complete = rrc_transaction.recv().await?;
 
         // Send Rrc Reconfiguration with the Nas message from earlier.
         let rrc_reconfiguration = DlDcchMessage {
@@ -276,11 +276,11 @@ impl RequestProvider<InitialContextSetupProcedure> for Handler {
             })),
         };
         let rrc_container = make_rrc_container(rrc_reconfiguration)?;
-        let rrc_response_channel = self.gnbcu.bind_rrc_ul_dcch(&ue);
+        let rrc_transaction = self.gnbcu.new_rrc_transaction(&ue).await;
         self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
 
         // Receive reconfiguration complete.
-        let _rrc_reconfiguration_complete: UlDcchMessage = rrc_response_channel.recv().await?;
+        let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction.recv().await?;
 
         Ok(InitialContextSetupResponse {
             amf_ue_ngap_id: r.amf_ue_ngap_id,

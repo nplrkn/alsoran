@@ -18,4 +18,4 @@ pdcp = {path = "../pdcp" }
 async-trait = "0.1.51"
 bitvec = {version = "0.22" }
 common = { path = "../common" }
-
+async-channel = "1.6.1"
