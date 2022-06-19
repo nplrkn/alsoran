@@ -35,13 +35,14 @@ async fn main() -> Result<()> {
     du.send_nas(nas_message, &logger).await?;
 
     info!(&logger, "< UE ctxt setup req (Security mode command) <");
-    du.receive_ue_context_setup_request(&logger).await?;
+    let security_mode_command = du.receive_ue_context_setup_request(&logger).await?;
 
     info!(&logger, "> UE ctxt setup resp >");
     du.send_ue_context_setup_response(&logger).await?;
 
     info!(&logger, "> Security mode complete >");
-    du.send_security_mode_complete(&logger).await?;
+    du.send_security_mode_complete(&security_mode_command, &logger)
+        .await?;
 
     info!(&logger, "< Rrc Reconfiguration (Registration Accept) <");
     let nas_registration_accept = du.receive_rrc_reconfiguration(&logger).await?;
@@ -53,8 +54,6 @@ async fn main() -> Result<()> {
     let nas_message = ue.recv_nas();
     info!(&logger, "> NAS Registration Complete >");
     du.send_nas(nas_message, &logger).await?;
-
-    assert!(false);
 
     drop(stop_source);
 

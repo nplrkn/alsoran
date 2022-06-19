@@ -223,16 +223,24 @@ impl MockDu {
         }
     }
 
-    pub async fn receive_ue_context_setup_request(&self, _logger: &Logger) -> Result<Vec<u8>> {
+    pub async fn receive_ue_context_setup_request(
+        &self,
+        _logger: &Logger,
+    ) -> Result<SecurityModeCommand> {
         let ue_context_setup_request = match self.recv().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
-        nas_from_dl_transfer_rrc_container(
-            ue_context_setup_request
-                .rrc_container
-                .expect("Expected Rrc Container on UeContextSetupRequest from CU"),
-        )
+
+        match match ue_context_setup_request.rrc_container {
+            Some(x) => rrc_from_container(x)?,
+            None => return Err(anyhow!("Expected Rrc container on UeContextSetupRequest",)),
+        }
+        .message
+        {
+            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => Ok(x),
+            x => Err(anyhow!("Expected security mode command - got {:?}", x)),
+        }
     }
 
     pub async fn send_ue_context_setup_response(&self, logger: &Logger) -> Result<()> {
@@ -268,10 +276,16 @@ impl MockDu {
             .await
     }
 
-    pub async fn send_security_mode_complete(&self, logger: &Logger) -> Result<()> {
+    pub async fn send_security_mode_complete(
+        &self,
+        security_mode_command: &SecurityModeCommand,
+        logger: &Logger,
+    ) -> Result<()> {
         let security_mode_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::SecurityModeComplete(SecurityModeComplete {
-                rrc_transaction_identifier: RrcTransactionIdentifier(1),
+                rrc_transaction_identifier: security_mode_command
+                    .rrc_transaction_identifier
+                    .clone(),
                 critical_extensions: CriticalExtensions27::SecurityModeComplete(
                     SecurityModeCompleteIEs {
                         late_non_critical_extension: None,
@@ -375,9 +389,8 @@ impl TnlaEventHandler for MockDu {
         &self,
         message: Message,
         _tnla_id: u32,
-        logger: &Logger,
+        _logger: &Logger,
     ) -> Option<Message> {
-        debug!(logger, "Got message from CU");
         self.internal_sender
             .send(Some(F1apPdu::from_bytes(&message).unwrap()))
             .await

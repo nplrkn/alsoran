@@ -43,7 +43,6 @@ impl SctpTnlaPool {
     ) where
         H: TnlaEventHandler,
     {
-        debug!(logger, "Wait on lock to add assoc {:?} to pool", assoc_id);
         self.assocs.lock().await.insert(assoc_id, assoc.clone());
 
         // TODO - this should spawn a task.  For example, it could lead to a NG Setup exchange.
@@ -73,7 +72,6 @@ impl SctpTnlaPool {
             logger.clone(),
         );
 
-        debug!(logger, "Wait on lock to remove assoc {:?}", assoc_id);
         self.assocs.lock().await.remove(&assoc_id);
     }
 
