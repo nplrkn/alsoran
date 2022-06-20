@@ -1,9 +1,20 @@
-use super::Gnbcu;
+use super::{Gnbcu, RrcHandler, UeContext};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{EventHandler, RequestError, RequestProvider, TnlaEvent};
-use slog::{info, warn, Logger};
+use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
+use pdcp::PdcpPdu;
+use slog::{debug, info, warn, Logger};
+
+#[derive(Clone)]
+pub struct F1apHandler {
+    pub gnbcu: Gnbcu,
+    pub rrc_handler: RrcHandler,
+}
+
+pub fn new(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
+    F1apCu(F1apHandler { gnbcu, rrc_handler })
+}
 
 #[async_trait]
 impl RequestProvider<F1SetupProcedure> for F1apHandler {
@@ -12,7 +23,7 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
         r: F1SetupRequest,
         logger: &Logger,
     ) -> Result<F1SetupResponse, RequestError<F1SetupFailure>> {
-        info!(logger, "Got F1 setup - send response");
+        debug!(logger, "Got F1 setup - send response");
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,
             gnb_cu_rrc_version: RrcVersion {
@@ -28,12 +39,57 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
     }
 }
 
-pub fn new(gnbcu: Gnbcu) -> F1apCu<F1apHandler> {
-    F1apCu(F1apHandler { gnbcu })
+#[async_trait]
+impl IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler {
+    async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
+        info!(logger, "Got InitialUlRrcMessageTransfer");
+
+        // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER,
+        // the gNB-CU should reject the UE under the assumption that the gNB-DU is not able to serve such UE."
+
+        // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER,
+        // the gNB-CU shall take it into account as specified in TS 38.401 [4]."
+
+        let ue_context = UeContext {
+            gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
+            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
+        };
+
+        self.rrc_handler
+            .dispatch_ccch(ue_context, &r.rrc_container.0, logger)
+            .await;
+    }
 }
-#[derive(Clone)]
-pub struct F1apHandler {
-    pub gnbcu: Gnbcu,
+
+#[async_trait]
+impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
+    async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
+        debug!(logger, "Got UlRrcMessageTransfer");
+
+        // TODO - "If the UL RRC MESSAGE TRANSFER message contains the New gNB-DU UE F1AP ID IE, the gNB-CU shall,
+        // if supported, replace the value received in the gNB-DU UE F1AP ID IE by the value of the New gNB-DU UE F1AP ID
+        // and use it for further signalling."
+
+        // TODO - retrive existing UE Context by looking up r.gnb_cu_ue_f1ap_id.
+        let ue_context = UeContext {
+            gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
+            gnb_cu_ue_f1ap_id: r.gnb_cu_ue_f1ap_id,
+        };
+
+        let pdcp_pdu = PdcpPdu(r.rrc_container.0);
+
+        let rrc_message_bytes = match pdcp_pdu.view_inner() {
+            Ok(x) => x,
+            Err(e) => {
+                warn!(logger, "Invalid PDCP PDU - {:?}", e);
+                return;
+            }
+        };
+
+        self.rrc_handler
+            .dispatch_dcch(ue_context, rrc_message_bytes, logger)
+            .await;
+    }
 }
 
 #[async_trait]

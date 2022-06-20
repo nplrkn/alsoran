@@ -462,25 +462,25 @@ class TopLevelEnums:
         self.initiating_encode_matches = ""
         self.initiating_decode_matches = ""
         self.initiating_enum = """\
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum InitiatingMessage {
 """
         self.successful_encode_matches = ""
         self.successful_decode_matches = ""
         self.successful_enum = """\
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
 """
         self.unsuccessful_encode_matches = ""
         self.unsuccessful_decode_matches = ""
         self.unsuccessful_enum = """\
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
 """
 
     def add_procedure(self, p):
-        if p.initiating == "PrivateMessage":
-            return
+        # if p.initiating == "PrivateMessage":
+        #     return
         self.initiating_enum += f"    {p.initiating}({p.initiating}),\n"
         self.initiating_decode_matches += f"""\
             {p.code} => Ok(Self::{p.initiating}({p.initiating}::decode(data)?)),
@@ -537,7 +537,7 @@ impl {name} {{
 }}
 
 """ + APER_CODEC_IMPL_FORMAT
-        return f"""\
+        return f"""
 {self.initiating_enum}}}
 {impl.format(name="InitiatingMessage",decode_matches=self.initiating_decode_matches,
              encode_matches=self.initiating_encode_matches)}
@@ -585,36 +585,25 @@ class RustInterpreter(Interpreter):
         # Output a new struct that impls the Procedure trait.
         # The decode function depends on whether there is a successful and unsuccessful response defined.
         if p.successful:
-            unsuccessful_match_arm = f"""\
+            self.output_procedure(p)
+        else:
+            self.output_indication(p)
+
+    def output_procedure(self, p):
+        top_pdu = p.family[0] + p.family[1:4].lower() + "Pdu"
+        unsuccessful_match_arm = f"""\
             {top_pdu}::UnsuccessfulOutcome(UnsuccessfulOutcome::{p.unsuccessful}(x)) => {{
                 Err(RequestError::UnsuccessfulOutcome(x))
             }}""" if p.unsuccessful else ""
 
-            decode_response = f"""
-    fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {{
-        let response_pdu = Self::TopPdu::from_bytes(bytes)?;
-        match response_pdu {{
-            {top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)) => Ok(x),
-{unsuccessful_match_arm}
-            _ => Err(RequestError::Other("Unexpected pdu contents".to_string())),
-        }}
-    }}"""
-        else:  # this is an indication
-            decode_response = f"""
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {{
-        Err(RequestError::Other("No response is defined for {p.initiating}!".to_string()))
-    }}"""
-
-        successful_outcome = f"Ok(x) => Some({top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)))" if p.successful else "Ok(_) => None"
-
         self.outfile += f"""
 pub struct {p.name} {{}}
 
-# [async_trait]
+#[async_trait]
 impl Procedure for {p.name} {{
     type TopPdu = {top_pdu};
     type Request = {p.initiating};
-    type Success = {p.successful or "()"};
+    type Success = {p.successful};
     type Failure = {p.unsuccessful or "()"};
     const CODE: u8 = {p.code};
 
@@ -624,7 +613,7 @@ impl Procedure for {p.name} {{
         logger: &Logger,
     ) -> Option<{top_pdu}> {{
         match <T as RequestProvider<{p.name}>>::request(provider, req, logger).await {{
-            {successful_outcome},
+            Ok(x) => Some({top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x))),
             Err(_) => todo!(),
         }}
     }}
@@ -632,9 +621,42 @@ impl Procedure for {p.name} {{
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {{
         {top_pdu}::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
     }}
-{decode_response}
-}}
 
+    fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {{
+        let response_pdu = Self::TopPdu::from_bytes(bytes)?;
+        match response_pdu {{
+            {top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x)) => Ok(x),
+{unsuccessful_match_arm}
+            _ => Err(RequestError::Other("Unexpected pdu contents".to_string())),
+        }}
+    }}
+}}
+"""
+
+    def output_indication(self, p):
+        top_pdu = p.family[0] + p.family[1:4].lower() + "Pdu"
+
+        self.outfile += f"""
+pub struct {p.name} {{}}
+
+#[async_trait]
+impl Indication for {p.name} {{
+    type TopPdu = {top_pdu};
+    type Request = {p.initiating};
+    const CODE: u8 = {p.code};
+
+    async fn call_provider<T: IndicationHandler<Self>>(
+        provider: &T,
+        req: {p.initiating},
+        logger: &Logger,
+    ) {{
+        <T as IndicationHandler<{p.name}>>::handle(provider, req, logger).await;
+    }}
+
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {{
+        {top_pdu}::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
+    }}
+}}
 """
 
     def enum_def(self, tree):
@@ -646,8 +668,8 @@ impl Procedure for {p.name} {{
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
@@ -683,7 +705,7 @@ impl {name} {{
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum {name} {{
 {field_interpreter.choice_fields}\
 }}
@@ -715,7 +737,7 @@ impl {name} {{
         inner = type_and_constraints(tree.children[1]).typ
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct {name}(pub {inner});
 
 impl {name} {{
@@ -755,7 +777,7 @@ impl {name} {{
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -834,7 +856,7 @@ impl {orig_name} {{
 
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -929,7 +951,7 @@ handoverNotification NGAP-ELEMENTARY-PROCEDURE ::= {
 
 pub struct AmfConfigurationUpdateProcedure {}
 
-# [async_trait]
+#[async_trait]
 impl Procedure for AmfConfigurationUpdateProcedure {
     type TopPdu = NgapPdu;
     type Request = AmfConfigurationUpdate;
@@ -964,38 +986,28 @@ impl Procedure for AmfConfigurationUpdateProcedure {
     }
 }
 
-
 pub struct HandoverNotificationProcedure {}
 
-# [async_trait]
-impl Procedure for HandoverNotificationProcedure {
+#[async_trait]
+impl Indication for HandoverNotificationProcedure {
     type TopPdu = NgapPdu;
     type Request = HandoverNotify;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 11;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: HandoverNotify,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<HandoverNotificationProcedure>>::request(provider, req, logger).await {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<HandoverNotificationProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::HandoverNotify(r)).into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other("No response is defined for HandoverNotify!".to_string()))
-    }
 }
 
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum InitiatingMessage {
     AmfConfigurationUpdate(AmfConfigurationUpdate),
     HandoverNotify(HandoverNotify),
@@ -1038,7 +1050,7 @@ impl AperCodec for InitiatingMessage {
     }
 }
 
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
 }
@@ -1074,7 +1086,7 @@ impl AperCodec for SuccessfulOutcome {
     }
 }
 
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
     AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure),
 }
@@ -1117,7 +1129,7 @@ ProcedureCode		::= INTEGER (0..255)
 """, """\
 
 // ProcedureCode
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ProcedureCode(pub u8);
 
 impl ProcedureCode {
@@ -1146,8 +1158,8 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
         output = """\
 
 // TriggeringMessage
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -1192,7 +1204,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
         output = """\
 
 // WlanMeasurementConfiguration
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_rtt: Option<WlanRtt>,
@@ -1238,8 +1250,8 @@ impl AperCodec for WlanMeasurementConfiguration {
     }
 }
 // WlanRtt
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum WlanRtt {
     Thing1,
 }
@@ -1274,11 +1286,11 @@ LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
 """
         output = """\
 
-// LteueRlfReportContainer
-# [derive(Clone, Debug)]
-pub struct LteueRlfReportContainer(pub Vec<u8>);
+// LteUeRlfReportContainer
+#[derive(Clone, Debug)]
+pub struct LteUeRlfReportContainer(pub Vec<u8>);
 
-impl LteueRlfReportContainer {
+impl LteUeRlfReportContainer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(data, None, None, false)?))
     }
@@ -1287,13 +1299,13 @@ impl LteueRlfReportContainer {
     }
 }
 
-impl AperCodec for LteueRlfReportContainer {
+impl AperCodec for LteUeRlfReportContainer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        LteueRlfReportContainer::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LteueRlfReportContainer"))
+        LteUeRlfReportContainer::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LteUeRlfReportContainer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LteueRlfReportContainer"))
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LteUeRlfReportContainer"))
     }
 }"""
         self.should_generate(input, output)
@@ -1305,7 +1317,7 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
         output = """\
 
 // MaximumDataBurstVolume
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl MaximumDataBurstVolume {
@@ -1335,7 +1347,7 @@ MobilityInformation ::= BIT STRING(SIZE(16))
         output = """\
 
 // MobilityInformation
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct MobilityInformation(pub BitString);
 
 impl MobilityInformation {
@@ -1369,8 +1381,8 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
         output = """\
 
 // MaximumIntegrityProtectedDataRate
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
@@ -1411,7 +1423,7 @@ EventTrigger ::= CHOICE {
 """, """\
 
 // EventTrigger
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig,
@@ -1451,8 +1463,8 @@ impl EventTrigger {
 }
 
 // OutOfCoverage
-# [derive(Clone, Debug, Copy, TryFromPrimitive)]
-# [repr(u8)]
+#[derive(Clone, Debug, Copy, TryFromPrimitive)]
+#[repr(u8)]
 pub enum OutOfCoverage {
     True,
 }
@@ -1487,7 +1499,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 """, """\
 
 // PduSessionResourceSetupRequest
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_paging_priority: Option<Vec<u8>>,
@@ -1571,7 +1583,7 @@ GNB-ID ::= CHOICE {
 """, """\
 
 // GnbId
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum GnbId {
     GnbId(BitString),
 }
@@ -1617,7 +1629,7 @@ PrivateIE-ID	::= CHOICE {
 """, """\
 
 // PrivateIeId
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
@@ -1665,7 +1677,7 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 """, """\
 
 // ExpectedActivityPeriod
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ExpectedActivityPeriod(pub i128);
 
 impl ExpectedActivityPeriod {
@@ -1693,7 +1705,7 @@ URI-address ::= VisibleString
 """, """\
 
 // UriAddress
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct UriAddress(pub String);
 
 impl UriAddress {
@@ -1720,7 +1732,7 @@ impl AperCodec for UriAddress {
 AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalDLUPTNLInformationForHOItem
 """, """
 // AdditionalDluptnlInformationForHoList
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
 
 impl AdditionalDluptnlInformationForHoList {
@@ -1763,7 +1775,7 @@ DLPRSResourceCoordinates ::= SEQUENCE {
 """, """\
 
 // DlprsResourceCoordinates
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct DlprsResourceCoordinates {
     pub listof_dl_prs_resource_set_arp: Vec<DlprsResourceSetArp>,
     pub foo: Option<i8>,
@@ -1831,7 +1843,7 @@ UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
 """, """\
 
 // UeAssociatedLogicalF1ConnectionListRes
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
 
 impl UeAssociatedLogicalF1ConnectionListRes {
@@ -1893,7 +1905,7 @@ BH-Routing-Information-Added-List-ItemIEs	F1AP-PROTOCOL-IES ::= {
 """, """\
 
 // BapMappingConfiguration
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct BapMappingConfiguration {
     pub bh_routing_information_added_list: Option<BhRoutingInformationAddedList>,
 }
@@ -1953,7 +1965,7 @@ impl AperCodec for BapMappingConfiguration {
     }
 }
 // BhRoutingInformationAddedList
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
 
 impl BhRoutingInformationAddedList {
@@ -2004,7 +2016,7 @@ GNB-CUSystemInformation ::= SEQUENCE {
 """, """\
 
 // GnbCuSystemInformation
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct GnbCuSystemInformation {
     pub sibtypetobeupdatedlist: Vec<SibtypetobeupdatedListItem>,
 }
@@ -2061,7 +2073,7 @@ SBCCH-SL-BCH-MessageType::=     CHOICE {
 }""", """\
 
 // SbcchSlBchMessageType
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum SbcchSlBchMessageType {
     C1(C1),
 }
@@ -2098,7 +2110,7 @@ impl AperCodec for SbcchSlBchMessageType {
     }
 }
 // C1
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum C1 {
     MasterInformationBlockSidelink(MasterInformationBlockSidelink),
     Spare1,
@@ -2153,7 +2165,7 @@ OverloadStopIEs NGAP-PROTOCOL-IES ::= {
 """, """\
 
 // OverloadStop
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct OverloadStop {
 }
 
@@ -2208,7 +2220,7 @@ LocationMeasurementIndication-IEs ::=       SEQUENCE {
 """, """\
 
 // LocationMeasurementIndicationIEs
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct LocationMeasurementIndicationIEs {
     pub measurement_indication: SetupRelease<LocationMeasurementInfo>,
 }
@@ -2259,7 +2271,7 @@ AvailabilityCombination-r16 ::=         SEQUENCE {
 """, """\
 
 // AvailabilityCombinationR16
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct AvailabilityCombinationR16 {
     pub resource_availability_r_16: Vec<u8>,
 }
@@ -2317,7 +2329,7 @@ SystemInformation-IEs ::=           SEQUENCE {
 """, """\
 
 // SystemInformationIEs
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct SystemInformationIEs {
     pub sib_type_and_info: Vec<SibTypeAndInfo>,
 }
@@ -2362,7 +2374,7 @@ impl AperCodec for SystemInformationIEs {
     }
 }
 // SibTypeAndInfo
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub enum SibTypeAndInfo {
     Sib2(Sib2),
     Sib3(Sib3),
@@ -2414,7 +2426,7 @@ CSI-AssociatedReportConfigInfo ::=  SEQUENCE {
 """, """\
 
 // CsiAssociatedReportConfigInfo
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct CsiAssociatedReportConfigInfo {
     pub nzp_csi_rs: NzpCsiRs,
 }
@@ -2448,7 +2460,7 @@ impl AperCodec for CsiAssociatedReportConfigInfo {
     }
 }
 // NzpCsiRs
-# [derive(Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct NzpCsiRs {
     pub qcl_info: Option<Vec<TciStateId>>,
 }

@@ -6,7 +6,7 @@ use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use futures::stream::StreamExt;
 use sctp::Message;
-use slog::{trace, Logger};
+use slog::{debug, Logger};
 use std::fmt::Debug;
 use std::net::SocketAddr;
 use stop_token::StopToken;
@@ -38,7 +38,7 @@ impl MockTransportProvider {
 #[async_trait]
 impl TransportProvider for MockTransportProvider {
     async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
-        trace!(logger, "MockTransportProvider send message {:?}", message);
+        debug!(logger, "MockTransportProvider send message {:?}", message);
         self.sender.send(message).await.unwrap();
         Ok(())
     }
@@ -60,10 +60,9 @@ impl TransportProvider for MockTransportProvider {
         let mut stream = receiver.take_until(stop_token);
         Ok(async_std::task::spawn(async move {
             while let Some(pdu) = stream.next().await {
-                trace!(
+                debug!(
                     logger,
-                    "MockTransportProvider received {:?}, forward to handler",
-                    pdu
+                    "MockTransportProvider received {:?}, forward to handler", pdu
                 );
                 handler.handle_message(pdu, 1, &logger).await;
             }

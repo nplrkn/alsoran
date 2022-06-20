@@ -23,7 +23,7 @@ USE_IES = "use super::ies::*;\n"
 USE_PDUS = """\
 use crate::common::Criticality;
 use super::pdu::*;
-use net::{Procedure, RequestError, AperSerde, RequestProvider};
+use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
 use async_trait::async_trait;
 use slog::Logger;
 use anyhow::Result;
@@ -83,6 +83,6 @@ def generate_rrc():
                   USE_BITSTRING + USE_RRC_SETUP_RELEASE + USE_NUM_ENUM, constants, parse_tree)
 
 
-generate_rrc()
 generate_xxap("ngap")
 generate_xxap("f1ap")
+generate_rrc()

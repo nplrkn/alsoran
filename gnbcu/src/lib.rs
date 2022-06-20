@@ -1,12 +1,20 @@
 mod config;
 mod f1ap_handler;
 mod ngap_handler;
+mod rrc_handler;
+mod rrc_transaction;
+mod ue_context;
 use anyhow::Result;
+use async_channel::Sender;
 use async_std::task::JoinHandle;
 pub use config::Config;
 use net::{SctpTransportProvider, Stack};
+use rrc::UlDcchMessage;
+use rrc_handler::RrcHandler;
+use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use slog::{info, Logger};
 use stop_token::{StopSource, StopToken};
+use ue_context::UeContext;
 
 // TS38.412, 7
 // The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol NGAP
@@ -24,6 +32,7 @@ pub struct Gnbcu {
     ngap: Stack,
     f1ap: Stack,
     logger: Logger,
+    rrc_transactions: PendingRrcTransactions,
 }
 
 impl Gnbcu {
@@ -33,6 +42,7 @@ impl Gnbcu {
             ngap: Stack::new(SctpTransportProvider::new(NGAP_SCTP_PPID)),
             f1ap: Stack::new(SctpTransportProvider::new(F1AP_SCTP_PPID)),
             logger: logger.clone(),
+            rrc_transactions: PendingRrcTransactions::new(),
         };
 
         // TODO - replace with something like the model in net::TransportTasks.
@@ -62,11 +72,12 @@ impl Gnbcu {
             logger,
             "Listen for connection from DU on {}", f1_listen_address
         );
+        let rrc_handler = RrcHandler::new(self.clone());
         let f1_transport = self
             .f1ap
             .listen(
                 f1_listen_address,
-                f1ap_handler::new(self.clone()),
+                f1ap_handler::new(self.clone(), rrc_handler),
                 logger.clone(),
             )
             .await?;
@@ -82,5 +93,17 @@ impl Gnbcu {
 
     pub async fn connected_amf_change(&self, _logger: &Logger) {
         // TODO
+    }
+
+    pub async fn new_rrc_transaction(&self, ue: &UeContext) -> RrcTransaction {
+        self.rrc_transactions
+            .new_transaction(ue.gnb_cu_ue_f1ap_id.0)
+            .await
+    }
+
+    pub async fn match_rrc_transaction(&self, ue: &UeContext) -> Option<Sender<UlDcchMessage>> {
+        self.rrc_transactions
+            .match_transaction(ue.gnb_cu_ue_f1ap_id.0)
+            .await
     }
 }

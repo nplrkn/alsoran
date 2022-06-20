@@ -3,18 +3,31 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- gnbdu-sim
-- Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
-- Requests should be processed in parallel in separate tasks.
-- Session setup (23.502, figure 4.3.2.2.1-1).  (Requires N2 PDU Session Request/Response.)
-- Review TODOs and remove commented out code
+- Fix malformed CellGroupConfig issue seen in Wireshark 
+- Build go code using cargo build and don't install it in alsoran output directory rather than home.
+- Fix code that does match match
+- Pretty Ue initial context and move into separate modules
+- Intermittent behavior in free5GC demo
+- Bug - Ctrl-C doesn't work on gnbcu if it is waiting for a UeContextSetupResponse.  (Would need to timeout so since this is meant to be graceful shutdown.)
+- Timers and timeouts within the procedures we do and testing
+- Regression test that avoids the need to run free5GC - put security mode command in Initial Context Setup Request
+- Bump dependencies
+- Write up reliable demo instructions starting with download of free5GC
+- Remove commented out code
+- Review TODOs
 
 ## MAYBE
+- Handle registration reject (e.g. test with UDM not running)
+- Requests should be processed in parallel in separate tasks.
 - Deduplicate inline definitions in RRC autogeneration
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## DONE
+- Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
+- Go program that processes NAS information
+- Encapsulate RRC in PDCP PDU
+- gnbdu-sim
 - RRC autogeneration
 - Multi worker code (including coordinator) moved to a 'prototype' version leaving remaining code super simple
 - NG Setup working again against free5GC using the instructions in [the free5gc howto](../howto/free5GC-testing.md).

@@ -3010,16 +3010,16 @@ impl AperCodec for GnbDuResourceCoordinationResponse {
 pub struct UeContextSetupRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
-    pub sp_cell_id: Nrcgi,
+    pub sp_cell_id: NrCgi,
     pub serv_cell_index: ServCellIndex,
     pub sp_cell_ul_configured: Option<CellUlConfigured>,
-    pub c_uto_durrc_information: CUtoDurrcInformation,
+    pub cu_to_du_rrc_information: CuToDuRrcInformation,
     pub candidate_sp_cell_list: Option<CandidateSpCellList>,
     pub drx_cycle: Option<DrxCycle>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
     pub s_cell_to_be_setup_list: Option<SCellToBeSetupList>,
-    pub sr_bs_to_be_setup_list: Option<SrBsToBeSetupList>,
-    pub dr_bs_to_be_setup_list: Option<DrBsToBeSetupList>,
+    pub srbs_to_be_setup_list: Option<SrbsToBeSetupList>,
+    pub drbs_to_be_setup_list: Option<DrbsToBeSetupList>,
     pub inactivity_monitoring_request: Option<InactivityMonitoringRequest>,
     pub rat_frequency_priority_information: Option<RatFrequencyPriorityInformation>,
     pub rrc_container: Option<RrcContainer>,
@@ -3030,17 +3030,17 @@ pub struct UeContextSetupRequest {
     pub resource_coordination_transfer_information: Option<ResourceCoordinationTransferInformation>,
     pub serving_cell_mo: Option<ServingCellMo>,
     pub new_gnb_cu_ue_f1ap_id: Option<GnbDuUeF1apId>,
-    pub ranueid: Option<Ranueid>,
+    pub ran_ue_id: Option<RanUeId>,
     pub trace_activation: Option<TraceActivation>,
     pub additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex>,
     pub bh_channels_to_be_setup_list: Option<BhChannelsToBeSetupList>,
     pub configured_bap_address: Option<BapAddress>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_link_ambr: Option<BitRate>,
-    pub sldr_bs_to_be_setup_list: Option<SldrBsToBeSetupList>,
+    pub sl_drbs_to_be_setup_list: Option<SlDrbsToBeSetupList>,
     pub conditional_inter_du_mobility_information: Option<ConditionalInterDuMobilityInformation>,
     pub management_based_mdt_plmn_list: Option<MdtPlmnList>,
     pub serving_nid: Option<Nid>,
@@ -3055,18 +3055,18 @@ impl UeContextSetupRequest {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut sp_cell_id: Option<Nrcgi> = None;
+        let mut sp_cell_id: Option<NrCgi> = None;
         let mut serv_cell_index: Option<ServCellIndex> = None;
         let mut sp_cell_ul_configured: Option<CellUlConfigured> = None;
-        let mut c_uto_durrc_information: Option<CUtoDurrcInformation> = None;
+        let mut cu_to_du_rrc_information: Option<CuToDuRrcInformation> = None;
         let mut candidate_sp_cell_list: Option<CandidateSpCellList> = None;
         let mut drx_cycle: Option<DrxCycle> = None;
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
         let mut s_cell_to_be_setup_list: Option<SCellToBeSetupList> = None;
-        let mut sr_bs_to_be_setup_list: Option<SrBsToBeSetupList> = None;
-        let mut dr_bs_to_be_setup_list: Option<DrBsToBeSetupList> = None;
+        let mut srbs_to_be_setup_list: Option<SrbsToBeSetupList> = None;
+        let mut drbs_to_be_setup_list: Option<DrbsToBeSetupList> = None;
         let mut inactivity_monitoring_request: Option<InactivityMonitoringRequest> = None;
         let mut rat_frequency_priority_information: Option<RatFrequencyPriorityInformation> = None;
         let mut rrc_container: Option<RrcContainer> = None;
@@ -3079,21 +3079,21 @@ impl UeContextSetupRequest {
         > = None;
         let mut serving_cell_mo: Option<ServingCellMo> = None;
         let mut new_gnb_cu_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut ranueid: Option<Ranueid> = None;
+        let mut ran_ue_id: Option<RanUeId> = None;
         let mut trace_activation: Option<TraceActivation> = None;
         let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
         let mut bh_channels_to_be_setup_list: Option<BhChannelsToBeSetupList> = None;
         let mut configured_bap_address: Option<BapAddress> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_link_ambr: Option<BitRate> = None;
-        let mut sldr_bs_to_be_setup_list: Option<SldrBsToBeSetupList> = None;
+        let mut sl_drbs_to_be_setup_list: Option<SlDrbsToBeSetupList> = None;
         let mut conditional_inter_du_mobility_information: Option<
             ConditionalInterDuMobilityInformation,
         > = None;
@@ -3108,10 +3108,10 @@ impl UeContextSetupRequest {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                63 => sp_cell_id = Some(Nrcgi::decode(data)?),
+                63 => sp_cell_id = Some(NrCgi::decode(data)?),
                 107 => serv_cell_index = Some(ServCellIndex::decode(data)?),
                 96 => sp_cell_ul_configured = Some(CellUlConfigured::decode(data)?),
-                9 => c_uto_durrc_information = Some(CUtoDurrcInformation::decode(data)?),
+                9 => cu_to_du_rrc_information = Some(CuToDuRrcInformation::decode(data)?),
                 90 => candidate_sp_cell_list = Some(CandidateSpCellList::decode(data)?),
                 38 => drx_cycle = Some(DrxCycle::decode(data)?),
                 49 => {
@@ -3119,8 +3119,8 @@ impl UeContextSetupRequest {
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
                 54 => s_cell_to_be_setup_list = Some(SCellToBeSetupList::decode(data)?),
-                74 => sr_bs_to_be_setup_list = Some(SrBsToBeSetupList::decode(data)?),
-                35 => dr_bs_to_be_setup_list = Some(DrBsToBeSetupList::decode(data)?),
+                74 => srbs_to_be_setup_list = Some(SrbsToBeSetupList::decode(data)?),
+                35 => drbs_to_be_setup_list = Some(DrbsToBeSetupList::decode(data)?),
                 97 => {
                     inactivity_monitoring_request = Some(InactivityMonitoringRequest::decode(data)?)
                 }
@@ -3139,25 +3139,25 @@ impl UeContextSetupRequest {
                 }
                 182 => serving_cell_mo = Some(ServingCellMo::decode(data)?),
                 217 => new_gnb_cu_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                226 => ranueid = Some(Ranueid::decode(data)?),
+                226 => ran_ue_id = Some(RanUeId::decode(data)?),
                 242 => trace_activation = Some(TraceActivation::decode(data)?),
                 248 => {
                     additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?)
                 }
                 258 => bh_channels_to_be_setup_list = Some(BhChannelsToBeSetupList::decode(data)?),
                 282 => configured_bap_address = Some(BapAddress::decode(data)?),
-                306 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                306 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 307 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 308 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 309 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 340 => pc5_link_ambr = Some(BitRate::decode(data)?),
-                330 => sldr_bs_to_be_setup_list = Some(SldrBsToBeSetupList::decode(data)?),
+                330 => sl_drbs_to_be_setup_list = Some(SlDrbsToBeSetupList::decode(data)?),
                 373 => {
                     conditional_inter_du_mobility_information =
                         Some(ConditionalInterDuMobilityInformation::decode(data)?)
@@ -3182,22 +3182,22 @@ impl UeContextSetupRequest {
         let serv_cell_index = serv_cell_index.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE serv_cell_index"
         )))?;
-        let c_uto_durrc_information = c_uto_durrc_information.ok_or(aper::AperCodecError::new(
-            format!("Missing mandatory IE c_uto_durrc_information"),
-        ))?;
+        let cu_to_du_rrc_information = cu_to_du_rrc_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE cu_to_du_rrc_information")),
+        )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             sp_cell_id,
             serv_cell_index,
             sp_cell_ul_configured,
-            c_uto_durrc_information,
+            cu_to_du_rrc_information,
             candidate_sp_cell_list,
             drx_cycle,
             resource_coordination_transfer_container,
             s_cell_to_be_setup_list,
-            sr_bs_to_be_setup_list,
-            dr_bs_to_be_setup_list,
+            srbs_to_be_setup_list,
+            drbs_to_be_setup_list,
             inactivity_monitoring_request,
             rat_frequency_priority_information,
             rrc_container,
@@ -3208,17 +3208,17 @@ impl UeContextSetupRequest {
             resource_coordination_transfer_information,
             serving_cell_mo,
             new_gnb_cu_ue_f1ap_id,
-            ranueid,
+            ran_ue_id,
             trace_activation,
             additional_rrm_priority_index,
             bh_channels_to_be_setup_list,
             configured_bap_address,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_link_ambr,
-            sldr_bs_to_be_setup_list,
+            sl_drbs_to_be_setup_list,
             conditional_inter_du_mobility_information,
             management_based_mdt_plmn_list,
             serving_nid,
@@ -3274,7 +3274,7 @@ impl UeContextSetupRequest {
         }
 
         let ie = &mut AperCodecData::new();
-        self.c_uto_durrc_information.encode(ie)?;
+        self.cu_to_du_rrc_information.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -3321,7 +3321,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_to_be_setup_list {
+        if let Some(x) = &self.srbs_to_be_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 74, false)?;
@@ -3331,7 +3331,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_to_be_setup_list {
+        if let Some(x) = &self.drbs_to_be_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
@@ -3441,7 +3441,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.ranueid {
+        if let Some(x) = &self.ran_ue_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
@@ -3491,7 +3491,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 306, false)?;
@@ -3511,7 +3511,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 308, false)?;
@@ -3521,7 +3521,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 309, false)?;
@@ -3541,7 +3541,7 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_to_be_setup_list {
+        if let Some(x) = &self.sl_drbs_to_be_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 330, false)?;
@@ -3704,11 +3704,11 @@ impl AperCodec for SCellToBeSetupList {
             .map_err(|e: AperCodecError| e.push_context("SCellToBeSetupList"))
     }
 }
-// SrBsToBeSetupList
+// SrbsToBeSetupList
 #[derive(Clone, Debug)]
-pub struct SrBsToBeSetupList(pub Vec<SrBsToBeSetupItem>);
+pub struct SrbsToBeSetupList(pub Vec<SrbsToBeSetupItem>);
 
-impl SrBsToBeSetupList {
+impl SrbsToBeSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -3717,7 +3717,7 @@ impl SrBsToBeSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsToBeSetupItem::decode(data)?);
+                items.push(SrbsToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -3736,22 +3736,22 @@ impl SrBsToBeSetupList {
     }
 }
 
-impl AperCodec for SrBsToBeSetupList {
+impl AperCodec for SrbsToBeSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupList"))
+        SrbsToBeSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupList"))
     }
 }
-// DrBsToBeSetupList
+// DrbsToBeSetupList
 #[derive(Clone, Debug)]
-pub struct DrBsToBeSetupList(pub Vec<DrBsToBeSetupItem>);
+pub struct DrbsToBeSetupList(pub Vec<DrbsToBeSetupItem>);
 
-impl DrBsToBeSetupList {
+impl DrbsToBeSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -3760,7 +3760,7 @@ impl DrBsToBeSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsToBeSetupItem::decode(data)?);
+                items.push(DrbsToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -3779,15 +3779,15 @@ impl DrBsToBeSetupList {
     }
 }
 
-impl AperCodec for DrBsToBeSetupList {
+impl AperCodec for DrbsToBeSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupList"))
+        DrbsToBeSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupList"))
     }
 }
 // BhChannelsToBeSetupList
@@ -3834,11 +3834,11 @@ impl AperCodec for BhChannelsToBeSetupList {
             .map_err(|e: AperCodecError| e.push_context("BhChannelsToBeSetupList"))
     }
 }
-// SldrBsToBeSetupList
+// SlDrbsToBeSetupList
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeSetupList(pub Vec<SldrBsToBeSetupItem>);
+pub struct SlDrbsToBeSetupList(pub Vec<SlDrbsToBeSetupItem>);
 
-impl SldrBsToBeSetupList {
+impl SlDrbsToBeSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -3847,7 +3847,7 @@ impl SldrBsToBeSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsToBeSetupItem::decode(data)?);
+                items.push(SlDrbsToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -3866,15 +3866,15 @@ impl SldrBsToBeSetupList {
     }
 }
 
-impl AperCodec for SldrBsToBeSetupList {
+impl AperCodec for SlDrbsToBeSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupList"))
+        SlDrbsToBeSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupList"))
     }
 }
 // UeContextSetupResponse
@@ -3882,22 +3882,22 @@ impl AperCodec for SldrBsToBeSetupList {
 pub struct UeContextSetupResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub d_uto_currc_information: DUtoCurrcInformation,
+    pub du_to_cu_rrc_information: DuToCuRrcInformation,
     pub c_rnti: Option<CRnti>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
     pub full_configuration: Option<FullConfiguration>,
-    pub dr_bs_setup_list: Option<DrBsSetupList>,
-    pub sr_bs_failed_to_be_setup_list: Option<SrBsFailedToBeSetupList>,
-    pub dr_bs_failed_to_be_setup_list: Option<DrBsFailedToBeSetupList>,
+    pub drbs_setup_list: Option<DrbsSetupList>,
+    pub srbs_failed_to_be_setup_list: Option<SrbsFailedToBeSetupList>,
+    pub drbs_failed_to_be_setup_list: Option<DrbsFailedToBeSetupList>,
     pub s_cell_failedto_setup_list: Option<SCellFailedtoSetupList>,
     pub inactivity_monitoring_response: Option<InactivityMonitoringResponse>,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
-    pub sr_bs_setup_list: Option<SrBsSetupList>,
+    pub srbs_setup_list: Option<SrbsSetupList>,
     pub bh_channels_setup_list: Option<BhChannelsSetupList>,
     pub bh_channels_failed_to_be_setup_list: Option<BhChannelsFailedToBeSetupList>,
-    pub sldr_bs_setup_list: Option<SldrBsSetupList>,
-    pub sldr_bs_failed_to_be_setup_list: Option<SldrBsFailedToBeSetupList>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub sl_drbs_setup_list: Option<SlDrbsSetupList>,
+    pub sl_drbs_failed_to_be_setup_list: Option<SlDrbsFailedToBeSetupList>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextSetupResponse {
@@ -3908,24 +3908,24 @@ impl UeContextSetupResponse {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
+        let mut du_to_cu_rrc_information: Option<DuToCuRrcInformation> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
         let mut full_configuration: Option<FullConfiguration> = None;
-        let mut dr_bs_setup_list: Option<DrBsSetupList> = None;
-        let mut sr_bs_failed_to_be_setup_list: Option<SrBsFailedToBeSetupList> = None;
-        let mut dr_bs_failed_to_be_setup_list: Option<DrBsFailedToBeSetupList> = None;
+        let mut drbs_setup_list: Option<DrbsSetupList> = None;
+        let mut srbs_failed_to_be_setup_list: Option<SrbsFailedToBeSetupList> = None;
+        let mut drbs_failed_to_be_setup_list: Option<DrbsFailedToBeSetupList> = None;
         let mut s_cell_failedto_setup_list: Option<SCellFailedtoSetupList> = None;
         let mut inactivity_monitoring_response: Option<InactivityMonitoringResponse> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
-        let mut sr_bs_setup_list: Option<SrBsSetupList> = None;
+        let mut srbs_setup_list: Option<SrbsSetupList> = None;
         let mut bh_channels_setup_list: Option<BhChannelsSetupList> = None;
         let mut bh_channels_failed_to_be_setup_list: Option<BhChannelsFailedToBeSetupList> = None;
-        let mut sldr_bs_setup_list: Option<SldrBsSetupList> = None;
-        let mut sldr_bs_failed_to_be_setup_list: Option<SldrBsFailedToBeSetupList> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut sl_drbs_setup_list: Option<SlDrbsSetupList> = None;
+        let mut sl_drbs_failed_to_be_setup_list: Option<SlDrbsFailedToBeSetupList> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -3934,33 +3934,33 @@ impl UeContextSetupResponse {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                39 => d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?),
+                39 => du_to_cu_rrc_information = Some(DuToCuRrcInformation::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 49 => {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
                 94 => full_configuration = Some(FullConfiguration::decode(data)?),
-                27 => dr_bs_setup_list = Some(DrBsSetupList::decode(data)?),
-                66 => sr_bs_failed_to_be_setup_list = Some(SrBsFailedToBeSetupList::decode(data)?),
-                15 => dr_bs_failed_to_be_setup_list = Some(DrBsFailedToBeSetupList::decode(data)?),
+                27 => drbs_setup_list = Some(DrbsSetupList::decode(data)?),
+                66 => srbs_failed_to_be_setup_list = Some(SrbsFailedToBeSetupList::decode(data)?),
+                15 => drbs_failed_to_be_setup_list = Some(DrbsFailedToBeSetupList::decode(data)?),
                 83 => s_cell_failedto_setup_list = Some(SCellFailedtoSetupList::decode(data)?),
                 98 => {
                     inactivity_monitoring_response =
                         Some(InactivityMonitoringResponse::decode(data)?)
                 }
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                202 => sr_bs_setup_list = Some(SrBsSetupList::decode(data)?),
+                202 => srbs_setup_list = Some(SrbsSetupList::decode(data)?),
                 260 => bh_channels_setup_list = Some(BhChannelsSetupList::decode(data)?),
                 279 => {
                     bh_channels_failed_to_be_setup_list =
                         Some(BhChannelsFailedToBeSetupList::decode(data)?)
                 }
-                324 => sldr_bs_setup_list = Some(SldrBsSetupList::decode(data)?),
+                324 => sl_drbs_setup_list = Some(SlDrbsSetupList::decode(data)?),
                 316 => {
-                    sldr_bs_failed_to_be_setup_list = Some(SldrBsFailedToBeSetupList::decode(data)?)
+                    sl_drbs_failed_to_be_setup_list = Some(SlDrbsFailedToBeSetupList::decode(data)?)
                 }
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -3975,27 +3975,27 @@ impl UeContextSetupResponse {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let d_uto_currc_information = d_uto_currc_information.ok_or(aper::AperCodecError::new(
-            format!("Missing mandatory IE d_uto_currc_information"),
-        ))?;
+        let du_to_cu_rrc_information = du_to_cu_rrc_information.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE du_to_cu_rrc_information")),
+        )?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
-            d_uto_currc_information,
+            du_to_cu_rrc_information,
             c_rnti,
             resource_coordination_transfer_container,
             full_configuration,
-            dr_bs_setup_list,
-            sr_bs_failed_to_be_setup_list,
-            dr_bs_failed_to_be_setup_list,
+            drbs_setup_list,
+            srbs_failed_to_be_setup_list,
+            drbs_failed_to_be_setup_list,
             s_cell_failedto_setup_list,
             inactivity_monitoring_response,
             criticality_diagnostics,
-            sr_bs_setup_list,
+            srbs_setup_list,
             bh_channels_setup_list,
             bh_channels_failed_to_be_setup_list,
-            sldr_bs_setup_list,
-            sldr_bs_failed_to_be_setup_list,
+            sl_drbs_setup_list,
+            sl_drbs_failed_to_be_setup_list,
             requested_target_cell_global_id,
         })
     }
@@ -4020,7 +4020,7 @@ impl UeContextSetupResponse {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.d_uto_currc_information.encode(ie)?;
+        self.du_to_cu_rrc_information.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -4057,7 +4057,7 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_setup_list {
+        if let Some(x) = &self.drbs_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 27, false)?;
@@ -4067,7 +4067,7 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_failed_to_be_setup_list {
+        if let Some(x) = &self.srbs_failed_to_be_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 66, false)?;
@@ -4077,7 +4077,7 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_failed_to_be_setup_list {
+        if let Some(x) = &self.drbs_failed_to_be_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 15, false)?;
@@ -4117,7 +4117,7 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_setup_list {
+        if let Some(x) = &self.srbs_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 202, false)?;
@@ -4147,7 +4147,7 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_setup_list {
+        if let Some(x) = &self.sl_drbs_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 324, false)?;
@@ -4157,7 +4157,7 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_failed_to_be_setup_list {
+        if let Some(x) = &self.sl_drbs_failed_to_be_setup_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 316, false)?;
@@ -4204,11 +4204,11 @@ impl AperCodec for UeContextSetupResponse {
             .map_err(|e: AperCodecError| e.push_context("UeContextSetupResponse"))
     }
 }
-// DrBsSetupList
+// DrbsSetupList
 #[derive(Clone, Debug)]
-pub struct DrBsSetupList(pub Vec<DrBsSetupItem>);
+pub struct DrbsSetupList(pub Vec<DrbsSetupItem>);
 
-impl DrBsSetupList {
+impl DrbsSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -4217,7 +4217,7 @@ impl DrBsSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsSetupItem::decode(data)?);
+                items.push(DrbsSetupItem::decode(data)?);
             }
             items
         }))
@@ -4236,22 +4236,22 @@ impl DrBsSetupList {
     }
 }
 
-impl AperCodec for DrBsSetupList {
+impl AperCodec for DrbsSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupList"))
+        DrbsSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupList"))
     }
 }
-// SrBsFailedToBeSetupList
+// SrbsFailedToBeSetupList
 #[derive(Clone, Debug)]
-pub struct SrBsFailedToBeSetupList(pub Vec<SrBsFailedToBeSetupItem>);
+pub struct SrbsFailedToBeSetupList(pub Vec<SrbsFailedToBeSetupItem>);
 
-impl SrBsFailedToBeSetupList {
+impl SrbsFailedToBeSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -4260,7 +4260,7 @@ impl SrBsFailedToBeSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsFailedToBeSetupItem::decode(data)?);
+                items.push(SrbsFailedToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -4279,22 +4279,22 @@ impl SrBsFailedToBeSetupList {
     }
 }
 
-impl AperCodec for SrBsFailedToBeSetupList {
+impl AperCodec for SrbsFailedToBeSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsFailedToBeSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupList"))
+        SrbsFailedToBeSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupList"))
     }
 }
-// DrBsFailedToBeSetupList
+// DrbsFailedToBeSetupList
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeSetupList(pub Vec<DrBsFailedToBeSetupItem>);
+pub struct DrbsFailedToBeSetupList(pub Vec<DrbsFailedToBeSetupItem>);
 
-impl DrBsFailedToBeSetupList {
+impl DrbsFailedToBeSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -4303,7 +4303,7 @@ impl DrBsFailedToBeSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsFailedToBeSetupItem::decode(data)?);
+                items.push(DrbsFailedToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -4322,15 +4322,15 @@ impl DrBsFailedToBeSetupList {
     }
 }
 
-impl AperCodec for DrBsFailedToBeSetupList {
+impl AperCodec for DrbsFailedToBeSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupList"))
+        DrbsFailedToBeSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupList"))
     }
 }
 // SCellFailedtoSetupList
@@ -4376,11 +4376,11 @@ impl AperCodec for SCellFailedtoSetupList {
             .map_err(|e: AperCodecError| e.push_context("SCellFailedtoSetupList"))
     }
 }
-// SrBsSetupList
+// SrbsSetupList
 #[derive(Clone, Debug)]
-pub struct SrBsSetupList(pub Vec<SrBsSetupItem>);
+pub struct SrbsSetupList(pub Vec<SrbsSetupItem>);
 
-impl SrBsSetupList {
+impl SrbsSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -4389,7 +4389,7 @@ impl SrBsSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsSetupItem::decode(data)?);
+                items.push(SrbsSetupItem::decode(data)?);
             }
             items
         }))
@@ -4408,15 +4408,15 @@ impl SrBsSetupList {
     }
 }
 
-impl AperCodec for SrBsSetupList {
+impl AperCodec for SrbsSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupList"))
+        SrbsSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupList"))
     }
 }
 // BhChannelsSetupList
@@ -4507,11 +4507,11 @@ impl AperCodec for BhChannelsFailedToBeSetupList {
             .map_err(|e: AperCodecError| e.push_context("BhChannelsFailedToBeSetupList"))
     }
 }
-// SldrBsSetupList
+// SlDrbsSetupList
 #[derive(Clone, Debug)]
-pub struct SldrBsSetupList(pub Vec<SldrBsSetupItem>);
+pub struct SlDrbsSetupList(pub Vec<SlDrbsSetupItem>);
 
-impl SldrBsSetupList {
+impl SlDrbsSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -4520,7 +4520,7 @@ impl SldrBsSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsSetupItem::decode(data)?);
+                items.push(SlDrbsSetupItem::decode(data)?);
             }
             items
         }))
@@ -4539,22 +4539,22 @@ impl SldrBsSetupList {
     }
 }
 
-impl AperCodec for SldrBsSetupList {
+impl AperCodec for SlDrbsSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupList"))
+        SlDrbsSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupList"))
     }
 }
-// SldrBsFailedToBeSetupList
+// SlDrbsFailedToBeSetupList
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeSetupList(pub Vec<SldrBsFailedToBeSetupItem>);
+pub struct SlDrbsFailedToBeSetupList(pub Vec<SlDrbsFailedToBeSetupItem>);
 
-impl SldrBsFailedToBeSetupList {
+impl SlDrbsFailedToBeSetupList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -4563,7 +4563,7 @@ impl SldrBsFailedToBeSetupList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsFailedToBeSetupItem::decode(data)?);
+                items.push(SlDrbsFailedToBeSetupItem::decode(data)?);
             }
             items
         }))
@@ -4582,15 +4582,15 @@ impl SldrBsFailedToBeSetupList {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeSetupList {
+impl AperCodec for SlDrbsFailedToBeSetupList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeSetupList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupList"))
+        SlDrbsFailedToBeSetupList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupList"))
     }
 }
 // UeContextSetupFailure
@@ -4601,7 +4601,7 @@ pub struct UeContextSetupFailure {
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
     pub potential_sp_cell_list: Option<PotentialSpCellList>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextSetupFailure {
@@ -4615,7 +4615,7 @@ impl UeContextSetupFailure {
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut potential_sp_cell_list: Option<PotentialSpCellList> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -4627,7 +4627,7 @@ impl UeContextSetupFailure {
                 0 => cause = Some(Cause::decode(data)?),
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 92 => potential_sp_cell_list = Some(PotentialSpCellList::decode(data)?),
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -4906,7 +4906,7 @@ pub struct UeContextReleaseCommand {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub cause: Cause,
     pub rrc_container: Option<RrcContainer>,
-    pub srbid: Option<Srbid>,
+    pub srb_id: Option<SrbId>,
     pub old_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
     pub execute_duplication: Option<ExecuteDuplication>,
     pub rrc_delivery_status_request: Option<RrcDeliveryStatusRequest>,
@@ -4923,7 +4923,7 @@ impl UeContextReleaseCommand {
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut rrc_container: Option<RrcContainer> = None;
-        let mut srbid: Option<Srbid> = None;
+        let mut srb_id: Option<SrbId> = None;
         let mut old_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut execute_duplication: Option<ExecuteDuplication> = None;
         let mut rrc_delivery_status_request: Option<RrcDeliveryStatusRequest> = None;
@@ -4938,7 +4938,7 @@ impl UeContextReleaseCommand {
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
-                64 => srbid = Some(Srbid::decode(data)?),
+                64 => srb_id = Some(SrbId::decode(data)?),
                 47 => old_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
                 109 => execute_duplication = Some(ExecuteDuplication::decode(data)?),
                 184 => rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?),
@@ -4965,7 +4965,7 @@ impl UeContextReleaseCommand {
             gnb_du_ue_f1ap_id,
             cause,
             rrc_container,
-            srbid,
+            srb_id,
             old_gnb_du_ue_f1ap_id,
             execute_duplication,
             rrc_delivery_status_request,
@@ -5010,7 +5010,7 @@ impl UeContextReleaseCommand {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.srbid {
+        if let Some(x) = &self.srb_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
@@ -5195,22 +5195,22 @@ impl AperCodec for UeContextReleaseComplete {
 pub struct UeContextModificationRequest {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub sp_cell_id: Option<Nrcgi>,
+    pub sp_cell_id: Option<NrCgi>,
     pub serv_cell_index: Option<ServCellIndex>,
     pub sp_cell_ul_configured: Option<CellUlConfigured>,
     pub drx_cycle: Option<DrxCycle>,
-    pub c_uto_durrc_information: Option<CUtoDurrcInformation>,
+    pub cu_to_du_rrc_information: Option<CuToDuRrcInformation>,
     pub transmission_action_indicator: Option<TransmissionActionIndicator>,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
     pub rrc_reconfiguration_complete_indicator: Option<RrcReconfigurationCompleteIndicator>,
     pub rrc_container: Option<RrcContainer>,
     pub s_cell_to_be_setup_mod_list: Option<SCellToBeSetupModList>,
     pub s_cell_to_be_removed_list: Option<SCellToBeRemovedList>,
-    pub sr_bs_to_be_setup_mod_list: Option<SrBsToBeSetupModList>,
-    pub dr_bs_to_be_setup_mod_list: Option<DrBsToBeSetupModList>,
-    pub dr_bs_to_be_modified_list: Option<DrBsToBeModifiedList>,
-    pub sr_bs_to_be_released_list: Option<SrBsToBeReleasedList>,
-    pub dr_bs_to_be_released_list: Option<DrBsToBeReleasedList>,
+    pub srbs_to_be_setup_mod_list: Option<SrbsToBeSetupModList>,
+    pub drbs_to_be_setup_mod_list: Option<DrbsToBeSetupModList>,
+    pub drbs_to_be_modified_list: Option<DrbsToBeModifiedList>,
+    pub srbs_to_be_released_list: Option<SrbsToBeReleasedList>,
+    pub drbs_to_be_released_list: Option<DrbsToBeReleasedList>,
     pub inactivity_monitoring_request: Option<InactivityMonitoringRequest>,
     pub rat_frequency_priority_information: Option<RatFrequencyPriorityInformation>,
     pub drx_configuration_indicator: Option<DrxConfigurationIndicator>,
@@ -5229,14 +5229,14 @@ pub struct UeContextModificationRequest {
     pub bh_channels_to_be_setup_mod_list: Option<BhChannelsToBeSetupModList>,
     pub bh_channels_to_be_modified_list: Option<BhChannelsToBeModifiedList>,
     pub bh_channels_to_be_released_list: Option<BhChannelsToBeReleasedList>,
-    pub nrv2x_services_authorized: Option<Nrv2xServicesAuthorized>,
+    pub nr_v2x_services_authorized: Option<NrV2xServicesAuthorized>,
     pub ltev2x_services_authorized: Option<Ltev2xServicesAuthorized>,
-    pub nrue_sidelink_aggregate_maximum_bitrate: Option<NrueSidelinkAggregateMaximumBitrate>,
-    pub lteue_sidelink_aggregate_maximum_bitrate: Option<LteueSidelinkAggregateMaximumBitrate>,
+    pub nr_ue_sidelink_aggregate_maximum_bitrate: Option<NrUeSidelinkAggregateMaximumBitrate>,
+    pub lte_ue_sidelink_aggregate_maximum_bitrate: Option<LteUeSidelinkAggregateMaximumBitrate>,
     pub pc5_link_ambr: Option<BitRate>,
-    pub sldr_bs_to_be_setup_mod_list: Option<SldrBsToBeSetupModList>,
-    pub sldr_bs_to_be_modified_list: Option<SldrBsToBeModifiedList>,
-    pub sldr_bs_to_be_released_list: Option<SldrBsToBeReleasedList>,
+    pub sl_drbs_to_be_setup_mod_list: Option<SlDrbsToBeSetupModList>,
+    pub sl_drbs_to_be_modified_list: Option<SlDrbsToBeModifiedList>,
+    pub sl_drbs_to_be_released_list: Option<SlDrbsToBeReleasedList>,
     pub conditional_intra_du_mobility_information: Option<ConditionalIntraDuMobilityInformation>,
     pub f1c_transfer_path: Option<F1cTransferPath>,
     pub scg_indicator: Option<ScgIndicator>,
@@ -5250,11 +5250,11 @@ impl UeContextModificationRequest {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut sp_cell_id: Option<Nrcgi> = None;
+        let mut sp_cell_id: Option<NrCgi> = None;
         let mut serv_cell_index: Option<ServCellIndex> = None;
         let mut sp_cell_ul_configured: Option<CellUlConfigured> = None;
         let mut drx_cycle: Option<DrxCycle> = None;
-        let mut c_uto_durrc_information: Option<CUtoDurrcInformation> = None;
+        let mut cu_to_du_rrc_information: Option<CuToDuRrcInformation> = None;
         let mut transmission_action_indicator: Option<TransmissionActionIndicator> = None;
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
@@ -5265,11 +5265,11 @@ impl UeContextModificationRequest {
         let mut rrc_container: Option<RrcContainer> = None;
         let mut s_cell_to_be_setup_mod_list: Option<SCellToBeSetupModList> = None;
         let mut s_cell_to_be_removed_list: Option<SCellToBeRemovedList> = None;
-        let mut sr_bs_to_be_setup_mod_list: Option<SrBsToBeSetupModList> = None;
-        let mut dr_bs_to_be_setup_mod_list: Option<DrBsToBeSetupModList> = None;
-        let mut dr_bs_to_be_modified_list: Option<DrBsToBeModifiedList> = None;
-        let mut sr_bs_to_be_released_list: Option<SrBsToBeReleasedList> = None;
-        let mut dr_bs_to_be_released_list: Option<DrBsToBeReleasedList> = None;
+        let mut srbs_to_be_setup_mod_list: Option<SrbsToBeSetupModList> = None;
+        let mut drbs_to_be_setup_mod_list: Option<DrbsToBeSetupModList> = None;
+        let mut drbs_to_be_modified_list: Option<DrbsToBeModifiedList> = None;
+        let mut srbs_to_be_released_list: Option<SrbsToBeReleasedList> = None;
+        let mut drbs_to_be_released_list: Option<DrbsToBeReleasedList> = None;
         let mut inactivity_monitoring_request: Option<InactivityMonitoringRequest> = None;
         let mut rat_frequency_priority_information: Option<RatFrequencyPriorityInformation> = None;
         let mut drx_configuration_indicator: Option<DrxConfigurationIndicator> = None;
@@ -5292,18 +5292,18 @@ impl UeContextModificationRequest {
         let mut bh_channels_to_be_setup_mod_list: Option<BhChannelsToBeSetupModList> = None;
         let mut bh_channels_to_be_modified_list: Option<BhChannelsToBeModifiedList> = None;
         let mut bh_channels_to_be_released_list: Option<BhChannelsToBeReleasedList> = None;
-        let mut nrv2x_services_authorized: Option<Nrv2xServicesAuthorized> = None;
+        let mut nr_v2x_services_authorized: Option<NrV2xServicesAuthorized> = None;
         let mut ltev2x_services_authorized: Option<Ltev2xServicesAuthorized> = None;
-        let mut nrue_sidelink_aggregate_maximum_bitrate: Option<
-            NrueSidelinkAggregateMaximumBitrate,
+        let mut nr_ue_sidelink_aggregate_maximum_bitrate: Option<
+            NrUeSidelinkAggregateMaximumBitrate,
         > = None;
-        let mut lteue_sidelink_aggregate_maximum_bitrate: Option<
-            LteueSidelinkAggregateMaximumBitrate,
+        let mut lte_ue_sidelink_aggregate_maximum_bitrate: Option<
+            LteUeSidelinkAggregateMaximumBitrate,
         > = None;
         let mut pc5_link_ambr: Option<BitRate> = None;
-        let mut sldr_bs_to_be_setup_mod_list: Option<SldrBsToBeSetupModList> = None;
-        let mut sldr_bs_to_be_modified_list: Option<SldrBsToBeModifiedList> = None;
-        let mut sldr_bs_to_be_released_list: Option<SldrBsToBeReleasedList> = None;
+        let mut sl_drbs_to_be_setup_mod_list: Option<SlDrbsToBeSetupModList> = None;
+        let mut sl_drbs_to_be_modified_list: Option<SlDrbsToBeModifiedList> = None;
+        let mut sl_drbs_to_be_released_list: Option<SlDrbsToBeReleasedList> = None;
         let mut conditional_intra_du_mobility_information: Option<
             ConditionalIntraDuMobilityInformation,
         > = None;
@@ -5317,11 +5317,11 @@ impl UeContextModificationRequest {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                63 => sp_cell_id = Some(Nrcgi::decode(data)?),
+                63 => sp_cell_id = Some(NrCgi::decode(data)?),
                 107 => serv_cell_index = Some(ServCellIndex::decode(data)?),
                 96 => sp_cell_ul_configured = Some(CellUlConfigured::decode(data)?),
                 38 => drx_cycle = Some(DrxCycle::decode(data)?),
-                9 => c_uto_durrc_information = Some(CUtoDurrcInformation::decode(data)?),
+                9 => cu_to_du_rrc_information = Some(CuToDuRrcInformation::decode(data)?),
                 79 => {
                     transmission_action_indicator = Some(TransmissionActionIndicator::decode(data)?)
                 }
@@ -5336,11 +5336,11 @@ impl UeContextModificationRequest {
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
                 56 => s_cell_to_be_setup_mod_list = Some(SCellToBeSetupModList::decode(data)?),
                 52 => s_cell_to_be_removed_list = Some(SCellToBeRemovedList::decode(data)?),
-                76 => sr_bs_to_be_setup_mod_list = Some(SrBsToBeSetupModList::decode(data)?),
-                37 => dr_bs_to_be_setup_mod_list = Some(DrBsToBeSetupModList::decode(data)?),
-                31 => dr_bs_to_be_modified_list = Some(DrBsToBeModifiedList::decode(data)?),
-                72 => sr_bs_to_be_released_list = Some(SrBsToBeReleasedList::decode(data)?),
-                33 => dr_bs_to_be_released_list = Some(DrBsToBeReleasedList::decode(data)?),
+                76 => srbs_to_be_setup_mod_list = Some(SrbsToBeSetupModList::decode(data)?),
+                37 => drbs_to_be_setup_mod_list = Some(DrbsToBeSetupModList::decode(data)?),
+                31 => drbs_to_be_modified_list = Some(DrbsToBeModifiedList::decode(data)?),
+                72 => srbs_to_be_released_list = Some(SrbsToBeReleasedList::decode(data)?),
+                33 => drbs_to_be_released_list = Some(DrbsToBeReleasedList::decode(data)?),
                 97 => {
                     inactivity_monitoring_request = Some(InactivityMonitoringRequest::decode(data)?)
                 }
@@ -5384,20 +5384,20 @@ impl UeContextModificationRequest {
                     bh_channels_to_be_released_list =
                         Some(BhChannelsToBeReleasedList::decode(data)?)
                 }
-                306 => nrv2x_services_authorized = Some(Nrv2xServicesAuthorized::decode(data)?),
+                306 => nr_v2x_services_authorized = Some(NrV2xServicesAuthorized::decode(data)?),
                 307 => ltev2x_services_authorized = Some(Ltev2xServicesAuthorized::decode(data)?),
                 308 => {
-                    nrue_sidelink_aggregate_maximum_bitrate =
-                        Some(NrueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    nr_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(NrUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 309 => {
-                    lteue_sidelink_aggregate_maximum_bitrate =
-                        Some(LteueSidelinkAggregateMaximumBitrate::decode(data)?)
+                    lte_ue_sidelink_aggregate_maximum_bitrate =
+                        Some(LteUeSidelinkAggregateMaximumBitrate::decode(data)?)
                 }
                 340 => pc5_link_ambr = Some(BitRate::decode(data)?),
-                332 => sldr_bs_to_be_setup_mod_list = Some(SldrBsToBeSetupModList::decode(data)?),
-                326 => sldr_bs_to_be_modified_list = Some(SldrBsToBeModifiedList::decode(data)?),
-                328 => sldr_bs_to_be_released_list = Some(SldrBsToBeReleasedList::decode(data)?),
+                332 => sl_drbs_to_be_setup_mod_list = Some(SlDrbsToBeSetupModList::decode(data)?),
+                326 => sl_drbs_to_be_modified_list = Some(SlDrbsToBeModifiedList::decode(data)?),
+                328 => sl_drbs_to_be_released_list = Some(SlDrbsToBeReleasedList::decode(data)?),
                 374 => {
                     conditional_intra_du_mobility_information =
                         Some(ConditionalIntraDuMobilityInformation::decode(data)?)
@@ -5425,18 +5425,18 @@ impl UeContextModificationRequest {
             serv_cell_index,
             sp_cell_ul_configured,
             drx_cycle,
-            c_uto_durrc_information,
+            cu_to_du_rrc_information,
             transmission_action_indicator,
             resource_coordination_transfer_container,
             rrc_reconfiguration_complete_indicator,
             rrc_container,
             s_cell_to_be_setup_mod_list,
             s_cell_to_be_removed_list,
-            sr_bs_to_be_setup_mod_list,
-            dr_bs_to_be_setup_mod_list,
-            dr_bs_to_be_modified_list,
-            sr_bs_to_be_released_list,
-            dr_bs_to_be_released_list,
+            srbs_to_be_setup_mod_list,
+            drbs_to_be_setup_mod_list,
+            drbs_to_be_modified_list,
+            srbs_to_be_released_list,
+            drbs_to_be_released_list,
             inactivity_monitoring_request,
             rat_frequency_priority_information,
             drx_configuration_indicator,
@@ -5455,14 +5455,14 @@ impl UeContextModificationRequest {
             bh_channels_to_be_setup_mod_list,
             bh_channels_to_be_modified_list,
             bh_channels_to_be_released_list,
-            nrv2x_services_authorized,
+            nr_v2x_services_authorized,
             ltev2x_services_authorized,
-            nrue_sidelink_aggregate_maximum_bitrate,
-            lteue_sidelink_aggregate_maximum_bitrate,
+            nr_ue_sidelink_aggregate_maximum_bitrate,
+            lte_ue_sidelink_aggregate_maximum_bitrate,
             pc5_link_ambr,
-            sldr_bs_to_be_setup_mod_list,
-            sldr_bs_to_be_modified_list,
-            sldr_bs_to_be_released_list,
+            sl_drbs_to_be_setup_mod_list,
+            sl_drbs_to_be_modified_list,
+            sl_drbs_to_be_released_list,
             conditional_intra_du_mobility_information,
             f1c_transfer_path,
             scg_indicator,
@@ -5528,7 +5528,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.c_uto_durrc_information {
+        if let Some(x) = &self.cu_to_du_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 9, false)?;
@@ -5598,7 +5598,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_to_be_setup_mod_list {
+        if let Some(x) = &self.srbs_to_be_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 76, false)?;
@@ -5608,7 +5608,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_to_be_setup_mod_list {
+        if let Some(x) = &self.drbs_to_be_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 37, false)?;
@@ -5618,7 +5618,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_to_be_modified_list {
+        if let Some(x) = &self.drbs_to_be_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 31, false)?;
@@ -5628,7 +5628,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_to_be_released_list {
+        if let Some(x) = &self.srbs_to_be_released_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 72, false)?;
@@ -5638,7 +5638,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_to_be_released_list {
+        if let Some(x) = &self.drbs_to_be_released_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
@@ -5828,7 +5828,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrv2x_services_authorized {
+        if let Some(x) = &self.nr_v2x_services_authorized {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 306, false)?;
@@ -5848,7 +5848,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.nrue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.nr_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 308, false)?;
@@ -5858,7 +5858,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.lteue_sidelink_aggregate_maximum_bitrate {
+        if let Some(x) = &self.lte_ue_sidelink_aggregate_maximum_bitrate {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 309, false)?;
@@ -5878,7 +5878,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_to_be_setup_mod_list {
+        if let Some(x) = &self.sl_drbs_to_be_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 332, false)?;
@@ -5888,7 +5888,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_to_be_modified_list {
+        if let Some(x) = &self.sl_drbs_to_be_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 326, false)?;
@@ -5898,7 +5898,7 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_to_be_released_list {
+        if let Some(x) = &self.sl_drbs_to_be_released_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 328, false)?;
@@ -6051,11 +6051,11 @@ impl AperCodec for SCellToBeRemovedList {
             .map_err(|e: AperCodecError| e.push_context("SCellToBeRemovedList"))
     }
 }
-// SrBsToBeSetupModList
+// SrbsToBeSetupModList
 #[derive(Clone, Debug)]
-pub struct SrBsToBeSetupModList(pub Vec<SrBsToBeSetupModItem>);
+pub struct SrbsToBeSetupModList(pub Vec<SrbsToBeSetupModItem>);
 
-impl SrBsToBeSetupModList {
+impl SrbsToBeSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -6064,7 +6064,7 @@ impl SrBsToBeSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsToBeSetupModItem::decode(data)?);
+                items.push(SrbsToBeSetupModItem::decode(data)?);
             }
             items
         }))
@@ -6083,22 +6083,22 @@ impl SrBsToBeSetupModList {
     }
 }
 
-impl AperCodec for SrBsToBeSetupModList {
+impl AperCodec for SrbsToBeSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupModList"))
+        SrbsToBeSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupModList"))
     }
 }
-// DrBsToBeSetupModList
+// DrbsToBeSetupModList
 #[derive(Clone, Debug)]
-pub struct DrBsToBeSetupModList(pub Vec<DrBsToBeSetupModItem>);
+pub struct DrbsToBeSetupModList(pub Vec<DrbsToBeSetupModItem>);
 
-impl DrBsToBeSetupModList {
+impl DrbsToBeSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -6107,7 +6107,7 @@ impl DrBsToBeSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsToBeSetupModItem::decode(data)?);
+                items.push(DrbsToBeSetupModItem::decode(data)?);
             }
             items
         }))
@@ -6126,15 +6126,15 @@ impl DrBsToBeSetupModList {
     }
 }
 
-impl AperCodec for DrBsToBeSetupModList {
+impl AperCodec for DrbsToBeSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupModList"))
+        DrbsToBeSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupModList"))
     }
 }
 // BhChannelsToBeSetupModList
@@ -6181,11 +6181,11 @@ impl AperCodec for BhChannelsToBeSetupModList {
             .map_err(|e: AperCodecError| e.push_context("BhChannelsToBeSetupModList"))
     }
 }
-// DrBsToBeModifiedList
+// DrbsToBeModifiedList
 #[derive(Clone, Debug)]
-pub struct DrBsToBeModifiedList(pub Vec<DrBsToBeModifiedItem>);
+pub struct DrbsToBeModifiedList(pub Vec<DrbsToBeModifiedItem>);
 
-impl DrBsToBeModifiedList {
+impl DrbsToBeModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -6194,7 +6194,7 @@ impl DrBsToBeModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsToBeModifiedItem::decode(data)?);
+                items.push(DrbsToBeModifiedItem::decode(data)?);
             }
             items
         }))
@@ -6213,15 +6213,15 @@ impl DrBsToBeModifiedList {
     }
 }
 
-impl AperCodec for DrBsToBeModifiedList {
+impl AperCodec for DrbsToBeModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeModifiedList"))
+        DrbsToBeModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeModifiedList"))
     }
 }
 // BhChannelsToBeModifiedList
@@ -6268,11 +6268,11 @@ impl AperCodec for BhChannelsToBeModifiedList {
             .map_err(|e: AperCodecError| e.push_context("BhChannelsToBeModifiedList"))
     }
 }
-// SrBsToBeReleasedList
+// SrbsToBeReleasedList
 #[derive(Clone, Debug)]
-pub struct SrBsToBeReleasedList(pub Vec<SrBsToBeReleasedItem>);
+pub struct SrbsToBeReleasedList(pub Vec<SrbsToBeReleasedItem>);
 
-impl SrBsToBeReleasedList {
+impl SrbsToBeReleasedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -6281,7 +6281,7 @@ impl SrBsToBeReleasedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsToBeReleasedItem::decode(data)?);
+                items.push(SrbsToBeReleasedItem::decode(data)?);
             }
             items
         }))
@@ -6300,22 +6300,22 @@ impl SrBsToBeReleasedList {
     }
 }
 
-impl AperCodec for SrBsToBeReleasedList {
+impl AperCodec for SrbsToBeReleasedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeReleasedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeReleasedList"))
+        SrbsToBeReleasedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeReleasedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeReleasedList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeReleasedList"))
     }
 }
-// DrBsToBeReleasedList
+// DrbsToBeReleasedList
 #[derive(Clone, Debug)]
-pub struct DrBsToBeReleasedList(pub Vec<DrBsToBeReleasedItem>);
+pub struct DrbsToBeReleasedList(pub Vec<DrbsToBeReleasedItem>);
 
-impl DrBsToBeReleasedList {
+impl DrbsToBeReleasedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -6324,7 +6324,7 @@ impl DrBsToBeReleasedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsToBeReleasedItem::decode(data)?);
+                items.push(DrbsToBeReleasedItem::decode(data)?);
             }
             items
         }))
@@ -6343,15 +6343,15 @@ impl DrBsToBeReleasedList {
     }
 }
 
-impl AperCodec for DrBsToBeReleasedList {
+impl AperCodec for DrbsToBeReleasedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeReleasedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeReleasedList"))
+        DrbsToBeReleasedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeReleasedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeReleasedList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeReleasedList"))
     }
 }
 // BhChannelsToBeReleasedList
@@ -6398,11 +6398,11 @@ impl AperCodec for BhChannelsToBeReleasedList {
             .map_err(|e: AperCodecError| e.push_context("BhChannelsToBeReleasedList"))
     }
 }
-// SldrBsToBeSetupModList
+// SlDrbsToBeSetupModList
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeSetupModList(pub Vec<SldrBsToBeSetupModItem>);
+pub struct SlDrbsToBeSetupModList(pub Vec<SlDrbsToBeSetupModItem>);
 
-impl SldrBsToBeSetupModList {
+impl SlDrbsToBeSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -6411,7 +6411,7 @@ impl SldrBsToBeSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsToBeSetupModItem::decode(data)?);
+                items.push(SlDrbsToBeSetupModItem::decode(data)?);
             }
             items
         }))
@@ -6430,22 +6430,22 @@ impl SldrBsToBeSetupModList {
     }
 }
 
-impl AperCodec for SldrBsToBeSetupModList {
+impl AperCodec for SlDrbsToBeSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupModList"))
+        SlDrbsToBeSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupModList"))
     }
 }
-// SldrBsToBeModifiedList
+// SlDrbsToBeModifiedList
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeModifiedList(pub Vec<SldrBsToBeModifiedItem>);
+pub struct SlDrbsToBeModifiedList(pub Vec<SlDrbsToBeModifiedItem>);
 
-impl SldrBsToBeModifiedList {
+impl SlDrbsToBeModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -6454,7 +6454,7 @@ impl SldrBsToBeModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsToBeModifiedItem::decode(data)?);
+                items.push(SlDrbsToBeModifiedItem::decode(data)?);
             }
             items
         }))
@@ -6473,22 +6473,22 @@ impl SldrBsToBeModifiedList {
     }
 }
 
-impl AperCodec for SldrBsToBeModifiedList {
+impl AperCodec for SlDrbsToBeModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeModifiedList"))
+        SlDrbsToBeModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeModifiedList"))
     }
 }
-// SldrBsToBeReleasedList
+// SlDrbsToBeReleasedList
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeReleasedList(pub Vec<SldrBsToBeReleasedItem>);
+pub struct SlDrbsToBeReleasedList(pub Vec<SlDrbsToBeReleasedItem>);
 
-impl SldrBsToBeReleasedList {
+impl SlDrbsToBeReleasedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -6497,7 +6497,7 @@ impl SldrBsToBeReleasedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsToBeReleasedItem::decode(data)?);
+                items.push(SlDrbsToBeReleasedItem::decode(data)?);
             }
             items
         }))
@@ -6516,15 +6516,15 @@ impl SldrBsToBeReleasedList {
     }
 }
 
-impl AperCodec for SldrBsToBeReleasedList {
+impl AperCodec for SlDrbsToBeReleasedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeReleasedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeReleasedList"))
+        SlDrbsToBeReleasedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeReleasedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeReleasedList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeReleasedList"))
     }
 }
 // UeContextModificationResponse
@@ -6533,29 +6533,29 @@ pub struct UeContextModificationResponse {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub d_uto_currc_information: Option<DUtoCurrcInformation>,
-    pub dr_bs_setup_mod_list: Option<DrBsSetupModList>,
-    pub dr_bs_modified_list: Option<DrBsModifiedList>,
-    pub sr_bs_failed_to_be_setup_mod_list: Option<SrBsFailedToBeSetupModList>,
-    pub dr_bs_failed_to_be_setup_mod_list: Option<DrBsFailedToBeSetupModList>,
+    pub du_to_cu_rrc_information: Option<DuToCuRrcInformation>,
+    pub drbs_setup_mod_list: Option<DrbsSetupModList>,
+    pub drbs_modified_list: Option<DrbsModifiedList>,
+    pub srbs_failed_to_be_setup_mod_list: Option<SrbsFailedToBeSetupModList>,
+    pub drbs_failed_to_be_setup_mod_list: Option<DrbsFailedToBeSetupModList>,
     pub s_cell_failedto_setup_mod_list: Option<SCellFailedtoSetupModList>,
-    pub dr_bs_failed_to_be_modified_list: Option<DrBsFailedToBeModifiedList>,
+    pub drbs_failed_to_be_modified_list: Option<DrbsFailedToBeModifiedList>,
     pub inactivity_monitoring_response: Option<InactivityMonitoringResponse>,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
     pub c_rnti: Option<CRnti>,
     pub associated_s_cell_list: Option<AssociatedSCellList>,
-    pub sr_bs_setup_mod_list: Option<SrBsSetupModList>,
-    pub sr_bs_modified_list: Option<SrBsModifiedList>,
+    pub srbs_setup_mod_list: Option<SrbsSetupModList>,
+    pub srbs_modified_list: Option<SrbsModifiedList>,
     pub full_configuration: Option<FullConfiguration>,
     pub bh_channels_setup_mod_list: Option<BhChannelsSetupModList>,
     pub bh_channels_modified_list: Option<BhChannelsModifiedList>,
     pub bh_channels_failed_to_be_setup_mod_list: Option<BhChannelsFailedToBeSetupModList>,
     pub bh_channels_failed_to_be_modified_list: Option<BhChannelsFailedToBeModifiedList>,
-    pub sldr_bs_setup_mod_list: Option<SldrBsSetupModList>,
-    pub sldr_bs_modified_list: Option<SldrBsModifiedList>,
-    pub sldr_bs_failed_to_be_setup_mod_list: Option<SldrBsFailedToBeSetupModList>,
-    pub sldr_bs_failed_to_be_modified_list: Option<SldrBsFailedToBeModifiedList>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub sl_drbs_setup_mod_list: Option<SlDrbsSetupModList>,
+    pub sl_drbs_modified_list: Option<SlDrbsModifiedList>,
+    pub sl_drbs_failed_to_be_setup_mod_list: Option<SlDrbsFailedToBeSetupModList>,
+    pub sl_drbs_failed_to_be_modified_list: Option<SlDrbsFailedToBeModifiedList>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextModificationResponse {
@@ -6569,19 +6569,19 @@ impl UeContextModificationResponse {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
-        let mut dr_bs_setup_mod_list: Option<DrBsSetupModList> = None;
-        let mut dr_bs_modified_list: Option<DrBsModifiedList> = None;
-        let mut sr_bs_failed_to_be_setup_mod_list: Option<SrBsFailedToBeSetupModList> = None;
-        let mut dr_bs_failed_to_be_setup_mod_list: Option<DrBsFailedToBeSetupModList> = None;
+        let mut du_to_cu_rrc_information: Option<DuToCuRrcInformation> = None;
+        let mut drbs_setup_mod_list: Option<DrbsSetupModList> = None;
+        let mut drbs_modified_list: Option<DrbsModifiedList> = None;
+        let mut srbs_failed_to_be_setup_mod_list: Option<SrbsFailedToBeSetupModList> = None;
+        let mut drbs_failed_to_be_setup_mod_list: Option<DrbsFailedToBeSetupModList> = None;
         let mut s_cell_failedto_setup_mod_list: Option<SCellFailedtoSetupModList> = None;
-        let mut dr_bs_failed_to_be_modified_list: Option<DrBsFailedToBeModifiedList> = None;
+        let mut drbs_failed_to_be_modified_list: Option<DrbsFailedToBeModifiedList> = None;
         let mut inactivity_monitoring_response: Option<InactivityMonitoringResponse> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut associated_s_cell_list: Option<AssociatedSCellList> = None;
-        let mut sr_bs_setup_mod_list: Option<SrBsSetupModList> = None;
-        let mut sr_bs_modified_list: Option<SrBsModifiedList> = None;
+        let mut srbs_setup_mod_list: Option<SrbsSetupModList> = None;
+        let mut srbs_modified_list: Option<SrbsModifiedList> = None;
         let mut full_configuration: Option<FullConfiguration> = None;
         let mut bh_channels_setup_mod_list: Option<BhChannelsSetupModList> = None;
         let mut bh_channels_modified_list: Option<BhChannelsModifiedList> = None;
@@ -6589,11 +6589,11 @@ impl UeContextModificationResponse {
             None;
         let mut bh_channels_failed_to_be_modified_list: Option<BhChannelsFailedToBeModifiedList> =
             None;
-        let mut sldr_bs_setup_mod_list: Option<SldrBsSetupModList> = None;
-        let mut sldr_bs_modified_list: Option<SldrBsModifiedList> = None;
-        let mut sldr_bs_failed_to_be_setup_mod_list: Option<SldrBsFailedToBeSetupModList> = None;
-        let mut sldr_bs_failed_to_be_modified_list: Option<SldrBsFailedToBeModifiedList> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut sl_drbs_setup_mod_list: Option<SlDrbsSetupModList> = None;
+        let mut sl_drbs_modified_list: Option<SlDrbsModifiedList> = None;
+        let mut sl_drbs_failed_to_be_setup_mod_list: Option<SlDrbsFailedToBeSetupModList> = None;
+        let mut sl_drbs_failed_to_be_modified_list: Option<SlDrbsFailedToBeModifiedList> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -6606,23 +6606,23 @@ impl UeContextModificationResponse {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                39 => d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?),
-                29 => dr_bs_setup_mod_list = Some(DrBsSetupModList::decode(data)?),
-                21 => dr_bs_modified_list = Some(DrBsModifiedList::decode(data)?),
+                39 => du_to_cu_rrc_information = Some(DuToCuRrcInformation::decode(data)?),
+                29 => drbs_setup_mod_list = Some(DrbsSetupModList::decode(data)?),
+                21 => drbs_modified_list = Some(DrbsModifiedList::decode(data)?),
                 68 => {
-                    sr_bs_failed_to_be_setup_mod_list =
-                        Some(SrBsFailedToBeSetupModList::decode(data)?)
+                    srbs_failed_to_be_setup_mod_list =
+                        Some(SrbsFailedToBeSetupModList::decode(data)?)
                 }
                 17 => {
-                    dr_bs_failed_to_be_setup_mod_list =
-                        Some(DrBsFailedToBeSetupModList::decode(data)?)
+                    drbs_failed_to_be_setup_mod_list =
+                        Some(DrbsFailedToBeSetupModList::decode(data)?)
                 }
                 85 => {
                     s_cell_failedto_setup_mod_list = Some(SCellFailedtoSetupModList::decode(data)?)
                 }
                 13 => {
-                    dr_bs_failed_to_be_modified_list =
-                        Some(DrBsFailedToBeModifiedList::decode(data)?)
+                    drbs_failed_to_be_modified_list =
+                        Some(DrbsFailedToBeModifiedList::decode(data)?)
                 }
                 98 => {
                     inactivity_monitoring_response =
@@ -6631,8 +6631,8 @@ impl UeContextModificationResponse {
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 198 => associated_s_cell_list = Some(AssociatedSCellList::decode(data)?),
-                204 => sr_bs_setup_mod_list = Some(SrBsSetupModList::decode(data)?),
-                206 => sr_bs_modified_list = Some(SrBsModifiedList::decode(data)?),
+                204 => srbs_setup_mod_list = Some(SrbsSetupModList::decode(data)?),
+                206 => srbs_modified_list = Some(SrbsModifiedList::decode(data)?),
                 94 => full_configuration = Some(FullConfiguration::decode(data)?),
                 275 => bh_channels_setup_mod_list = Some(BhChannelsSetupModList::decode(data)?),
                 273 => bh_channels_modified_list = Some(BhChannelsModifiedList::decode(data)?),
@@ -6644,17 +6644,17 @@ impl UeContextModificationResponse {
                     bh_channels_failed_to_be_modified_list =
                         Some(BhChannelsFailedToBeModifiedList::decode(data)?)
                 }
-                333 => sldr_bs_setup_mod_list = Some(SldrBsSetupModList::decode(data)?),
-                318 => sldr_bs_modified_list = Some(SldrBsModifiedList::decode(data)?),
+                333 => sl_drbs_setup_mod_list = Some(SlDrbsSetupModList::decode(data)?),
+                318 => sl_drbs_modified_list = Some(SlDrbsModifiedList::decode(data)?),
                 334 => {
-                    sldr_bs_failed_to_be_setup_mod_list =
-                        Some(SldrBsFailedToBeSetupModList::decode(data)?)
+                    sl_drbs_failed_to_be_setup_mod_list =
+                        Some(SlDrbsFailedToBeSetupModList::decode(data)?)
                 }
                 314 => {
-                    sldr_bs_failed_to_be_modified_list =
-                        Some(SldrBsFailedToBeModifiedList::decode(data)?)
+                    sl_drbs_failed_to_be_modified_list =
+                        Some(SlDrbsFailedToBeModifiedList::decode(data)?)
                 }
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -6673,28 +6673,28 @@ impl UeContextModificationResponse {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            d_uto_currc_information,
-            dr_bs_setup_mod_list,
-            dr_bs_modified_list,
-            sr_bs_failed_to_be_setup_mod_list,
-            dr_bs_failed_to_be_setup_mod_list,
+            du_to_cu_rrc_information,
+            drbs_setup_mod_list,
+            drbs_modified_list,
+            srbs_failed_to_be_setup_mod_list,
+            drbs_failed_to_be_setup_mod_list,
             s_cell_failedto_setup_mod_list,
-            dr_bs_failed_to_be_modified_list,
+            drbs_failed_to_be_modified_list,
             inactivity_monitoring_response,
             criticality_diagnostics,
             c_rnti,
             associated_s_cell_list,
-            sr_bs_setup_mod_list,
-            sr_bs_modified_list,
+            srbs_setup_mod_list,
+            srbs_modified_list,
             full_configuration,
             bh_channels_setup_mod_list,
             bh_channels_modified_list,
             bh_channels_failed_to_be_setup_mod_list,
             bh_channels_failed_to_be_modified_list,
-            sldr_bs_setup_mod_list,
-            sldr_bs_modified_list,
-            sldr_bs_failed_to_be_setup_mod_list,
-            sldr_bs_failed_to_be_modified_list,
+            sl_drbs_setup_mod_list,
+            sl_drbs_modified_list,
+            sl_drbs_failed_to_be_setup_mod_list,
+            sl_drbs_failed_to_be_modified_list,
             requested_target_cell_global_id,
         })
     }
@@ -6728,7 +6728,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.d_uto_currc_information {
+        if let Some(x) = &self.du_to_cu_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
@@ -6738,7 +6738,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_setup_mod_list {
+        if let Some(x) = &self.drbs_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 29, false)?;
@@ -6748,7 +6748,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_modified_list {
+        if let Some(x) = &self.drbs_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 21, false)?;
@@ -6758,7 +6758,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_failed_to_be_setup_mod_list {
+        if let Some(x) = &self.srbs_failed_to_be_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 68, false)?;
@@ -6768,7 +6768,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_failed_to_be_setup_mod_list {
+        if let Some(x) = &self.drbs_failed_to_be_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 17, false)?;
@@ -6788,7 +6788,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_failed_to_be_modified_list {
+        if let Some(x) = &self.drbs_failed_to_be_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 13, false)?;
@@ -6838,7 +6838,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_setup_mod_list {
+        if let Some(x) = &self.srbs_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 204, false)?;
@@ -6848,7 +6848,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_modified_list {
+        if let Some(x) = &self.srbs_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 206, false)?;
@@ -6908,7 +6908,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_setup_mod_list {
+        if let Some(x) = &self.sl_drbs_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 333, false)?;
@@ -6918,7 +6918,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_modified_list {
+        if let Some(x) = &self.sl_drbs_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 318, false)?;
@@ -6928,7 +6928,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_failed_to_be_setup_mod_list {
+        if let Some(x) = &self.sl_drbs_failed_to_be_setup_mod_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 334, false)?;
@@ -6938,7 +6938,7 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_failed_to_be_modified_list {
+        if let Some(x) = &self.sl_drbs_failed_to_be_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 314, false)?;
@@ -6985,11 +6985,11 @@ impl AperCodec for UeContextModificationResponse {
             .map_err(|e: AperCodecError| e.push_context("UeContextModificationResponse"))
     }
 }
-// DrBsSetupModList
+// DrbsSetupModList
 #[derive(Clone, Debug)]
-pub struct DrBsSetupModList(pub Vec<DrBsSetupModItem>);
+pub struct DrbsSetupModList(pub Vec<DrbsSetupModItem>);
 
-impl DrBsSetupModList {
+impl DrbsSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -6998,7 +6998,7 @@ impl DrBsSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsSetupModItem::decode(data)?);
+                items.push(DrbsSetupModItem::decode(data)?);
             }
             items
         }))
@@ -7017,22 +7017,22 @@ impl DrBsSetupModList {
     }
 }
 
-impl AperCodec for DrBsSetupModList {
+impl AperCodec for DrbsSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupModList"))
+        DrbsSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupModList"))
     }
 }
-// DrBsModifiedList
+// DrbsModifiedList
 #[derive(Clone, Debug)]
-pub struct DrBsModifiedList(pub Vec<DrBsModifiedItem>);
+pub struct DrbsModifiedList(pub Vec<DrbsModifiedItem>);
 
-impl DrBsModifiedList {
+impl DrbsModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -7041,7 +7041,7 @@ impl DrBsModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsModifiedItem::decode(data)?);
+                items.push(DrbsModifiedItem::decode(data)?);
             }
             items
         }))
@@ -7060,22 +7060,22 @@ impl DrBsModifiedList {
     }
 }
 
-impl AperCodec for DrBsModifiedList {
+impl AperCodec for DrbsModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedList"))
+        DrbsModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedList"))
     }
 }
-// SrBsSetupModList
+// SrbsSetupModList
 #[derive(Clone, Debug)]
-pub struct SrBsSetupModList(pub Vec<SrBsSetupModItem>);
+pub struct SrbsSetupModList(pub Vec<SrbsSetupModItem>);
 
-impl SrBsSetupModList {
+impl SrbsSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -7084,7 +7084,7 @@ impl SrBsSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsSetupModItem::decode(data)?);
+                items.push(SrbsSetupModItem::decode(data)?);
             }
             items
         }))
@@ -7103,22 +7103,22 @@ impl SrBsSetupModList {
     }
 }
 
-impl AperCodec for SrBsSetupModList {
+impl AperCodec for SrbsSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupModList"))
+        SrbsSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupModList"))
     }
 }
-// SrBsModifiedList
+// SrbsModifiedList
 #[derive(Clone, Debug)]
-pub struct SrBsModifiedList(pub Vec<SrBsModifiedItem>);
+pub struct SrbsModifiedList(pub Vec<SrbsModifiedItem>);
 
-impl SrBsModifiedList {
+impl SrbsModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -7127,7 +7127,7 @@ impl SrBsModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsModifiedItem::decode(data)?);
+                items.push(SrbsModifiedItem::decode(data)?);
             }
             items
         }))
@@ -7146,22 +7146,22 @@ impl SrBsModifiedList {
     }
 }
 
-impl AperCodec for SrBsModifiedList {
+impl AperCodec for SrbsModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsModifiedList"))
+        SrbsModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsModifiedList"))
     }
 }
-// DrBsFailedToBeModifiedList
+// DrbsFailedToBeModifiedList
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeModifiedList(pub Vec<DrBsFailedToBeModifiedItem>);
+pub struct DrbsFailedToBeModifiedList(pub Vec<DrbsFailedToBeModifiedItem>);
 
-impl DrBsFailedToBeModifiedList {
+impl DrbsFailedToBeModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -7170,7 +7170,7 @@ impl DrBsFailedToBeModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsFailedToBeModifiedItem::decode(data)?);
+                items.push(DrbsFailedToBeModifiedItem::decode(data)?);
             }
             items
         }))
@@ -7189,22 +7189,22 @@ impl DrBsFailedToBeModifiedList {
     }
 }
 
-impl AperCodec for DrBsFailedToBeModifiedList {
+impl AperCodec for DrbsFailedToBeModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeModifiedList"))
+        DrbsFailedToBeModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeModifiedList"))
     }
 }
-// SrBsFailedToBeSetupModList
+// SrbsFailedToBeSetupModList
 #[derive(Clone, Debug)]
-pub struct SrBsFailedToBeSetupModList(pub Vec<SrBsFailedToBeSetupModItem>);
+pub struct SrbsFailedToBeSetupModList(pub Vec<SrbsFailedToBeSetupModItem>);
 
-impl SrBsFailedToBeSetupModList {
+impl SrbsFailedToBeSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -7213,7 +7213,7 @@ impl SrBsFailedToBeSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsFailedToBeSetupModItem::decode(data)?);
+                items.push(SrbsFailedToBeSetupModItem::decode(data)?);
             }
             items
         }))
@@ -7232,22 +7232,22 @@ impl SrBsFailedToBeSetupModList {
     }
 }
 
-impl AperCodec for SrBsFailedToBeSetupModList {
+impl AperCodec for SrbsFailedToBeSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsFailedToBeSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupModList"))
+        SrbsFailedToBeSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupModList"))
     }
 }
-// DrBsFailedToBeSetupModList
+// DrbsFailedToBeSetupModList
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeSetupModList(pub Vec<DrBsFailedToBeSetupModItem>);
+pub struct DrbsFailedToBeSetupModList(pub Vec<DrbsFailedToBeSetupModItem>);
 
-impl DrBsFailedToBeSetupModList {
+impl DrbsFailedToBeSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -7256,7 +7256,7 @@ impl DrBsFailedToBeSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsFailedToBeSetupModItem::decode(data)?);
+                items.push(DrbsFailedToBeSetupModItem::decode(data)?);
             }
             items
         }))
@@ -7275,15 +7275,15 @@ impl DrBsFailedToBeSetupModList {
     }
 }
 
-impl AperCodec for DrBsFailedToBeSetupModList {
+impl AperCodec for DrbsFailedToBeSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupModList"))
+        DrbsFailedToBeSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupModList"))
     }
 }
 // SCellFailedtoSetupModList
@@ -7548,11 +7548,11 @@ impl AperCodec for AssociatedSCellList {
             .map_err(|e: AperCodecError| e.push_context("AssociatedSCellList"))
     }
 }
-// SldrBsSetupModList
+// SlDrbsSetupModList
 #[derive(Clone, Debug)]
-pub struct SldrBsSetupModList(pub Vec<SldrBsSetupModItem>);
+pub struct SlDrbsSetupModList(pub Vec<SlDrbsSetupModItem>);
 
-impl SldrBsSetupModList {
+impl SlDrbsSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -7561,7 +7561,7 @@ impl SldrBsSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsSetupModItem::decode(data)?);
+                items.push(SlDrbsSetupModItem::decode(data)?);
             }
             items
         }))
@@ -7580,22 +7580,22 @@ impl SldrBsSetupModList {
     }
 }
 
-impl AperCodec for SldrBsSetupModList {
+impl AperCodec for SlDrbsSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupModList"))
+        SlDrbsSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupModList"))
     }
 }
-// SldrBsModifiedList
+// SlDrbsModifiedList
 #[derive(Clone, Debug)]
-pub struct SldrBsModifiedList(pub Vec<SldrBsModifiedItem>);
+pub struct SlDrbsModifiedList(pub Vec<SlDrbsModifiedItem>);
 
-impl SldrBsModifiedList {
+impl SlDrbsModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -7604,7 +7604,7 @@ impl SldrBsModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsModifiedItem::decode(data)?);
+                items.push(SlDrbsModifiedItem::decode(data)?);
             }
             items
         }))
@@ -7623,22 +7623,22 @@ impl SldrBsModifiedList {
     }
 }
 
-impl AperCodec for SldrBsModifiedList {
+impl AperCodec for SlDrbsModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedList"))
+        SlDrbsModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedList"))
     }
 }
-// SldrBsFailedToBeModifiedList
+// SlDrbsFailedToBeModifiedList
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeModifiedList(pub Vec<SldrBsFailedToBeModifiedItem>);
+pub struct SlDrbsFailedToBeModifiedList(pub Vec<SlDrbsFailedToBeModifiedItem>);
 
-impl SldrBsFailedToBeModifiedList {
+impl SlDrbsFailedToBeModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -7647,7 +7647,7 @@ impl SldrBsFailedToBeModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsFailedToBeModifiedItem::decode(data)?);
+                items.push(SlDrbsFailedToBeModifiedItem::decode(data)?);
             }
             items
         }))
@@ -7666,22 +7666,22 @@ impl SldrBsFailedToBeModifiedList {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeModifiedList {
+impl AperCodec for SlDrbsFailedToBeModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeModifiedList"))
+        SlDrbsFailedToBeModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeModifiedList"))
     }
 }
-// SldrBsFailedToBeSetupModList
+// SlDrbsFailedToBeSetupModList
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeSetupModList(pub Vec<SldrBsFailedToBeSetupModItem>);
+pub struct SlDrbsFailedToBeSetupModList(pub Vec<SlDrbsFailedToBeSetupModItem>);
 
-impl SldrBsFailedToBeSetupModList {
+impl SlDrbsFailedToBeSetupModList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -7690,7 +7690,7 @@ impl SldrBsFailedToBeSetupModList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsFailedToBeSetupModItem::decode(data)?);
+                items.push(SlDrbsFailedToBeSetupModItem::decode(data)?);
             }
             items
         }))
@@ -7709,15 +7709,15 @@ impl SldrBsFailedToBeSetupModList {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeSetupModList {
+impl AperCodec for SlDrbsFailedToBeSetupModList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeSetupModList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupModList"))
+        SlDrbsFailedToBeSetupModList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupModList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupModList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupModList"))
     }
 }
 // UeContextModificationFailure
@@ -7727,7 +7727,7 @@ pub struct UeContextModificationFailure {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub cause: Cause,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
-    pub requested_target_cell_global_id: Option<Nrcgi>,
+    pub requested_target_cell_global_id: Option<NrCgi>,
 }
 
 impl UeContextModificationFailure {
@@ -7740,7 +7740,7 @@ impl UeContextModificationFailure {
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut cause: Option<Cause> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
-        let mut requested_target_cell_global_id: Option<Nrcgi> = None;
+        let mut requested_target_cell_global_id: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -7751,7 +7751,7 @@ impl UeContextModificationFailure {
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
                 0 => cause = Some(Cause::decode(data)?),
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
-                376 => requested_target_cell_global_id = Some(Nrcgi::decode(data)?),
+                376 => requested_target_cell_global_id = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -7858,14 +7858,14 @@ pub struct UeContextModificationRequired {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub d_uto_currc_information: Option<DUtoCurrcInformation>,
-    pub dr_bs_required_to_be_modified_list: Option<DrBsRequiredToBeModifiedList>,
-    pub sr_bs_required_to_be_released_list: Option<SrBsRequiredToBeReleasedList>,
-    pub dr_bs_required_to_be_released_list: Option<DrBsRequiredToBeReleasedList>,
+    pub du_to_cu_rrc_information: Option<DuToCuRrcInformation>,
+    pub drbs_required_to_be_modified_list: Option<DrbsRequiredToBeModifiedList>,
+    pub srbs_required_to_be_released_list: Option<SrbsRequiredToBeReleasedList>,
+    pub drbs_required_to_be_released_list: Option<DrbsRequiredToBeReleasedList>,
     pub cause: Cause,
     pub bh_channels_required_to_be_released_list: Option<BhChannelsRequiredToBeReleasedList>,
-    pub sldr_bs_required_to_be_modified_list: Option<SldrBsRequiredToBeModifiedList>,
-    pub sldr_bs_required_to_be_released_list: Option<SldrBsRequiredToBeReleasedList>,
+    pub sl_drbs_required_to_be_modified_list: Option<SlDrbsRequiredToBeModifiedList>,
+    pub sl_drbs_required_to_be_released_list: Option<SlDrbsRequiredToBeReleasedList>,
     pub target_cells_to_cancel: Option<TargetCellList>,
 }
 
@@ -7880,16 +7880,16 @@ impl UeContextModificationRequired {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut d_uto_currc_information: Option<DUtoCurrcInformation> = None;
-        let mut dr_bs_required_to_be_modified_list: Option<DrBsRequiredToBeModifiedList> = None;
-        let mut sr_bs_required_to_be_released_list: Option<SrBsRequiredToBeReleasedList> = None;
-        let mut dr_bs_required_to_be_released_list: Option<DrBsRequiredToBeReleasedList> = None;
+        let mut du_to_cu_rrc_information: Option<DuToCuRrcInformation> = None;
+        let mut drbs_required_to_be_modified_list: Option<DrbsRequiredToBeModifiedList> = None;
+        let mut srbs_required_to_be_released_list: Option<SrbsRequiredToBeReleasedList> = None;
+        let mut drbs_required_to_be_released_list: Option<DrbsRequiredToBeReleasedList> = None;
         let mut cause: Option<Cause> = None;
         let mut bh_channels_required_to_be_released_list: Option<
             BhChannelsRequiredToBeReleasedList,
         > = None;
-        let mut sldr_bs_required_to_be_modified_list: Option<SldrBsRequiredToBeModifiedList> = None;
-        let mut sldr_bs_required_to_be_released_list: Option<SldrBsRequiredToBeReleasedList> = None;
+        let mut sl_drbs_required_to_be_modified_list: Option<SlDrbsRequiredToBeModifiedList> = None;
+        let mut sl_drbs_required_to_be_released_list: Option<SlDrbsRequiredToBeReleasedList> = None;
         let mut target_cells_to_cancel: Option<TargetCellList> = None;
 
         for _ in 0..len {
@@ -7903,18 +7903,18 @@ impl UeContextModificationRequired {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                39 => d_uto_currc_information = Some(DUtoCurrcInformation::decode(data)?),
+                39 => du_to_cu_rrc_information = Some(DuToCuRrcInformation::decode(data)?),
                 23 => {
-                    dr_bs_required_to_be_modified_list =
-                        Some(DrBsRequiredToBeModifiedList::decode(data)?)
+                    drbs_required_to_be_modified_list =
+                        Some(DrbsRequiredToBeModifiedList::decode(data)?)
                 }
                 70 => {
-                    sr_bs_required_to_be_released_list =
-                        Some(SrBsRequiredToBeReleasedList::decode(data)?)
+                    srbs_required_to_be_released_list =
+                        Some(SrbsRequiredToBeReleasedList::decode(data)?)
                 }
                 25 => {
-                    dr_bs_required_to_be_released_list =
-                        Some(DrBsRequiredToBeReleasedList::decode(data)?)
+                    drbs_required_to_be_released_list =
+                        Some(DrbsRequiredToBeReleasedList::decode(data)?)
                 }
                 0 => cause = Some(Cause::decode(data)?),
                 277 => {
@@ -7922,12 +7922,12 @@ impl UeContextModificationRequired {
                         Some(BhChannelsRequiredToBeReleasedList::decode(data)?)
                 }
                 320 => {
-                    sldr_bs_required_to_be_modified_list =
-                        Some(SldrBsRequiredToBeModifiedList::decode(data)?)
+                    sl_drbs_required_to_be_modified_list =
+                        Some(SlDrbsRequiredToBeModifiedList::decode(data)?)
                 }
                 322 => {
-                    sldr_bs_required_to_be_released_list =
-                        Some(SldrBsRequiredToBeReleasedList::decode(data)?)
+                    sl_drbs_required_to_be_released_list =
+                        Some(SlDrbsRequiredToBeReleasedList::decode(data)?)
                 }
                 375 => target_cells_to_cancel = Some(TargetCellList::decode(data)?),
                 x => {
@@ -7951,14 +7951,14 @@ impl UeContextModificationRequired {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            d_uto_currc_information,
-            dr_bs_required_to_be_modified_list,
-            sr_bs_required_to_be_released_list,
-            dr_bs_required_to_be_released_list,
+            du_to_cu_rrc_information,
+            drbs_required_to_be_modified_list,
+            srbs_required_to_be_released_list,
+            drbs_required_to_be_released_list,
             cause,
             bh_channels_required_to_be_released_list,
-            sldr_bs_required_to_be_modified_list,
-            sldr_bs_required_to_be_released_list,
+            sl_drbs_required_to_be_modified_list,
+            sl_drbs_required_to_be_released_list,
             target_cells_to_cancel,
         })
     }
@@ -7992,7 +7992,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.d_uto_currc_information {
+        if let Some(x) = &self.du_to_cu_rrc_information {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
@@ -8002,7 +8002,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_required_to_be_modified_list {
+        if let Some(x) = &self.drbs_required_to_be_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 23, false)?;
@@ -8012,7 +8012,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sr_bs_required_to_be_released_list {
+        if let Some(x) = &self.srbs_required_to_be_released_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 70, false)?;
@@ -8022,7 +8022,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_required_to_be_released_list {
+        if let Some(x) = &self.drbs_required_to_be_released_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 25, false)?;
@@ -8050,7 +8050,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_required_to_be_modified_list {
+        if let Some(x) = &self.sl_drbs_required_to_be_modified_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 320, false)?;
@@ -8060,7 +8060,7 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_required_to_be_released_list {
+        if let Some(x) = &self.sl_drbs_required_to_be_released_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 322, false)?;
@@ -8107,11 +8107,11 @@ impl AperCodec for UeContextModificationRequired {
             .map_err(|e: AperCodecError| e.push_context("UeContextModificationRequired"))
     }
 }
-// DrBsRequiredToBeModifiedList
+// DrbsRequiredToBeModifiedList
 #[derive(Clone, Debug)]
-pub struct DrBsRequiredToBeModifiedList(pub Vec<DrBsRequiredToBeModifiedItem>);
+pub struct DrbsRequiredToBeModifiedList(pub Vec<DrbsRequiredToBeModifiedItem>);
 
-impl DrBsRequiredToBeModifiedList {
+impl DrbsRequiredToBeModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -8120,7 +8120,7 @@ impl DrBsRequiredToBeModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsRequiredToBeModifiedItem::decode(data)?);
+                items.push(DrbsRequiredToBeModifiedItem::decode(data)?);
             }
             items
         }))
@@ -8139,22 +8139,22 @@ impl DrBsRequiredToBeModifiedList {
     }
 }
 
-impl AperCodec for DrBsRequiredToBeModifiedList {
+impl AperCodec for DrbsRequiredToBeModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsRequiredToBeModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeModifiedList"))
+        DrbsRequiredToBeModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeModifiedList"))
     }
 }
-// DrBsRequiredToBeReleasedList
+// DrbsRequiredToBeReleasedList
 #[derive(Clone, Debug)]
-pub struct DrBsRequiredToBeReleasedList(pub Vec<DrBsRequiredToBeReleasedItem>);
+pub struct DrbsRequiredToBeReleasedList(pub Vec<DrbsRequiredToBeReleasedItem>);
 
-impl DrBsRequiredToBeReleasedList {
+impl DrbsRequiredToBeReleasedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -8163,7 +8163,7 @@ impl DrBsRequiredToBeReleasedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsRequiredToBeReleasedItem::decode(data)?);
+                items.push(DrbsRequiredToBeReleasedItem::decode(data)?);
             }
             items
         }))
@@ -8182,22 +8182,22 @@ impl DrBsRequiredToBeReleasedList {
     }
 }
 
-impl AperCodec for DrBsRequiredToBeReleasedList {
+impl AperCodec for DrbsRequiredToBeReleasedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsRequiredToBeReleasedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeReleasedList"))
+        DrbsRequiredToBeReleasedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeReleasedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeReleasedList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeReleasedList"))
     }
 }
-// SrBsRequiredToBeReleasedList
+// SrbsRequiredToBeReleasedList
 #[derive(Clone, Debug)]
-pub struct SrBsRequiredToBeReleasedList(pub Vec<SrBsRequiredToBeReleasedItem>);
+pub struct SrbsRequiredToBeReleasedList(pub Vec<SrbsRequiredToBeReleasedItem>);
 
-impl SrBsRequiredToBeReleasedList {
+impl SrbsRequiredToBeReleasedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(8), false)?;
@@ -8206,7 +8206,7 @@ impl SrBsRequiredToBeReleasedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SrBsRequiredToBeReleasedItem::decode(data)?);
+                items.push(SrbsRequiredToBeReleasedItem::decode(data)?);
             }
             items
         }))
@@ -8225,15 +8225,15 @@ impl SrBsRequiredToBeReleasedList {
     }
 }
 
-impl AperCodec for SrBsRequiredToBeReleasedList {
+impl AperCodec for SrbsRequiredToBeReleasedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsRequiredToBeReleasedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsRequiredToBeReleasedList"))
+        SrbsRequiredToBeReleasedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsRequiredToBeReleasedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsRequiredToBeReleasedList"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsRequiredToBeReleasedList"))
     }
 }
 // BhChannelsRequiredToBeReleasedList
@@ -8280,11 +8280,11 @@ impl AperCodec for BhChannelsRequiredToBeReleasedList {
             .map_err(|e: AperCodecError| e.push_context("BhChannelsRequiredToBeReleasedList"))
     }
 }
-// SldrBsRequiredToBeModifiedList
+// SlDrbsRequiredToBeModifiedList
 #[derive(Clone, Debug)]
-pub struct SldrBsRequiredToBeModifiedList(pub Vec<SldrBsRequiredToBeModifiedItem>);
+pub struct SlDrbsRequiredToBeModifiedList(pub Vec<SlDrbsRequiredToBeModifiedItem>);
 
-impl SldrBsRequiredToBeModifiedList {
+impl SlDrbsRequiredToBeModifiedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -8293,7 +8293,7 @@ impl SldrBsRequiredToBeModifiedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsRequiredToBeModifiedItem::decode(data)?);
+                items.push(SlDrbsRequiredToBeModifiedItem::decode(data)?);
             }
             items
         }))
@@ -8312,22 +8312,22 @@ impl SldrBsRequiredToBeModifiedList {
     }
 }
 
-impl AperCodec for SldrBsRequiredToBeModifiedList {
+impl AperCodec for SlDrbsRequiredToBeModifiedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsRequiredToBeModifiedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeModifiedList"))
+        SlDrbsRequiredToBeModifiedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeModifiedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeModifiedList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeModifiedList"))
     }
 }
-// SldrBsRequiredToBeReleasedList
+// SlDrbsRequiredToBeReleasedList
 #[derive(Clone, Debug)]
-pub struct SldrBsRequiredToBeReleasedList(pub Vec<SldrBsRequiredToBeReleasedItem>);
+pub struct SlDrbsRequiredToBeReleasedList(pub Vec<SlDrbsRequiredToBeReleasedItem>);
 
-impl SldrBsRequiredToBeReleasedList {
+impl SlDrbsRequiredToBeReleasedList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -8336,7 +8336,7 @@ impl SldrBsRequiredToBeReleasedList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsRequiredToBeReleasedItem::decode(data)?);
+                items.push(SlDrbsRequiredToBeReleasedItem::decode(data)?);
             }
             items
         }))
@@ -8355,15 +8355,15 @@ impl SldrBsRequiredToBeReleasedList {
     }
 }
 
-impl AperCodec for SldrBsRequiredToBeReleasedList {
+impl AperCodec for SlDrbsRequiredToBeReleasedList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsRequiredToBeReleasedList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeReleasedList"))
+        SlDrbsRequiredToBeReleasedList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeReleasedList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeReleasedList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeReleasedList"))
     }
 }
 // UeContextModificationConfirm
@@ -8372,12 +8372,12 @@ pub struct UeContextModificationConfirm {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub resource_coordination_transfer_container: Option<ResourceCoordinationTransferContainer>,
-    pub dr_bs_modified_conf_list: Option<DrBsModifiedConfList>,
+    pub drbs_modified_conf_list: Option<DrbsModifiedConfList>,
     pub rrc_container: Option<RrcContainer>,
     pub criticality_diagnostics: Option<CriticalityDiagnostics>,
     pub execute_duplication: Option<ExecuteDuplication>,
     pub resource_coordination_transfer_information: Option<ResourceCoordinationTransferInformation>,
-    pub sldr_bs_modified_conf_list: Option<SldrBsModifiedConfList>,
+    pub sl_drbs_modified_conf_list: Option<SlDrbsModifiedConfList>,
 }
 
 impl UeContextModificationConfirm {
@@ -8391,14 +8391,14 @@ impl UeContextModificationConfirm {
         let mut resource_coordination_transfer_container: Option<
             ResourceCoordinationTransferContainer,
         > = None;
-        let mut dr_bs_modified_conf_list: Option<DrBsModifiedConfList> = None;
+        let mut drbs_modified_conf_list: Option<DrbsModifiedConfList> = None;
         let mut rrc_container: Option<RrcContainer> = None;
         let mut criticality_diagnostics: Option<CriticalityDiagnostics> = None;
         let mut execute_duplication: Option<ExecuteDuplication> = None;
         let mut resource_coordination_transfer_information: Option<
             ResourceCoordinationTransferInformation,
         > = None;
-        let mut sldr_bs_modified_conf_list: Option<SldrBsModifiedConfList> = None;
+        let mut sl_drbs_modified_conf_list: Option<SlDrbsModifiedConfList> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -8411,7 +8411,7 @@ impl UeContextModificationConfirm {
                     resource_coordination_transfer_container =
                         Some(ResourceCoordinationTransferContainer::decode(data)?)
                 }
-                19 => dr_bs_modified_conf_list = Some(DrBsModifiedConfList::decode(data)?),
+                19 => drbs_modified_conf_list = Some(DrbsModifiedConfList::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
                 7 => criticality_diagnostics = Some(CriticalityDiagnostics::decode(data)?),
                 109 => execute_duplication = Some(ExecuteDuplication::decode(data)?),
@@ -8419,7 +8419,7 @@ impl UeContextModificationConfirm {
                     resource_coordination_transfer_information =
                         Some(ResourceCoordinationTransferInformation::decode(data)?)
                 }
-                337 => sldr_bs_modified_conf_list = Some(SldrBsModifiedConfList::decode(data)?),
+                337 => sl_drbs_modified_conf_list = Some(SlDrbsModifiedConfList::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -8438,12 +8438,12 @@ impl UeContextModificationConfirm {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             resource_coordination_transfer_container,
-            dr_bs_modified_conf_list,
+            drbs_modified_conf_list,
             rrc_container,
             criticality_diagnostics,
             execute_duplication,
             resource_coordination_transfer_information,
-            sldr_bs_modified_conf_list,
+            sl_drbs_modified_conf_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -8476,7 +8476,7 @@ impl UeContextModificationConfirm {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.dr_bs_modified_conf_list {
+        if let Some(x) = &self.drbs_modified_conf_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 19, false)?;
@@ -8526,7 +8526,7 @@ impl UeContextModificationConfirm {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.sldr_bs_modified_conf_list {
+        if let Some(x) = &self.sl_drbs_modified_conf_list {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 337, false)?;
@@ -8563,11 +8563,11 @@ impl AperCodec for UeContextModificationConfirm {
             .map_err(|e: AperCodecError| e.push_context("UeContextModificationConfirm"))
     }
 }
-// DrBsModifiedConfList
+// DrbsModifiedConfList
 #[derive(Clone, Debug)]
-pub struct DrBsModifiedConfList(pub Vec<DrBsModifiedConfItem>);
+pub struct DrbsModifiedConfList(pub Vec<DrbsModifiedConfItem>);
 
-impl DrBsModifiedConfList {
+impl DrbsModifiedConfList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(64), false)?;
@@ -8576,7 +8576,7 @@ impl DrBsModifiedConfList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(DrBsModifiedConfItem::decode(data)?);
+                items.push(DrbsModifiedConfItem::decode(data)?);
             }
             items
         }))
@@ -8595,22 +8595,22 @@ impl DrBsModifiedConfList {
     }
 }
 
-impl AperCodec for DrBsModifiedConfList {
+impl AperCodec for DrbsModifiedConfList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsModifiedConfList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedConfList"))
+        DrbsModifiedConfList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedConfList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedConfList"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedConfList"))
     }
 }
-// SldrBsModifiedConfList
+// SlDrbsModifiedConfList
 #[derive(Clone, Debug)]
-pub struct SldrBsModifiedConfList(pub Vec<SldrBsModifiedConfItem>);
+pub struct SlDrbsModifiedConfList(pub Vec<SlDrbsModifiedConfItem>);
 
-impl SldrBsModifiedConfList {
+impl SlDrbsModifiedConfList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(512), false)?;
@@ -8619,7 +8619,7 @@ impl SldrBsModifiedConfList {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(SldrBsModifiedConfItem::decode(data)?);
+                items.push(SlDrbsModifiedConfItem::decode(data)?);
             }
             items
         }))
@@ -8638,15 +8638,15 @@ impl SldrBsModifiedConfList {
     }
 }
 
-impl AperCodec for SldrBsModifiedConfList {
+impl AperCodec for SlDrbsModifiedConfList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsModifiedConfList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedConfList"))
+        SlDrbsModifiedConfList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedConfList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedConfList"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedConfList"))
     }
 }
 // UeContextModificationRefuse
@@ -9584,34 +9584,34 @@ impl AperCodec for DrbActivityList {
             .map_err(|e: AperCodecError| e.push_context("DrbActivityList"))
     }
 }
-// InitialUlrrcMessageTransfer
+// InitialUlRrcMessageTransfer
 #[derive(Clone, Debug)]
-pub struct InitialUlrrcMessageTransfer {
+pub struct InitialUlRrcMessageTransfer {
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub c_rnti: CRnti,
     pub rrc_container: RrcContainer,
-    pub d_uto_currc_container: Option<DUtoCurrcContainer>,
+    pub du_to_cu_rrc_container: Option<DuToCuRrcContainer>,
     pub sul_access_indication: Option<SulAccessIndication>,
     pub transaction_id: TransactionId,
-    pub ranueid: Option<Ranueid>,
+    pub ran_ue_id: Option<RanUeId>,
     pub rrc_container_rrc_setup_complete: Option<RrcContainerRrcSetupComplete>,
 }
 
-impl InitialUlrrcMessageTransfer {
+impl InitialUlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut nrcgi: Option<Nrcgi> = None;
+        let mut nr_cgi: Option<NrCgi> = None;
         let mut c_rnti: Option<CRnti> = None;
         let mut rrc_container: Option<RrcContainer> = None;
-        let mut d_uto_currc_container: Option<DUtoCurrcContainer> = None;
+        let mut du_to_cu_rrc_container: Option<DuToCuRrcContainer> = None;
         let mut sul_access_indication: Option<SulAccessIndication> = None;
         let mut transaction_id: Option<TransactionId> = None;
-        let mut ranueid: Option<Ranueid> = None;
+        let mut ran_ue_id: Option<RanUeId> = None;
         let mut rrc_container_rrc_setup_complete: Option<RrcContainerRrcSetupComplete> = None;
 
         for _ in 0..len {
@@ -9620,13 +9620,13 @@ impl InitialUlrrcMessageTransfer {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                111 => nrcgi = Some(Nrcgi::decode(data)?),
+                111 => nr_cgi = Some(NrCgi::decode(data)?),
                 95 => c_rnti = Some(CRnti::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
-                128 => d_uto_currc_container = Some(DUtoCurrcContainer::decode(data)?),
+                128 => du_to_cu_rrc_container = Some(DuToCuRrcContainer::decode(data)?),
                 178 => sul_access_indication = Some(SulAccessIndication::decode(data)?),
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                226 => ranueid = Some(Ranueid::decode(data)?),
+                226 => ran_ue_id = Some(RanUeId::decode(data)?),
                 241 => {
                     rrc_container_rrc_setup_complete =
                         Some(RrcContainerRrcSetupComplete::decode(data)?)
@@ -9642,8 +9642,8 @@ impl InitialUlrrcMessageTransfer {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrcgi"
+        let nr_cgi = nr_cgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_cgi"
         )))?;
         let c_rnti = c_rnti.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE c_rnti"
@@ -9656,13 +9656,13 @@ impl InitialUlrrcMessageTransfer {
         )))?;
         Ok(Self {
             gnb_du_ue_f1ap_id,
-            nrcgi,
+            nr_cgi,
             c_rnti,
             rrc_container,
-            d_uto_currc_container,
+            du_to_cu_rrc_container,
             sul_access_indication,
             transaction_id,
-            ranueid,
+            ran_ue_id,
             rrc_container_rrc_setup_complete,
         })
     }
@@ -9679,7 +9679,7 @@ impl InitialUlrrcMessageTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrcgi.encode(ie)?;
+        self.nr_cgi.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -9702,7 +9702,7 @@ impl InitialUlrrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.d_uto_currc_container {
+        if let Some(x) = &self.du_to_cu_rrc_container {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 128, false)?;
@@ -9730,7 +9730,7 @@ impl InitialUlrrcMessageTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        if let Some(x) = &self.ranueid {
+        if let Some(x) = &self.ran_ue_id {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 226, false)?;
@@ -9766,36 +9766,36 @@ impl InitialUlrrcMessageTransfer {
     }
 }
 
-impl AperCodec for InitialUlrrcMessageTransfer {
+impl AperCodec for InitialUlRrcMessageTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        InitialUlrrcMessageTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("InitialUlrrcMessageTransfer"))
+        InitialUlRrcMessageTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("InitialUlRrcMessageTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("InitialUlrrcMessageTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("InitialUlRrcMessageTransfer"))
     }
 }
-// DlrrcMessageTransfer
+// DlRrcMessageTransfer
 #[derive(Clone, Debug)]
-pub struct DlrrcMessageTransfer {
+pub struct DlRrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub old_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
-    pub srbid: Srbid,
+    pub srb_id: SrbId,
     pub execute_duplication: Option<ExecuteDuplication>,
     pub rrc_container: RrcContainer,
     pub rat_frequency_priority_information: Option<RatFrequencyPriorityInformation>,
     pub rrc_delivery_status_request: Option<RrcDeliveryStatusRequest>,
     pub ue_context_not_retrievable: Option<UeContextNotRetrievable>,
-    pub redirected_rr_cmessage: Option<Vec<u8>>,
+    pub redirected_rrc_message: Option<Vec<u8>>,
     pub plmn_assistance_info_for_net_shar: Option<PlmnIdentity>,
     pub new_gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
     pub additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex>,
 }
 
-impl DlrrcMessageTransfer {
+impl DlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -9804,13 +9804,13 @@ impl DlrrcMessageTransfer {
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut old_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut srbid: Option<Srbid> = None;
+        let mut srb_id: Option<SrbId> = None;
         let mut execute_duplication: Option<ExecuteDuplication> = None;
         let mut rrc_container: Option<RrcContainer> = None;
         let mut rat_frequency_priority_information: Option<RatFrequencyPriorityInformation> = None;
         let mut rrc_delivery_status_request: Option<RrcDeliveryStatusRequest> = None;
         let mut ue_context_not_retrievable: Option<UeContextNotRetrievable> = None;
-        let mut redirected_rr_cmessage: Option<Vec<u8>> = None;
+        let mut redirected_rrc_message: Option<Vec<u8>> = None;
         let mut plmn_assistance_info_for_net_shar: Option<PlmnIdentity> = None;
         let mut new_gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
@@ -9823,7 +9823,7 @@ impl DlrrcMessageTransfer {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
                 47 => old_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                64 => srbid = Some(Srbid::decode(data)?),
+                64 => srb_id = Some(SrbId::decode(data)?),
                 109 => execute_duplication = Some(ExecuteDuplication::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
                 108 => {
@@ -9833,7 +9833,7 @@ impl DlrrcMessageTransfer {
                 184 => rrc_delivery_status_request = Some(RrcDeliveryStatusRequest::decode(data)?),
                 222 => ue_context_not_retrievable = Some(UeContextNotRetrievable::decode(data)?),
                 218 => {
-                    redirected_rr_cmessage =
+                    redirected_rrc_message =
                         Some(aper::decode::decode_octetstring(data, None, None, false)?)
                 }
                 221 => plmn_assistance_info_for_net_shar = Some(PlmnIdentity::decode(data)?),
@@ -9855,8 +9855,8 @@ impl DlrrcMessageTransfer {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let srbid = srbid.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE srbid"
+        let srb_id = srb_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srb_id"
         )))?;
         let rrc_container = rrc_container.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE rrc_container"
@@ -9865,13 +9865,13 @@ impl DlrrcMessageTransfer {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             old_gnb_du_ue_f1ap_id,
-            srbid,
+            srb_id,
             execute_duplication,
             rrc_container,
             rat_frequency_priority_information,
             rrc_delivery_status_request,
             ue_context_not_retrievable,
-            redirected_rr_cmessage,
+            redirected_rrc_message,
             plmn_assistance_info_for_net_shar,
             new_gnb_cu_ue_f1ap_id,
             additional_rrm_priority_index,
@@ -9908,7 +9908,7 @@ impl DlrrcMessageTransfer {
         }
 
         let ie = &mut AperCodecData::new();
-        self.srbid.encode(ie)?;
+        self.srb_id.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -9963,7 +9963,7 @@ impl DlrrcMessageTransfer {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.redirected_rr_cmessage {
+        if let Some(x) = &self.redirected_rrc_message {
             let ie = &mut AperCodecData::new();
             aper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 218, false)?;
@@ -10019,29 +10019,29 @@ impl DlrrcMessageTransfer {
     }
 }
 
-impl AperCodec for DlrrcMessageTransfer {
+impl AperCodec for DlRrcMessageTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DlrrcMessageTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DlrrcMessageTransfer"))
+        DlRrcMessageTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DlRrcMessageTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DlrrcMessageTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("DlRrcMessageTransfer"))
     }
 }
-// UlrrcMessageTransfer
+// UlRrcMessageTransfer
 #[derive(Clone, Debug)]
-pub struct UlrrcMessageTransfer {
+pub struct UlRrcMessageTransfer {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub srbid: Srbid,
+    pub srb_id: SrbId,
     pub rrc_container: RrcContainer,
     pub selected_plmn_id: Option<PlmnIdentity>,
     pub new_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId>,
 }
 
-impl UlrrcMessageTransfer {
+impl UlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
@@ -10049,7 +10049,7 @@ impl UlrrcMessageTransfer {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut srbid: Option<Srbid> = None;
+        let mut srb_id: Option<SrbId> = None;
         let mut rrc_container: Option<RrcContainer> = None;
         let mut selected_plmn_id: Option<PlmnIdentity> = None;
         let mut new_gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
@@ -10061,7 +10061,7 @@ impl UlrrcMessageTransfer {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                64 => srbid = Some(Srbid::decode(data)?),
+                64 => srb_id = Some(SrbId::decode(data)?),
                 50 => rrc_container = Some(RrcContainer::decode(data)?),
                 224 => selected_plmn_id = Some(PlmnIdentity::decode(data)?),
                 219 => new_gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
@@ -10079,8 +10079,8 @@ impl UlrrcMessageTransfer {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let srbid = srbid.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE srbid"
+        let srb_id = srb_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srb_id"
         )))?;
         let rrc_container = rrc_container.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE rrc_container"
@@ -10088,7 +10088,7 @@ impl UlrrcMessageTransfer {
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
-            srbid,
+            srb_id,
             rrc_container,
             selected_plmn_id,
             new_gnb_du_ue_f1ap_id,
@@ -10115,7 +10115,7 @@ impl UlrrcMessageTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.srbid.encode(ie)?;
+        self.srb_id.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -10166,15 +10166,15 @@ impl UlrrcMessageTransfer {
     }
 }
 
-impl AperCodec for UlrrcMessageTransfer {
+impl AperCodec for UlRrcMessageTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UlrrcMessageTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UlrrcMessageTransfer"))
+        UlRrcMessageTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UlRrcMessageTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UlrrcMessageTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("UlRrcMessageTransfer"))
     }
 }
 // PrivateMessage
@@ -10213,9 +10213,9 @@ impl AperCodec for PrivateMessage {
 #[derive(Clone, Debug)]
 pub struct SystemInformationDeliveryCommand {
     pub transaction_id: TransactionId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub s_itype_list: SItypeList,
-    pub confirmed_ueid: GnbDuUeF1apId,
+    pub confirmed_ue_id: GnbDuUeF1apId,
 }
 
 impl SystemInformationDeliveryCommand {
@@ -10225,9 +10225,9 @@ impl SystemInformationDeliveryCommand {
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut nrcgi: Option<Nrcgi> = None;
+        let mut nr_cgi: Option<NrCgi> = None;
         let mut s_itype_list: Option<SItypeList> = None;
-        let mut confirmed_ueid: Option<GnbDuUeF1apId> = None;
+        let mut confirmed_ue_id: Option<GnbDuUeF1apId> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -10235,9 +10235,9 @@ impl SystemInformationDeliveryCommand {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                111 => nrcgi = Some(Nrcgi::decode(data)?),
+                111 => nr_cgi = Some(NrCgi::decode(data)?),
                 116 => s_itype_list = Some(SItypeList::decode(data)?),
-                156 => confirmed_ueid = Some(GnbDuUeF1apId::decode(data)?),
+                156 => confirmed_ue_id = Some(GnbDuUeF1apId::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -10249,20 +10249,20 @@ impl SystemInformationDeliveryCommand {
         let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrcgi"
+        let nr_cgi = nr_cgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_cgi"
         )))?;
         let s_itype_list = s_itype_list.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE s_itype_list"
         )))?;
-        let confirmed_ueid = confirmed_ueid.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE confirmed_ueid"
+        let confirmed_ue_id = confirmed_ue_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE confirmed_ue_id"
         )))?;
         Ok(Self {
             transaction_id,
-            nrcgi,
+            nr_cgi,
             s_itype_list,
-            confirmed_ueid,
+            confirmed_ue_id,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10278,7 +10278,7 @@ impl SystemInformationDeliveryCommand {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrcgi.encode(ie)?;
+        self.nr_cgi.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -10294,7 +10294,7 @@ impl SystemInformationDeliveryCommand {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.confirmed_ueid.encode(ie)?;
+        self.confirmed_ue_id.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 156, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11109,7 +11109,7 @@ pub struct RrcDeliveryReport {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub rrc_delivery_status: RrcDeliveryStatus,
-    pub srbid: Srbid,
+    pub srb_id: SrbId,
 }
 
 impl RrcDeliveryReport {
@@ -11121,7 +11121,7 @@ impl RrcDeliveryReport {
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
         let mut rrc_delivery_status: Option<RrcDeliveryStatus> = None;
-        let mut srbid: Option<Srbid> = None;
+        let mut srb_id: Option<SrbId> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11131,7 +11131,7 @@ impl RrcDeliveryReport {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
                 185 => rrc_delivery_status = Some(RrcDeliveryStatus::decode(data)?),
-                64 => srbid = Some(Srbid::decode(data)?),
+                64 => srb_id = Some(SrbId::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11149,14 +11149,14 @@ impl RrcDeliveryReport {
         let rrc_delivery_status = rrc_delivery_status.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE rrc_delivery_status"
         )))?;
-        let srbid = srbid.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE srbid"
+        let srb_id = srb_id.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE srb_id"
         )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
             rrc_delivery_status,
-            srbid,
+            srb_id,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11188,7 +11188,7 @@ impl RrcDeliveryReport {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.srbid.encode(ie)?;
+        self.srb_id.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 64, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11842,21 +11842,21 @@ impl AperCodec for CellTrafficTrace {
             .map_err(|e: AperCodecError| e.push_context("CellTrafficTrace"))
     }
 }
-// DucuRadioInformationTransfer
+// DuCuRadioInformationTransfer
 #[derive(Clone, Debug)]
-pub struct DucuRadioInformationTransfer {
+pub struct DuCuRadioInformationTransfer {
     pub transaction_id: TransactionId,
-    pub ducu_radio_information_type: DucuRadioInformationType,
+    pub du_cu_radio_information_type: DuCuRadioInformationType,
 }
 
-impl DucuRadioInformationTransfer {
+impl DuCuRadioInformationTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut ducu_radio_information_type: Option<DucuRadioInformationType> = None;
+        let mut du_cu_radio_information_type: Option<DuCuRadioInformationType> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11864,7 +11864,7 @@ impl DucuRadioInformationTransfer {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                249 => ducu_radio_information_type = Some(DucuRadioInformationType::decode(data)?),
+                249 => du_cu_radio_information_type = Some(DuCuRadioInformationType::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11876,12 +11876,12 @@ impl DucuRadioInformationTransfer {
         let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let ducu_radio_information_type = ducu_radio_information_type.ok_or(
-            aper::AperCodecError::new(format!("Missing mandatory IE ducu_radio_information_type")),
+        let du_cu_radio_information_type = du_cu_radio_information_type.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE du_cu_radio_information_type")),
         )?;
         Ok(Self {
             transaction_id,
-            ducu_radio_information_type,
+            du_cu_radio_information_type,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11897,7 +11897,7 @@ impl DucuRadioInformationTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.ducu_radio_information_type.encode(ie)?;
+        self.du_cu_radio_information_type.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 249, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -11920,32 +11920,32 @@ impl DucuRadioInformationTransfer {
     }
 }
 
-impl AperCodec for DucuRadioInformationTransfer {
+impl AperCodec for DuCuRadioInformationTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DucuRadioInformationTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucuRadioInformationTransfer"))
+        DuCuRadioInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuCuRadioInformationTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucuRadioInformationTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("DuCuRadioInformationTransfer"))
     }
 }
-// CuduRadioInformationTransfer
+// CuDuRadioInformationTransfer
 #[derive(Clone, Debug)]
-pub struct CuduRadioInformationTransfer {
+pub struct CuDuRadioInformationTransfer {
     pub transaction_id: TransactionId,
-    pub cudu_radio_information_type: CuduRadioInformationType,
+    pub cu_du_radio_information_type: CuDuRadioInformationType,
 }
 
-impl CuduRadioInformationTransfer {
+impl CuDuRadioInformationTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut transaction_id: Option<TransactionId> = None;
-        let mut cudu_radio_information_type: Option<CuduRadioInformationType> = None;
+        let mut cu_du_radio_information_type: Option<CuDuRadioInformationType> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -11953,7 +11953,7 @@ impl CuduRadioInformationTransfer {
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 78 => transaction_id = Some(TransactionId::decode(data)?),
-                250 => cudu_radio_information_type = Some(CuduRadioInformationType::decode(data)?),
+                250 => cu_du_radio_information_type = Some(CuDuRadioInformationType::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -11965,12 +11965,12 @@ impl CuduRadioInformationTransfer {
         let transaction_id = transaction_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE transaction_id"
         )))?;
-        let cudu_radio_information_type = cudu_radio_information_type.ok_or(
-            aper::AperCodecError::new(format!("Missing mandatory IE cudu_radio_information_type")),
+        let cu_du_radio_information_type = cu_du_radio_information_type.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE cu_du_radio_information_type")),
         )?;
         Ok(Self {
             transaction_id,
-            cudu_radio_information_type,
+            cu_du_radio_information_type,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11986,7 +11986,7 @@ impl CuduRadioInformationTransfer {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.cudu_radio_information_type.encode(ie)?;
+        self.cu_du_radio_information_type.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 250, false)?;
         Criticality::Ignore.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -12009,15 +12009,15 @@ impl CuduRadioInformationTransfer {
     }
 }
 
-impl AperCodec for CuduRadioInformationTransfer {
+impl AperCodec for CuDuRadioInformationTransfer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CuduRadioInformationTransfer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuduRadioInformationTransfer"))
+        CuDuRadioInformationTransfer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationTransfer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuduRadioInformationTransfer"))
+            .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationTransfer"))
     }
 }
 // BapMappingConfiguration
@@ -14463,7 +14463,7 @@ impl AperCodec for ReferenceTimeInformationReport {
 pub struct AccessSuccess {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl AccessSuccess {
@@ -14474,7 +14474,7 @@ impl AccessSuccess {
 
         let mut gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId> = None;
         let mut gnb_du_ue_f1ap_id: Option<GnbDuUeF1apId> = None;
-        let mut nrcgi: Option<Nrcgi> = None;
+        let mut nr_cgi: Option<NrCgi> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
@@ -14483,7 +14483,7 @@ impl AccessSuccess {
             match id {
                 40 => gnb_cu_ue_f1ap_id = Some(GnbCuUeF1apId::decode(data)?),
                 41 => gnb_du_ue_f1ap_id = Some(GnbDuUeF1apId::decode(data)?),
-                111 => nrcgi = Some(Nrcgi::decode(data)?),
+                111 => nr_cgi = Some(NrCgi::decode(data)?),
                 x => {
                     return Err(aper::AperCodecError::new(format!(
                         "Unrecognised IE type {}",
@@ -14498,13 +14498,13 @@ impl AccessSuccess {
         let gnb_du_ue_f1ap_id = gnb_du_ue_f1ap_id.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE gnb_du_ue_f1ap_id"
         )))?;
-        let nrcgi = nrcgi.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE nrcgi"
+        let nr_cgi = nr_cgi.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE nr_cgi"
         )))?;
         Ok(Self {
             gnb_cu_ue_f1ap_id,
             gnb_du_ue_f1ap_id,
-            nrcgi,
+            nr_cgi,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -14528,7 +14528,7 @@ impl AccessSuccess {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.nrcgi.encode(ie)?;
+        self.nr_cgi.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 111, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;

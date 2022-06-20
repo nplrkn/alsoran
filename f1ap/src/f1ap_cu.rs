@@ -1,30 +1,45 @@
 use super::top_pdu::*;
-use crate::{InitiatingMessage, F1apPdu};
+use crate::{F1apPdu, InitiatingMessage};
 use async_trait::async_trait;
-use net::{Application, EventHandler, InterfaceProvider, Procedure, RequestProvider, TnlaEvent};
+use net::{
+    Application, EventHandler, Indication, IndicationHandler, InterfaceProvider, Procedure,
+    RequestProvider, TnlaEvent,
+};
 use slog::{error, Logger};
 
 #[derive(Clone)]
 pub struct F1apCu<T>(pub T)
 where
-    T: RequestProvider<F1SetupProcedure>; // TODO
+    T: EventHandler;
 
 #[async_trait]
 impl<T> EventHandler for F1apCu<T>
 where
-    T: RequestProvider<F1SetupProcedure> + EventHandler,
+    T: EventHandler,
 {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         self.0.handle_event(event, tnla_id, logger).await;
     }
 }
 
-impl<T> Application for F1apCu<T> where T: RequestProvider<F1SetupProcedure> + EventHandler + Clone {}
+impl<T> Application for F1apCu<T> where
+    T: RequestProvider<F1SetupProcedure>
+        + EventHandler
+        + Clone
+        + IndicationHandler<InitialUlRrcMessageTransferProcedure>
+        + IndicationHandler<UlRrcMessageTransferProcedure>
+{
+}
 
 #[async_trait]
 impl<T> InterfaceProvider for F1apCu<T>
 where
-    T: Send + Sync + RequestProvider<F1SetupProcedure>,
+    T: Send
+        + Sync
+        + EventHandler
+        + RequestProvider<F1SetupProcedure>
+        + IndicationHandler<InitialUlRrcMessageTransferProcedure>
+        + IndicationHandler<UlRrcMessageTransferProcedure>,
 {
     type TopPdu = F1apPdu;
     async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Option<F1apPdu> {
@@ -39,14 +54,15 @@ where
             InitiatingMessage::F1SetupRequest(req) => {
                 F1SetupProcedure::call_provider(&self.0, req, logger).await
             }
+            InitiatingMessage::InitialUlRrcMessageTransfer(req) => {
+                InitialUlRrcMessageTransferProcedure::call_provider(&self.0, req, logger).await;
+                None
+            }
+            InitiatingMessage::UlRrcMessageTransfer(req) => {
+                UlRrcMessageTransferProcedure::call_provider(&self.0, req, logger).await;
+                None
+            }
             _ => todo!(),
         }
     }
 }
-
-// async fn route_request<T>(&provider: T, req: Message, logger: &Logger) -> Result<F1apPdu> {
-//     match <T as RequestProvider<F1SetupProcedure>>::request(provider, req, logger).await {
-//         Ok(x) => Ok(F1apPdu::SuccessfulOutcome(NgSetupRequest(x))),
-//         Err(_) => todo!(),
-//     }
-// }

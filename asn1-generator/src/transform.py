@@ -14,10 +14,11 @@ import sys
 def add_type_name(orig_typename, name_dict):
     name = pascal_case(orig_typename)
     if name_dict.get(name):
+        underscore = '_' if orig_typename[-1].isdigit() else ''
         suffix = 1
-        while name_dict.get(name + str(suffix)):
+        while name_dict.get(name + underscore + str(suffix)):
             suffix += 1
-        name = name + str(suffix)
+        name = name + underscore + str(suffix)
     name_dict[name] = True
     return name
 

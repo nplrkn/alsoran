@@ -4,7 +4,7 @@ use crate::common::Criticality;
 use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 use async_trait::async_trait;
-use net::{AperSerde, Procedure, RequestError, RequestProvider};
+use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
 use slog::Logger;
 
 // NgapPdu
@@ -108,425 +108,275 @@ impl Procedure for AmfConfigurationUpdateProcedure {
 pub struct AmfcpRelocationIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for AmfcpRelocationIndicationProcedure {
+impl Indication for AmfcpRelocationIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = AmfcpRelocationIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 64;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: AmfcpRelocationIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<AmfcpRelocationIndicationProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<AmfcpRelocationIndicationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::AmfcpRelocationIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for AmfcpRelocationIndication!".to_string(),
-        ))
     }
 }
 
 pub struct AmfStatusIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for AmfStatusIndicationProcedure {
+impl Indication for AmfStatusIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = AmfStatusIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 1;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: AmfStatusIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<AmfStatusIndicationProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<AmfStatusIndicationProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::AmfStatusIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for AmfStatusIndication!".to_string(),
-        ))
     }
 }
 
 pub struct CellTrafficTraceProcedure {}
 
 #[async_trait]
-impl Procedure for CellTrafficTraceProcedure {
+impl Indication for CellTrafficTraceProcedure {
     type TopPdu = NgapPdu;
     type Request = CellTrafficTrace;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 2;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: CellTrafficTrace,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<CellTrafficTraceProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<CellTrafficTraceProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::CellTrafficTrace(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for CellTrafficTrace!".to_string(),
-        ))
     }
 }
 
 pub struct ConnectionEstablishmentIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for ConnectionEstablishmentIndicationProcedure {
+impl Indication for ConnectionEstablishmentIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = ConnectionEstablishmentIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 65;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: ConnectionEstablishmentIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<ConnectionEstablishmentIndicationProcedure>>::request(
+    ) {
+        <T as IndicationHandler<ConnectionEstablishmentIndicationProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::ConnectionEstablishmentIndication(r))
             .into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for ConnectionEstablishmentIndication!".to_string(),
-        ))
-    }
 }
 
 pub struct DeactivateTraceProcedure {}
 
 #[async_trait]
-impl Procedure for DeactivateTraceProcedure {
+impl Indication for DeactivateTraceProcedure {
     type TopPdu = NgapPdu;
     type Request = DeactivateTrace;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 3;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: DeactivateTrace,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DeactivateTraceProcedure>>::request(provider, req, logger).await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<DeactivateTraceProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::DeactivateTrace(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DeactivateTrace!".to_string(),
-        ))
     }
 }
 
 pub struct DownlinkNasTransportProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkNasTransportProcedure {
+impl Indication for DownlinkNasTransportProcedure {
     type TopPdu = NgapPdu;
     type Request = DownlinkNasTransport;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 4;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: DownlinkNasTransport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkNasTransportProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<DownlinkNasTransportProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkNasTransport(r)).into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkNasTransport!".to_string(),
-        ))
-    }
 }
 
-pub struct DownlinkNonUeAssociatedNrpPaTransportProcedure {}
+pub struct DownlinkNonUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkNonUeAssociatedNrpPaTransportProcedure {
+impl Indication for DownlinkNonUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = DownlinkNonUeAssociatedNrpPaTransport;
-    type Success = ();
-    type Failure = ();
+    type Request = DownlinkNonUeAssociatedNrPPaTransport;
     const CODE: u8 = 5;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
-        req: DownlinkNonUeAssociatedNrpPaTransport,
+        req: DownlinkNonUeAssociatedNrPPaTransport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkNonUeAssociatedNrpPaTransportProcedure>>::request(
+    ) {
+        <T as IndicationHandler<DownlinkNonUeAssociatedNrPPaTransportProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkNonUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkNonUeAssociatedNrPPaTransport(r))
             .into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkNonUeAssociatedNrpPaTransport!".to_string(),
-        ))
     }
 }
 
 pub struct DownlinkRanConfigurationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkRanConfigurationTransferProcedure {
+impl Indication for DownlinkRanConfigurationTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = DownlinkRanConfigurationTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 6;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: DownlinkRanConfigurationTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkRanConfigurationTransferProcedure>>::request(
+    ) {
+        <T as IndicationHandler<DownlinkRanConfigurationTransferProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkRanConfigurationTransfer(r))
             .into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkRanConfigurationTransfer!".to_string(),
-        ))
-    }
 }
 
 pub struct DownlinkRanEarlyStatusTransferProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkRanEarlyStatusTransferProcedure {
+impl Indication for DownlinkRanEarlyStatusTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = DownlinkRanEarlyStatusTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 63;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: DownlinkRanEarlyStatusTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkRanEarlyStatusTransferProcedure>>::request(
+    ) {
+        <T as IndicationHandler<DownlinkRanEarlyStatusTransferProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkRanEarlyStatusTransfer(r))
             .into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkRanEarlyStatusTransfer!".to_string(),
-        ))
-    }
 }
 
 pub struct DownlinkRanStatusTransferProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkRanStatusTransferProcedure {
+impl Indication for DownlinkRanStatusTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = DownlinkRanStatusTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 7;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: DownlinkRanStatusTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkRanStatusTransferProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<DownlinkRanStatusTransferProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkRanStatusTransfer(r)).into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkRanStatusTransfer!".to_string(),
-        ))
-    }
 }
 
-pub struct DownlinkUeAssociatedNrpPaTransportProcedure {}
+pub struct DownlinkUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkUeAssociatedNrpPaTransportProcedure {
+impl Indication for DownlinkUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = DownlinkUeAssociatedNrpPaTransport;
-    type Success = ();
-    type Failure = ();
+    type Request = DownlinkUeAssociatedNrPPaTransport;
     const CODE: u8 = 8;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
-        req: DownlinkUeAssociatedNrpPaTransport,
+        req: DownlinkUeAssociatedNrPPaTransport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkUeAssociatedNrpPaTransportProcedure>>::request(
+    ) {
+        <T as IndicationHandler<DownlinkUeAssociatedNrPPaTransportProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkUeAssociatedNrPPaTransport(r))
             .into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkUeAssociatedNrpPaTransport!".to_string(),
-        ))
     }
 }
 
 pub struct ErrorIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for ErrorIndicationProcedure {
+impl Indication for ErrorIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = ErrorIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 9;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: ErrorIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<ErrorIndicationProcedure>>::request(provider, req, logger).await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<ErrorIndicationProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::ErrorIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for ErrorIndication!".to_string(),
-        ))
     }
 }
 
@@ -571,34 +421,22 @@ impl Procedure for HandoverCancelProcedure {
 pub struct HandoverNotificationProcedure {}
 
 #[async_trait]
-impl Procedure for HandoverNotificationProcedure {
+impl Indication for HandoverNotificationProcedure {
     type TopPdu = NgapPdu;
     type Request = HandoverNotify;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 11;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: HandoverNotify,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<HandoverNotificationProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<HandoverNotificationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::HandoverNotify(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for HandoverNotify!".to_string(),
-        ))
     }
 }
 
@@ -689,33 +527,21 @@ impl Procedure for HandoverResourceAllocationProcedure {
 pub struct HandoverSuccessProcedure {}
 
 #[async_trait]
-impl Procedure for HandoverSuccessProcedure {
+impl Indication for HandoverSuccessProcedure {
     type TopPdu = NgapPdu;
     type Request = HandoverSuccess;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 61;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: HandoverSuccess,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<HandoverSuccessProcedure>>::request(provider, req, logger).await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<HandoverSuccessProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::HandoverSuccess(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for HandoverSuccess!".to_string(),
-        ))
     }
 }
 
@@ -763,176 +589,111 @@ impl Procedure for InitialContextSetupProcedure {
 pub struct InitialUeMessageProcedure {}
 
 #[async_trait]
-impl Procedure for InitialUeMessageProcedure {
+impl Indication for InitialUeMessageProcedure {
     type TopPdu = NgapPdu;
     type Request = InitialUeMessage;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 15;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: InitialUeMessage,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<InitialUeMessageProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<InitialUeMessageProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for InitialUeMessage!".to_string(),
-        ))
     }
 }
 
 pub struct LocationReportProcedure {}
 
 #[async_trait]
-impl Procedure for LocationReportProcedure {
+impl Indication for LocationReportProcedure {
     type TopPdu = NgapPdu;
     type Request = LocationReport;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 18;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: LocationReport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<LocationReportProcedure>>::request(provider, req, logger).await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<LocationReportProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::LocationReport(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for LocationReport!".to_string(),
-        ))
     }
 }
 
 pub struct LocationReportingControlProcedure {}
 
 #[async_trait]
-impl Procedure for LocationReportingControlProcedure {
+impl Indication for LocationReportingControlProcedure {
     type TopPdu = NgapPdu;
     type Request = LocationReportingControl;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 16;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: LocationReportingControl,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<LocationReportingControlProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<LocationReportingControlProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::LocationReportingControl(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for LocationReportingControl!".to_string(),
-        ))
     }
 }
 
 pub struct LocationReportingFailureIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for LocationReportingFailureIndicationProcedure {
+impl Indication for LocationReportingFailureIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = LocationReportingFailureIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 17;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: LocationReportingFailureIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<LocationReportingFailureIndicationProcedure>>::request(
+    ) {
+        <T as IndicationHandler<LocationReportingFailureIndicationProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::LocationReportingFailureIndication(r))
             .into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for LocationReportingFailureIndication!".to_string(),
-        ))
-    }
 }
 
 pub struct NasNonDeliveryIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for NasNonDeliveryIndicationProcedure {
+impl Indication for NasNonDeliveryIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = NasNonDeliveryIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 19;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: NasNonDeliveryIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<NasNonDeliveryIndicationProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<NasNonDeliveryIndicationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::NasNonDeliveryIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for NasNonDeliveryIndication!".to_string(),
-        ))
     }
 }
 
@@ -1015,96 +776,59 @@ impl Procedure for NgSetupProcedure {
 pub struct OverloadStartProcedure {}
 
 #[async_trait]
-impl Procedure for OverloadStartProcedure {
+impl Indication for OverloadStartProcedure {
     type TopPdu = NgapPdu;
     type Request = OverloadStart;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 22;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: OverloadStart,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<OverloadStartProcedure>>::request(provider, req, logger).await {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<OverloadStartProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::OverloadStart(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for OverloadStart!".to_string(),
-        ))
     }
 }
 
 pub struct OverloadStopProcedure {}
 
 #[async_trait]
-impl Procedure for OverloadStopProcedure {
+impl Indication for OverloadStopProcedure {
     type TopPdu = NgapPdu;
     type Request = OverloadStop;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 23;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: OverloadStop,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<OverloadStopProcedure>>::request(provider, req, logger).await {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<OverloadStopProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::OverloadStop(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for OverloadStop!".to_string(),
-        ))
     }
 }
 
 pub struct PagingProcedure {}
 
 #[async_trait]
-impl Procedure for PagingProcedure {
+impl Indication for PagingProcedure {
     type TopPdu = NgapPdu;
     type Request = Paging;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 24;
 
-    async fn call_provider<T: RequestProvider<Self>>(
-        provider: &T,
-        req: Paging,
-        logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<PagingProcedure>>::request(provider, req, logger).await {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    async fn call_provider<T: IndicationHandler<Self>>(provider: &T, req: Paging, logger: &Logger) {
+        <T as IndicationHandler<PagingProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::Paging(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for Paging!".to_string(),
-        ))
     }
 }
 
@@ -1240,36 +964,22 @@ impl Procedure for PduSessionResourceModifyIndicationProcedure {
 pub struct PduSessionResourceNotifyProcedure {}
 
 #[async_trait]
-impl Procedure for PduSessionResourceNotifyProcedure {
+impl Indication for PduSessionResourceNotifyProcedure {
     type TopPdu = NgapPdu;
     type Request = PduSessionResourceNotify;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 30;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: PduSessionResourceNotify,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<PduSessionResourceNotifyProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<PduSessionResourceNotifyProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceNotify(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for PduSessionResourceNotify!".to_string(),
-        ))
     }
 }
 
@@ -1401,68 +1111,44 @@ impl Procedure for PwsCancelProcedure {
 pub struct PwsFailureIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for PwsFailureIndicationProcedure {
+impl Indication for PwsFailureIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = PwsFailureIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 33;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: PwsFailureIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<PwsFailureIndicationProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<PwsFailureIndicationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::PwsFailureIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for PwsFailureIndication!".to_string(),
-        ))
     }
 }
 
 pub struct PwsRestartIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for PwsRestartIndicationProcedure {
+impl Indication for PwsRestartIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = PwsRestartIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 34;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: PwsRestartIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<PwsRestartIndicationProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<PwsRestartIndicationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::PwsRestartIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for PwsRestartIndication!".to_string(),
-        ))
     }
 }
 
@@ -1514,244 +1200,156 @@ impl Procedure for RanConfigurationUpdateProcedure {
 pub struct RancpRelocationIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for RancpRelocationIndicationProcedure {
+impl Indication for RancpRelocationIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = RancpRelocationIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 57;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: RancpRelocationIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<RancpRelocationIndicationProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<RancpRelocationIndicationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::RancpRelocationIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for RancpRelocationIndication!".to_string(),
-        ))
     }
 }
 
 pub struct RerouteNasRequestProcedure {}
 
 #[async_trait]
-impl Procedure for RerouteNasRequestProcedure {
+impl Indication for RerouteNasRequestProcedure {
     type TopPdu = NgapPdu;
     type Request = RerouteNasRequest;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 36;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: RerouteNasRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<RerouteNasRequestProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<RerouteNasRequestProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::RerouteNasRequest(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for RerouteNasRequest!".to_string(),
-        ))
     }
 }
 
 pub struct RetrieveUeInformationProcedure {}
 
 #[async_trait]
-impl Procedure for RetrieveUeInformationProcedure {
+impl Indication for RetrieveUeInformationProcedure {
     type TopPdu = NgapPdu;
     type Request = RetrieveUeInformation;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 55;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: RetrieveUeInformation,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<RetrieveUeInformationProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<RetrieveUeInformationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::RetrieveUeInformation(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for RetrieveUeInformation!".to_string(),
-        ))
     }
 }
 
 pub struct RrcInactiveTransitionReportProcedure {}
 
 #[async_trait]
-impl Procedure for RrcInactiveTransitionReportProcedure {
+impl Indication for RrcInactiveTransitionReportProcedure {
     type TopPdu = NgapPdu;
     type Request = RrcInactiveTransitionReport;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 37;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: RrcInactiveTransitionReport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<RrcInactiveTransitionReportProcedure>>::request(
+    ) {
+        <T as IndicationHandler<RrcInactiveTransitionReportProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::RrcInactiveTransitionReport(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for RrcInactiveTransitionReport!".to_string(),
-        ))
     }
 }
 
 pub struct SecondaryRatDataUsageReportProcedure {}
 
 #[async_trait]
-impl Procedure for SecondaryRatDataUsageReportProcedure {
+impl Indication for SecondaryRatDataUsageReportProcedure {
     type TopPdu = NgapPdu;
     type Request = SecondaryRatDataUsageReport;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 52;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: SecondaryRatDataUsageReport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<SecondaryRatDataUsageReportProcedure>>::request(
+    ) {
+        <T as IndicationHandler<SecondaryRatDataUsageReportProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::SecondaryRatDataUsageReport(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for SecondaryRatDataUsageReport!".to_string(),
-        ))
     }
 }
 
 pub struct TraceFailureIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for TraceFailureIndicationProcedure {
+impl Indication for TraceFailureIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = TraceFailureIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 38;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: TraceFailureIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<TraceFailureIndicationProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<TraceFailureIndicationProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::TraceFailureIndication(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for TraceFailureIndication!".to_string(),
-        ))
     }
 }
 
 pub struct TraceStartProcedure {}
 
 #[async_trait]
-impl Procedure for TraceStartProcedure {
+impl Indication for TraceStartProcedure {
     type TopPdu = NgapPdu;
     type Request = TraceStart;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 39;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: TraceStart,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<TraceStartProcedure>>::request(provider, req, logger).await {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<TraceStartProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::TraceStart(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for TraceStart!".to_string(),
-        ))
     }
 }
 
@@ -1840,36 +1438,22 @@ impl Procedure for UeContextReleaseProcedure {
 pub struct UeContextReleaseRequestProcedure {}
 
 #[async_trait]
-impl Procedure for UeContextReleaseRequestProcedure {
+impl Indication for UeContextReleaseRequestProcedure {
     type TopPdu = NgapPdu;
     type Request = UeContextReleaseRequest;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 42;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UeContextReleaseRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UeContextReleaseRequestProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<UeContextReleaseRequestProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UeContextReleaseRequest(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UeContextReleaseRequest!".to_string(),
-        ))
     }
 }
 
@@ -1957,34 +1541,22 @@ impl Procedure for UeContextSuspendProcedure {
 pub struct UeInformationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for UeInformationTransferProcedure {
+impl Indication for UeInformationTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = UeInformationTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 56;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UeInformationTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UeInformationTransferProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<UeInformationTransferProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UeInformationTransfer(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UeInformationTransfer!".to_string(),
-        ))
     }
 }
 
@@ -2078,288 +1650,189 @@ impl Procedure for UeRadioCapabilityIdMappingProcedure {
 pub struct UeRadioCapabilityInfoIndicationProcedure {}
 
 #[async_trait]
-impl Procedure for UeRadioCapabilityInfoIndicationProcedure {
+impl Indication for UeRadioCapabilityInfoIndicationProcedure {
     type TopPdu = NgapPdu;
     type Request = UeRadioCapabilityInfoIndication;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 44;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UeRadioCapabilityInfoIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UeRadioCapabilityInfoIndicationProcedure>>::request(
+    ) {
+        <T as IndicationHandler<UeRadioCapabilityInfoIndicationProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UeRadioCapabilityInfoIndication(r))
             .into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UeRadioCapabilityInfoIndication!".to_string(),
-        ))
-    }
 }
 
-pub struct UetnlaBindingReleaseProcedure {}
+pub struct UeTnlaBindingReleaseProcedure {}
 
 #[async_trait]
-impl Procedure for UetnlaBindingReleaseProcedure {
+impl Indication for UeTnlaBindingReleaseProcedure {
     type TopPdu = NgapPdu;
-    type Request = UetnlaBindingReleaseRequest;
-    type Success = ();
-    type Failure = ();
+    type Request = UeTnlaBindingReleaseRequest;
     const CODE: u8 = 45;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
-        req: UetnlaBindingReleaseRequest,
+        req: UeTnlaBindingReleaseRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UetnlaBindingReleaseProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<UeTnlaBindingReleaseProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::UetnlaBindingReleaseRequest(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UetnlaBindingReleaseRequest!".to_string(),
-        ))
+        NgapPdu::InitiatingMessage(InitiatingMessage::UeTnlaBindingReleaseRequest(r)).into_bytes()
     }
 }
 
 pub struct UplinkNasTransportProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkNasTransportProcedure {
+impl Indication for UplinkNasTransportProcedure {
     type TopPdu = NgapPdu;
     type Request = UplinkNasTransport;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 46;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UplinkNasTransport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkNasTransportProcedure>>::request(provider, req, logger)
-            .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<UplinkNasTransportProcedure>>::handle(provider, req, logger).await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNasTransport(r)).into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkNasTransport!".to_string(),
-        ))
-    }
 }
 
-pub struct UplinkNonUeAssociatedNrpPaTransportProcedure {}
+pub struct UplinkNonUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkNonUeAssociatedNrpPaTransportProcedure {
+impl Indication for UplinkNonUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = UplinkNonUeAssociatedNrpPaTransport;
-    type Success = ();
-    type Failure = ();
+    type Request = UplinkNonUeAssociatedNrPPaTransport;
     const CODE: u8 = 47;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
-        req: UplinkNonUeAssociatedNrpPaTransport,
+        req: UplinkNonUeAssociatedNrPPaTransport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkNonUeAssociatedNrpPaTransportProcedure>>::request(
+    ) {
+        <T as IndicationHandler<UplinkNonUeAssociatedNrPPaTransportProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNonUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkNonUeAssociatedNrPPaTransport(r))
             .into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkNonUeAssociatedNrpPaTransport!".to_string(),
-        ))
     }
 }
 
 pub struct UplinkRanConfigurationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkRanConfigurationTransferProcedure {
+impl Indication for UplinkRanConfigurationTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = UplinkRanConfigurationTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 48;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UplinkRanConfigurationTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkRanConfigurationTransferProcedure>>::request(
+    ) {
+        <T as IndicationHandler<UplinkRanConfigurationTransferProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UplinkRanConfigurationTransfer(r))
             .into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkRanConfigurationTransfer!".to_string(),
-        ))
-    }
 }
 
 pub struct UplinkRanEarlyStatusTransferProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkRanEarlyStatusTransferProcedure {
+impl Indication for UplinkRanEarlyStatusTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = UplinkRanEarlyStatusTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 62;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UplinkRanEarlyStatusTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkRanEarlyStatusTransferProcedure>>::request(
+    ) {
+        <T as IndicationHandler<UplinkRanEarlyStatusTransferProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UplinkRanEarlyStatusTransfer(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkRanEarlyStatusTransfer!".to_string(),
-        ))
     }
 }
 
 pub struct UplinkRanStatusTransferProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkRanStatusTransferProcedure {
+impl Indication for UplinkRanStatusTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = UplinkRanStatusTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 49;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UplinkRanStatusTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkRanStatusTransferProcedure>>::request(
-            provider, req, logger,
-        )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+    ) {
+        <T as IndicationHandler<UplinkRanStatusTransferProcedure>>::handle(provider, req, logger)
+            .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UplinkRanStatusTransfer(r)).into_bytes()
     }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkRanStatusTransfer!".to_string(),
-        ))
-    }
 }
 
-pub struct UplinkUeAssociatedNrpPaTransportProcedure {}
+pub struct UplinkUeAssociatedNrPPaTransportProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkUeAssociatedNrpPaTransportProcedure {
+impl Indication for UplinkUeAssociatedNrPPaTransportProcedure {
     type TopPdu = NgapPdu;
-    type Request = UplinkUeAssociatedNrpPaTransport;
-    type Success = ();
-    type Failure = ();
+    type Request = UplinkUeAssociatedNrPPaTransport;
     const CODE: u8 = 50;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
-        req: UplinkUeAssociatedNrpPaTransport,
+        req: UplinkUeAssociatedNrPPaTransport,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkUeAssociatedNrpPaTransportProcedure>>::request(
+    ) {
+        <T as IndicationHandler<UplinkUeAssociatedNrPPaTransportProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
-        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkUeAssociatedNrpPaTransport(r))
+        NgapPdu::InitiatingMessage(InitiatingMessage::UplinkUeAssociatedNrPPaTransport(r))
             .into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkUeAssociatedNrpPaTransport!".to_string(),
-        ))
     }
 }
 
@@ -2405,73 +1878,49 @@ impl Procedure for WriteReplaceWarningProcedure {
 pub struct UplinkRimInformationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for UplinkRimInformationTransferProcedure {
+impl Indication for UplinkRimInformationTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = UplinkRimInformationTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 53;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: UplinkRimInformationTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<UplinkRimInformationTransferProcedure>>::request(
+    ) {
+        <T as IndicationHandler<UplinkRimInformationTransferProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::UplinkRimInformationTransfer(r)).into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for UplinkRimInformationTransfer!".to_string(),
-        ))
     }
 }
 
 pub struct DownlinkRimInformationTransferProcedure {}
 
 #[async_trait]
-impl Procedure for DownlinkRimInformationTransferProcedure {
+impl Indication for DownlinkRimInformationTransferProcedure {
     type TopPdu = NgapPdu;
     type Request = DownlinkRimInformationTransfer;
-    type Success = ();
-    type Failure = ();
     const CODE: u8 = 54;
 
-    async fn call_provider<T: RequestProvider<Self>>(
+    async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: DownlinkRimInformationTransfer,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
-        match <T as RequestProvider<DownlinkRimInformationTransferProcedure>>::request(
+    ) {
+        <T as IndicationHandler<DownlinkRimInformationTransferProcedure>>::handle(
             provider, req, logger,
         )
-        .await
-        {
-            Ok(_) => None,
-            Err(_) => todo!(),
-        }
+        .await;
     }
 
     fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::DownlinkRimInformationTransfer(r))
             .into_bytes()
-    }
-
-    fn decode_response(_bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>> {
-        Err(RequestError::Other(
-            "No response is defined for DownlinkRimInformationTransfer!".to_string(),
-        ))
     }
 }
 
@@ -2484,11 +1933,11 @@ pub enum InitiatingMessage {
     ConnectionEstablishmentIndication(ConnectionEstablishmentIndication),
     DeactivateTrace(DeactivateTrace),
     DownlinkNasTransport(DownlinkNasTransport),
-    DownlinkNonUeAssociatedNrpPaTransport(DownlinkNonUeAssociatedNrpPaTransport),
+    DownlinkNonUeAssociatedNrPPaTransport(DownlinkNonUeAssociatedNrPPaTransport),
     DownlinkRanConfigurationTransfer(DownlinkRanConfigurationTransfer),
     DownlinkRanEarlyStatusTransfer(DownlinkRanEarlyStatusTransfer),
     DownlinkRanStatusTransfer(DownlinkRanStatusTransfer),
-    DownlinkUeAssociatedNrpPaTransport(DownlinkUeAssociatedNrpPaTransport),
+    DownlinkUeAssociatedNrPPaTransport(DownlinkUeAssociatedNrPPaTransport),
     ErrorIndication(ErrorIndication),
     HandoverCancel(HandoverCancel),
     HandoverNotify(HandoverNotify),
@@ -2532,13 +1981,13 @@ pub enum InitiatingMessage {
     UeRadioCapabilityCheckRequest(UeRadioCapabilityCheckRequest),
     UeRadioCapabilityIdMappingRequest(UeRadioCapabilityIdMappingRequest),
     UeRadioCapabilityInfoIndication(UeRadioCapabilityInfoIndication),
-    UetnlaBindingReleaseRequest(UetnlaBindingReleaseRequest),
+    UeTnlaBindingReleaseRequest(UeTnlaBindingReleaseRequest),
     UplinkNasTransport(UplinkNasTransport),
-    UplinkNonUeAssociatedNrpPaTransport(UplinkNonUeAssociatedNrpPaTransport),
+    UplinkNonUeAssociatedNrPPaTransport(UplinkNonUeAssociatedNrPPaTransport),
     UplinkRanConfigurationTransfer(UplinkRanConfigurationTransfer),
     UplinkRanEarlyStatusTransfer(UplinkRanEarlyStatusTransfer),
     UplinkRanStatusTransfer(UplinkRanStatusTransfer),
-    UplinkUeAssociatedNrpPaTransport(UplinkUeAssociatedNrpPaTransport),
+    UplinkUeAssociatedNrPPaTransport(UplinkUeAssociatedNrPPaTransport),
     WriteReplaceWarningRequest(WriteReplaceWarningRequest),
     UplinkRimInformationTransfer(UplinkRimInformationTransfer),
     DownlinkRimInformationTransfer(DownlinkRimInformationTransfer),
@@ -2566,8 +2015,8 @@ impl InitiatingMessage {
             4 => Ok(Self::DownlinkNasTransport(DownlinkNasTransport::decode(
                 data,
             )?)),
-            5 => Ok(Self::DownlinkNonUeAssociatedNrpPaTransport(
-                DownlinkNonUeAssociatedNrpPaTransport::decode(data)?,
+            5 => Ok(Self::DownlinkNonUeAssociatedNrPPaTransport(
+                DownlinkNonUeAssociatedNrPPaTransport::decode(data)?,
             )),
             6 => Ok(Self::DownlinkRanConfigurationTransfer(
                 DownlinkRanConfigurationTransfer::decode(data)?,
@@ -2578,8 +2027,8 @@ impl InitiatingMessage {
             7 => Ok(Self::DownlinkRanStatusTransfer(
                 DownlinkRanStatusTransfer::decode(data)?,
             )),
-            8 => Ok(Self::DownlinkUeAssociatedNrpPaTransport(
-                DownlinkUeAssociatedNrpPaTransport::decode(data)?,
+            8 => Ok(Self::DownlinkUeAssociatedNrPPaTransport(
+                DownlinkUeAssociatedNrPPaTransport::decode(data)?,
             )),
             9 => Ok(Self::ErrorIndication(ErrorIndication::decode(data)?)),
             10 => Ok(Self::HandoverCancel(HandoverCancel::decode(data)?)),
@@ -2676,12 +2125,12 @@ impl InitiatingMessage {
             44 => Ok(Self::UeRadioCapabilityInfoIndication(
                 UeRadioCapabilityInfoIndication::decode(data)?,
             )),
-            45 => Ok(Self::UetnlaBindingReleaseRequest(
-                UetnlaBindingReleaseRequest::decode(data)?,
+            45 => Ok(Self::UeTnlaBindingReleaseRequest(
+                UeTnlaBindingReleaseRequest::decode(data)?,
             )),
             46 => Ok(Self::UplinkNasTransport(UplinkNasTransport::decode(data)?)),
-            47 => Ok(Self::UplinkNonUeAssociatedNrpPaTransport(
-                UplinkNonUeAssociatedNrpPaTransport::decode(data)?,
+            47 => Ok(Self::UplinkNonUeAssociatedNrPPaTransport(
+                UplinkNonUeAssociatedNrPPaTransport::decode(data)?,
             )),
             48 => Ok(Self::UplinkRanConfigurationTransfer(
                 UplinkRanConfigurationTransfer::decode(data)?,
@@ -2692,8 +2141,8 @@ impl InitiatingMessage {
             49 => Ok(Self::UplinkRanStatusTransfer(
                 UplinkRanStatusTransfer::decode(data)?,
             )),
-            50 => Ok(Self::UplinkUeAssociatedNrpPaTransport(
-                UplinkUeAssociatedNrpPaTransport::decode(data)?,
+            50 => Ok(Self::UplinkUeAssociatedNrPPaTransport(
+                UplinkUeAssociatedNrPPaTransport::decode(data)?,
             )),
             51 => Ok(Self::WriteReplaceWarningRequest(
                 WriteReplaceWarningRequest::decode(data)?,
@@ -2749,7 +2198,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::DownlinkNonUeAssociatedNrpPaTransport(x) => {
+            Self::DownlinkNonUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2769,7 +2218,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::DownlinkUeAssociatedNrpPaTransport(x) => {
+            Self::DownlinkUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2989,7 +2438,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UetnlaBindingReleaseRequest(x) => {
+            Self::UeTnlaBindingReleaseRequest(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 45, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -2999,7 +2448,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UplinkNonUeAssociatedNrpPaTransport(x) => {
+            Self::UplinkNonUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 47, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
@@ -3019,7 +2468,7 @@ impl InitiatingMessage {
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;
             }
-            Self::UplinkUeAssociatedNrpPaTransport(x) => {
+            Self::UplinkUeAssociatedNrPPaTransport(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 50, false)?;
                 Criticality::Ignore.encode(data)?;
                 x.encode(data)?;

@@ -1,7 +1,10 @@
 use super::top_pdu::*;
 use crate::{InitiatingMessage, NgapPdu};
 use async_trait::async_trait;
-use net::{Application, EventHandler, InterfaceProvider, Procedure, RequestProvider, TnlaEvent};
+use net::{
+    Application, EventHandler, Indication, IndicationHandler, InterfaceProvider, Procedure,
+    RequestProvider, TnlaEvent,
+};
 use slog::{error, Logger};
 
 #[derive(Clone)]
@@ -19,12 +22,23 @@ where
     }
 }
 
-impl<T> Application for NgapGnb<T> where T: RequestProvider<NgSetupProcedure> + EventHandler + Clone {}
+impl<T> Application for NgapGnb<T> where
+    T: RequestProvider<NgSetupProcedure>
+        + EventHandler
+        + Clone
+        + IndicationHandler<DownlinkNasTransportProcedure>
+        + RequestProvider<InitialContextSetupProcedure>
+{
+}
 
 #[async_trait]
 impl<T> InterfaceProvider for NgapGnb<T>
 where
-    T: Send + Sync + RequestProvider<NgSetupProcedure>,
+    T: Send
+        + Sync
+        + RequestProvider<NgSetupProcedure>
+        + IndicationHandler<DownlinkNasTransportProcedure>
+        + RequestProvider<InitialContextSetupProcedure>,
 {
     type TopPdu = NgapPdu;
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
@@ -39,14 +53,14 @@ where
             InitiatingMessage::NgSetupRequest(req) => {
                 NgSetupProcedure::call_provider(&self.0, req, logger).await
             }
+            InitiatingMessage::DownlinkNasTransport(req) => {
+                DownlinkNasTransportProcedure::call_provider(&self.0, req, logger).await;
+                None
+            }
+            InitiatingMessage::InitialContextSetupRequest(req) => {
+                InitialContextSetupProcedure::call_provider(&self.0, req, logger).await
+            }
             _ => todo!(),
         }
     }
 }
-
-// async fn route_request<T>(&provider: T, req: Message, logger: &Logger) -> Result<NgapPdu> {
-//     match <T as RequestProvider<NgSetupProcedure>>::request(provider, req, logger).await {
-//         Ok(x) => Ok(NgapPdu::SuccessfulOutcome(NgSetupRequest(x))),
-//         Err(_) => todo!(),
-//     }
-// }

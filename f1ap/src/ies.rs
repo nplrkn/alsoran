@@ -229,7 +229,7 @@ impl AperCodec for ActivatedCellsToBeUpdatedList {
 // ActivatedCellsToBeUpdatedListItem
 #[derive(Clone, Debug)]
 pub struct ActivatedCellsToBeUpdatedListItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub iab_du_cell_resource_configuration_mode_info: IabDuCellResourceConfigurationModeInfo,
 }
 
@@ -237,12 +237,12 @@ impl ActivatedCellsToBeUpdatedListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let iab_du_cell_resource_configuration_mode_info =
             IabDuCellResourceConfigurationModeInfo::decode(data)?;
 
         Ok(Self {
-            nrcgi,
+            nr_cgi,
             iab_du_cell_resource_configuration_mode_info,
         })
     }
@@ -251,7 +251,7 @@ impl ActivatedCellsToBeUpdatedListItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         self.iab_du_cell_resource_configuration_mode_info
             .encode(data)?;
 
@@ -679,14 +679,14 @@ impl AperCodec for AggressorCellList {
 // AggressorCellListItem
 #[derive(Clone, Debug)]
 pub struct AggressorCellListItem {
-    pub aggressor_cell_id: Nrcgi,
+    pub aggressor_cell_id: NrCgi,
 }
 
 impl AggressorCellListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let aggressor_cell_id = Nrcgi::decode(data)?;
+        let aggressor_cell_id = NrCgi::decode(data)?;
 
         Ok(Self { aggressor_cell_id })
     }
@@ -1037,14 +1037,14 @@ impl AperCodec for AperiodicSrsResourceTrigger {
 // AssociatedSCellItem
 #[derive(Clone, Debug)]
 pub struct AssociatedSCellItem {
-    pub s_cell_id: Nrcgi,
+    pub s_cell_id: NrCgi,
 }
 
 impl AssociatedSCellItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let s_cell_id = Nrcgi::decode(data)?;
+        let s_cell_id = NrCgi::decode(data)?;
 
         Ok(Self { s_cell_id })
     }
@@ -2941,14 +2941,14 @@ impl AperCodec for CancelAllWarningMessagesIndicator {
 // CandidateSpCellItem
 #[derive(Clone, Debug)]
 pub struct CandidateSpCellItem {
-    pub candidate_sp_cell_id: Nrcgi,
+    pub candidate_sp_cell_id: NrCgi,
 }
 
 impl CandidateSpCellItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let candidate_sp_cell_id = Nrcgi::decode(data)?;
+        let candidate_sp_cell_id = NrCgi::decode(data)?;
 
         Ok(Self {
             candidate_sp_cell_id,
@@ -3358,18 +3358,18 @@ impl AperCodec for CellMeasurementResultList {
 // CellMeasurementResultItem
 #[derive(Clone, Debug)]
 pub struct CellMeasurementResultItem {
-    pub cell_id: Nrcgi,
+    pub cell_id: NrCgi,
     pub radio_resource_status: Option<RadioResourceStatus>,
     pub composite_available_capacity_group: Option<CompositeAvailableCapacityGroup>,
     pub slice_available_capacity: Option<SliceAvailableCapacity>,
-    pub numberof_active_u_es: Option<NumberofActiveUEs>,
+    pub numberof_active_ues: Option<NumberofActiveUes>,
 }
 
 impl CellMeasurementResultItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 5)?;
-        let cell_id = Nrcgi::decode(data)?;
+        let cell_id = NrCgi::decode(data)?;
         let radio_resource_status = if optionals[0] {
             Some(RadioResourceStatus::decode(data)?)
         } else {
@@ -3385,8 +3385,8 @@ impl CellMeasurementResultItem {
         } else {
             None
         };
-        let numberof_active_u_es = if optionals[3] {
-            Some(NumberofActiveUEs::decode(data)?)
+        let numberof_active_ues = if optionals[3] {
+            Some(NumberofActiveUes::decode(data)?)
         } else {
             None
         };
@@ -3396,7 +3396,7 @@ impl CellMeasurementResultItem {
             radio_resource_status,
             composite_available_capacity_group,
             slice_available_capacity,
-            numberof_active_u_es,
+            numberof_active_ues,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -3404,7 +3404,7 @@ impl CellMeasurementResultItem {
         optionals.push(self.radio_resource_status.is_some());
         optionals.push(self.composite_available_capacity_group.is_some());
         optionals.push(self.slice_available_capacity.is_some());
-        optionals.push(self.numberof_active_u_es.is_some());
+        optionals.push(self.numberof_active_ues.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
@@ -3418,7 +3418,7 @@ impl CellMeasurementResultItem {
         if let Some(x) = &self.slice_available_capacity {
             x.encode(data)?;
         }
-        if let Some(x) = &self.numberof_active_u_es {
+        if let Some(x) = &self.numberof_active_ues {
             x.encode(data)?;
         }
 
@@ -3466,7 +3466,7 @@ impl AperCodec for CellPortionId {
 // CellsFailedToBeActivatedListItem
 #[derive(Clone, Debug)]
 pub struct CellsFailedToBeActivatedListItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub cause: Cause,
 }
 
@@ -3474,17 +3474,17 @@ impl CellsFailedToBeActivatedListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        Ok(Self { nrcgi, cause })
+        Ok(Self { nr_cgi, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         self.cause.encode(data)?;
 
         Ok(())
@@ -3505,7 +3505,7 @@ impl AperCodec for CellsFailedToBeActivatedListItem {
 // CellsStatusItem
 #[derive(Clone, Debug)]
 pub struct CellsStatusItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub service_status: ServiceStatus,
 }
 
@@ -3513,11 +3513,11 @@ impl CellsStatusItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let service_status = ServiceStatus::decode(data)?;
 
         Ok(Self {
-            nrcgi,
+            nr_cgi,
             service_status,
         })
     }
@@ -3526,7 +3526,7 @@ impl CellsStatusItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         self.service_status.encode(data)?;
 
         Ok(())
@@ -3547,23 +3547,23 @@ impl AperCodec for CellsStatusItem {
 // CellsToBeBroadcastItem
 #[derive(Clone, Debug)]
 pub struct CellsToBeBroadcastItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl CellsToBeBroadcastItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { nrcgi })
+        Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -3583,23 +3583,23 @@ impl AperCodec for CellsToBeBroadcastItem {
 // CellsBroadcastCompletedItem
 #[derive(Clone, Debug)]
 pub struct CellsBroadcastCompletedItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl CellsBroadcastCompletedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { nrcgi })
+        Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -3619,23 +3619,23 @@ impl AperCodec for CellsBroadcastCompletedItem {
 // BroadcastToBeCancelledItem
 #[derive(Clone, Debug)]
 pub struct BroadcastToBeCancelledItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl BroadcastToBeCancelledItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { nrcgi })
+        Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -3655,7 +3655,7 @@ impl AperCodec for BroadcastToBeCancelledItem {
 // CellsBroadcastCancelledItem
 #[derive(Clone, Debug)]
 pub struct CellsBroadcastCancelledItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
@@ -3663,11 +3663,11 @@ impl CellsBroadcastCancelledItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
 
         Ok(Self {
-            nrcgi,
+            nr_cgi,
             number_of_broadcasts,
         })
     }
@@ -3676,7 +3676,7 @@ impl CellsBroadcastCancelledItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
         Ok(())
@@ -3697,30 +3697,30 @@ impl AperCodec for CellsBroadcastCancelledItem {
 // CellsToBeActivatedListItem
 #[derive(Clone, Debug)]
 pub struct CellsToBeActivatedListItem {
-    pub nrcgi: Nrcgi,
-    pub nrpci: Option<Nrpci>,
+    pub nr_cgi: NrCgi,
+    pub nr_pci: Option<NrPci>,
 }
 
 impl CellsToBeActivatedListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let nrcgi = Nrcgi::decode(data)?;
-        let nrpci = if optionals[0] {
-            Some(Nrpci::decode(data)?)
+        let nr_cgi = NrCgi::decode(data)?;
+        let nr_pci = if optionals[0] {
+            Some(NrPci::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { nrcgi, nrpci })
+        Ok(Self { nr_cgi, nr_pci })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.nrpci.is_some());
+        optionals.push(self.nr_pci.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
-        if let Some(x) = &self.nrpci {
+        self.nr_cgi.encode(data)?;
+        if let Some(x) = &self.nr_pci {
             x.encode(data)?;
         }
 
@@ -3742,23 +3742,23 @@ impl AperCodec for CellsToBeActivatedListItem {
 // CellsToBeDeactivatedListItem
 #[derive(Clone, Debug)]
 pub struct CellsToBeDeactivatedListItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl CellsToBeDeactivatedListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { nrcgi })
+        Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -3778,7 +3778,7 @@ impl AperCodec for CellsToBeDeactivatedListItem {
 // CellsToBeBarredItem
 #[derive(Clone, Debug)]
 pub struct CellsToBeBarredItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub cell_barred: CellBarred,
 }
 
@@ -3786,17 +3786,20 @@ impl CellsToBeBarredItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let cell_barred = CellBarred::decode(data)?;
 
-        Ok(Self { nrcgi, cell_barred })
+        Ok(Self {
+            nr_cgi,
+            cell_barred,
+        })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         self.cell_barred.encode(data)?;
 
         Ok(())
@@ -3916,7 +3919,7 @@ impl AperCodec for CellToReportList {
 // CellToReportItem
 #[derive(Clone, Debug)]
 pub struct CellToReportItem {
-    pub cell_id: Nrcgi,
+    pub cell_id: NrCgi,
     pub ssb_to_report_list: Option<SsbToReportList>,
     pub slice_to_report_list: Option<SliceToReportList>,
 }
@@ -3925,7 +3928,7 @@ impl CellToReportItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 3)?;
-        let cell_id = Nrcgi::decode(data)?;
+        let cell_id = NrCgi::decode(data)?;
         let ssb_to_report_list = if optionals[0] {
             Some(SsbToReportList::decode(data)?)
         } else {
@@ -4080,7 +4083,7 @@ impl AperCodec for ChildNodeCellsList {
 // ChildNodeCellsListItem
 #[derive(Clone, Debug)]
 pub struct ChildNodeCellsListItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub iab_du_cell_resource_configuration_mode_info:
         Option<IabDuCellResourceConfigurationModeInfo>,
     pub iab_stc_info: Option<IabStcInfo>,
@@ -4097,7 +4100,7 @@ impl ChildNodeCellsListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 10)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let iab_du_cell_resource_configuration_mode_info = if optionals[0] {
             Some(IabDuCellResourceConfigurationModeInfo::decode(data)?)
         } else {
@@ -4145,7 +4148,7 @@ impl ChildNodeCellsListItem {
         };
 
         Ok(Self {
-            nrcgi,
+            nr_cgi,
             iab_du_cell_resource_configuration_mode_info,
             iab_stc_info,
             rach_config_common,
@@ -4171,7 +4174,7 @@ impl ChildNodeCellsListItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         if let Some(x) = &self.iab_du_cell_resource_configuration_mode_info {
             x.encode(data)?;
         }
@@ -4368,13 +4371,13 @@ impl AperCodec for ChOtriggerIntraDu {
             .map_err(|e: AperCodecError| e.push_context("ChOtriggerIntraDu"))
     }
 }
-// CnuePagingIdentity
+// CnUePagingIdentity
 #[derive(Clone, Debug)]
-pub enum CnuePagingIdentity {
+pub enum CnUePagingIdentity {
     FiveGSTmsi(BitString),
 }
 
-impl CnuePagingIdentity {
+impl CnUePagingIdentity {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
@@ -4405,15 +4408,15 @@ impl CnuePagingIdentity {
     }
 }
 
-impl AperCodec for CnuePagingIdentity {
+impl AperCodec for CnUePagingIdentity {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CnuePagingIdentity::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CnuePagingIdentity"))
+        CnUePagingIdentity::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CnUePagingIdentity"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CnuePagingIdentity"))
+            .map_err(|e: AperCodecError| e.push_context("CnUePagingIdentity"))
     }
 }
 // CompositeAvailableCapacityGroup
@@ -4537,14 +4540,14 @@ impl AperCodec for ChoProbability {
 #[derive(Clone, Debug)]
 pub struct ConditionalInterDuMobilityInformation {
     pub cho_trigger: ChOtriggerInterDu,
-    pub target_gnb_duuef1apid: Option<GnbDuUeF1apId>,
+    pub target_gnb_du_ue_f1apid: Option<GnbDuUeF1apId>,
 }
 
 impl ConditionalInterDuMobilityInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
         let cho_trigger = ChOtriggerInterDu::decode(data)?;
-        let target_gnb_duuef1apid = if optionals[0] {
+        let target_gnb_du_ue_f1apid = if optionals[0] {
             Some(GnbDuUeF1apId::decode(data)?)
         } else {
             None
@@ -4552,17 +4555,17 @@ impl ConditionalInterDuMobilityInformation {
 
         Ok(Self {
             cho_trigger,
-            target_gnb_duuef1apid,
+            target_gnb_du_ue_f1apid,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.target_gnb_duuef1apid.is_some());
+        optionals.push(self.target_gnb_du_ue_f1apid.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.cho_trigger.encode(data)?;
-        if let Some(x) = &self.target_gnb_duuef1apid {
+        if let Some(x) = &self.target_gnb_du_ue_f1apid {
             x.encode(data)?;
         }
 
@@ -4958,13 +4961,13 @@ impl AperCodec for CRnti {
             .map_err(|e: AperCodecError| e.push_context("CRnti"))
     }
 }
-// CuduRadioInformationType
+// CuDuRadioInformationType
 #[derive(Clone, Debug)]
-pub enum CuduRadioInformationType {
-    Rim(CudurimInformation),
+pub enum CuDuRadioInformationType {
+    Rim(CuDuRimInformation),
 }
 
-impl CuduRadioInformationType {
+impl CuDuRadioInformationType {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
@@ -4973,7 +4976,7 @@ impl CuduRadioInformationType {
             ));
         }
         match idx {
-            0 => Ok(Self::Rim(CudurimInformation::decode(data)?)),
+            0 => Ok(Self::Rim(CuDuRimInformation::decode(data)?)),
             1 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
             )),
@@ -4990,25 +4993,25 @@ impl CuduRadioInformationType {
     }
 }
 
-impl AperCodec for CuduRadioInformationType {
+impl AperCodec for CuDuRadioInformationType {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CuduRadioInformationType::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuduRadioInformationType"))
+        CuDuRadioInformationType::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationType"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CuduRadioInformationType"))
+            .map_err(|e: AperCodecError| e.push_context("CuDuRadioInformationType"))
     }
 }
-// CudurimInformation
+// CuDuRimInformation
 #[derive(Clone, Debug)]
-pub struct CudurimInformation {
+pub struct CuDuRimInformation {
     pub victim_gnb_set_id: GnbSetId,
     pub rimrs_detection_status: RimrsDetectionStatus,
 }
 
-impl CudurimInformation {
+impl CuDuRimInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
@@ -5032,26 +5035,26 @@ impl CudurimInformation {
     }
 }
 
-impl AperCodec for CudurimInformation {
+impl AperCodec for CuDuRimInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CudurimInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CudurimInformation"))
+        CuDuRimInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CuDuRimInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CudurimInformation"))
+            .map_err(|e: AperCodecError| e.push_context("CuDuRimInformation"))
     }
 }
-// CUtoDurrcInformation
+// CuToDuRrcInformation
 #[derive(Clone, Debug)]
-pub struct CUtoDurrcInformation {
+pub struct CuToDuRrcInformation {
     pub cg_config_info: Option<CgConfigInfo>,
     pub ue_capability_rat_container_list: Option<UeCapabilityRatContainerList>,
     pub meas_config: Option<MeasConfig>,
 }
 
-impl CUtoDurrcInformation {
+impl CuToDuRrcInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
         let cg_config_info = if optionals[0] {
@@ -5098,15 +5101,15 @@ impl CUtoDurrcInformation {
     }
 }
 
-impl AperCodec for CUtoDurrcInformation {
+impl AperCodec for CuToDuRrcInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CUtoDurrcInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CUtoDurrcInformation"))
+        CuToDuRrcInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("CuToDuRrcInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("CUtoDurrcInformation"))
+            .map_err(|e: AperCodecError| e.push_context("CuToDuRrcInformation"))
     }
 }
 // DcBasedDuplicationConfigured
@@ -5144,7 +5147,7 @@ impl AperCodec for DcBasedDuplicationConfigured {
 #[derive(Clone, Debug)]
 pub struct DedicatedSiDeliveryNeededUeItem {
     pub gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl DedicatedSiDeliveryNeededUeItem {
@@ -5152,11 +5155,11 @@ impl DedicatedSiDeliveryNeededUeItem {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
         let gnb_cu_ue_f1ap_id = GnbCuUeF1apId::decode(data)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
         Ok(Self {
             gnb_cu_ue_f1ap_id,
-            nrcgi,
+            nr_cgi,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5165,7 +5168,7 @@ impl DedicatedSiDeliveryNeededUeItem {
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.gnb_cu_ue_f1ap_id.encode(data)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -5721,14 +5724,14 @@ impl AperCodec for DluptnlInformationToBeSetupItem {
 // DrbActivityItem
 #[derive(Clone, Debug)]
 pub struct DrbActivityItem {
-    pub drbid: Drbid,
+    pub drb_id: DrbId,
     pub drb_activity: Option<DrbActivity>,
 }
 
 impl DrbActivityItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let drb_activity = if optionals[0] {
             Some(DrbActivity::decode(data)?)
         } else {
@@ -5736,7 +5739,7 @@ impl DrbActivityItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             drb_activity,
         })
     }
@@ -5746,7 +5749,7 @@ impl DrbActivityItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.drb_activity {
             x.encode(data)?;
         }
@@ -5797,11 +5800,11 @@ impl AperCodec for DrbActivity {
             .map_err(|e: AperCodecError| e.push_context("DrbActivity"))
     }
 }
-// Drbid
+// DrbId
 #[derive(Clone, Debug)]
-pub struct Drbid(pub u8);
+pub struct DrbId(pub u8);
 
-impl Drbid {
+impl DrbId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(1), Some(32), true)?.0 as u8,
@@ -5812,34 +5815,34 @@ impl Drbid {
     }
 }
 
-impl AperCodec for Drbid {
+impl AperCodec for DrbId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Drbid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Drbid"))
+        DrbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("DrbId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Drbid"))
+            .map_err(|e: AperCodecError| e.push_context("DrbId"))
     }
 }
-// DrBsFailedToBeModifiedItem
+// DrbsFailedToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsFailedToBeModifiedItem {
+    pub drb_id: DrbId,
     pub cause: Option<Cause>,
 }
 
-impl DrBsFailedToBeModifiedItem {
+impl DrbsFailedToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { drbid, cause })
+        Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -5847,7 +5850,7 @@ impl DrBsFailedToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -5856,35 +5859,35 @@ impl DrBsFailedToBeModifiedItem {
     }
 }
 
-impl AperCodec for DrBsFailedToBeModifiedItem {
+impl AperCodec for DrbsFailedToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeModifiedItem"))
+        DrbsFailedToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeModifiedItem"))
     }
 }
-// DrBsFailedToBeSetupItem
+// DrbsFailedToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeSetupItem {
-    pub drbid: Drbid,
+pub struct DrbsFailedToBeSetupItem {
+    pub drb_id: DrbId,
     pub cause: Option<Cause>,
 }
 
-impl DrBsFailedToBeSetupItem {
+impl DrbsFailedToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { drbid, cause })
+        Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -5892,7 +5895,7 @@ impl DrBsFailedToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -5901,35 +5904,35 @@ impl DrBsFailedToBeSetupItem {
     }
 }
 
-impl AperCodec for DrBsFailedToBeSetupItem {
+impl AperCodec for DrbsFailedToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupItem"))
+        DrbsFailedToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupItem"))
     }
 }
-// DrBsFailedToBeSetupModItem
+// DrbsFailedToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct DrBsFailedToBeSetupModItem {
-    pub drbid: Drbid,
+pub struct DrbsFailedToBeSetupModItem {
+    pub drb_id: DrbId,
     pub cause: Option<Cause>,
 }
 
-impl DrBsFailedToBeSetupModItem {
+impl DrbsFailedToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { drbid, cause })
+        Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -5937,7 +5940,7 @@ impl DrBsFailedToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -5946,15 +5949,15 @@ impl DrBsFailedToBeSetupModItem {
     }
 }
 
-impl AperCodec for DrBsFailedToBeSetupModItem {
+impl AperCodec for DrbsFailedToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsFailedToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupModItem"))
+        DrbsFailedToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsFailedToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsFailedToBeSetupModItem"))
     }
 }
 // DrbInformation
@@ -6014,18 +6017,18 @@ impl AperCodec for DrbInformation {
             .map_err(|e: AperCodecError| e.push_context("DrbInformation"))
     }
 }
-// DrBsModifiedItem
+// DrbsModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsModifiedItem {
+    pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsModifiedItem {
+impl DrbsModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let lcid = if optionals[0] {
             Some(Lcid::decode(data)?)
         } else {
@@ -6034,7 +6037,7 @@ impl DrBsModifiedItem {
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             lcid,
             dluptnl_information_to_be_setup_list,
         })
@@ -6045,7 +6048,7 @@ impl DrBsModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
@@ -6055,33 +6058,33 @@ impl DrBsModifiedItem {
     }
 }
 
-impl AperCodec for DrBsModifiedItem {
+impl AperCodec for DrbsModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedItem"))
+        DrbsModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedItem"))
     }
 }
-// DrBsModifiedConfItem
+// DrbsModifiedConfItem
 #[derive(Clone, Debug)]
-pub struct DrBsModifiedConfItem {
-    pub drbid: Drbid,
+pub struct DrbsModifiedConfItem {
+    pub drb_id: DrbId,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
 }
 
-impl DrBsModifiedConfItem {
+impl DrbsModifiedConfItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             uluptnl_information_to_be_setup_list,
         })
     }
@@ -6090,28 +6093,28 @@ impl DrBsModifiedConfItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.uluptnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsModifiedConfItem {
+impl AperCodec for DrbsModifiedConfItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsModifiedConfItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedConfItem"))
+        DrbsModifiedConfItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedConfItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsModifiedConfItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsModifiedConfItem"))
     }
 }
 // DrbNotifyItem
 #[derive(Clone, Debug)]
 pub struct DrbNotifyItem {
-    pub drbid: Drbid,
+    pub drb_id: DrbId,
     pub notification_cause: NotificationCause,
 }
 
@@ -6119,11 +6122,11 @@ impl DrbNotifyItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let notification_cause = NotificationCause::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             notification_cause,
         })
     }
@@ -6132,7 +6135,7 @@ impl DrbNotifyItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.notification_cause.encode(data)?;
 
         Ok(())
@@ -6150,22 +6153,22 @@ impl AperCodec for DrbNotifyItem {
             .map_err(|e: AperCodecError| e.push_context("DrbNotifyItem"))
     }
 }
-// DrBsRequiredToBeModifiedItem
+// DrbsRequiredToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsRequiredToBeModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsRequiredToBeModifiedItem {
+    pub drb_id: DrbId,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsRequiredToBeModifiedItem {
+impl DrbsRequiredToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             dluptnl_information_to_be_setup_list,
         })
     }
@@ -6174,72 +6177,72 @@ impl DrBsRequiredToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.dluptnl_information_to_be_setup_list.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsRequiredToBeModifiedItem {
+impl AperCodec for DrbsRequiredToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsRequiredToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeModifiedItem"))
+        DrbsRequiredToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeModifiedItem"))
     }
 }
-// DrBsRequiredToBeReleasedItem
+// DrbsRequiredToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct DrBsRequiredToBeReleasedItem {
-    pub drbid: Drbid,
+pub struct DrbsRequiredToBeReleasedItem {
+    pub drb_id: DrbId,
 }
 
-impl DrBsRequiredToBeReleasedItem {
+impl DrbsRequiredToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
 
-        Ok(Self { drbid })
+        Ok(Self { drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsRequiredToBeReleasedItem {
+impl AperCodec for DrbsRequiredToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsRequiredToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeReleasedItem"))
+        DrbsRequiredToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsRequiredToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsRequiredToBeReleasedItem"))
     }
 }
-// DrBsSetupItem
+// DrbsSetupItem
 #[derive(Clone, Debug)]
-pub struct DrBsSetupItem {
-    pub drbid: Drbid,
+pub struct DrbsSetupItem {
+    pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsSetupItem {
+impl DrbsSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let lcid = if optionals[0] {
             Some(Lcid::decode(data)?)
         } else {
@@ -6248,7 +6251,7 @@ impl DrBsSetupItem {
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             lcid,
             dluptnl_information_to_be_setup_list,
         })
@@ -6259,7 +6262,7 @@ impl DrBsSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
@@ -6269,29 +6272,29 @@ impl DrBsSetupItem {
     }
 }
 
-impl AperCodec for DrBsSetupItem {
+impl AperCodec for DrbsSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupItem"))
+        DrbsSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupItem"))
     }
 }
-// DrBsSetupModItem
+// DrbsSetupModItem
 #[derive(Clone, Debug)]
-pub struct DrBsSetupModItem {
-    pub drbid: Drbid,
+pub struct DrbsSetupModItem {
+    pub drb_id: DrbId,
     pub lcid: Option<Lcid>,
     pub dluptnl_information_to_be_setup_list: DluptnlInformationToBeSetupList,
 }
 
-impl DrBsSetupModItem {
+impl DrbsSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let lcid = if optionals[0] {
             Some(Lcid::decode(data)?)
         } else {
@@ -6300,7 +6303,7 @@ impl DrBsSetupModItem {
         let dluptnl_information_to_be_setup_list = DluptnlInformationToBeSetupList::decode(data)?;
 
         Ok(Self {
-            drbid,
+            drb_id,
             lcid,
             dluptnl_information_to_be_setup_list,
         })
@@ -6311,7 +6314,7 @@ impl DrBsSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.lcid {
             x.encode(data)?;
         }
@@ -6321,30 +6324,30 @@ impl DrBsSetupModItem {
     }
 }
 
-impl AperCodec for DrBsSetupModItem {
+impl AperCodec for DrbsSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupModItem"))
+        DrbsSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsSetupModItem"))
     }
 }
-// DrBsToBeModifiedItem
+// DrbsToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeModifiedItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeModifiedItem {
+    pub drb_id: DrbId,
     pub qos_information: Option<QosInformation>,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
     pub ul_configuration: Option<UlConfiguration>,
 }
 
-impl DrBsToBeModifiedItem {
+impl DrbsToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let qos_information = if optionals[0] {
             Some(QosInformation::decode(data)?)
         } else {
@@ -6358,7 +6361,7 @@ impl DrBsToBeModifiedItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             qos_information,
             uluptnl_information_to_be_setup_list,
             ul_configuration,
@@ -6371,7 +6374,7 @@ impl DrBsToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         if let Some(x) = &self.qos_information {
             x.encode(data)?;
         }
@@ -6384,57 +6387,57 @@ impl DrBsToBeModifiedItem {
     }
 }
 
-impl AperCodec for DrBsToBeModifiedItem {
+impl AperCodec for DrbsToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeModifiedItem"))
+        DrbsToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeModifiedItem"))
     }
 }
-// DrBsToBeReleasedItem
+// DrbsToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeReleasedItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeReleasedItem {
+    pub drb_id: DrbId,
 }
 
-impl DrBsToBeReleasedItem {
+impl DrbsToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
 
-        Ok(Self { drbid })
+        Ok(Self { drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for DrBsToBeReleasedItem {
+impl AperCodec for DrbsToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeReleasedItem"))
+        DrbsToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeReleasedItem"))
     }
 }
-// DrBsToBeSetupItem
+// DrbsToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeSetupItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeSetupItem {
+    pub drb_id: DrbId,
     pub qos_information: QosInformation,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
     pub rlc_mode: RlcMode,
@@ -6442,10 +6445,10 @@ pub struct DrBsToBeSetupItem {
     pub duplication_activation: Option<DuplicationActivation>,
 }
 
-impl DrBsToBeSetupItem {
+impl DrbsToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let qos_information = QosInformation::decode(data)?;
         let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
@@ -6461,7 +6464,7 @@ impl DrBsToBeSetupItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             qos_information,
             uluptnl_information_to_be_setup_list,
             rlc_mode,
@@ -6476,7 +6479,7 @@ impl DrBsToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.qos_information.encode(data)?;
         self.uluptnl_information_to_be_setup_list.encode(data)?;
         self.rlc_mode.encode(data)?;
@@ -6491,21 +6494,21 @@ impl DrBsToBeSetupItem {
     }
 }
 
-impl AperCodec for DrBsToBeSetupItem {
+impl AperCodec for DrbsToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupItem"))
+        DrbsToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupItem"))
     }
 }
-// DrBsToBeSetupModItem
+// DrbsToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct DrBsToBeSetupModItem {
-    pub drbid: Drbid,
+pub struct DrbsToBeSetupModItem {
+    pub drb_id: DrbId,
     pub qos_information: QosInformation,
     pub uluptnl_information_to_be_setup_list: UluptnlInformationToBeSetupList,
     pub rlc_mode: RlcMode,
@@ -6513,10 +6516,10 @@ pub struct DrBsToBeSetupModItem {
     pub duplication_activation: Option<DuplicationActivation>,
 }
 
-impl DrBsToBeSetupModItem {
+impl DrbsToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let drbid = Drbid::decode(data)?;
+        let drb_id = DrbId::decode(data)?;
         let qos_information = QosInformation::decode(data)?;
         let uluptnl_information_to_be_setup_list = UluptnlInformationToBeSetupList::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
@@ -6532,7 +6535,7 @@ impl DrBsToBeSetupModItem {
         };
 
         Ok(Self {
-            drbid,
+            drb_id,
             qos_information,
             uluptnl_information_to_be_setup_list,
             rlc_mode,
@@ -6547,7 +6550,7 @@ impl DrBsToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.drbid.encode(data)?;
+        self.drb_id.encode(data)?;
         self.qos_information.encode(data)?;
         self.uluptnl_information_to_be_setup_list.encode(data)?;
         self.rlc_mode.encode(data)?;
@@ -6562,15 +6565,15 @@ impl DrBsToBeSetupModItem {
     }
 }
 
-impl AperCodec for DrBsToBeSetupModItem {
+impl AperCodec for DrbsToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DrBsToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupModItem"))
+        DrbsToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DrBsToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("DrbsToBeSetupModItem"))
     }
 }
 // DrxCycle
@@ -6776,11 +6779,11 @@ impl AperCodec for Dscp {
             .map_err(|e: AperCodecError| e.push_context("Dscp"))
     }
 }
-// DUtoCurrcContainer
+// DuToCuRrcContainer
 #[derive(Clone, Debug)]
-pub struct DUtoCurrcContainer(pub Vec<u8>);
+pub struct DuToCuRrcContainer(pub Vec<u8>);
 
-impl DUtoCurrcContainer {
+impl DuToCuRrcContainer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(
             data, None, None, false,
@@ -6791,24 +6794,24 @@ impl DUtoCurrcContainer {
     }
 }
 
-impl AperCodec for DUtoCurrcContainer {
+impl AperCodec for DuToCuRrcContainer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DUtoCurrcContainer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCurrcContainer"))
+        DuToCuRrcContainer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcContainer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCurrcContainer"))
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcContainer"))
     }
 }
-// DucuRadioInformationType
+// DuCuRadioInformationType
 #[derive(Clone, Debug)]
-pub enum DucuRadioInformationType {
-    Rim(DucurimInformation),
+pub enum DuCuRadioInformationType {
+    Rim(DuCuRimInformation),
 }
 
-impl DucuRadioInformationType {
+impl DuCuRadioInformationType {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
@@ -6817,7 +6820,7 @@ impl DucuRadioInformationType {
             ));
         }
         match idx {
-            0 => Ok(Self::Rim(DucurimInformation::decode(data)?)),
+            0 => Ok(Self::Rim(DuCuRimInformation::decode(data)?)),
             1 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
             )),
@@ -6834,26 +6837,26 @@ impl DucuRadioInformationType {
     }
 }
 
-impl AperCodec for DucuRadioInformationType {
+impl AperCodec for DuCuRadioInformationType {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DucuRadioInformationType::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucuRadioInformationType"))
+        DuCuRadioInformationType::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuCuRadioInformationType"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucuRadioInformationType"))
+            .map_err(|e: AperCodecError| e.push_context("DuCuRadioInformationType"))
     }
 }
-// DucurimInformation
+// DuCuRimInformation
 #[derive(Clone, Debug)]
-pub struct DucurimInformation {
+pub struct DuCuRimInformation {
     pub victim_gnb_set_id: GnbSetId,
     pub rimrs_detection_status: RimrsDetectionStatus,
     pub aggressor_cell_list: AggressorCellList,
 }
 
-impl DucurimInformation {
+impl DuCuRimInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
@@ -6880,25 +6883,25 @@ impl DucurimInformation {
     }
 }
 
-impl AperCodec for DucurimInformation {
+impl AperCodec for DuCuRimInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DucurimInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucurimInformation"))
+        DuCuRimInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuCuRimInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DucurimInformation"))
+            .map_err(|e: AperCodecError| e.push_context("DuCuRimInformation"))
     }
 }
-// DufSlotConfigItem
+// DuFSlotConfigItem
 #[derive(Clone, Debug)]
-pub enum DufSlotConfigItem {
+pub enum DuFSlotConfigItem {
     ExplicitFormat(ExplicitFormat),
     ImplicitFormat(ImplicitFormat),
 }
 
-impl DufSlotConfigItem {
+impl DuFSlotConfigItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
@@ -6929,28 +6932,28 @@ impl DufSlotConfigItem {
     }
 }
 
-impl AperCodec for DufSlotConfigItem {
+impl AperCodec for DuFSlotConfigItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufSlotConfigItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigItem"))
+        DuFSlotConfigItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigItem"))
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigItem"))
     }
 }
-// DufSlotConfigList
+// DuFSlotConfigList
 #[derive(Clone, Debug)]
-pub struct DufSlotConfigList(pub Vec<DufSlotConfigItem>);
+pub struct DuFSlotConfigList(pub Vec<DuFSlotConfigItem>);
 
-impl DufSlotConfigList {
+impl DuFSlotConfigList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(320), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DufSlotConfigItem::decode(data)?);
+                items.push(DuFSlotConfigItem::decode(data)?);
             }
             items
         }))
@@ -6964,22 +6967,22 @@ impl DufSlotConfigList {
     }
 }
 
-impl AperCodec for DufSlotConfigList {
+impl AperCodec for DuFSlotConfigList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufSlotConfigList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigList"))
+        DuFSlotConfigList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotConfigList"))
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotConfigList"))
     }
 }
-// DufSlotformatIndex
+// DuFSlotformatIndex
 #[derive(Clone, Debug)]
-pub struct DufSlotformatIndex(pub u8);
+pub struct DuFSlotformatIndex(pub u8);
 
-impl DufSlotformatIndex {
+impl DuFSlotformatIndex {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(254), false)?.0 as u8,
@@ -6990,21 +6993,21 @@ impl DufSlotformatIndex {
     }
 }
 
-impl AperCodec for DufSlotformatIndex {
+impl AperCodec for DuFSlotformatIndex {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufSlotformatIndex::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotformatIndex"))
+        DuFSlotformatIndex::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotformatIndex"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufSlotformatIndex"))
+            .map_err(|e: AperCodecError| e.push_context("DuFSlotformatIndex"))
     }
 }
-// DufTransmissionPeriodicity
+// DuFTransmissionPeriodicity
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum DufTransmissionPeriodicity {
+pub enum DuFTransmissionPeriodicity {
     Ms0p5,
     Ms0p625,
     Ms1,
@@ -7015,7 +7018,7 @@ pub enum DufTransmissionPeriodicity {
     Ms10,
 }
 
-impl DufTransmissionPeriodicity {
+impl DuFTransmissionPeriodicity {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(7), true)?;
         if extended {
@@ -7028,15 +7031,15 @@ impl DufTransmissionPeriodicity {
     }
 }
 
-impl AperCodec for DufTransmissionPeriodicity {
+impl AperCodec for DuFTransmissionPeriodicity {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DufTransmissionPeriodicity::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufTransmissionPeriodicity"))
+        DuFTransmissionPeriodicity::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuFTransmissionPeriodicity"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DufTransmissionPeriodicity"))
+            .map_err(|e: AperCodecError| e.push_context("DuFTransmissionPeriodicity"))
     }
 }
 // DuRxMtRx
@@ -7163,15 +7166,15 @@ impl AperCodec for DuTxMtRx {
             .map_err(|e: AperCodecError| e.push_context("DuTxMtRx"))
     }
 }
-// DUtoCurrcInformation
+// DuToCuRrcInformation
 #[derive(Clone, Debug)]
-pub struct DUtoCurrcInformation {
+pub struct DuToCuRrcInformation {
     pub cell_group_config: CellGroupConfig,
     pub meas_gap_config: Option<MeasGapConfig>,
     pub requested_p_max_fr1: Option<Vec<u8>>,
 }
 
-impl DUtoCurrcInformation {
+impl DuToCuRrcInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
         let cell_group_config = CellGroupConfig::decode(data)?;
@@ -7211,15 +7214,15 @@ impl DUtoCurrcInformation {
     }
 }
 
-impl AperCodec for DUtoCurrcInformation {
+impl AperCodec for DuToCuRrcInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DUtoCurrcInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCurrcInformation"))
+        DuToCuRrcInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DUtoCurrcInformation"))
+            .map_err(|e: AperCodecError| e.push_context("DuToCuRrcInformation"))
     }
 }
 // DuplicationActivation
@@ -9545,17 +9548,17 @@ impl AperCodec for FullConfiguration {
             .map_err(|e: AperCodecError| e.push_context("FullConfiguration"))
     }
 }
-// FlowsMappedToSldrbList
+// FlowsMappedToSlDrbList
 #[derive(Clone, Debug)]
-pub struct FlowsMappedToSldrbList(pub Vec<FlowsMappedToSldrbItem>);
+pub struct FlowsMappedToSlDrbList(pub Vec<FlowsMappedToSlDrbItem>);
 
-impl FlowsMappedToSldrbList {
+impl FlowsMappedToSlDrbList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(2048), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(FlowsMappedToSldrbItem::decode(data)?);
+                items.push(FlowsMappedToSlDrbItem::decode(data)?);
             }
             items
         }))
@@ -9569,24 +9572,24 @@ impl FlowsMappedToSldrbList {
     }
 }
 
-impl AperCodec for FlowsMappedToSldrbList {
+impl AperCodec for FlowsMappedToSlDrbList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        FlowsMappedToSldrbList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbList"))
+        FlowsMappedToSlDrbList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbList"))
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbList"))
     }
 }
-// FlowsMappedToSldrbItem
+// FlowsMappedToSlDrbItem
 #[derive(Clone, Debug)]
-pub struct FlowsMappedToSldrbItem {
+pub struct FlowsMappedToSlDrbItem {
     pub pc_5_qos_flow_identifier: Pc5QosFlowIdentifier,
 }
 
-impl FlowsMappedToSldrbItem {
+impl FlowsMappedToSlDrbItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -9607,15 +9610,15 @@ impl FlowsMappedToSldrbItem {
     }
 }
 
-impl AperCodec for FlowsMappedToSldrbItem {
+impl AperCodec for FlowsMappedToSlDrbItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        FlowsMappedToSldrbItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbItem"))
+        FlowsMappedToSlDrbItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSldrbItem"))
+            .map_err(|e: AperCodecError| e.push_context("FlowsMappedToSlDrbItem"))
     }
 }
 // GbrQosInformation
@@ -10166,8 +10169,8 @@ impl AperCodec for GnbCuUeF1apId {
 #[derive(Clone, Debug)]
 pub struct GnbDuCellResourceConfiguration {
     pub subcarrier_spacing: SubcarrierSpacing,
-    pub duf_transmission_periodicity: Option<DufTransmissionPeriodicity>,
-    pub duf_slot_config_list: Option<DufSlotConfigList>,
+    pub du_f_transmission_periodicity: Option<DuFTransmissionPeriodicity>,
+    pub du_f_slot_config_list: Option<DuFSlotConfigList>,
     pub hsna_transmission_periodicity: HsnaTransmissionPeriodicity,
     pub hnsa_slot_config_list: Option<HsnaSlotConfigList>,
 }
@@ -10177,13 +10180,13 @@ impl GnbDuCellResourceConfiguration {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 4)?;
         let subcarrier_spacing = SubcarrierSpacing::decode(data)?;
-        let duf_transmission_periodicity = if optionals[0] {
-            Some(DufTransmissionPeriodicity::decode(data)?)
+        let du_f_transmission_periodicity = if optionals[0] {
+            Some(DuFTransmissionPeriodicity::decode(data)?)
         } else {
             None
         };
-        let duf_slot_config_list = if optionals[1] {
-            Some(DufSlotConfigList::decode(data)?)
+        let du_f_slot_config_list = if optionals[1] {
+            Some(DuFSlotConfigList::decode(data)?)
         } else {
             None
         };
@@ -10196,25 +10199,25 @@ impl GnbDuCellResourceConfiguration {
 
         Ok(Self {
             subcarrier_spacing,
-            duf_transmission_periodicity,
-            duf_slot_config_list,
+            du_f_transmission_periodicity,
+            du_f_slot_config_list,
             hsna_transmission_periodicity,
             hnsa_slot_config_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.duf_transmission_periodicity.is_some());
-        optionals.push(self.duf_slot_config_list.is_some());
+        optionals.push(self.du_f_transmission_periodicity.is_some());
+        optionals.push(self.du_f_slot_config_list.is_some());
         optionals.push(self.hnsa_slot_config_list.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         self.subcarrier_spacing.encode(data)?;
-        if let Some(x) = &self.duf_transmission_periodicity {
+        if let Some(x) = &self.du_f_transmission_periodicity {
             x.encode(data)?;
         }
-        if let Some(x) = &self.duf_slot_config_list {
+        if let Some(x) = &self.du_f_slot_config_list {
             x.encode(data)?;
         }
         self.hsna_transmission_periodicity.encode(data)?;
@@ -12253,17 +12256,17 @@ impl AperCodec for IaBv4AddressesRequested {
 // ImplicitFormat
 #[derive(Clone, Debug)]
 pub struct ImplicitFormat {
-    pub duf_slotformat_index: DufSlotformatIndex,
+    pub du_f_slotformat_index: DuFSlotformatIndex,
 }
 
 impl ImplicitFormat {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let duf_slotformat_index = DufSlotformatIndex::decode(data)?;
+        let du_f_slotformat_index = DuFSlotformatIndex::decode(data)?;
 
         Ok(Self {
-            duf_slotformat_index,
+            du_f_slotformat_index,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -12271,7 +12274,7 @@ impl ImplicitFormat {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.duf_slotformat_index.encode(data)?;
+        self.du_f_slotformat_index.encode(data)?;
 
         Ok(())
     }
@@ -12444,9 +12447,9 @@ impl AperCodec for InterfacesToTrace {
 // IntendedTddDlUlConfig
 #[derive(Clone, Debug)]
 pub struct IntendedTddDlUlConfig {
-    pub nrscs: Nrscs1,
-    pub nrcp: Nrcp,
-    pub nrdlul_tx_periodicity: NrdlulTxPeriodicity,
+    pub nr_scs: NrScs1,
+    pub nr_cp: NrCp,
+    pub nr_dlul_tx_periodicity: NrDlulTxPeriodicity,
     pub slot_configuration_list: SlotConfigurationList,
 }
 
@@ -12454,15 +12457,15 @@ impl IntendedTddDlUlConfig {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let nrscs = Nrscs1::decode(data)?;
-        let nrcp = Nrcp::decode(data)?;
-        let nrdlul_tx_periodicity = NrdlulTxPeriodicity::decode(data)?;
+        let nr_scs = NrScs1::decode(data)?;
+        let nr_cp = NrCp::decode(data)?;
+        let nr_dlul_tx_periodicity = NrDlulTxPeriodicity::decode(data)?;
         let slot_configuration_list = SlotConfigurationList::decode(data)?;
 
         Ok(Self {
-            nrscs,
-            nrcp,
-            nrdlul_tx_periodicity,
+            nr_scs,
+            nr_cp,
+            nr_dlul_tx_periodicity,
             slot_configuration_list,
         })
     }
@@ -12471,9 +12474,9 @@ impl IntendedTddDlUlConfig {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nrscs.encode(data)?;
-        self.nrcp.encode(data)?;
-        self.nrdlul_tx_periodicity.encode(data)?;
+        self.nr_scs.encode(data)?;
+        self.nr_cp.encode(data)?;
+        self.nr_dlul_tx_periodicity.encode(data)?;
         self.slot_configuration_list.encode(data)?;
 
         Ok(())
@@ -13191,20 +13194,20 @@ impl AperCodec for LowerLayerPresenceStatusChange {
             .map_err(|e: AperCodecError| e.push_context("LowerLayerPresenceStatusChange"))
     }
 }
-// LteueSidelinkAggregateMaximumBitrate
+// LteUeSidelinkAggregateMaximumBitrate
 #[derive(Clone, Debug)]
-pub struct LteueSidelinkAggregateMaximumBitrate {
-    pub uelte_sidelink_aggregate_maximum_bitrate: BitRate,
+pub struct LteUeSidelinkAggregateMaximumBitrate {
+    pub ue_lte_sidelink_aggregate_maximum_bitrate: BitRate,
 }
 
-impl LteueSidelinkAggregateMaximumBitrate {
+impl LteUeSidelinkAggregateMaximumBitrate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let uelte_sidelink_aggregate_maximum_bitrate = BitRate::decode(data)?;
+        let ue_lte_sidelink_aggregate_maximum_bitrate = BitRate::decode(data)?;
 
         Ok(Self {
-            uelte_sidelink_aggregate_maximum_bitrate,
+            ue_lte_sidelink_aggregate_maximum_bitrate,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -13212,21 +13215,22 @@ impl LteueSidelinkAggregateMaximumBitrate {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.uelte_sidelink_aggregate_maximum_bitrate.encode(data)?;
+        self.ue_lte_sidelink_aggregate_maximum_bitrate
+            .encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for LteueSidelinkAggregateMaximumBitrate {
+impl AperCodec for LteUeSidelinkAggregateMaximumBitrate {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        LteueSidelinkAggregateMaximumBitrate::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("LteueSidelinkAggregateMaximumBitrate"))
+        LteUeSidelinkAggregateMaximumBitrate::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("LteUeSidelinkAggregateMaximumBitrate"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("LteueSidelinkAggregateMaximumBitrate"))
+            .map_err(|e: AperCodecError| e.push_context("LteUeSidelinkAggregateMaximumBitrate"))
     }
 }
 // Ltev2xServicesAuthorized
@@ -14354,7 +14358,7 @@ impl AperCodec for NeedforGap {
 // NeighbourCellInformationItem
 #[derive(Clone, Debug)]
 pub struct NeighbourCellInformationItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub intended_tdd_dl_ul_config: Option<IntendedTddDlUlConfig>,
 }
 
@@ -14362,7 +14366,7 @@ impl NeighbourCellInformationItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let intended_tdd_dl_ul_config = if optionals[0] {
             Some(IntendedTddDlUlConfig::decode(data)?)
         } else {
@@ -14370,7 +14374,7 @@ impl NeighbourCellInformationItem {
         };
 
         Ok(Self {
-            nrcgi,
+            nr_cgi,
             intended_tdd_dl_ul_config,
         })
     }
@@ -14380,7 +14384,7 @@ impl NeighbourCellInformationItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         if let Some(x) = &self.intended_tdd_dl_ul_config {
             x.encode(data)?;
         }
@@ -14621,23 +14625,23 @@ impl AperCodec for Nid {
 // NrCgiListForRestartItem
 #[derive(Clone, Debug)]
 pub struct NrCgiListForRestartItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl NrCgiListForRestartItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { nrcgi })
+        Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -15324,7 +15328,7 @@ impl AperCodec for NrCarrierList {
 // NrCarrierItem
 #[derive(Clone, Debug)]
 pub struct NrCarrierItem {
-    pub carrier_scs: Nrscs,
+    pub carrier_scs: NrScs,
     pub offset_to_carrier: u16,
     pub carrier_bandwidth: u16,
 }
@@ -15333,7 +15337,7 @@ impl NrCarrierItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let carrier_scs = Nrscs::decode(data)?;
+        let carrier_scs = NrScs::decode(data)?;
         let offset_to_carrier =
             aper::decode::decode_integer(data, Some(0), Some(2199), true)?.0 as u16;
         let carrier_bandwidth =
@@ -15386,7 +15390,7 @@ impl AperCodec for NrCarrierItem {
 // NrFreqInfo
 #[derive(Clone, Debug)]
 pub struct NrFreqInfo {
-    pub nrarfcn: u32,
+    pub nr_arfcn: u32,
     pub sul_information: Option<SulInformation>,
     pub freq_band_list_nr: Vec<FreqBandNrItem>,
 }
@@ -15394,7 +15398,7 @@ pub struct NrFreqInfo {
 impl NrFreqInfo {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let nrarfcn = aper::decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32;
+        let nr_arfcn = aper::decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32;
         let sul_information = if optionals[0] {
             Some(SulInformation::decode(data)?)
         } else {
@@ -15410,7 +15414,7 @@ impl NrFreqInfo {
         };
 
         Ok(Self {
-            nrarfcn,
+            nr_arfcn,
             sul_information,
             freq_band_list_nr,
         })
@@ -15426,7 +15430,7 @@ impl NrFreqInfo {
             Some(0),
             Some(3279165),
             false,
-            self.nrarfcn as i128,
+            self.nr_arfcn as i128,
             false,
         )?;
         if let Some(x) = &self.sul_information {
@@ -15458,14 +15462,14 @@ impl AperCodec for NrFreqInfo {
             .map_err(|e: AperCodecError| e.push_context("NrFreqInfo"))
     }
 }
-// Nrcgi
+// NrCgi
 #[derive(Clone, Debug)]
-pub struct Nrcgi {
+pub struct NrCgi {
     pub plmn_identity: PlmnIdentity,
     pub nr_cell_identity: NrCellIdentity,
 }
 
-impl Nrcgi {
+impl NrCgi {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -15489,14 +15493,14 @@ impl Nrcgi {
     }
 }
 
-impl AperCodec for Nrcgi {
+impl AperCodec for NrCgi {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrcgi::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Nrcgi"))
+        NrCgi::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NrCgi"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrcgi"))
+            .map_err(|e: AperCodecError| e.push_context("NrCgi"))
     }
 }
 // NrModeInfo
@@ -15547,23 +15551,23 @@ impl AperCodec for NrModeInfo {
             .map_err(|e: AperCodecError| e.push_context("NrModeInfo"))
     }
 }
-// NrprachConfig
+// NrPrachConfig
 #[derive(Clone, Debug)]
-pub struct NrprachConfig {
-    pub ul_prach_config_list: Option<NrprachConfigList>,
-    pub sul_prach_config_list: Option<NrprachConfigList>,
+pub struct NrPrachConfig {
+    pub ul_prach_config_list: Option<NrPrachConfigList>,
+    pub sul_prach_config_list: Option<NrPrachConfigList>,
 }
 
-impl NrprachConfig {
+impl NrPrachConfig {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
         let ul_prach_config_list = if optionals[0] {
-            Some(NrprachConfigList::decode(data)?)
+            Some(NrPrachConfigList::decode(data)?)
         } else {
             None
         };
         let sul_prach_config_list = if optionals[1] {
-            Some(NrprachConfigList::decode(data)?)
+            Some(NrPrachConfigList::decode(data)?)
         } else {
             None
         };
@@ -15591,15 +15595,15 @@ impl NrprachConfig {
     }
 }
 
-impl AperCodec for NrprachConfig {
+impl AperCodec for NrPrachConfig {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NrprachConfig::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrprachConfig"))
+        NrPrachConfig::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrPrachConfig"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrprachConfig"))
+            .map_err(|e: AperCodecError| e.push_context("NrPrachConfig"))
     }
 }
 // NrCellIdentity
@@ -15631,10 +15635,10 @@ impl AperCodec for NrCellIdentity {
             .map_err(|e: AperCodecError| e.push_context("NrCellIdentity"))
     }
 }
-// Nrnrb
+// NrNrB
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum Nrnrb {
+pub enum NrNrB {
     Nrb11,
     Nrb18,
     Nrb24,
@@ -15666,7 +15670,7 @@ pub enum Nrnrb {
     Nrb273,
 }
 
-impl Nrnrb {
+impl NrNrB {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(28), true)?;
         if extended {
@@ -15679,21 +15683,21 @@ impl Nrnrb {
     }
 }
 
-impl AperCodec for Nrnrb {
+impl AperCodec for NrNrB {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrnrb::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Nrnrb"))
+        NrNrB::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NrNrB"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrnrb"))
+            .map_err(|e: AperCodecError| e.push_context("NrNrB"))
     }
 }
-// Nrpci
+// NrPci
 #[derive(Clone, Debug)]
-pub struct Nrpci(pub u16);
+pub struct NrPci(pub u16);
 
-impl Nrpci {
+impl NrPci {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(1007), false)?.0 as u16,
@@ -15704,27 +15708,27 @@ impl Nrpci {
     }
 }
 
-impl AperCodec for Nrpci {
+impl AperCodec for NrPci {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrpci::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Nrpci"))
+        NrPci::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NrPci"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrpci"))
+            .map_err(|e: AperCodecError| e.push_context("NrPci"))
     }
 }
-// NrprachConfigList
+// NrPrachConfigList
 #[derive(Clone, Debug)]
-pub struct NrprachConfigList(pub Vec<NrprachConfigItem>);
+pub struct NrPrachConfigList(pub Vec<NrPrachConfigItem>);
 
-impl NrprachConfigList {
+impl NrPrachConfigList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(0), Some(16), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(NrprachConfigItem::decode(data)?);
+                items.push(NrPrachConfigItem::decode(data)?);
             }
             items
         }))
@@ -15738,21 +15742,21 @@ impl NrprachConfigList {
     }
 }
 
-impl AperCodec for NrprachConfigList {
+impl AperCodec for NrPrachConfigList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NrprachConfigList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrprachConfigList"))
+        NrPrachConfigList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrPrachConfigList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrprachConfigList"))
+            .map_err(|e: AperCodecError| e.push_context("NrPrachConfigList"))
     }
 }
-// NrprachConfigItem
+// NrPrachConfigItem
 #[derive(Clone, Debug)]
-pub struct NrprachConfigItem {
-    pub nrscs: Nrscs,
+pub struct NrPrachConfigItem {
+    pub nr_scs: NrScs,
     pub prach_freq_startfrom_carrier: u16,
     pub msg_1fdm: Msg1fdm,
     pub parch_config_index: i128,
@@ -15761,11 +15765,11 @@ pub struct NrprachConfigItem {
     pub zero_correl_zone_config: u8,
 }
 
-impl NrprachConfigItem {
+impl NrPrachConfigItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrscs = Nrscs::decode(data)?;
+        let nr_scs = NrScs::decode(data)?;
         let prach_freq_startfrom_carrier =
             aper::decode::decode_integer(data, Some(0), Some(274), true)?.0 as u16;
         let msg_1fdm = Msg1fdm::decode(data)?;
@@ -15776,7 +15780,7 @@ impl NrprachConfigItem {
             aper::decode::decode_integer(data, Some(0), Some(15), false)?.0 as u8;
 
         Ok(Self {
-            nrscs,
+            nr_scs,
             prach_freq_startfrom_carrier,
             msg_1fdm,
             parch_config_index,
@@ -15790,7 +15794,7 @@ impl NrprachConfigItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrscs.encode(data)?;
+        self.nr_scs.encode(data)?;
         aper::encode::encode_integer(
             data,
             Some(0),
@@ -15823,28 +15827,28 @@ impl NrprachConfigItem {
     }
 }
 
-impl AperCodec for NrprachConfigItem {
+impl AperCodec for NrPrachConfigItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NrprachConfigItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrprachConfigItem"))
+        NrPrachConfigItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrPrachConfigItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrprachConfigItem"))
+            .map_err(|e: AperCodecError| e.push_context("NrPrachConfigItem"))
     }
 }
-// Nrscs
+// NrScs
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum Nrscs {
+pub enum NrScs {
     Scs15,
     Scs30,
     Scs60,
     Scs120,
 }
 
-impl Nrscs {
+impl NrScs {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
         if extended {
@@ -15857,21 +15861,21 @@ impl Nrscs {
     }
 }
 
-impl AperCodec for Nrscs {
+impl AperCodec for NrScs {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrscs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Nrscs"))
+        NrScs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NrScs"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrscs"))
+            .map_err(|e: AperCodecError| e.push_context("NrScs"))
     }
 }
-// NrueRlfReportContainer
+// NrUeRlfReportContainer
 #[derive(Clone, Debug)]
-pub struct NrueRlfReportContainer(pub Vec<u8>);
+pub struct NrUeRlfReportContainer(pub Vec<u8>);
 
-impl NrueRlfReportContainer {
+impl NrUeRlfReportContainer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(
             data, None, None, false,
@@ -15882,22 +15886,22 @@ impl NrueRlfReportContainer {
     }
 }
 
-impl AperCodec for NrueRlfReportContainer {
+impl AperCodec for NrUeRlfReportContainer {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NrueRlfReportContainer::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrueRlfReportContainer"))
+        NrUeRlfReportContainer::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrUeRlfReportContainer"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrueRlfReportContainer"))
+            .map_err(|e: AperCodecError| e.push_context("NrUeRlfReportContainer"))
     }
 }
-// NumberofActiveUEs
+// NumberofActiveUes
 #[derive(Clone, Debug)]
-pub struct NumberofActiveUEs(pub u32);
+pub struct NumberofActiveUes(pub u32);
 
-impl NumberofActiveUEs {
+impl NumberofActiveUes {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(16777215), true)?.0 as u32,
@@ -15908,15 +15912,15 @@ impl NumberofActiveUEs {
     }
 }
 
-impl AperCodec for NumberofActiveUEs {
+impl AperCodec for NumberofActiveUes {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NumberofActiveUEs::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUEs"))
+        NumberofActiveUes::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUes"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUEs"))
+            .map_err(|e: AperCodecError| e.push_context("NumberofActiveUes"))
     }
 }
 // NumberOfBroadcasts
@@ -16027,14 +16031,14 @@ impl AperCodec for NumDlulSymbols {
             .map_err(|e: AperCodecError| e.push_context("NumDlulSymbols"))
     }
 }
-// Nrv2xServicesAuthorized
+// NrV2xServicesAuthorized
 #[derive(Clone, Debug)]
-pub struct Nrv2xServicesAuthorized {
+pub struct NrV2xServicesAuthorized {
     pub vehicle_ue: Option<VehicleUe>,
     pub pedestrian_ue: Option<PedestrianUe>,
 }
 
-impl Nrv2xServicesAuthorized {
+impl NrV2xServicesAuthorized {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 3)?;
@@ -16072,31 +16076,31 @@ impl Nrv2xServicesAuthorized {
     }
 }
 
-impl AperCodec for Nrv2xServicesAuthorized {
+impl AperCodec for NrV2xServicesAuthorized {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrv2xServicesAuthorized::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrv2xServicesAuthorized"))
+        NrV2xServicesAuthorized::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrV2xServicesAuthorized"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrv2xServicesAuthorized"))
+            .map_err(|e: AperCodecError| e.push_context("NrV2xServicesAuthorized"))
     }
 }
-// NrueSidelinkAggregateMaximumBitrate
+// NrUeSidelinkAggregateMaximumBitrate
 #[derive(Clone, Debug)]
-pub struct NrueSidelinkAggregateMaximumBitrate {
-    pub uenr_sidelink_aggregate_maximum_bitrate: BitRate,
+pub struct NrUeSidelinkAggregateMaximumBitrate {
+    pub ue_nr_sidelink_aggregate_maximum_bitrate: BitRate,
 }
 
-impl NrueSidelinkAggregateMaximumBitrate {
+impl NrUeSidelinkAggregateMaximumBitrate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let uenr_sidelink_aggregate_maximum_bitrate = BitRate::decode(data)?;
+        let ue_nr_sidelink_aggregate_maximum_bitrate = BitRate::decode(data)?;
 
         Ok(Self {
-            uenr_sidelink_aggregate_maximum_bitrate,
+            ue_nr_sidelink_aggregate_maximum_bitrate,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -16104,21 +16108,21 @@ impl NrueSidelinkAggregateMaximumBitrate {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.uenr_sidelink_aggregate_maximum_bitrate.encode(data)?;
+        self.ue_nr_sidelink_aggregate_maximum_bitrate.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for NrueSidelinkAggregateMaximumBitrate {
+impl AperCodec for NrUeSidelinkAggregateMaximumBitrate {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NrueSidelinkAggregateMaximumBitrate::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrueSidelinkAggregateMaximumBitrate"))
+        NrUeSidelinkAggregateMaximumBitrate::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrUeSidelinkAggregateMaximumBitrate"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrueSidelinkAggregateMaximumBitrate"))
+            .map_err(|e: AperCodecError| e.push_context("NrUeSidelinkAggregateMaximumBitrate"))
     }
 }
 // NzpCsiRsResourceId
@@ -16294,23 +16298,23 @@ impl AperCodec for PerExponent {
 // PagingCellItem
 #[derive(Clone, Debug)]
 pub struct PagingCellItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
 }
 
 impl PagingCellItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { nrcgi })
+        Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -16363,8 +16367,8 @@ impl AperCodec for PagingDrx {
 // PagingIdentity
 #[derive(Clone, Debug)]
 pub enum PagingIdentity {
-    RanuePagingIdentity(RanuePagingIdentity),
-    CnuePagingIdentity(CnuePagingIdentity),
+    RanUePagingIdentity(RanUePagingIdentity),
+    CnUePagingIdentity(CnUePagingIdentity),
 }
 
 impl PagingIdentity {
@@ -16376,10 +16380,10 @@ impl PagingIdentity {
             ));
         }
         match idx {
-            0 => Ok(Self::RanuePagingIdentity(RanuePagingIdentity::decode(
+            0 => Ok(Self::RanUePagingIdentity(RanUePagingIdentity::decode(
                 data,
             )?)),
-            1 => Ok(Self::CnuePagingIdentity(CnuePagingIdentity::decode(data)?)),
+            1 => Ok(Self::CnUePagingIdentity(CnUePagingIdentity::decode(data)?)),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
             )),
@@ -16388,11 +16392,11 @@ impl PagingIdentity {
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
-            Self::RanuePagingIdentity(x) => {
+            Self::RanUePagingIdentity(x) => {
                 aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
-            Self::CnuePagingIdentity(x) => {
+            Self::CnUePagingIdentity(x) => {
                 aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
@@ -17322,7 +17326,7 @@ impl AperCodec for PosBroadcast {
 }
 // PositioningBroadcastCells
 #[derive(Clone, Debug)]
-pub struct PositioningBroadcastCells(pub Vec<Nrcgi>);
+pub struct PositioningBroadcastCells(pub Vec<NrCgi>);
 
 impl PositioningBroadcastCells {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -17331,7 +17335,7 @@ impl PositioningBroadcastCells {
                 aper::decode::decode_length_determinent(data, Some(1), Some(16384), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(Nrcgi::decode(data)?);
+                items.push(NrCgi::decode(data)?);
             }
             items
         }))
@@ -18462,14 +18466,14 @@ impl AperCodec for PrsInformationPos {
 // PotentialSpCellItem
 #[derive(Clone, Debug)]
 pub struct PotentialSpCellItem {
-    pub potential_sp_cell_id: Nrcgi,
+    pub potential_sp_cell_id: NrCgi,
 }
 
 impl PotentialSpCellItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let potential_sp_cell_id = Nrcgi::decode(data)?;
+        let potential_sp_cell_id = NrCgi::decode(data)?;
 
         Ok(Self {
             potential_sp_cell_id,
@@ -19225,7 +19229,7 @@ impl AperCodec for PrsResourceSetItem {
 // PwsFailedNrCgiItem
 #[derive(Clone, Debug)]
 pub struct PwsFailedNrCgiItem {
-    pub nrcgi: Nrcgi,
+    pub nr_cgi: NrCgi,
     pub number_of_broadcasts: NumberOfBroadcasts,
 }
 
@@ -19233,11 +19237,11 @@ impl PwsFailedNrCgiItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrcgi = Nrcgi::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
         let number_of_broadcasts = NumberOfBroadcasts::decode(data)?;
 
         Ok(Self {
-            nrcgi,
+            nr_cgi,
             number_of_broadcasts,
         })
     }
@@ -19246,7 +19250,7 @@ impl PwsFailedNrCgiItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
+        self.nr_cgi.encode(data)?;
         self.number_of_broadcasts.encode(data)?;
 
         Ok(())
@@ -19939,11 +19943,11 @@ impl AperCodec for RanUeMeasurementId {
             .map_err(|e: AperCodecError| e.push_context("RanUeMeasurementId"))
     }
 }
-// Ranueid
+// RanUeId
 #[derive(Clone, Debug)]
-pub struct Ranueid(pub Vec<u8>);
+pub struct RanUeId(pub Vec<u8>);
 
-impl Ranueid {
+impl RanUeId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(aper::decode::decode_octetstring(
             data,
@@ -19957,23 +19961,23 @@ impl Ranueid {
     }
 }
 
-impl AperCodec for Ranueid {
+impl AperCodec for RanUeId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Ranueid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Ranueid"))
+        RanUeId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("RanUeId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Ranueid"))
+            .map_err(|e: AperCodecError| e.push_context("RanUeId"))
     }
 }
-// RanuePagingIdentity
+// RanUePagingIdentity
 #[derive(Clone, Debug)]
-pub struct RanuePagingIdentity {
+pub struct RanUePagingIdentity {
     pub irnti: BitString,
 }
 
-impl RanuePagingIdentity {
+impl RanUePagingIdentity {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
@@ -19992,15 +19996,15 @@ impl RanuePagingIdentity {
     }
 }
 
-impl AperCodec for RanuePagingIdentity {
+impl AperCodec for RanUePagingIdentity {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        RanuePagingIdentity::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("RanuePagingIdentity"))
+        RanUePagingIdentity::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("RanUePagingIdentity"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("RanuePagingIdentity"))
+            .map_err(|e: AperCodecError| e.push_context("RanUePagingIdentity"))
     }
 }
 // RatFrequencyPriorityInformation
@@ -21755,14 +21759,14 @@ impl AperCodec for RlfReportInformationList {
 // RlfReportInformationItem
 #[derive(Clone, Debug)]
 pub struct RlfReportInformationItem {
-    pub nrue_rlf_report_container: NrueRlfReportContainer,
+    pub nr_ue_rlf_report_container: NrUeRlfReportContainer,
     pub ue_assitant_identifier: Option<GnbDuUeF1apId>,
 }
 
 impl RlfReportInformationItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let nrue_rlf_report_container = NrueRlfReportContainer::decode(data)?;
+        let nr_ue_rlf_report_container = NrUeRlfReportContainer::decode(data)?;
         let ue_assitant_identifier = if optionals[0] {
             Some(GnbDuUeF1apId::decode(data)?)
         } else {
@@ -21770,7 +21774,7 @@ impl RlfReportInformationItem {
         };
 
         Ok(Self {
-            nrue_rlf_report_container,
+            nr_ue_rlf_report_container,
             ue_assitant_identifier,
         })
     }
@@ -21780,7 +21784,7 @@ impl RlfReportInformationItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrue_rlf_report_container.encode(data)?;
+        self.nr_ue_rlf_report_container.encode(data)?;
         if let Some(x) = &self.ue_assitant_identifier {
             x.encode(data)?;
         }
@@ -22057,14 +22061,14 @@ impl AperCodec for RoutingId {
 // SCellFailedtoSetupItem
 #[derive(Clone, Debug)]
 pub struct SCellFailedtoSetupItem {
-    pub s_cell_id: Nrcgi,
+    pub s_cell_id: NrCgi,
     pub cause: Option<Cause>,
 }
 
 impl SCellFailedtoSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let s_cell_id = Nrcgi::decode(data)?;
+        let s_cell_id = NrCgi::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
@@ -22102,14 +22106,14 @@ impl AperCodec for SCellFailedtoSetupItem {
 // SCellFailedtoSetupModItem
 #[derive(Clone, Debug)]
 pub struct SCellFailedtoSetupModItem {
-    pub s_cell_id: Nrcgi,
+    pub s_cell_id: NrCgi,
     pub cause: Option<Cause>,
 }
 
 impl SCellFailedtoSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let s_cell_id = Nrcgi::decode(data)?;
+        let s_cell_id = NrCgi::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
@@ -22147,14 +22151,14 @@ impl AperCodec for SCellFailedtoSetupModItem {
 // SCellToBeRemovedItem
 #[derive(Clone, Debug)]
 pub struct SCellToBeRemovedItem {
-    pub s_cell_id: Nrcgi,
+    pub s_cell_id: NrCgi,
 }
 
 impl SCellToBeRemovedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let s_cell_id = Nrcgi::decode(data)?;
+        let s_cell_id = NrCgi::decode(data)?;
 
         Ok(Self { s_cell_id })
     }
@@ -22183,7 +22187,7 @@ impl AperCodec for SCellToBeRemovedItem {
 // SCellToBeSetupItem
 #[derive(Clone, Debug)]
 pub struct SCellToBeSetupItem {
-    pub s_cell_id: Nrcgi,
+    pub s_cell_id: NrCgi,
     pub s_cell_index: SCellIndex,
     pub s_cell_ul_configured: Option<CellUlConfigured>,
 }
@@ -22191,7 +22195,7 @@ pub struct SCellToBeSetupItem {
 impl SCellToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let s_cell_id = Nrcgi::decode(data)?;
+        let s_cell_id = NrCgi::decode(data)?;
         let s_cell_index = SCellIndex::decode(data)?;
         let s_cell_ul_configured = if optionals[0] {
             Some(CellUlConfigured::decode(data)?)
@@ -22235,7 +22239,7 @@ impl AperCodec for SCellToBeSetupItem {
 // SCellToBeSetupModItem
 #[derive(Clone, Debug)]
 pub struct SCellToBeSetupModItem {
-    pub s_cell_id: Nrcgi,
+    pub s_cell_id: NrCgi,
     pub s_cell_index: SCellIndex,
     pub s_cell_ul_configured: Option<CellUlConfigured>,
 }
@@ -22243,7 +22247,7 @@ pub struct SCellToBeSetupModItem {
 impl SCellToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let s_cell_id = Nrcgi::decode(data)?;
+        let s_cell_id = NrCgi::decode(data)?;
         let s_cell_index = SCellIndex::decode(data)?;
         let s_cell_ul_configured = if optionals[0] {
             Some(CellUlConfigured::decode(data)?)
@@ -22644,8 +22648,8 @@ impl AperCodec for ServingCellMo {
 // ServedCellInformation
 #[derive(Clone, Debug)]
 pub struct ServedCellInformation {
-    pub nrcgi: Nrcgi,
-    pub nrpci: Nrpci,
+    pub nr_cgi: NrCgi,
+    pub nr_pci: NrPci,
     pub five_gs_tac: Option<FiveGsTac>,
     pub configured_eps_tac: Option<ConfiguredEpsTac>,
     pub served_plmn_s: ServedPlmnSList,
@@ -22656,8 +22660,8 @@ pub struct ServedCellInformation {
 impl ServedCellInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 3)?;
-        let nrcgi = Nrcgi::decode(data)?;
-        let nrpci = Nrpci::decode(data)?;
+        let nr_cgi = NrCgi::decode(data)?;
+        let nr_pci = NrPci::decode(data)?;
         let five_gs_tac = if optionals[0] {
             Some(FiveGsTac::decode(data)?)
         } else {
@@ -22674,8 +22678,8 @@ impl ServedCellInformation {
             aper::decode::decode_octetstring(data, None, None, false)?;
 
         Ok(Self {
-            nrcgi,
-            nrpci,
+            nr_cgi,
+            nr_pci,
             five_gs_tac,
             configured_eps_tac,
             served_plmn_s,
@@ -22690,8 +22694,8 @@ impl ServedCellInformation {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrcgi.encode(data)?;
-        self.nrpci.encode(data)?;
+        self.nr_cgi.encode(data)?;
+        self.nr_pci.encode(data)?;
         if let Some(x) = &self.five_gs_tac {
             x.encode(data)?;
         }
@@ -22817,23 +22821,23 @@ impl AperCodec for ServedCellsToAddItem {
 // ServedCellsToDeleteItem
 #[derive(Clone, Debug)]
 pub struct ServedCellsToDeleteItem {
-    pub old_nrcgi: Nrcgi,
+    pub old_nr_cgi: NrCgi,
 }
 
 impl ServedCellsToDeleteItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let old_nrcgi = Nrcgi::decode(data)?;
+        let old_nr_cgi = NrCgi::decode(data)?;
 
-        Ok(Self { old_nrcgi })
+        Ok(Self { old_nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.old_nrcgi.encode(data)?;
+        self.old_nr_cgi.encode(data)?;
 
         Ok(())
     }
@@ -22853,7 +22857,7 @@ impl AperCodec for ServedCellsToDeleteItem {
 // ServedCellsToModifyItem
 #[derive(Clone, Debug)]
 pub struct ServedCellsToModifyItem {
-    pub old_nrcgi: Nrcgi,
+    pub old_nr_cgi: NrCgi,
     pub served_cell_information: ServedCellInformation,
     pub gnb_du_system_information: Option<GnbDuSystemInformation>,
 }
@@ -22861,7 +22865,7 @@ pub struct ServedCellsToModifyItem {
 impl ServedCellsToModifyItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let old_nrcgi = Nrcgi::decode(data)?;
+        let old_nr_cgi = NrCgi::decode(data)?;
         let served_cell_information = ServedCellInformation::decode(data)?;
         let gnb_du_system_information = if optionals[0] {
             Some(GnbDuSystemInformation::decode(data)?)
@@ -22870,7 +22874,7 @@ impl ServedCellsToModifyItem {
         };
 
         Ok(Self {
-            old_nrcgi,
+            old_nr_cgi,
             served_cell_information,
             gnb_du_system_information,
         })
@@ -22881,7 +22885,7 @@ impl ServedCellsToModifyItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.old_nrcgi.encode(data)?;
+        self.old_nr_cgi.encode(data)?;
         self.served_cell_information.encode(data)?;
         if let Some(x) = &self.gnb_du_system_information {
             x.encode(data)?;
@@ -23396,11 +23400,11 @@ impl AperCodec for SibtypetobeupdatedListItem {
             .map_err(|e: AperCodecError| e.push_context("SibtypetobeupdatedListItem"))
     }
 }
-// Sldrbid
+// SlDrbId
 #[derive(Clone, Debug)]
-pub struct Sldrbid(pub u16);
+pub struct SlDrbId(pub u16);
 
-impl Sldrbid {
+impl SlDrbId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(1), Some(512), true)?.0 as u16,
@@ -23411,76 +23415,76 @@ impl Sldrbid {
     }
 }
 
-impl AperCodec for Sldrbid {
+impl AperCodec for SlDrbId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Sldrbid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Sldrbid"))
+        SlDrbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SlDrbId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Sldrbid"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbId"))
     }
 }
-// SldrbInformation
+// SlDrbInformation
 #[derive(Clone, Debug)]
-pub struct SldrbInformation {
-    pub sldrb_qos: Pc5QosParameters,
-    pub flows_mapped_to_sldrb_list: FlowsMappedToSldrbList,
+pub struct SlDrbInformation {
+    pub sl_drb_qos: Pc5QosParameters,
+    pub flows_mapped_to_sl_drb_list: FlowsMappedToSlDrbList,
 }
 
-impl SldrbInformation {
+impl SlDrbInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 0)?;
-        let sldrb_qos = Pc5QosParameters::decode(data)?;
-        let flows_mapped_to_sldrb_list = FlowsMappedToSldrbList::decode(data)?;
+        let sl_drb_qos = Pc5QosParameters::decode(data)?;
+        let flows_mapped_to_sl_drb_list = FlowsMappedToSlDrbList::decode(data)?;
 
         Ok(Self {
-            sldrb_qos,
-            flows_mapped_to_sldrb_list,
+            sl_drb_qos,
+            flows_mapped_to_sl_drb_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.sldrb_qos.encode(data)?;
-        self.flows_mapped_to_sldrb_list.encode(data)?;
+        self.sl_drb_qos.encode(data)?;
+        self.flows_mapped_to_sl_drb_list.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrbInformation {
+impl AperCodec for SlDrbInformation {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrbInformation::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrbInformation"))
+        SlDrbInformation::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbInformation"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrbInformation"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbInformation"))
     }
 }
-// SldrBsFailedToBeModifiedItem
+// SlDrbsFailedToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeModifiedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsFailedToBeModifiedItem {
+    pub sl_drb_id: SlDrbId,
     pub cause: Option<Cause>,
 }
 
-impl SldrBsFailedToBeModifiedItem {
+impl SlDrbsFailedToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { sldrbid, cause })
+        Ok(Self { sl_drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -23488,7 +23492,7 @@ impl SldrBsFailedToBeModifiedItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -23497,36 +23501,36 @@ impl SldrBsFailedToBeModifiedItem {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeModifiedItem {
+impl AperCodec for SlDrbsFailedToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeModifiedItem"))
+        SlDrbsFailedToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeModifiedItem"))
     }
 }
-// SldrBsFailedToBeSetupItem
+// SlDrbsFailedToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeSetupItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsFailedToBeSetupItem {
+    pub sl_drb_id: SlDrbId,
     pub cause: Option<Cause>,
 }
 
-impl SldrBsFailedToBeSetupItem {
+impl SlDrbsFailedToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { sldrbid, cause })
+        Ok(Self { sl_drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -23534,7 +23538,7 @@ impl SldrBsFailedToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -23543,36 +23547,36 @@ impl SldrBsFailedToBeSetupItem {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeSetupItem {
+impl AperCodec for SlDrbsFailedToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupItem"))
+        SlDrbsFailedToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupItem"))
     }
 }
-// SldrBsFailedToBeSetupModItem
+// SlDrbsFailedToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SldrBsFailedToBeSetupModItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsFailedToBeSetupModItem {
+    pub sl_drb_id: SlDrbId,
     pub cause: Option<Cause>,
 }
 
-impl SldrBsFailedToBeSetupModItem {
+impl SlDrbsFailedToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { sldrbid, cause })
+        Ok(Self { sl_drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -23580,7 +23584,7 @@ impl SldrBsFailedToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -23589,248 +23593,248 @@ impl SldrBsFailedToBeSetupModItem {
     }
 }
 
-impl AperCodec for SldrBsFailedToBeSetupModItem {
+impl AperCodec for SlDrbsFailedToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsFailedToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupModItem"))
+        SlDrbsFailedToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsFailedToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsFailedToBeSetupModItem"))
     }
 }
-// SldrBsModifiedItem
+// SlDrbsModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsModifiedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsModifiedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsModifiedItem {
+impl SlDrbsModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsModifiedItem {
+impl AperCodec for SlDrbsModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedItem"))
+        SlDrbsModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedItem"))
     }
 }
-// SldrBsModifiedConfItem
+// SlDrbsModifiedConfItem
 #[derive(Clone, Debug)]
-pub struct SldrBsModifiedConfItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsModifiedConfItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsModifiedConfItem {
+impl SlDrbsModifiedConfItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsModifiedConfItem {
+impl AperCodec for SlDrbsModifiedConfItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsModifiedConfItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedConfItem"))
+        SlDrbsModifiedConfItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedConfItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsModifiedConfItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsModifiedConfItem"))
     }
 }
-// SldrBsRequiredToBeModifiedItem
+// SlDrbsRequiredToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsRequiredToBeModifiedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsRequiredToBeModifiedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsRequiredToBeModifiedItem {
+impl SlDrbsRequiredToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsRequiredToBeModifiedItem {
+impl AperCodec for SlDrbsRequiredToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsRequiredToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeModifiedItem"))
+        SlDrbsRequiredToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeModifiedItem"))
     }
 }
-// SldrBsRequiredToBeReleasedItem
+// SlDrbsRequiredToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsRequiredToBeReleasedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsRequiredToBeReleasedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsRequiredToBeReleasedItem {
+impl SlDrbsRequiredToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsRequiredToBeReleasedItem {
+impl AperCodec for SlDrbsRequiredToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsRequiredToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeReleasedItem"))
+        SlDrbsRequiredToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsRequiredToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsRequiredToBeReleasedItem"))
     }
 }
-// SldrBsSetupItem
+// SlDrbsSetupItem
 #[derive(Clone, Debug)]
-pub struct SldrBsSetupItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsSetupItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsSetupItem {
+impl SlDrbsSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsSetupItem {
+impl AperCodec for SlDrbsSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupItem"))
+        SlDrbsSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupItem"))
     }
 }
-// SldrBsSetupModItem
+// SlDrbsSetupModItem
 #[derive(Clone, Debug)]
-pub struct SldrBsSetupModItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsSetupModItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsSetupModItem {
+impl SlDrbsSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsSetupModItem {
+impl AperCodec for SlDrbsSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupModItem"))
+        SlDrbsSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsSetupModItem"))
     }
 }
-// SldrBsToBeModifiedItem
+// SlDrbsToBeModifiedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeModifiedItem {
-    pub sldrbid: Sldrbid,
-    pub sldrb_information: Option<SldrbInformation>,
+pub struct SlDrbsToBeModifiedItem {
+    pub sl_drb_id: SlDrbId,
+    pub sl_drb_information: Option<SlDrbInformation>,
     pub rlc_mode: Option<RlcMode>,
 }
 
-impl SldrBsToBeModifiedItem {
+impl SlDrbsToBeModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 3)?;
-        let sldrbid = Sldrbid::decode(data)?;
-        let sldrb_information = if optionals[0] {
-            Some(SldrbInformation::decode(data)?)
+        let sl_drb_id = SlDrbId::decode(data)?;
+        let sl_drb_information = if optionals[0] {
+            Some(SlDrbInformation::decode(data)?)
         } else {
             None
         };
@@ -23841,20 +23845,20 @@ impl SldrBsToBeModifiedItem {
         };
 
         Ok(Self {
-            sldrbid,
-            sldrb_information,
+            sl_drb_id,
+            sl_drb_information,
             rlc_mode,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.sldrb_information.is_some());
+        optionals.push(self.sl_drb_information.is_some());
         optionals.push(self.rlc_mode.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
-        if let Some(x) = &self.sldrb_information {
+        self.sl_drb_id.encode(data)?;
+        if let Some(x) = &self.sl_drb_information {
             x.encode(data)?;
         }
         if let Some(x) = &self.rlc_mode {
@@ -23865,72 +23869,72 @@ impl SldrBsToBeModifiedItem {
     }
 }
 
-impl AperCodec for SldrBsToBeModifiedItem {
+impl AperCodec for SlDrbsToBeModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeModifiedItem"))
+        SlDrbsToBeModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeModifiedItem"))
     }
 }
-// SldrBsToBeReleasedItem
+// SlDrbsToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeReleasedItem {
-    pub sldrbid: Sldrbid,
+pub struct SlDrbsToBeReleasedItem {
+    pub sl_drb_id: SlDrbId,
 }
 
-impl SldrBsToBeReleasedItem {
+impl SlDrbsToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
 
-        Ok(Self { sldrbid })
+        Ok(Self { sl_drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
+        self.sl_drb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsToBeReleasedItem {
+impl AperCodec for SlDrbsToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeReleasedItem"))
+        SlDrbsToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeReleasedItem"))
     }
 }
-// SldrBsToBeSetupItem
+// SlDrbsToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeSetupItem {
-    pub sldrbid: Sldrbid,
-    pub sldrb_information: SldrbInformation,
+pub struct SlDrbsToBeSetupItem {
+    pub sl_drb_id: SlDrbId,
+    pub sl_drb_information: SlDrbInformation,
     pub rlc_mode: RlcMode,
 }
 
-impl SldrBsToBeSetupItem {
+impl SlDrbsToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let sldrbid = Sldrbid::decode(data)?;
-        let sldrb_information = SldrbInformation::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
+        let sl_drb_information = SlDrbInformation::decode(data)?;
         let rlc_mode = RlcMode::decode(data)?;
 
         Ok(Self {
-            sldrbid,
-            sldrb_information,
+            sl_drb_id,
+            sl_drb_information,
             rlc_mode,
         })
     }
@@ -23939,39 +23943,39 @@ impl SldrBsToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
-        self.sldrb_information.encode(data)?;
+        self.sl_drb_id.encode(data)?;
+        self.sl_drb_information.encode(data)?;
         self.rlc_mode.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SldrBsToBeSetupItem {
+impl AperCodec for SlDrbsToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupItem"))
+        SlDrbsToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupItem"))
     }
 }
-// SldrBsToBeSetupModItem
+// SlDrbsToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SldrBsToBeSetupModItem {
-    pub sldrbid: Sldrbid,
-    pub sldrb_information: SldrbInformation,
+pub struct SlDrbsToBeSetupModItem {
+    pub sl_drb_id: SlDrbId,
+    pub sl_drb_information: SlDrbInformation,
     pub rlc_mode: Option<RlcMode>,
 }
 
-impl SldrBsToBeSetupModItem {
+impl SlDrbsToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let sldrbid = Sldrbid::decode(data)?;
-        let sldrb_information = SldrbInformation::decode(data)?;
+        let sl_drb_id = SlDrbId::decode(data)?;
+        let sl_drb_information = SlDrbInformation::decode(data)?;
         let rlc_mode = if optionals[0] {
             Some(RlcMode::decode(data)?)
         } else {
@@ -23979,8 +23983,8 @@ impl SldrBsToBeSetupModItem {
         };
 
         Ok(Self {
-            sldrbid,
-            sldrb_information,
+            sl_drb_id,
+            sl_drb_information,
             rlc_mode,
         })
     }
@@ -23990,8 +23994,8 @@ impl SldrBsToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.sldrbid.encode(data)?;
-        self.sldrb_information.encode(data)?;
+        self.sl_drb_id.encode(data)?;
+        self.sl_drb_information.encode(data)?;
         if let Some(x) = &self.rlc_mode {
             x.encode(data)?;
         }
@@ -24000,15 +24004,15 @@ impl SldrBsToBeSetupModItem {
     }
 }
 
-impl AperCodec for SldrBsToBeSetupModItem {
+impl AperCodec for SlDrbsToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SldrBsToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupModItem"))
+        SlDrbsToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SldrBsToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SlDrbsToBeSetupModItem"))
     }
 }
 // SlPhyMacRlcConfig
@@ -24871,11 +24875,11 @@ impl AperCodec for SpectrumSharingGroupId {
             .map_err(|e: AperCodecError| e.push_context("SpectrumSharingGroupId"))
     }
 }
-// Srbid
+// SrbId
 #[derive(Clone, Debug)]
-pub struct Srbid(pub u8);
+pub struct SrbId(pub u8);
 
-impl Srbid {
+impl SrbId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
             aper::decode::decode_integer(data, Some(0), Some(3), true)?.0 as u8,
@@ -24886,34 +24890,34 @@ impl Srbid {
     }
 }
 
-impl AperCodec for Srbid {
+impl AperCodec for SrbId {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Srbid::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Srbid"))
+        SrbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SrbId"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Srbid"))
+            .map_err(|e: AperCodecError| e.push_context("SrbId"))
     }
 }
-// SrBsFailedToBeSetupItem
+// SrbsFailedToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SrBsFailedToBeSetupItem {
-    pub srbid: Srbid,
+pub struct SrbsFailedToBeSetupItem {
+    pub srb_id: SrbId,
     pub cause: Option<Cause>,
 }
 
-impl SrBsFailedToBeSetupItem {
+impl SrbsFailedToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { srbid, cause })
+        Ok(Self { srb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -24921,7 +24925,7 @@ impl SrBsFailedToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -24930,35 +24934,35 @@ impl SrBsFailedToBeSetupItem {
     }
 }
 
-impl AperCodec for SrBsFailedToBeSetupItem {
+impl AperCodec for SrbsFailedToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsFailedToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupItem"))
+        SrbsFailedToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupItem"))
     }
 }
-// SrBsFailedToBeSetupModItem
+// SrbsFailedToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SrBsFailedToBeSetupModItem {
-    pub srbid: Srbid,
+pub struct SrbsFailedToBeSetupModItem {
+    pub srb_id: SrbId,
     pub cause: Option<Cause>,
 }
 
-impl SrBsFailedToBeSetupModItem {
+impl SrbsFailedToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let cause = if optionals[0] {
             Some(Cause::decode(data)?)
         } else {
             None
         };
 
-        Ok(Self { srbid, cause })
+        Ok(Self { srb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -24966,7 +24970,7 @@ impl SrBsFailedToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.cause {
             x.encode(data)?;
         }
@@ -24975,217 +24979,217 @@ impl SrBsFailedToBeSetupModItem {
     }
 }
 
-impl AperCodec for SrBsFailedToBeSetupModItem {
+impl AperCodec for SrbsFailedToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsFailedToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupModItem"))
+        SrbsFailedToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsFailedToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsFailedToBeSetupModItem"))
     }
 }
-// SrBsModifiedItem
+// SrbsModifiedItem
 #[derive(Clone, Debug)]
-pub struct SrBsModifiedItem {
-    pub srbid: Srbid,
+pub struct SrbsModifiedItem {
+    pub srb_id: SrbId,
     pub lcid: Lcid,
 }
 
-impl SrBsModifiedItem {
+impl SrbsModifiedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let lcid = Lcid::decode(data)?;
 
-        Ok(Self { srbid, lcid })
+        Ok(Self { srb_id, lcid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         self.lcid.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsModifiedItem {
+impl AperCodec for SrbsModifiedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsModifiedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsModifiedItem"))
+        SrbsModifiedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsModifiedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsModifiedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsModifiedItem"))
     }
 }
-// SrBsRequiredToBeReleasedItem
+// SrbsRequiredToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SrBsRequiredToBeReleasedItem {
-    pub srbid: Srbid,
+pub struct SrbsRequiredToBeReleasedItem {
+    pub srb_id: SrbId,
 }
 
-impl SrBsRequiredToBeReleasedItem {
+impl SrbsRequiredToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
 
-        Ok(Self { srbid })
+        Ok(Self { srb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsRequiredToBeReleasedItem {
+impl AperCodec for SrbsRequiredToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsRequiredToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsRequiredToBeReleasedItem"))
+        SrbsRequiredToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsRequiredToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsRequiredToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsRequiredToBeReleasedItem"))
     }
 }
-// SrBsSetupItem
+// SrbsSetupItem
 #[derive(Clone, Debug)]
-pub struct SrBsSetupItem {
-    pub srbid: Srbid,
+pub struct SrbsSetupItem {
+    pub srb_id: SrbId,
     pub lcid: Lcid,
 }
 
-impl SrBsSetupItem {
+impl SrbsSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let lcid = Lcid::decode(data)?;
 
-        Ok(Self { srbid, lcid })
+        Ok(Self { srb_id, lcid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         self.lcid.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsSetupItem {
+impl AperCodec for SrbsSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupItem"))
+        SrbsSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupItem"))
     }
 }
-// SrBsSetupModItem
+// SrbsSetupModItem
 #[derive(Clone, Debug)]
-pub struct SrBsSetupModItem {
-    pub srbid: Srbid,
+pub struct SrbsSetupModItem {
+    pub srb_id: SrbId,
     pub lcid: Lcid,
 }
 
-impl SrBsSetupModItem {
+impl SrbsSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let lcid = Lcid::decode(data)?;
 
-        Ok(Self { srbid, lcid })
+        Ok(Self { srb_id, lcid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         self.lcid.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsSetupModItem {
+impl AperCodec for SrbsSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupModItem"))
+        SrbsSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsSetupModItem"))
     }
 }
-// SrBsToBeReleasedItem
+// SrbsToBeReleasedItem
 #[derive(Clone, Debug)]
-pub struct SrBsToBeReleasedItem {
-    pub srbid: Srbid,
+pub struct SrbsToBeReleasedItem {
+    pub srb_id: SrbId,
 }
 
-impl SrBsToBeReleasedItem {
+impl SrbsToBeReleasedItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
 
-        Ok(Self { srbid })
+        Ok(Self { srb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
 
         Ok(())
     }
 }
 
-impl AperCodec for SrBsToBeReleasedItem {
+impl AperCodec for SrbsToBeReleasedItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeReleasedItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeReleasedItem"))
+        SrbsToBeReleasedItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeReleasedItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeReleasedItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeReleasedItem"))
     }
 }
-// SrBsToBeSetupItem
+// SrbsToBeSetupItem
 #[derive(Clone, Debug)]
-pub struct SrBsToBeSetupItem {
-    pub srbid: Srbid,
+pub struct SrbsToBeSetupItem {
+    pub srb_id: SrbId,
     pub duplication_indication: Option<DuplicationIndication>,
 }
 
-impl SrBsToBeSetupItem {
+impl SrbsToBeSetupItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let duplication_indication = if optionals[0] {
             Some(DuplicationIndication::decode(data)?)
         } else {
@@ -25193,7 +25197,7 @@ impl SrBsToBeSetupItem {
         };
 
         Ok(Self {
-            srbid,
+            srb_id,
             duplication_indication,
         })
     }
@@ -25203,7 +25207,7 @@ impl SrBsToBeSetupItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.duplication_indication {
             x.encode(data)?;
         }
@@ -25212,28 +25216,28 @@ impl SrBsToBeSetupItem {
     }
 }
 
-impl AperCodec for SrBsToBeSetupItem {
+impl AperCodec for SrbsToBeSetupItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeSetupItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupItem"))
+        SrbsToBeSetupItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupItem"))
     }
 }
-// SrBsToBeSetupModItem
+// SrbsToBeSetupModItem
 #[derive(Clone, Debug)]
-pub struct SrBsToBeSetupModItem {
-    pub srbid: Srbid,
+pub struct SrbsToBeSetupModItem {
+    pub srb_id: SrbId,
     pub duplication_indication: Option<DuplicationIndication>,
 }
 
-impl SrBsToBeSetupModItem {
+impl SrbsToBeSetupModItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let srbid = Srbid::decode(data)?;
+        let srb_id = SrbId::decode(data)?;
         let duplication_indication = if optionals[0] {
             Some(DuplicationIndication::decode(data)?)
         } else {
@@ -25241,7 +25245,7 @@ impl SrBsToBeSetupModItem {
         };
 
         Ok(Self {
-            srbid,
+            srb_id,
             duplication_indication,
         })
     }
@@ -25251,7 +25255,7 @@ impl SrBsToBeSetupModItem {
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.srbid.encode(data)?;
+        self.srb_id.encode(data)?;
         if let Some(x) = &self.duplication_indication {
             x.encode(data)?;
         }
@@ -25260,15 +25264,15 @@ impl SrBsToBeSetupModItem {
     }
 }
 
-impl AperCodec for SrBsToBeSetupModItem {
+impl AperCodec for SrbsToBeSetupModItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SrBsToBeSetupModItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupModItem"))
+        SrbsToBeSetupModItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupModItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SrBsToBeSetupModItem"))
+            .map_err(|e: AperCodecError| e.push_context("SrbsToBeSetupModItem"))
     }
 }
 // SrsCarrierList
@@ -25312,7 +25316,7 @@ pub struct SrsCarrierListItem {
     pub point_a: u32,
     pub uplink_channel_bw_per_scs_list: UplinkChannelBwPerScsList,
     pub active_ulbwp: ActiveUlbwp,
-    pub pci: Option<Nrpci>,
+    pub pci: Option<NrPci>,
 }
 
 impl SrsCarrierListItem {
@@ -25323,7 +25327,7 @@ impl SrsCarrierListItem {
         let uplink_channel_bw_per_scs_list = UplinkChannelBwPerScsList::decode(data)?;
         let active_ulbwp = ActiveUlbwp::decode(data)?;
         let pci = if optionals[0] {
-            Some(Nrpci::decode(data)?)
+            Some(NrPci::decode(data)?)
         } else {
             None
         };
@@ -26010,7 +26014,7 @@ impl AperCodec for SrsResourceTrigger {
 // Ssb
 #[derive(Clone, Debug)]
 pub struct Ssb {
-    pub pci_nr: Nrpci,
+    pub pci_nr: NrPci,
     pub ssb_index: Option<SsbIndex>,
 }
 
@@ -26018,7 +26022,7 @@ impl Ssb {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 2)?;
-        let pci_nr = Nrpci::decode(data)?;
+        let pci_nr = NrPci::decode(data)?;
         let ssb_index = if optionals[0] {
             Some(SsbIndex::decode(data)?)
         } else {
@@ -26615,7 +26619,7 @@ impl AperCodec for SsbInformationList {
 #[derive(Clone, Debug)]
 pub struct SsbInformationItem {
     pub ssb_configuration: SsbTfConfiguration,
-    pub pci_nr: Nrpci,
+    pub pci_nr: NrPci,
 }
 
 impl SsbInformationItem {
@@ -26623,7 +26627,7 @@ impl SsbInformationItem {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
         let ssb_configuration = SsbTfConfiguration::decode(data)?;
-        let pci_nr = Nrpci::decode(data)?;
+        let pci_nr = NrPci::decode(data)?;
 
         Ok(Self {
             ssb_configuration,
@@ -26915,7 +26919,7 @@ impl AperCodec for SsbToReportItem {
 // SulInformation
 #[derive(Clone, Debug)]
 pub struct SulInformation {
-    pub sul_nrarfcn: u32,
+    pub sul_nr_arfcn: u32,
     pub sul_transmission_bandwidth: TransmissionBandwidth,
 }
 
@@ -26923,12 +26927,12 @@ impl SulInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let sul_nrarfcn =
+        let sul_nr_arfcn =
             aper::decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32;
         let sul_transmission_bandwidth = TransmissionBandwidth::decode(data)?;
 
         Ok(Self {
-            sul_nrarfcn,
+            sul_nr_arfcn,
             sul_transmission_bandwidth,
         })
     }
@@ -26942,7 +26946,7 @@ impl SulInformation {
             Some(0),
             Some(3279165),
             false,
-            self.sul_nrarfcn as i128,
+            self.sul_nr_arfcn as i128,
             false,
         )?;
         self.sul_transmission_bandwidth.encode(data)?;
@@ -27308,14 +27312,14 @@ impl AperCodec for TargetCellList {
 // TargetCellListItem
 #[derive(Clone, Debug)]
 pub struct TargetCellListItem {
-    pub target_cell: Nrcgi,
+    pub target_cell: NrCgi,
 }
 
 impl TargetCellListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 1)?;
-        let target_cell = Nrcgi::decode(data)?;
+        let target_cell = NrCgi::decode(data)?;
 
         Ok(Self { target_cell })
     }
@@ -28034,26 +28038,26 @@ impl AperCodec for TransactionId {
 // TransmissionBandwidth
 #[derive(Clone, Debug)]
 pub struct TransmissionBandwidth {
-    pub nrscs: Nrscs,
-    pub nrnrb: Nrnrb,
+    pub nr_scs: NrScs,
+    pub nr_nr_b: NrNrB,
 }
 
 impl TransmissionBandwidth {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let nrscs = Nrscs::decode(data)?;
-        let nrnrb = Nrnrb::decode(data)?;
+        let nr_scs = NrScs::decode(data)?;
+        let nr_nr_b = NrNrB::decode(data)?;
 
-        Ok(Self { nrscs, nrnrb })
+        Ok(Self { nr_scs, nr_nr_b })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.nrscs.encode(data)?;
-        self.nrnrb.encode(data)?;
+        self.nr_scs.encode(data)?;
+        self.nr_nr_b.encode(data)?;
 
         Ok(())
     }
@@ -28122,8 +28126,8 @@ impl AperCodec for TransmissionComb {
 // TransmissionCombPos
 #[derive(Clone, Debug)]
 pub enum TransmissionCombPos {
-    N2(N21),
-    N4(N41),
+    N2(N2_1),
+    N4(N4_1),
     N8(N8),
 }
 
@@ -28136,8 +28140,8 @@ impl TransmissionCombPos {
             ));
         }
         match idx {
-            0 => Ok(Self::N2(N21::decode(data)?)),
-            1 => Ok(Self::N4(N41::decode(data)?)),
+            0 => Ok(Self::N2(N2_1::decode(data)?)),
+            1 => Ok(Self::N4(N4_1::decode(data)?)),
             2 => Ok(Self::N8(N8::decode(data)?)),
             3 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -28585,9 +28589,9 @@ impl AperCodec for TrpInformationTypeResponseList {
 // TrpInformationTypeResponseItem
 #[derive(Clone, Debug)]
 pub enum TrpInformationTypeResponseItem {
-    PciNr(Nrpci),
-    NgRanCgi(Nrcgi),
-    Nrarfcn(u32),
+    PciNr(NrPci),
+    NgRanCgi(NrCgi),
+    NrArfcn(u32),
     PrsConfiguration(PrsConfiguration),
     SsBinformation(SsbInformation),
     SfnInitialisationTime(RelativeTime1900),
@@ -28604,9 +28608,9 @@ impl TrpInformationTypeResponseItem {
             ));
         }
         match idx {
-            0 => Ok(Self::PciNr(Nrpci::decode(data)?)),
-            1 => Ok(Self::NgRanCgi(Nrcgi::decode(data)?)),
-            2 => Ok(Self::Nrarfcn(
+            0 => Ok(Self::PciNr(NrPci::decode(data)?)),
+            1 => Ok(Self::NgRanCgi(NrCgi::decode(data)?)),
+            2 => Ok(Self::NrArfcn(
                 aper::decode::decode_integer(data, Some(0), Some(3279165), false)?.0 as u32,
             )),
             3 => Ok(Self::PrsConfiguration(PrsConfiguration::decode(data)?)),
@@ -28634,7 +28638,7 @@ impl TrpInformationTypeResponseItem {
                 aper::encode::encode_choice_idx(data, 0, 8, false, 1, false)?;
                 x.encode(data)
             }
-            Self::Nrarfcn(x) => {
+            Self::NrArfcn(x) => {
                 aper::encode::encode_choice_idx(data, 0, 8, false, 2, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(3279165), false, *x as i128, false)
             }
@@ -30089,23 +30093,25 @@ impl AperCodec for UlBhNonUpTrafficMappingItem {
 // UlConfiguration
 #[derive(Clone, Debug)]
 pub struct UlConfiguration {
-    pub ulue_configuration: UlueConfiguration,
+    pub ul_ue_configuration: UlUeConfiguration,
 }
 
 impl UlConfiguration {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
-        let ulue_configuration = UlueConfiguration::decode(data)?;
+        let ul_ue_configuration = UlUeConfiguration::decode(data)?;
 
-        Ok(Self { ulue_configuration })
+        Ok(Self {
+            ul_ue_configuration,
+        })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.ulue_configuration.encode(data)?;
+        self.ul_ue_configuration.encode(data)?;
 
         Ok(())
     }
@@ -30281,16 +30287,16 @@ impl AperCodec for UlSrsRsrp {
             .map_err(|e: AperCodecError| e.push_context("UlSrsRsrp"))
     }
 }
-// UlueConfiguration
+// UlUeConfiguration
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum UlueConfiguration {
+pub enum UlUeConfiguration {
     NoData,
     Shared,
     Only,
 }
 
-impl UlueConfiguration {
+impl UlUeConfiguration {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), true)?;
         if extended {
@@ -30303,15 +30309,15 @@ impl UlueConfiguration {
     }
 }
 
-impl AperCodec for UlueConfiguration {
+impl AperCodec for UlUeConfiguration {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UlueConfiguration::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UlueConfiguration"))
+        UlUeConfiguration::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("UlUeConfiguration"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("UlueConfiguration"))
+            .map_err(|e: AperCodecError| e.push_context("UlUeConfiguration"))
     }
 }
 // UlUpTnlInformationToUpdateListItem
@@ -30987,17 +30993,17 @@ impl AperCodec for ResourceType1 {
             .map_err(|e: AperCodecError| e.push_context("ResourceType1"))
     }
 }
-// Nrscs1
+// NrScs1
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum Nrscs1 {
+pub enum NrScs1 {
     Scs15,
     Scs30,
     Scs60,
     Scs120,
 }
 
-impl Nrscs1 {
+impl NrScs1 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(3), true)?;
         if extended {
@@ -31010,25 +31016,25 @@ impl Nrscs1 {
     }
 }
 
-impl AperCodec for Nrscs1 {
+impl AperCodec for NrScs1 {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrscs1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Nrscs1"))
+        NrScs1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NrScs1"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrscs1"))
+            .map_err(|e: AperCodecError| e.push_context("NrScs1"))
     }
 }
-// Nrcp
+// NrCp
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum Nrcp {
+pub enum NrCp {
     Normal,
     Extended,
 }
 
-impl Nrcp {
+impl NrCp {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
         if extended {
@@ -31041,20 +31047,20 @@ impl Nrcp {
     }
 }
 
-impl AperCodec for Nrcp {
+impl AperCodec for NrCp {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        Nrcp::decode_inner(data).map_err(|e: AperCodecError| e.push_context("Nrcp"))
+        NrCp::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NrCp"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("Nrcp"))
+            .map_err(|e: AperCodecError| e.push_context("NrCp"))
     }
 }
-// NrdlulTxPeriodicity
+// NrDlulTxPeriodicity
 #[derive(Clone, Debug, Copy, TryFromPrimitive)]
 #[repr(u8)]
-pub enum NrdlulTxPeriodicity {
+pub enum NrDlulTxPeriodicity {
     Ms0p5,
     Ms0p625,
     Ms1,
@@ -31075,7 +31081,7 @@ pub enum NrdlulTxPeriodicity {
     Ms160,
 }
 
-impl NrdlulTxPeriodicity {
+impl NrDlulTxPeriodicity {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(17), true)?;
         if extended {
@@ -31088,15 +31094,15 @@ impl NrdlulTxPeriodicity {
     }
 }
 
-impl AperCodec for NrdlulTxPeriodicity {
+impl AperCodec for NrDlulTxPeriodicity {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NrdlulTxPeriodicity::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrdlulTxPeriodicity"))
+        NrDlulTxPeriodicity::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NrDlulTxPeriodicity"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("NrdlulTxPeriodicity"))
+            .map_err(|e: AperCodecError| e.push_context("NrDlulTxPeriodicity"))
     }
 }
 // Msg1scs
@@ -32507,14 +32513,14 @@ impl AperCodec for N4 {
             .map_err(|e: AperCodecError| e.push_context("N4"))
     }
 }
-// N21
+// N2_1
 #[derive(Clone, Debug)]
-pub struct N21 {
+pub struct N2_1 {
     pub comb_offset_n_2: u8,
     pub cyclic_shift_n_2: u8,
 }
 
-impl N21 {
+impl N2_1 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 0)?;
@@ -32551,24 +32557,24 @@ impl N21 {
     }
 }
 
-impl AperCodec for N21 {
+impl AperCodec for N2_1 {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        N21::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N21"))
+        N2_1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N2_1"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("N21"))
+            .map_err(|e: AperCodecError| e.push_context("N2_1"))
     }
 }
-// N41
+// N4_1
 #[derive(Clone, Debug)]
-pub struct N41 {
+pub struct N4_1 {
     pub comb_offset_n_4: u8,
     pub cyclic_shift_n_4: u8,
 }
 
-impl N41 {
+impl N4_1 {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, false, 0)?;
@@ -32606,14 +32612,14 @@ impl N41 {
     }
 }
 
-impl AperCodec for N41 {
+impl AperCodec for N4_1 {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        N41::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N41"))
+        N4_1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("N4_1"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("N41"))
+            .map_err(|e: AperCodecError| e.push_context("N4_1"))
     }
 }
 // N8

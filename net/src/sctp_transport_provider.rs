@@ -8,7 +8,7 @@ use async_trait::async_trait;
 use futures::stream::StreamExt;
 use futures::{future, pin_mut};
 use sctp::{Message, SctpAssociation};
-use slog::{info, o, trace, warn, Logger};
+use slog::{debug, info, o, warn, Logger};
 use std::fmt::Debug;
 use std::net::SocketAddr;
 use std::time::Duration;
@@ -65,7 +65,7 @@ impl TransportProvider for SctpTransportProvider {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
                     Ok(assoc) => {
                         let logger = logger.new(o!("connection" => assoc_id));
-                        trace!(logger, "Established connection");
+                        debug!(logger, "Established connection");
 
                         self.tnla_pool
                             .add_and_handle_no_spawn(
@@ -125,7 +125,7 @@ impl TransportProvider for SctpTransportProvider {
         let stream = stream.take_until(stop_token.clone());
 
         Ok(task::spawn(async move {
-            trace!(logger, "Listening for SCTP connections on {:?}", addr);
+            debug!(logger, "Listening for SCTP connections on {:?}", addr);
             pin_mut!(stream);
             let mut connection_tasks = vec![];
             loop {
@@ -158,9 +158,9 @@ impl TransportProvider for SctpTransportProvider {
                 }
             }
 
-            trace!(logger, "Wait for connection tasks to finish");
+            debug!(logger, "Wait for connection tasks to finish");
             future::join_all(connection_tasks).await;
-            trace!(logger, "Connection tasks finished");
+            debug!(logger, "Connection tasks finished");
         }))
     }
 }
