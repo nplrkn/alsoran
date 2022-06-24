@@ -60,133 +60,51 @@ The NG-RAN node is also allow to add endpoints.  So the other workers catch up b
 
 > When the configuration with multiple SCTP endpoints per NG-RAN node is supported and the NG-RAN node wants to add additional SCTP endpoints, the RAN configuration update procedure shall be the first NGAP procedure triggered on an additional TNLA of an already setup NG-C interface instance after the TNL association has become operational, and the AMF shall associate the TNLA to the NG-C interface instance using the included Global RAN node ID.
 
+## AMF support for multiple associations
+
 free5GC AMF identifies GNB / creates RAN context by connection.  Each of our workers would manifest as a separate RAN.  So it is never going to do triangular redirection.  And there is no point having a node controller because there is no coordination required.
 
 Open5GS AMF identifies the gNB by address - see amf_gnb_find_by_addr().  Presumably this means it can't do triangular redirection either.  Since both NG Setup and ngap_handle_ran_configuration_update() call amf_gnb_set_gnb_id() the GNB IDs will overwrite each other for the purposes of handover.
 
-If neither of the open source AMFs can cope with multiple parallel connections from same gNB, possibly some of the commerical ones don't either.  It depends on their support for TS 38.412 multi associations.
+If neither of the open source AMFs can cope with multiple parallel connections from same gNB, possibly some of the commercial ones don't either.  It depends on their support for TS 38.412 multi associations.
 
 ## Overload
 
 The AMF may order the gNB to reduce the signalling load.  This needs to propagate to all workers.
 
-## Chosen design - Node controller
+## Coordinator design
 
-Considering the following designs to propagate information around the cluster
+To allow workers to coordinate, we could provide a coordinator microservice.  The idea is that
 
-1. Gossip protocol.  
-2. Kubernetes controller ConfigMaps.
-3. Additional node controller microservice.
-
-...I went for the last of these.
-
-The idea is that
-
-- the node controller does all non-UE associated signaling and knows about all the TNLAs
-- the workers find the node controller using a Kubernetes service
-- the node controller needs some synchronization mechanism
+- the coordinator controls or does non-UE associated signaling and knows about all the TNLAs
+- the workers find the coordinator using a Kubernetes service
+- the coordinator synchronizes exchanges across multiple workers
   - either a consistent store like etcd
-  - or needs to be a singleton pod
+  - or needs to be a singleton pod (potentially per instance of the API) with single-threaded business logic
   - or needs to be an active-standby.
   
 Key example of why a synchronization mechanism is needed is that otherwise two node controller instances might simultaneously try to send NG Setup.
 
-### Interface state information - idea - reject
-
-When the coordinator responds to a worker, it lets the worker know if the NG interface instance is up yet.  This means that the worker can automatously decide whether to send NG Setup or RAN Configuration update.
-
-The problem with this idea is that when two workers come up simultaneously, they will both learn that the interface instance is down and thus both send NG Setup.  Hence this idea is rejected and the following idea is used instead.
-
 ### Procedure trigger callback
+
+Consider a design where the worker on startup was informed whether the AMF has been contacted and the NG interface instance is up yet.  The worker can now autonomously decide whether to send NG Setup or RAN Configuration update.
+
+The problem with this idea is that, when two workers come up simultaneously, they will both learn that the interface instance is down and thus both send NG Setup.  More elaborate synchronization is needed.
 
 Worker instances provide a procedure trigger callback.  
 
 When the coordinator learns of a new connection to the AMF, it uses the procedure trigger callback to trigger an NG Setup or RAN configuration update.  Either a single task must be used, or a consistent store.
 
-Decision is to go with a single "Interface management" thread that communicates using channels.
+### Sequencing of connection establishment 
 
-### TNLA handling
+Can new workers be set up in such a way as to minimize the situation where UE associated messages can't be passed through?
 
-TNLAs are stored in the StcpTnlaPool.  Anyone can use this pool to send a message.
-A client attempts to maintain one TNLA to each endpoint at all times.  
-The client has one task per endpoint, either resolving, or waiting for a retry, or handling the connection.  Connections are added/removed from the pool as they get successfully estalbished / fail / are retracted.  This shows that there is not a 1:1 relationship between connections in the pool and tasks.  Therefore the pool can't store a task handle.
-The server has N connections.  These can simply hang off the listen.
-When gracefully deleting the client, we signal all of the per endpoint tasks to stop what they are doing and then join the tasks.
+Since the UE initiates the connection, this suggests setting up the NGAP interface before allowing a new DU to finish initializing its connection.
 
-### Sequencing of connection establishment - first worker
+However, if this same policy is applied when adding the second worker, there is the danger that it will receive a triangular redirected response from the AMF and be unable to pass it back to a DU. 
 
-The goal is to avoid the situation where the first message(s) sent by the AMF to the CU can't be passed onto a DU, and vice versa.
-
-For example, if we fully set up the DU side first, it will send us UE messages but we don't have an AMF connection to pass them on. 
-
-```mermaid
-sequenceDiagram
-  participant DU
-  participant W1
-  participant AMF
-  W1->>AMF: establish connection
-  Note over W1: deliberately withhold NG Setup
-  DU->>W1: establish connection
-  DU->>W1: F1 Setup
-  W1->>AMF: NG Setup
-  AMF->>W1: NG Setup Ack
-  Note over AMF: may now send UE messages to W1
-  W1->>DU: F1 Setup Ack
-  Note over DU: may now send UE messages to W1
-```
-
-Still, it is possible that right to left messages may overtake the F1 Setup Ack.  Until proven otherwise, we assume that, upon transmission of an F1 Setup, the DU is capable of receiving new requests from the CU.  Similarly, we ensure that, upon transmission of an NG Setup, the CU is capable of receiving new requests from the AMF.
-
-### Sequencing of connection establishment - second worker
-
-Again, the danger is that the new worker receives a message it can't pass on.  Our choice is to get the DU connection set up first.
-
-```mermaid
-sequenceDiagram
-  participant DU
-  participant W1
-  participant C
-  participant W2
-  participant AMF
-  W2->>C: add F1AP port
-  C->>W1: add F1AP ports
-  W1->>DU: GNB-CU Configuration Update
-  DU->>W2: connect
-  Note over W2: messages from DU can't be handled yet
-  DU->>W1: GNB-CU Configuration Update ack
-  W1->>C: add F1AP ports ok
-  C->>W2: ok, AMF address
-  note over W2: in the error variant, go into activation failed
-  W2->>AMF: connect
-  W2->>C: connected to AMF 
-  C->>W2: trigger configuration update
-  W2->>AMF: RAN configuration update
-  AMF->>W2: RAN configuration update response  
-  W2->>C: ok
-  Note over W2: check that the AMF is actually letting us use the TNLA for UE associated signaling
-  Note over W2: can now pass messages from DU through
-```
 
 ### Multiple TNLA endpoints from AMF
-
-```mermaid
-sequenceDiagram
-  participant C
-  participant W1
-  participant W2
-  participant AMF
-  W1->>C: F1AP port, no AMFs connected
-  C->>W1: AMF address 
-  W1->>AMF: connect
-  W1->>C: F1AP port, AMF connected
-  C->>W1: ok 
-  C->>W1: trigger NG setup
-  W1->>AMF: NG Setup
-  AMF->>W1: Ack
-  W1->>C: ok
-```
-
-alternative
 
 ```mermaid
 sequenceDiagram
@@ -229,7 +147,6 @@ sequenceDiagram
 
 ### Where we need to connect to multiple AMFs
 
-
 This is from 29.303.
 
 The AMFs available within an AMF Set should be provisioned within NAPTR records in the DNS, under the AMF Set FQDN (as defined in clause 28.3.2.7 of 3GPP TS 23.003 [4]), with the Service Parameters "x-3gpp-amf:x-n2".
@@ -237,13 +154,5 @@ The 5G-AN may discover the AMFs available within an AMF Set by:
 -	constructing the AMF Set FQDN, as defined in clause 28.3.2.7 of 3GPP TS 23.003 [4], identifying the AMF Set of the AMFs to be discovered; and
 -	initiating an S-NAPTR procedure, with the Application-Unique String set to that AMF Set FQDN, and with the "Service Parameters" set to "x-3gpp-amf:x-n2".
 
-
 When connecting to an AMF it may provide a backup AMF name per GUAMI in its served GUAMI list.
-This is apparently not a DNS name.  So we are going to find it by doing an NG Setup (or getting an AMF configuration update that changes it).
-
-Simple case.  
-
-```mermaid
-sequenceDiagram
-  participant C
 
