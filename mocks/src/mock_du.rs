@@ -242,12 +242,14 @@ impl MockDu {
     }
 
     pub async fn send_ue_context_setup_response(&self, logger: &Logger) -> Result<()> {
+        let cell_group_config =
+            f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
         let ue_context_setup_response = F1apPdu::SuccessfulOutcome(
             SuccessfulOutcome::UeContextSetupResponse(UeContextSetupResponse {
                 gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
                 du_to_cu_rrc_information: DuToCuRrcInformation {
-                    cell_group_config: CellGroupConfig(Vec::new()),
+                    cell_group_config,
                     meas_gap_config: None,
                     requested_p_max_fr1: None,
                 },
@@ -339,9 +341,8 @@ impl MockDu {
     }
 }
 
-fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
-    // We also need a CellGroupConfig to give to the CU.
-    let cell_group_config_ie = rrc::CellGroupConfig {
+fn make_rrc_cell_group_config() -> rrc::CellGroupConfig {
+    rrc::CellGroupConfig {
         cell_group_id: CellGroupId(0),
         rlc_bearer_to_add_mod_list: None,
         rlc_bearer_to_release_list: None,
@@ -351,8 +352,11 @@ fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
         s_cell_to_add_mod_list: None,
         s_cell_to_release_list: None,
     }
-    .into_bytes()
-    .unwrap();
+}
+
+fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
+    // We also need a CellGroupConfig to give to the CU.
+    let cell_group_config_ie = make_rrc_cell_group_config().into_bytes().unwrap();
     DuToCuRrcContainer(cell_group_config_ie)
 }
 
