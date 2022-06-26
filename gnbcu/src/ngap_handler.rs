@@ -118,26 +118,6 @@ fn make_rrc_container(rrc: DlDcchMessage) -> Result<f1ap::RrcContainer> {
     Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).bytes()))
 }
 
-// fn make_rrc_container_for_nas(
-//     _ue: &UeContext,
-//     nas_message: DedicatedNasMessage,
-//     _logger: &Logger,
-// ) -> Result<f1ap::RrcContainer> {
-//     let rrc = DlDcchMessage {
-//         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
-//             rrc_transaction_identifier: RrcTransactionIdentifier(2),
-//             critical_extensions: CriticalExtensions4::DlInformationTransfer(
-//                 DlInformationTransferIEs {
-//                     dedicated_nas_message: Some(nas_message),
-//                     late_non_critical_extension: None,
-//                     non_critical_extension: None,
-//                 },
-//             ),
-//         })),
-//     };
-//     make_rrc_container(rrc)
-// }
-
 #[async_trait]
 impl RequestProvider<InitialContextSetupProcedure> for Handler {
     async fn request(

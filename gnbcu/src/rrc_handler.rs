@@ -174,7 +174,7 @@ impl RrcHandler {
             }
         };
 
-        // To do - shoudl be from Ue context
+        // Todo - should be from Ue context
         let nr_cgi = ngap::NrCgi {
             plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
             nr_cell_identity: ngap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
