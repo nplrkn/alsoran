@@ -1,4 +1,4 @@
-use super::{Gnbcu, UeContext};
+use crate::{Gnbcu, UeContext};
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::*;
