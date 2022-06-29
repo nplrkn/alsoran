@@ -10,5 +10,6 @@ members = [
     "gnbcu",
     "gnbdu-sim",
     "rrc",
-    "pdcp"
+    "pdcp",
+    "integration-tests"
 ]
