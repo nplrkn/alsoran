@@ -1,4 +1,5 @@
-use super::{Gnbcu, RrcHandler, UeContext};
+use super::RrcHandler;
+use crate::{Gnbcu, UeContext};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;

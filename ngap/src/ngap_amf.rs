@@ -18,17 +18,14 @@ where
 {
     type TopPdu = NgapPdu;
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
-        match match p {
-            NgapPdu::InitiatingMessage(m) => m,
-            _ => return None,
-        } {
-            InitiatingMessage::RanConfigurationUpdate(req) => {
+        match p {
+            NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(req)) => {
                 RanConfigurationUpdateProcedure::call_provider(&self.0, req, logger).await
             }
-            InitiatingMessage::NgSetupRequest(req) => {
+            NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(req)) => {
                 NgSetupProcedure::call_provider(&self.0, req, logger).await
             }
-            _ => todo!(),
+            _ => return None,
         }
     }
 }

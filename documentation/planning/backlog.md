@@ -3,27 +3,31 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Fix malformed CellGroupConfig issue seen in Wireshark 
-- Build go code using cargo build and don't install it in alsoran output directory rather than home.
-- Fix code that does match match
-- Pretty Ue initial context and move into separate modules
+- Regression test that avoids the need to run free5GC
+- impl<T> InterfaceProvider for NgapGnb<T> should just be impl for T?
+- move to consistent message logging
+- commonize F1apHandler and NgapHandler
 - Intermittent behavior in free5GC demo
 - Bug - Ctrl-C doesn't work on gnbcu if it is waiting for a UeContextSetupResponse.  (Would need to timeout so since this is meant to be graceful shutdown.)
 - Timers and timeouts within the procedures we do and testing
-- Regression test that avoids the need to run free5GC - put security mode command in Initial Context Setup Request
-- Bump dependencies
-- Write up reliable demo instructions starting with download of free5GC
+- Bump deps
 - Remove commented out code
-- Review TODOs
+- Review TODOs where possible
+- Code review
+- Write up reliable demo instructions starting with download of free5GC
 
 ## MAYBE
-- Handle registration reject (e.g. test with UDM not running)
+- Handle registration reject (e.g. test free5GC with UDM not running)
 - Requests should be processed in parallel in separate tasks.
 - Deduplicate inline definitions in RRC autogeneration
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## DONE
+- Pretty Ue initial context and move into separate modules
+- Fix malformed CellGroupConfig issue seen in Wireshark in F1AP UEContextSetupResponse -- DUtoCURRCInformation, cellGroupConfig shown as <MISSING>
+- Build go code using cargo build.
+- Fix code that does match match
 - Registration (23.502, figure 4.2.2.2-1) wrapped in UE Initial Access procedure (38.401, figure 8.1-1) working against free5GC as seen in ngap_setup.pcap.
 - Go program that processes NAS information
 - Encapsulate RRC in PDCP PDU
@@ -74,5 +78,4 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - SCTP connect
 - test against a free5GC
 - add logging
-- do two exchanges concurrently in UT
-- explore is HA + use of SCTP.
+- explore HA + use of SCTP.

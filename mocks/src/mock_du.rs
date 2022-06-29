@@ -148,10 +148,8 @@ impl MockDu {
 
         let rrc_message_bytes = pdcp_pdu.view_inner()?;
 
-        let rrc_setup = match match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
-            DlCcchMessageType::C1(x) => x,
-        } {
-            C1_1::RrcSetup(x) => Ok(x),
+        let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
+            DlCcchMessageType::C1(C1_1::RrcSetup(x)) => Ok(x),
             x => Err(anyhow!("Unexpected RRC message {:?}", x)),
         }?;
 
@@ -244,12 +242,14 @@ impl MockDu {
     }
 
     pub async fn send_ue_context_setup_response(&self, logger: &Logger) -> Result<()> {
+        let cell_group_config =
+            f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
         let ue_context_setup_response = F1apPdu::SuccessfulOutcome(
             SuccessfulOutcome::UeContextSetupResponse(UeContextSetupResponse {
                 gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
                 du_to_cu_rrc_information: DuToCuRrcInformation {
-                    cell_group_config: CellGroupConfig(Vec::new()),
+                    cell_group_config,
                     meas_gap_config: None,
                     requested_p_max_fr1: None,
                 },
@@ -298,22 +298,24 @@ impl MockDu {
 
     pub async fn receive_rrc_reconfiguration(&self, _logger: &Logger) -> Result<Vec<u8>> {
         let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
-        // TODO: don't need match match match here or elsewhere
         let mut nas_messages =
-            match match match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
-                DlDcchMessageType::C1(x) => x,
-            } {
-                C1_2::RrcReconfiguration(x) => Ok(x),
-                x => Err(anyhow!("Unexpected RRC message {:?}", x)),
-            }?
-            .critical_extensions
-            {
-                CriticalExtensions15::RrcReconfiguration(x) => x,
-            }
-            .non_critical_extension
-            .ok_or(anyhow!("Expected non critical extension"))?
-            .dedicated_nas_message_list
-            .ok_or(anyhow!("Expected NAS message list"))?;
+            match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
+                DlDcchMessageType::C1(C1_2::RrcReconfiguration(RrcReconfiguration {
+                    critical_extensions:
+                        CriticalExtensions15::RrcReconfiguration(RrcReconfigurationIEs {
+                            non_critical_extension:
+                                Some(RrcReconfigurationV1530IEs {
+                                    dedicated_nas_message_list: Some(x),
+                                    ..
+                                }),
+                            ..
+                        }),
+                    ..
+                })) => Ok(x),
+                _ => Err(anyhow!(
+                    "Couldn't find NAS message list in Rrc Reconfiguration"
+                )),
+            }?;
 
         if nas_messages.len() != 1 {
             return Err(anyhow!("Expected a single NAS message in list"));
@@ -339,9 +341,8 @@ impl MockDu {
     }
 }
 
-fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
-    // We also need a CellGroupConfig to give to the CU.
-    let cell_group_config_ie = rrc::CellGroupConfig {
+fn make_rrc_cell_group_config() -> rrc::CellGroupConfig {
+    rrc::CellGroupConfig {
         cell_group_id: CellGroupId(0),
         rlc_bearer_to_add_mod_list: None,
         rlc_bearer_to_release_list: None,
@@ -351,8 +352,11 @@ fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
         s_cell_to_add_mod_list: None,
         s_cell_to_release_list: None,
     }
-    .into_bytes()
-    .unwrap();
+}
+
+fn make_du_to_cu_rrc_container() -> DuToCuRrcContainer {
+    // We also need a CellGroupConfig to give to the CU.
+    let cell_group_config_ie = make_rrc_cell_group_config().into_bytes().unwrap();
     DuToCuRrcContainer(cell_group_config_ie)
 }
 
@@ -364,20 +368,17 @@ fn rrc_from_container(rrc_container: RrcContainer) -> Result<DlDcchMessage> {
 }
 
 fn nas_from_dl_transfer_rrc_container(rrc_container: RrcContainer) -> Result<Vec<u8>> {
-    let rrc_dl_transfer = match match match rrc_from_container(rrc_container)?.message {
-        DlDcchMessageType::C1(x) => x,
-    } {
-        C1_2::DlInformationTransfer(x) => Ok(x),
+    match rrc_from_container(rrc_container)?.message {
+        DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
+            critical_extensions:
+                CriticalExtensions4::DlInformationTransfer(DlInformationTransferIEs {
+                    dedicated_nas_message: Some(x),
+                    ..
+                }),
+            ..
+        })) => Ok(x.0),
         x => Err(anyhow!("Unexpected RRC message {:?}", x)),
-    }?
-    .critical_extensions
-    {
-        CriticalExtensions4::DlInformationTransfer(x) => x,
-    };
-    Ok(rrc_dl_transfer
-        .dedicated_nas_message
-        .ok_or(anyhow!("NAS message not present"))?
-        .0)
+    }
 }
 #[async_trait]
 impl TnlaEventHandler for MockDu {

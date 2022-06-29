@@ -1,16 +1,15 @@
 mod config;
-mod f1ap_handler;
-mod ngap_handler;
-mod rrc_handler;
+mod handlers;
+mod procedures;
 mod rrc_transaction;
 mod ue_context;
 use anyhow::Result;
 use async_channel::Sender;
 use async_std::task::JoinHandle;
 pub use config::Config;
+use handlers::{f1ap, ngap, RrcHandler};
 use net::{SctpTransportProvider, Stack};
 use rrc::UlDcchMessage;
-use rrc_handler::RrcHandler;
 use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use slog::{info, Logger};
 use stop_token::{StopSource, StopToken};
@@ -65,7 +64,7 @@ impl Gnbcu {
         info!(logger, "Maintain connection to AMF {}", amf_address);
         let ngap_transport = self
             .ngap
-            .connect(amf_address, ngap_handler::new(self.clone()), logger.clone())
+            .connect(amf_address, ngap::new(self.clone()), logger.clone())
             .await?;
         let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
         info!(
@@ -77,7 +76,7 @@ impl Gnbcu {
             .f1ap
             .listen(
                 f1_listen_address,
-                f1ap_handler::new(self.clone(), rrc_handler),
+                f1ap::new(self.clone(), rrc_handler),
                 logger.clone(),
             )
             .await?;
@@ -95,6 +94,10 @@ impl Gnbcu {
         // TODO
     }
 
+    // Start a new Rrc transaction.  This is not a robust long term mechnanism, since the
+    // calling task is only interested in the next matching response to the Rrc transactions it initiates
+    // whereas we are curently giving it the next UlDcchMessage of any kind.
+    // TODO
     pub async fn new_rrc_transaction(&self, ue: &UeContext) -> RrcTransaction {
         self.rrc_transactions
             .new_transaction(ue.gnb_cu_ue_f1ap_id.0)

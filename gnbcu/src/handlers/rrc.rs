@@ -1,4 +1,4 @@
-use super::{Gnbcu, UeContext};
+use crate::{Gnbcu, UeContext};
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -17,26 +17,20 @@ impl RrcHandler {
     }
 
     pub async fn dispatch_ccch(&self, ue: UeContext, message: &[u8], logger: &Logger) {
-        match match match match UlCcchMessage::from_bytes(message) {
+        match UlCcchMessage::from_bytes(message) {
             Err(e) => {
-                warn!(logger, "Failed to decode RRC message: {:?}", e);
-                return;
+                warn!(logger, "Failed to decode RRC message: {:?}", e)
             }
-            Ok(m) => m,
-        }
-        .message
-        {
-            UlCcchMessageType::C1(m) => m,
-        } {
-            C1_4::RrcSetupRequest(x) => self.rrc_setup_request(ue, x, logger),
-            C1_4::RrcResumeRequest(_) => todo!(),
-            C1_4::RrcReestablishmentRequest(_) => todo!(),
-            C1_4::RrcSystemInfoRequest(_) => todo!(),
-        }
-        .await
-        {
-            Err(e) => warn!(logger, "Error processing Rrc message {:?}", e),
-            _ => (),
+            Ok(UlCcchMessage {
+                message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(x)),
+            }) => {
+                if let Err(e) = self.rrc_setup_request(ue, x, logger).await {
+                    warn!(logger, "Failed processing RrcSetupRequest {:?}", e)
+                }
+            }
+            Ok(m) => {
+                warn!(logger, "Not yet implemented Rrc message {:?}", m)
+            }
         }
     }
 
@@ -55,22 +49,18 @@ impl RrcHandler {
             return;
         }
 
-        match match match message.message {
-            UlDcchMessageType::C1(m) => m,
-            UlDcchMessageType::MessageClassExtension(_) => {
-                warn!(
-                    logger,
-                    "UlDcchMessage ignored - message class extension not implemented"
-                );
-                return;
+        match message.message {
+            UlDcchMessageType::C1(C1_6::RrcSetupComplete(x)) => {
+                if let Err(e) = self.rrc_setup_complete(ue, x, logger).await {
+                    warn!(logger, "Error processing Rrc Setup Complete - {:?}", e)
+                }
             }
-        } {
-            C1_6::RrcSetupComplete(x) => self.rrc_setup_complete(ue, x, logger).await,
-            C1_6::UlInformationTransfer(x) => self.ul_information_transfer(ue, x, logger).await,
-            _ => todo!(),
-        } {
-            Err(e) => warn!(logger, "Error processing Rrc message {:?}", e),
-            _ => (),
+            UlDcchMessageType::C1(C1_6::UlInformationTransfer(x)) => {
+                if let Err(e) = self.ul_information_transfer(ue, x, logger).await {
+                    warn!(logger, "Error processing Ul Information Transfer - {:?}", e)
+                }
+            }
+            _ => warn!(logger, "Unsupported UlDcchMessage {:?}", message.message),
         }
     }
 
@@ -173,19 +163,18 @@ impl RrcHandler {
         req: UlInformationTransfer,
         logger: &Logger,
     ) -> Result<()> {
-        let nas_pdu = match match req.critical_extensions {
-            CriticalExtensions37::UlInformationTransfer(x) => x,
-        }
-        .dedicated_nas_message
-        {
-            None => {
+        let nas_pdu = match req.critical_extensions {
+            CriticalExtensions37::UlInformationTransfer(UlInformationTransferIEs {
+                dedicated_nas_message: Some(x),
+                ..
+            }) => NasPdu(x.0),
+            _ => {
                 debug!(&logger, "No Nas Message present - nothing to do");
                 return Ok(());
             }
-            Some(x) => NasPdu(x.0),
         };
 
-        // To do - shoudl be from Ue context
+        // Todo - should be from Ue context
         let nr_cgi = ngap::NrCgi {
             plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
             nr_cell_identity: ngap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
