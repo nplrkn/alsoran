@@ -5,6 +5,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## TO DO
 - Pretty Ue initial context and move into separate modules
 - impl<T> InterfaceProvider for NgapGnb<T> should just be impl for T?
+- move to consistent message logging
 - commonize F1apHandler and NgapHandler
 - Intermittent behavior in free5GC demo
 - Bug - Ctrl-C doesn't work on gnbcu if it is waiting for a UeContextSetupResponse.  (Would need to timeout so since this is meant to be graceful shutdown.)

@@ -8,19 +8,24 @@ use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, Logger};
 
+// Carry out initial context setup procedure.
+//
+// 1.    Ngap Initial Context Setup Request + Nas <-
+// 2. <- F1ap Ue Context Setup Request + Rrc Security Mode Command
+// 3. -> F1ap Ue Context Setup Response
+// 4. -> Rrc Security Mode Complete
+// 5. <- Rrc Reconfiguration + Nas
+// 6. -> Rrc Reconfiguration Complete
+// 7.    Ngap Initial Context Setup Response ->
 pub async fn initial_context_setup(
     gnbcu: &Gnbcu,
     r: InitialContextSetupRequest,
     logger: &Logger,
 ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
     debug!(&logger, "Initial Context Setup + Nas << ");
-    // 1.    Ngap Initial Context Setup Request + Nas <-
-    // 2. <- F1ap Ue Context Setup Request + Rrc Security Mode Command
-    // 3. -> F1ap Ue Context Setup Response
-    // 4. -> Rrc Security Mode Complete
-    // 5. <- Rrc Reconfiguration + Nas
-    // 6. -> Rrc Reconfiguration Complete
-    // 7.    Ngap Initial Context Setup Response ->
+
+    // Todo - this should be Result<InitialContextSetupResponse, Cause>, and the caller
+    // should create the InitialContextSetupFailure.
 
     // Todo - retrieve UE context by ran_ue_ngap_id.
     let ue = UeContext {
@@ -29,37 +34,43 @@ pub async fn initial_context_setup(
     };
 
     // Build Security Mode command and wrap it in an RrcContainer.
-    debug!(&logger, "<< Ue Context Setup + Rrc Security Mode Command");
-
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
     let rrc_security_mode_command = build_rrc_security_mode_command(RrcTransactionIdentifier(2));
     let rrc_container = Some(make_rrc_container(rrc_security_mode_command)?);
 
     // Build Ue Context Setup request and include the Rrc security mode command.
     let ue_context_setup_request = build_ue_context_setup_request(&r, rrc_container);
+
+    // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
+    debug!(&logger, "<< Ue Context Setup + Rrc Security Mode Command");
     let _ue_context_setup_response = <Stack as RequestProvider<UeContextSetupProcedure>>::request(
         &gnbcu.f1ap,
         ue_context_setup_request,
         &logger,
     )
-    .await?;
+    .await
+    .map_err(|_| RequestError::UnsuccessfulOutcome(build_initial_context_setup_failure()))?;
     debug!(&logger, ">> Ue Context Setup response");
 
+    // Also get back the response from the UE to the (inner) Security Mode Command.
     let _rrc_security_mode_complete = rrc_transaction.recv().await?;
     debug!(&logger, ">> Rrc Security Mode Complete");
 
-    // Send Rrc Reconfiguration with the Nas message from earlier.
+    // Build Rrc Reconfiguration including the Nas message from earlier.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
     let rrc_reconfiguration = build_rrc_reconfiguration(
         RrcTransactionIdentifier(3),
         r.nas_pdu.map(|x| DedicatedNasMessage(x.0)),
     );
     let rrc_container = make_rrc_container(rrc_reconfiguration)?;
+
+    // Send to the UE and get back the response.
     debug!(&logger, "<< Rrc Reconfiguration");
     gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
     let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction.recv().await?;
     debug!(&logger, ">> Rrc Reconfiguration Complete");
 
+    // Reply to the AMF.
     debug!(&logger, "Initial Context Setup response >>");
     Ok(InitialContextSetupResponse {
         amf_ue_ngap_id: r.amf_ue_ngap_id,
@@ -175,4 +186,8 @@ fn build_rrc_reconfiguration(
             }),
         })),
     }
+}
+
+fn build_initial_context_setup_failure() -> InitialContextSetupFailure {
+    todo!()
 }
