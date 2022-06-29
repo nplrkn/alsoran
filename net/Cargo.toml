@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 sctp = { path = "../sctp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
-async-trait = "0.1.51"
+async-trait = "0.1.56"
 slog = "2.7.0"
 sloggers = "2.1.1"
 anyhow = "1.0.52"
