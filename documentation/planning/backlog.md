@@ -10,6 +10,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Intermittent behavior in free5GC demo
 - Bug - Ctrl-C doesn't work on gnbcu if it is waiting for a UeContextSetupResponse.  (Would need to timeout so since this is meant to be graceful shutdown.)
 - Timers and timeouts within the procedures we do and testing
+- Log review and cleanup
 - Bump deps
 - Remove commented out code
 - Review TODOs where possible
@@ -22,6 +23,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Deduplicate inline definitions in RRC autogeneration
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
+- Adopt https://github.com/cucumber-rs/cucumber for integration tests
 
 ## DONE
 - Pretty Ue initial context and move into separate modules

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use async_std::task::JoinHandle;
 use gnbcu::{Config, Gnbcu};
 use mocks::MockAmf;
@@ -27,8 +28,16 @@ pub struct WorkerInfo {
     pub f1ap_host_port: String,
 }
 
+#[derive(PartialEq, PartialOrd)]
+pub enum Stage {
+    Init,
+    AmfConnected,
+    DuConnected,
+    UeRegistered,
+}
+
 impl TestContext {
-    pub async fn new() -> Self {
+    pub async fn new(stage: Stage) -> Result<Self> {
         let logger = common::logging::test_init();
 
         let orig_hook = panic::take_hook();
@@ -38,7 +47,7 @@ impl TestContext {
         }));
 
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
-        let amf_address = "127.0.0.1:38212";
+        let amf_address = "127.0.0.1:38412";
         let amf = MockAmf::new(amf_address, &logger).await;
 
         let (du, du_stop_source) = MockDu::new(&logger).await;
@@ -55,7 +64,35 @@ impl TestContext {
             workers: vec![],
         };
         tc.start_worker().await;
-        tc
+
+        tc.get_to_stage(stage).await
+    }
+
+    async fn get_to_stage(self, stage: Stage) -> Result<Self> {
+        if stage >= Stage::AmfConnected {
+            self.amf.expect_connection().await;
+            self.amf.handle_ng_setup().await?;
+        }
+        if stage >= Stage::DuConnected {
+            self.du
+                .establish_connection(self.worker_info(0).f1ap_host_port)
+                .await?;
+            self.du.perform_f1_setup().await?;
+        }
+        if stage >= Stage::UeRegistered {
+            self.du.perform_rrc_setup(Vec::new()).await?;
+            self.amf.receive_initial_ue_message().await?;
+            self.amf.send_initial_context_setup_request().await?;
+            let security_mode_command = self.du.receive_ue_context_setup_request().await?;
+            self.du.send_ue_context_setup_response().await?;
+            self.du
+                .send_security_mode_complete(&security_mode_command)
+                .await?;
+            let _nas = self.du.receive_rrc_reconfiguration().await?;
+            self.du.send_rrc_reconfiguration_complete().await?;
+            self.amf.receive_initial_context_setup_response().await?;
+        }
+        Ok(self)
     }
 
     pub fn worker_info(&self, index: usize) -> WorkerInfo {

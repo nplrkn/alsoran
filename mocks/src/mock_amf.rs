@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use bitvec::prelude::*;
 use net::{AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider};
 use ngap::*;
-use slog::{info, o, debug, Logger};
+use slog::{debug, info, o, Logger};
 use std::fmt::Debug;
 use stop_token::StopSource;
 
@@ -68,8 +68,9 @@ impl MockAmf {
             .expect("Expected message")
     }
 
-    pub async fn handle_ng_setup(&self, logger: &Logger) -> Result<()> {
+    pub async fn handle_ng_setup(&self) -> Result<()> {
         // Catch NG Setup from the GNB
+        let logger = &self.logger;
         info!(logger, "Wait for NG Setup from GNB");
 
         let pdu = self.receive_ngap_pdu().await;
@@ -147,6 +148,18 @@ impl MockAmf {
             .await?;
 
         Ok(())
+    }
+
+    pub async fn receive_initial_ue_message(&self) -> Result<()> {
+        todo!()
+    }
+
+    pub async fn send_initial_context_setup_request(&self) -> Result<()> {
+        todo!()
+    }
+
+    pub async fn receive_initial_context_setup_response(&self) -> Result<()> {
+        todo!()
     }
 }
 

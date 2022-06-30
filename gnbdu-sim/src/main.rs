@@ -16,7 +16,7 @@ async fn main() -> Result<()> {
 
     info!(&logger, "> RRC Setup (NAS Registration Request >");
     let nas_message = ue.recv_nas();
-    du.perform_rrc_setup(nas_message, &logger).await?;
+    du.perform_rrc_setup(nas_message).await?;
 
     info!(&logger, "< NAS Authentication request <");
     let nas_authentication_request = du.receive_nas().await?;
@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
 
     info!(&logger, "> NAS Authentication response >");
     let nas_message = ue.recv_nas();
-    du.send_nas(nas_message, &logger).await?;
+    du.send_nas(nas_message).await?;
 
     info!(&logger, "< NAS Security mode command <");
     let nas_security_mode_command = du.receive_nas().await?;
@@ -32,28 +32,28 @@ async fn main() -> Result<()> {
 
     info!(&logger, "> NAS Security mode complete >");
     let nas_message = ue.recv_nas();
-    du.send_nas(nas_message, &logger).await?;
+    du.send_nas(nas_message).await?;
 
     info!(&logger, "< UE ctxt setup req (Security mode command) <");
-    let security_mode_command = du.receive_ue_context_setup_request(&logger).await?;
+    let security_mode_command = du.receive_ue_context_setup_request().await?;
 
     info!(&logger, "> UE ctxt setup resp >");
-    du.send_ue_context_setup_response(&logger).await?;
+    du.send_ue_context_setup_response().await?;
 
     info!(&logger, "> Security mode complete >");
-    du.send_security_mode_complete(&security_mode_command, &logger)
+    du.send_security_mode_complete(&security_mode_command)
         .await?;
 
     info!(&logger, "< Rrc Reconfiguration (Registration Accept) <");
-    let nas_registration_accept = du.receive_rrc_reconfiguration(&logger).await?;
+    let nas_registration_accept = du.receive_rrc_reconfiguration().await?;
     ue.send_nas(nas_registration_accept, &logger);
 
     info!(&logger, "> Rrc Reconfiguration Complete >");
-    du.send_rrc_reconfiguration_complete(&logger).await?;
+    du.send_rrc_reconfiguration_complete().await?;
 
     let nas_message = ue.recv_nas();
     info!(&logger, "> NAS Registration Complete >");
-    du.send_nas(nas_message, &logger).await?;
+    du.send_nas(nas_message).await?;
 
     drop(stop_source);
 
