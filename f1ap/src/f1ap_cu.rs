@@ -12,6 +12,12 @@ pub struct F1apCu<T>(pub T)
 where
     T: EventHandler;
 
+impl<T: EventHandler> F1apCu<T> {
+    pub fn new(inner: T) -> Self {
+        F1apCu(inner)
+    }
+}
+
 #[async_trait]
 impl<T> EventHandler for F1apCu<T>
 where
@@ -40,6 +46,7 @@ where
         + RequestProvider<F1SetupProcedure>
         + IndicationHandler<InitialUlRrcMessageTransferProcedure>
         + IndicationHandler<UlRrcMessageTransferProcedure>,
+    // Todo - add all other procedures
 {
     type TopPdu = F1apPdu;
     async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Option<F1apPdu> {

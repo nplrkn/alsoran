@@ -9,12 +9,18 @@ use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
 pub struct F1apHandler {
-    pub gnbcu: Gnbcu,
-    pub rrc_handler: RrcHandler,
+    _gnbcu: Gnbcu,
+    rrc_handler: RrcHandler,
 }
 
-pub fn new(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
-    F1apCu(F1apHandler { gnbcu, rrc_handler })
+impl F1apHandler {
+    // So called because the the F1apCu implements the Application trait.
+    pub fn new_f1ap_application(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
+        F1apCu::new(F1apHandler {
+            _gnbcu: gnbcu,
+            rrc_handler,
+        })
+    }
 }
 
 #[async_trait]
