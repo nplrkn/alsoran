@@ -152,6 +152,7 @@ impl RrcHandler {
             npn_access_information: None,
         };
 
+        debug!(logger, "InitialUeMessage >");
         InitialUeMessageProcedure::call_provider(&self.0.ngap, m, logger).await;
 
         Ok(())

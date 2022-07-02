@@ -3,7 +3,7 @@ use async_std::task::JoinHandle;
 use gnbcu::{Config, Gnbcu};
 use mocks::MockAmf;
 use mocks::MockDu;
-use slog::{info, o, Logger};
+use slog::{info, o, trace, Logger};
 use std::{panic, process};
 use stop_token::StopSource;
 
@@ -123,11 +123,11 @@ impl TestContext {
         // self.coord_task.await;
         // self.control_task.await;
 
-        info!(self.logger, "Terminate workers");
+        trace!(self.logger, "Terminate workers");
         for worker in self.workers {
             drop(worker.stop_source);
 
-            info!(self.logger, "Wait for worker to terminate connection");
+            trace!(self.logger, "Wait for worker to terminate connection");
             assert!(self
                 .amf
                 .receiver

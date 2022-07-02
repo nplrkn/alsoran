@@ -5,7 +5,7 @@ use async_std::task::JoinHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{debug, warn, Logger};
+use slog::{trace, warn, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::StopToken;
@@ -45,8 +45,7 @@ impl SctpTnlaPool {
     {
         self.assocs.lock().await.insert(assoc_id, assoc.clone());
 
-        // TODO - this should spawn a task.  For example, it could lead to a NG Setup exchange.
-        debug!(logger, "Notify TNLA established");
+        trace!(logger, "Notify TNLA established");
         spawn_handle_event(
             handler.clone(),
             TnlaEvent::Established,
@@ -54,7 +53,7 @@ impl SctpTnlaPool {
             logger.clone(),
         );
 
-        debug!(logger, "Start TNLA event loop");
+        trace!(logger, "Start TNLA event loop");
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
         pin_mut!(message_stream);
         while let Some(Ok(message)) = message_stream.next().await {

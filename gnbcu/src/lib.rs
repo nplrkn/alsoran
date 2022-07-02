@@ -11,7 +11,7 @@ use handlers::{f1ap, ngap, RrcHandler};
 use net::{SctpTransportProvider, Stack};
 use rrc::UlDcchMessage;
 use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
-use slog::{info, Logger};
+use slog::{info, trace, Logger};
 use stop_token::{StopSource, StopToken};
 use ue_context::UeContext;
 
@@ -86,7 +86,7 @@ impl Gnbcu {
         ngap_transport.graceful_shutdown().await;
         f1_transport.graceful_shutdown().await;
 
-        info!(logger, "Stop");
+        trace!(logger, "Server task finished");
         Ok(())
     }
 

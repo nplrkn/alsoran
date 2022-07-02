@@ -3,19 +3,18 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Regression test integration covering same ground as live test with free5GC
-- impl<T> InterfaceProvider for NgapGnb<T> should just be impl for T?
-- move to consistent message logging
 - commonize F1apHandler and NgapHandler
+- impl<T> InterfaceProvider for NgapGnb<T> should just be impl for T?
 - Intermittent behavior in free5GC demo
 - Bug - Ctrl-C doesn't work on gnbcu if it is waiting for a UeContextSetupResponse.  (Would need to timeout so since this is meant to be graceful shutdown.)
 - Timers and timeouts within the procedures we do and testing
-- Log review and cleanup
+- Log review and cleanup - one line context logging?
 - Bump deps
 - Remove commented out code
 - Review TODOs where possible
 - Code review
 - Write up reliable demo instructions starting with download of free5GC
+- Redo roadmap
 
 ## MAYBE
 - Handle registration reject (e.g. test free5GC with UDM not running)
@@ -27,6 +26,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Adopt https://github.com/cucumber-rs/cucumber for integration tests
 
 ## DONE
+- Move to consistent message logging
+- Regression test integration covering same ground as live test with free5GC
 - Pretty Ue initial context and move into separate modules
 - Fix malformed CellGroupConfig issue seen in Wireshark in F1AP UEContextSetupResponse -- DUtoCURRCInformation, cellGroupConfig shown as <MISSING>
 - Build go code using cargo build.

@@ -7,7 +7,7 @@ use net::{AperSerde, Indication, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use pdcp::PdcpPdu;
 use rrc::*;
-use slog::{debug, info, o, Logger};
+use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};
 
 // TS38.472, section 7 - the Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP
@@ -56,7 +56,7 @@ impl MockDu {
             .await?;
 
         // Wait for the connection to be accepted.
-        debug!(self.logger, "Wait for connection to be accepted by CU");
+        trace!(self.logger, "Wait for connection to be accepted by CU");
         match self.receiver.recv().await? {
             None => {
                 info!(self.logger, "Successful connection establishment to CU");
@@ -176,7 +176,7 @@ impl MockDu {
 
         info!(
             logger,
-            "<< UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request))"
+            "UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request)) >>"
         );
         self.send_ul_rrc(rrc_setup_complete).await
     }
@@ -237,7 +237,13 @@ impl MockDu {
         }
         .message
         {
-            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => Ok(x),
+            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
+                info!(
+                    &self.logger,
+                    "UeContextSetupRequest(SecurityModeCommand) <<"
+                );
+                Ok(x)
+            }
             x => Err(anyhow!("Expected security mode command - got {:?}", x)),
         }
     }
@@ -311,7 +317,10 @@ impl MockDu {
                             ..
                         }),
                     ..
-                })) => Ok(x),
+                })) => {
+                    info!(&self.logger, "DlRrcMessageTransfer(RrcReconfiguration) <<");
+                    Ok(x)
+                }
                 _ => Err(anyhow!(
                     "Couldn't find NAS message list in Rrc Reconfiguration"
                 )),
@@ -324,7 +333,7 @@ impl MockDu {
     }
 
     pub async fn send_rrc_reconfiguration_complete(&self) -> Result<()> {
-        let security_mode_complete = UlDcchMessage {
+        let rrc_reconfiguration_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcReconfigurationComplete(
                 RrcReconfigurationComplete {
                     rrc_transaction_identifier: RrcTransactionIdentifier(1),
@@ -337,7 +346,11 @@ impl MockDu {
                 },
             )),
         };
-        self.send_ul_rrc(security_mode_complete).await
+        info!(
+            &self.logger,
+            "UlRrcMessageTransfer(RrcReconfigurationComplete) >>"
+        );
+        self.send_ul_rrc(rrc_reconfiguration_complete).await
     }
 }
 

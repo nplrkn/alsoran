@@ -51,7 +51,7 @@ impl MockAmf {
 
     pub async fn expect_connection(&self) {
         // Wait for connection to be established - the mock TNLA event handler sends us an empty message to indicate this.
-        debug!(self.logger, "Wait for connection from worker");
+        trace!(self.logger, "Wait for connection from worker");
         assert!(self
             .receiver
             .recv()
@@ -132,7 +132,7 @@ impl MockAmf {
     }
 
     pub async fn handle_ran_configuration_update(&self, logger: &Logger) -> Result<()> {
-        info!(logger, "Wait for RAN Configuration Update from GNB");
+        debug!(logger, "Wait for RAN Configuration Update from GNB");
 
         let pdu = self.receive_ngap_pdu().await;
 
@@ -204,7 +204,7 @@ impl MockAmf {
                 ue_radio_capability: None,
                 index_to_rfsp: None,
                 masked_imeisv: None,
-                nas_pdu: None,
+                nas_pdu: Some(NasPdu(Vec::new())),
                 emergency_fallback_indicator: None,
                 rrc_inactive_transition_report_request: None,
                 ue_radio_capability_for_paging: None,
@@ -234,7 +234,9 @@ impl MockAmf {
     }
 
     pub async fn receive_initial_context_setup_response(&self) -> Result<()> {
-        todo!()
+        info!(&self.logger, ">> InitialContextSetupResponse");
+        let _pdu = self.receive_ngap_pdu().await;
+        Ok(())
     }
 }
 
