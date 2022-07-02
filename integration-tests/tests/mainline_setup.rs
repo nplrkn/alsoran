@@ -28,8 +28,8 @@ async fn ue_can_register() -> Result<()> {
     Ok(())
 }
 
-#[async_std::test]
-#[serial]
-async fn uplink_and_downlink_nas() -> Result<()> {
-    todo!()
-}
+// #[async_std::test]
+// #[serial]
+// async fn uplink_and_downlink_nas() -> Result<()> {
+//     todo!()
+// }

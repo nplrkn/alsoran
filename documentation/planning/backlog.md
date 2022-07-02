@@ -3,7 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Regression test that avoids the need to run free5GC
+- Regression test integration covering same ground as live test with free5GC
 - impl<T> InterfaceProvider for NgapGnb<T> should just be impl for T?
 - move to consistent message logging
 - commonize F1apHandler and NgapHandler
@@ -23,6 +23,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Deduplicate inline definitions in RRC autogeneration
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
+- Have the integration test not use real sockets and run in parallel
 - Adopt https://github.com/cucumber-rs/cucumber for integration tests
 
 ## DONE

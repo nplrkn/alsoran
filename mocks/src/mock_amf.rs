@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use bitvec::prelude::*;
 use net::{AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider};
 use ngap::*;
-use slog::{debug, info, o, Logger};
+use slog::{debug, info, o, trace, Logger};
 use std::fmt::Debug;
 use stop_token::StopSource;
 
@@ -82,15 +82,8 @@ impl MockAmf {
             Err(anyhow!("Not an NG setup"))
         }?;
 
-        //let amf_name = AmfName("MockAmf".to_string());
-        let plmn_identity = PlmnIdentity(vec![2, 3, 2]);
         let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
-            guami: Guami {
-                plmn_identity,
-                amf_region_id: AmfRegionId(bitvec![Msb0,u8;1;8]),
-                amf_set_id: AmfSetId(bitvec![Msb0,u8;1;10]),
-                amf_pointer: AmfPointer(bitvec![Msb0,u8;1;6]),
-            },
+            guami: self.guami(),
             backup_amf_name: None,
         }]);
 
@@ -100,12 +93,9 @@ impl MockAmf {
                 served_guami_list,
                 relative_amf_capacity: RelativeAmfCapacity(100),
                 plmn_support_list: PlmnSupportList(vec![PlmnSupportItem {
-                    plmn_identity: PlmnIdentity(vec![2, 3, 2]),
+                    plmn_identity: self.plmn_identity(),
                     slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        s_nssai: SNssai {
-                            sst: Sst(vec![0x01]),
-                            sd: None,
-                        },
+                        s_nssai: self.snssai(),
                     }]),
                 }]),
                 criticality_diagnostics: None,
@@ -121,6 +111,26 @@ impl MockAmf {
         Ok(())
     }
 
+    fn guami(&self) -> Guami {
+        Guami {
+            plmn_identity: self.plmn_identity(),
+            amf_region_id: AmfRegionId(bitvec![Msb0,u8;1;8]),
+            amf_set_id: AmfSetId(bitvec![Msb0,u8;1;10]),
+            amf_pointer: AmfPointer(bitvec![Msb0,u8;1;6]),
+        }
+    }
+
+    fn plmn_identity(&self) -> PlmnIdentity {
+        PlmnIdentity(vec![2, 3, 2])
+    }
+
+    fn snssai(&self) -> SNssai {
+        SNssai {
+            sst: Sst(vec![0x01]),
+            sd: None,
+        }
+    }
+
     pub async fn handle_ran_configuration_update(&self, logger: &Logger) -> Result<()> {
         info!(logger, "Wait for RAN Configuration Update from GNB");
 
@@ -130,7 +140,7 @@ impl MockAmf {
             _ran_configuration_update,
         )) = pdu
         {
-            info!(logger, "Got RAN configuration update, send response");
+            info!(logger, ">> RanConfigurationUpdate");
             Ok(())
         } else {
             Err(anyhow!("Not a RAN configuration update"))
@@ -143,6 +153,7 @@ impl MockAmf {
                 },
             ));
 
+        info!(logger, "<< RanConfigurationUpdateAcknowledge");
         self.sender
             .send_message(response.into_bytes()?, &logger)
             .await?;
@@ -151,11 +162,75 @@ impl MockAmf {
     }
 
     pub async fn receive_initial_ue_message(&self) -> Result<()> {
-        todo!()
+        let logger = &self.logger;
+        if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(
+            _initial_ue_message,
+        )) = self.receive_ngap_pdu().await
+        {
+            info!(logger, ">> InitialUeMessage");
+            Ok(())
+        } else {
+            Err(anyhow!("Not an initial UE message"))
+        }
     }
 
     pub async fn send_initial_context_setup_request(&self) -> Result<()> {
-        todo!()
+        let logger = &self.logger;
+        let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(
+            InitialContextSetupRequest {
+                amf_ue_ngap_id: AmfUeNgapId(1),
+                ran_ue_ngap_id: RanUeNgapId(1),
+                old_amf: None,
+                ue_aggregate_maximum_bit_rate: None,
+                core_network_assistance_information_for_inactive: None,
+                guami: self.guami(),
+                pdu_session_resource_setup_list_cxt_req: None,
+                allowed_nssai: AllowedNssai(vec![AllowedNssaiItem {
+                    s_nssai: self.snssai(),
+                }]),
+                ue_security_capabilities: UeSecurityCapabilities {
+                    nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![Msb0,u8;0;16]),
+                    nr_integrity_protection_algorithms: NrIntegrityProtectionAlgorithms(
+                        bitvec![Msb0,u8;0;16],
+                    ),
+                    eutr_aencryption_algorithms: EutrAencryptionAlgorithms(bitvec![Msb0,u8;0;16]),
+                    eutr_aintegrity_protection_algorithms: EutrAintegrityProtectionAlgorithms(
+                        bitvec![Msb0,u8;0;16],
+                    ),
+                },
+                security_key: SecurityKey(bitvec![Msb0,u8;0;256]),
+                trace_activation: None,
+                mobility_restriction_list: None,
+                ue_radio_capability: None,
+                index_to_rfsp: None,
+                masked_imeisv: None,
+                nas_pdu: None,
+                emergency_fallback_indicator: None,
+                rrc_inactive_transition_report_request: None,
+                ue_radio_capability_for_paging: None,
+                redirection_voice_fallback: None,
+                location_reporting_request_type: None,
+                cn_assisted_ran_tuning: None,
+                srvcc_operation_possible: None,
+                iab_authorized: None,
+                enhanced_coverage_restriction: None,
+                extended_connected_time: None,
+                ue_differentiation_info: None,
+                nr_v2x_services_authorized: None,
+                ltev2x_services_authorized: None,
+                nr_ue_sidelink_aggregate_maximum_bitrate: None,
+                lte_ue_sidelink_aggregate_maximum_bitrate: None,
+                pc5_qos_parameters: None,
+                c_emode_brestricted: None,
+                ue_up_c_iot_support: None,
+                rg_level_wireline_access_characteristics: None,
+                management_based_mdt_plmn_list: None,
+                ue_radio_capability_id: None,
+            },
+        ));
+
+        info!(logger, "<< InitialContextSetupRequest");
+        self.sender.send_message(pdu.into_bytes()?, &logger).await
     }
 
     pub async fn receive_initial_context_setup_response(&self) -> Result<()> {
@@ -176,7 +251,7 @@ impl TnlaEventHandler for Handler {
         _tnla_id: u32,
         logger: &Logger,
     ) -> Option<Vec<u8>> {
-        debug!(logger, "Got message from GNB");
+        trace!(logger, "Got message from GNB");
         self.0
             .send(Some(NgapPdu::from_bytes(&message).unwrap()))
             .await

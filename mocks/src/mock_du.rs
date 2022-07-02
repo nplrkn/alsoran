@@ -89,13 +89,13 @@ impl MockDu {
                 bap_address: None,
                 extended_gnb_cu_name: None,
             }));
-        info!(self.logger, "Wait for F1 Setup response from GNB");
+        info!(self.logger, "F1SetupRequest >>");
         self.sender
             .send_message(pdu.into_bytes()?, &self.logger)
             .await?;
 
         let _response = self.recv().await;
-        info!(self.logger, "Got response from CU");
+        info!(self.logger, "F1SetupResponse <<");
         Ok(())
     }
 
@@ -133,17 +133,13 @@ impl MockDu {
                 rrc_container_rrc_setup_complete: None,
             })?;
 
-        info!(
-            logger,
-            "DU sends InitialUlRrcMessageTransfer containing RrcSetupRequest"
-        );
+        info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
 
         self.sender.send_message(f1_indication, logger).await
     }
 
     pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
         let logger = &self.logger;
-
         self.send_rrc_setup_request().await?;
 
         // Receive DL Rrc Message Transfer and extract RRC Setup
@@ -180,7 +176,7 @@ impl MockDu {
 
         info!(
             logger,
-            "DU sends UlRrcMessageTransfer containing RrcSetupComplete containing NAS Registration Request"
+            "<< UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request))"
         );
         self.send_ul_rrc(rrc_setup_complete).await
     }
