@@ -3,14 +3,12 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Intermittent behavior in free5GC demo
-- Bug - Ctrl-C doesn't work on gnbcu if it is waiting for a UeContextSetupResponse.  (Would need to timeout so since this is meant to be graceful shutdown.)
-- Timers and timeouts within the procedures we do and testing
-- Log review and cleanup - one line context logging?
+- If we lose the connection or a long time passes, stop waiting for a response
 - Bump deps
 - Remove commented out code
 - Review TODOs where possible
 - Code review
+- Intermittent behavior in free5GC demo
 - Write up reliable demo instructions starting with download of free5GC
 - Redo roadmap
 
