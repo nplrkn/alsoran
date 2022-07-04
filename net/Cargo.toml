@@ -11,12 +11,10 @@ sctp = { path = "../sctp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.51"
 slog = "2.7.0"
-sloggers = "2.1.1"
 anyhow = "1.0.52"
 async-channel = "1.6.1"
 async-io = "1.7.0"
 async-net = "1.6.1"
-hex = "0.4.3"
 futures = "0.3.19"
 futures-lite = "1.12.0"
 log = "0.4.3"

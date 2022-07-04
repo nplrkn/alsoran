@@ -294,15 +294,9 @@ dependencies = [
  "anyhow",
  "async-channel",
  "async-io",
- "async-net",
  "async-std",
- "async-stream",
- "async-trait",
- "errno",
- "futures",
  "futures-core",
  "futures-lite",
- "hex",
  "libc",
  "log",
  "signal-hook",
@@ -312,7 +306,6 @@ dependencies = [
  "slog-envlogger",
  "slog-term",
  "sloggers",
- "stop-token",
 ]
 
 [[package]]
@@ -419,7 +412,6 @@ dependencies = [
  "asn1-codecs",
  "async-trait",
  "bitvec",
- "hex",
  "net",
  "num_enum",
  "slog",
@@ -640,7 +632,6 @@ dependencies = [
  "async-std",
  "common",
  "gnbcu",
- "hex",
  "mocks",
  "serial_test",
  "slog",
@@ -748,7 +739,6 @@ dependencies = [
  "async-trait",
  "bitvec",
  "f1ap",
- "hex",
  "net",
  "ngap",
  "pdcp",
@@ -773,11 +763,9 @@ dependencies = [
  "futures",
  "futures-core",
  "futures-lite",
- "hex",
  "log",
  "sctp",
  "slog",
- "sloggers",
  "stop-token",
 ]
 
@@ -1045,14 +1033,9 @@ checksum = "3582f63211428f83597b51b2ddb88e2a91a9d52d12831f9d08f5e624e8977422"
 name = "rrc"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "asn1-codecs",
- "async-trait",
  "bitvec",
- "hex",
- "net",
  "num_enum",
- "slog",
 ]
 
 [[package]]
