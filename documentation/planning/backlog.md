@@ -4,7 +4,6 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 
 ## TO DO
 - If we lose the connection or a long time passes, stop waiting for a response
-- Bump deps
 - Remove commented out code
 - Review TODOs where possible
 - Code review
@@ -22,6 +21,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Adopt https://github.com/cucumber-rs/cucumber for integration tests
 
 ## DONE
+- Bump deps
 - Move to consistent message logging
 - Regression test integration covering same ground as live test with free5GC
 - Pretty Ue initial context and move into separate modules
