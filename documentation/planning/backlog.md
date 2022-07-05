@@ -3,15 +3,14 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- If we lose the connection or a long time passes, stop waiting for a response
-- Remove commented out code
-- Review TODOs where possible
-- Code review
+- Code review (incl commented out code and TODOs)
 - Intermittent behavior in free5GC demo
 - Write up reliable demo instructions starting with download of free5GC
 - Redo roadmap
+- Get approval to publish
 
 ## MAYBE
+- If we lose the connection or a long time passes, stop waiting for a response
 - Handle registration reject (e.g. test free5GC with UDM not running)
 - Requests should be processed in parallel in separate tasks.
 - Deduplicate inline definitions in RRC autogeneration

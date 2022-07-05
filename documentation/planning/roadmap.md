@@ -4,12 +4,6 @@
 
 Reduce the cost of 5G RAN by providing high quality free componentry.
 
-## Who Alsoran is for
-
--  5G Core developers who need a reference RAN to test against.
--  RAN developers who would benefit from ready made Rust components.
--  Developers of 5G testbeds.
-
 ## Releases
 
 ### Release 0.1 - NGAP and F1AP basics
