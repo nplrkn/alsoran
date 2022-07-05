@@ -8,18 +8,21 @@ use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, warn, Logger};
 
-impl RequestProvider<NgSetupProcedure> for Handler {}
+impl RequestProvider<NgSetupProcedure> for NgapHandler {}
 
-pub fn new(gnbcu: Gnbcu) -> NgapGnb<Handler> {
-    NgapGnb(Handler { gnbcu })
-}
 #[derive(Clone)]
-pub struct Handler {
-    pub gnbcu: Gnbcu,
+pub struct NgapHandler {
+    gnbcu: Gnbcu,
 }
 
+impl NgapHandler {
+    // So called because the the NgapGnb implements the Application trait.
+    pub fn new_ngap_application(gnbcu: Gnbcu) -> NgapGnb<NgapHandler> {
+        NgapGnb::new(NgapHandler { gnbcu })
+    }
+}
 #[async_trait]
-impl EventHandler for Handler {
+impl EventHandler for NgapHandler {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established => {
@@ -33,7 +36,7 @@ impl EventHandler for Handler {
 }
 
 #[async_trait]
-impl IndicationHandler<DownlinkNasTransportProcedure> for Handler {
+impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         debug!(
             &logger,
@@ -74,7 +77,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for Handler {
 }
 
 #[async_trait]
-impl RequestProvider<InitialContextSetupProcedure> for Handler {
+impl RequestProvider<InitialContextSetupProcedure> for NgapHandler {
     async fn request(
         &self,
         r: InitialContextSetupRequest,

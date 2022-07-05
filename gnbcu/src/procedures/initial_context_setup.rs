@@ -22,7 +22,7 @@ pub async fn initial_context_setup(
     r: InitialContextSetupRequest,
     logger: &Logger,
 ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
-    debug!(&logger, "Initial Context Setup + Nas << ");
+    debug!(&logger, "InitialContextSetupRequest(Nas) << ");
 
     // Todo - this should be Result<InitialContextSetupResponse, Cause>, and the caller
     // should create the InitialContextSetupFailure.
@@ -42,7 +42,7 @@ pub async fn initial_context_setup(
     let ue_context_setup_request = build_ue_context_setup_request(&r, rrc_container);
 
     // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
-    debug!(&logger, "<< Ue Context Setup + Rrc Security Mode Command");
+    debug!(&logger, "<< UeContextSetup(RrcSecurityModeCommand)");
     let _ue_context_setup_response = <Stack as RequestProvider<UeContextSetupProcedure>>::request(
         &gnbcu.f1ap,
         ue_context_setup_request,
@@ -50,11 +50,11 @@ pub async fn initial_context_setup(
     )
     .await
     .map_err(|_| RequestError::UnsuccessfulOutcome(build_initial_context_setup_failure()))?;
-    debug!(&logger, ">> Ue Context Setup response");
+    debug!(&logger, ">> UeContextSetupResponse");
 
     // Also get back the response from the UE to the (inner) Security Mode Command.
     let _rrc_security_mode_complete = rrc_transaction.recv().await?;
-    debug!(&logger, ">> Rrc Security Mode Complete");
+    debug!(&logger, ">> RrcSecurityModeComplete");
 
     // Build Rrc Reconfiguration including the Nas message from earlier.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
@@ -65,13 +65,13 @@ pub async fn initial_context_setup(
     let rrc_container = make_rrc_container(rrc_reconfiguration)?;
 
     // Send to the UE and get back the response.
-    debug!(&logger, "<< Rrc Reconfiguration");
+    debug!(&logger, "<< RrcReconfiguration");
     gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
     let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction.recv().await?;
-    debug!(&logger, ">> Rrc Reconfiguration Complete");
+    debug!(&logger, ">> RrcReconfigurationComplete");
 
     // Reply to the AMF.
-    debug!(&logger, "Initial Context Setup response >>");
+    debug!(&logger, "InitialContextSetupResponse >>");
     Ok(InitialContextSetupResponse {
         amf_ue_ngap_id: r.amf_ue_ngap_id,
         ran_ue_ngap_id: RanUeNgapId(1),

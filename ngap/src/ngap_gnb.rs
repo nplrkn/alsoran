@@ -8,9 +8,13 @@ use net::{
 use slog::{error, Logger};
 
 #[derive(Clone)]
-pub struct NgapGnb<T>(pub T)
-where
-    T: RequestProvider<NgSetupProcedure>; // TODO
+pub struct NgapGnb<T>(T);
+
+impl<T> NgapGnb<T> {
+    pub fn new(inner: T) -> Self {
+        NgapGnb(inner)
+    }
+}
 
 #[async_trait]
 impl<T> EventHandler for NgapGnb<T>

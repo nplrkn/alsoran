@@ -7,13 +7,15 @@ use anyhow::Result;
 use async_channel::Sender;
 use async_std::task::JoinHandle;
 pub use config::Config;
-use handlers::{f1ap, ngap, RrcHandler};
+use handlers::RrcHandler;
 use net::{SctpTransportProvider, Stack};
 use rrc::UlDcchMessage;
 use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
-use slog::{info, Logger};
+use slog::{info, trace, Logger};
 use stop_token::{StopSource, StopToken};
 use ue_context::UeContext;
+
+use crate::handlers::{F1apHandler, NgapHandler};
 
 // TS38.412, 7
 // The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol NGAP
@@ -64,7 +66,11 @@ impl Gnbcu {
         info!(logger, "Maintain connection to AMF {}", amf_address);
         let ngap_transport = self
             .ngap
-            .connect(amf_address, ngap::new(self.clone()), logger.clone())
+            .connect(
+                amf_address,
+                NgapHandler::new_ngap_application(self.clone()),
+                logger.clone(),
+            )
             .await?;
         let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
         info!(
@@ -76,7 +82,7 @@ impl Gnbcu {
             .f1ap
             .listen(
                 f1_listen_address,
-                f1ap::new(self.clone(), rrc_handler),
+                F1apHandler::new_f1ap_application(self.clone(), rrc_handler),
                 logger.clone(),
             )
             .await?;
@@ -86,7 +92,7 @@ impl Gnbcu {
         ngap_transport.graceful_shutdown().await;
         f1_transport.graceful_shutdown().await;
 
-        info!(logger, "Stop");
+        trace!(logger, "Server task finished");
         Ok(())
     }
 

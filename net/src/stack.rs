@@ -11,7 +11,7 @@ use async_net::SocketAddr;
 use async_std::sync::{Arc, Mutex};
 use async_std::task::JoinHandle;
 use async_trait::async_trait;
-use slog::{debug, warn, Logger};
+use slog::{trace, warn, Logger};
 use stop_token::StopSource;
 
 type TransactionMatchFn = Box<dyn Fn(&Message) -> bool + Send + Sync>;
@@ -169,7 +169,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
 
         match position {
             Some(index) => {
-                debug!(logger, "Matched the transaction at position {}", index);
+                trace!(logger, "Matched the transaction at position {}", index);
                 let (_, response_channel) = self.pending_requests.lock().await.swap_remove(index);
                 response_channel
                     .send(message)

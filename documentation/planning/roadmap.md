@@ -2,7 +2,7 @@
 
 ## Mission
 
-Our mission is to reduce the cost of 5G RAN by providing high quality free componentry.
+Reduce the cost of 5G RAN by providing high quality free componentry.
 
 ## Who Alsoran is for
 

@@ -9,12 +9,18 @@ use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
 pub struct F1apHandler {
-    pub gnbcu: Gnbcu,
-    pub rrc_handler: RrcHandler,
+    _gnbcu: Gnbcu,
+    rrc_handler: RrcHandler,
 }
 
-pub fn new(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
-    F1apCu(F1apHandler { gnbcu, rrc_handler })
+impl F1apHandler {
+    // So called because the the F1apCu implements the Application trait.
+    pub fn new_f1ap_application(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
+        F1apCu::new(F1apHandler {
+            _gnbcu: gnbcu,
+            rrc_handler,
+        })
+    }
 }
 
 #[async_trait]
@@ -24,7 +30,8 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
         r: F1SetupRequest,
         logger: &Logger,
     ) -> Result<F1SetupResponse, RequestError<F1SetupFailure>> {
-        debug!(logger, "Got F1 setup - send response");
+        debug!(logger, ">> F1SetupRequest");
+        debug!(logger, "<< F1SetupResponse");
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,
             gnb_cu_rrc_version: RrcVersion {
@@ -43,7 +50,7 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
 #[async_trait]
 impl IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
-        info!(logger, "Got InitialUlRrcMessageTransfer");
+        debug!(logger, ">> InitialUlRrcMessageTransfer");
 
         // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER,
         // the gNB-CU should reject the UE under the assumption that the gNB-DU is not able to serve such UE."
@@ -65,7 +72,7 @@ impl IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler {
 #[async_trait]
 impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
-        debug!(logger, "Got UlRrcMessageTransfer");
+        debug!(logger, ">> UlRrcMessageTransfer");
 
         // TODO - "If the UL RRC MESSAGE TRANSFER message contains the New gNB-DU UE F1AP ID IE, the gNB-CU shall,
         // if supported, replace the value received in the gNB-DU UE F1AP ID IE by the value of the New gNB-DU UE F1AP ID

@@ -7,7 +7,7 @@ use net::{AperSerde, Indication, Message, TransportProvider};
 use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
 use pdcp::PdcpPdu;
 use rrc::*;
-use slog::{debug, info, o, Logger};
+use slog::{info, o, trace, Logger};
 use stop_token::{StopSource, StopToken};
 
 // TS38.472, section 7 - the Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP
@@ -56,7 +56,7 @@ impl MockDu {
             .await?;
 
         // Wait for the connection to be accepted.
-        debug!(self.logger, "Wait for connection to be accepted by CU");
+        trace!(self.logger, "Wait for connection to be accepted by CU");
         match self.receiver.recv().await? {
             None => {
                 info!(self.logger, "Successful connection establishment to CU");
@@ -89,17 +89,19 @@ impl MockDu {
                 bap_address: None,
                 extended_gnb_cu_name: None,
             }));
-        info!(self.logger, "Wait for F1 Setup response from GNB");
+        info!(self.logger, "F1SetupRequest >>");
         self.sender
             .send_message(pdu.into_bytes()?, &self.logger)
             .await?;
 
         let _response = self.recv().await;
-        info!(self.logger, "Got response from CU");
+        info!(self.logger, "F1SetupResponse <<");
         Ok(())
     }
 
-    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>, logger: &Logger) -> Result<()> {
+    pub async fn send_rrc_setup_request(&self) -> Result<()> {
+        let logger = &self.logger;
+
         // Build RRC Setup Request
         let rrc_setup_request = UlCcchMessage {
             message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(RrcSetupRequest {
@@ -131,12 +133,14 @@ impl MockDu {
                 rrc_container_rrc_setup_complete: None,
             })?;
 
-        info!(
-            &logger,
-            "DU sends InitialUlRrcMessageTransfer containing RrcSetupRequest"
-        );
+        info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
 
-        self.sender.send_message(f1_indication, logger).await?;
+        self.sender.send_message(f1_indication, logger).await
+    }
+
+    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
+        let logger = &self.logger;
+        self.send_rrc_setup_request().await?;
 
         // Receive DL Rrc Message Transfer and extract RRC Setup
         let dl_rrc_message_transfer = match self.recv().await {
@@ -171,13 +175,13 @@ impl MockDu {
         };
 
         info!(
-            &logger,
-            "DU sends UlRrcMessageTransfer containing RrcSetupComplete containing NAS Registration Request"
+            logger,
+            "UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request)) >>"
         );
-        self.send_ul_rrc(rrc_setup_complete, logger).await
+        self.send_ul_rrc(rrc_setup_complete).await
     }
 
-    pub async fn send_nas(&self, nas_bytes: Vec<u8>, logger: &Logger) -> Result<()> {
+    pub async fn send_nas(&self, nas_bytes: Vec<u8>) -> Result<()> {
         let rrc = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::UlInformationTransfer(UlInformationTransfer {
                 critical_extensions: CriticalExtensions37::UlInformationTransfer(
@@ -188,10 +192,10 @@ impl MockDu {
                 ),
             })),
         };
-        self.send_ul_rrc(rrc, &logger).await
+        self.send_ul_rrc(rrc).await
     }
 
-    async fn send_ul_rrc(&self, rrc: UlDcchMessage, logger: &Logger) -> Result<()> {
+    async fn send_ul_rrc(&self, rrc: UlDcchMessage) -> Result<()> {
         // Encapsulate RRC message in PDCP PDU.
         let rrc_bytes = rrc.into_bytes()?;
         let pdcp_pdu = PdcpPdu::encode(&rrc_bytes);
@@ -206,7 +210,7 @@ impl MockDu {
             new_gnb_du_ue_f1ap_id: None,
         })?;
 
-        self.sender.send_message(f1_indication, logger).await
+        self.sender.send_message(f1_indication, &self.logger).await
     }
 
     pub async fn receive_nas(&self) -> Result<Vec<u8>> {
@@ -221,10 +225,7 @@ impl MockDu {
         }
     }
 
-    pub async fn receive_ue_context_setup_request(
-        &self,
-        _logger: &Logger,
-    ) -> Result<SecurityModeCommand> {
+    pub async fn receive_ue_context_setup_request(&self) -> Result<SecurityModeCommand> {
         let ue_context_setup_request = match self.recv().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
@@ -236,12 +237,18 @@ impl MockDu {
         }
         .message
         {
-            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => Ok(x),
+            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
+                info!(
+                    &self.logger,
+                    "UeContextSetupRequest(SecurityModeCommand) <<"
+                );
+                Ok(x)
+            }
             x => Err(anyhow!("Expected security mode command - got {:?}", x)),
         }
     }
 
-    pub async fn send_ue_context_setup_response(&self, logger: &Logger) -> Result<()> {
+    pub async fn send_ue_context_setup_response(&self) -> Result<()> {
         let cell_group_config =
             f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
         let ue_context_setup_response = F1apPdu::SuccessfulOutcome(
@@ -272,14 +279,13 @@ impl MockDu {
         )
         .into_bytes()?;
         self.sender
-            .send_message(ue_context_setup_response, logger)
+            .send_message(ue_context_setup_response, &self.logger)
             .await
     }
 
     pub async fn send_security_mode_complete(
         &self,
         security_mode_command: &SecurityModeCommand,
-        logger: &Logger,
     ) -> Result<()> {
         let security_mode_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::SecurityModeComplete(SecurityModeComplete {
@@ -293,10 +299,10 @@ impl MockDu {
                 ),
             })),
         };
-        self.send_ul_rrc(security_mode_complete, logger).await
+        self.send_ul_rrc(security_mode_complete).await
     }
 
-    pub async fn receive_rrc_reconfiguration(&self, _logger: &Logger) -> Result<Vec<u8>> {
+    pub async fn receive_rrc_reconfiguration(&self) -> Result<Vec<u8>> {
         let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
         let mut nas_messages =
             match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
@@ -311,7 +317,10 @@ impl MockDu {
                             ..
                         }),
                     ..
-                })) => Ok(x),
+                })) => {
+                    info!(&self.logger, "DlRrcMessageTransfer(RrcReconfiguration) <<");
+                    Ok(x)
+                }
                 _ => Err(anyhow!(
                     "Couldn't find NAS message list in Rrc Reconfiguration"
                 )),
@@ -323,8 +332,8 @@ impl MockDu {
         Ok(nas_messages.remove(0).0)
     }
 
-    pub async fn send_rrc_reconfiguration_complete(&self, logger: &Logger) -> Result<()> {
-        let security_mode_complete = UlDcchMessage {
+    pub async fn send_rrc_reconfiguration_complete(&self) -> Result<()> {
+        let rrc_reconfiguration_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcReconfigurationComplete(
                 RrcReconfigurationComplete {
                     rrc_transaction_identifier: RrcTransactionIdentifier(1),
@@ -337,7 +346,11 @@ impl MockDu {
                 },
             )),
         };
-        self.send_ul_rrc(security_mode_complete, logger).await
+        info!(
+            &self.logger,
+            "UlRrcMessageTransfer(RrcReconfigurationComplete) >>"
+        );
+        self.send_ul_rrc(rrc_reconfiguration_complete).await
     }
 }
 

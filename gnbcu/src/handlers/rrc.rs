@@ -90,7 +90,7 @@ impl RrcHandler {
         // This has to be encapsulated in a PDCP PDU.
         let pdcp_pdu = PdcpPdu::encode(&rrc_setup.into_bytes()?);
 
-        debug!(logger, "Send Rrc Setup");
+        debug!(logger, "<< RrcSetup");
         self.0
             .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.bytes()), logger)
             .await;
@@ -103,7 +103,7 @@ impl RrcHandler {
         req: RrcSetupComplete,
         logger: &Logger,
     ) -> Result<()> {
-        debug!(logger, "Received Rrc Setup Complete");
+        debug!(logger, ">> RrcSetupComplete");
 
         // TODO: check transaction identifier matches that in UE context?
         let _transaction_id = req.rrc_transaction_identifier;
@@ -152,6 +152,7 @@ impl RrcHandler {
             npn_access_information: None,
         };
 
+        debug!(logger, "InitialUeMessage >");
         InitialUeMessageProcedure::call_provider(&self.0.ngap, m, logger).await;
 
         Ok(())
