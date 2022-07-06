@@ -20,14 +20,12 @@ From TS 38.413:
 
 A comment on Github suggests that it is normal practice to use stream ID 0 for non-UE associated signaling: [https://github.com/free5gc/free5gc/issues/88#issuecomment-767446612]
 
-So we implement that.
-
 ## UE associated signaling
 
 From TS 38.413:
 > For a single UE-associated signalling, the NG-RAN node shall use one SCTP association and one SCTP stream, and the SCTP association/stream should not be changed during the communication of the UE-associated signalling until after current SCTP association is failed, or TNL binding update is performed as described in TS 23.502.
 
-i.e. everyone uses the association and stream chosen by the GNB... unless it decides not to.
+i.e. everyone uses the association / stream chosen in the first place by the GNB... until they don't.
 
 TS 38.472 has almost identical text for F1AP, and additionally clarifies in TS38.473:
 > The F1AP UE TNLA binding is a binding between a F1AP UE association and a specific TNL association for a given UE. After the F1AP UE TNLA binding is created, the gNB-CU can update the UE TNLA binding by sending the F1AP message for the UE to the gNB-DU via a different TNLA. The gNB-DU shall update the F1AP UE TNLA binding with the new TNLA.
@@ -36,12 +34,8 @@ The gNB-DU Configuration Update procedure also allows the gNB-DU to inform the g
 
 F1AP specifies serialization of procedures for a UE.  From TS 38.473:
 > Unless explicitly indicated in the procedure specification, at any instance in time one protocol endpoint shall have a maximum of one ongoing F1AP procedure related to a certain UE.
-But the equivalent section in the NGAP document doesn't!
 
 ## Multiple associations
-
-There are a maximum of 32.  See maxnoofTNLAssociations in NGAP ASN.1 - TS38.413.
-
 ### Between GNB-CU and GNB-DU
 
 As described in TS38.401, Multiple TNLAs for F1-C:
@@ -59,6 +53,8 @@ Conversely, the AMF may order us to open multiple associations to it.  Here we h
 The NG-RAN node is also allow to add endpoints.  So the other workers catch up by adding their own connections and sending RAN CONFIGURATION UPDATE.
 
 > When the configuration with multiple SCTP endpoints per NG-RAN node is supported and the NG-RAN node wants to add additional SCTP endpoints, the RAN configuration update procedure shall be the first NGAP procedure triggered on an additional TNLA of an already setup NG-C interface instance after the TNL association has become operational, and the AMF shall associate the TNLA to the NG-C interface instance using the included Global RAN node ID.
+
+There are a maximum of 32.  See maxnoofTNLAssociations in NGAP ASN.1 - TS38.413.
 
 ## AMF support for multiple associations
 
