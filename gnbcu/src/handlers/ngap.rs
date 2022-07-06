@@ -25,8 +25,8 @@ impl NgapHandler {
 impl EventHandler for NgapHandler {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
-            TnlaEvent::Established => {
-                info!(logger, "NGAP TNLA {} established", tnla_id);
+            TnlaEvent::Established(addr) => {
+                info!(logger, "NGAP TNLA {} established to {}", tnla_id, addr);
                 crate::procedures::ng_setup(&self.gnbcu, logger).await;
             }
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
@@ -38,10 +38,7 @@ impl EventHandler for NgapHandler {
 #[async_trait]
 impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
-        debug!(
-            &logger,
-            "Got Downlink Nas Transport - send RRC to UE via DU"
-        );
+        debug!(&logger, "DownlinkNasTransport(Nas) <<");
         // To do - retrieve UE context by ran_ue_ngap_id.
         let ue = UeContext {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
@@ -72,6 +69,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
             }
         };
         let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).bytes());
+        debug!(&logger, "<< DlInformationTransfer(Nas)");
         self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
     }
 }

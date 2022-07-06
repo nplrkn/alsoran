@@ -133,9 +133,10 @@ impl TransportProvider for SctpTransportProvider {
                     Some(Ok(assoc)) => {
                         let assoc_id = 53; // TODO
                         let logger = logger.new(o!("connection" => assoc_id));
-                        info!(
+                        trace!(
                             logger,
-                            "Accepted SCTP connection from {}", assoc.remote_address
+                            "Accepted SCTP connection from {}",
+                            assoc.remote_address
                         );
                         let task = self
                             .tnla_pool

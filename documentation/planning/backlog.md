@@ -3,24 +3,16 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- In demo, gnbcu logs strangely end with ">> UlRrcMessageTransfer".  Where's the uplink message?
-- In demo, gnbcu logs saying UlRrcMessageTransfer should include (nas) 
-- In demo, inconsistent debug log "Got Downlink Nas Transport - send RRC to UE via DU"
-- In demo, inconsistent debug log "InitialUeMessage >"
-- In demo, downgrade log Accepted connection from Some(127.0.0.1:60313), since we already have an INFO log for that
-- In demo, consider merging 'Accepted SCTP connection from 127.0.0.1:60313' and 'NGAP TNLA 3 established' into single INFO log
 - In demo, gnbdu-sim has inconsistent message logging
 - At end of demo, gnbcu panicked on Ctrl-C with 'not yet implemented'.  AMF was Ctrl-C'd first.  
-- Three lines for each log sucks
 - Code review (incl commented out code and TODOs)
 - Remove the weird TNLA 3, TNLA 53 IDs
 - Intermittent behavior in free5GC demo
-- Write up reliable demo instructions starting with download of free5GC
-- Add quickstart instructions and notes on current status to top readme
 - Redo roadmap
 - Get approval to publish
-
-## MAYBE
+-----------
+- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
+-----------
 - Fix clippy
 - If we lose the connection or a long time passes, stop waiting for a response
 - Handle registration reject (e.g. test free5GC with UDM not running)
@@ -31,7 +23,18 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Have the integration test not use real sockets and run in parallel
 - Adopt https://github.com/cucumber-rs/cucumber for integration tests
 
+## RETEST
+
 ## DONE
+- Three lines for each log sucks
+- In demo, gnbcu logs strangely end with ">> UlRrcMessageTransfer".  Where's the uplink message?
+- In demo, gnbcu logs saying UlRrcMessageTransfer should include (nas) 
+- In demo, inconsistent debug log "Got Downlink Nas Transport - send RRC to UE via DU"
+- In demo, downgrade log Accepted connection from Some(127.0.0.1:60313), since we already have an INFO log for that
+- In demo, consider merging 'Accepted SCTP connection from 127.0.0.1:60313' and 'NGAP TNLA 3 established' into single INFO log
+- In demo, inconsistent debug log "InitialUeMessage >"
+- Write up reliable demo instructions starting with download of free5GC
+- Add quickstart instructions and notes on current status to top readme
 - Bump deps
 - Move to consistent message logging
 - Regression test integration covering same ground as live test with free5GC
