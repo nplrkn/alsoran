@@ -3,11 +3,9 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
+- At end of demo, gnbcu panicked on Ctrl-C with 'not yet implemented'.  AMF was Ctrl-C'd first.  AMF logs indicate it is sending AMF Status Indication.  Crash is in ngap_gnb.rs.  Add an FV for this.
 - In demo, gnbdu-sim has inconsistent message logging
-- At end of demo, gnbcu panicked on Ctrl-C with 'not yet implemented'.  AMF was Ctrl-C'd first.  
 - Code review (incl commented out code and TODOs)
-- Remove the weird TNLA 3, TNLA 53 IDs
-- Intermittent behavior in free5GC demo
 - Redo roadmap
 - Get approval to publish
 -----------
@@ -26,6 +24,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Remove the weird TNLA 3, TNLA 53 IDs
 - Three lines for each log sucks
 - In demo, gnbcu logs strangely end with ">> UlRrcMessageTransfer".  Where's the uplink message?
 - In demo, gnbcu logs saying UlRrcMessageTransfer should include (nas) 
