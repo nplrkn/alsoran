@@ -152,7 +152,7 @@ impl RrcHandler {
             npn_access_information: None,
         };
 
-        debug!(logger, "InitialUeMessage >");
+        debug!(logger, "InitialUeMessage(Nas) >>");
         InitialUeMessageProcedure::call_provider(&self.0.ngap, m, logger).await;
 
         Ok(())
@@ -174,6 +174,8 @@ impl RrcHandler {
                 return Ok(());
             }
         };
+
+        debug!(logger, ">> UlInformationTransfer(Nas)");
 
         // Todo - should be from Ue context
         let nr_cgi = ngap::NrCgi {
@@ -200,6 +202,7 @@ impl RrcHandler {
             twif_identity_information: None,
         };
 
+        debug!(logger, "UplinkNasTransport(Nas) >>");
         UplinkNasTransportProcedure::call_provider(&self.0.ngap, m, logger).await;
         Ok(())
     }
@@ -228,6 +231,7 @@ impl Gnbcu {
             additional_rrm_priority_index: None,
         };
 
+        debug!(&logger, "<< DlRrcMessageTransfer");
         DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
     }
 }

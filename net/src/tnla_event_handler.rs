@@ -1,4 +1,4 @@
-//use crate::ngap::NgapPdu;
+use async_net::SocketAddr;
 use async_trait::async_trait;
 use sctp::Message;
 use slog::Logger;
@@ -17,6 +17,6 @@ pub trait TnlaEventHandler: 'static + Send + Sync + Clone {
 }
 
 pub enum TnlaEvent {
-    Established,
+    Established(SocketAddr),
     Terminated,
 }

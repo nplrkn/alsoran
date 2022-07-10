@@ -55,7 +55,11 @@ impl TransportProvider for MockTransportProvider {
     {
         let receiver = self.receiver.clone();
         handler
-            .handle_event(TnlaEvent::Established, 1, &logger)
+            .handle_event(
+                TnlaEvent::Established("127.0.0.1:11111".parse().unwrap()),
+                1,
+                &logger,
+            )
             .await;
         let mut stream = receiver.take_until(stop_token);
         Ok(async_std::task::spawn(async move {

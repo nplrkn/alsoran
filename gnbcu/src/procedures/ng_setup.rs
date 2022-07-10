@@ -2,7 +2,7 @@ use crate::Gnbcu;
 use bitvec::prelude::*;
 use net::{RequestProvider, Stack};
 use ngap::*;
-use slog::{debug, warn, Logger};
+use slog::{debug, info, warn, Logger};
 
 pub async fn ng_setup(gnbcu: &Gnbcu, logger: &Logger) {
     // This uses the default expected values of free5GC.
@@ -38,7 +38,14 @@ pub async fn ng_setup(gnbcu: &Gnbcu, logger: &Logger) {
     )
     .await
     {
-        Ok(_response) => debug!(logger, "NgSetupResponse <<"),
+        Ok(response) => {
+            debug!(logger, "NgSetupResponse <<");
+            info!(
+                logger,
+                "NGAP interface initialized with {:?}", response.amf_name
+            );
+        }
+
         Err(e) => warn!(logger, "NG Setup failed - {:?}", e),
     }
 }

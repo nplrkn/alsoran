@@ -12,6 +12,8 @@ async fn main() -> Result<()> {
     du.establish_connection("127.0.0.1:38472".to_string())
         .await?;
 
+    du.perform_f1_setup().await?;
+
     let mut ue = Ue::new();
 
     info!(&logger, "> RRC Setup (NAS Registration Request >");

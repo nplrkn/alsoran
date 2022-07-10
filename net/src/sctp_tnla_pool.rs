@@ -48,7 +48,7 @@ impl SctpTnlaPool {
         trace!(logger, "Notify TNLA established");
         spawn_handle_event(
             handler.clone(),
-            TnlaEvent::Established,
+            TnlaEvent::Established(assoc.remote_address),
             assoc_id,
             logger.clone(),
         );

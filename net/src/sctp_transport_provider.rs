@@ -59,7 +59,7 @@ impl TransportProvider for SctpTransportProvider {
     where
         H: TnlaEventHandler,
     {
-        let assoc_id = 3; // TODO
+        let assoc_id = 1; // TODO
         let task = task::spawn(async move {
             loop {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
@@ -131,11 +131,12 @@ impl TransportProvider for SctpTransportProvider {
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
-                        let assoc_id = 53; // TODO
+                        let assoc_id = 1; // TODO
                         let logger = logger.new(o!("connection" => assoc_id));
-                        info!(
+                        trace!(
                             logger,
-                            "Accepted SCTP connection from {}", assoc.remote_address
+                            "Accepted SCTP connection from {}",
+                            assoc.remote_address
                         );
                         let task = self
                             .tnla_pool

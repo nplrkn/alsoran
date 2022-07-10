@@ -31,6 +31,7 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
         logger: &Logger,
     ) -> Result<F1SetupResponse, RequestError<F1SetupFailure>> {
         debug!(logger, ">> F1SetupRequest");
+        info!(logger, "F1AP interface initialized with {:?}", r.gnb_du_id);
         debug!(logger, "<< F1SetupResponse");
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,
@@ -104,7 +105,9 @@ impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
 impl EventHandler for F1apHandler {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
-            TnlaEvent::Established => info!(logger, "F1AP TNLA {} established", tnla_id),
+            TnlaEvent::Established(addr) => {
+                info!(logger, "F1AP TNLA {} established from {}", tnla_id, addr)
+            }
             TnlaEvent::Terminated => warn!(logger, "F1AP TNLA {} closed", tnla_id),
         };
     }
