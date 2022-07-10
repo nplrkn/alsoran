@@ -32,6 +32,7 @@ impl<T> Application for NgapGnb<T> where
         + Clone
         + IndicationHandler<DownlinkNasTransportProcedure>
         + RequestProvider<InitialContextSetupProcedure>
+        + IndicationHandler<AmfStatusIndicationProcedure>
 {
 }
 
@@ -42,7 +43,8 @@ where
         + Sync
         + RequestProvider<NgSetupProcedure>
         + IndicationHandler<DownlinkNasTransportProcedure>
-        + RequestProvider<InitialContextSetupProcedure>,
+        + RequestProvider<InitialContextSetupProcedure>
+        + IndicationHandler<AmfStatusIndicationProcedure>,
 {
     type TopPdu = NgapPdu;
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
@@ -63,6 +65,10 @@ where
             }
             InitiatingMessage::InitialContextSetupRequest(req) => {
                 InitialContextSetupProcedure::call_provider(&self.0, req, logger).await
+            }
+            InitiatingMessage::AmfStatusIndication(req) => {
+                AmfStatusIndicationProcedure::call_provider(&self.0, req, logger).await;
+                None
             }
             _ => todo!(),
         }
