@@ -10,6 +10,7 @@ pub mod ngap_amf;
 pub use ngap_amf::*;
 pub mod ngap_gnb;
 pub use ngap_gnb::*;
+mod display;
 
 #[cfg(test)]
 mod test;

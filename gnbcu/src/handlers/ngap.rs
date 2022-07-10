@@ -85,3 +85,13 @@ impl RequestProvider<InitialContextSetupProcedure> for NgapHandler {
         procedures::initial_context_setup(&self.gnbcu, r, logger).await
     }
 }
+
+#[async_trait]
+impl IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler {
+    async fn handle(&self, i: AmfStatusIndication, logger: &Logger) {
+        debug!(logger, "<< Amf Status Indication");
+        for guami_item in i.unavailable_guami_list.0 {
+            info!(logger, "GUAMI {} now unavailable", guami_item.guami);
+        }
+    }
+}

@@ -238,6 +238,22 @@ impl MockAmf {
         let _pdu = self.receive_ngap_pdu().await;
         Ok(())
     }
+
+    pub async fn send_status_indication(&self) -> Result<()> {
+        info!(&self.logger, "<< AmfStatusIndication");
+        let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::AmfStatusIndication(
+            AmfStatusIndication {
+                unavailable_guami_list: UnavailableGuamiList(vec![UnavailableGuamiItem {
+                    guami: self.guami(),
+                    timer_approach_for_guami_removal: None,
+                    backup_amf_name: None,
+                }]),
+            },
+        ));
+        self.sender
+            .send_message(pdu.into_bytes()?, &self.logger)
+            .await
+    }
 }
 
 #[async_trait]
