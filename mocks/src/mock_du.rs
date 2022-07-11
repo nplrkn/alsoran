@@ -156,6 +156,7 @@ impl MockDu {
             DlCcchMessageType::C1(C1_1::RrcSetup(x)) => Ok(x),
             x => Err(anyhow!("Unexpected RRC message {:?}", x)),
         }?;
+        info!(logger, "DlRrcMessageTransfer(RrcSetup) <<");
 
         // Build RRC Setup Response
         let rrc_setup_complete = UlDcchMessage {
@@ -192,6 +193,10 @@ impl MockDu {
                 ),
             })),
         };
+        info!(
+            &self.logger,
+            "UlRrcMessageTransfer(UlInformationTransfer(Nas)) >>"
+        );
         self.send_ul_rrc(rrc).await
     }
 
@@ -215,6 +220,10 @@ impl MockDu {
 
     pub async fn receive_nas(&self) -> Result<Vec<u8>> {
         let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
+        info!(
+            &self.logger,
+            "DlRrcMessageTransfer(DlInformationTransfer(Nas)) <<"
+        );
         nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
     }
 
@@ -278,6 +287,8 @@ impl MockDu {
             }),
         )
         .into_bytes()?;
+        info!(&self.logger, "UeContextSetupResponse >>");
+
         self.sender
             .send_message(ue_context_setup_response, &self.logger)
             .await
@@ -299,6 +310,10 @@ impl MockDu {
                 ),
             })),
         };
+        info!(
+            &self.logger,
+            "UlRrcMessageTransfer(SecurityModeComplete) >>"
+        );
         self.send_ul_rrc(security_mode_complete).await
     }
 
@@ -318,7 +333,10 @@ impl MockDu {
                         }),
                     ..
                 })) => {
-                    info!(&self.logger, "DlRrcMessageTransfer(RrcReconfiguration) <<");
+                    info!(
+                        &self.logger,
+                        "DlRrcMessageTransfer(RrcReconfiguration(Nas)) <<"
+                    );
                     Ok(x)
                 }
                 _ => Err(anyhow!(
