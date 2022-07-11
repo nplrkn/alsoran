@@ -3,9 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- In demo, gnbdu-sim has inconsistent message logging
 - Code review (incl commented out code and TODOs)
-- Redo roadmap
 - Get approval to publish
 -----------
 - Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
@@ -23,6 +21,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Redo roadmap
+- In demo, gnbdu-sim has inconsistent message logging
 - At end of demo, gnbcu panicked on Ctrl-C with 'not yet implemented'.  AMF was Ctrl-C'd first.  AMF logs indicate it is sending AMF Status Indication.  Crash is in ngap_gnb.rs.  Add an FV for this.
 - Remove the weird TNLA 3, TNLA 53 IDs
 - Three lines for each log sucks
