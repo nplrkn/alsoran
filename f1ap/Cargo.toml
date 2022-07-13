@@ -7,10 +7,9 @@ edition = "2021"
 doctest = false
 
 [dependencies]
-#asn1-codecs = { path = "../../hampi/codecs" }
-asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="all-fixes" }
+asn1-codecs = "0.2.0"
+bitvec = "1.0.1"
 num_enum = "0.5.7"
-bitvec = { version = "0.22" }
 net = { path = "../net" }
 async-trait = "0.1.51"
 anyhow = "1.0.52"

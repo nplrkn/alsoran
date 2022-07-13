@@ -12,7 +12,7 @@ USE_ASN1 = """\
 USE_BITSTRING = """\
 use bitvec::prelude::*;
 #[allow(dead_code)]
-pub type BitString = BitVec<Msb0, u8>;
+pub type BitString = BitVec<u8, Msb0>;
 """
 USE_NUM_ENUM = """\
 #[allow(unused_imports)]

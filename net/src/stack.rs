@@ -3,16 +3,14 @@
 use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{
     Indication, IndicationHandler, Message, Procedure, RequestError, RequestMessageHandler,
-    RequestProvider, SctpTransportProvider, TnlaEvent, TransportProvider,
+    RequestProvider, SctpTransportProvider, TnlaEvent, TransportProvider, TransportTasks,
 };
 use anyhow::Result;
 use async_channel::Sender;
 use async_net::SocketAddr;
 use async_std::sync::{Arc, Mutex};
-use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use slog::{trace, warn, Logger};
-use stop_token::StopSource;
 
 type TransactionMatchFn = Box<dyn Fn(&Message) -> bool + Send + Sync>;
 type SharedTransactions = Arc<Mutex<Box<Vec<(TransactionMatchFn, Sender<Message>)>>>>;
@@ -48,17 +46,10 @@ impl Stack {
             application,
             pending_requests: self.pending_requests.clone(),
         };
-        let stop_source = StopSource::new();
-
-        let handle = self
-            .transport_provider
+        self.transport_provider
             .clone()
-            .maintain_connection(connect_address, stop_source.token(), receiver, logger)
-            .await?;
-        Ok(TransportTasks {
-            handle,
-            stop_source,
-        })
+            .maintain_connection(connect_address, receiver, logger)
+            .await
     }
 
     pub async fn listen<A: Application>(
@@ -71,33 +62,15 @@ impl Stack {
             application,
             pending_requests: self.pending_requests.clone(),
         };
-        let stop_source = StopSource::new();
 
-        let handle = self
-            .transport_provider
+        self.transport_provider
             .clone()
-            .serve(listen_address, stop_source.token(), receiver, logger)
-            .await?;
-        Ok(TransportTasks {
-            handle,
-            stop_source,
-        })
+            .serve(listen_address, receiver, logger)
+            .await
     }
 
     pub async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
         self.transport_provider.remote_tnla_addresses().await
-    }
-}
-
-pub struct TransportTasks {
-    handle: JoinHandle<()>,
-    stop_source: StopSource,
-}
-
-impl TransportTasks {
-    pub async fn graceful_shutdown(self) {
-        drop(self.stop_source);
-        self.handle.await
     }
 }
 

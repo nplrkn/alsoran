@@ -31,8 +31,13 @@ fn make_ng_setup() -> NgSetupRequest {
     }
 }
 
+use bitvec::view::AsBits;
 #[test]
 fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
+    let value = "free5gc".to_string();
+    let bits: &BitSlice<u8, Msb0> = value.as_bits();
+    let bytes = bits.to_bitvec().into_vec();
+    println!("{:?}", hex::encode(bytes));
     let ng_setup = make_ng_setup();
     let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
     let bytes = ngap_pdu.into_bytes()?;
@@ -54,7 +59,7 @@ fn test_ng_setup() -> Result<(), AperCodecError> {
     let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
             plmn_identity: PlmnIdentity(vec![2, 3, 2]),
-            gnb_id: GnbId::GnbId(bitvec![Msb0,u8; 1; 22]),
+            gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
         }),
         ran_node_name: None,
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {

@@ -118,7 +118,7 @@ fn build_ue_context_setup_request(
         gnb_du_ue_f1ap_id: Some(GnbDuUeF1apId(1)),
         sp_cell_id: f1ap::NrCgi {
             plmn_identity: f1ap::PlmnIdentity(vec![0, 1, 2]),
-            nr_cell_identity: f1ap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
+            nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         },
         serv_cell_index: f1ap::ServCellIndex(0),
         sp_cell_ul_configured: None,

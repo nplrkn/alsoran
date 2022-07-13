@@ -22,5 +22,4 @@ errno = "0.2.8"
 stop-token = "0.6.1"
 async-stream = "0.3.2"
 futures-core = "0.3.19"
-#asn1-codecs = { path = "../../hampi/codecs" }
-asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="all-fixes" }
+asn1-codecs = "0.2.0"

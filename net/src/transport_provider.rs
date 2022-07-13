@@ -1,11 +1,9 @@
-use crate::tnla_event_handler::TnlaEventHandler;
+use crate::{tnla_event_handler::TnlaEventHandler, TransportTasks};
 use anyhow::Result;
 use async_net::SocketAddr;
-use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use sctp::Message;
 use slog::Logger;
-use stop_token::StopToken;
 
 //pub struct Binding;
 
@@ -19,20 +17,18 @@ pub trait TransportProvider: Send + Sync + 'static {
     async fn serve<H>(
         self,
         listen_addr: String,
-        stop_token: StopToken,
         handler: H,
         logger: Logger,
-    ) -> Result<JoinHandle<()>>
+    ) -> Result<TransportTasks>
     where
         H: TnlaEventHandler;
 
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
-        stop_token: StopToken,
         handler: H,
         logger: Logger,
-    ) -> Result<JoinHandle<()>>
+    ) -> Result<TransportTasks>
     where
         H: TnlaEventHandler;
 

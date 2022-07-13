@@ -10,7 +10,6 @@ use stop_token::StopSource;
 pub struct TestContext {
     pub amf: MockAmf,
     pub du: MockDu,
-    du_stop_source: StopSource,
     pub logger: Logger,
     //coord_stop_source: StopSource,
     //coord_task: JoinHandle<()>,
@@ -50,13 +49,12 @@ impl TestContext {
         let amf_address = "127.0.0.1:38412";
         let amf = MockAmf::new(amf_address, &logger).await;
 
-        let (du, du_stop_source) = MockDu::new(&logger).await;
+        let du = MockDu::new(&logger).await;
 
         // let (coord_stop_source, coord_task, control_task) = coordinator::spawn(logger.new(o!("cu-c" => 1))).unwrap();
         let mut tc = TestContext {
             amf,
             du,
-            du_stop_source,
             logger,
             //coord_stop_source,
             //coord_task,
@@ -68,7 +66,7 @@ impl TestContext {
         tc.get_to_stage(stage).await
     }
 
-    async fn get_to_stage(self, stage: Stage) -> Result<Self> {
+    async fn get_to_stage(mut self, stage: Stage) -> Result<Self> {
         if stage >= Stage::AmfConnected {
             self.amf.expect_connection().await;
             self.amf.handle_ng_setup().await?;
@@ -128,21 +126,14 @@ impl TestContext {
             drop(worker.stop_source);
 
             trace!(self.logger, "Wait for worker to terminate connection");
-            assert!(self
-                .amf
-                .receiver
-                .recv()
-                .await
-                .expect("Expected connection termination")
-                .is_none());
+            self.amf.expect_connection().await;
             worker.task.await;
         }
 
         info!(self.logger, "Terminate mock AMF");
-        drop(self.amf.stop_source);
-        self.amf.task.await;
+        self.amf.terminate().await;
 
         info!(self.logger, "Terminate mock DU");
-        drop(self.du_stop_source);
+        self.du.terminate().await;
     }
 }

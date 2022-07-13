@@ -1,8 +1,4 @@
 use slog::Logger;
-//use sloggers::terminal::{Destination, TerminalLoggerBuilder};
-//use sloggers::types::{Format, Severity};
-//use sloggers::Build;
-
 use slog::{o, Drain};
 
 pub fn test_init() -> Logger {
@@ -15,12 +11,6 @@ pub fn test_init() -> Logger {
 
 pub fn init() -> Logger {
     init_terminal_logging()
-    // let mut builder = TerminalLoggerBuilder::new();
-    // builder.level(Severity::Debug);
-    // builder.destination(Destination::Stdout);
-    // builder.format(Format::Compact);
-
-    // builder.build().unwrap()
 }
 
 pub fn init_terminal_logging() -> Logger {

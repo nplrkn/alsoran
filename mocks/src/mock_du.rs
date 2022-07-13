@@ -1,77 +1,72 @@
+use std::ops::Deref;
+
 use anyhow::{anyhow, Result};
-use async_channel::{Receiver, Sender};
-use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Indication, Message, TransportProvider};
-use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
+use net::{AperSerde, Indication, TransportProvider};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{info, o, trace, Logger};
-use stop_token::{StopSource, StopToken};
+
+use crate::mock::{Mock, Pdu};
+
+impl Pdu for F1apPdu {}
 
 // TS38.472, section 7 - the Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP
 // for the application layer protocol F1AP is 62
 const F1AP_SCTP_PPID: u32 = 62;
 
-// TODO make generic and commonize with MockAmf?
-#[derive(Clone)]
 pub struct MockDu {
-    pub stop_token: StopToken,
-    pub receiver: Receiver<Option<F1apPdu>>,
-    pub sender: SctpTransportProvider,
-    internal_sender: Sender<Option<F1apPdu>>,
-    logger: Logger,
+    mock: Mock<F1apPdu>,
 }
 
-impl MockDu {
-    pub async fn new(logger: &Logger) -> (MockDu, StopSource) {
-        let logger = logger.new(o!("du" => 1));
-        let (internal_sender, receiver) = async_channel::unbounded();
-        let stop_source = StopSource::new();
-        let sender = SctpTransportProvider::new(F1AP_SCTP_PPID);
+impl Deref for MockDu {
+    type Target = Mock<F1apPdu>;
 
-        (
-            MockDu {
-                stop_token: stop_source.token(),
-                receiver,
-                sender,
-                internal_sender,
-                logger,
-            },
-            stop_source,
-        )
+    fn deref(&self) -> &Self::Target {
+        &self.mock
+    }
+}
+
+// #[derive(Debug, Clone)]
+// struct Handler(pub Sender<Option<F1apPdu>>);
+
+impl MockDu {
+    pub async fn new(logger: &Logger) -> MockDu {
+        let logger = logger.new(o!("du" => 1));
+        let mock = Mock::new(logger, F1AP_SCTP_PPID).await;
+
+        MockDu { mock }
     }
 
-    pub async fn establish_connection(&self, connect_addr_string: String) -> Result<()> {
-        let _task = self
-            .sender
+    pub async fn terminate(self) {
+        self.mock.terminate().await
+    }
+
+    pub async fn establish_connection(&mut self, connect_addr_string: String) -> Result<()> {
+        let task = self
+            .transport
             .clone()
             .maintain_connection(
                 connect_addr_string,
-                self.stop_token.clone(),
-                self.clone(),
+                self.mock.handler().unwrap(),
                 self.logger.clone(),
             )
             .await?;
 
         // Wait for the connection to be accepted.
         trace!(self.logger, "Wait for connection to be accepted by CU");
-        match self.receiver.recv().await? {
-            None => {
-                info!(self.logger, "Successful connection establishment to CU");
-                Ok(())
-            }
-            Some(_) => Err(anyhow!("Unexpectedly received a message")),
-        }
+        self.expect_connection().await;
+
+        self.mock.transport_tasks = Some(task);
+
+        Ok(())
     }
 
     /// Receive an F1apPdu from the GNB-CU, with a 0.5s timeout.
     async fn recv(&self) -> F1apPdu {
-        async_std::future::timeout(std::time::Duration::from_millis(500), self.receiver.recv())
+        async_std::future::timeout(std::time::Duration::from_millis(500), self.receive_pdu())
             .await
-            .unwrap()
-            .unwrap()
             .unwrap()
     }
 
@@ -81,7 +76,7 @@ impl MockDu {
                 transaction_id: TransactionId(0),
                 gnb_du_id: GnbDuId(123),
                 gnb_du_rrc_version: RrcVersion {
-                    latest_rrc_version: bitvec![Msb0, u8;0, 0, 0],
+                    latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
                 },
                 gnb_du_name: None,
                 gnb_du_served_cells_list: None,
@@ -90,7 +85,7 @@ impl MockDu {
                 extended_gnb_cu_name: None,
             }));
         info!(self.logger, "F1SetupRequest >>");
-        self.sender
+        self.transport
             .send_message(pdu.into_bytes()?, &self.logger)
             .await?;
 
@@ -106,9 +101,9 @@ impl MockDu {
         let rrc_setup_request = UlCcchMessage {
             message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(RrcSetupRequest {
                 rrc_setup_request: RrcSetupRequestIEs {
-                    ue_identity: InitialUeIdentity::Ng5gSTmsiPart1(bitvec![Msb0, u8; 0;39]),
+                    ue_identity: InitialUeIdentity::Ng5gSTmsiPart1(bitvec![u8, Msb0; 0;39]),
                     establishment_cause: EstablishmentCause::MtAccess,
-                    spare: bitvec![Msb0, u8;0;1],
+                    spare: bitvec![u8, Msb0;0;1],
                 },
             })),
         }
@@ -122,7 +117,7 @@ impl MockDu {
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
                 nr_cgi: NrCgi {
                     plmn_identity: PlmnIdentity(vec![0, 1, 2]),
-                    nr_cell_identity: NrCellIdentity(bitvec![Msb0,u8;0;36]),
+                    nr_cell_identity: NrCellIdentity(bitvec![u8,Msb0;0;36]),
                 },
                 c_rnti: CRnti(14),
                 rrc_container: RrcContainer(rrc_setup_request),
@@ -135,7 +130,7 @@ impl MockDu {
 
         info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
 
-        self.sender.send_message(f1_indication, logger).await
+        self.transport.send_message(f1_indication, logger).await
     }
 
     pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
@@ -215,7 +210,9 @@ impl MockDu {
             new_gnb_du_ue_f1ap_id: None,
         })?;
 
-        self.sender.send_message(f1_indication, &self.logger).await
+        self.transport
+            .send_message(f1_indication, &self.logger)
+            .await
     }
 
     pub async fn receive_nas(&self) -> Result<Vec<u8>> {
@@ -289,7 +286,7 @@ impl MockDu {
         .into_bytes()?;
         info!(&self.logger, "UeContextSetupResponse >>");
 
-        self.sender
+        self.transport
             .send_message(ue_context_setup_response, &self.logger)
             .await
     }
@@ -411,22 +408,22 @@ fn nas_from_dl_transfer_rrc_container(rrc_container: RrcContainer) -> Result<Vec
         x => Err(anyhow!("Unexpected RRC message {:?}", x)),
     }
 }
-#[async_trait]
-impl TnlaEventHandler for MockDu {
-    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-        self.internal_sender.send(None).await.unwrap();
-    }
+// #[async_trait]
+// impl TnlaEventHandler for MockDu {
+//     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
+//         self.internal_sender.send(None).await.unwrap();
+//     }
 
-    async fn handle_message(
-        &self,
-        message: Message,
-        _tnla_id: u32,
-        _logger: &Logger,
-    ) -> Option<Message> {
-        self.internal_sender
-            .send(Some(F1apPdu::from_bytes(&message).unwrap()))
-            .await
-            .unwrap();
-        None
-    }
-}
+//     async fn handle_message(
+//         &self,
+//         message: Message,
+//         _tnla_id: u32,
+//         _logger: &Logger,
+//     ) -> Option<Message> {
+//         self.internal_sender
+//             .send(Some(F1apPdu::from_bytes(&message).unwrap()))
+//             .await
+//             .unwrap();
+//         None
+//     }
+// }

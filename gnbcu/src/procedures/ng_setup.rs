@@ -9,7 +9,7 @@ pub async fn ng_setup(gnbcu: &Gnbcu, logger: &Logger) {
     let ng_setup_request = NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
             plmn_identity: PlmnIdentity(vec![0x2, 0xf8, 0x39]),
-            gnb_id: GnbId::GnbId(bitvec![Msb0,u8; 1; 22]),
+            gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
         }),
         ran_node_name: None,
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {

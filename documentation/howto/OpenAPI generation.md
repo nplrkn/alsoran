@@ -1,5 +1,7 @@
 # OpenAPI generation
 
+(Not currently in use in project.)
+
 openapitools was installed using the launcher script at [https://github.com/OpenAPITools/openapi-generator#1---installation].
 
 To run,
