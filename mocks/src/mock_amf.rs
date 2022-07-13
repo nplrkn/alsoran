@@ -1,7 +1,7 @@
 use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
-use net::{AperSerde, TransportProvider};
+use net::AperSerde;
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::Deref;
@@ -22,24 +22,10 @@ impl Deref for MockAmf {
     }
 }
 
-// #[derive(Debug, Clone)]
-// struct Handler(pub Sender<Option<NgapPdu>>);
-
 impl MockAmf {
     pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
         let mut mock = Mock::new(logger.new(o!("amf" => 1)), NGAP_SCTP_PPID).await;
-        let transport_tasks = mock
-            .transport
-            .clone()
-            .serve(
-                amf_address.to_string(),
-                mock.handler().unwrap(),
-                logger.clone(),
-            )
-            .await
-            .expect("Server bind failed");
-        mock.transport_tasks = Some(transport_tasks);
-
+        mock.serve(amf_address.to_string()).await;
         MockAmf { mock }
     }
 
@@ -83,9 +69,7 @@ impl MockAmf {
                 extended_amf_name: None,
             }));
 
-        self.transport
-            .send_message(response.into_bytes()?, &logger)
-            .await?;
+        self.send(response.into_bytes()?).await;
 
         Ok(())
     }
@@ -133,9 +117,7 @@ impl MockAmf {
             ));
 
         info!(logger, "<< RanConfigurationUpdateAcknowledge");
-        self.transport
-            .send_message(response.into_bytes()?, &logger)
-            .await?;
+        self.send(response.into_bytes()?).await;
 
         Ok(())
     }
@@ -209,9 +191,8 @@ impl MockAmf {
         ));
 
         info!(logger, "<< InitialContextSetupRequest");
-        self.transport
-            .send_message(pdu.into_bytes()?, &logger)
-            .await
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 
     pub async fn receive_initial_context_setup_response(&self) -> Result<()> {
@@ -231,30 +212,7 @@ impl MockAmf {
                 }]),
             },
         ));
-        self.transport
-            .send_message(pdu.into_bytes()?, &self.logger)
-            .await
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 }
-
-// #[async_trait]
-// impl TnlaEventHandler for Handler {
-//     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-//         self.0.send(None).await.unwrap();
-//     }
-
-//     // TODO indicate whether it is UE or non UE associated?
-//     async fn handle_message(
-//         &self,
-//         message: Vec<u8>,
-//         _tnla_id: u32,
-//         logger: &Logger,
-//     ) -> Option<Vec<u8>> {
-//         trace!(logger, "Got message from GNB");
-//         self.0
-//             .send(Some(NgapPdu::from_bytes(&message).unwrap()))
-//             .await
-//             .unwrap();
-//         None
-//     }
-// }

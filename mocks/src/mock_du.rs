@@ -1,14 +1,12 @@
-use std::ops::Deref;
-
+use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Indication, TransportProvider};
+use net::{AperSerde, Indication};
 use pdcp::PdcpPdu;
 use rrc::*;
-use slog::{info, o, trace, Logger};
-
-use crate::mock::{Mock, Pdu};
+use slog::{info, o, Logger};
+use std::ops::{Deref, DerefMut};
 
 impl Pdu for F1apPdu {}
 
@@ -28,8 +26,11 @@ impl Deref for MockDu {
     }
 }
 
-// #[derive(Debug, Clone)]
-// struct Handler(pub Sender<Option<F1apPdu>>);
+impl DerefMut for MockDu {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.mock
+    }
+}
 
 impl MockDu {
     pub async fn new(logger: &Logger) -> MockDu {
@@ -41,26 +42,6 @@ impl MockDu {
 
     pub async fn terminate(self) {
         self.mock.terminate().await
-    }
-
-    pub async fn establish_connection(&mut self, connect_addr_string: String) -> Result<()> {
-        let task = self
-            .transport
-            .clone()
-            .maintain_connection(
-                connect_addr_string,
-                self.mock.handler().unwrap(),
-                self.logger.clone(),
-            )
-            .await?;
-
-        // Wait for the connection to be accepted.
-        trace!(self.logger, "Wait for connection to be accepted by CU");
-        self.expect_connection().await;
-
-        self.mock.transport_tasks = Some(task);
-
-        Ok(())
     }
 
     /// Receive an F1apPdu from the GNB-CU, with a 0.5s timeout.
@@ -85,9 +66,7 @@ impl MockDu {
                 extended_gnb_cu_name: None,
             }));
         info!(self.logger, "F1SetupRequest >>");
-        self.transport
-            .send_message(pdu.into_bytes()?, &self.logger)
-            .await?;
+        self.send(pdu.into_bytes()?).await;
 
         let _response = self.recv().await;
         info!(self.logger, "F1SetupResponse <<");
@@ -130,7 +109,8 @@ impl MockDu {
 
         info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
 
-        self.transport.send_message(f1_indication, logger).await
+        self.send(f1_indication).await;
+        Ok(())
     }
 
     pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
@@ -210,9 +190,8 @@ impl MockDu {
             new_gnb_du_ue_f1ap_id: None,
         })?;
 
-        self.transport
-            .send_message(f1_indication, &self.logger)
-            .await
+        self.send(f1_indication).await;
+        Ok(())
     }
 
     pub async fn receive_nas(&self) -> Result<Vec<u8>> {
@@ -286,9 +265,8 @@ impl MockDu {
         .into_bytes()?;
         info!(&self.logger, "UeContextSetupResponse >>");
 
-        self.transport
-            .send_message(ue_context_setup_response, &self.logger)
-            .await
+        self.send(ue_context_setup_response).await;
+        Ok(())
     }
 
     pub async fn send_security_mode_complete(
@@ -408,22 +386,3 @@ fn nas_from_dl_transfer_rrc_container(rrc_container: RrcContainer) -> Result<Vec
         x => Err(anyhow!("Unexpected RRC message {:?}", x)),
     }
 }
-// #[async_trait]
-// impl TnlaEventHandler for MockDu {
-//     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-//         self.internal_sender.send(None).await.unwrap();
-//     }
-
-//     async fn handle_message(
-//         &self,
-//         message: Message,
-//         _tnla_id: u32,
-//         _logger: &Logger,
-//     ) -> Option<Message> {
-//         self.internal_sender
-//             .send(Some(F1apPdu::from_bytes(&message).unwrap()))
-//             .await
-//             .unwrap();
-//         None
-//     }
-// }

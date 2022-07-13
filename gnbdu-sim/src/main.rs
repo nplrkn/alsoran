@@ -9,8 +9,7 @@ async fn main() -> Result<()> {
     let logger = common::logging::init_terminal_logging();
     let mut du = MockDu::new(&logger).await;
 
-    du.establish_connection("127.0.0.1:38472".to_string())
-        .await?;
+    du.connect("127.0.0.1:38472".to_string()).await;
     du.perform_f1_setup().await?;
 
     let mut ue = Ue::new();

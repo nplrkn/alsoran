@@ -72,9 +72,8 @@ impl TestContext {
             self.amf.handle_ng_setup().await?;
         }
         if stage >= Stage::DuConnected {
-            self.du
-                .establish_connection(self.worker_info(0).f1ap_host_port)
-                .await?;
+            let address = self.worker_info(0).f1ap_host_port;
+            self.du.connect(address).await;
             self.du.perform_f1_setup().await?;
         }
         if stage >= Stage::UeRegistered {

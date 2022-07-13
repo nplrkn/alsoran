@@ -1,6 +1,9 @@
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
-use net::{AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportTasks};
+use net::{
+    AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider,
+    TransportTasks,
+};
 use slog::{trace, Logger};
 use std::fmt::Debug;
 
@@ -8,11 +11,11 @@ pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
 
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
-    pub transport: SctpTransportProvider,
+    transport: SctpTransportProvider,
     receiver: Receiver<Option<P>>,
     pub logger: Logger,
     handler: Option<Handler<P>>,
-    pub transport_tasks: Option<TransportTasks>,
+    transport_tasks: Option<TransportTasks>,
 }
 
 #[derive(Debug, Clone)]
@@ -33,15 +36,37 @@ impl<P: Pdu> Mock<P> {
         }
     }
 
-    pub fn handler(&mut self) -> Option<Handler<P>> {
-        std::mem::take(&mut self.handler)
+    pub async fn serve(&mut self, address: String) {
+        let transport_tasks = self
+            .transport
+            .clone()
+            .serve(
+                address,
+                std::mem::take(&mut self.handler).unwrap(),
+                self.logger.clone(),
+            )
+            .await
+            .expect("Server bind failed");
+        self.transport_tasks = Some(transport_tasks);
     }
 
-    // pub async fn terminate(&mut self) {
-    //     if let Some(transport_tasks) = std::mem::take(&mut self.transport_tasks) {
-    //         transport_tasks.graceful_shutdown().await;
-    //     }
-    // }
+    pub async fn connect(&mut self, address: String) {
+        let transport_tasks = self
+            .transport
+            .clone()
+            .maintain_connection(
+                address,
+                std::mem::take(&mut self.handler).unwrap(),
+                self.logger.clone(),
+            )
+            .await
+            .expect("Connect failed");
+        self.transport_tasks = Some(transport_tasks);
+
+        // Wait for the connection to be accepted.
+        trace!(self.logger, "Wait for connection to be accepted");
+        self.expect_connection().await;
+    }
 
     pub async fn terminate(self) {
         if let Some(transport_tasks) = self.transport_tasks {
@@ -58,6 +83,13 @@ impl<P: Pdu> Mock<P> {
             .await
             .expect("Failed mock recv")
             .is_none());
+    }
+
+    pub async fn send(&self, message: Vec<u8>) {
+        self.transport
+            .send_message(message, &self.logger)
+            .await
+            .expect("Failed to send message");
     }
 
     pub async fn receive_pdu(&self) -> P {
