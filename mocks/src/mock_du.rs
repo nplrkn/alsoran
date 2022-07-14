@@ -10,10 +10,6 @@ use std::ops::{Deref, DerefMut};
 
 impl Pdu for F1apPdu {}
 
-// TS38.472, section 7 - the Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP
-// for the application layer protocol F1AP is 62
-const F1AP_SCTP_PPID: u32 = 62;
-
 pub struct MockDu {
     mock: Mock<F1apPdu>,
 }
@@ -32,11 +28,12 @@ impl DerefMut for MockDu {
     }
 }
 
+const F1AP_SCTP_PPID: u32 = 62;
+
 impl MockDu {
     pub async fn new(logger: &Logger) -> MockDu {
         let logger = logger.new(o!("du" => 1));
         let mock = Mock::new(logger, F1AP_SCTP_PPID).await;
-
         MockDu { mock }
     }
 
@@ -44,14 +41,19 @@ impl MockDu {
         self.mock.terminate().await
     }
 
-    /// Receive an F1apPdu from the GNB-CU, with a 0.5s timeout.
-    async fn recv(&self) -> F1apPdu {
-        async_std::future::timeout(std::time::Duration::from_millis(500), self.receive_pdu())
-            .await
-            .unwrap()
+    pub async fn perform_f1_setup(&self) -> Result<()> {
+        self.send_f1_setup_request().await?;
+        self.receive_f1_setup_response().await;
+        Ok(())
     }
 
-    pub async fn perform_f1_setup(&self) -> Result<()> {
+    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
+        self.send_rrc_setup_request().await?;
+        let rrc_setup = self.receive_rrc_setup().await?;
+        self.send_rrc_setup_complete(rrc_setup, nas_message).await
+    }
+
+    async fn send_f1_setup_request(&self) -> Result<()> {
         let pdu =
             f1ap::F1apPdu::InitiatingMessage(InitiatingMessage::F1SetupRequest(F1SetupRequest {
                 transaction_id: TransactionId(0),
@@ -67,13 +69,15 @@ impl MockDu {
             }));
         info!(self.logger, "F1SetupRequest >>");
         self.send(pdu.into_bytes()?).await;
-
-        let _response = self.recv().await;
-        info!(self.logger, "F1SetupResponse <<");
         Ok(())
     }
 
-    pub async fn send_rrc_setup_request(&self) -> Result<()> {
+    async fn receive_f1_setup_response(&self) {
+        let _response = self.receive_pdu().await;
+        info!(self.logger, "F1SetupResponse <<");
+    }
+
+    async fn send_rrc_setup_request(&self) -> Result<()> {
         let logger = &self.logger;
 
         // Build RRC Setup Request
@@ -113,27 +117,27 @@ impl MockDu {
         Ok(())
     }
 
-    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
-        let logger = &self.logger;
-        self.send_rrc_setup_request().await?;
-
+    async fn receive_rrc_setup(&self) -> Result<RrcSetup> {
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let dl_rrc_message_transfer = match self.recv().await {
+        let dl_rrc_message_transfer = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
-
         let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
-
         let rrc_message_bytes = pdcp_pdu.view_inner()?;
-
         let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
             DlCcchMessageType::C1(C1_1::RrcSetup(x)) => Ok(x),
             x => Err(anyhow!("Unexpected RRC message {:?}", x)),
         }?;
-        info!(logger, "DlRrcMessageTransfer(RrcSetup) <<");
+        info!(&self.logger, "DlRrcMessageTransfer(RrcSetup) <<");
+        Ok(rrc_setup)
+    }
 
-        // Build RRC Setup Response
+    async fn send_rrc_setup_complete(
+        &self,
+        rrc_setup: RrcSetup,
+        nas_message: Vec<u8>,
+    ) -> Result<()> {
         let rrc_setup_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcSetupComplete(RrcSetupComplete {
                 rrc_transaction_identifier: rrc_setup.rrc_transaction_identifier,
@@ -151,7 +155,7 @@ impl MockDu {
         };
 
         info!(
-            logger,
+            &self.logger,
             "UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request)) >>"
         );
         self.send_ul_rrc(rrc_setup_complete).await
@@ -203,15 +207,15 @@ impl MockDu {
         nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
     }
 
-    pub async fn receive_dl_rrc(&self) -> Result<DlRrcMessageTransfer> {
-        match self.recv().await {
+    async fn receive_dl_rrc(&self) -> Result<DlRrcMessageTransfer> {
+        match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }
     }
 
     pub async fn receive_ue_context_setup_request(&self) -> Result<SecurityModeCommand> {
-        let ue_context_setup_request = match self.recv().await {
+        let ue_context_setup_request = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;

@@ -11,9 +11,6 @@ pub struct TestContext {
     pub amf: MockAmf,
     pub du: MockDu,
     pub logger: Logger,
-    //coord_stop_source: StopSource,
-    //coord_task: JoinHandle<()>,
-    //control_task: JoinHandle<()>,
     workers: Vec<InternalWorkerInfo>,
 }
 
@@ -48,17 +45,12 @@ impl TestContext {
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
         let amf_address = "127.0.0.1:38412";
         let amf = MockAmf::new(amf_address, &logger).await;
-
         let du = MockDu::new(&logger).await;
 
-        // let (coord_stop_source, coord_task, control_task) = coordinator::spawn(logger.new(o!("cu-c" => 1))).unwrap();
         let mut tc = TestContext {
             amf,
             du,
             logger,
-            //coord_stop_source,
-            //coord_task,
-            //control_task,
             workers: vec![],
         };
         tc.start_worker().await;
@@ -102,7 +94,6 @@ impl TestContext {
         let worker_number = self.workers.len() as u16;
 
         let mut config = Config::default();
-        //config.callback_server_bind_port += worker_number;
         config.f1ap_bind_port += worker_number;
 
         let (stop_source, task) =
@@ -115,11 +106,6 @@ impl TestContext {
     }
 
     pub async fn terminate(self) {
-        //info!(self.logger, "Terminate coordinator");
-        // drop(self.coord_stop_source);
-        // self.coord_task.await;
-        // self.control_task.await;
-
         trace!(self.logger, "Terminate workers");
         for worker in self.workers {
             drop(worker.stop_source);

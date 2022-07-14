@@ -92,10 +92,12 @@ impl<P: Pdu> Mock<P> {
             .expect("Failed to send message");
     }
 
+    /// Receive a Pdu, with a 0.5s timeout.
     pub async fn receive_pdu(&self) -> P {
-        self.receiver
-            .recv()
+        let f = self.receiver.recv();
+        async_std::future::timeout(std::time::Duration::from_millis(500), f)
             .await
+            .unwrap()
             .expect("Expected message")
             .expect("Expected message")
     }

@@ -27,9 +27,3 @@ async fn ue_can_register() -> Result<()> {
     tc.terminate().await;
     Ok(())
 }
-
-// #[async_std::test]
-// #[serial]
-// async fn uplink_and_downlink_nas() -> Result<()> {
-//     todo!()
-// }

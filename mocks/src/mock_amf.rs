@@ -6,8 +6,6 @@ use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::Deref;
 
-const NGAP_SCTP_PPID: u32 = 60;
-
 impl Pdu for NgapPdu {}
 
 pub struct MockAmf {
@@ -22,6 +20,8 @@ impl Deref for MockAmf {
     }
 }
 
+const NGAP_SCTP_PPID: u32 = 60;
+
 impl MockAmf {
     pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
         let mut mock = Mock::new(logger.new(o!("amf" => 1)), NGAP_SCTP_PPID).await;
@@ -34,7 +34,6 @@ impl MockAmf {
     }
 
     pub async fn handle_ng_setup(&self) -> Result<()> {
-        // Catch NG Setup from the GNB
         let logger = &self.logger;
         info!(logger, "Wait for NG Setup from GNB");
 
