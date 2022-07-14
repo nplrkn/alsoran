@@ -1,8 +1,8 @@
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider,
-    TransportTasks,
+    AperSerde, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
+    TransportProvider,
 };
 use slog::{trace, Logger};
 use std::fmt::Debug;
@@ -15,7 +15,7 @@ pub struct Mock<P: Pdu> {
     receiver: Receiver<Option<P>>,
     pub logger: Logger,
     handler: Option<Handler<P>>,
-    transport_tasks: Option<TransportTasks>,
+    transport_tasks: Option<ShutdownHandle>,
 }
 
 #[derive(Debug, Clone)]

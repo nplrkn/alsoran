@@ -83,7 +83,7 @@ pub async fn initial_context_setup(
 
 fn make_rrc_container(rrc: DlDcchMessage) -> Result<f1ap::RrcContainer> {
     let rrc_bytes = rrc.into_bytes()?;
-    Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).bytes()))
+    Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).into()))
 }
 
 fn build_rrc_security_mode_command(

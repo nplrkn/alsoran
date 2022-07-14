@@ -3,20 +3,21 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Code review (incl commented out code and TODOs)
+- Code review (incl commented out code and TODOs) - gnbcu
+- Fix failing test
 - Get approval to publish
 -----------
-- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
+- Have the integration test not use real sockets and run in parallel
 -----------
-- Fix clippy
-- If we lose the connection or a long time passes, stop waiting for a response
-- Handle registration reject (e.g. test free5GC with UDM not running)
-- Requests should be processed in parallel in separate tasks.
+- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
+- Generate procedures for Rrc.  Need a new kind of transport provider (not an SCTP one).
+- Implement setuprelease
 - Deduplicate inline definitions in RRC autogeneration
+- Fix clippy
+-----------
+- Adopt https://github.com/cucumber-rs/cucumber for integration tests
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
-- Have the integration test not use real sockets and run in parallel
-- Adopt https://github.com/cucumber-rs/cucumber for integration tests
 
 ## RETEST
 

@@ -189,7 +189,7 @@ impl MockDu {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
             srb_id: SrbId(1),
-            rrc_container: RrcContainer(pdcp_pdu.bytes()),
+            rrc_container: RrcContainer(pdcp_pdu.into()),
             selected_plmn_id: None,
             new_gnb_du_ue_f1ap_id: None,
         })?;

@@ -1,6 +1,6 @@
 use super::transport_provider::TransportProvider;
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
-use crate::TransportTasks;
+use crate::ShutdownHandle;
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
@@ -48,7 +48,7 @@ impl TransportProvider for MockTransportProvider {
         _connect_addr_string: String,
         handler: H,
         logger: Logger,
-    ) -> Result<TransportTasks>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler,
     {
@@ -72,7 +72,7 @@ impl TransportProvider for MockTransportProvider {
                 handler.handle_message(pdu, 1, &logger).await;
             }
         });
-        Ok(TransportTasks::new(join_handle, stop_source))
+        Ok(ShutdownHandle::new(join_handle, stop_source))
     }
 
     async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
@@ -84,7 +84,7 @@ impl TransportProvider for MockTransportProvider {
         _listen_addr: String,
         _handler: H,
         _logger: Logger,
-    ) -> Result<TransportTasks>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler,
     {

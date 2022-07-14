@@ -1,12 +1,12 @@
 use async_std::task::JoinHandle;
 use stop_token::StopSource;
 
-pub struct TransportTasks {
+pub struct ShutdownHandle {
     handle: JoinHandle<()>,
     stop_source: StopSource,
 }
 
-impl TransportTasks {
+impl ShutdownHandle {
     pub fn new(handle: JoinHandle<()>, stop_source: StopSource) -> Self {
         Self {
             handle,

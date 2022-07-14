@@ -1,5 +1,4 @@
-// Portions are copied from free5GC project, licensed under Apache License 2.0, January 2004.
-// License file: https://raw.githubusercontent.com/free5gc/free5gc/main/LICENSE
+// Portions are copied from free5GC project, licensed under Apache License 2.0, January 2004 - see FREE5GC-LICENSE.txt.
 
 package main
 

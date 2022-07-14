@@ -3,7 +3,7 @@
 use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{
     Indication, IndicationHandler, Message, Procedure, RequestError, RequestMessageHandler,
-    RequestProvider, SctpTransportProvider, TnlaEvent, TransportProvider, TransportTasks,
+    RequestProvider, SctpTransportProvider, ShutdownHandle, TnlaEvent, TransportProvider,
 };
 use anyhow::Result;
 use async_channel::Sender;
@@ -41,7 +41,7 @@ impl Stack {
         connect_address: String,
         application: A,
         logger: Logger,
-    ) -> Result<TransportTasks> {
+    ) -> Result<ShutdownHandle> {
         let receiver = StackReceiver {
             application,
             pending_requests: self.pending_requests.clone(),
@@ -57,7 +57,7 @@ impl Stack {
         listen_address: String,
         application: A,
         logger: Logger,
-    ) -> Result<TransportTasks> {
+    ) -> Result<ShutdownHandle> {
         let receiver = StackReceiver {
             application,
             pending_requests: self.pending_requests.clone(),

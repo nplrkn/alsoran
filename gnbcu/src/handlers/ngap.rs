@@ -39,7 +39,7 @@ impl EventHandler for NgapHandler {
 impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         debug!(&logger, "DownlinkNasTransport(Nas) <<");
-        // To do - retrieve UE context by ran_ue_ngap_id.
+        // TODO - retrieve UE context by ran_ue_ngap_id.
         let ue = UeContext {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
@@ -68,7 +68,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
                 return;
             }
         };
-        let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).bytes());
+        let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
         debug!(&logger, "<< DlInformationTransfer(Nas)");
         self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
     }

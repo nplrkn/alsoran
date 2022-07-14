@@ -92,7 +92,7 @@ impl RrcHandler {
 
         debug!(logger, "<< RrcSetup");
         self.0
-            .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.bytes()), logger)
+            .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.into()), logger)
             .await;
         Ok(())
     }

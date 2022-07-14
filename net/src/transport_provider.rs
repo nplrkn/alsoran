@@ -1,4 +1,4 @@
-use crate::{tnla_event_handler::TnlaEventHandler, TransportTasks};
+use crate::{tnla_event_handler::TnlaEventHandler, ShutdownHandle};
 use anyhow::Result;
 use async_net::SocketAddr;
 use async_trait::async_trait;
@@ -6,8 +6,6 @@ use sctp::Message;
 use slog::Logger;
 
 //pub struct Binding;
-
-// TODO: Message should be a byte array slice or a Vec<u8>?
 
 /// The TransportProvider trait abstracts the transport, for example, to allow a non-SCTP test transport to be used.
 #[async_trait]
@@ -19,7 +17,7 @@ pub trait TransportProvider: Send + Sync + 'static {
         listen_addr: String,
         handler: H,
         logger: Logger,
-    ) -> Result<TransportTasks>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler;
 
@@ -28,7 +26,7 @@ pub trait TransportProvider: Send + Sync + 'static {
         connect_addr_string: String,
         handler: H,
         logger: Logger,
-    ) -> Result<TransportTasks>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler;
 

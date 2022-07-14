@@ -1,6 +1,6 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
-use crate::{TransportProvider, TransportTasks};
+use crate::{ShutdownHandle, TransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;
@@ -53,7 +53,7 @@ impl TransportProvider for SctpTransportProvider {
         connect_addr_string: String,
         handler: H,
         logger: Logger,
-    ) -> Result<TransportTasks>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler,
     {
@@ -96,7 +96,7 @@ impl TransportProvider for SctpTransportProvider {
                 }
             }
         });
-        Ok(TransportTasks::new(join_handle, stop_source))
+        Ok(ShutdownHandle::new(join_handle, stop_source))
     }
 
     // Return the set of TNLA remote address to which we are currently connected
@@ -109,7 +109,7 @@ impl TransportProvider for SctpTransportProvider {
         listen_addr: String,
         handler: H,
         logger: Logger,
-    ) -> Result<TransportTasks>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler,
     {
@@ -158,7 +158,7 @@ impl TransportProvider for SctpTransportProvider {
             future::join_all(connection_tasks).await;
             trace!(logger, "Connection tasks finished");
         });
-        Ok(TransportTasks::new(join_handle, stop_source))
+        Ok(ShutdownHandle::new(join_handle, stop_source))
     }
 }
 
