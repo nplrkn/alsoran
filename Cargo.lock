@@ -307,6 +307,7 @@ dependencies = [
  "slog-envlogger",
  "slog-term",
  "sloggers",
+ "stop-token",
 ]
 
 [[package]]
@@ -760,6 +761,7 @@ dependencies = [
  "async-std",
  "async-stream",
  "async-trait",
+ "common",
  "errno",
  "futures",
  "futures-core",

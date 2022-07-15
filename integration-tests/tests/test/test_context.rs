@@ -1,11 +1,10 @@
 use anyhow::Result;
-use async_std::task::JoinHandle;
+use common::ShutdownHandle;
 use gnbcu::{Config, Gnbcu};
 use mocks::MockAmf;
 use mocks::MockDu;
 use slog::{info, o, trace, Logger};
 use std::{panic, process};
-use stop_token::StopSource;
 
 pub struct TestContext {
     pub amf: MockAmf,
@@ -15,8 +14,7 @@ pub struct TestContext {
 }
 
 struct InternalWorkerInfo {
-    pub stop_source: StopSource,
-    pub task: JoinHandle<()>,
+    pub shutdown_handle: ShutdownHandle,
     pub config: Config,
 }
 
@@ -96,11 +94,10 @@ impl TestContext {
         let mut config = Config::default();
         config.f1ap_bind_port += worker_number;
 
-        let (stop_source, task) =
+        let shutdown_handle =
             Gnbcu::spawn(config.clone(), &self.logger.new(o!("cu-w"=> worker_number))).unwrap();
         self.workers.push(InternalWorkerInfo {
-            stop_source,
-            task,
+            shutdown_handle,
             config,
         })
     }
@@ -108,11 +105,9 @@ impl TestContext {
     pub async fn terminate(self) {
         trace!(self.logger, "Terminate workers");
         for worker in self.workers {
-            drop(worker.stop_source);
-
+            worker.shutdown_handle.graceful_shutdown().await;
             trace!(self.logger, "Wait for worker to terminate connection");
             self.amf.expect_connection().await;
-            worker.task.await;
         }
 
         info!(self.logger, "Terminate mock AMF");

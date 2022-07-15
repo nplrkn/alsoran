@@ -6,15 +6,23 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Code review (incl commented out code and TODOs) - gnbcu
 - Fix failing test
 - Get approval to publish
+- Rerun live test
+- Review all readmes as seen on Github
+- Set to public
 -----------
 - Have the integration test not use real sockets and run in parallel
 -----------
 - Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
+-----------
+- Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Generate procedures for Rrc.  Need a new kind of transport provider (not an SCTP one).
 - Implement setuprelease
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
 -----------
+- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
+-----------
+- Have the integration test not use real sockets and run in parallel
 - Adopt https://github.com/cucumber-rs/cucumber for integration tests
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.

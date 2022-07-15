@@ -14,7 +14,6 @@ pub struct F1apHandler {
 }
 
 impl F1apHandler {
-    // So called because the the F1apCu implements the Application trait.
     pub fn new_f1ap_application(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
         F1apCu::new(F1apHandler {
             _gnbcu: gnbcu,

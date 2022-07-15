@@ -132,7 +132,6 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
 
         // If it matches a pending request, route it back over the response channel.
 
-        // TODO switch to read write lock
         let position = self
             .pending_requests
             .lock()

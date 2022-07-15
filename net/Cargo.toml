@@ -8,6 +8,7 @@ doctest = false
 
 [dependencies]
 sctp = { path = "../sctp" }
+common = { path = "../common"}
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.51"
 slog = "2.7.0"

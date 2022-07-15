@@ -16,7 +16,6 @@ pub struct NgapHandler {
 }
 
 impl NgapHandler {
-    // So called because the the NgapGnb implements the Application trait.
     pub fn new_ngap_application(gnbcu: Gnbcu) -> NgapGnb<NgapHandler> {
         NgapGnb::new(NgapHandler { gnbcu })
     }
@@ -31,7 +30,7 @@ impl EventHandler for NgapHandler {
             }
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
         };
-        self.gnbcu.connected_amf_change(logger).await;
+        // TODO
     }
 }
 
@@ -82,7 +81,17 @@ impl RequestProvider<InitialContextSetupProcedure> for NgapHandler {
         logger: &Logger,
     ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
         debug!(logger, "Initial Context Setup Procedure");
-        procedures::initial_context_setup(&self.gnbcu, r, logger).await
+        procedures::initial_context_setup(&self.gnbcu, &r, logger)
+            .await
+            .map_err(|cause| {
+                RequestError::UnsuccessfulOutcome(InitialContextSetupFailure {
+                    amf_ue_ngap_id: r.amf_ue_ngap_id,
+                    ran_ue_ngap_id: r.ran_ue_ngap_id,
+                    pdu_session_resource_failed_to_setup_list_cxt_fail: None,
+                    cause,
+                    criticality_diagnostics: None,
+                })
+            })
     }
 }
 
