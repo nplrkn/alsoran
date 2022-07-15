@@ -3,7 +3,6 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Code review (incl commented out code and TODOs) - gnbcu
 - Fix failing test
 - Get approval to publish
 - Rerun live test
@@ -30,6 +29,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Code review (incl commented out code and TODOs) - gnbcu
 - Redo roadmap
 - In demo, gnbdu-sim has inconsistent message logging
 - At end of demo, gnbcu panicked on Ctrl-C with 'not yet implemented'.  AMF was Ctrl-C'd first.  AMF logs indicate it is sending AMF Status Indication.  Crash is in ngap_gnb.rs.  Add an FV for this.
