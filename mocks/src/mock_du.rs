@@ -1,87 +1,65 @@
+use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
-use async_channel::{Receiver, Sender};
-use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Indication, Message, TransportProvider};
-use net::{SctpTransportProvider, TnlaEvent, TnlaEventHandler};
+use net::{AperSerde, Indication};
 use pdcp::PdcpPdu;
 use rrc::*;
-use slog::{info, o, trace, Logger};
-use stop_token::{StopSource, StopToken};
+use slog::{info, o, Logger};
+use std::ops::{Deref, DerefMut};
 
-// TS38.472, section 7 - the Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP
-// for the application layer protocol F1AP is 62
-const F1AP_SCTP_PPID: u32 = 62;
+impl Pdu for F1apPdu {}
 
-// TODO make generic and commonize with MockAmf?
-#[derive(Clone)]
 pub struct MockDu {
-    pub stop_token: StopToken,
-    pub receiver: Receiver<Option<F1apPdu>>,
-    pub sender: SctpTransportProvider,
-    internal_sender: Sender<Option<F1apPdu>>,
-    logger: Logger,
+    mock: Mock<F1apPdu>,
 }
 
+impl Deref for MockDu {
+    type Target = Mock<F1apPdu>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.mock
+    }
+}
+
+impl DerefMut for MockDu {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.mock
+    }
+}
+
+const F1AP_SCTP_PPID: u32 = 62;
+
 impl MockDu {
-    pub async fn new(logger: &Logger) -> (MockDu, StopSource) {
+    pub async fn new(logger: &Logger) -> MockDu {
         let logger = logger.new(o!("du" => 1));
-        let (internal_sender, receiver) = async_channel::unbounded();
-        let stop_source = StopSource::new();
-        let sender = SctpTransportProvider::new(F1AP_SCTP_PPID);
-
-        (
-            MockDu {
-                stop_token: stop_source.token(),
-                receiver,
-                sender,
-                internal_sender,
-                logger,
-            },
-            stop_source,
-        )
+        let mock = Mock::new(logger, F1AP_SCTP_PPID).await;
+        MockDu { mock }
     }
 
-    pub async fn establish_connection(&self, connect_addr_string: String) -> Result<()> {
-        let _task = self
-            .sender
-            .clone()
-            .maintain_connection(
-                connect_addr_string,
-                self.stop_token.clone(),
-                self.clone(),
-                self.logger.clone(),
-            )
-            .await?;
-
-        // Wait for the connection to be accepted.
-        trace!(self.logger, "Wait for connection to be accepted by CU");
-        match self.receiver.recv().await? {
-            None => {
-                info!(self.logger, "Successful connection establishment to CU");
-                Ok(())
-            }
-            Some(_) => Err(anyhow!("Unexpectedly received a message")),
-        }
-    }
-
-    /// Receive an F1apPdu from the GNB-CU, with a 0.5s timeout.
-    async fn recv(&self) -> F1apPdu {
-        async_std::future::timeout(std::time::Duration::from_millis(500), self.receiver.recv())
-            .await
-            .unwrap()
-            .unwrap()
-            .unwrap()
+    pub async fn terminate(self) {
+        self.mock.terminate().await
     }
 
     pub async fn perform_f1_setup(&self) -> Result<()> {
+        self.send_f1_setup_request().await?;
+        self.receive_f1_setup_response().await;
+        Ok(())
+    }
+
+    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
+        self.send_rrc_setup_request().await?;
+        let rrc_setup = self.receive_rrc_setup().await?;
+        self.send_rrc_setup_complete(rrc_setup, nas_message).await
+    }
+
+    async fn send_f1_setup_request(&self) -> Result<()> {
         let pdu =
             f1ap::F1apPdu::InitiatingMessage(InitiatingMessage::F1SetupRequest(F1SetupRequest {
                 transaction_id: TransactionId(0),
                 gnb_du_id: GnbDuId(123),
                 gnb_du_rrc_version: RrcVersion {
-                    latest_rrc_version: bitvec![Msb0, u8;0, 0, 0],
+                    latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
                 },
                 gnb_du_name: None,
                 gnb_du_served_cells_list: None,
@@ -90,25 +68,25 @@ impl MockDu {
                 extended_gnb_cu_name: None,
             }));
         info!(self.logger, "F1SetupRequest >>");
-        self.sender
-            .send_message(pdu.into_bytes()?, &self.logger)
-            .await?;
-
-        let _response = self.recv().await;
-        info!(self.logger, "F1SetupResponse <<");
+        self.send(pdu.into_bytes()?).await;
         Ok(())
     }
 
-    pub async fn send_rrc_setup_request(&self) -> Result<()> {
+    async fn receive_f1_setup_response(&self) {
+        let _response = self.receive_pdu().await;
+        info!(self.logger, "F1SetupResponse <<");
+    }
+
+    async fn send_rrc_setup_request(&self) -> Result<()> {
         let logger = &self.logger;
 
         // Build RRC Setup Request
         let rrc_setup_request = UlCcchMessage {
             message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(RrcSetupRequest {
                 rrc_setup_request: RrcSetupRequestIEs {
-                    ue_identity: InitialUeIdentity::Ng5gSTmsiPart1(bitvec![Msb0, u8; 0;39]),
+                    ue_identity: InitialUeIdentity::Ng5gSTmsiPart1(bitvec![u8, Msb0; 0;39]),
                     establishment_cause: EstablishmentCause::MtAccess,
-                    spare: bitvec![Msb0, u8;0;1],
+                    spare: bitvec![u8, Msb0;0;1],
                 },
             })),
         }
@@ -122,7 +100,7 @@ impl MockDu {
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
                 nr_cgi: NrCgi {
                     plmn_identity: PlmnIdentity(vec![0, 1, 2]),
-                    nr_cell_identity: NrCellIdentity(bitvec![Msb0,u8;0;36]),
+                    nr_cell_identity: NrCellIdentity(bitvec![u8,Msb0;0;36]),
                 },
                 c_rnti: CRnti(14),
                 rrc_container: RrcContainer(rrc_setup_request),
@@ -135,30 +113,31 @@ impl MockDu {
 
         info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
 
-        self.sender.send_message(f1_indication, logger).await
+        self.send(f1_indication).await;
+        Ok(())
     }
 
-    pub async fn perform_rrc_setup(&self, nas_message: Vec<u8>) -> Result<()> {
-        let logger = &self.logger;
-        self.send_rrc_setup_request().await?;
-
+    async fn receive_rrc_setup(&self) -> Result<RrcSetup> {
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let dl_rrc_message_transfer = match self.recv().await {
+        let dl_rrc_message_transfer = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
-
         let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
-
         let rrc_message_bytes = pdcp_pdu.view_inner()?;
-
         let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
             DlCcchMessageType::C1(C1_1::RrcSetup(x)) => Ok(x),
             x => Err(anyhow!("Unexpected RRC message {:?}", x)),
         }?;
-        info!(logger, "DlRrcMessageTransfer(RrcSetup) <<");
+        info!(&self.logger, "DlRrcMessageTransfer(RrcSetup) <<");
+        Ok(rrc_setup)
+    }
 
-        // Build RRC Setup Response
+    async fn send_rrc_setup_complete(
+        &self,
+        rrc_setup: RrcSetup,
+        nas_message: Vec<u8>,
+    ) -> Result<()> {
         let rrc_setup_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcSetupComplete(RrcSetupComplete {
                 rrc_transaction_identifier: rrc_setup.rrc_transaction_identifier,
@@ -176,7 +155,7 @@ impl MockDu {
         };
 
         info!(
-            logger,
+            &self.logger,
             "UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request)) >>"
         );
         self.send_ul_rrc(rrc_setup_complete).await
@@ -210,12 +189,13 @@ impl MockDu {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
             srb_id: SrbId(1),
-            rrc_container: RrcContainer(pdcp_pdu.bytes()),
+            rrc_container: RrcContainer(pdcp_pdu.into()),
             selected_plmn_id: None,
             new_gnb_du_ue_f1ap_id: None,
         })?;
 
-        self.sender.send_message(f1_indication, &self.logger).await
+        self.send(f1_indication).await;
+        Ok(())
     }
 
     pub async fn receive_nas(&self) -> Result<Vec<u8>> {
@@ -227,15 +207,15 @@ impl MockDu {
         nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
     }
 
-    pub async fn receive_dl_rrc(&self) -> Result<DlRrcMessageTransfer> {
-        match self.recv().await {
+    async fn receive_dl_rrc(&self) -> Result<DlRrcMessageTransfer> {
+        match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }
     }
 
     pub async fn receive_ue_context_setup_request(&self) -> Result<SecurityModeCommand> {
-        let ue_context_setup_request = match self.recv().await {
+        let ue_context_setup_request = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
@@ -289,9 +269,8 @@ impl MockDu {
         .into_bytes()?;
         info!(&self.logger, "UeContextSetupResponse >>");
 
-        self.sender
-            .send_message(ue_context_setup_response, &self.logger)
-            .await
+        self.send(ue_context_setup_response).await;
+        Ok(())
     }
 
     pub async fn send_security_mode_complete(
@@ -409,24 +388,5 @@ fn nas_from_dl_transfer_rrc_container(rrc_container: RrcContainer) -> Result<Vec
             ..
         })) => Ok(x.0),
         x => Err(anyhow!("Unexpected RRC message {:?}", x)),
-    }
-}
-#[async_trait]
-impl TnlaEventHandler for MockDu {
-    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-        self.internal_sender.send(None).await.unwrap();
-    }
-
-    async fn handle_message(
-        &self,
-        message: Message,
-        _tnla_id: u32,
-        _logger: &Logger,
-    ) -> Option<Message> {
-        self.internal_sender
-            .send(Some(F1apPdu::from_bytes(&message).unwrap()))
-            .await
-            .unwrap();
-        None
     }
 }

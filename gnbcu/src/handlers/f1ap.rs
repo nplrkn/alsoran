@@ -14,7 +14,6 @@ pub struct F1apHandler {
 }
 
 impl F1apHandler {
-    // So called because the the F1apCu implements the Application trait.
     pub fn new_f1ap_application(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
         F1apCu::new(F1apHandler {
             _gnbcu: gnbcu,
@@ -36,7 +35,7 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,
             gnb_cu_rrc_version: RrcVersion {
-                latest_rrc_version: bitvec![Msb0, u8;0, 0, 0],
+                latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
             },
             gnb_cu_name: None,
             cells_to_be_activated_list: None,

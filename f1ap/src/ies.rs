@@ -3,7 +3,7 @@ use super::common::*;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 use bitvec::prelude::*;
 #[allow(dead_code)]
-pub type BitString = BitVec<Msb0, u8>;
+pub type BitString = BitVec<u8, Msb0>;
 #[allow(unused_imports)]
 use num_enum::TryFromPrimitive;
 

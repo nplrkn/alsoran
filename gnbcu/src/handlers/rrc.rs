@@ -92,7 +92,7 @@ impl RrcHandler {
 
         debug!(logger, "<< RrcSetup");
         self.0
-            .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.bytes()), logger)
+            .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.into()), logger)
             .await;
         Ok(())
     }
@@ -120,7 +120,7 @@ impl RrcHandler {
         // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk-convert?)
         let nr_cgi = ngap::NrCgi {
             plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
-            nr_cell_identity: ngap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
+            nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         };
 
         // Initial UE Message to the AMF containing the enclosed NAS message.
@@ -180,7 +180,7 @@ impl RrcHandler {
         // Todo - should be from Ue context
         let nr_cgi = ngap::NrCgi {
             plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
-            nr_cell_identity: ngap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
+            nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         };
 
         let m = UplinkNasTransport {

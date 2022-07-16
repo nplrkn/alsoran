@@ -54,7 +54,7 @@ fn test_ng_setup() -> Result<(), AperCodecError> {
     let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
             plmn_identity: PlmnIdentity(vec![2, 3, 2]),
-            gnb_id: GnbId::GnbId(bitvec![Msb0,u8; 1; 22]),
+            gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
         }),
         ran_node_name: None,
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {

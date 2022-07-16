@@ -1,6 +1,6 @@
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
-use crate::TransportProvider;
+use crate::{ShutdownHandle, TransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;
@@ -12,8 +12,7 @@ use slog::{info, o, trace, warn, Logger};
 use std::fmt::Debug;
 use std::net::SocketAddr;
 use std::time::Duration;
-use stop_token::StopToken;
-use task::JoinHandle;
+use stop_token::StopSource;
 
 #[derive(Debug, Clone)]
 pub struct SctpTransportProvider {
@@ -52,15 +51,16 @@ impl TransportProvider for SctpTransportProvider {
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
-        stop_token: StopToken,
         handler: H,
         logger: Logger,
-    ) -> Result<JoinHandle<()>>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler,
     {
         let assoc_id = 1; // TODO
-        let task = task::spawn(async move {
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
+        let join_handle = task::spawn(async move {
             loop {
                 match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
                     Ok(assoc) => {
@@ -96,7 +96,7 @@ impl TransportProvider for SctpTransportProvider {
                 }
             }
         });
-        Ok(task)
+        Ok(ShutdownHandle::new(join_handle, stop_source))
     }
 
     // Return the set of TNLA remote address to which we are currently connected
@@ -107,24 +107,19 @@ impl TransportProvider for SctpTransportProvider {
     async fn serve<H>(
         self,
         listen_addr: String,
-        stop_token: StopToken,
         handler: H,
         logger: Logger,
-    ) -> Result<JoinHandle<()>>
+    ) -> Result<ShutdownHandle>
     where
         H: TnlaEventHandler,
     {
         let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
-
-        // let wrapped_handler = Wrapper {
-        //     handler,
-        //     codec: self.codec,
-        // };
-
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
         let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
         let stream = stream.take_until(stop_token.clone());
 
-        Ok(task::spawn(async move {
+        let join_handle = task::spawn(async move {
             trace!(logger, "Listening for SCTP connections on {:?}", addr);
             pin_mut!(stream);
             let mut connection_tasks = vec![];
@@ -162,7 +157,8 @@ impl TransportProvider for SctpTransportProvider {
             trace!(logger, "Wait for connection tasks to finish");
             future::join_all(connection_tasks).await;
             trace!(logger, "Connection tasks finished");
-        }))
+        });
+        Ok(ShutdownHandle::new(join_handle, stop_source))
     }
 }
 

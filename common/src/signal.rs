@@ -5,7 +5,7 @@ use signal_hook::consts::signal::*;
 use signal_hook_async_std::Signals;
 
 pub async fn wait_for_signal() -> Result<i32> {
-    let signals = Signals::new(&[SIGHUP, SIGTERM, SIGINT, SIGQUIT]).unwrap();
+    let signals = Signals::new(&[SIGHUP, SIGTERM, SIGINT, SIGQUIT])?;
     let handle = signals.handle();
     let (sig_sender, sig_receiver) = async_channel::unbounded();
     let signals_task = async_std::task::spawn(handle_signals(signals, sig_sender));

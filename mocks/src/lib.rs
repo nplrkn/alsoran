@@ -1,3 +1,4 @@
+mod mock;
 mod mock_du;
 pub use mock_du::MockDu;
 mod mock_amf;

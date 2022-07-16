@@ -2,7 +2,7 @@ use crate::{Gnbcu, UeContext};
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
-use net::{AperSerde, RequestError, RequestProvider, Stack};
+use net::{AperSerde, RequestProvider, Stack};
 use ngap::*;
 use pdcp::PdcpPdu;
 use rrc::*;
@@ -10,18 +10,18 @@ use slog::{debug, Logger};
 
 // Carry out initial context setup procedure.
 //
-// 1.    Ngap Initial Context Setup Request + Nas <-
-// 2. <- F1ap Ue Context Setup Request + Rrc Security Mode Command
-// 3. -> F1ap Ue Context Setup Response
-// 4. -> Rrc Security Mode Complete
-// 5. <- Rrc Reconfiguration + Nas
-// 6. -> Rrc Reconfiguration Complete
-// 7.    Ngap Initial Context Setup Response ->
+// 1.    Ngap Initial Context Setup Request + Nas <<
+// 2. << F1ap Ue Context Setup Request + Rrc Security Mode Command
+// 3. >> F1ap Ue Context Setup Response
+// 4. >> Rrc Security Mode Complete
+// 5. << Rrc Reconfiguration + Nas
+// 6. >> Rrc Reconfiguration Complete
+// 7.    Ngap Initial Context Setup Response >>
 pub async fn initial_context_setup(
     gnbcu: &Gnbcu,
-    r: InitialContextSetupRequest,
+    r: &InitialContextSetupRequest,
     logger: &Logger,
-) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
+) -> Result<InitialContextSetupResponse, Cause> {
     debug!(&logger, "InitialContextSetupRequest(Nas) << ");
 
     // Todo - this should be Result<InitialContextSetupResponse, Cause>, and the caller
@@ -49,31 +49,37 @@ pub async fn initial_context_setup(
         &logger,
     )
     .await
-    .map_err(|_| RequestError::UnsuccessfulOutcome(build_initial_context_setup_failure()))?;
+    .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
     debug!(&logger, ">> UeContextSetupResponse");
 
     // Also get back the response from the UE to the (inner) Security Mode Command.
-    let _rrc_security_mode_complete = rrc_transaction.recv().await?;
+    let _rrc_security_mode_complete = rrc_transaction
+        .recv()
+        .await
+        .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
     debug!(&logger, ">> RrcSecurityModeComplete");
 
     // Build Rrc Reconfiguration including the Nas message from earlier.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
     let rrc_reconfiguration = build_rrc_reconfiguration(
         RrcTransactionIdentifier(3),
-        r.nas_pdu.map(|x| DedicatedNasMessage(x.0)),
+        r.nas_pdu.clone().map(|x| DedicatedNasMessage(x.0)),
     );
     let rrc_container = make_rrc_container(rrc_reconfiguration)?;
 
     // Send to the UE and get back the response.
     debug!(&logger, "<< RrcReconfiguration");
     gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
-    let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction.recv().await?;
+    let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
+        .recv()
+        .await
+        .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
     debug!(&logger, ">> RrcReconfigurationComplete");
 
     // Reply to the AMF.
     debug!(&logger, "InitialContextSetupResponse >>");
     Ok(InitialContextSetupResponse {
-        amf_ue_ngap_id: r.amf_ue_ngap_id,
+        amf_ue_ngap_id: r.amf_ue_ngap_id.clone(),
         ran_ue_ngap_id: RanUeNgapId(1),
         pdu_session_resource_setup_list_cxt_res: None,
         pdu_session_resource_failed_to_setup_list_cxt_res: None,
@@ -81,9 +87,11 @@ pub async fn initial_context_setup(
     })
 }
 
-fn make_rrc_container(rrc: DlDcchMessage) -> Result<f1ap::RrcContainer> {
-    let rrc_bytes = rrc.into_bytes()?;
-    Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).bytes()))
+fn make_rrc_container(rrc: DlDcchMessage) -> Result<f1ap::RrcContainer, Cause> {
+    let rrc_bytes = rrc
+        .into_bytes()
+        .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
+    Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).into()))
 }
 
 fn build_rrc_security_mode_command(
@@ -118,7 +126,7 @@ fn build_ue_context_setup_request(
         gnb_du_ue_f1ap_id: Some(GnbDuUeF1apId(1)),
         sp_cell_id: f1ap::NrCgi {
             plmn_identity: f1ap::PlmnIdentity(vec![0, 1, 2]),
-            nr_cell_identity: f1ap::NrCellIdentity(bitvec![Msb0,u8;0;36]),
+            nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
         },
         serv_cell_index: f1ap::ServCellIndex(0),
         sp_cell_ul_configured: None,
@@ -186,8 +194,4 @@ fn build_rrc_reconfiguration(
             }),
         })),
     }
-}
-
-fn build_initial_context_setup_failure() -> InitialContextSetupFailure {
-    todo!()
 }

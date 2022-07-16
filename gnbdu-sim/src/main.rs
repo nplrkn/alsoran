@@ -7,10 +7,9 @@ use ue::Ue;
 #[async_std::main]
 async fn main() -> Result<()> {
     let logger = common::logging::init_terminal_logging();
-    let (du, stop_source) = MockDu::new(&logger).await;
+    let mut du = MockDu::new(&logger).await;
 
-    du.establish_connection("127.0.0.1:38472".to_string())
-        .await?;
+    du.connect("127.0.0.1:38472".to_string()).await;
     du.perform_f1_setup().await?;
 
     let mut ue = Ue::new();
@@ -49,7 +48,7 @@ async fn main() -> Result<()> {
     info!(&logger, ">> NAS Registration Complete");
     du.send_nas(nas_message).await?;
 
-    drop(stop_source);
+    du.terminate().await;
 
     Ok(())
 }

@@ -1,79 +1,43 @@
+use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
-use async_channel::{Receiver, Sender};
-use async_std::task::JoinHandle;
-use async_trait::async_trait;
 use bitvec::prelude::*;
-use net::{AperSerde, SctpTransportProvider, TnlaEvent, TnlaEventHandler, TransportProvider};
+use net::AperSerde;
 use ngap::*;
-use slog::{debug, info, o, trace, Logger};
-use std::fmt::Debug;
-use stop_token::StopSource;
+use slog::{debug, info, o, Logger};
+use std::ops::Deref;
+
+impl Pdu for NgapPdu {}
+
+pub struct MockAmf {
+    mock: Mock<NgapPdu>,
+}
+
+impl Deref for MockAmf {
+    type Target = Mock<NgapPdu>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.mock
+    }
+}
 
 const NGAP_SCTP_PPID: u32 = 60;
 
-// TODO why pub?
-pub struct MockAmf {
-    pub stop_source: StopSource,
-    pub receiver: Receiver<Option<NgapPdu>>,
-    pub sender: SctpTransportProvider,
-    pub task: JoinHandle<()>,
-    logger: Logger,
-}
-
-#[derive(Debug, Clone)]
-struct Handler(pub Sender<Option<NgapPdu>>);
-
 impl MockAmf {
     pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
-        let (internal_sender, receiver) = async_channel::unbounded();
-        let logger = logger.new(o!("amf" => 1));
-        let stop_source = StopSource::new();
-        let server = SctpTransportProvider::new(NGAP_SCTP_PPID);
-        let task = server
-            .clone()
-            .serve(
-                amf_address.to_string(),
-                stop_source.token(),
-                Handler(internal_sender),
-                logger.clone(),
-            )
-            .await
-            .expect("Server bind failed");
-
-        MockAmf {
-            receiver,
-            stop_source,
-            sender: server,
-            task,
-            logger,
-        }
+        let mut mock = Mock::new(logger.new(o!("amf" => 1)), NGAP_SCTP_PPID).await;
+        mock.serve(amf_address.to_string()).await;
+        MockAmf { mock }
     }
 
-    pub async fn expect_connection(&self) {
-        // Wait for connection to be established - the mock TNLA event handler sends us an empty message to indicate this.
-        trace!(self.logger, "Wait for connection from worker");
-        assert!(self
-            .receiver
-            .recv()
-            .await
-            .expect("Failed mock recv")
-            .is_none());
-    }
-
-    async fn receive_ngap_pdu(&self) -> NgapPdu {
-        self.receiver
-            .recv()
-            .await
-            .expect("Expected message")
-            .expect("Expected message")
+    pub async fn terminate(self) {
+        self.mock.terminate().await
     }
 
     pub async fn handle_ng_setup(&self) -> Result<()> {
-        // Catch NG Setup from the GNB
         let logger = &self.logger;
         info!(logger, "Wait for NG Setup from GNB");
 
-        let pdu = self.receive_ngap_pdu().await;
+        let pdu = self.receive_pdu().await;
 
         if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
             info!(self.logger, "Got NG Setup, send setup response");
@@ -104,9 +68,7 @@ impl MockAmf {
                 extended_amf_name: None,
             }));
 
-        self.sender
-            .send_message(response.into_bytes()?, &logger)
-            .await?;
+        self.send(response.into_bytes()?).await;
 
         Ok(())
     }
@@ -114,9 +76,9 @@ impl MockAmf {
     fn guami(&self) -> Guami {
         Guami {
             plmn_identity: self.plmn_identity(),
-            amf_region_id: AmfRegionId(bitvec![Msb0,u8;1;8]),
-            amf_set_id: AmfSetId(bitvec![Msb0,u8;1;10]),
-            amf_pointer: AmfPointer(bitvec![Msb0,u8;1;6]),
+            amf_region_id: AmfRegionId(bitvec![u8,Msb0;1;8]),
+            amf_set_id: AmfSetId(bitvec![u8,Msb0;1;10]),
+            amf_pointer: AmfPointer(bitvec![u8,Msb0;1;6]),
         }
     }
 
@@ -134,7 +96,7 @@ impl MockAmf {
     pub async fn handle_ran_configuration_update(&self, logger: &Logger) -> Result<()> {
         debug!(logger, "Wait for RAN Configuration Update from GNB");
 
-        let pdu = self.receive_ngap_pdu().await;
+        let pdu = self.receive_pdu().await;
 
         if let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
             _ran_configuration_update,
@@ -154,9 +116,7 @@ impl MockAmf {
             ));
 
         info!(logger, "<< RanConfigurationUpdateAcknowledge");
-        self.sender
-            .send_message(response.into_bytes()?, &logger)
-            .await?;
+        self.send(response.into_bytes()?).await;
 
         Ok(())
     }
@@ -165,7 +125,7 @@ impl MockAmf {
         let logger = &self.logger;
         if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(
             _initial_ue_message,
-        )) = self.receive_ngap_pdu().await
+        )) = self.receive_pdu().await
         {
             info!(logger, ">> InitialUeMessage");
             Ok(())
@@ -189,16 +149,16 @@ impl MockAmf {
                     s_nssai: self.snssai(),
                 }]),
                 ue_security_capabilities: UeSecurityCapabilities {
-                    nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![Msb0,u8;0;16]),
+                    nr_encryption_algorithms: NrEncryptionAlgorithms(bitvec![u8,Msb0;0;16]),
                     nr_integrity_protection_algorithms: NrIntegrityProtectionAlgorithms(
-                        bitvec![Msb0,u8;0;16],
+                        bitvec![u8,Msb0;0;16],
                     ),
-                    eutr_aencryption_algorithms: EutrAencryptionAlgorithms(bitvec![Msb0,u8;0;16]),
+                    eutr_aencryption_algorithms: EutrAencryptionAlgorithms(bitvec![u8,Msb0;0;16]),
                     eutr_aintegrity_protection_algorithms: EutrAintegrityProtectionAlgorithms(
-                        bitvec![Msb0,u8;0;16],
+                        bitvec![u8,Msb0;0;16],
                     ),
                 },
-                security_key: SecurityKey(bitvec![Msb0,u8;0;256]),
+                security_key: SecurityKey(bitvec![u8,Msb0;0;256]),
                 trace_activation: None,
                 mobility_restriction_list: None,
                 ue_radio_capability: None,
@@ -230,12 +190,13 @@ impl MockAmf {
         ));
 
         info!(logger, "<< InitialContextSetupRequest");
-        self.sender.send_message(pdu.into_bytes()?, &logger).await
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 
     pub async fn receive_initial_context_setup_response(&self) -> Result<()> {
         info!(&self.logger, ">> InitialContextSetupResponse");
-        let _pdu = self.receive_ngap_pdu().await;
+        let _pdu = self.receive_pdu().await;
         Ok(())
     }
 
@@ -250,30 +211,7 @@ impl MockAmf {
                 }]),
             },
         ));
-        self.sender
-            .send_message(pdu.into_bytes()?, &self.logger)
-            .await
-    }
-}
-
-#[async_trait]
-impl TnlaEventHandler for Handler {
-    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-        self.0.send(None).await.unwrap();
-    }
-
-    // TODO indicate whether it is UE or non UE associated?
-    async fn handle_message(
-        &self,
-        message: Vec<u8>,
-        _tnla_id: u32,
-        logger: &Logger,
-    ) -> Option<Vec<u8>> {
-        trace!(logger, "Got message from GNB");
-        self.0
-            .send(Some(NgapPdu::from_bytes(&message).unwrap()))
-            .await
-            .unwrap();
-        None
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 }

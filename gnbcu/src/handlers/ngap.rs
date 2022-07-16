@@ -16,7 +16,6 @@ pub struct NgapHandler {
 }
 
 impl NgapHandler {
-    // So called because the the NgapGnb implements the Application trait.
     pub fn new_ngap_application(gnbcu: Gnbcu) -> NgapGnb<NgapHandler> {
         NgapGnb::new(NgapHandler { gnbcu })
     }
@@ -31,7 +30,7 @@ impl EventHandler for NgapHandler {
             }
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
         };
-        self.gnbcu.connected_amf_change(logger).await;
+        // TODO
     }
 }
 
@@ -39,7 +38,7 @@ impl EventHandler for NgapHandler {
 impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         debug!(&logger, "DownlinkNasTransport(Nas) <<");
-        // To do - retrieve UE context by ran_ue_ngap_id.
+        // TODO - retrieve UE context by ran_ue_ngap_id.
         let ue = UeContext {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
@@ -68,7 +67,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
                 return;
             }
         };
-        let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).bytes());
+        let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
         debug!(&logger, "<< DlInformationTransfer(Nas)");
         self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
     }
@@ -82,7 +81,17 @@ impl RequestProvider<InitialContextSetupProcedure> for NgapHandler {
         logger: &Logger,
     ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
         debug!(logger, "Initial Context Setup Procedure");
-        procedures::initial_context_setup(&self.gnbcu, r, logger).await
+        procedures::initial_context_setup(&self.gnbcu, &r, logger)
+            .await
+            .map_err(|cause| {
+                RequestError::UnsuccessfulOutcome(InitialContextSetupFailure {
+                    amf_ue_ngap_id: r.amf_ue_ngap_id,
+                    ran_ue_ngap_id: r.ran_ue_ngap_id,
+                    pdu_session_resource_failed_to_setup_list_cxt_fail: None,
+                    cause,
+                    criticality_diagnostics: None,
+                })
+            })
     }
 }
 
