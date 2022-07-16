@@ -3,7 +3,6 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Fix failing test
 - Get approval to publish
 - Rerun live test
 - Review all readmes as seen on Github
@@ -29,6 +28,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Fix failing test
 - Code review (incl commented out code and TODOs) - gnbcu
 - Redo roadmap
 - In demo, gnbdu-sim has inconsistent message logging

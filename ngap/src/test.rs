@@ -31,13 +31,8 @@ fn make_ng_setup() -> NgSetupRequest {
     }
 }
 
-use bitvec::view::AsBits;
 #[test]
 fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
-    let value = "free5gc".to_string();
-    let bits: &BitSlice<u8, Msb0> = value.as_bits();
-    let bytes = bits.to_bitvec().into_vec();
-    println!("{:?}", hex::encode(bytes));
     let ng_setup = make_ng_setup();
     let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
     let bytes = ngap_pdu.into_bytes()?;
