@@ -20,8 +20,8 @@ impl PdcpPdu {
     }
 }
 
-impl Into<Vec<u8>> for PdcpPdu {
-    fn into(self) -> Vec<u8> {
-        self.0
+impl From<PdcpPdu> for Vec<u8> {
+    fn from(p: PdcpPdu) -> Self {
+        p.0
     }
 }
