@@ -1,5 +1,5 @@
 use super::RrcHandler;
-use crate::{Gnbcu, UeContext};
+use crate::{Gnbcu, UeState};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -58,7 +58,7 @@ impl IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler {
         // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER,
         // the gNB-CU shall take it into account as specified in TS 38.401 [4]."
 
-        let ue_context = UeContext {
+        let ue_context = UeState {
             gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
         };
@@ -79,7 +79,7 @@ impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
         // and use it for further signalling."
 
         // TODO - retrive existing UE Context by looking up r.gnb_cu_ue_f1ap_id.
-        let ue_context = UeContext {
+        let ue_context = UeState {
             gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
             gnb_cu_ue_f1ap_id: r.gnb_cu_ue_f1ap_id,
         };

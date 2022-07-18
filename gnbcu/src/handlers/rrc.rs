@@ -1,4 +1,4 @@
-use crate::{Gnbcu, UeContext};
+use crate::{Gnbcu, UeState};
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -16,7 +16,7 @@ impl RrcHandler {
         RrcHandler(gnbcu)
     }
 
-    pub async fn dispatch_ccch(&self, ue: UeContext, message: &[u8], logger: &Logger) {
+    pub async fn dispatch_ccch(&self, ue: UeState, message: &[u8], logger: &Logger) {
         match UlCcchMessage::from_bytes(message) {
             Err(e) => {
                 warn!(logger, "Failed to decode RRC message: {:?}", e)
@@ -34,7 +34,7 @@ impl RrcHandler {
         }
     }
 
-    pub async fn dispatch_dcch(&self, ue: UeContext, message: &[u8], logger: &Logger) {
+    pub async fn dispatch_dcch(&self, ue: UeState, message: &[u8], logger: &Logger) {
         let message = match UlDcchMessage::from_bytes(message) {
             Err(e) => {
                 warn!(logger, "Failed to decode RRC message: {:?}", e);
@@ -66,7 +66,7 @@ impl RrcHandler {
 
     async fn rrc_setup_request(
         &self,
-        ue: UeContext,
+        ue: UeState,
         _req: RrcSetupRequest,
         logger: &Logger,
     ) -> Result<()> {
@@ -99,7 +99,7 @@ impl RrcHandler {
 
     async fn rrc_setup_complete(
         &self,
-        _ue: UeContext,
+        _ue: UeState,
         req: RrcSetupComplete,
         logger: &Logger,
     ) -> Result<()> {
@@ -160,7 +160,7 @@ impl RrcHandler {
 
     async fn ul_information_transfer(
         &self,
-        _ue: UeContext,
+        _ue: UeState,
         req: UlInformationTransfer,
         logger: &Logger,
     ) -> Result<()> {
@@ -211,7 +211,7 @@ impl RrcHandler {
 impl Gnbcu {
     pub async fn send_rrc_to_ue(
         &self,
-        ue: UeContext,
+        ue: UeState,
         rrc_container: f1ap::RrcContainer,
         logger: &Logger,
     ) {

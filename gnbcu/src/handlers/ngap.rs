@@ -1,4 +1,4 @@
-use crate::{procedures, Gnbcu, UeContext};
+use crate::{procedures, Gnbcu, UeState};
 use anyhow::Result;
 use async_trait::async_trait;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId};
@@ -39,7 +39,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         debug!(&logger, "DownlinkNasTransport(Nas) <<");
         // TODO - retrieve UE context by ran_ue_ngap_id.
-        let ue = UeContext {
+        let ue = UeState {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
         };

@@ -1,4 +1,4 @@
-use crate::{Gnbcu, UeContext};
+use crate::{Gnbcu, UeState};
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
@@ -28,7 +28,7 @@ pub async fn initial_context_setup(
     // should create the InitialContextSetupFailure.
 
     // Todo - retrieve UE context by ran_ue_ngap_id.
-    let ue = UeContext {
+    let ue = UeState {
         gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
         gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
     };

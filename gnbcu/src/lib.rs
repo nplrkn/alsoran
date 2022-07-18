@@ -1,18 +1,18 @@
 mod config;
+mod datastore;
 mod handlers;
 mod procedures;
 mod rrc_transaction;
-mod ue_context;
 use anyhow::Result;
 use async_channel::Sender;
 pub use config::Config;
+use datastore::UeState;
 use handlers::RrcHandler;
 use net::{SctpTransportProvider, ShutdownHandle, Stack};
 use rrc::UlDcchMessage;
 use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use slog::{info, Logger};
 use stop_token::{StopSource, StopToken};
-use ue_context::UeContext;
 
 use crate::handlers::{F1apHandler, NgapHandler};
 
@@ -96,14 +96,14 @@ impl Gnbcu {
     }
 
     /// Start a new RRC transaction.
-    pub async fn new_rrc_transaction(&self, ue: &UeContext) -> RrcTransaction {
+    pub async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction {
         self.rrc_transactions
             .new_transaction(ue.gnb_cu_ue_f1ap_id.0)
             .await
     }
 
     /// Determine if this is a response to a local pending RRC transaction.
-    pub async fn match_rrc_transaction(&self, ue: &UeContext) -> Option<Sender<UlDcchMessage>> {
+    pub async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>> {
         // This is not a robust mechanism.  The calling task is only interested in the next matching
         // response to the RRC transactions it initiates, whereas we are giving it the next UlDcchMessage of any kind.
         // TODO
