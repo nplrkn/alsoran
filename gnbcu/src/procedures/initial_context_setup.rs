@@ -1,4 +1,4 @@
-use crate::{Gnbcu, UeState};
+use crate::{GnbcuOps, UeState};
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
@@ -17,8 +17,8 @@ use slog::{debug, Logger};
 // 5. << Rrc Reconfiguration + Nas
 // 6. >> Rrc Reconfiguration Complete
 // 7.    Ngap Initial Context Setup Response >>
-pub async fn initial_context_setup(
-    gnbcu: &Gnbcu,
+pub async fn initial_context_setup<G: GnbcuOps>(
+    gnbcu: &G,
     r: &InitialContextSetupRequest,
     logger: &Logger,
 ) -> Result<InitialContextSetupResponse, Cause> {
@@ -44,7 +44,7 @@ pub async fn initial_context_setup(
     // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
     debug!(&logger, "<< UeContextSetup(RrcSecurityModeCommand)");
     let _ue_context_setup_response = <Stack as RequestProvider<UeContextSetupProcedure>>::request(
-        &gnbcu.f1ap,
+        gnbcu.f1ap_stack(),
         ue_context_setup_request,
         &logger,
     )

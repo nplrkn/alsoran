@@ -6,20 +6,20 @@ use async_trait::async_trait;
 
 use super::{UeState, UeStateStore};
 
-pub struct MockStore {
+pub struct MockUeStore {
     kvs: Arc<Mutex<HashMap<u64, UeState>>>,
 }
 
-impl MockStore {
+impl MockUeStore {
     pub fn new() -> Self {
-        MockStore {
+        MockUeStore {
             kvs: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 }
 
 #[async_trait]
-impl UeStateStore for MockStore {
+impl UeStateStore for MockUeStore {
     async fn store(&self, k: u64, s: UeState, _ttl_secs: u32) -> Result<()> {
         self.kvs.lock().await.insert(k, s);
         Ok(())
@@ -43,7 +43,7 @@ mod tests {
 
     #[async_std::test]
     async fn test_mock_store() -> Result<()> {
-        let m = MockStore::new();
+        let m = MockUeStore::new();
         let ue_state = UeState {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(3),
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(2),

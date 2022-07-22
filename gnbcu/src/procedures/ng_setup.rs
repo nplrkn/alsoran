@@ -1,10 +1,10 @@
-use crate::Gnbcu;
+use crate::GnbcuOps;
 use bitvec::prelude::*;
 use net::{RequestProvider, Stack};
 use ngap::*;
 use slog::{debug, info, warn, Logger};
 
-pub async fn ng_setup(gnbcu: &Gnbcu, logger: &Logger) {
+pub async fn ng_setup<G: GnbcuOps>(gnbcu: &G, logger: &Logger) {
     // This uses the default expected values of free5GC.
     let ng_setup_request = NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
@@ -29,7 +29,7 @@ pub async fn ng_setup(gnbcu: &Gnbcu, logger: &Logger) {
         nb_iot_default_paging_drx: None,
         extended_ran_node_name: None,
     };
-    let ng_setup_provider = &gnbcu.ngap;
+    let ng_setup_provider = gnbcu.ngap_stack();
     debug!(logger, "NgSetupRequest >>");
     match <Stack as RequestProvider<NgSetupProcedure>>::request(
         ng_setup_provider,

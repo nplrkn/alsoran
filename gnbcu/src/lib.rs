@@ -5,16 +5,32 @@ mod procedures;
 mod rrc_transaction;
 use anyhow::Result;
 use async_channel::Sender;
+use async_trait::async_trait;
 pub use config::Config;
 use datastore::UeState;
+use f1ap::{DlRrcMessageTransfer, DlRrcMessageTransferProcedure, SrbId};
 use handlers::RrcHandler;
-use net::{SctpTransportProvider, ShutdownHandle, Stack};
+use net::{Indication, SctpTransportProvider, ShutdownHandle, Stack};
 use rrc::UlDcchMessage;
 use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
-use slog::{info, Logger};
+use slog::{debug, info, Logger};
 use stop_token::{StopSource, StopToken};
 
 use crate::handlers::{F1apHandler, NgapHandler};
+
+#[async_trait]
+pub trait GnbcuOps: Send + Sync + Clone + 'static {
+    fn ngap_stack(&self) -> &Stack;
+    fn f1ap_stack(&self) -> &Stack;
+
+    /// Start a new RRC transaction.
+    async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction;
+
+    /// Determine if this is a response to a local pending RRC transaction.
+    async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>>;
+
+    async fn send_rrc_to_ue(&self, ue: UeState, rrc_container: f1ap::RrcContainer, logger: &Logger);
+}
 
 // TS38.412, 7
 // The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol NGAP
@@ -31,16 +47,19 @@ pub struct Gnbcu {
     config: Config,
     ngap: Stack,
     f1ap: Stack,
+    //ue_store: U,
     logger: Logger,
     rrc_transactions: PendingRrcTransactions,
 }
 
 impl Gnbcu {
-    pub fn spawn(config: Config, logger: &Logger) -> Result<ShutdownHandle> {
+    pub fn spawn_with_mock(config: Config, logger: &Logger) -> Result<ShutdownHandle> //, ue_store: U
+    {
         let gnbcu = Gnbcu {
             config,
             ngap: Stack::new(SctpTransportProvider::new(NGAP_SCTP_PPID)),
             f1ap: Stack::new(SctpTransportProvider::new(F1AP_SCTP_PPID)),
+            //ue_store,
             logger: logger.clone(),
             rrc_transactions: PendingRrcTransactions::new(),
         };
@@ -56,6 +75,9 @@ impl Gnbcu {
                 .expect("Gnbcu startup failure");
         });
         Ok(ShutdownHandle::new(handle, stop_source))
+    }
+    pub fn spawn(config: Config, logger: &Logger) -> Result<ShutdownHandle> {
+        Self::spawn_with_mock(config, logger) //RedisUeStore::new()
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
@@ -94,21 +116,57 @@ impl Gnbcu {
             )
             .await
     }
+}
+
+#[async_trait]
+impl GnbcuOps for Gnbcu {
+    fn ngap_stack(&self) -> &Stack {
+        &self.ngap
+    }
+    fn f1ap_stack(&self) -> &Stack {
+        &self.f1ap
+    }
 
     /// Start a new RRC transaction.
-    pub async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction {
+    async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction {
         self.rrc_transactions
             .new_transaction(ue.gnb_cu_ue_f1ap_id.0)
             .await
     }
 
     /// Determine if this is a response to a local pending RRC transaction.
-    pub async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>> {
+    async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>> {
         // This is not a robust mechanism.  The calling task is only interested in the next matching
         // response to the RRC transactions it initiates, whereas we are giving it the next UlDcchMessage of any kind.
         // TODO
         self.rrc_transactions
             .match_transaction(ue.gnb_cu_ue_f1ap_id.0)
             .await
+    }
+
+    async fn send_rrc_to_ue(
+        &self,
+        ue: UeState,
+        rrc_container: f1ap::RrcContainer,
+        logger: &Logger,
+    ) {
+        let dl_message = DlRrcMessageTransfer {
+            gnb_cu_ue_f1ap_id: ue.gnb_cu_ue_f1ap_id,
+            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
+            old_gnb_du_ue_f1ap_id: None,
+            srb_id: SrbId(1),
+            execute_duplication: None,
+            rrc_container,
+            rat_frequency_priority_information: None,
+            rrc_delivery_status_request: None,
+            ue_context_not_retrievable: None,
+            redirected_rrc_message: None,
+            plmn_assistance_info_for_net_shar: None,
+            new_gnb_cu_ue_f1ap_id: None,
+            additional_rrm_priority_index: None,
+        };
+
+        debug!(&logger, "<< DlRrcMessageTransfer");
+        DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
     }
 }

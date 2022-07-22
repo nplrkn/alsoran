@@ -1,4 +1,4 @@
-use crate::{procedures, Gnbcu, UeState};
+use crate::{procedures, GnbcuOps, UeState};
 use anyhow::Result;
 use async_trait::async_trait;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId};
@@ -8,20 +8,20 @@ use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, warn, Logger};
 
-impl RequestProvider<NgSetupProcedure> for NgapHandler {}
+impl<G: GnbcuOps> RequestProvider<NgSetupProcedure> for NgapHandler<G> {}
 
 #[derive(Clone)]
-pub struct NgapHandler {
-    gnbcu: Gnbcu,
+pub struct NgapHandler<G> {
+    gnbcu: G,
 }
 
-impl NgapHandler {
-    pub fn new_ngap_application(gnbcu: Gnbcu) -> NgapGnb<NgapHandler> {
+impl<G: GnbcuOps> NgapHandler<G> {
+    pub fn new_ngap_application(gnbcu: G) -> NgapGnb<NgapHandler<G>> {
         NgapGnb::new(NgapHandler { gnbcu })
     }
 }
 #[async_trait]
-impl EventHandler for NgapHandler {
+impl<G: GnbcuOps> EventHandler for NgapHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {
@@ -35,7 +35,7 @@ impl EventHandler for NgapHandler {
 }
 
 #[async_trait]
-impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
+impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         debug!(&logger, "DownlinkNasTransport(Nas) <<");
         // TODO - retrieve UE context by ran_ue_ngap_id.
@@ -74,7 +74,7 @@ impl IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler {
 }
 
 #[async_trait]
-impl RequestProvider<InitialContextSetupProcedure> for NgapHandler {
+impl<G: GnbcuOps> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> {
     async fn request(
         &self,
         r: InitialContextSetupRequest,
@@ -96,7 +96,7 @@ impl RequestProvider<InitialContextSetupProcedure> for NgapHandler {
 }
 
 #[async_trait]
-impl IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler {
+impl<G: GnbcuOps> IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler<G> {
     async fn handle(&self, i: AmfStatusIndication, logger: &Logger) {
         debug!(logger, "<< Amf Status Indication");
         for guami_item in i.unavailable_guami_list.0 {

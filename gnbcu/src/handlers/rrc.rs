@@ -1,7 +1,6 @@
-use crate::{Gnbcu, UeState};
+use crate::{GnbcuOps, UeState};
 use anyhow::Result;
 use bitvec::prelude::*;
-use f1ap::*;
 use net::{AperSerde, Indication};
 use ngap::*;
 use pdcp::PdcpPdu;
@@ -9,10 +8,10 @@ use rrc::*;
 use slog::{debug, warn, Logger};
 
 #[derive(Clone)]
-pub struct RrcHandler(Gnbcu);
+pub struct RrcHandler<G: GnbcuOps>(G);
 
-impl RrcHandler {
-    pub fn new(gnbcu: Gnbcu) -> RrcHandler {
+impl<G: GnbcuOps> RrcHandler<G> {
+    pub fn new(gnbcu: G) -> RrcHandler<G> {
         RrcHandler(gnbcu)
     }
 
@@ -153,7 +152,7 @@ impl RrcHandler {
         };
 
         debug!(logger, "InitialUeMessage(Nas) >>");
-        InitialUeMessageProcedure::call_provider(&self.0.ngap, m, logger).await;
+        InitialUeMessageProcedure::call_provider(self.0.ngap_stack(), m, logger).await;
 
         Ok(())
     }
@@ -203,35 +202,7 @@ impl RrcHandler {
         };
 
         debug!(logger, "UplinkNasTransport(Nas) >>");
-        UplinkNasTransportProcedure::call_provider(&self.0.ngap, m, logger).await;
+        UplinkNasTransportProcedure::call_provider(self.0.ngap_stack(), m, logger).await;
         Ok(())
-    }
-}
-
-impl Gnbcu {
-    pub async fn send_rrc_to_ue(
-        &self,
-        ue: UeState,
-        rrc_container: f1ap::RrcContainer,
-        logger: &Logger,
-    ) {
-        let dl_message = DlRrcMessageTransfer {
-            gnb_cu_ue_f1ap_id: ue.gnb_cu_ue_f1ap_id,
-            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
-            old_gnb_du_ue_f1ap_id: None,
-            srb_id: SrbId(1),
-            execute_duplication: None,
-            rrc_container,
-            rat_frequency_priority_information: None,
-            rrc_delivery_status_request: None,
-            ue_context_not_retrievable: None,
-            redirected_rrc_message: None,
-            plmn_assistance_info_for_net_shar: None,
-            new_gnb_cu_ue_f1ap_id: None,
-            additional_rrm_priority_index: None,
-        };
-
-        debug!(&logger, "<< DlRrcMessageTransfer");
-        DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
     }
 }

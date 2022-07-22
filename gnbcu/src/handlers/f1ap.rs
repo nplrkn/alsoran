@@ -1,5 +1,5 @@
 use super::RrcHandler;
-use crate::{Gnbcu, UeState};
+use crate::{GnbcuOps, UeState};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -8,13 +8,13 @@ use pdcp::PdcpPdu;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
-pub struct F1apHandler {
-    _gnbcu: Gnbcu,
-    rrc_handler: RrcHandler,
+pub struct F1apHandler<G: GnbcuOps> {
+    _gnbcu: G,
+    rrc_handler: RrcHandler<G>,
 }
 
-impl F1apHandler {
-    pub fn new_f1ap_application(gnbcu: Gnbcu, rrc_handler: RrcHandler) -> F1apCu<F1apHandler> {
+impl<G: GnbcuOps> F1apHandler<G> {
+    pub fn new_f1ap_application(gnbcu: G, rrc_handler: RrcHandler<G>) -> F1apCu<F1apHandler<G>> {
         F1apCu::new(F1apHandler {
             _gnbcu: gnbcu,
             rrc_handler,
@@ -23,7 +23,7 @@ impl F1apHandler {
 }
 
 #[async_trait]
-impl RequestProvider<F1SetupProcedure> for F1apHandler {
+impl<G: GnbcuOps> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
     async fn request(
         &self,
         r: F1SetupRequest,
@@ -48,7 +48,7 @@ impl RequestProvider<F1SetupProcedure> for F1apHandler {
 }
 
 #[async_trait]
-impl IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler {
+impl<G: GnbcuOps> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> InitialUlRrcMessageTransfer");
 
@@ -70,7 +70,7 @@ impl IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler {
 }
 
 #[async_trait]
-impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
+impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> UlRrcMessageTransfer");
 
@@ -101,7 +101,7 @@ impl IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler {
 }
 
 #[async_trait]
-impl EventHandler for F1apHandler {
+impl<G: GnbcuOps> EventHandler for F1apHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {
