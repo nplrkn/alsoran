@@ -6,6 +6,7 @@ use async_trait::async_trait;
 
 use super::{UeState, UeStateStore};
 
+#[derive(Clone)]
 pub struct MockUeStore {
     kvs: Arc<Mutex<HashMap<u64, UeState>>>,
 }
@@ -35,7 +36,7 @@ impl UeStateStore for MockUeStore {
 
 #[cfg(test)]
 mod tests {
-    use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId};
+    use f1ap::GnbDuUeF1apId;
 
     use crate::datastore::UeState;
 
@@ -46,7 +47,7 @@ mod tests {
         let m = MockUeStore::new();
         let ue_state = UeState {
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(3),
-            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(2),
+            key: 2,
         };
         m.store(123, ue_state, 0).await?;
         let _ue_state = m.retrieve(&123).await.unwrap().unwrap();

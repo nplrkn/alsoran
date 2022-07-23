@@ -3,12 +3,14 @@ mod datastore;
 mod handlers;
 mod procedures;
 mod rrc_transaction;
+
 use anyhow::Result;
 use async_channel::Sender;
 use async_trait::async_trait;
 pub use config::Config;
-use datastore::UeState;
-use f1ap::{DlRrcMessageTransfer, DlRrcMessageTransferProcedure, SrbId};
+pub use datastore::{MockUeStore, RedisUeStore};
+use datastore::{UeState, UeStateStore};
+use f1ap::{DlRrcMessageTransfer, DlRrcMessageTransferProcedure, GnbCuUeF1apId, SrbId};
 use handlers::RrcHandler;
 use net::{Indication, SctpTransportProvider, ShutdownHandle, Stack};
 use rrc::UlDcchMessage;
@@ -19,7 +21,7 @@ use stop_token::{StopSource, StopToken};
 use crate::handlers::{F1apHandler, NgapHandler};
 
 #[async_trait]
-pub trait GnbcuOps: Send + Sync + Clone + 'static {
+pub trait GnbcuOps: Send + Sync + Clone + 'static + UeStateStore {
     fn ngap_stack(&self) -> &Stack;
     fn f1ap_stack(&self) -> &Stack;
 
@@ -43,23 +45,22 @@ const NGAP_SCTP_PPID: u32 = 60;
 const F1AP_SCTP_PPID: u32 = 62;
 
 #[derive(Clone)]
-pub struct Gnbcu {
+pub struct Gnbcu<U: UeStateStore> {
     config: Config,
     ngap: Stack,
     f1ap: Stack,
-    //ue_store: U,
+    ue_store: U,
     logger: Logger,
     rrc_transactions: PendingRrcTransactions,
 }
 
-impl Gnbcu {
-    pub fn spawn_with_mock(config: Config, logger: &Logger) -> Result<ShutdownHandle> //, ue_store: U
-    {
+impl<U: UeStateStore> Gnbcu<U> {
+    pub fn spawn(config: Config, ue_store: U, logger: &Logger) -> Result<ShutdownHandle> {
         let gnbcu = Gnbcu {
             config,
             ngap: Stack::new(SctpTransportProvider::new(NGAP_SCTP_PPID)),
             f1ap: Stack::new(SctpTransportProvider::new(F1AP_SCTP_PPID)),
-            //ue_store,
+            ue_store,
             logger: logger.clone(),
             rrc_transactions: PendingRrcTransactions::new(),
         };
@@ -75,9 +76,6 @@ impl Gnbcu {
                 .expect("Gnbcu startup failure");
         });
         Ok(ShutdownHandle::new(handle, stop_source))
-    }
-    pub fn spawn(config: Config, logger: &Logger) -> Result<ShutdownHandle> {
-        Self::spawn_with_mock(config, logger) //RedisUeStore::new()
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
@@ -107,7 +105,7 @@ impl Gnbcu {
             &self.logger,
             "Listen for connection from DU on {}", f1_listen_address
         );
-        let rrc_handler = RrcHandler::new(self.clone());
+        let rrc_handler = RrcHandler::new(self.clone(), self.config.rrc_handler_config.clone());
         self.f1ap
             .listen(
                 f1_listen_address,
@@ -119,7 +117,22 @@ impl Gnbcu {
 }
 
 #[async_trait]
-impl GnbcuOps for Gnbcu {
+impl<U: UeStateStore> UeStateStore for Gnbcu<U> {
+    async fn store(&self, k: u64, s: UeState, ttl_secs: u32) -> Result<()> {
+        self.ue_store.store(k, s, ttl_secs).await
+    }
+    async fn retrieve(&self, k: &u64) -> Result<Option<UeState>> {
+        self.ue_store.retrieve(k).await
+    }
+    async fn delete(&self, k: &u64) -> Result<()> {
+        self.ue_store.delete(k).await
+    }
+}
+
+//impl<U: UeStateStore> UeStateStore for Gnbcu<U> {}
+
+#[async_trait]
+impl<U: UeStateStore> GnbcuOps for Gnbcu<U> {
     fn ngap_stack(&self) -> &Stack {
         &self.ngap
     }
@@ -129,9 +142,7 @@ impl GnbcuOps for Gnbcu {
 
     /// Start a new RRC transaction.
     async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction {
-        self.rrc_transactions
-            .new_transaction(ue.gnb_cu_ue_f1ap_id.0)
-            .await
+        self.rrc_transactions.new_transaction(ue.key).await
     }
 
     /// Determine if this is a response to a local pending RRC transaction.
@@ -139,9 +150,7 @@ impl GnbcuOps for Gnbcu {
         // This is not a robust mechanism.  The calling task is only interested in the next matching
         // response to the RRC transactions it initiates, whereas we are giving it the next UlDcchMessage of any kind.
         // TODO
-        self.rrc_transactions
-            .match_transaction(ue.gnb_cu_ue_f1ap_id.0)
-            .await
+        self.rrc_transactions.match_transaction(ue.key).await
     }
 
     async fn send_rrc_to_ue(
@@ -151,7 +160,7 @@ impl GnbcuOps for Gnbcu {
         logger: &Logger,
     ) {
         let dl_message = DlRrcMessageTransfer {
-            gnb_cu_ue_f1ap_id: ue.gnb_cu_ue_f1ap_id,
+            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
             gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
             old_gnb_du_ue_f1ap_id: None,
             srb_id: SrbId(1),

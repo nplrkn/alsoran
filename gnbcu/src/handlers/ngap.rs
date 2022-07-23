@@ -1,7 +1,6 @@
-use crate::{procedures, GnbcuOps, UeState};
+use crate::{procedures, GnbcuOps};
 use anyhow::Result;
 use async_trait::async_trait;
-use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId};
 use net::{AperSerde, EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use ngap::*;
 use pdcp::PdcpPdu;
@@ -38,10 +37,16 @@ impl<G: GnbcuOps> EventHandler for NgapHandler<G> {
 impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         debug!(&logger, "DownlinkNasTransport(Nas) <<");
-        // TODO - retrieve UE context by ran_ue_ngap_id.
-        let ue = UeState {
-            gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
-            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
+
+        let ue_state = match self.gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
+            Ok(Some(x)) => x,
+            _ => {
+                debug!(
+                    &logger,
+                    "Failed to get UE state - can't carry out downlink Nas transfer"
+                );
+                return;
+            }
         };
 
         let rrc = match (DlDcchMessage {
@@ -69,7 +74,9 @@ impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandl
         };
         let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
         debug!(&logger, "<< DlInformationTransfer(Nas)");
-        self.gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
+        self.gnbcu
+            .send_rrc_to_ue(ue_state, rrc_container, logger)
+            .await;
     }
 }
 

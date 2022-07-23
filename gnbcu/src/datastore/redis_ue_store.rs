@@ -4,6 +4,7 @@ use async_trait::async_trait;
 
 use super::{UeState, UeStateStore};
 
+#[derive(Clone)]
 pub struct RedisUeStore {}
 
 impl RedisUeStore {

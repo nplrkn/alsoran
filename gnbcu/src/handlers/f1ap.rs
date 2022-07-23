@@ -5,18 +5,19 @@ use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use pdcp::PdcpPdu;
+use rand::Rng;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
 pub struct F1apHandler<G: GnbcuOps> {
-    _gnbcu: G,
+    gnbcu: G,
     rrc_handler: RrcHandler<G>,
 }
 
 impl<G: GnbcuOps> F1apHandler<G> {
     pub fn new_f1ap_application(gnbcu: G, rrc_handler: RrcHandler<G>) -> F1apCu<F1apHandler<G>> {
         F1apCu::new(F1apHandler {
-            _gnbcu: gnbcu,
+            gnbcu: gnbcu,
             rrc_handler,
         })
     }
@@ -60,7 +61,7 @@ impl<G: GnbcuOps> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1
 
         let ue_context = UeState {
             gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
-            gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
+            key: rand::thread_rng().gen::<u64>(),
         };
 
         self.rrc_handler
@@ -74,15 +75,20 @@ impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandl
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> UlRrcMessageTransfer");
 
-        // TODO - "If the UL RRC MESSAGE TRANSFER message contains the New gNB-DU UE F1AP ID IE, the gNB-CU shall,
+        let ue_state = match self.gnbcu.retrieve(&r.gnb_cu_ue_f1ap_id.0).await {
+            Ok(Some(x)) => x,
+            _ => {
+                debug!(
+                    &logger,
+                    "Failed to get UE state - can't carry out message transfer"
+                );
+                return;
+            }
+        };
+
+        // TODO: "If the UL RRC MESSAGE TRANSFER message contains the New gNB-DU UE F1AP ID IE, the gNB-CU shall,
         // if supported, replace the value received in the gNB-DU UE F1AP ID IE by the value of the New gNB-DU UE F1AP ID
         // and use it for further signalling."
-
-        // TODO - retrive existing UE Context by looking up r.gnb_cu_ue_f1ap_id.
-        let ue_context = UeState {
-            gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
-            gnb_cu_ue_f1ap_id: r.gnb_cu_ue_f1ap_id,
-        };
 
         let pdcp_pdu = PdcpPdu(r.rrc_container.0);
 
@@ -95,7 +101,7 @@ impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandl
         };
 
         self.rrc_handler
-            .dispatch_dcch(ue_context, rrc_message_bytes, logger)
+            .dispatch_dcch(ue_state, rrc_message_bytes, logger)
             .await;
     }
 }

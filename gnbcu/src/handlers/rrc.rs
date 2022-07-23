@@ -8,11 +8,28 @@ use rrc::*;
 use slog::{debug, warn, Logger};
 
 #[derive(Clone)]
-pub struct RrcHandler<G: GnbcuOps>(G);
+pub struct RrcHandler<G: GnbcuOps> {
+    gnbcu: G,
+    config: RrcHandlerConfig,
+}
+
+#[derive(Clone, Debug)]
+pub struct RrcHandlerConfig {
+    /// TTL for the Ue State at the point of the initial access procedures
+    initial_ttl_secs: u32,
+}
+
+impl Default for RrcHandlerConfig {
+    fn default() -> Self {
+        RrcHandlerConfig {
+            initial_ttl_secs: 5,
+        }
+    }
+}
 
 impl<G: GnbcuOps> RrcHandler<G> {
-    pub fn new(gnbcu: G) -> RrcHandler<G> {
-        RrcHandler(gnbcu)
+    pub fn new(gnbcu: G, config: RrcHandlerConfig) -> RrcHandler<G> {
+        RrcHandler { gnbcu, config }
     }
 
     pub async fn dispatch_ccch(&self, ue: UeState, message: &[u8], logger: &Logger) {
@@ -43,7 +60,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
         };
 
         // Look for a matching transaction.
-        if let Some(sender) = self.0.match_rrc_transaction(&ue).await {
+        if let Some(sender) = self.gnbcu.match_rrc_transaction(&ue).await {
             let _ = sender.send(message).await;
             return;
         }
@@ -90,7 +107,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
         let pdcp_pdu = PdcpPdu::encode(&rrc_setup.into_bytes()?);
 
         debug!(logger, "<< RrcSetup");
-        self.0
+        self.gnbcu
             .send_rrc_to_ue(ue, f1ap::RrcContainer(pdcp_pdu.into()), logger)
             .await;
         Ok(())
@@ -98,7 +115,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
 
     async fn rrc_setup_complete(
         &self,
-        _ue: UeState,
+        ue: UeState,
         req: RrcSetupComplete,
         logger: &Logger,
     ) -> Result<()> {
@@ -151,15 +168,20 @@ impl<G: GnbcuOps> RrcHandler<G> {
             npn_access_information: None,
         };
 
+        debug!(logger, "Store UE state");
+        self.gnbcu
+            .store(ue.key, ue, self.config.initial_ttl_secs)
+            .await?;
+
         debug!(logger, "InitialUeMessage(Nas) >>");
-        InitialUeMessageProcedure::call_provider(self.0.ngap_stack(), m, logger).await;
+        InitialUeMessageProcedure::call_provider(self.gnbcu.ngap_stack(), m, logger).await;
 
         Ok(())
     }
 
     async fn ul_information_transfer(
         &self,
-        _ue: UeState,
+        ue: UeState,
         req: UlInformationTransfer,
         logger: &Logger,
     ) -> Result<()> {
@@ -183,8 +205,8 @@ impl<G: GnbcuOps> RrcHandler<G> {
         };
 
         let m = UplinkNasTransport {
-            amf_ue_ngap_id: AmfUeNgapId(1),
-            ran_ue_ngap_id: RanUeNgapId(1),
+            amf_ue_ngap_id: AmfUeNgapId(ue.amf_ue_ngap_id),
+            ran_ue_ngap_id: RanUeNgapId(ue.key),
             nas_pdu,
             user_location_information: UserLocationInformation::UserLocationInformationNr(
                 UserLocationInformationNr {
@@ -202,7 +224,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
         };
 
         debug!(logger, "UplinkNasTransport(Nas) >>");
-        UplinkNasTransportProcedure::call_provider(self.0.ngap_stack(), m, logger).await;
+        UplinkNasTransportProcedure::call_provider(self.gnbcu.ngap_stack(), m, logger).await;
         Ok(())
     }
 }

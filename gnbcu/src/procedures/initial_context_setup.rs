@@ -1,4 +1,4 @@
-use crate::{GnbcuOps, UeState};
+use crate::GnbcuOps;
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
@@ -24,14 +24,12 @@ pub async fn initial_context_setup<G: GnbcuOps>(
 ) -> Result<InitialContextSetupResponse, Cause> {
     debug!(&logger, "InitialContextSetupRequest(Nas) << ");
 
-    // Todo - this should be Result<InitialContextSetupResponse, Cause>, and the caller
-    // should create the InitialContextSetupFailure.
-
-    // Todo - retrieve UE context by ran_ue_ngap_id.
-    let ue = UeState {
-        gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
-        gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
-    };
+    // Retrieve UE context by ran_ue_ngap_id.
+    let ue = gnbcu
+        .retrieve(&r.ran_ue_ngap_id.0)
+        .await
+        .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?
+        .ok_or(Cause::RadioNetwork(CauseRadioNetwork::UnknownLocalUeNgapId))?;
 
     // Build Security Mode command and wrap it in an RrcContainer.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;

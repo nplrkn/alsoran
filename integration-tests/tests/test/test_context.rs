@@ -1,5 +1,6 @@
 use anyhow::Result;
 use common::ShutdownHandle;
+use gnbcu::MockUeStore;
 use gnbcu::{Config, Gnbcu};
 use mocks::MockAmf;
 use mocks::MockDu;
@@ -94,8 +95,12 @@ impl TestContext {
         let mut config = Config::default();
         config.f1ap_bind_port += worker_number;
 
-        let shutdown_handle =
-            Gnbcu::spawn(config.clone(), &self.logger.new(o!("cu-w"=> worker_number))).unwrap();
+        let shutdown_handle = Gnbcu::spawn(
+            config.clone(),
+            MockUeStore::new(),
+            &self.logger.new(o!("cu-w"=> worker_number)),
+        )
+        .unwrap();
         self.workers.push(InternalWorkerInfo {
             shutdown_handle,
             config,
