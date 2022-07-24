@@ -1073,8 +1073,11 @@ name = "rrc"
 version = "0.1.0"
 dependencies = [
  "asn1-codecs",
+ "async-trait",
  "bitvec",
+ "net",
  "num_enum",
+ "slog",
 ]
 
 [[package]]

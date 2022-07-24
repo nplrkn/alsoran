@@ -67,7 +67,7 @@ pub async fn initial_context_setup<G: GnbcuOps>(
 
     // Send to the UE and get back the response.
     debug!(&logger, "<< RrcReconfiguration");
-    gnbcu.send_rrc_to_ue(ue, rrc_container, logger).await;
+    gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
     let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
         .recv()
         .await

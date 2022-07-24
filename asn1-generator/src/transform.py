@@ -324,9 +324,9 @@ class TypeTransformer(Transformer):
             t = "u8"
         elif ub < 65536:
             t = "u16"
-        elif ub < 4294967295:
+        elif ub < 4294967296:
             t = "u32"
-        elif ub <= 18446744073709551615:
+        elif ub < 18446744073709551616:
             t = "u64"
         else:
             t = "i128"

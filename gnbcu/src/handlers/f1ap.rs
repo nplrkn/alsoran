@@ -1,11 +1,10 @@
 use super::RrcHandler;
-use crate::{GnbcuOps, UeState};
+use crate::{procedures, GnbcuOps};
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use pdcp::PdcpPdu;
-use rand::Rng;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
@@ -52,6 +51,9 @@ impl<G: GnbcuOps> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
 impl<G: GnbcuOps> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> InitialUlRrcMessageTransfer");
+        if let Err(e) = procedures::initial_access(&self.gnbcu, r, logger).await {
+            debug!(logger, "Inital access procedure failed - {:?}", e);
+        }
 
         // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER,
         // the gNB-CU should reject the UE under the assumption that the gNB-DU is not able to serve such UE."
@@ -59,14 +61,16 @@ impl<G: GnbcuOps> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1
         // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER,
         // the gNB-CU shall take it into account as specified in TS 38.401 [4]."
 
-        let ue_context = UeState {
-            gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
-            key: rand::thread_rng().gen::<u64>(),
-        };
+        // let ue_context = UeState {
+        //     amf_ue_ngap_id: None,
+        //     gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
+        //     key: rand::thread_rng().gen::<u32>(),
+        // };
+        // debug!(&logger, "Created UE {:#010x}", ue_context.key);
 
-        self.rrc_handler
-            .dispatch_ccch(ue_context, &r.rrc_container.0, logger)
-            .await;
+        // self.rrc_handler
+        //     .dispatch_ccch(ue_context, &r.rrc_container.0, logger)
+        //     .await;
     }
 }
 
@@ -75,12 +79,17 @@ impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandl
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> UlRrcMessageTransfer");
 
+        // So if this is a response, we DON'T RETRIEVE
+        // And if this a request we do.
+        // So do we give the message to the RRC dispatcher?
+
         let ue_state = match self.gnbcu.retrieve(&r.gnb_cu_ue_f1ap_id.0).await {
             Ok(Some(x)) => x,
             _ => {
                 debug!(
                     &logger,
-                    "Failed to get UE state - can't carry out message transfer"
+                    "Failed to get UE {:#010x} - can't carry out UL message transfer",
+                    r.gnb_cu_ue_f1ap_id.0
                 );
                 return;
             }

@@ -24,6 +24,7 @@ use crate::handlers::{F1apHandler, NgapHandler};
 pub trait GnbcuOps: Send + Sync + Clone + 'static + UeStateStore {
     fn ngap_stack(&self) -> &Stack;
     fn f1ap_stack(&self) -> &Stack;
+    fn config(&self) -> &Config;
 
     /// Start a new RRC transaction.
     async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction;
@@ -31,7 +32,12 @@ pub trait GnbcuOps: Send + Sync + Clone + 'static + UeStateStore {
     /// Determine if this is a response to a local pending RRC transaction.
     async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>>;
 
-    async fn send_rrc_to_ue(&self, ue: UeState, rrc_container: f1ap::RrcContainer, logger: &Logger);
+    async fn send_rrc_to_ue(
+        &self,
+        ue: &UeState,
+        rrc_container: f1ap::RrcContainer,
+        logger: &Logger,
+    );
 }
 
 // TS38.412, 7
@@ -105,7 +111,7 @@ impl<U: UeStateStore> Gnbcu<U> {
             &self.logger,
             "Listen for connection from DU on {}", f1_listen_address
         );
-        let rrc_handler = RrcHandler::new(self.clone(), self.config.rrc_handler_config.clone());
+        let rrc_handler = RrcHandler::new(self.clone());
         self.f1ap
             .listen(
                 f1_listen_address,
@@ -118,18 +124,62 @@ impl<U: UeStateStore> Gnbcu<U> {
 
 #[async_trait]
 impl<U: UeStateStore> UeStateStore for Gnbcu<U> {
-    async fn store(&self, k: u64, s: UeState, ttl_secs: u32) -> Result<()> {
+    async fn store(&self, k: u32, s: UeState, ttl_secs: u32) -> Result<()> {
         self.ue_store.store(k, s, ttl_secs).await
     }
-    async fn retrieve(&self, k: &u64) -> Result<Option<UeState>> {
+    async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
         self.ue_store.retrieve(k).await
     }
-    async fn delete(&self, k: &u64) -> Result<()> {
+    async fn delete(&self, k: &u32) -> Result<()> {
         self.ue_store.delete(k).await
     }
 }
 
-//impl<U: UeStateStore> UeStateStore for Gnbcu<U> {}
+// A first attempt at implementing RequestProvider for RRC.
+// New idea is to impl it on RrcTransaction and get rid of UeRrcChannel.
+
+// pub struct UeRrcChannel<'a> {
+//     gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
+//     gnb_du_ue_f1ap_id: GnbDuUeF1apId,
+//     srb_id: SrbId,
+//     f1ap_stack: &'a Stack,
+//     rrc_transaction: RrcTransaction,
+// }
+
+// #[async_trait]
+// impl<P: Procedure, 'a> RequestProvider<P> for UeRrcChannel<'a> {
+//     async fn request(
+//         &self,
+//         r: P::Request,
+//         logger: &Logger,
+//     ) -> Result<P::Success, RequestError<P::Failure>> {
+//         let bytes = P::encode_request(r)?;
+//         let pdcp_pdu = PdcpPdu::encode(&bytes);
+//         let rrc_container = f1ap::RrcContainer(pdcp_pdu.into());
+//         let dl_message = DlRrcMessageTransfer {
+//             gnb_cu_ue_f1ap_id: self.gnb_cu_ue_f1ap_id.clone(),
+//             gnb_du_ue_f1ap_id: self.gnb_du_ue_f1ap_id.clone(),
+//             old_gnb_du_ue_f1ap_id: None,
+//             srb_id: self.srb_id.clone(),
+//             execute_duplication: None,
+//             rrc_container,
+//             rat_frequency_priority_information: None,
+//             rrc_delivery_status_request: None,
+//             ue_context_not_retrievable: None,
+//             redirected_rrc_message: None,
+//             plmn_assistance_info_for_net_shar: None,
+//             new_gnb_cu_ue_f1ap_id: None,
+//             additional_rrm_priority_index: None,
+//         };
+
+//         debug!(&logger, "<< DlRrcMessageTransfer");
+//         DlRrcMessageTransferProcedure::call_provider(self.f1ap_stack, dl_message, logger).await;
+
+//         // Receive response on the channel or timeout.
+//         let msg = self.rrc_transaction.recv().await?;
+//         P::decode_response(&msg)
+//     }
+// }
 
 #[async_trait]
 impl<U: UeStateStore> GnbcuOps for Gnbcu<U> {
@@ -138,6 +188,9 @@ impl<U: UeStateStore> GnbcuOps for Gnbcu<U> {
     }
     fn f1ap_stack(&self) -> &Stack {
         &self.f1ap
+    }
+    fn config(&self) -> &Config {
+        &self.config
     }
 
     /// Start a new RRC transaction.
@@ -155,13 +208,13 @@ impl<U: UeStateStore> GnbcuOps for Gnbcu<U> {
 
     async fn send_rrc_to_ue(
         &self,
-        ue: UeState,
+        ue: &UeState,
         rrc_container: f1ap::RrcContainer,
         logger: &Logger,
     ) {
         let dl_message = DlRrcMessageTransfer {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
-            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
+            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id.clone(),
             old_gnb_du_ue_f1ap_id: None,
             srb_id: SrbId(1),
             execute_duplication: None,

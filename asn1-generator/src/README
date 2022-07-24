@@ -5,7 +5,7 @@ This is a Python program that reads the ASN.1 files defining the RAN referece po
 # Run the autogenerator
 
 ```
-./generate_xxap.py
+./autogen.py
 ```
 
 The above command reads the NGAP, F1AP and RRC ASN.1 files and overwrites various files in the corresponding directories.

@@ -43,7 +43,8 @@ impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandl
             _ => {
                 debug!(
                     &logger,
-                    "Failed to get UE state - can't carry out downlink Nas transfer"
+                    "Failed to get UE {:#010x} - can't carry out downlink Nas transfer",
+                    i.ran_ue_ngap_id.0
                 );
                 return;
             }
@@ -75,7 +76,7 @@ impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandl
         let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
         debug!(&logger, "<< DlInformationTransfer(Nas)");
         self.gnbcu
-            .send_rrc_to_ue(ue_state, rrc_container, logger)
+            .send_rrc_to_ue(&ue_state, rrc_container, logger)
             .await;
     }
 }

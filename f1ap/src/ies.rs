@@ -10134,12 +10134,12 @@ impl AperCodec for GnbCuTnlAssociationToUpdateItem {
 }
 // GnbCuUeF1apId
 #[derive(Clone, Debug)]
-pub struct GnbCuUeF1apId(pub u64);
+pub struct GnbCuUeF1apId(pub u32);
 
 impl GnbCuUeF1apId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
-            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u64,
+            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u32,
         ))
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10242,12 +10242,12 @@ impl AperCodec for GnbDuCellResourceConfiguration {
 }
 // GnbDuUeF1apId
 #[derive(Clone, Debug)]
-pub struct GnbDuUeF1apId(pub u64);
+pub struct GnbDuUeF1apId(pub u32);
 
 impl GnbDuUeF1apId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
-            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u64,
+            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u32,
         ))
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {

@@ -8,7 +8,7 @@ use super::{UeState, UeStateStore};
 
 #[derive(Clone)]
 pub struct MockUeStore {
-    kvs: Arc<Mutex<HashMap<u64, UeState>>>,
+    kvs: Arc<Mutex<HashMap<u32, UeState>>>,
 }
 
 impl MockUeStore {
@@ -21,14 +21,14 @@ impl MockUeStore {
 
 #[async_trait]
 impl UeStateStore for MockUeStore {
-    async fn store(&self, k: u64, s: UeState, _ttl_secs: u32) -> Result<()> {
+    async fn store(&self, k: u32, s: UeState, _ttl_secs: u32) -> Result<()> {
         self.kvs.lock().await.insert(k, s);
         Ok(())
     }
-    async fn retrieve(&self, k: &u64) -> Result<Option<UeState>> {
+    async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
         Ok(self.kvs.lock().await.get(k).map(|x| x.clone()))
     }
-    async fn delete(&self, k: &u64) -> Result<()> {
+    async fn delete(&self, k: &u32) -> Result<()> {
         self.kvs.lock().await.remove(k);
         Ok(())
     }
@@ -46,6 +46,7 @@ mod tests {
     async fn test_mock_store() -> Result<()> {
         let m = MockUeStore::new();
         let ue_state = UeState {
+            amf_ue_ngap_id: None,
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(3),
             key: 2,
         };

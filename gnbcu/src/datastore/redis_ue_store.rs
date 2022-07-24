@@ -15,13 +15,13 @@ impl RedisUeStore {
 
 #[async_trait]
 impl UeStateStore for RedisUeStore {
-    async fn store(&self, k: u64, s: UeState, _ttl_secs: u32) -> Result<()> {
+    async fn store(&self, k: u32, s: UeState, _ttl_secs: u32) -> Result<()> {
         todo!()
     }
-    async fn retrieve(&self, k: &u64) -> Result<Option<UeState>> {
+    async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
         todo!()
     }
-    async fn delete(&self, k: &u64) -> Result<()> {
+    async fn delete(&self, k: &u32) -> Result<()> {
         todo!()
     }
 }
