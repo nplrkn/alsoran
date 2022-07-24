@@ -30,7 +30,7 @@ pub trait GnbcuOps: Send + Sync + Clone + 'static + UeStateStore {
     async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction;
 
     /// Determine if this is a response to a local pending RRC transaction.
-    async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>>;
+    async fn match_rrc_transaction(&self, ue_id: u32) -> Option<Sender<UlDcchMessage>>;
 
     async fn send_rrc_to_ue(
         &self,
@@ -199,11 +199,11 @@ impl<U: UeStateStore> GnbcuOps for Gnbcu<U> {
     }
 
     /// Determine if this is a response to a local pending RRC transaction.
-    async fn match_rrc_transaction(&self, ue: &UeState) -> Option<Sender<UlDcchMessage>> {
+    async fn match_rrc_transaction(&self, ue_id: u32) -> Option<Sender<UlDcchMessage>> {
         // This is not a robust mechanism.  The calling task is only interested in the next matching
         // response to the RRC transactions it initiates, whereas we are giving it the next UlDcchMessage of any kind.
         // TODO
-        self.rrc_transactions.match_transaction(ue.key).await
+        self.rrc_transactions.match_transaction(ue_id).await
     }
 
     async fn send_rrc_to_ue(

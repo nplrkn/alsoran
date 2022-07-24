@@ -79,22 +79,6 @@ impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandl
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> UlRrcMessageTransfer");
 
-        // So if this is a response, we DON'T RETRIEVE
-        // And if this a request we do.
-        // So do we give the message to the RRC dispatcher?
-
-        let ue_state = match self.gnbcu.retrieve(&r.gnb_cu_ue_f1ap_id.0).await {
-            Ok(Some(x)) => x,
-            _ => {
-                debug!(
-                    &logger,
-                    "Failed to get UE {:#010x} - can't carry out UL message transfer",
-                    r.gnb_cu_ue_f1ap_id.0
-                );
-                return;
-            }
-        };
-
         // TODO: "If the UL RRC MESSAGE TRANSFER message contains the New gNB-DU UE F1AP ID IE, the gNB-CU shall,
         // if supported, replace the value received in the gNB-DU UE F1AP ID IE by the value of the New gNB-DU UE F1AP ID
         // and use it for further signalling."
@@ -110,7 +94,7 @@ impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandl
         };
 
         self.rrc_handler
-            .dispatch_dcch(ue_state, rrc_message_bytes, logger)
+            .dispatch_dcch(r.gnb_cu_ue_f1ap_id.0, rrc_message_bytes, logger)
             .await;
     }
 }

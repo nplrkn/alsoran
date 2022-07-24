@@ -18,25 +18,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
         RrcHandler { gnbcu }
     }
 
-    // pub async fn dispatch_ccch(&self, ue: UeState, message: &[u8], logger: &Logger) {
-    //     match UlCcchMessage::from_bytes(message) {
-    //         Err(e) => {
-    //             warn!(logger, "Failed to decode RRC message: {:?}", e)
-    //         }
-    //         Ok(UlCcchMessage {
-    //             message: UlCcchMessageType::C1(C1_4::RrcSetupRequest(x)),
-    //         }) => {
-    //             if let Err(e) = self.rrc_setup_request(ue, x, logger).await {
-    //                 warn!(logger, "Failed processing RrcSetupRequest {:?}", e)
-    //             }
-    //         }
-    //         Ok(m) => {
-    //             warn!(logger, "Not yet implemented Rrc message {:?}", m)
-    //         }
-    //     }
-    // }
-
-    pub async fn dispatch_dcch(&self, ue: UeState, message: &[u8], logger: &Logger) {
+    pub async fn dispatch_dcch(&self, ue_id: u32, message: &[u8], logger: &Logger) {
         let message = match UlDcchMessage::from_bytes(message) {
             Err(e) => {
                 warn!(logger, "Failed to decode RRC message: {:?}", e);
@@ -46,17 +28,24 @@ impl<G: GnbcuOps> RrcHandler<G> {
         };
 
         // Look for a matching transaction.
-        if let Some(sender) = self.gnbcu.match_rrc_transaction(&ue).await {
+        if let Some(sender) = self.gnbcu.match_rrc_transaction(ue_id).await {
             let _ = sender.send(message).await;
             return;
         }
 
+        // This is a request.  Retrieve the UE.
+        let ue = match self.gnbcu.retrieve(&ue_id).await {
+            Ok(Some(x)) => x,
+            _ => {
+                debug!(
+                    &logger,
+                    "Failed to get UE {:#010x} - can't carry out UL message transfer", ue_id
+                );
+                return;
+            }
+        };
+
         match message.message {
-            // UlDcchMessageType::C1(C1_6::RrcSetupComplete(x)) => {
-            //     if let Err(e) = self.rrc_setup_complete(ue, x, logger).await {
-            //         warn!(logger, "Error processing Rrc Setup Complete - {:?}", e)
-            //     }
-            // }
             UlDcchMessageType::C1(C1_6::UlInformationTransfer(x)) => {
                 if let Err(e) = self.ul_information_transfer(ue, x, logger).await {
                     warn!(logger, "Error processing Ul Information Transfer - {:?}", e)
@@ -65,82 +54,6 @@ impl<G: GnbcuOps> RrcHandler<G> {
             _ => warn!(logger, "Unsupported UlDcchMessage {:?}", message.message),
         }
     }
-
-    // async fn rrc_setup_request(
-    //     &self,
-    //     ue: UeState,
-    //     req: RrcSetupRequest,
-    //     logger: &Logger,
-    // ) -> Result<()> {
-    //     debug!(logger, ">> Rrc Setup Request");
-    //     procedures::initial_access(&self.gnbcu, ue, &req, logger).await
-    // }
-
-    // async fn rrc_setup_complete(
-    //     &self,
-    //     ue: UeState,
-    //     req: RrcSetupComplete,
-    //     logger: &Logger,
-    // ) -> Result<()> {
-    //     debug!(logger, ">> RrcSetupComplete");
-
-    //     // TODO: check transaction identifier matches that in UE context?
-    //     let _transaction_id = req.rrc_transaction_identifier;
-    //     let req = match req.critical_extensions {
-    //         CriticalExtensions22::RrcSetupComplete(x) => x,
-    //     };
-
-    //     // TODO: get establishment cause from the earlier Rrc Setup Request.  Means
-    //     // we need a single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
-    //     // with a timeout.  This means that the F1 layer needs to provide something
-    //     // similar to impl<P: Procedure> RequestProvider<P> for Stack.
-    //     let rrc_establishment_cause = RrcEstablishmentCause::MtAccess;
-
-    //     // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk-convert?)
-    //     let nr_cgi = ngap::NrCgi {
-    //         plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
-    //         nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
-    //     };
-
-    //     // Initial UE Message to the AMF containing the enclosed NAS message.
-    //     let m = InitialUeMessage {
-    //         ran_ue_ngap_id: RanUeNgapId(1),
-    //         nas_pdu: NasPdu(req.dedicated_nas_message.0),
-    //         user_location_information: UserLocationInformation::UserLocationInformationNr(
-    //             UserLocationInformationNr {
-    //                 nr_cgi,
-    //                 tai: Tai {
-    //                     plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
-    //                     tac: Tac(vec![0, 0, 1]),
-    //                 },
-    //                 time_stamp: None,
-    //             },
-    //         ),
-    //         rrc_establishment_cause,
-    //         five_g_s_tmsi: None,
-    //         amf_set_id: None,
-    //         ue_context_request: Some(UeContextRequest::Requested),
-    //         allowed_nssai: None,
-    //         source_to_target_amf_information_reroute: None,
-    //         selected_plmn_identity: None,
-    //         iab_node_indication: None,
-    //         c_emode_b_support_indicator: None,
-    //         ltem_indication: None,
-    //         edt_session: None,
-    //         authenticated_indication: None,
-    //         npn_access_information: None,
-    //     };
-
-    //     debug!(logger, "Store UE state");
-    //     self.gnbcu
-    //         .store(ue.key, ue, self.config.initial_ttl_secs)
-    //         .await?;
-
-    //     debug!(logger, "InitialUeMessage(Nas) >>");
-    //     InitialUeMessageProcedure::call_provider(self.gnbcu.ngap_stack(), m, logger).await;
-
-    //     Ok(())
-    // }
 
     async fn ul_information_transfer(
         &self,

@@ -53,6 +53,7 @@ pub async fn initial_access<G: GnbcuOps>(
         _ => Err(anyhow!("Expected Rrc Setup complete")),
     }?;
 
+    // This was an idea for a more elegant model.
     // let rrc_setup_complete = <UeRrcChannel as RequestProvider<RrcSetupProcedure>>::request(
     //     gnbcu.ue_rrc_channel(),
     //     rrc_setup,
@@ -65,10 +66,7 @@ pub async fn initial_access<G: GnbcuOps>(
         CriticalExtensions22::RrcSetupComplete(x) => x,
     };
 
-    // TODO: get establishment cause from the earlier Rrc Setup Request.  Means
-    // we need a single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
-    // with a timeout.  This means that the F1 layer needs to provide something
-    // similar to impl<P: Procedure> RequestProvider<P> for Stack.
+    // TODO: get establishment cause from the earlier Rrc Setup Request.
     let rrc_establishment_cause = RrcEstablishmentCause::MtAccess;
 
     // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk-convert?)
@@ -106,7 +104,7 @@ pub async fn initial_access<G: GnbcuOps>(
         npn_access_information: None,
     };
 
-    debug!(logger, "Store UE state");
+    debug!(logger, "Store UE {:#010x}", ue.key);
     gnbcu
         .store(ue.key, ue, gnbcu.config().initial_ue_ttl_secs)
         .await?;
