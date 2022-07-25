@@ -39,7 +39,7 @@ impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandl
         debug!(&logger, "DownlinkNasTransport(Nas) <<");
 
         let ue_state = match self.gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
-            Ok(Some(x)) => x,
+            Ok(x) => x,
             _ => {
                 debug!(
                     &logger,

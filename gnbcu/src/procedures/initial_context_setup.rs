@@ -29,8 +29,7 @@ pub async fn initial_context_setup<G: GnbcuOps>(
     let ue = gnbcu
         .retrieve(&r.ran_ue_ngap_id.0)
         .await
-        .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?
-        .ok_or(Cause::RadioNetwork(CauseRadioNetwork::UnknownLocalUeNgapId))?;
+        .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::UnknownLocalUeNgapId))?;
 
     // Build Security Mode command and wrap it in an RrcContainer.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;

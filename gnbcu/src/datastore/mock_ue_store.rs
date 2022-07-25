@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use async_std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 
@@ -25,8 +25,13 @@ impl UeStateStore for MockUeStore {
         self.kvs.lock().await.insert(k, s);
         Ok(())
     }
-    async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
-        Ok(self.kvs.lock().await.get(k).map(|x| x.clone()))
+    async fn retrieve(&self, k: &u32) -> Result<UeState> {
+        self.kvs
+            .lock()
+            .await
+            .get(k)
+            .map(|x| x.clone())
+            .ok_or(anyhow!("No such key)"))
     }
     async fn delete(&self, k: &u32) -> Result<()> {
         self.kvs.lock().await.remove(k);
@@ -51,10 +56,10 @@ mod tests {
             key: 2,
         };
         m.store(123, ue_state, 0).await?;
-        let _ue_state = m.retrieve(&123).await.unwrap().unwrap();
-        assert!(m.retrieve(&0).await.unwrap().is_none());
+        let _ue_state = m.retrieve(&123).await.unwrap();
+        assert!(m.retrieve(&0).await.is_err());
         m.delete(&123).await.unwrap();
-        assert!(m.retrieve(&123).await.unwrap().is_none());
+        assert!(m.retrieve(&123).await.is_err());
         m.delete(&0).await.unwrap();
         Ok(())
     }

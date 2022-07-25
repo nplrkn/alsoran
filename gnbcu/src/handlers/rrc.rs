@@ -35,7 +35,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
 
         // This is a request.  Retrieve the UE.
         let ue = match self.gnbcu.retrieve(&ue_id).await {
-            Ok(Some(x)) => x,
+            Ok(x) => x,
             _ => {
                 debug!(
                     &logger,

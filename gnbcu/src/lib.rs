@@ -127,7 +127,7 @@ impl<U: UeStateStore> UeStateStore for Gnbcu<U> {
     async fn store(&self, k: u32, s: UeState, ttl_secs: usize) -> Result<()> {
         self.ue_store.store(k, s, ttl_secs).await
     }
-    async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
+    async fn retrieve(&self, k: &u32) -> Result<UeState> {
         self.ue_store.retrieve(k).await
     }
     async fn delete(&self, k: &u32) -> Result<()> {

@@ -2,8 +2,9 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use redis::{AsyncCommands, Client};
+use speedy::{Readable, Writable};
 
-use super::{UeState, UeStateStore};
+use super::{ue_state::UeStateSerializable, UeState, UeStateStore};
 
 #[derive(Clone)]
 pub struct RedisUeStore {
@@ -19,17 +20,22 @@ impl RedisUeStore {
 
 #[async_trait]
 impl UeStateStore for RedisUeStore {
-    async fn store(&self, k: u32, s: UeState, ttl_secs: usize) -> Result<()> {
-        let conn = self.client.get_async_connection().await?;
-        conn.set_ex(k, s, ttl_secs).await?;
+    async fn store(&self, k: u32, v: UeState, ttl_secs: usize) -> Result<()> {
+        let mut conn = self.client.get_async_connection().await?;
+        let v: UeStateSerializable = v.into();
+        let v = v.write_to_vec()?;
+        conn.set_ex(k, v, ttl_secs).await?;
         Ok(())
     }
-    async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
-        let conn = self.client.get_async_connection().await?;
-        todo!()
+    async fn retrieve(&self, k: &u32) -> Result<UeState> {
+        let mut conn = self.client.get_async_connection().await?;
+        let v: Vec<u8> = conn.get(k).await?;
+        let v = UeStateSerializable::read_from_buffer(&v)?;
+        Ok(v.into())
     }
     async fn delete(&self, k: &u32) -> Result<()> {
-        let conn = self.client.get_async_connection().await?;
-        todo!()
+        let mut conn = self.client.get_async_connection().await?;
+        conn.del(k).await?;
+        Ok(())
     }
 }
