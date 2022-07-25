@@ -77,7 +77,7 @@ pub async fn initial_access<G: GnbcuOps>(
 
     // Initial UE Message to the AMF containing the enclosed NAS message.
     let m = InitialUeMessage {
-        ran_ue_ngap_id: RanUeNgapId(1),
+        ran_ue_ngap_id: RanUeNgapId(ue.key),
         nas_pdu: NasPdu(rrc_setup_complete.dedicated_nas_message.0),
         user_location_information: UserLocationInformation::UserLocationInformationNr(
             UserLocationInformationNr {

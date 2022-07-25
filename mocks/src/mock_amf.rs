@@ -133,6 +133,7 @@ impl MockAmf {
         })) = self.receive_pdu().await
         {
             info!(logger, ">> InitialUeMessage");
+            debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
             self.ran_ue_ngap_id = Some(ran_ue_ngap_id);
             Ok(())
         } else {

@@ -8,10 +8,9 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Review all readmes as seen on Github
 - Set to public
 -----------
-- Have the integration test not use real sockets and run in parallel
+- -ve response to InitialContextSetupRequest with bad RAN UE ID
 -----------
-- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
------------
+- Get rid of todo!() in top_pdu.rs and replace with a log
 - Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Generate procedures for Rrc.  Need a new kind of transport provider (not an SCTP one).
 - Implement setuprelease
@@ -28,6 +27,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
 - Fix failing test
 - Code review (incl commented out code and TODOs) - gnbcu
 - Redo roadmap

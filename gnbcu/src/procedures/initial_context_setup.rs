@@ -25,6 +25,7 @@ pub async fn initial_context_setup<G: GnbcuOps>(
     debug!(&logger, "InitialContextSetupRequest(Nas) << ");
 
     // Retrieve UE context by ran_ue_ngap_id.
+    debug!(&logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
     let ue = gnbcu
         .retrieve(&r.ran_ue_ngap_id.0)
         .await
