@@ -8,6 +8,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Review all readmes as seen on Github
 - Set to public
 -----------
+- Redis live test
+-----------
 - -ve response to InitialContextSetupRequest with bad RAN UE ID
 -----------
 - Get rid of todo!() in top_pdu.rs and replace with a log

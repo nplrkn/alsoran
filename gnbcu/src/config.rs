@@ -4,7 +4,7 @@ pub struct Config {
     pub f1ap_bind_port: u16,
 
     // TTL to set on the UE state during the initial access procedure
-    pub initial_ue_ttl_secs: u32,
+    pub initial_ue_ttl_secs: usize,
 }
 
 impl Default for Config {

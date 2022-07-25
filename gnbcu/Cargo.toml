@@ -21,3 +21,4 @@ bitvec = "1.0.1"
 common = { path = "../common" }
 async-channel = "1.6.1"
 rand = "0.8.5"
+redis = {version = "0.21.5", features = ["async-std-comp"]}

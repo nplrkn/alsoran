@@ -1,27 +1,35 @@
 #![allow(dead_code, unused_variables)]
 use anyhow::Result;
 use async_trait::async_trait;
+use redis::{AsyncCommands, Client};
 
 use super::{UeState, UeStateStore};
 
 #[derive(Clone)]
-pub struct RedisUeStore {}
+pub struct RedisUeStore {
+    client: Client,
+}
 
 impl RedisUeStore {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new() -> Result<Self> {
+        let client = Client::open("redis://127.0.0.1/")?;
+        Ok(RedisUeStore { client })
     }
 }
 
 #[async_trait]
 impl UeStateStore for RedisUeStore {
-    async fn store(&self, k: u32, s: UeState, _ttl_secs: u32) -> Result<()> {
-        todo!()
+    async fn store(&self, k: u32, s: UeState, ttl_secs: usize) -> Result<()> {
+        let conn = self.client.get_async_connection().await?;
+        conn.set_ex(k, s, ttl_secs).await?;
+        Ok(())
     }
     async fn retrieve(&self, k: &u32) -> Result<Option<UeState>> {
+        let conn = self.client.get_async_connection().await?;
         todo!()
     }
     async fn delete(&self, k: &u32) -> Result<()> {
+        let conn = self.client.get_async_connection().await?;
         todo!()
     }
 }

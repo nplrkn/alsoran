@@ -21,7 +21,7 @@ impl MockUeStore {
 
 #[async_trait]
 impl UeStateStore for MockUeStore {
-    async fn store(&self, k: u32, s: UeState, _ttl_secs: u32) -> Result<()> {
+    async fn store(&self, k: u32, s: UeState, _ttl_secs: usize) -> Result<()> {
         self.kvs.lock().await.insert(k, s);
         Ok(())
     }
