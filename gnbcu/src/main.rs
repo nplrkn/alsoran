@@ -8,7 +8,7 @@ async fn main() -> Result<()> {
     let root_logger = logging::init();
     let shutdown_handle = Gnbcu::spawn(
         Config::default(),
-        RedisUeStore::new().unwrap(),
+        RedisUeStore::new(6379).unwrap(),
         &root_logger,
     )?;
     let s = signal::wait_for_signal().await?;

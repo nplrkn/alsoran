@@ -12,8 +12,8 @@ pub struct RedisUeStore {
 }
 
 impl RedisUeStore {
-    pub fn new() -> Result<Self> {
-        let client = Client::open("redis://127.0.0.1/")?;
+    pub fn new(port: u16) -> Result<Self> {
+        let client = Client::open(format!("redis://127.0.0.1:{}/", port))?;
         Ok(RedisUeStore { client })
     }
 }

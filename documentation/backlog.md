@@ -3,32 +3,34 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
+- Merge Redis branch and add to live test
 - Get approval to publish
 - Rerun live test
 - Review all readmes as seen on Github
 - Set to public
------------
-- Redis live test
------------
-- -ve response to InitialContextSetupRequest with bad RAN UE ID
------------
+----FUNCTION----
+- Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
+- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
+----PERFORMANCE----
+- Don't create 1 Redis connection per access
+-----ASN.1 GENERATOR------
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
-- Generate procedures for Rrc.  Need a new kind of transport provider (not an SCTP one).
+- Generate procedures for Rrc and make F1AP a RequestProvider.
 - Implement setuprelease
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
------------
-- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
------------
+-----TESTS------
 - Have the integration test not use real sockets and run in parallel
-- Adopt https://github.com/cucumber-rs/cucumber for integration tests
+- Redis live test should not create Redis dump.rdb
+----MAINTAINABILITY----
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## RETEST
 
 ## DONE
+- Redis live test
 - Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
 - Fix failing test
 - Code review (incl commented out code and TODOs) - gnbcu
