@@ -30,7 +30,7 @@ the same UE, then two records are created.  We use a fairly short initial TTL so
 
 From this point, the UE Context may be retrieved for message transfer purposes.  During the initial access sequence, NAS authentication and security get set up in this way, without modifying the UE context. 
 
-Here is the first downlink message transfer, used to carry the NAS Authentication Request.
+Here is the first downlink message transfer, used to carry the NAS Authentication Request.  
 
 ```mermaid
 sequenceDiagram
@@ -39,8 +39,11 @@ sequenceDiagram
   participant AMF
   AMF->>CU: Downlink NAS Transport + NAS Authentication Request
   Note over CU: Retrieve
+  Note over CU: Store (first time only)
   CU->>DU: Dl Rrc Message Transfer + Rrc Dl Information Transfer + NAS Authentication Request
 ```
+
+The first time Downlink NAS Transport is received, we store the AMF's UE Id.  Subsequent occurences are handled without a store. 
 
 And here is the uplink message transfer used to carry the NAS Authentication Response.
 

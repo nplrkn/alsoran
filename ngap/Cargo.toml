@@ -8,7 +8,7 @@ doctest = false
 
 [dependencies]
 #asn1-codecs = "0.2.0"
-asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="fix-string-decode" }
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="fix-constrained-u32-encode" }
 bitvec = "1.0.1"
 hex = "0.4.3"
 num_enum = "0.5.7"

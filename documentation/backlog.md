@@ -3,12 +3,16 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Merge Redis branch and add to live test
+- Uplink and downlink NAS transfer should be in the procedures module
+- Store AMF UE Ngap Id on first downlink NAS transport
+- Get live test working
+- Merge Redis branch 
 - Get approval to publish
 - Rerun live test
 - Review all readmes as seen on Github
 - Set to public
 ----FUNCTION----
+- Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs.
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 ----PERFORMANCE----
@@ -21,6 +25,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
 -----TESTS------
+- Intermittent failure of live redis test
 - Have the integration test not use real sockets and run in parallel
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
@@ -30,6 +35,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Fix int coding bug
 - Redis live test
 - Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
 - Fix failing test

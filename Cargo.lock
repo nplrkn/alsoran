@@ -32,7 +32,7 @@ checksum = "c5d78ce20460b82d3fa150275ed9d55e21064fc7951177baacf86a145c4a4b1f"
 [[package]]
 name = "asn1-codecs"
 version = "0.2.0"
-source = "git+https://github.com/nplrkn/hampi?branch=fix-string-decode#24f8609f789aed2f8b9a8702a01a3f236a10826a"
+source = "git+https://github.com/nplrkn/hampi?branch=fix-constrained-u32-encode#ad4f8ac91a78921c1c3ad968abcace14e49c315d"
 dependencies = [
  "bitvec",
  "log",
