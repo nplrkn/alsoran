@@ -1,10 +1,7 @@
 use crate::GnbcuOps;
 use crate::UeState;
-use anyhow::{anyhow, Result};
-use bitvec::prelude::*;
-use net::{AperSerde, Indication};
-use ngap::*;
-
+use anyhow::Result;
+use net::AperSerde;
 use rrc::*;
 use slog::{debug, warn, Logger};
 
@@ -61,48 +58,7 @@ impl<G: GnbcuOps> RrcHandler<G> {
         req: UlInformationTransfer,
         logger: &Logger,
     ) -> Result<()> {
-        let nas_pdu = match req.critical_extensions {
-            CriticalExtensions37::UlInformationTransfer(UlInformationTransferIEs {
-                dedicated_nas_message: Some(x),
-                ..
-            }) => NasPdu(x.0),
-            _ => {
-                debug!(&logger, "No Nas Message present - nothing to do");
-                return Ok(());
-            }
-        };
-
-        debug!(logger, ">> UlInformationTransfer(Nas)");
-
-        let amf_ue_ngap_id = ue.amf_ue_ngap_id.ok_or(anyhow!("AMF NGAP Id unknown"))?;
-
-        // Todo - should be from Ue context
-        let nr_cgi = ngap::NrCgi {
-            plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
-            nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
-        };
-
-        let m = UplinkNasTransport {
-            amf_ue_ngap_id,
-            ran_ue_ngap_id: RanUeNgapId(ue.key),
-            nas_pdu,
-            user_location_information: UserLocationInformation::UserLocationInformationNr(
-                UserLocationInformationNr {
-                    nr_cgi,
-                    tai: Tai {
-                        plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
-                        tac: Tac(vec![0, 0, 1]),
-                    },
-                    time_stamp: None,
-                },
-            ),
-            w_agf_identity_information: None,
-            tngf_identity_information: None,
-            twif_identity_information: None,
-        };
-
-        debug!(logger, "UplinkNasTransport(Nas) >>");
-        UplinkNasTransportProcedure::call_provider(self.gnbcu.ngap_stack(), m, logger).await;
+        crate::procedures::uplink_nas(&self.gnbcu, ue, req, logger).await;
         Ok(())
     }
 }

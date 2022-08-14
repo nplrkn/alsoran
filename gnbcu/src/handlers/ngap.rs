@@ -1,10 +1,8 @@
 use crate::{procedures, GnbcuOps};
 use anyhow::Result;
 use async_trait::async_trait;
-use net::{AperSerde, EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
+use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use ngap::*;
-use pdcp::PdcpPdu;
-use rrc::*;
 use slog::{debug, info, warn, Logger};
 
 impl<G: GnbcuOps> RequestProvider<NgSetupProcedure> for NgapHandler<G> {}
@@ -36,48 +34,7 @@ impl<G: GnbcuOps> EventHandler for NgapHandler<G> {
 #[async_trait]
 impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
-        debug!(&logger, "DownlinkNasTransport(Nas) <<");
-
-        let ue_state = match self.gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
-            Ok(x) => x,
-            _ => {
-                debug!(
-                    &logger,
-                    "Failed to get UE {:#010x} - can't carry out downlink Nas transfer",
-                    i.ran_ue_ngap_id.0
-                );
-                return;
-            }
-        };
-
-        let rrc = match (DlDcchMessage {
-            message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
-                rrc_transaction_identifier: RrcTransactionIdentifier(2),
-                critical_extensions: CriticalExtensions4::DlInformationTransfer(
-                    DlInformationTransferIEs {
-                        dedicated_nas_message: Some(DedicatedNasMessage(i.nas_pdu.0)),
-                        late_non_critical_extension: None,
-                        non_critical_extension: None,
-                    },
-                ),
-            })),
-        }
-        .into_bytes())
-        {
-            Ok(x) => x,
-            Err(e) => {
-                warn!(
-                    logger,
-                    "Failed to encode Rrc DlInformationTransfer - {:?}", e
-                );
-                return;
-            }
-        };
-        let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
-        debug!(&logger, "<< DlInformationTransfer(Nas)");
-        self.gnbcu
-            .send_rrc_to_ue(&ue_state, rrc_container, logger)
-            .await;
+        crate::procedures::downlink_nas(&self.gnbcu, i, logger).await;
     }
 }
 

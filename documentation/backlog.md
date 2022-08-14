@@ -3,7 +3,6 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Uplink and downlink NAS transfer should be in the procedures module
 - Store AMF UE Ngap Id on first downlink NAS transport
 - Get live test working
 - Merge Redis branch 
@@ -35,6 +34,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Uplink and downlink NAS transfer should be in the procedures module
 - Fix int coding bug
 - Redis live test
 - Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
