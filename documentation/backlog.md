@@ -3,7 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Store AMF UE Ngap Id on first downlink NAS transport
+- Clean up Redis even if live redis test fails
 - Get live test working
 - Merge Redis branch 
 - Get approval to publish
@@ -11,7 +11,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Review all readmes as seen on Github
 - Set to public
 ----FUNCTION----
-- Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs.
+- Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 ----PERFORMANCE----
@@ -34,6 +34,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Store AMF UE Ngap Id on first downlink NAS transport
 - Uplink and downlink NAS transfer should be in the procedures module
 - Fix int coding bug
 - Redis live test

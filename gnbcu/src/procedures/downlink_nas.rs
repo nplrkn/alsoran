@@ -9,7 +9,7 @@ use slog::{debug, warn, Logger};
 pub async fn downlink_nas<G: GnbcuOps>(gnbcu: &G, i: DownlinkNasTransport, logger: &Logger) {
     debug!(&logger, "DownlinkNasTransport(Nas) <<");
 
-    let ue_state = match gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
+    let mut ue = match gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
         Ok(x) => x,
         _ => {
             debug!(
@@ -20,6 +20,20 @@ pub async fn downlink_nas<G: GnbcuOps>(gnbcu: &G, i: DownlinkNasTransport, logge
             return;
         }
     };
+
+    match ue.amf_ue_ngap_id {
+        Some(ref x) if x.0 == i.amf_ue_ngap_id.0 => (),
+        _ => {
+            debug!(logger, "Learned AMF NGAP ID {:#x}", i.amf_ue_ngap_id.0);
+            ue.amf_ue_ngap_id = Some(i.amf_ue_ngap_id);
+            if let Err(e) = gnbcu
+                .store(ue.key, ue.clone(), gnbcu.config().initial_ue_ttl_secs)
+                .await
+            {
+                debug!(logger, "Failed to store UE state - error {:?}", e);
+            }
+        }
+    }
 
     let rrc = match (DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
@@ -46,5 +60,5 @@ pub async fn downlink_nas<G: GnbcuOps>(gnbcu: &G, i: DownlinkNasTransport, logge
     };
     let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
     debug!(&logger, "<< DlInformationTransfer(Nas)");
-    gnbcu.send_rrc_to_ue(&ue_state, rrc_container, logger).await;
+    gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
 }
