@@ -78,7 +78,7 @@ pub async fn initial_context_setup<G: GnbcuOps>(
     debug!(&logger, "InitialContextSetupResponse >>");
     Ok(InitialContextSetupResponse {
         amf_ue_ngap_id: r.amf_ue_ngap_id.clone(),
-        ran_ue_ngap_id: RanUeNgapId(1),
+        ran_ue_ngap_id: RanUeNgapId(ue.key),
         pdu_session_resource_setup_list_cxt_res: None,
         pdu_session_resource_failed_to_setup_list_cxt_res: None,
         criticality_diagnostics: None,

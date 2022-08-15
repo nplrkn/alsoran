@@ -4,7 +4,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 
 ## TO DO
 - Clean up Redis even if live redis test fails
-- Get live test working
+- In demo, GNBDU SIM should not warn 'connection failed - will retry' on shutdown
+- Tidy code e.g. in procedures, GnbcuOps
 - Merge Redis branch 
 - Get approval to publish
 - Rerun live test
@@ -34,6 +35,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Get live test and demo working
 - Store AMF UE Ngap Id on first downlink NAS transport
 - Uplink and downlink NAS transfer should be in the procedures module
 - Fix int coding bug
