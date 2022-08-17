@@ -3,11 +3,11 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- GNBDU-SIM should not hang and should produce a clear error message if mongo is not started
 - Clean up Redis even if live redis test fails
 - Live Redis test only passes second time??
 - Tidy code e.g. in procedures, GnbcuOps
 - Merge Redis branch 
+- Registration of multiple UEs
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github
@@ -36,6 +36,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- GNBDU-SIM should produce a clear error message if mongo is not started
 - In demo, GNBDU SIM should not warn 'connection failed - will retry' on shutdown
 - Get live test and demo working
 - Store AMF UE Ngap Id on first downlink NAS transport
