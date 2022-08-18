@@ -20,26 +20,6 @@ use stop_token::{StopSource, StopToken};
 
 use crate::handlers::{F1apHandler, NgapHandler};
 
-#[async_trait]
-pub trait GnbcuOps: Send + Sync + Clone + 'static + UeStateStore {
-    fn ngap_stack(&self) -> &Stack;
-    fn f1ap_stack(&self) -> &Stack;
-    fn config(&self) -> &Config;
-
-    /// Start a new RRC transaction.
-    async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction;
-
-    /// Determine if this is a response to a local pending RRC transaction.
-    async fn match_rrc_transaction(&self, ue_id: u32) -> Option<Sender<UlDcchMessage>>;
-
-    async fn send_rrc_to_ue(
-        &self,
-        ue: &UeState,
-        rrc_container: f1ap::RrcContainer,
-        logger: &Logger,
-    );
-}
-
 // TS38.412, 7
 // The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol NGAP
 // is 60, and 66 for DTLS over SCTP (IETF RFC 6083 [8]).
@@ -182,7 +162,7 @@ impl<U: UeStateStore> UeStateStore for Gnbcu<U> {
 // }
 
 #[async_trait]
-impl<U: UeStateStore> GnbcuOps for Gnbcu<U> {
+impl<U: UeStateStore> procedures::GnbcuOps for Gnbcu<U> {
     fn ngap_stack(&self) -> &Stack {
         &self.ngap
     }

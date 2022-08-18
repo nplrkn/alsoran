@@ -1,4 +1,4 @@
-use crate::GnbcuOps;
+use super::GnbcuOps;
 use bitvec::prelude::*;
 use net::{RequestProvider, Stack};
 use ngap::*;

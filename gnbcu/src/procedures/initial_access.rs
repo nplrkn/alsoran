@@ -1,4 +1,5 @@
-use crate::{datastore::UeState, GnbcuOps};
+use super::GnbcuOps;
+use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use f1ap::InitialUlRrcMessageTransfer;

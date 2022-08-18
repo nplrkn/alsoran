@@ -1,4 +1,5 @@
-use crate::{datastore::UeState, GnbcuOps};
+use super::GnbcuOps;
+use crate::datastore::UeState;
 use bitvec::prelude::*;
 use net::Indication;
 use ngap::{

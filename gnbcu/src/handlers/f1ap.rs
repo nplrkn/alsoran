@@ -1,10 +1,11 @@
 use super::RrcHandler;
-use crate::{procedures, GnbcuOps};
+use crate::procedures;
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use pdcp::PdcpPdu;
+use procedures::GnbcuOps;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]

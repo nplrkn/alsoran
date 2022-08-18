@@ -1,4 +1,4 @@
-use crate::GnbcuOps;
+use super::GnbcuOps;
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};

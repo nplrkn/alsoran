@@ -1,4 +1,4 @@
-use crate::{procedures, GnbcuOps};
+use crate::procedures::{self, GnbcuOps};
 use anyhow::Result;
 use async_trait::async_trait;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};

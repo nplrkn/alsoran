@@ -1,4 +1,4 @@
-use crate::GnbcuOps;
+use super::GnbcuOps;
 use net::AperSerde;
 use ngap::DownlinkNasTransport;
 use pdcp::PdcpPdu;

@@ -1,5 +1,4 @@
-use crate::GnbcuOps;
-use crate::UeState;
+use crate::{procedures::GnbcuOps, UeState};
 use anyhow::Result;
 use net::AperSerde;
 use rrc::*;
