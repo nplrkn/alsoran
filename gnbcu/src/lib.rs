@@ -162,7 +162,7 @@ impl<U: UeStateStore> UeStateStore for Gnbcu<U> {
 // }
 
 #[async_trait]
-impl<U: UeStateStore> procedures::GnbcuOps for Gnbcu<U> {
+impl<U: UeStateStore> procedures::GnbcuT for Gnbcu<U> {
     fn ngap_stack(&self) -> &Stack {
         &self.ngap
     }

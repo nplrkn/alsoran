@@ -1,15 +1,15 @@
-use crate::{procedures::GnbcuOps, UeState};
+use crate::{procedures::GnbcuT, UeState};
 use anyhow::Result;
 use net::AperSerde;
 use rrc::*;
 use slog::{debug, warn, Logger};
 
 #[derive(Clone)]
-pub struct RrcHandler<G: GnbcuOps> {
+pub struct RrcHandler<G: GnbcuT> {
     gnbcu: G,
 }
 
-impl<G: GnbcuOps> RrcHandler<G> {
+impl<G: GnbcuT> RrcHandler<G> {
     pub fn new(gnbcu: G) -> RrcHandler<G> {
         RrcHandler { gnbcu }
     }

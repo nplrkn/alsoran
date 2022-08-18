@@ -1,4 +1,4 @@
-use super::GnbcuOps;
+use super::GnbcuT;
 use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
@@ -11,7 +11,7 @@ use rrc::*;
 use slog::{debug, Logger};
 
 // Initial Access Procedure
-pub async fn initial_access<G: GnbcuOps>(
+pub async fn initial_access<G: GnbcuT>(
     gnbcu: &G,
     r: InitialUlRrcMessageTransfer,
     logger: &Logger,

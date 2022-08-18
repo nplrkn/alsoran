@@ -1,4 +1,4 @@
-use super::GnbcuOps;
+use super::GnbcuT;
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
@@ -17,7 +17,7 @@ use slog::{debug, Logger};
 // 5. << Rrc Reconfiguration + Nas
 // 6. >> Rrc Reconfiguration Complete
 // 7.    Ngap Initial Context Setup Response >>
-pub async fn initial_context_setup<G: GnbcuOps>(
+pub async fn initial_context_setup<G: GnbcuT>(
     gnbcu: &G,
     r: &InitialContextSetupRequest,
     logger: &Logger,

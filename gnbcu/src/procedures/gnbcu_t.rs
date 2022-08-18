@@ -9,8 +9,9 @@ use net::Stack;
 use rrc::UlDcchMessage;
 use slog::Logger;
 
+/// GnbcuT - trait representing a Gnbcu instance on top of which Gnbcu business logic can be implemented.
 #[async_trait]
-pub trait GnbcuOps: Send + Sync + Clone + 'static + UeStateStore {
+pub trait GnbcuT: Send + Sync + Clone + 'static + UeStateStore {
     fn ngap_stack(&self) -> &Stack;
     fn f1ap_stack(&self) -> &Stack;
     fn config(&self) -> &Config;

@@ -1,24 +1,24 @@
-use crate::procedures::{self, GnbcuOps};
+use crate::procedures::{self, GnbcuT};
 use anyhow::Result;
 use async_trait::async_trait;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use ngap::*;
 use slog::{debug, info, warn, Logger};
 
-impl<G: GnbcuOps> RequestProvider<NgSetupProcedure> for NgapHandler<G> {}
+impl<G: GnbcuT> RequestProvider<NgSetupProcedure> for NgapHandler<G> {}
 
 #[derive(Clone)]
 pub struct NgapHandler<G> {
     gnbcu: G,
 }
 
-impl<G: GnbcuOps> NgapHandler<G> {
+impl<G: GnbcuT> NgapHandler<G> {
     pub fn new_ngap_application(gnbcu: G) -> NgapGnb<NgapHandler<G>> {
         NgapGnb::new(NgapHandler { gnbcu })
     }
 }
 #[async_trait]
-impl<G: GnbcuOps> EventHandler for NgapHandler<G> {
+impl<G: GnbcuT> EventHandler for NgapHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {
@@ -32,14 +32,14 @@ impl<G: GnbcuOps> EventHandler for NgapHandler<G> {
 }
 
 #[async_trait]
-impl<G: GnbcuOps> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
+impl<G: GnbcuT> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
         crate::procedures::downlink_nas(&self.gnbcu, i, logger).await;
     }
 }
 
 #[async_trait]
-impl<G: GnbcuOps> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> {
+impl<G: GnbcuT> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> {
     async fn request(
         &self,
         r: InitialContextSetupRequest,
@@ -61,7 +61,7 @@ impl<G: GnbcuOps> RequestProvider<InitialContextSetupProcedure> for NgapHandler<
 }
 
 #[async_trait]
-impl<G: GnbcuOps> IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler<G> {
+impl<G: GnbcuT> IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler<G> {
     async fn handle(&self, i: AmfStatusIndication, logger: &Logger) {
         debug!(logger, "<< Amf Status Indication");
         for guami_item in i.unavailable_guami_list.0 {

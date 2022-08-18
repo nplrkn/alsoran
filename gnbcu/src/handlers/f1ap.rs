@@ -5,16 +5,16 @@ use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use pdcp::PdcpPdu;
-use procedures::GnbcuOps;
+use procedures::GnbcuT;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
-pub struct F1apHandler<G: GnbcuOps> {
+pub struct F1apHandler<G: GnbcuT> {
     gnbcu: G,
     rrc_handler: RrcHandler<G>,
 }
 
-impl<G: GnbcuOps> F1apHandler<G> {
+impl<G: GnbcuT> F1apHandler<G> {
     pub fn new_f1ap_application(gnbcu: G, rrc_handler: RrcHandler<G>) -> F1apCu<F1apHandler<G>> {
         F1apCu::new(F1apHandler {
             gnbcu: gnbcu,
@@ -24,7 +24,7 @@ impl<G: GnbcuOps> F1apHandler<G> {
 }
 
 #[async_trait]
-impl<G: GnbcuOps> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
+impl<G: GnbcuT> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
     async fn request(
         &self,
         r: F1SetupRequest,
@@ -49,7 +49,7 @@ impl<G: GnbcuOps> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
 }
 
 #[async_trait]
-impl<G: GnbcuOps> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
+impl<G: GnbcuT> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> InitialUlRrcMessageTransfer");
         if let Err(e) = procedures::initial_access(&self.gnbcu, r, logger).await {
@@ -76,7 +76,7 @@ impl<G: GnbcuOps> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1
 }
 
 #[async_trait]
-impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler<G> {
+impl<G: GnbcuT> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> UlRrcMessageTransfer");
 
@@ -101,7 +101,7 @@ impl<G: GnbcuOps> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandl
 }
 
 #[async_trait]
-impl<G: GnbcuOps> EventHandler for F1apHandler<G> {
+impl<G: GnbcuT> EventHandler for F1apHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {

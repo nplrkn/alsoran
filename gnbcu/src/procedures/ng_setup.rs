@@ -1,10 +1,10 @@
-use super::GnbcuOps;
+use super::GnbcuT;
 use bitvec::prelude::*;
 use net::{RequestProvider, Stack};
 use ngap::*;
 use slog::{debug, info, warn, Logger};
 
-pub async fn ng_setup<G: GnbcuOps>(gnbcu: &G, logger: &Logger) {
+pub async fn ng_setup<G: GnbcuT>(gnbcu: &G, logger: &Logger) {
     // This uses the default expected values of free5GC.
     let ng_setup_request = NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {

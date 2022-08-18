@@ -1,4 +1,4 @@
-use super::GnbcuOps;
+use super::GnbcuT;
 use net::AperSerde;
 use ngap::DownlinkNasTransport;
 use pdcp::PdcpPdu;
@@ -6,7 +6,7 @@ use rrc::*;
 use slog::{debug, warn, Logger};
 
 // Downlink Nas Procedure
-pub async fn downlink_nas<G: GnbcuOps>(gnbcu: &G, i: DownlinkNasTransport, logger: &Logger) {
+pub async fn downlink_nas<G: GnbcuT>(gnbcu: &G, i: DownlinkNasTransport, logger: &Logger) {
     debug!(&logger, "DownlinkNasTransport(Nas) <<");
 
     let mut ue = match gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
