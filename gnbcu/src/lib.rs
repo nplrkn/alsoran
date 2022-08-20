@@ -12,7 +12,10 @@ pub use datastore::{MockUeStore, RedisUeStore};
 use datastore::{UeState, UeStateStore};
 use f1ap::{DlRrcMessageTransfer, DlRrcMessageTransferProcedure, GnbCuUeF1apId, SrbId};
 use handlers::RrcHandler;
-use net::{Indication, SctpTransportProvider, ShutdownHandle, Stack};
+use net::{
+    Indication, IndicationHandler, Procedure, RequestError, RequestProvider, SctpTransportProvider,
+    ShutdownHandle, Stack,
+};
 use rrc::UlDcchMessage;
 use rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use slog::{debug, info, Logger};
@@ -163,14 +166,29 @@ impl<U: UeStateStore> UeStateStore for Gnbcu<U> {
 
 #[async_trait]
 impl<U: UeStateStore> procedures::GnbcuT for Gnbcu<U> {
-    fn ngap_stack(&self) -> &Stack {
-        &self.ngap
-    }
-    fn f1ap_stack(&self) -> &Stack {
-        &self.f1ap
-    }
     fn config(&self) -> &Config {
         &self.config
+    }
+    async fn ngap_request<P: Procedure>(
+        &self,
+        r: P::Request,
+        logger: &Logger,
+    ) -> Result<P::Success, RequestError<P::Failure>> {
+        <Stack as RequestProvider<P>>::request(&self.ngap, r, logger).await
+    }
+    async fn ngap_indication<P: Indication>(&self, r: P::Request, logger: &Logger) {
+        <Stack as IndicationHandler<P>>::handle(&self.ngap, r, logger).await
+    }
+
+    async fn f1ap_request<P: Procedure>(
+        &self,
+        r: P::Request,
+        logger: &Logger,
+    ) -> Result<P::Success, RequestError<P::Failure>> {
+        <Stack as RequestProvider<P>>::request(&self.f1ap, r, logger).await
+    }
+    async fn f1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger) {
+        <Stack as IndicationHandler<P>>::handle(&self.f1ap, r, logger).await
     }
 
     /// Start a new RRC transaction.

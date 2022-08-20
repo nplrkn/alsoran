@@ -1,7 +1,6 @@
 use super::GnbcuT;
 use crate::datastore::UeState;
 use bitvec::prelude::*;
-use net::Indication;
 use ngap::{
     NasPdu, RanUeNgapId, Tac, Tai, UplinkNasTransport, UplinkNasTransportProcedure,
     UserLocationInformation, UserLocationInformationNr,
@@ -66,5 +65,7 @@ pub async fn uplink_nas<G: GnbcuT>(
     };
 
     debug!(logger, "UplinkNasTransport(Nas) >>");
-    UplinkNasTransportProcedure::call_provider(gnbcu.ngap_stack(), m, logger).await
+    gnbcu
+        .ngap_indication::<UplinkNasTransportProcedure>(m, logger)
+        .await
 }

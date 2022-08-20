@@ -2,7 +2,7 @@ use super::GnbcuT;
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
-use net::{AperSerde, RequestProvider, Stack};
+use net::AperSerde;
 use ngap::*;
 use pdcp::PdcpPdu;
 use rrc::*;
@@ -41,13 +41,10 @@ pub async fn initial_context_setup<G: GnbcuT>(
 
     // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
     debug!(&logger, "<< UeContextSetup(RrcSecurityModeCommand)");
-    let _ue_context_setup_response = <Stack as RequestProvider<UeContextSetupProcedure>>::request(
-        gnbcu.f1ap_stack(),
-        ue_context_setup_request,
-        &logger,
-    )
-    .await
-    .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
+    let _ue_context_setup_response = gnbcu
+        .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, &logger)
+        .await
+        .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
     debug!(&logger, ">> UeContextSetupResponse");
 
     // Also get back the response from the UE to the (inner) Security Mode Command.

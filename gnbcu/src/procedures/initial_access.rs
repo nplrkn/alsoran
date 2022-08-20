@@ -3,7 +3,7 @@ use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use f1ap::InitialUlRrcMessageTransfer;
-use net::{AperSerde, Indication, Procedure};
+use net::{AperSerde, Procedure};
 use ngap::*;
 use pdcp::PdcpPdu;
 use rand::Rng;
@@ -111,7 +111,9 @@ pub async fn initial_access<G: GnbcuT>(
         .await?;
 
     debug!(logger, "InitialUeMessage(Nas) >>");
-    InitialUeMessageProcedure::call_provider(gnbcu.ngap_stack(), m, logger).await;
+    gnbcu
+        .ngap_indication::<InitialUeMessageProcedure>(m, logger)
+        .await;
     Ok(())
 }
 

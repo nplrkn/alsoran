@@ -1,6 +1,5 @@
 use super::GnbcuT;
 use bitvec::prelude::*;
-use net::{RequestProvider, Stack};
 use ngap::*;
 use slog::{debug, info, warn, Logger};
 
@@ -29,14 +28,10 @@ pub async fn ng_setup<G: GnbcuT>(gnbcu: &G, logger: &Logger) {
         nb_iot_default_paging_drx: None,
         extended_ran_node_name: None,
     };
-    let ng_setup_provider = gnbcu.ngap_stack();
     debug!(logger, "NgSetupRequest >>");
-    match <Stack as RequestProvider<NgSetupProcedure>>::request(
-        ng_setup_provider,
-        ng_setup_request,
-        logger,
-    )
-    .await
+    match gnbcu
+        .ngap_request::<NgSetupProcedure>(ng_setup_request, logger)
+        .await
     {
         Ok(response) => {
             debug!(logger, "NgSetupResponse <<");
@@ -47,5 +42,5 @@ pub async fn ng_setup<G: GnbcuT>(gnbcu: &G, logger: &Logger) {
         }
 
         Err(e) => warn!(logger, "NG Setup failed - {:?}", e),
-    }
+    };
 }
