@@ -3,7 +3,8 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Tidy code e.g. in procedures, GnbcuOps
+- Intermittent failure of live redis test
+- Have the integration test not use real sockets and run in parallel
 - Merge Redis branch 
 - Registration of multiple UEs in FV
 - Get approval to publish
@@ -24,8 +25,6 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
 -----TESTS------
-- Have the integration test not use real sockets and run in parallel
-- Intermittent failure of live redis test
 - Clean up Redis even if live redis test fails
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
@@ -35,6 +34,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Tidy code e.g. in procedures, GnbcuOps
 - GNBDU-SIM should produce a clear error message if mongo is not started
 - In demo, GNBDU SIM should not warn 'connection failed - will retry' on shutdown
 - Get live test and demo working

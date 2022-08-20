@@ -1,4 +1,4 @@
-use super::GnbcuT;
+use super::Gnbcu;
 use anyhow::Result;
 use bitvec::prelude::*;
 use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
@@ -8,16 +8,15 @@ use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, Logger};
 
-// Carry out initial context setup procedure.
-//
-// 1.    Ngap Initial Context Setup Request + Nas <<
-// 2. << F1ap Ue Context Setup Request + Rrc Security Mode Command
+// Initial context setup procedure.
+// 1.    Ngap InitialContextSetupRequest(Nas) <<
+// 2. << F1ap UeContextSetup(Rrc SecurityModeCommand)
 // 3. >> F1ap Ue Context Setup Response
-// 4. >> Rrc Security Mode Complete
-// 5. << Rrc Reconfiguration + Nas
-// 6. >> Rrc Reconfiguration Complete
-// 7.    Ngap Initial Context Setup Response >>
-pub async fn initial_context_setup<G: GnbcuT>(
+// 4. >> Rrc SecurityModeComplete
+// 5. << Rrc RrcReconfiguration(Nas)
+// 6. >> Rrc RrcReconfigurationComplete
+// 7.    Ngap InitialContextSetupResponse >>
+pub async fn initial_context_setup<G: Gnbcu>(
     gnbcu: &G,
     r: &InitialContextSetupRequest,
     logger: &Logger,
@@ -40,7 +39,7 @@ pub async fn initial_context_setup<G: GnbcuT>(
     let ue_context_setup_request = build_ue_context_setup_request(&r, rrc_container);
 
     // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
-    debug!(&logger, "<< UeContextSetup(RrcSecurityModeCommand)");
+    debug!(&logger, "<< UeContextSetup(SecurityModeCommand)");
     let _ue_context_setup_response = gnbcu
         .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, &logger)
         .await
@@ -52,7 +51,7 @@ pub async fn initial_context_setup<G: GnbcuT>(
         .recv()
         .await
         .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
-    debug!(&logger, ">> RrcSecurityModeComplete");
+    debug!(&logger, ">> SecurityModeComplete");
 
     // Build Rrc Reconfiguration including the Nas message from earlier.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;

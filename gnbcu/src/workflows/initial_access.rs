@@ -1,4 +1,4 @@
-use super::GnbcuT;
+use super::Gnbcu;
 use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
@@ -11,14 +11,23 @@ use rrc::*;
 use slog::{debug, Logger};
 
 // Initial Access Procedure
-pub async fn initial_access<G: GnbcuT>(
+// 1. >> Rrc RrcSetupRequest
+// 2. << Rrc RrcSetup
+// 3. >> Rrc RrcSetupComplete
+// 4.    Ngap InitialUeMessage >>
+pub async fn initial_access<G: Gnbcu>(
     gnbcu: &G,
     r: InitialUlRrcMessageTransfer,
     logger: &Logger,
 ) -> Result<()> {
-    debug!(&logger, "Initial Access Procedure");
+    // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER,
+    // the gNB-CU should reject the UE under the assumption that the gNB-DU is not able to serve such UE."
+
+    // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER,
+    // the gNB-CU shall take it into account as specified in TS 38.401 [4]."
 
     let _rrc_setup_request = expect_rrc_setup_request(&r.rrc_container.0)?;
+    debug!(logger, ">> Rrc RrcSetupRequest");
 
     let ue = UeState {
         amf_ue_ngap_id: None,
@@ -54,7 +63,7 @@ pub async fn initial_access<G: GnbcuT>(
         _ => Err(anyhow!("Expected Rrc Setup complete")),
     }?;
 
-    // This was an idea for a more elegant model.
+    // This was an idea for a more elegant model.  See also TODO in gnbcu_trait.rs.
     // let rrc_setup_complete = <UeRrcChannel as RequestProvider<RrcSetupProcedure>>::request(
     //     gnbcu.ue_rrc_channel(),
     //     rrc_setup,

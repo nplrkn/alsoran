@@ -1,4 +1,4 @@
-use super::GnbcuT;
+use super::Gnbcu;
 use crate::datastore::UeState;
 use bitvec::prelude::*;
 use ngap::{
@@ -9,7 +9,9 @@ use rrc::*;
 use slog::{debug, Logger};
 
 // Uplink Nas Procedure
-pub async fn uplink_nas<G: GnbcuT>(
+// 1. >> Rrc UlInformationTransfer(Nas)
+// 2.    Ngap UplinkNasTransport(Nas) >>
+pub async fn uplink_nas<G: Gnbcu>(
     gnbcu: &G,
     ue: UeState,
     i: UlInformationTransfer,

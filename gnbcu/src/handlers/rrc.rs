@@ -1,15 +1,15 @@
-use crate::{procedures::GnbcuT, UeState};
+use crate::{Gnbcu, UeState};
 use anyhow::Result;
 use net::AperSerde;
 use rrc::*;
 use slog::{debug, warn, Logger};
 
 #[derive(Clone)]
-pub struct RrcHandler<G: GnbcuT> {
+pub struct RrcHandler<G: Gnbcu> {
     gnbcu: G,
 }
 
-impl<G: GnbcuT> RrcHandler<G> {
+impl<G: Gnbcu> RrcHandler<G> {
     pub fn new(gnbcu: G) -> RrcHandler<G> {
         RrcHandler { gnbcu }
     }
@@ -57,7 +57,7 @@ impl<G: GnbcuT> RrcHandler<G> {
         req: UlInformationTransfer,
         logger: &Logger,
     ) -> Result<()> {
-        crate::procedures::uplink_nas(&self.gnbcu, ue, req, logger).await;
+        crate::workflows::uplink_nas(&self.gnbcu, ue, req, logger).await;
         Ok(())
     }
 }

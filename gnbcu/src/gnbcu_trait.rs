@@ -1,4 +1,4 @@
-pub use crate::Config;
+use super::Config;
 use crate::{
     datastore::{UeState, UeStateStore},
     rrc_transaction::RrcTransaction,
@@ -9,9 +9,9 @@ use net::{Indication, Procedure, RequestError};
 use rrc::UlDcchMessage;
 use slog::Logger;
 
-/// GnbcuT - trait representing a Gnbcu instance on top of which Gnbcu business logic can be implemented.
+/// Gnbcu trait representing the collection of services needed by Gnbcu procedure logic.
 #[async_trait]
-pub trait GnbcuT: Send + Sync + Clone + 'static + UeStateStore {
+pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
     fn config(&self) -> &Config;
 
     async fn ngap_request<P: Procedure>(
@@ -27,6 +27,9 @@ pub trait GnbcuT: Send + Sync + Clone + 'static + UeStateStore {
         logger: &Logger,
     ) -> Result<P::Success, RequestError<P::Failure>>;
     async fn f1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger);
+
+    // TODO - make RRC request and indication similar to the above?
+    // See "This was an idea for a more elegant model" in initial_access.rs.
 
     /// Start a new RRC transaction.
     async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction;

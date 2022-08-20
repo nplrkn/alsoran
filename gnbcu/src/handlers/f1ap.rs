@@ -1,20 +1,20 @@
+use super::Gnbcu;
 use super::RrcHandler;
-use crate::procedures;
+use crate::workflows;
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use pdcp::PdcpPdu;
-use procedures::GnbcuT;
 use slog::{debug, info, warn, Logger};
 
 #[derive(Clone)]
-pub struct F1apHandler<G: GnbcuT> {
+pub struct F1apHandler<G: Gnbcu> {
     gnbcu: G,
     rrc_handler: RrcHandler<G>,
 }
 
-impl<G: GnbcuT> F1apHandler<G> {
+impl<G: Gnbcu> F1apHandler<G> {
     pub fn new_f1ap_application(gnbcu: G, rrc_handler: RrcHandler<G>) -> F1apCu<F1apHandler<G>> {
         F1apCu::new(F1apHandler {
             gnbcu: gnbcu,
@@ -24,7 +24,7 @@ impl<G: GnbcuT> F1apHandler<G> {
 }
 
 #[async_trait]
-impl<G: GnbcuT> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
+impl<G: Gnbcu> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
     async fn request(
         &self,
         r: F1SetupRequest,
@@ -49,34 +49,17 @@ impl<G: GnbcuT> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
 }
 
 #[async_trait]
-impl<G: GnbcuT> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
+impl<G: Gnbcu> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> InitialUlRrcMessageTransfer");
-        if let Err(e) = procedures::initial_access(&self.gnbcu, r, logger).await {
+        if let Err(e) = workflows::initial_access(&self.gnbcu, r, logger).await {
             debug!(logger, "Inital access procedure failed - {:?}", e);
         }
-
-        // TODO - "If the DU to CU RRC Container IE is not included in the INITIAL UL RRC MESSAGE TRANSFER,
-        // the gNB-CU should reject the UE under the assumption that the gNB-DU is not able to serve such UE."
-
-        // TODO - "If the RRC-Container-RRCSetupComplete IE is included in the INITIAL UL RRC MESSAGE TRANSFER,
-        // the gNB-CU shall take it into account as specified in TS 38.401 [4]."
-
-        // let ue_context = UeState {
-        //     amf_ue_ngap_id: None,
-        //     gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
-        //     key: rand::thread_rng().gen::<u32>(),
-        // };
-        // debug!(&logger, "Created UE {:#010x}", ue_context.key);
-
-        // self.rrc_handler
-        //     .dispatch_ccch(ue_context, &r.rrc_container.0, logger)
-        //     .await;
     }
 }
 
 #[async_trait]
-impl<G: GnbcuT> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler<G> {
+impl<G: Gnbcu> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: UlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> UlRrcMessageTransfer");
 
@@ -101,7 +84,7 @@ impl<G: GnbcuT> IndicationHandler<UlRrcMessageTransferProcedure> for F1apHandler
 }
 
 #[async_trait]
-impl<G: GnbcuT> EventHandler for F1apHandler<G> {
+impl<G: Gnbcu> EventHandler for F1apHandler<G> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         match event {
             TnlaEvent::Established(addr) => {

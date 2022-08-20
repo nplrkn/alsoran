@@ -1,6 +1,6 @@
 use anyhow::Result;
 use common::ShutdownHandle;
-use gnbcu::{Config, Gnbcu};
+use gnbcu::{ConcreteGnbcu, Config};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::MockAmf;
 use mocks::MockDu;
@@ -105,9 +105,9 @@ impl TestContext {
         let logger = self.logger.new(o!("cu-w"=> worker_number));
 
         let shutdown_handle = if let Some(port) = redis_port {
-            Gnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
+            ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
         } else {
-            Gnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+            ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
         }
         .unwrap();
         self.workers.push(InternalWorkerInfo {

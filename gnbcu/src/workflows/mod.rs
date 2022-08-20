@@ -1,11 +1,12 @@
 mod downlink_nas;
-mod gnbcu_t;
 mod initial_access;
 mod initial_context_setup;
 mod ng_setup;
 mod uplink_nas;
+
+use super::Gnbcu;
+
 pub use downlink_nas::downlink_nas;
-pub use gnbcu_t::GnbcuT;
 pub use initial_access::initial_access;
 pub use initial_context_setup::initial_context_setup;
 pub use ng_setup::ng_setup;
