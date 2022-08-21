@@ -3,6 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
+- Update Amf Mock to support multiple Ues
 - Registration of multiple UEs in FV
 - Have the integration test not use real sockets and run in parallel
 - Clean RRC interface

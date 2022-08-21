@@ -76,17 +76,7 @@ impl TestContext {
             self.du.perform_f1_setup().await?;
         }
         if stage >= Stage::UeRegistered {
-            self.du.perform_rrc_setup(Vec::new()).await?;
-            self.amf.receive_initial_ue_message().await?;
-            self.amf.send_initial_context_setup_request().await?;
-            let security_mode_command = self.du.receive_ue_context_setup_request().await?;
-            self.du.send_ue_context_setup_response().await?;
-            self.du
-                .send_security_mode_complete(&security_mode_command)
-                .await?;
-            let _nas = self.du.receive_rrc_reconfiguration().await?;
-            self.du.send_rrc_reconfiguration_complete().await?;
-            self.amf.receive_initial_context_setup_response().await?;
+            self.register_ue(1).await?;
         }
         Ok(self)
     }
@@ -95,6 +85,21 @@ impl TestContext {
         WorkerInfo {
             f1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.f1ap_bind_port),
         }
+    }
+
+    pub async fn register_ue(&mut self, ue_id: u32) -> Result<()> {
+        self.du.perform_rrc_setup(ue_id, Vec::new()).await?;
+        self.amf.receive_initial_ue_message().await?;
+        self.amf.send_initial_context_setup_request().await?;
+        let security_mode_command = self.du.receive_ue_context_setup_request().await?;
+        self.du.send_ue_context_setup_response(ue_id).await?;
+        self.du
+            .send_security_mode_complete(ue_id, &security_mode_command)
+            .await?;
+        let _nas = self.du.receive_rrc_reconfiguration().await?;
+        self.du.send_rrc_reconfiguration_complete(ue_id).await?;
+        self.amf.receive_initial_context_setup_response().await?;
+        Ok(())
     }
 
     pub async fn start_worker(&mut self, redis_port: Option<u16>) {
