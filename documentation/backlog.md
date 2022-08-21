@@ -3,10 +3,11 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Intermittent failure of live redis test
-- Have the integration test not use real sockets and run in parallel
-- Merge Redis branch 
 - Registration of multiple UEs in FV
+- Have the integration test not use real sockets and run in parallel
+- Clean RRC interface
+- Intermittent failure of live redis test
+- Break procedures into small functions
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github

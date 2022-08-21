@@ -14,7 +14,7 @@ The gNB-CU control and user plane (gNB-CU-CP and gNB-CU-UP) are interconnected b
 
 ## Current status
 
--  Alsoran can perform some basic procedures with hardcoded identifiers: NG Setup, F1 Setup, and registration of a single UE.
+-  Alsoran can perform some basic procedures: NG Setup, F1 Setup, and registration of a single UE.
 
 -  The supported procedures can be demonstrated against open source 5G core Free5GC.  
 
@@ -22,9 +22,10 @@ The gNB-CU control and user plane (gNB-CU-CP and gNB-CU-UP) are interconnected b
 
 -  The ASN.1 generator is also included in the project.  Functional but incomplete, most notably in the area of extension fields (forward compatibility).  This is in Python, and is rather messy.
 
+-  Storage of UE Context in Redis datastore.
+
 ## Up next
 
--  Storage of UE Context in separate datastore.
 -  E1 and sample userplane.
 -  Scale out of control plane.
 
@@ -46,5 +47,3 @@ The key 3GPP specifications are as follows.
 -  TS38.413 - NG Application Protocol (NGAP)
 -  TS38.472 - F1 signalling transport
 -  TS38.473 - F1 Application Protocol (F1AP)
-
-
