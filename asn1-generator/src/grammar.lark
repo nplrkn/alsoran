@@ -63,9 +63,9 @@ enumerated.1:             "ENUMERATED" _items{enum_field}
 enum_field:              _identifier
 
 choice:                 "CHOICE" _items{_choice_item}
-_choice_item:            choice_field | extension_container | empty_sequence
+_choice_item:            choice_field | choice_extension_container | empty_sequence
 choice_field:           _identifier _field_type
-empty_sequence.3:       _identifier "SEQUENCE" "{}" -> extension_container
+empty_sequence.3:       _identifier "SEQUENCE" "{}" -> choice_extension_container
 
 integer:                "INTEGER" named_values? ["(" _constraints ")"]
 printable_string:       "PrintableString" [_size]
@@ -102,6 +102,7 @@ ie:                      _ie{"mandatory"}
 
 container:              _identifier "{" "{" _identifier "}" "}" 
 extension_container.0:  _identifier container "OPTIONAL"? ","?
+choice_extension_container: _identifier "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}" 
 
 _size:                  "(" "SIZE" "(" _constraints ")" ")"
 _constraints:           _range_options+

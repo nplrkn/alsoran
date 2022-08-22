@@ -253,7 +253,7 @@ class ChoiceFieldsTo(Interpreter):
 """
         self.field_index += 1
 
-    def extension_container(self, tree):
+    def choice_extension_container(self, tree):
         self.field_index += 1
 
 
@@ -276,7 +276,7 @@ class ChoiceFieldsFrom(Interpreter):
 """
         self.field_index += 1
 
-    def extension_container(self, tree):
+    def choice_extension_container(self, tree):
         self.fields_from += f"""\
             {self.field_index} => Err(AperCodecError::new("Choice extension container not implemented")),
 """
@@ -2511,6 +2511,14 @@ impl AperCodec for NzpCsiRs {
         self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
     }
 }""")
+
+    def test_choice_of_protocol_ie_container(self):
+        self.should_generate("""\
+System-BearerContextSetupRequest ::= CHOICE {
+	e-UTRAN-BearerContextSetupRequest		ProtocolIE-Container { {EUTRAN-BearerContextSetupRequest } },
+	nG-RAN-BearerContextSetupRequest		ProtocolIE-Container { {NG-RAN-BearerContextSetupRequest } },
+	choice-extension						ProtocolIE-SingleContainer { {System-BearerContextSetupRequest-ExtIEs }  }
+}""", "")
 
 
 if __name__ == '__main__':

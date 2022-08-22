@@ -84,7 +84,7 @@ def generate_rrc():
                   USE_BITSTRING + USE_RRC_SETUP_RELEASE + USE_NUM_ENUM, constants, parse_tree)
 
 
-generate_xxap("e1ap")
 generate_xxap("ngap")
 generate_xxap("f1ap")
+generate_xxap("e1ap")
 generate_rrc()
