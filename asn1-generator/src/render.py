@@ -253,7 +253,7 @@ class ChoiceFieldsTo(Interpreter):
 """
         self.field_index += 1
 
-    def choice_extension_container(self, tree):
+    def extension_container(self, tree):
         self.field_index += 1
 
 
@@ -276,7 +276,7 @@ class ChoiceFieldsFrom(Interpreter):
 """
         self.field_index += 1
 
-    def choice_extension_container(self, tree):
+    def extension_container(self, tree):
         self.fields_from += f"""\
             {self.field_index} => Err(AperCodecError::new("Choice extension container not implemented")),
 """

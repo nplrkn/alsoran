@@ -182,6 +182,12 @@ class TypeTransformer(Transformer):
         tree.children[0] = pascal_case(tree.children[0])
         return tree
 
+    def choice_ie_container(self, tree):
+        tree.children[1] = self.transform_type(
+            tree.children[1], tree.children[0])
+        tree.children[0] = snake_case(tree.children[0])
+        return tree
+
     def optional_field(self, tree):
         tree.children[1] = self.transform_type(
             tree.children[1], tree.children[0])
@@ -931,6 +937,14 @@ document
       enum_field\tSomethingElse
       enum_field\tDb24
 """)
+
+    def test_choice_of_protocol_ie_container(self):
+        self.should_generate("""\
+System-BearerContextSetupRequest ::= CHOICE {
+	e-UTRAN-BearerContextSetupRequest		ProtocolIE-Container { {EUTRAN-BearerContextSetupRequest } },
+	nG-RAN-BearerContextSetupRequest		ProtocolIE-Container { {NG-RAN-BearerContextSetupRequest } },
+	choice-extension						ProtocolIE-SingleContainer { {System-BearerContextSetupRequest-ExtIEs }  }
+}""", "")
 
 
 if __name__ == '__main__':
