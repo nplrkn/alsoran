@@ -3,11 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Have the integration test not use real sockets and run in parallel
-- Clean RRC interface
-- Intermittent failure of live redis test
-- Break procedures into small functions
-- free5GC demo can register 2 (N?) UEs
+----PUBLICATION----
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github
@@ -26,10 +22,15 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
 -----TESTS------
+- free5GC demo can register 2 (N?) UEs
 - Parallel registration of two UEs
+- Have the integration test not use real sockets and run in parallel
+- Intermittent failure of live redis test
 - Clean up Redis even if live redis test fails
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
+- Cleaner RRC interface in trait Gnbcu
+- Break procedures into small functions
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
