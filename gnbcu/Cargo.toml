@@ -19,7 +19,7 @@ pdcp = {path = "../pdcp" }
 async-trait = "0.1.51"
 bitvec = "1.0.1"
 common = { path = "../common" }
-async-channel = "1.6.1"
+async-channel = "1.7.1"
 rand = "0.8.5"
 redis = {version = "0.21.5", features = ["async-std-comp"]}
 speedy = "0.8.2"
