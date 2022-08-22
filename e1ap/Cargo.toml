@@ -1,0 +1,15 @@
+[package]
+name = "e1ap"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="fix-constrained-u32-encode" }
+bitvec = "1.0.1"
+num_enum = "0.5.7"
+net = { path = "../net" }
+async-trait = "0.1.51"
+anyhow = "1.0.52"
+slog = "2.7.0"

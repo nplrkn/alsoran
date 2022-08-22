@@ -7,6 +7,7 @@ members = [
     "net",
     "ngap",
     "f1ap",
+    "e1ap",
     "gnbcu",
     "gnbdu-sim",
     "rrc",

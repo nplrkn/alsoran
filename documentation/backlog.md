@@ -15,6 +15,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ----PERFORMANCE----
 - Don't create 1 Redis connection per access
 -----ASN.1 GENERATOR------
+- Move to latest version of specs
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Generate procedures for Rrc and make F1AP a RequestProvider.

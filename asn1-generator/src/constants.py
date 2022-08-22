@@ -5,8 +5,8 @@ from parse import parse_file
 
 
 class Constants(Interpreter):
-    def __init__(self):
-        self.constants = dict()
+    def __init__(self, constants):
+        self.constants = constants
 
     def constant_def(self, tree):
         key = tree.children[0].value
@@ -14,8 +14,8 @@ class Constants(Interpreter):
         self.constants[key] = int_value
 
 
-def get_constants(tree):
-    i = Constants()
+def get_constants(tree, constants=dict()):
+    i = Constants(constants)
     i.visit(tree)
     return i.constants
 
@@ -26,7 +26,7 @@ def get_constants_from_file(input_file):
 
 
 if __name__ == '__main__':
-    input_file = "f1ap/asn1/F1AP-Constants.asn"
+    input_file = "../asn1/e1ap/E1AP-Constants.asn"
     tree = parse_file(input_file)
     print(tree.pretty())
     d = get_constants(tree)
