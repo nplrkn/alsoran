@@ -3,31 +3,47 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
+- Registration of multiple UEs in FV
+- Have the integration test not use real sockets and run in parallel
+- Clean RRC interface
+- Intermittent failure of live redis test
+- Break procedures into small functions
 - Get approval to publish
-- Rerun live test
+- Rerun demo
 - Review all readmes as seen on Github
 - Set to public
------------
-- Have the integration test not use real sockets and run in parallel
------------
-- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
------------
+----FUNCTION----
+- Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
+- Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
+- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
+----PERFORMANCE----
+- Don't create 1 Redis connection per access
+-----ASN.1 GENERATOR------
+- Get rid of todo!() in top_pdu.rs and replace with a log
 - Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
-- Generate procedures for Rrc.  Need a new kind of transport provider (not an SCTP one).
+- Generate procedures for Rrc and make F1AP a RequestProvider.
 - Implement setuprelease
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
------------
-- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
------------
-- Have the integration test not use real sockets and run in parallel
-- Adopt https://github.com/cucumber-rs/cucumber for integration tests
+-----TESTS------
+- Clean up Redis even if live redis test fails
+- Redis live test should not create Redis dump.rdb
+----MAINTAINABILITY----
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## RETEST
 
 ## DONE
+- Tidy code e.g. in procedures, GnbcuOps
+- GNBDU-SIM should produce a clear error message if mongo is not started
+- In demo, GNBDU SIM should not warn 'connection failed - will retry' on shutdown
+- Get live test and demo working
+- Store AMF UE Ngap Id on first downlink NAS transport
+- Uplink and downlink NAS transfer should be in the procedures module
+- Fix int coding bug
+- Redis live test
+- Single async fn / task that sends the Rrc Setup and waits for Rrc Setup Complete
 - Fix failing test
 - Code review (incl commented out code and TODOs) - gnbcu
 - Redo roadmap

@@ -92,6 +92,8 @@ impl<P: Procedure> RequestProvider<P> for Stack {
             .push((Box::new(match_fn), sender));
 
         self.transport_provider.send_message(bytes, logger).await?;
+
+        // TODO - timeout
         let msg = receiver.recv().await?;
         P::decode_response(&msg)
     }

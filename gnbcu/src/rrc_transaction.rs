@@ -16,18 +16,18 @@ impl RrcTransaction {
 }
 
 #[derive(Clone)]
-pub struct PendingRrcTransactions(Arc<Mutex<HashMap<u64, Sender<UlDcchMessage>>>>);
+pub struct PendingRrcTransactions(Arc<Mutex<HashMap<u32, Sender<UlDcchMessage>>>>);
 
 impl PendingRrcTransactions {
     pub fn new() -> Self {
         PendingRrcTransactions(Arc::new(Mutex::new(HashMap::new())))
     }
-    pub async fn new_transaction(&self, ue_id: u64) -> RrcTransaction {
+    pub async fn new_transaction(&self, ue_id: u32) -> RrcTransaction {
         let (sender, receiver) = async_channel::bounded::<UlDcchMessage>(1);
         self.0.lock().await.insert(ue_id, sender);
         RrcTransaction { receiver }
     }
-    pub async fn match_transaction(&self, ue_id: u64) -> Option<Sender<UlDcchMessage>> {
+    pub async fn match_transaction(&self, ue_id: u32) -> Option<Sender<UlDcchMessage>> {
         self.0.lock().await.remove(&ue_id)
     }
 }

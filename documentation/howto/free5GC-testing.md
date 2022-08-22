@@ -29,8 +29,9 @@ In terminal 2, start capturing NGAP and F1AP over the loopback interface.
 sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
 ```
 
-In terminal 3, in the alsoran directory, run the Alsoran GNB-CU.  On startup it will connect to the AMF and perform NG Setup.
+In terminal 3, in the alsoran directory, run Redis and the Alsoran GNB-CU.  On startup the GNB-CU will connect to the AMF and perform NG Setup.
 ```
+redis-server &
 cargo run --bin gnbcu
 ```
 
@@ -39,9 +40,10 @@ In terminal 4, in the alsoran directory, run `gnbdu-sim` tool.  This provisions 
 cargo run --bin gnbdu-sim
 ```
 
-In terminal 2, hit Ctrl-C to finish the tcpdump.  You can now view it in Wireshark.  The 'Malformed Packet' errors are a known problem.
+In terminal 2, hit Ctrl-C to finish the tcpdump.  You can now view `alsoran.pcap` in Wireshark.  The 'Malformed Packet' errors are a known problem.
 
 To clean up,
 - Ctrl-C in terminal 3 to shut down Alsoran
+- `fg` and Ctrl-C in terminal 3 to shut down Redis, and `rm dump.rbd` to clean up its saved state
 - in terminal 1, `kill $(jobs -p)` to terminate the free5GC network functions that are running in the background
 - `sudo service mongodb stop` to terminate MongoDB.

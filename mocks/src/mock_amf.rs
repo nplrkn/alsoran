@@ -10,6 +10,7 @@ impl Pdu for NgapPdu {}
 
 pub struct MockAmf {
     mock: Mock<NgapPdu>,
+    ran_ue_ngap_id: Option<RanUeNgapId>,
 }
 
 impl Deref for MockAmf {
@@ -26,7 +27,10 @@ impl MockAmf {
     pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
         let mut mock = Mock::new(logger.new(o!("amf" => 1)), NGAP_SCTP_PPID).await;
         mock.serve(amf_address.to_string()).await;
-        MockAmf { mock }
+        MockAmf {
+            mock,
+            ran_ue_ngap_id: None,
+        }
     }
 
     pub async fn terminate(self) {
@@ -121,13 +125,16 @@ impl MockAmf {
         Ok(())
     }
 
-    pub async fn receive_initial_ue_message(&self) -> Result<()> {
+    pub async fn receive_initial_ue_message(&mut self) -> Result<()> {
         let logger = &self.logger;
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(
-            _initial_ue_message,
-        )) = self.receive_pdu().await
+        if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
+            ran_ue_ngap_id,
+            ..
+        })) = self.receive_pdu().await
         {
             info!(logger, ">> InitialUeMessage");
+            debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
+            self.ran_ue_ngap_id = Some(ran_ue_ngap_id);
             Ok(())
         } else {
             Err(anyhow!("Not an initial UE message"))
@@ -136,10 +143,11 @@ impl MockAmf {
 
     pub async fn send_initial_context_setup_request(&self) -> Result<()> {
         let logger = &self.logger;
+        let ran_ue_ngap_id = self.ran_ue_ngap_id.clone().unwrap();
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(
             InitialContextSetupRequest {
                 amf_ue_ngap_id: AmfUeNgapId(1),
-                ran_ue_ngap_id: RanUeNgapId(1),
+                ran_ue_ngap_id,
                 old_amf: None,
                 ue_aggregate_maximum_bit_rate: None,
                 core_network_assistance_information_for_inactive: None,

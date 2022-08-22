@@ -1,6 +1,7 @@
 use anyhow::Result;
 use common::ShutdownHandle;
-use gnbcu::{Config, Gnbcu};
+use gnbcu::{ConcreteGnbcu, Config};
+use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::MockAmf;
 use mocks::MockDu;
 use slog::{info, o, trace, Logger};
@@ -32,6 +33,14 @@ pub enum Stage {
 
 impl TestContext {
     pub async fn new(stage: Stage) -> Result<Self> {
+        Self::new_with(stage, None).await
+    }
+
+    pub async fn new_with_redis(stage: Stage, redis_port: u16) -> Result<Self> {
+        Self::new_with(stage, Some(redis_port)).await
+    }
+
+    async fn new_with(stage: Stage, redis: Option<u16>) -> Result<Self> {
         let logger = common::logging::test_init();
 
         let orig_hook = panic::take_hook();
@@ -51,7 +60,7 @@ impl TestContext {
             logger,
             workers: vec![],
         };
-        tc.start_worker().await;
+        tc.start_worker(redis).await;
 
         tc.get_to_stage(stage).await
     }
@@ -88,14 +97,19 @@ impl TestContext {
         }
     }
 
-    pub async fn start_worker(&mut self) {
+    pub async fn start_worker(&mut self, redis_port: Option<u16>) {
         let worker_number = self.workers.len() as u16;
 
         let mut config = Config::default();
         config.f1ap_bind_port += worker_number;
+        let logger = self.logger.new(o!("cu-w"=> worker_number));
 
-        let shutdown_handle =
-            Gnbcu::spawn(config.clone(), &self.logger.new(o!("cu-w"=> worker_number))).unwrap();
+        let shutdown_handle = if let Some(port) = redis_port {
+            ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
+        } else {
+            ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+        }
+        .unwrap();
         self.workers.push(InternalWorkerInfo {
             shutdown_handle,
             config,

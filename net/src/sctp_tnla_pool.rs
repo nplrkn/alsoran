@@ -56,20 +56,32 @@ impl SctpTnlaPool {
         trace!(logger, "Start TNLA event loop");
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
         pin_mut!(message_stream);
-        while let Some(Ok(message)) = message_stream.next().await {
-            if let Some(response) = handler.handle_message(message, assoc_id, &logger).await {
-                if let Err(e) = assoc.send_msg(response).await {
-                    warn!(logger, "Failed to send response - {}", e)
+        loop {
+            match message_stream.next().await {
+                // Graceful shutdown
+                None => break,
+                // Remote end terminated connection
+                Some(Err(_)) => {
+                    spawn_handle_event(
+                        handler.clone(),
+                        TnlaEvent::Terminated,
+                        assoc_id,
+                        logger.clone(),
+                    );
+                    break;
+                }
+                // Received a message
+                Some(Ok(message)) => {
+                    async_std::task::spawn(handle_message(
+                        handler.clone(),
+                        message,
+                        assoc.clone(),
+                        assoc_id,
+                        logger.clone(),
+                    ));
                 }
             }
         }
-
-        spawn_handle_event(
-            handler.clone(),
-            TnlaEvent::Terminated,
-            assoc_id,
-            logger.clone(),
-        );
 
         self.assocs.lock().await.remove(&assoc_id);
     }
@@ -107,4 +119,18 @@ fn spawn_handle_event<H: TnlaEventHandler>(
     logger: Logger,
 ) {
     async_std::task::spawn(async move { handler.handle_event(event, tnla_id, &logger).await });
+}
+
+async fn handle_message<H: TnlaEventHandler>(
+    handler: H,
+    message: Vec<u8>,
+    assoc: Arc<SctpAssociation>,
+    assoc_id: u32,
+    logger: Logger,
+) {
+    if let Some(response) = handler.handle_message(message, assoc_id, &logger).await {
+        if let Err(e) = assoc.send_msg(response).await {
+            warn!(logger, "Failed to send response - {}", e)
+        }
+    }
 }

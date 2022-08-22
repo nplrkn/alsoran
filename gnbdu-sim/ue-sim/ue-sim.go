@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/free5gc/CommonConsumerTestData/UDM/TestGenAuthData"
 	"github.com/free5gc/MongoDBLibrary"
@@ -42,7 +43,6 @@ func new_ue() *RanUeContext {
 		TestGenAuthData.MilenageTestSet19.OP)
 
 	// Configure UE in free5GC (idempotent)
-	MongoDBLibrary.SetMongoDB("free5gc", "mongodb://127.0.0.1:27017")
 	provisionUeInFree5GC(ue)
 	return ue
 }
@@ -115,6 +115,21 @@ func sendNas(msg []byte) {
 }
 
 func provisionUeInFree5GC(ue *RanUeContext) {
+	done := make(chan bool, 1)
+	go func() {
+		done <- doProvisionUeInFree5GC(ue)
+	}()
+	select {
+	case <-time.After(1 * time.Second):
+		log.Fatal("Timed out trying to provision Ue in MongoDb")
+	case <-done:
+		return
+	}
+
+}
+
+func doProvisionUeInFree5GC(ue *RanUeContext) bool {
+	MongoDBLibrary.SetMongoDB("free5gc", "mongodb://127.0.0.1:27017")
 	servingPlmnId := "20893"
 	InsertAuthSubscriptionToMongoDB(ue.Supi, ue.AuthenticationSubs)
 	InsertAccessAndMobilitySubscriptionDataToMongoDB(ue.Supi, GetAccessAndMobilitySubscriptionData(), servingPlmnId)
@@ -122,4 +137,5 @@ func provisionUeInFree5GC(ue *RanUeContext) {
 	InsertSessionManagementSubscriptionDataToMongoDB(ue.Supi, servingPlmnId, GetSessionManagementSubscriptionData())
 	InsertAmPolicyDataToMongoDB(ue.Supi, GetAmPolicyData())
 	InsertSmPolicyDataToMongoDB(ue.Supi, GetSmPolicyData())
+	return true
 }

@@ -22134,12 +22134,12 @@ impl AperCodec for RanStatusTransferTransparentContainer {
 }
 // RanUeNgapId
 #[derive(Clone, Debug)]
-pub struct RanUeNgapId(pub u64);
+pub struct RanUeNgapId(pub u32);
 
 impl RanUeNgapId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
-            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u64,
+            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u32,
         ))
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -24071,12 +24071,12 @@ impl AperCodec for ServiceAreaInformationItem {
 }
 // SGnbUeX2apId
 #[derive(Clone, Debug)]
-pub struct SGnbUeX2apId(pub u64);
+pub struct SGnbUeX2apId(pub u32);
 
 impl SGnbUeX2apId {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self(
-            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u64,
+            aper::decode::decode_integer(data, Some(0), Some(4294967295), false)?.0 as u32,
         ))
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {

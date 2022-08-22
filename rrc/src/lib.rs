@@ -1,6 +1,8 @@
 mod rrc;
 pub use crate::rrc::*;
 use asn1_codecs::aper::{AperCodec, AperCodecData, AperCodecError};
+mod procedure;
+pub use procedure::*;
 
 #[derive(Clone, Debug)]
 pub enum SetupRelease<T: AperCodec> {

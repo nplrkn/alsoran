@@ -76,7 +76,6 @@ impl TransportProvider for SctpTransportProvider {
                                 logger.clone(),
                             )
                             .await;
-                        warn!(logger, "SCTP connection terminated - will retry");
                     }
                     Err(e) => {
                         warn!(

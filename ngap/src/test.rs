@@ -82,3 +82,16 @@ fn test_ng_setup() -> Result<(), AperCodecError> {
     //Error: Error { msg: "3 Padding bits at Offset 125 not all '0'." }
     Ok(())
 }
+
+#[test]
+fn test_ran_ue_ngap_id() -> Result<(), AperCodecError> {
+    let ran_ue_ngap_id = RanUeNgapId(0x10203040);
+    let bytes = ran_ue_ngap_id.into_bytes()?;
+    let output_hex = hex::encode(bytes.clone());
+    println!("Output of RAN UE NGAP ID encode is {}", output_hex);
+    assert_eq!(output_hex, "c010203040");
+    let ran_ue_ngap_id_2 = RanUeNgapId::from_bytes(&bytes)?;
+    assert_eq!(0x10203040, ran_ue_ngap_id_2.0);
+
+    Ok(())
+}
