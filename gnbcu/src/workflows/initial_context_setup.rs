@@ -1,7 +1,9 @@
+use crate::datastore::UeState;
+
 use super::Gnbcu;
 use anyhow::Result;
 use bitvec::prelude::*;
-use f1ap::{GnbCuUeF1apId, GnbDuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
+use f1ap::{GnbCuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
 use net::AperSerde;
 use ngap::*;
 use pdcp::PdcpPdu;
@@ -36,7 +38,7 @@ pub async fn initial_context_setup<G: Gnbcu>(
     let rrc_container = Some(make_rrc_container(rrc_security_mode_command)?);
 
     // Build Ue Context Setup request and include the Rrc security mode command.
-    let ue_context_setup_request = build_ue_context_setup_request(&r, rrc_container);
+    let ue_context_setup_request = build_ue_context_setup_request(&r, &ue, rrc_container);
 
     // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
     debug!(&logger, "<< UeContextSetup(SecurityModeCommand)");
@@ -111,13 +113,14 @@ fn build_rrc_security_mode_command(
 
 fn build_ue_context_setup_request(
     _r: &InitialContextSetupRequest,
+    ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> UeContextSetupRequest {
     // TODO: derive and use frunk for the common ngap / f1ap structures seen here.
 
     UeContextSetupRequest {
-        gnb_cu_ue_f1ap_id: GnbCuUeF1apId(1),
-        gnb_du_ue_f1ap_id: Some(GnbDuUeF1apId(1)),
+        gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
+        gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id.clone()),
         sp_cell_id: f1ap::NrCgi {
             plmn_identity: f1ap::PlmnIdentity(vec![0, 1, 2]),
             nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),

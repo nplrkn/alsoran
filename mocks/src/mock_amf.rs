@@ -4,13 +4,17 @@ use bitvec::prelude::*;
 use net::AperSerde;
 use ngap::*;
 use slog::{debug, info, o, Logger};
-use std::ops::Deref;
+use std::{collections::HashMap, ops::Deref};
 
 impl Pdu for NgapPdu {}
 
 pub struct MockAmf {
     mock: Mock<NgapPdu>,
-    ran_ue_ngap_id: Option<RanUeNgapId>,
+    ues: HashMap<u32, UeContext>,
+}
+
+struct UeContext {
+    ran_ue_ngap_id: RanUeNgapId,
 }
 
 impl Deref for MockAmf {
@@ -29,7 +33,7 @@ impl MockAmf {
         mock.serve(amf_address.to_string()).await;
         MockAmf {
             mock,
-            ran_ue_ngap_id: None,
+            ues: HashMap::new(),
         }
     }
 
@@ -125,7 +129,7 @@ impl MockAmf {
         Ok(())
     }
 
-    pub async fn receive_initial_ue_message(&mut self) -> Result<()> {
+    pub async fn receive_initial_ue_message(&mut self, ue_id: u32) -> Result<()> {
         let logger = &self.logger;
         if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
             ran_ue_ngap_id,
@@ -134,19 +138,19 @@ impl MockAmf {
         {
             info!(logger, ">> InitialUeMessage");
             debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
-            self.ran_ue_ngap_id = Some(ran_ue_ngap_id);
+            self.ues.insert(ue_id, UeContext { ran_ue_ngap_id });
             Ok(())
         } else {
             Err(anyhow!("Not an initial UE message"))
         }
     }
 
-    pub async fn send_initial_context_setup_request(&self) -> Result<()> {
+    pub async fn send_initial_context_setup_request(&self, ue_id: u32) -> Result<()> {
         let logger = &self.logger;
-        let ran_ue_ngap_id = self.ran_ue_ngap_id.clone().unwrap();
+        let ran_ue_ngap_id = self.ues[&ue_id].ran_ue_ngap_id.clone();
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(
             InitialContextSetupRequest {
-                amf_ue_ngap_id: AmfUeNgapId(1),
+                amf_ue_ngap_id: AmfUeNgapId(ue_id.into()),
                 ran_ue_ngap_id,
                 old_amf: None,
                 ue_aggregate_maximum_bit_rate: None,
@@ -202,9 +206,18 @@ impl MockAmf {
         Ok(())
     }
 
-    pub async fn receive_initial_context_setup_response(&self) -> Result<()> {
+    pub async fn receive_initial_context_setup_response(&self, ue_id: u32) -> Result<()> {
         info!(&self.logger, ">> InitialContextSetupResponse");
-        let _pdu = self.receive_pdu().await;
+        let received_amf_ue_id = match self.receive_pdu().await {
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
+                InitialContextSetupResponse { amf_ue_ngap_id, .. },
+            )) => Ok(amf_ue_ngap_id.0),
+            x => Err(anyhow!(
+                "Expecting InitialContextSetupResponse, got unexpected message {:?}",
+                x
+            )),
+        }?;
+        assert_eq!(received_amf_ue_id, ue_id.into());
         Ok(())
     }
 

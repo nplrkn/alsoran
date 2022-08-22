@@ -18,7 +18,7 @@ async fn ue_can_register_live_redis() -> Result<()> {
         .expect("Couldn't run 'redis-server'");
 
     // Run test
-    let tc = TestContext::new_with_redis(Stage::UeRegistered, port).await?;
+    let tc = TestContext::new_with_redis(Stage::Ue1Registered, port).await?;
     tc.terminate().await;
 
     // Terminate Redis
