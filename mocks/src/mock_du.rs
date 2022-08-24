@@ -6,12 +6,19 @@ use net::{AperSerde, Indication};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{info, o, Logger};
-use std::ops::{Deref, DerefMut};
+use std::{
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+};
 
 impl Pdu for F1apPdu {}
 
 pub struct MockDu {
     mock: Mock<F1apPdu>,
+    ues: HashMap<u32, UeContext>,
+}
+
+struct UeContext {
     gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
 }
 
@@ -37,7 +44,7 @@ impl MockDu {
         let mock = Mock::new(logger, F1AP_SCTP_PPID).await;
         MockDu {
             mock,
-            gnb_cu_ue_f1ap_id: None,
+            ues: HashMap::new(),
         }
     }
 
@@ -49,12 +56,6 @@ impl MockDu {
         self.send_f1_setup_request().await?;
         self.receive_f1_setup_response().await;
         Ok(())
-    }
-
-    pub async fn perform_rrc_setup(&mut self, nas_message: Vec<u8>) -> Result<()> {
-        self.send_rrc_setup_request().await?;
-        let rrc_setup = self.receive_rrc_setup().await?;
-        self.send_rrc_setup_complete(rrc_setup, nas_message).await
     }
 
     async fn send_f1_setup_request(&self) -> Result<()> {
@@ -81,7 +82,20 @@ impl MockDu {
         info!(self.logger, "F1SetupResponse <<");
     }
 
-    async fn send_rrc_setup_request(&self) -> Result<()> {
+    pub async fn perform_rrc_setup(&mut self, ue_id: u32, nas_message: Vec<u8>) -> Result<()> {
+        self.ues.insert(
+            ue_id,
+            UeContext {
+                gnb_cu_ue_f1ap_id: None,
+            },
+        );
+        self.send_rrc_setup_request(ue_id).await?;
+        let rrc_setup = self.receive_rrc_setup(ue_id).await?;
+        self.send_rrc_setup_complete(ue_id, rrc_setup, nas_message)
+            .await
+    }
+
+    async fn send_rrc_setup_request(&self, ue_id: u32) -> Result<()> {
         let logger = &self.logger;
 
         // Build RRC Setup Request
@@ -101,7 +115,7 @@ impl MockDu {
         // Wrap them in an F1 Initial UL Rrc Message Transfer.
         let f1_indication =
             InitialUlRrcMessageTransferProcedure::encode_request(InitialUlRrcMessageTransfer {
-                gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+                gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_id),
                 nr_cgi: NrCgi {
                     plmn_identity: PlmnIdentity(vec![0, 1, 2]),
                     nr_cell_identity: NrCellIdentity(bitvec![u8,Msb0;0;36]),
@@ -121,13 +135,14 @@ impl MockDu {
         Ok(())
     }
 
-    async fn receive_rrc_setup(&mut self) -> Result<RrcSetup> {
+    async fn receive_rrc_setup(&mut self, ue_id: u32) -> Result<RrcSetup> {
         // Receive DL Rrc Message Transfer and extract RRC Setup
         let dl_rrc_message_transfer = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
-        self.gnb_cu_ue_f1ap_id = Some(dl_rrc_message_transfer.gnb_cu_ue_f1ap_id);
+        self.ues.get_mut(&ue_id).unwrap().gnb_cu_ue_f1ap_id =
+            Some(dl_rrc_message_transfer.gnb_cu_ue_f1ap_id);
         let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
         let rrc_message_bytes = pdcp_pdu.view_inner()?;
         let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
@@ -140,6 +155,7 @@ impl MockDu {
 
     async fn send_rrc_setup_complete(
         &self,
+        ue_id: u32,
         rrc_setup: RrcSetup,
         nas_message: Vec<u8>,
     ) -> Result<()> {
@@ -163,10 +179,10 @@ impl MockDu {
             &self.logger,
             "UlRrcMessageTransfer(RrcSetupComplete(NAS Registration Request)) >>"
         );
-        self.send_ul_rrc(rrc_setup_complete).await
+        self.send_ul_rrc(ue_id, rrc_setup_complete).await
     }
 
-    pub async fn send_nas(&self, nas_bytes: Vec<u8>) -> Result<()> {
+    pub async fn send_nas(&self, ue_id: u32, nas_bytes: Vec<u8>) -> Result<()> {
         let rrc = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::UlInformationTransfer(UlInformationTransfer {
                 critical_extensions: CriticalExtensions37::UlInformationTransfer(
@@ -181,11 +197,11 @@ impl MockDu {
             &self.logger,
             "UlRrcMessageTransfer(UlInformationTransfer(Nas)) >>"
         );
-        self.send_ul_rrc(rrc).await
+        self.send_ul_rrc(ue_id, rrc).await
     }
 
-    async fn send_ul_rrc(&self, rrc: UlDcchMessage) -> Result<()> {
-        let gnb_cu_ue_f1ap_id = self.gnb_cu_ue_f1ap_id.clone().unwrap();
+    async fn send_ul_rrc(&self, ue_id: u32, rrc: UlDcchMessage) -> Result<()> {
+        let gnb_cu_ue_f1ap_id = self.ues[&ue_id].gnb_cu_ue_f1ap_id.clone().unwrap();
 
         // Encapsulate RRC message in PDCP PDU.
         let rrc_bytes = rrc.into_bytes()?;
@@ -194,7 +210,7 @@ impl MockDu {
         // Wrap it in an UL Rrc Message Transfer
         let f1_indication = UlRrcMessageTransferProcedure::encode_request(UlRrcMessageTransfer {
             gnb_cu_ue_f1ap_id,
-            gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+            gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_id),
             srb_id: SrbId(1),
             rrc_container: RrcContainer(pdcp_pdu.into()),
             selected_plmn_id: None,
@@ -205,8 +221,8 @@ impl MockDu {
         Ok(())
     }
 
-    pub async fn receive_nas(&self) -> Result<Vec<u8>> {
-        let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
+    pub async fn receive_nas(&self, ue_id: u32) -> Result<Vec<u8>> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
         info!(
             &self.logger,
             "DlRrcMessageTransfer(DlInformationTransfer(Nas)) <<"
@@ -214,18 +230,29 @@ impl MockDu {
         nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
     }
 
-    async fn receive_dl_rrc(&self) -> Result<DlRrcMessageTransfer> {
-        match self.receive_pdu().await {
+    async fn receive_dl_rrc(&self, ue_id: u32) -> Result<DlRrcMessageTransfer> {
+        let dl_rrc_message_transfer = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
-        }
+        }?;
+
+        assert_eq!(dl_rrc_message_transfer.gnb_du_ue_f1ap_id.0, ue_id);
+        Ok(dl_rrc_message_transfer)
     }
 
-    pub async fn receive_ue_context_setup_request(&self) -> Result<SecurityModeCommand> {
+    pub async fn receive_ue_context_setup_request(
+        &self,
+        ue_id: u32,
+    ) -> Result<SecurityModeCommand> {
         let ue_context_setup_request = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
+
+        match ue_context_setup_request.gnb_du_ue_f1ap_id {
+            Some(GnbDuUeF1apId(x)) if x == ue_id => (),
+            _ => panic!("Bad ue id"),
+        }
 
         match match ue_context_setup_request.rrc_container {
             Some(x) => rrc_from_container(x)?,
@@ -244,14 +271,14 @@ impl MockDu {
         }
     }
 
-    pub async fn send_ue_context_setup_response(&self) -> Result<()> {
-        let gnb_cu_ue_f1ap_id = self.gnb_cu_ue_f1ap_id.clone().unwrap();
+    pub async fn send_ue_context_setup_response(&self, ue_id: u32) -> Result<()> {
+        let gnb_cu_ue_f1ap_id = self.ues[&ue_id].gnb_cu_ue_f1ap_id.clone().unwrap();
         let cell_group_config =
             f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
         let ue_context_setup_response = F1apPdu::SuccessfulOutcome(
             SuccessfulOutcome::UeContextSetupResponse(UeContextSetupResponse {
                 gnb_cu_ue_f1ap_id,
-                gnb_du_ue_f1ap_id: GnbDuUeF1apId(1),
+                gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_id),
                 du_to_cu_rrc_information: DuToCuRrcInformation {
                     cell_group_config,
                     meas_gap_config: None,
@@ -283,6 +310,7 @@ impl MockDu {
 
     pub async fn send_security_mode_complete(
         &self,
+        ue_id: u32,
         security_mode_command: &SecurityModeCommand,
     ) -> Result<()> {
         let security_mode_complete = UlDcchMessage {
@@ -301,11 +329,11 @@ impl MockDu {
             &self.logger,
             "UlRrcMessageTransfer(SecurityModeComplete) >>"
         );
-        self.send_ul_rrc(security_mode_complete).await
+        self.send_ul_rrc(ue_id, security_mode_complete).await
     }
 
-    pub async fn receive_rrc_reconfiguration(&self) -> Result<Vec<u8>> {
-        let dl_rrc_message_transfer = self.receive_dl_rrc().await?;
+    pub async fn receive_rrc_reconfiguration(&self, ue_id: u32) -> Result<Vec<u8>> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
         let mut nas_messages =
             match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
                 DlDcchMessageType::C1(C1_2::RrcReconfiguration(RrcReconfiguration {
@@ -337,7 +365,7 @@ impl MockDu {
         Ok(nas_messages.remove(0).0)
     }
 
-    pub async fn send_rrc_reconfiguration_complete(&self) -> Result<()> {
+    pub async fn send_rrc_reconfiguration_complete(&self, ue_id: u32) -> Result<()> {
         let rrc_reconfiguration_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::RrcReconfigurationComplete(
                 RrcReconfigurationComplete {
@@ -355,7 +383,7 @@ impl MockDu {
             &self.logger,
             "UlRrcMessageTransfer(RrcReconfigurationComplete) >>"
         );
-        self.send_ul_rrc(rrc_reconfiguration_complete).await
+        self.send_ul_rrc(ue_id, rrc_reconfiguration_complete).await
     }
 }
 

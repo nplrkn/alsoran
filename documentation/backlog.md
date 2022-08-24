@@ -3,11 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- Registration of multiple UEs in FV
-- Have the integration test not use real sockets and run in parallel
-- Clean RRC interface
-- Intermittent failure of live redis test
-- Break procedures into small functions
+----PUBLICATION----
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github
@@ -26,15 +22,23 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Deduplicate inline definitions in RRC autogeneration
 - Fix clippy
 -----TESTS------
+- free5GC demo can register 2 (N?) UEs
+- Parallel registration of two UEs
+- Have the integration test not use real sockets and run in parallel
+- Intermittent failure of live redis test
 - Clean up Redis even if live redis test fails
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
+- Cleaner RRC interface in trait Gnbcu
+- Break procedures into small functions
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## RETEST
 
 ## DONE
+- Update Amf Mock to support multiple Ues
+- Registration of multiple UEs in FV
 - Tidy code e.g. in procedures, GnbcuOps
 - GNBDU-SIM should produce a clear error message if mongo is not started
 - In demo, GNBDU SIM should not warn 'connection failed - will retry' on shutdown

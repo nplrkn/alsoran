@@ -6,12 +6,13 @@ use std::{
 };
 
 pub struct Ue {
+    pub id: u32,
     stdin: ChildStdin,
     stdout: ChildStdout,
 }
 
 impl Ue {
-    pub fn new() -> Self {
+    pub fn new(id: u32) -> Self {
         // Spawn the ue-sim process.
         let mut child = Command::new("ue-sim")
             .stdin(Stdio::piped())
@@ -21,7 +22,7 @@ impl Ue {
         let stdout = child.stdout.take().expect("Couldn't take stdout");
         let stdin = child.stdin.take().expect("Couldn't take stdin");
 
-        Ue { stdout, stdin }
+        Ue { id, stdout, stdin }
     }
 
     pub fn recv_nas(&mut self) -> Vec<u8> {
