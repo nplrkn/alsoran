@@ -229,6 +229,13 @@ class ChoiceFields(Interpreter):
     {name}{"("+typ+")" if typ != "null" else ""},
 """
 
+    def choice_ie_container(self, tree):
+        name = tree.children[0]
+        typ = type_and_constraints(tree.children[1]).typ
+        self.choice_fields += f"""\
+    {name}{"("+typ+")" if typ != "null" else ""},
+"""
+
     def extension_marker(self, tree):
         self.extensible = True
 
@@ -241,6 +248,12 @@ class ChoiceFieldsTo(Interpreter):
         self.extensible = extensible
 
     def choice_field(self, tree):
+        self.choice_field_common(tree)
+
+    def choice_ie_container(self, tree):
+        self.choice_field_common(tree)
+
+    def choice_field_common(self, tree):
         name = tree.children[0]
         type_info = type_and_constraints(tree.children[1])
 
@@ -263,6 +276,12 @@ class ChoiceFieldsFrom(Interpreter):
         self.field_index = 0
 
     def choice_field(self, tree):
+        self.choice_field_common(tree)
+
+    def choice_ie_container(self, tree):
+        self.choice_field_common(tree)
+
+    def choice_field_common(self, tree):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
 
@@ -462,19 +481,19 @@ class TopLevelEnums:
         self.initiating_encode_matches = ""
         self.initiating_decode_matches = ""
         self.initiating_enum = """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum InitiatingMessage {
 """
         self.successful_encode_matches = ""
         self.successful_decode_matches = ""
         self.successful_enum = """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
 """
         self.unsuccessful_encode_matches = ""
         self.unsuccessful_decode_matches = ""
         self.unsuccessful_enum = """\
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
 """
 
@@ -599,7 +618,7 @@ class RustInterpreter(Interpreter):
         self.outfile += f"""
 pub struct {p.name} {{}}
 
-#[async_trait]
+# [async_trait]
 impl Procedure for {p.name} {{
     type TopPdu = {top_pdu};
     type Request = {p.initiating};
@@ -639,7 +658,7 @@ impl Procedure for {p.name} {{
         self.outfile += f"""
 pub struct {p.name} {{}}
 
-#[async_trait]
+# [async_trait]
 impl Indication for {p.name} {{
     type TopPdu = {top_pdu};
     type Request = {p.initiating};
@@ -668,8 +687,8 @@ impl Indication for {p.name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, Debug, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum {name} {{
 {field_interpreter.enum_fields}\
 }}
@@ -705,7 +724,7 @@ impl {name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum {name} {{
 {field_interpreter.choice_fields}\
 }}
@@ -737,7 +756,7 @@ impl {name} {{
         inner = type_and_constraints(tree.children[1]).typ
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct {name}(pub {inner});
 
 impl {name} {{
@@ -777,7 +796,7 @@ impl {name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -856,7 +875,7 @@ impl {orig_name} {{
 
         self.outfile += f"""
 // {orig_name}
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct {name} {{
 {field_interpreter.struct_fields}\
 }}
@@ -951,7 +970,7 @@ handoverNotification NGAP-ELEMENTARY-PROCEDURE ::= {
 
 pub struct AmfConfigurationUpdateProcedure {}
 
-#[async_trait]
+# [async_trait]
 impl Procedure for AmfConfigurationUpdateProcedure {
     type TopPdu = NgapPdu;
     type Request = AmfConfigurationUpdate;
@@ -988,7 +1007,7 @@ impl Procedure for AmfConfigurationUpdateProcedure {
 
 pub struct HandoverNotificationProcedure {}
 
-#[async_trait]
+# [async_trait]
 impl Indication for HandoverNotificationProcedure {
     type TopPdu = NgapPdu;
     type Request = HandoverNotify;
@@ -1007,7 +1026,7 @@ impl Indication for HandoverNotificationProcedure {
     }
 }
 
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum InitiatingMessage {
     AmfConfigurationUpdate(AmfConfigurationUpdate),
     HandoverNotify(HandoverNotify),
@@ -1050,7 +1069,7 @@ impl AperCodec for InitiatingMessage {
     }
 }
 
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum SuccessfulOutcome {
     AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge),
 }
@@ -1086,7 +1105,7 @@ impl AperCodec for SuccessfulOutcome {
     }
 }
 
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum UnsuccessfulOutcome {
     AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure),
 }
@@ -1129,7 +1148,7 @@ ProcedureCode		::= INTEGER (0..255)
 """, """\
 
 // ProcedureCode
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct ProcedureCode(pub u8);
 
 impl ProcedureCode {
@@ -1158,8 +1177,8 @@ TriggeringMessage	::= ENUMERATED { initiating-message, successful-outcome, unsuc
         output = """\
 
 // TriggeringMessage
-#[derive(Clone, Debug, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
     SuccessfulOutcome,
@@ -1204,7 +1223,7 @@ WLANMeasurementConfiguration ::= SEQUENCE {
         output = """\
 
 // WlanMeasurementConfiguration
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct WlanMeasurementConfiguration {
     pub wlan_meas_config: WlanMeasConfig,
     pub wlan_rtt: Option<WlanRtt>,
@@ -1250,8 +1269,8 @@ impl AperCodec for WlanMeasurementConfiguration {
     }
 }
 // WlanRtt
-#[derive(Clone, Debug, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum WlanRtt {
     Thing1,
 }
@@ -1287,7 +1306,7 @@ LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
         output = """\
 
 // LteUeRlfReportContainer
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct LteUeRlfReportContainer(pub Vec<u8>);
 
 impl LteUeRlfReportContainer {
@@ -1317,7 +1336,7 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
         output = """\
 
 // MaximumDataBurstVolume
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl MaximumDataBurstVolume {
@@ -1347,7 +1366,7 @@ MobilityInformation ::= BIT STRING(SIZE(16))
         output = """\
 
 // MobilityInformation
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct MobilityInformation(pub BitString);
 
 impl MobilityInformation {
@@ -1381,8 +1400,8 @@ MaximumIntegrityProtectedDataRate ::= ENUMERATED {
         output = """\
 
 // MaximumIntegrityProtectedDataRate
-#[derive(Clone, Debug, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum MaximumIntegrityProtectedDataRate {
     Bitrate64kbs,
     MaximumUeRate,
@@ -1423,7 +1442,7 @@ EventTrigger ::= CHOICE {
 """, """\
 
 // EventTrigger
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum EventTrigger {
     OutOfCoverage(OutOfCoverage),
     EventL1LoggedMdtConfig,
@@ -1463,8 +1482,8 @@ impl EventTrigger {
 }
 
 // OutOfCoverage
-#[derive(Clone, Debug, Copy, TryFromPrimitive)]
-#[repr(u8)]
+# [derive(Clone, Debug, Copy, TryFromPrimitive)]
+# [repr(u8)]
 pub enum OutOfCoverage {
     True,
 }
@@ -1499,7 +1518,7 @@ PDUSessionResourceSetupRequestIEs NGAP-PROTOCOL-IES ::= {
 """, """\
 
 // PduSessionResourceSetupRequest
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct PduSessionResourceSetupRequest {
     pub amf_ue_ngap_id: AmfUeNgapId,
     pub ran_paging_priority: Option<Vec<u8>>,
@@ -1583,7 +1602,7 @@ GNB-ID ::= CHOICE {
 """, """\
 
 // GnbId
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum GnbId {
     GnbId(BitString),
 }
@@ -1629,7 +1648,7 @@ PrivateIE-ID	::= CHOICE {
 """, """\
 
 // PrivateIeId
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum PrivateIeId {
     Local(u16),
     Global(Vec<u8>),
@@ -1677,7 +1696,7 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 """, """\
 
 // ExpectedActivityPeriod
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct ExpectedActivityPeriod(pub i128);
 
 impl ExpectedActivityPeriod {
@@ -1705,7 +1724,7 @@ URI-address ::= VisibleString
 """, """\
 
 // UriAddress
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct UriAddress(pub String);
 
 impl UriAddress {
@@ -1732,7 +1751,7 @@ impl AperCodec for UriAddress {
 AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalDLUPTNLInformationForHOItem
 """, """
 // AdditionalDluptnlInformationForHoList
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
 
 impl AdditionalDluptnlInformationForHoList {
@@ -1775,7 +1794,7 @@ DLPRSResourceCoordinates ::= SEQUENCE {
 """, """\
 
 // DlprsResourceCoordinates
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct DlprsResourceCoordinates {
     pub listof_dl_prs_resource_set_arp: Vec<DlprsResourceSetArp>,
     pub foo: Option<i8>,
@@ -1843,7 +1862,7 @@ UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
 """, """\
 
 // UeAssociatedLogicalF1ConnectionListRes
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
 
 impl UeAssociatedLogicalF1ConnectionListRes {
@@ -1905,7 +1924,7 @@ BH-Routing-Information-Added-List-ItemIEs	F1AP-PROTOCOL-IES ::= {
 """, """\
 
 // BapMappingConfiguration
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct BapMappingConfiguration {
     pub bh_routing_information_added_list: Option<BhRoutingInformationAddedList>,
 }
@@ -1965,7 +1984,7 @@ impl AperCodec for BapMappingConfiguration {
     }
 }
 // BhRoutingInformationAddedList
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
 
 impl BhRoutingInformationAddedList {
@@ -2016,7 +2035,7 @@ GNB-CUSystemInformation ::= SEQUENCE {
 """, """\
 
 // GnbCuSystemInformation
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct GnbCuSystemInformation {
     pub sibtypetobeupdatedlist: Vec<SibtypetobeupdatedListItem>,
 }
@@ -2073,7 +2092,7 @@ SBCCH-SL-BCH-MessageType::=     CHOICE {
 }""", """\
 
 // SbcchSlBchMessageType
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum SbcchSlBchMessageType {
     C1(C1),
 }
@@ -2110,7 +2129,7 @@ impl AperCodec for SbcchSlBchMessageType {
     }
 }
 // C1
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum C1 {
     MasterInformationBlockSidelink(MasterInformationBlockSidelink),
     Spare1,
@@ -2165,7 +2184,7 @@ OverloadStopIEs NGAP-PROTOCOL-IES ::= {
 """, """\
 
 // OverloadStop
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct OverloadStop {
 }
 
@@ -2220,7 +2239,7 @@ LocationMeasurementIndication-IEs ::=       SEQUENCE {
 """, """\
 
 // LocationMeasurementIndicationIEs
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct LocationMeasurementIndicationIEs {
     pub measurement_indication: SetupRelease<LocationMeasurementInfo>,
 }
@@ -2271,7 +2290,7 @@ AvailabilityCombination-r16 ::=         SEQUENCE {
 """, """\
 
 // AvailabilityCombinationR16
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct AvailabilityCombinationR16 {
     pub resource_availability_r_16: Vec<u8>,
 }
@@ -2329,7 +2348,7 @@ SystemInformation-IEs ::=           SEQUENCE {
 """, """\
 
 // SystemInformationIEs
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct SystemInformationIEs {
     pub sib_type_and_info: Vec<SibTypeAndInfo>,
 }
@@ -2374,7 +2393,7 @@ impl AperCodec for SystemInformationIEs {
     }
 }
 // SibTypeAndInfo
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub enum SibTypeAndInfo {
     Sib2(Sib2),
     Sib3(Sib3),
@@ -2426,7 +2445,7 @@ CSI-AssociatedReportConfigInfo ::=  SEQUENCE {
 """, """\
 
 // CsiAssociatedReportConfigInfo
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct CsiAssociatedReportConfigInfo {
     pub nzp_csi_rs: NzpCsiRs,
 }
@@ -2460,7 +2479,7 @@ impl AperCodec for CsiAssociatedReportConfigInfo {
     }
 }
 // NzpCsiRs
-#[derive(Clone, Debug)]
+# [derive(Clone, Debug)]
 pub struct NzpCsiRs {
     pub qcl_info: Option<Vec<TciStateId>>,
 }
@@ -2518,7 +2537,19 @@ System-BearerContextSetupRequest ::= CHOICE {
 	e-UTRAN-BearerContextSetupRequest		ProtocolIE-Container { {EUTRAN-BearerContextSetupRequest } },
 	nG-RAN-BearerContextSetupRequest		ProtocolIE-Container { {NG-RAN-BearerContextSetupRequest } },
 	choice-extension						ProtocolIE-SingleContainer { {System-BearerContextSetupRequest-ExtIEs }  }
-}""", "")
+}
+
+EUTRAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
+	{ ID id-DRB-To-Setup-List-EUTRAN		CRITICALITY reject	 TYPE DRB-To-Setup-List-EUTRAN		PRESENCE mandatory } |
+	{ ID id-SubscriberProfileIDforRFP		CRITICALITY ignore	 TYPE SubscriberProfileIDforRFP		PRESENCE optional } |
+	{ ID id-AdditionalRRMPriorityIndex		CRITICALITY ignore	 TYPE AdditionalRRMPriorityIndex	PRESENCE optional } ,
+	...
+}
+
+NG-RAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
+	{ ID id-PDU-Session-Resource-To-Setup-List		CRITICALITY reject	 TYPE PDU-Session-Resource-To-Setup-List		PRESENCE mandatory } ,
+	...
+}""", "", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
 
 
 if __name__ == '__main__':
