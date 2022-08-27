@@ -78,14 +78,15 @@ class IeContainerMerger(Transformer):
         #
         #  ...to
         #   choice
-        #     choice_ie_container
+        #     choice_field
         #       EutranBearerContextSetupRequest
         #       ies
         #         ie
-        #     choice_ie_container
+        #     choice_field
         #       ...etc
         for child in tree.children:
             if child.data == "choice_ie_container":
+                child.data = "choice_field"
                 child.children[1] = self.ie_dict[child.children[1]]
         return tree
 
@@ -283,6 +284,11 @@ class TypeTransformer(Transformer):
         elif tree.data == 'choice':
             name = self.unique_type_name(orig_name)
             new_def = Tree('choice_def', [name, tree])
+            self.extra_defs.append(new_def)
+            tree = name
+        elif tree.data == 'ies':
+            name = self.unique_type_name(orig_name)
+            new_def = Tree('choice_pdu', [name, tree])
             self.extra_defs.append(new_def)
             tree = name
         else:
@@ -991,37 +997,43 @@ document
   choice_def
     SystemBearerContextSetupRequest
     choice
-      choice_ie_container
+      choice_field
         EutranBearerContextSetupRequest
-        ies
-          ie
-            drb_to_setup_list_eutran
-            42
-            reject
-            DrbToSetupListEutran
-          optional_ie
-            subscriber_profile_i_dfor_rfp
-            43
-            ignore
-            SubscriberProfileIDforRfp
-          optional_ie
-            additional_rrm_priority_index
-            123
-            ignore
-            AdditionalRrmPriorityIndex
-          extension_marker
-      choice_ie_container
+        EutranBearerContextSetupRequest
+      choice_field
         NgRanBearerContextSetupRequest
-        ies
-          ie
-            pdu_session_resource_to_setup_list
-            321
-            reject
-            PduSessionResourceToSetupList
-          extension_marker
+        NgRanBearerContextSetupRequest
       extension_container
         choice-extension
         single_ie_container\tSystem-BearerContextSetupRequest-ExtIEs
+  choice_pdu
+    EutranBearerContextSetupRequest
+    ies
+      ie
+        drb_to_setup_list_eutran
+        42
+        reject
+        DrbToSetupListEutran
+      optional_ie
+        subscriber_profile_i_dfor_rfp
+        43
+        ignore
+        SubscriberProfileIDforRfp
+      optional_ie
+        additional_rrm_priority_index
+        123
+        ignore
+        AdditionalRrmPriorityIndex
+      extension_marker
+  choice_pdu
+    NgRanBearerContextSetupRequest
+    ies
+      ie
+        pdu_session_resource_to_setup_list
+        321
+        reject
+        PduSessionResourceToSetupList
+      extension_marker
 """, constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
 
 
