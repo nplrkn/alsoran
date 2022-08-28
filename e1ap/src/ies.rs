@@ -1305,19 +1305,19 @@ impl AperCodec for DataForwardingRequest {
             .map_err(|e: AperCodecError| e.push_context("DataForwardingRequest"))
     }
 }
-// DataForwardingtoEUtranInformationList
+// DataForwardingtoEutranInformationList
 #[derive(Clone, Debug)]
-pub struct DataForwardingtoEUtranInformationList(
-    pub Vec<DataForwardingtoEUtranInformationListItem>,
+pub struct DataForwardingtoEutranInformationList(
+    pub Vec<DataForwardingtoEutranInformationListItem>,
 );
 
-impl DataForwardingtoEUtranInformationList {
+impl DataForwardingtoEutranInformationList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(256), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DataForwardingtoEUtranInformationListItem::decode(data)?);
+                items.push(DataForwardingtoEutranInformationListItem::decode(data)?);
             }
             items
         }))
@@ -1331,25 +1331,25 @@ impl DataForwardingtoEUtranInformationList {
     }
 }
 
-impl AperCodec for DataForwardingtoEUtranInformationList {
+impl AperCodec for DataForwardingtoEutranInformationList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DataForwardingtoEUtranInformationList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DataForwardingtoEUtranInformationList"))
+        DataForwardingtoEutranInformationList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("DataForwardingtoEutranInformationList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("DataForwardingtoEUtranInformationList"))
+            .map_err(|e: AperCodecError| e.push_context("DataForwardingtoEutranInformationList"))
     }
 }
-// DataForwardingtoEUtranInformationListItem
+// DataForwardingtoEutranInformationListItem
 #[derive(Clone, Debug)]
-pub struct DataForwardingtoEUtranInformationListItem {
+pub struct DataForwardingtoEutranInformationListItem {
     pub data_forwarding_tunnel_information: UpTnlInformation,
     pub qos_flows_to_be_forwarded_list: QosFlowsToBeForwardedList,
 }
 
-impl DataForwardingtoEUtranInformationListItem {
+impl DataForwardingtoEutranInformationListItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -1373,16 +1373,16 @@ impl DataForwardingtoEUtranInformationListItem {
     }
 }
 
-impl AperCodec for DataForwardingtoEUtranInformationListItem {
+impl AperCodec for DataForwardingtoEutranInformationListItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DataForwardingtoEUtranInformationListItem::decode_inner(data).map_err(
-            |e: AperCodecError| e.push_context("DataForwardingtoEUtranInformationListItem"),
+        DataForwardingtoEutranInformationListItem::decode_inner(data).map_err(
+            |e: AperCodecError| e.push_context("DataForwardingtoEutranInformationListItem"),
         )
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data).map_err(|e: AperCodecError| {
-            e.push_context("DataForwardingtoEUtranInformationListItem")
+            e.push_context("DataForwardingtoEutranInformationListItem")
         })
     }
 }

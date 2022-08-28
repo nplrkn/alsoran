@@ -84,6 +84,9 @@ class IeContainerMerger(Transformer):
         #         ie
         #     choice_field
         #       ...etc
+        #
+        # The ies section will then get broken out into a separate choice_pdu in a later
+        # stage - see transform_type().
         for child in tree.children:
             if child.data == "choice_ie_container":
                 child.data = "choice_field"

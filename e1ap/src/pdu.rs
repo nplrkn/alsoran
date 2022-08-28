@@ -18,7 +18,6 @@ pub struct Reset {
 
 impl Reset {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -85,18 +84,9 @@ impl Reset {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -246,7 +236,6 @@ pub struct ResetAcknowledge {
 
 impl ResetAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -316,18 +305,9 @@ impl ResetAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -401,7 +381,6 @@ pub struct ErrorIndication {
 
 impl ErrorIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -492,18 +471,9 @@ impl ErrorIndication {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -534,7 +504,6 @@ pub struct GnbCuUpE1SetupRequest {
 
 impl GnbCuUpE1SetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -667,18 +636,9 @@ impl GnbCuUpE1SetupRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -810,7 +770,6 @@ pub struct GnbCuUpE1SetupResponse {
 
 impl GnbCuUpE1SetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -888,18 +847,9 @@ impl GnbCuUpE1SetupResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -926,7 +876,6 @@ pub struct GnbCuUpE1SetupFailure {
 
 impl GnbCuUpE1SetupFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1005,18 +954,9 @@ impl GnbCuUpE1SetupFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1043,7 +983,6 @@ pub struct GnbCuCpE1SetupRequest {
 
 impl GnbCuCpE1SetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1121,18 +1060,9 @@ impl GnbCuCpE1SetupRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1163,7 +1093,6 @@ pub struct GnbCuCpE1SetupResponse {
 
 impl GnbCuCpE1SetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1296,18 +1225,9 @@ impl GnbCuCpE1SetupResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1334,7 +1254,6 @@ pub struct GnbCuCpE1SetupFailure {
 
 impl GnbCuCpE1SetupFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1413,18 +1332,9 @@ impl GnbCuCpE1SetupFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1455,7 +1365,6 @@ pub struct GnbCuUpConfigurationUpdate {
 
 impl GnbCuUpConfigurationUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1586,18 +1495,9 @@ impl GnbCuUpConfigurationUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1658,7 +1558,6 @@ pub struct GnbCuUpConfigurationUpdateAcknowledge {
 
 impl GnbCuUpConfigurationUpdateAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1723,18 +1622,9 @@ impl GnbCuUpConfigurationUpdateAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1761,7 +1651,6 @@ pub struct GnbCuUpConfigurationUpdateFailure {
 
 impl GnbCuUpConfigurationUpdateFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1840,18 +1729,9 @@ impl GnbCuUpConfigurationUpdateFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1881,7 +1761,6 @@ pub struct GnbCuCpConfigurationUpdate {
 
 impl GnbCuCpConfigurationUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1998,18 +1877,9 @@ impl GnbCuCpConfigurationUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2142,7 +2012,6 @@ pub struct GnbCuCpConfigurationUpdateAcknowledge {
 
 impl GnbCuCpConfigurationUpdateAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2236,18 +2105,9 @@ impl GnbCuCpConfigurationUpdateAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2344,7 +2204,6 @@ pub struct GnbCuCpConfigurationUpdateFailure {
 
 impl GnbCuCpConfigurationUpdateFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2423,18 +2282,9 @@ impl GnbCuCpConfigurationUpdateFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2459,7 +2309,6 @@ pub struct E1ReleaseRequest {
 
 impl E1ReleaseRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2512,18 +2361,9 @@ impl E1ReleaseRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2547,7 +2387,6 @@ pub struct E1ReleaseResponse {
 
 impl E1ReleaseResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2584,18 +2423,9 @@ impl E1ReleaseResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2636,7 +2466,6 @@ pub struct BearerContextSetupRequest {
 
 impl BearerContextSetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2910,18 +2739,9 @@ impl BearerContextSetupRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2939,7 +2759,10 @@ impl AperCodec for BearerContextSetupRequest {
 }
 // SystemBearerContextSetupRequest
 #[derive(Clone, Debug)]
-pub enum SystemBearerContextSetupRequest {}
+pub enum SystemBearerContextSetupRequest {
+    EutranBearerContextSetupRequest(EutranBearerContextSetupRequest),
+    NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest),
+}
 
 impl SystemBearerContextSetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -2950,11 +2773,11 @@ impl SystemBearerContextSetupRequest {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranBearerContextSetupRequest(
+                EutranBearerContextSetupRequest::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanBearerContextSetupRequest(
+                NgRanBearerContextSetupRequest::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -2963,7 +2786,16 @@ impl SystemBearerContextSetupRequest {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranBearerContextSetupRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextSetupRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -2988,7 +2820,6 @@ pub struct BearerContextSetupResponse {
 
 impl BearerContextSetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3060,18 +2891,9 @@ impl BearerContextSetupResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3089,7 +2911,10 @@ impl AperCodec for BearerContextSetupResponse {
 }
 // SystemBearerContextSetupResponse
 #[derive(Clone, Debug)]
-pub enum SystemBearerContextSetupResponse {}
+pub enum SystemBearerContextSetupResponse {
+    EutranBearerContextSetupResponse(EutranBearerContextSetupResponse),
+    NgRanBearerContextSetupResponse(NgRanBearerContextSetupResponse),
+}
 
 impl SystemBearerContextSetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -3100,11 +2925,11 @@ impl SystemBearerContextSetupResponse {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranBearerContextSetupResponse(
+                EutranBearerContextSetupResponse::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanBearerContextSetupResponse(
+                NgRanBearerContextSetupResponse::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -3113,7 +2938,16 @@ impl SystemBearerContextSetupResponse {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranBearerContextSetupResponse(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextSetupResponse(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -3139,7 +2973,6 @@ pub struct BearerContextSetupFailure {
 
 impl BearerContextSetupFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3218,18 +3051,9 @@ impl BearerContextSetupFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3265,7 +3089,6 @@ pub struct BearerContextModificationRequest {
 
 impl BearerContextModificationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3469,18 +3292,9 @@ impl BearerContextModificationRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3498,7 +3312,10 @@ impl AperCodec for BearerContextModificationRequest {
 }
 // SystemBearerContextModificationRequest
 #[derive(Clone, Debug)]
-pub enum SystemBearerContextModificationRequest {}
+pub enum SystemBearerContextModificationRequest {
+    EutranBearerContextModificationRequest(EutranBearerContextModificationRequest),
+    NgRanBearerContextModificationRequest(NgRanBearerContextModificationRequest),
+}
 
 impl SystemBearerContextModificationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -3509,11 +3326,11 @@ impl SystemBearerContextModificationRequest {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranBearerContextModificationRequest(
+                EutranBearerContextModificationRequest::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanBearerContextModificationRequest(
+                NgRanBearerContextModificationRequest::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -3522,7 +3339,16 @@ impl SystemBearerContextModificationRequest {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranBearerContextModificationRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextModificationRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -3548,7 +3374,6 @@ pub struct BearerContextModificationResponse {
 
 impl BearerContextModificationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3619,18 +3444,9 @@ impl BearerContextModificationResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3648,7 +3464,10 @@ impl AperCodec for BearerContextModificationResponse {
 }
 // SystemBearerContextModificationResponse
 #[derive(Clone, Debug)]
-pub enum SystemBearerContextModificationResponse {}
+pub enum SystemBearerContextModificationResponse {
+    EutranBearerContextModificationResponse(EutranBearerContextModificationResponse),
+    NgRanBearerContextModificationResponse(NgRanBearerContextModificationResponse),
+}
 
 impl SystemBearerContextModificationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -3659,11 +3478,11 @@ impl SystemBearerContextModificationResponse {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranBearerContextModificationResponse(
+                EutranBearerContextModificationResponse::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanBearerContextModificationResponse(
+                NgRanBearerContextModificationResponse::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -3672,7 +3491,16 @@ impl SystemBearerContextModificationResponse {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranBearerContextModificationResponse(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextModificationResponse(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -3698,7 +3526,6 @@ pub struct BearerContextModificationFailure {
 
 impl BearerContextModificationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3778,18 +3605,9 @@ impl BearerContextModificationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3815,7 +3633,6 @@ pub struct BearerContextModificationRequired {
 
 impl BearerContextModificationRequired {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3889,18 +3706,9 @@ impl BearerContextModificationRequired {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3918,7 +3726,10 @@ impl AperCodec for BearerContextModificationRequired {
 }
 // SystemBearerContextModificationRequired
 #[derive(Clone, Debug)]
-pub enum SystemBearerContextModificationRequired {}
+pub enum SystemBearerContextModificationRequired {
+    EutranBearerContextModificationRequired(EutranBearerContextModificationRequired),
+    NgRanBearerContextModificationRequired(NgRanBearerContextModificationRequired),
+}
 
 impl SystemBearerContextModificationRequired {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -3929,11 +3740,11 @@ impl SystemBearerContextModificationRequired {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranBearerContextModificationRequired(
+                EutranBearerContextModificationRequired::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanBearerContextModificationRequired(
+                NgRanBearerContextModificationRequired::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -3942,7 +3753,16 @@ impl SystemBearerContextModificationRequired {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranBearerContextModificationRequired(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextModificationRequired(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -3967,7 +3787,6 @@ pub struct BearerContextModificationConfirm {
 
 impl BearerContextModificationConfirm {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4038,18 +3857,9 @@ impl BearerContextModificationConfirm {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4067,7 +3877,10 @@ impl AperCodec for BearerContextModificationConfirm {
 }
 // SystemBearerContextModificationConfirm
 #[derive(Clone, Debug)]
-pub enum SystemBearerContextModificationConfirm {}
+pub enum SystemBearerContextModificationConfirm {
+    EutranBearerContextModificationConfirm(EutranBearerContextModificationConfirm),
+    NgRanBearerContextModificationConfirm(NgRanBearerContextModificationConfirm),
+}
 
 impl SystemBearerContextModificationConfirm {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -4078,11 +3891,11 @@ impl SystemBearerContextModificationConfirm {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranBearerContextModificationConfirm(
+                EutranBearerContextModificationConfirm::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanBearerContextModificationConfirm(
+                NgRanBearerContextModificationConfirm::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -4091,7 +3904,16 @@ impl SystemBearerContextModificationConfirm {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranBearerContextModificationConfirm(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextModificationConfirm(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -4116,7 +3938,6 @@ pub struct BearerContextReleaseCommand {
 
 impl BearerContextReleaseCommand {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4183,18 +4004,9 @@ impl BearerContextReleaseCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4221,7 +4033,6 @@ pub struct BearerContextReleaseComplete {
 
 impl BearerContextReleaseComplete {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4303,18 +4114,9 @@ impl BearerContextReleaseComplete {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4341,7 +4143,6 @@ pub struct BearerContextReleaseRequest {
 
 impl BearerContextReleaseRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4421,18 +4222,9 @@ impl BearerContextReleaseRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4493,7 +4285,6 @@ pub struct BearerContextInactivityNotification {
 
 impl BearerContextInactivityNotification {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4560,18 +4351,9 @@ impl BearerContextInactivityNotification {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4598,7 +4380,6 @@ pub struct DlDataNotification {
 
 impl DlDataNotification {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4677,18 +4458,9 @@ impl DlDataNotification {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4714,7 +4486,6 @@ pub struct UlDataNotification {
 
 impl UlDataNotification {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4781,18 +4552,9 @@ impl UlDataNotification {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4818,7 +4580,6 @@ pub struct DataUsageReport {
 
 impl DataUsageReport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4885,18 +4646,9 @@ impl DataUsageReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4922,7 +4674,6 @@ pub struct GnbCuUpCounterCheckRequest {
 
 impl GnbCuUpCounterCheckRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4994,18 +4745,9 @@ impl GnbCuUpCounterCheckRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5023,7 +4765,10 @@ impl AperCodec for GnbCuUpCounterCheckRequest {
 }
 // SystemGnbCuUpCounterCheckRequest
 #[derive(Clone, Debug)]
-pub enum SystemGnbCuUpCounterCheckRequest {}
+pub enum SystemGnbCuUpCounterCheckRequest {
+    EutranGnbCuUpCounterCheckRequest(EutranGnbCuUpCounterCheckRequest),
+    NgRanGnbCuUpCounterCheckRequest(NgRanGnbCuUpCounterCheckRequest),
+}
 
 impl SystemGnbCuUpCounterCheckRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
@@ -5034,11 +4779,11 @@ impl SystemGnbCuUpCounterCheckRequest {
             ));
         }
         match idx {
-            0 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            0 => Ok(Self::EutranGnbCuUpCounterCheckRequest(
+                EutranGnbCuUpCounterCheckRequest::decode(data)?,
             )),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
+            1 => Ok(Self::NgRanGnbCuUpCounterCheckRequest(
+                NgRanGnbCuUpCounterCheckRequest::decode(data)?,
             )),
             2 => Err(AperCodecError::new(
                 "Choice extension container not implemented",
@@ -5047,7 +4792,16 @@ impl SystemGnbCuUpCounterCheckRequest {
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        match self {}
+        match self {
+            Self::EutranGnbCuUpCounterCheckRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanGnbCuUpCounterCheckRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
     }
 }
 
@@ -5071,7 +4825,6 @@ pub struct GnbCuUpStatusIndication {
 
 impl GnbCuUpStatusIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5127,18 +4880,9 @@ impl GnbCuUpStatusIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5164,7 +4908,6 @@ pub struct GnbCuCpMeasurementResultsInformation {
 
 impl GnbCuCpMeasurementResultsInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5237,18 +4980,9 @@ impl GnbCuCpMeasurementResultsInformation {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5274,7 +5008,6 @@ pub struct MrdcDataUsageReport {
 
 impl MrdcDataUsageReport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5346,18 +5079,9 @@ impl MrdcDataUsageReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5383,7 +5107,6 @@ pub struct TraceStart {
 
 impl TraceStart {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5450,18 +5173,9 @@ impl TraceStart {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5486,7 +5200,6 @@ pub struct DeactivateTrace {
 
 impl DeactivateTrace {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5553,18 +5266,9 @@ impl DeactivateTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5593,7 +5297,6 @@ pub struct CellTrafficTrace {
 
 impl CellTrafficTrace {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5703,18 +5406,9 @@ impl CellTrafficTrace {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5775,7 +5469,6 @@ pub struct ResourceStatusRequest {
 
 impl ResourceStatusRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5896,18 +5589,9 @@ impl ResourceStatusRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5934,7 +5618,6 @@ pub struct ResourceStatusResponse {
 
 impl ResourceStatusResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6036,18 +5719,9 @@ impl ResourceStatusResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6075,7 +5749,6 @@ pub struct ResourceStatusFailure {
 
 impl ResourceStatusFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6183,18 +5856,9 @@ impl ResourceStatusFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6222,7 +5886,6 @@ pub struct ResourceStatusUpdate {
 
 impl ResourceStatusUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6333,18 +5996,9 @@ impl ResourceStatusUpdate {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6369,7 +6023,6 @@ pub struct IabUptnlAddressUpdate {
 
 impl IabUptnlAddressUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6423,18 +6076,9 @@ impl IabUptnlAddressUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6495,7 +6139,6 @@ pub struct IabUptnlAddressUpdateAcknowledge {
 
 impl IabUptnlAddressUpdateAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6562,18 +6205,9 @@ impl IabUptnlAddressUpdateAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6635,7 +6269,6 @@ pub struct IabUptnlAddressUpdateFailure {
 
 impl IabUptnlAddressUpdateFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6714,18 +6347,9 @@ impl IabUptnlAddressUpdateFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6751,7 +6375,6 @@ pub struct EarlyForwardingSnTransfer {
 
 impl EarlyForwardingSnTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6823,18 +6446,9 @@ impl EarlyForwardingSnTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6848,5 +6462,1233 @@ impl AperCodec for EarlyForwardingSnTransfer {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
             .map_err(|e: AperCodecError| e.push_context("EarlyForwardingSnTransfer"))
+    }
+}
+// EutranBearerContextSetupRequest
+#[derive(Clone, Debug)]
+pub struct EutranBearerContextSetupRequest {
+    pub drb_to_setup_list_eutran: DrbToSetupListEutran,
+    pub subscriber_profile_i_dfor_rfp: Option<SubscriberProfileIDforRfp>,
+    pub additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex>,
+}
+
+impl EutranBearerContextSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_to_setup_list_eutran: Option<DrbToSetupListEutran> = None;
+        let mut subscriber_profile_i_dfor_rfp: Option<SubscriberProfileIDforRfp> = None;
+        let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                32 => drb_to_setup_list_eutran = Some(DrbToSetupListEutran::decode(data)?),
+                83 => {
+                    subscriber_profile_i_dfor_rfp = Some(SubscriberProfileIDforRfp::decode(data)?)
+                }
+                84 => {
+                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        let drb_to_setup_list_eutran = drb_to_setup_list_eutran.ok_or(
+            aper::AperCodecError::new(format!("Missing mandatory IE drb_to_setup_list_eutran")),
+        )?;
+        Ok(Self {
+            drb_to_setup_list_eutran,
+            subscriber_profile_i_dfor_rfp,
+            additional_rrm_priority_index,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.drb_to_setup_list_eutran.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 32, false)?;
+        Criticality::Reject.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        if let Some(x) = &self.subscriber_profile_i_dfor_rfp {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.additional_rrm_priority_index {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 84, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextSetupRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupRequest"))
+    }
+}
+// NgRanBearerContextSetupRequest
+#[derive(Clone, Debug)]
+pub struct NgRanBearerContextSetupRequest {
+    pub pdu_session_resource_to_setup_list: PduSessionResourceToSetupList,
+}
+
+impl NgRanBearerContextSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_to_setup_list: Option<PduSessionResourceToSetupList> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                42 => {
+                    pdu_session_resource_to_setup_list =
+                        Some(PduSessionResourceToSetupList::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        let pdu_session_resource_to_setup_list =
+            pdu_session_resource_to_setup_list.ok_or(aper::AperCodecError::new(format!(
+                "Missing mandatory IE pdu_session_resource_to_setup_list"
+            )))?;
+        Ok(Self {
+            pdu_session_resource_to_setup_list,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.pdu_session_resource_to_setup_list.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 42, false)?;
+        Criticality::Reject.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextSetupRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+    }
+}
+// EutranBearerContextSetupResponse
+#[derive(Clone, Debug)]
+pub struct EutranBearerContextSetupResponse {
+    pub drb_setup_list_eutran: DrbSetupListEutran,
+    pub drb_failed_list_eutran: Option<DrbFailedListEutran>,
+}
+
+impl EutranBearerContextSetupResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_setup_list_eutran: Option<DrbSetupListEutran> = None;
+        let mut drb_failed_list_eutran: Option<DrbFailedListEutran> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                37 => drb_setup_list_eutran = Some(DrbSetupListEutran::decode(data)?),
+                38 => drb_failed_list_eutran = Some(DrbFailedListEutran::decode(data)?),
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        let drb_setup_list_eutran = drb_setup_list_eutran.ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE drb_setup_list_eutran"),
+        ))?;
+        Ok(Self {
+            drb_setup_list_eutran,
+            drb_failed_list_eutran,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.drb_setup_list_eutran.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 37, false)?;
+        Criticality::Ignore.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        if let Some(x) = &self.drb_failed_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 38, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextSetupResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextSetupResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupResponse"))
+    }
+}
+// NgRanBearerContextSetupResponse
+#[derive(Clone, Debug)]
+pub struct NgRanBearerContextSetupResponse {
+    pub pdu_session_resource_setup_list: PduSessionResourceSetupList,
+    pub pdu_session_resource_failed_list: Option<PduSessionResourceFailedList>,
+}
+
+impl NgRanBearerContextSetupResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_setup_list: Option<PduSessionResourceSetupList> = None;
+        let mut pdu_session_resource_failed_list: Option<PduSessionResourceFailedList> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                46 => {
+                    pdu_session_resource_setup_list =
+                        Some(PduSessionResourceSetupList::decode(data)?)
+                }
+                47 => {
+                    pdu_session_resource_failed_list =
+                        Some(PduSessionResourceFailedList::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        let pdu_session_resource_setup_list =
+            pdu_session_resource_setup_list.ok_or(aper::AperCodecError::new(format!(
+                "Missing mandatory IE pdu_session_resource_setup_list"
+            )))?;
+        Ok(Self {
+            pdu_session_resource_setup_list,
+            pdu_session_resource_failed_list,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.pdu_session_resource_setup_list.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 46, false)?;
+        Criticality::Ignore.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        if let Some(x) = &self.pdu_session_resource_failed_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 47, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextSetupResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextSetupResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupResponse"))
+    }
+}
+// EutranBearerContextModificationRequest
+#[derive(Clone, Debug)]
+pub struct EutranBearerContextModificationRequest {
+    pub drb_to_setup_mod_list_eutran: Option<DrbToSetupModListEutran>,
+    pub drb_to_modify_list_eutran: Option<DrbToModifyListEutran>,
+    pub drb_to_remove_list_eutran: Option<DrbToRemoveListEutran>,
+    pub subscriber_profile_i_dfor_rfp: Option<SubscriberProfileIDforRfp>,
+    pub additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex>,
+}
+
+impl EutranBearerContextModificationRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_to_setup_mod_list_eutran: Option<DrbToSetupModListEutran> = None;
+        let mut drb_to_modify_list_eutran: Option<DrbToModifyListEutran> = None;
+        let mut drb_to_remove_list_eutran: Option<DrbToRemoveListEutran> = None;
+        let mut subscriber_profile_i_dfor_rfp: Option<SubscriberProfileIDforRfp> = None;
+        let mut additional_rrm_priority_index: Option<AdditionalRrmPriorityIndex> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                51 => drb_to_setup_mod_list_eutran = Some(DrbToSetupModListEutran::decode(data)?),
+                33 => drb_to_modify_list_eutran = Some(DrbToModifyListEutran::decode(data)?),
+                34 => drb_to_remove_list_eutran = Some(DrbToRemoveListEutran::decode(data)?),
+                83 => {
+                    subscriber_profile_i_dfor_rfp = Some(SubscriberProfileIDforRfp::decode(data)?)
+                }
+                84 => {
+                    additional_rrm_priority_index = Some(AdditionalRrmPriorityIndex::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            drb_to_setup_mod_list_eutran,
+            drb_to_modify_list_eutran,
+            drb_to_remove_list_eutran,
+            subscriber_profile_i_dfor_rfp,
+            additional_rrm_priority_index,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.drb_to_setup_mod_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 51, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_to_modify_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 33, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_to_remove_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 34, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.subscriber_profile_i_dfor_rfp {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.additional_rrm_priority_index {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 84, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextModificationRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextModificationRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationRequest"))
+    }
+}
+// NgRanBearerContextModificationRequest
+#[derive(Clone, Debug)]
+pub struct NgRanBearerContextModificationRequest {
+    pub pdu_session_resource_to_setup_mod_list: Option<PduSessionResourceToSetupModList>,
+    pub pdu_session_resource_to_modify_list: Option<PduSessionResourceToModifyList>,
+    pub pdu_session_resource_to_remove_list: Option<PduSessionResourceToRemoveList>,
+}
+
+impl NgRanBearerContextModificationRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_to_setup_mod_list: Option<PduSessionResourceToSetupModList> =
+            None;
+        let mut pdu_session_resource_to_modify_list: Option<PduSessionResourceToModifyList> = None;
+        let mut pdu_session_resource_to_remove_list: Option<PduSessionResourceToRemoveList> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                56 => {
+                    pdu_session_resource_to_setup_mod_list =
+                        Some(PduSessionResourceToSetupModList::decode(data)?)
+                }
+                43 => {
+                    pdu_session_resource_to_modify_list =
+                        Some(PduSessionResourceToModifyList::decode(data)?)
+                }
+                44 => {
+                    pdu_session_resource_to_remove_list =
+                        Some(PduSessionResourceToRemoveList::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            pdu_session_resource_to_setup_mod_list,
+            pdu_session_resource_to_modify_list,
+            pdu_session_resource_to_remove_list,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.pdu_session_resource_to_setup_mod_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 56, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.pdu_session_resource_to_modify_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.pdu_session_resource_to_remove_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 44, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextModificationRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextModificationRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationRequest"))
+    }
+}
+// EutranBearerContextModificationResponse
+#[derive(Clone, Debug)]
+pub struct EutranBearerContextModificationResponse {
+    pub drb_setup_mod_list_eutran: Option<DrbSetupModListEutran>,
+    pub drb_failed_mod_list_eutran: Option<DrbFailedModListEutran>,
+    pub drb_modified_list_eutran: Option<DrbModifiedListEutran>,
+    pub drb_failed_to_modify_list_eutran: Option<DrbFailedToModifyListEutran>,
+    pub retainability_measurements_info: Option<RetainabilityMeasurementsInfo>,
+}
+
+impl EutranBearerContextModificationResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_setup_mod_list_eutran: Option<DrbSetupModListEutran> = None;
+        let mut drb_failed_mod_list_eutran: Option<DrbFailedModListEutran> = None;
+        let mut drb_modified_list_eutran: Option<DrbModifiedListEutran> = None;
+        let mut drb_failed_to_modify_list_eutran: Option<DrbFailedToModifyListEutran> = None;
+        let mut retainability_measurements_info: Option<RetainabilityMeasurementsInfo> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                52 => drb_setup_mod_list_eutran = Some(DrbSetupModListEutran::decode(data)?),
+                53 => drb_failed_mod_list_eutran = Some(DrbFailedModListEutran::decode(data)?),
+                39 => drb_modified_list_eutran = Some(DrbModifiedListEutran::decode(data)?),
+                40 => {
+                    drb_failed_to_modify_list_eutran =
+                        Some(DrbFailedToModifyListEutran::decode(data)?)
+                }
+                85 => {
+                    retainability_measurements_info =
+                        Some(RetainabilityMeasurementsInfo::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            drb_setup_mod_list_eutran,
+            drb_failed_mod_list_eutran,
+            drb_modified_list_eutran,
+            drb_failed_to_modify_list_eutran,
+            retainability_measurements_info,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.drb_setup_mod_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 52, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_failed_mod_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 53, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_modified_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 39, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_failed_to_modify_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 40, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.retainability_measurements_info {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextModificationResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextModificationResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationResponse"))
+    }
+}
+// NgRanBearerContextModificationResponse
+#[derive(Clone, Debug)]
+pub struct NgRanBearerContextModificationResponse {
+    pub pdu_session_resource_setup_mod_list: Option<PduSessionResourceSetupModList>,
+    pub pdu_session_resource_failed_mod_list: Option<PduSessionResourceFailedModList>,
+    pub pdu_session_resource_modified_list: Option<PduSessionResourceModifiedList>,
+    pub pdu_session_resource_failed_to_modify_list: Option<PduSessionResourceFailedToModifyList>,
+    pub retainability_measurements_info: Option<RetainabilityMeasurementsInfo>,
+}
+
+impl NgRanBearerContextModificationResponse {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_setup_mod_list: Option<PduSessionResourceSetupModList> = None;
+        let mut pdu_session_resource_failed_mod_list: Option<PduSessionResourceFailedModList> =
+            None;
+        let mut pdu_session_resource_modified_list: Option<PduSessionResourceModifiedList> = None;
+        let mut pdu_session_resource_failed_to_modify_list: Option<
+            PduSessionResourceFailedToModifyList,
+        > = None;
+        let mut retainability_measurements_info: Option<RetainabilityMeasurementsInfo> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                54 => {
+                    pdu_session_resource_setup_mod_list =
+                        Some(PduSessionResourceSetupModList::decode(data)?)
+                }
+                55 => {
+                    pdu_session_resource_failed_mod_list =
+                        Some(PduSessionResourceFailedModList::decode(data)?)
+                }
+                48 => {
+                    pdu_session_resource_modified_list =
+                        Some(PduSessionResourceModifiedList::decode(data)?)
+                }
+                49 => {
+                    pdu_session_resource_failed_to_modify_list =
+                        Some(PduSessionResourceFailedToModifyList::decode(data)?)
+                }
+                85 => {
+                    retainability_measurements_info =
+                        Some(RetainabilityMeasurementsInfo::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            pdu_session_resource_setup_mod_list,
+            pdu_session_resource_failed_mod_list,
+            pdu_session_resource_modified_list,
+            pdu_session_resource_failed_to_modify_list,
+            retainability_measurements_info,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.pdu_session_resource_setup_mod_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 54, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.pdu_session_resource_failed_mod_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 55, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.pdu_session_resource_modified_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 48, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.pdu_session_resource_failed_to_modify_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 49, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.retainability_measurements_info {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 85, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextModificationResponse {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextModificationResponse::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationResponse"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationResponse"))
+    }
+}
+// EutranBearerContextModificationRequired
+#[derive(Clone, Debug)]
+pub struct EutranBearerContextModificationRequired {
+    pub drb_required_to_modify_list_eutran: Option<DrbRequiredToModifyListEutran>,
+    pub drb_required_to_remove_list_eutran: Option<DrbRequiredToRemoveListEutran>,
+}
+
+impl EutranBearerContextModificationRequired {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_required_to_modify_list_eutran: Option<DrbRequiredToModifyListEutran> = None;
+        let mut drb_required_to_remove_list_eutran: Option<DrbRequiredToRemoveListEutran> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                35 => {
+                    drb_required_to_modify_list_eutran =
+                        Some(DrbRequiredToModifyListEutran::decode(data)?)
+                }
+                36 => {
+                    drb_required_to_remove_list_eutran =
+                        Some(DrbRequiredToRemoveListEutran::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            drb_required_to_modify_list_eutran,
+            drb_required_to_remove_list_eutran,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.drb_required_to_modify_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 35, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.drb_required_to_remove_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 36, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextModificationRequired {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextModificationRequired::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationRequired"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationRequired"))
+    }
+}
+// NgRanBearerContextModificationRequired
+#[derive(Clone, Debug)]
+pub struct NgRanBearerContextModificationRequired {
+    pub pdu_session_resource_required_to_modify_list:
+        Option<PduSessionResourceRequiredToModifyList>,
+    pub pdu_session_resource_to_remove_list: Option<PduSessionResourceToRemoveList>,
+}
+
+impl NgRanBearerContextModificationRequired {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_required_to_modify_list: Option<
+            PduSessionResourceRequiredToModifyList,
+        > = None;
+        let mut pdu_session_resource_to_remove_list: Option<PduSessionResourceToRemoveList> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                45 => {
+                    pdu_session_resource_required_to_modify_list =
+                        Some(PduSessionResourceRequiredToModifyList::decode(data)?)
+                }
+                44 => {
+                    pdu_session_resource_to_remove_list =
+                        Some(PduSessionResourceToRemoveList::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            pdu_session_resource_required_to_modify_list,
+            pdu_session_resource_to_remove_list,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.pdu_session_resource_required_to_modify_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 45, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        if let Some(x) = &self.pdu_session_resource_to_remove_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 44, false)?;
+            Criticality::Reject.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextModificationRequired {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextModificationRequired::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationRequired"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationRequired"))
+    }
+}
+// EutranBearerContextModificationConfirm
+#[derive(Clone, Debug)]
+pub struct EutranBearerContextModificationConfirm {
+    pub drb_confirm_modified_list_eutran: Option<DrbConfirmModifiedListEutran>,
+}
+
+impl EutranBearerContextModificationConfirm {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drb_confirm_modified_list_eutran: Option<DrbConfirmModifiedListEutran> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                41 => {
+                    drb_confirm_modified_list_eutran =
+                        Some(DrbConfirmModifiedListEutran::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            drb_confirm_modified_list_eutran,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.drb_confirm_modified_list_eutran {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 41, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextModificationConfirm {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextModificationConfirm::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationConfirm"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranBearerContextModificationConfirm"))
+    }
+}
+// NgRanBearerContextModificationConfirm
+#[derive(Clone, Debug)]
+pub struct NgRanBearerContextModificationConfirm {
+    pub pdu_session_resource_confirm_modified_list: Option<PduSessionResourceConfirmModifiedList>,
+}
+
+impl NgRanBearerContextModificationConfirm {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_confirm_modified_list: Option<
+            PduSessionResourceConfirmModifiedList,
+        > = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                50 => {
+                    pdu_session_resource_confirm_modified_list =
+                        Some(PduSessionResourceConfirmModifiedList::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        Ok(Self {
+            pdu_session_resource_confirm_modified_list,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.pdu_session_resource_confirm_modified_list {
+            let ie = &mut AperCodecData::new();
+            x.encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 50, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextModificationConfirm {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextModificationConfirm::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationConfirm"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanBearerContextModificationConfirm"))
+    }
+}
+// EutranGnbCuUpCounterCheckRequest
+#[derive(Clone, Debug)]
+pub struct EutranGnbCuUpCounterCheckRequest {
+    pub drbs_subject_to_counter_check_list_eutran: DrbsSubjectToCounterCheckListEutran,
+}
+
+impl EutranGnbCuUpCounterCheckRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drbs_subject_to_counter_check_list_eutran: Option<
+            DrbsSubjectToCounterCheckListEutran,
+        > = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                61 => {
+                    drbs_subject_to_counter_check_list_eutran =
+                        Some(DrbsSubjectToCounterCheckListEutran::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        let drbs_subject_to_counter_check_list_eutran = drbs_subject_to_counter_check_list_eutran
+            .ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE drbs_subject_to_counter_check_list_eutran"),
+        ))?;
+        Ok(Self {
+            drbs_subject_to_counter_check_list_eutran,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.drbs_subject_to_counter_check_list_eutran.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 61, false)?;
+        Criticality::Ignore.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranGnbCuUpCounterCheckRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranGnbCuUpCounterCheckRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranGnbCuUpCounterCheckRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EutranGnbCuUpCounterCheckRequest"))
+    }
+}
+// NgRanGnbCuUpCounterCheckRequest
+#[derive(Clone, Debug)]
+pub struct NgRanGnbCuUpCounterCheckRequest {
+    pub drbs_subject_to_counter_check_list_ng_ran: DrbsSubjectToCounterCheckListNgRan,
+}
+
+impl NgRanGnbCuUpCounterCheckRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut drbs_subject_to_counter_check_list_ng_ran: Option<
+            DrbsSubjectToCounterCheckListNgRan,
+        > = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                62 => {
+                    drbs_subject_to_counter_check_list_ng_ran =
+                        Some(DrbsSubjectToCounterCheckListNgRan::decode(data)?)
+                }
+                x => {
+                    return Err(aper::AperCodecError::new(format!(
+                        "Unrecognised IE type {}",
+                        x
+                    )))
+                }
+            }
+        }
+        let drbs_subject_to_counter_check_list_ng_ran = drbs_subject_to_counter_check_list_ng_ran
+            .ok_or(aper::AperCodecError::new(
+            format!("Missing mandatory IE drbs_subject_to_counter_check_list_ng_ran"),
+        ))?;
+        Ok(Self {
+            drbs_subject_to_counter_check_list_ng_ran,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.drbs_subject_to_counter_check_list_ng_ran.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 62, false)?;
+        Criticality::Ignore.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanGnbCuUpCounterCheckRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanGnbCuUpCounterCheckRequest::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanGnbCuUpCounterCheckRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("NgRanGnbCuUpCounterCheckRequest"))
     }
 }

@@ -17209,7 +17209,6 @@ pub struct PduSessionResourceModifyRequestTransfer {
 
 impl PduSessionResourceModifyRequestTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17398,18 +17397,9 @@ impl PduSessionResourceModifyRequestTransfer {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -19283,7 +19273,6 @@ pub struct PduSessionResourceSetupRequestTransfer {
 
 impl PduSessionResourceSetupRequestTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -19520,18 +19509,9 @@ impl PduSessionResourceSetupRequestTransfer {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
