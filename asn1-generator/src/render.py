@@ -111,6 +111,9 @@ def decode_expression(tree):
         return f"""{type_info.typ.replace("<", "::<")}::decode(data)?"""
 
 
+# Returns a lambda (x, data="data", copy_type_deref=""), where x is the field name, data is the
+# AperCodec data and copy_type_deref is a "*" if we are dealing with a reference.
+# Applying the lambda produces a chunk of code to encode the given tree.
 def encode_expression_fn(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof == "ie_container_sequence_of":
@@ -393,7 +396,7 @@ class IeFields(Interpreter):
         self.fields_to += f"""
         if let Some(x) = &self.{name} {{
             let ie = &mut AperCodecData::new();
-            {encode_expression_fn(tree.children[3])("x", "ie")}?;
+            {encode_expression_fn(tree.children[3])("x", "ie", copy_type_deref="*")}?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
             Criticality::{criticality.title()}.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -2554,25 +2557,175 @@ impl AperCodec for NzpCsiRs {
     }
 }""")
 
-#     def test_choice_of_protocol_ie_container(self):
-#         self.should_generate("""\
-# System-BearerContextSetupRequest ::= CHOICE {
-# 	e-UTRAN-BearerContextSetupRequest		ProtocolIE-Container { {EUTRAN-BearerContextSetupRequest } },
-# 	nG-RAN-BearerContextSetupRequest		ProtocolIE-Container { {NG-RAN-BearerContextSetupRequest } },
-# 	choice-extension						ProtocolIE-SingleContainer { {System-BearerContextSetupRequest-ExtIEs }  }
-# }
+    def test_choice_of_protocol_ie_container(self):
+        self.should_generate("""\
+System-BearerContextSetupRequest ::= CHOICE {
+	e-UTRAN-BearerContextSetupRequest		ProtocolIE-Container { {EUTRAN-BearerContextSetupRequest } },
+	nG-RAN-BearerContextSetupRequest		ProtocolIE-Container { {NG-RAN-BearerContextSetupRequest } },
+	choice-extension						ProtocolIE-SingleContainer { {System-BearerContextSetupRequest-ExtIEs }  }
+}
 
-# EUTRAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
-# 	{ ID id-DRB-To-Setup-List-EUTRAN		CRITICALITY reject	 TYPE DRB-To-Setup-List-EUTRAN		PRESENCE mandatory } |
-# 	{ ID id-SubscriberProfileIDforRFP		CRITICALITY ignore	 TYPE SubscriberProfileIDforRFP		PRESENCE optional } |
-# 	{ ID id-AdditionalRRMPriorityIndex		CRITICALITY ignore	 TYPE AdditionalRRMPriorityIndex	PRESENCE optional } ,
-# 	...
-# }
+EUTRAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
+	{ ID id-SubscriberProfileIDforRFP		CRITICALITY ignore	 TYPE INTEGER (1..4095, ...)		PRESENCE optional } |
+	...
+}
 
-# NG-RAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
-# 	{ ID id-PDU-Session-Resource-To-Setup-List		CRITICALITY reject	 TYPE PDU-Session-Resource-To-Setup-List		PRESENCE mandatory } ,
-# 	...
-# }""", "", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
+NG-RAN-BearerContextSetupRequest E1AP-PROTOCOL-IES ::= {
+	{ ID id-PDU-Session-Resource-To-Setup-List		CRITICALITY reject	 TYPE PDU-Session-Resource-To-Setup-List		PRESENCE mandatory } ,
+	...
+}""", """
+// SystemBearerContextSetupRequest
+# [derive(Clone, Debug)]
+pub enum SystemBearerContextSetupRequest {
+    EutranBearerContextSetupRequest(EutranBearerContextSetupRequest),
+    NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest),
+}
+
+impl SystemBearerContextSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        if extended {
+            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+        }
+        match idx {
+            0 => Ok(Self::EutranBearerContextSetupRequest(EutranBearerContextSetupRequest::decode(data)?)),
+            1 => Ok(Self::NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest::decode(data)?)),
+            2 => Err(AperCodecError::new("Choice extension container not implemented")),
+            _ => Err(AperCodecError::new("Unknown choice idx"))
+        }
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        match self {
+            Self::EutranBearerContextSetupRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                x.encode(data)
+            }
+            Self::NgRanBearerContextSetupRequest(x) => {
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                x.encode(data)
+            }
+        }
+    }
+}
+
+impl AperCodec for SystemBearerContextSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        SystemBearerContextSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemBearerContextSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemBearerContextSetupRequest"))
+    }
+}
+// EutranBearerContextSetupRequest
+# [derive(Clone, Debug)]
+pub struct EutranBearerContextSetupRequest {
+    pub subscriber_profile_i_dfor_rfp: Option<u16>,
+}
+
+impl EutranBearerContextSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut subscriber_profile_i_dfor_rfp: Option<u16> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                43 => subscriber_profile_i_dfor_rfp = Some(aper::decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16),
+                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+            }
+        }
+        Ok(Self {
+            subscriber_profile_i_dfor_rfp,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        if let Some(x) = &self.subscriber_profile_i_dfor_rfp {
+            let ie = &mut AperCodecData::new();
+            aper::encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
+            Criticality::Ignore.encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for EutranBearerContextSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        EutranBearerContextSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupRequest"))
+    }
+}
+// NgRanBearerContextSetupRequest
+# [derive(Clone, Debug)]
+pub struct NgRanBearerContextSetupRequest {
+    pub pdu_session_resource_to_setup_list: PduSessionResourceToSetupList,
+}
+
+impl NgRanBearerContextSetupRequest {
+    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+
+        let mut pdu_session_resource_to_setup_list: Option<PduSessionResourceToSetupList> = None;
+
+        for _ in 0..len {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _ = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                321 => pdu_session_resource_to_setup_list = Some(PduSessionResourceToSetupList::decode(data)?),
+                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+            }
+        }
+        let pdu_session_resource_to_setup_list = pdu_session_resource_to_setup_list.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE pdu_session_resource_to_setup_list"
+        )))?;
+        Ok(Self {
+            pdu_session_resource_to_setup_list,
+        })
+    }
+    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        let mut num_ies = 0;
+        let ies = &mut AperCodecData::new();
+
+        let ie = &mut AperCodecData::new();
+        self.pdu_session_resource_to_setup_list.encode(ie)?;
+        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 321, false)?;
+        Criticality::Reject.encode(ies)?;
+        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        ies.append_aligned(ie);
+        num_ies += 1;
+
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
+        Ok(())
+    }
+}
+
+impl AperCodec for NgRanBearerContextSetupRequest {
+    type Output = Self;
+    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+        NgRanBearerContextSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+    }
+    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+    }
+}""", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
 
 
 if __name__ == '__main__':

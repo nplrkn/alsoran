@@ -5553,7 +5553,7 @@ impl ResourceStatusRequest {
 
         if let Some(x) = &self.gnb_cu_up_measurement_id {
             let ie = &mut AperCodecData::new();
-            aper::encode::encode_integer(ie, Some(1), Some(4095), true, x as i128, false)?;
+            aper::encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 90, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -5830,7 +5830,7 @@ impl ResourceStatusFailure {
 
         if let Some(x) = &self.gnb_cu_up_measurement_id {
             let ie = &mut AperCodecData::new();
-            aper::encode::encode_integer(ie, Some(1), Some(4095), true, x as i128, false)?;
+            aper::encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 90, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -5970,7 +5970,7 @@ impl ResourceStatusUpdate {
 
         if let Some(x) = &self.gnb_cu_up_measurement_id {
             let ie = &mut AperCodecData::new();
-            aper::encode::encode_integer(ie, Some(1), Some(4095), true, x as i128, false)?;
+            aper::encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 90, false)?;
             Criticality::Ignore.encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
