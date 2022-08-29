@@ -496,7 +496,7 @@ pub struct GnbCuUpE1SetupRequest {
     pub gnb_cu_up_id: GnbCuUpId,
     pub gnb_cu_up_name: Option<GnbCuUpName>,
     pub cn_support: CnSupport,
-    pub supported_plmn_s: SupportedPlmnSList,
+    pub supported_plmns: SupportedPlmnsList,
     pub gnb_cu_up_capacity: Option<GnbCuUpCapacity>,
     pub transport_layer_address_info: Option<TransportLayerAddressInfo>,
     pub extended_gnb_cu_up_name: Option<ExtendedGnbCuUpName>,
@@ -511,7 +511,7 @@ impl GnbCuUpE1SetupRequest {
         let mut gnb_cu_up_id: Option<GnbCuUpId> = None;
         let mut gnb_cu_up_name: Option<GnbCuUpName> = None;
         let mut cn_support: Option<CnSupport> = None;
-        let mut supported_plmn_s: Option<SupportedPlmnSList> = None;
+        let mut supported_plmns: Option<SupportedPlmnsList> = None;
         let mut gnb_cu_up_capacity: Option<GnbCuUpCapacity> = None;
         let mut transport_layer_address_info: Option<TransportLayerAddressInfo> = None;
         let mut extended_gnb_cu_up_name: Option<ExtendedGnbCuUpName> = None;
@@ -525,7 +525,7 @@ impl GnbCuUpE1SetupRequest {
                 7 => gnb_cu_up_id = Some(GnbCuUpId::decode(data)?),
                 8 => gnb_cu_up_name = Some(GnbCuUpName::decode(data)?),
                 10 => cn_support = Some(CnSupport::decode(data)?),
-                11 => supported_plmn_s = Some(SupportedPlmnSList::decode(data)?),
+                11 => supported_plmns = Some(SupportedPlmnsList::decode(data)?),
                 64 => gnb_cu_up_capacity = Some(GnbCuUpCapacity::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 130 => extended_gnb_cu_up_name = Some(ExtendedGnbCuUpName::decode(data)?),
@@ -546,15 +546,15 @@ impl GnbCuUpE1SetupRequest {
         let cn_support = cn_support.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE cn_support"
         )))?;
-        let supported_plmn_s = supported_plmn_s.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE supported_plmn_s"
+        let supported_plmns = supported_plmns.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE supported_plmns"
         )))?;
         Ok(Self {
             transaction_id,
             gnb_cu_up_id,
             gnb_cu_up_name,
             cn_support,
-            supported_plmn_s,
+            supported_plmns,
             gnb_cu_up_capacity,
             transport_layer_address_info,
             extended_gnb_cu_up_name,
@@ -599,7 +599,7 @@ impl GnbCuUpE1SetupRequest {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.supported_plmn_s.encode(ie)?;
+        self.supported_plmns.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 11, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -654,17 +654,17 @@ impl AperCodec for GnbCuUpE1SetupRequest {
             .map_err(|e: AperCodecError| e.push_context("GnbCuUpE1SetupRequest"))
     }
 }
-// SupportedPlmnSList
+// SupportedPlmnsList
 #[derive(Clone, Debug)]
-pub struct SupportedPlmnSList(pub Vec<SupportedPlmnSItem>);
+pub struct SupportedPlmnsList(pub Vec<SupportedPlmnsItem>);
 
-impl SupportedPlmnSList {
+impl SupportedPlmnsList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(12), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(SupportedPlmnSItem::decode(data)?);
+                items.push(SupportedPlmnsItem::decode(data)?);
             }
             items
         }))
@@ -678,27 +678,27 @@ impl SupportedPlmnSList {
     }
 }
 
-impl AperCodec for SupportedPlmnSList {
+impl AperCodec for SupportedPlmnsList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SupportedPlmnSList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnSList"))
+        SupportedPlmnsList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnsList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnSList"))
+            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnsList"))
     }
 }
-// SupportedPlmnSItem
+// SupportedPlmnsItem
 #[derive(Clone, Debug)]
-pub struct SupportedPlmnSItem {
+pub struct SupportedPlmnsItem {
     pub plmn_identity: PlmnIdentity,
     pub slice_support_list: Option<SliceSupportList>,
     pub nr_cgi_support_list: Option<NrCgiSupportList>,
     pub qos_parameters_support_list: Option<QosParametersSupportList>,
 }
 
-impl SupportedPlmnSItem {
+impl SupportedPlmnsItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 4)?;
         let plmn_identity = PlmnIdentity::decode(data)?;
@@ -748,15 +748,15 @@ impl SupportedPlmnSItem {
     }
 }
 
-impl AperCodec for SupportedPlmnSItem {
+impl AperCodec for SupportedPlmnsItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SupportedPlmnSItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnSItem"))
+        SupportedPlmnsItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnsItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnSItem"))
+            .map_err(|e: AperCodecError| e.push_context("SupportedPlmnsItem"))
     }
 }
 // GnbCuUpE1SetupResponse
@@ -1085,7 +1085,7 @@ pub struct GnbCuCpE1SetupResponse {
     pub gnb_cu_up_id: GnbCuUpId,
     pub gnb_cu_up_name: Option<GnbCuUpName>,
     pub cn_support: CnSupport,
-    pub supported_plmn_s: SupportedPlmnSList,
+    pub supported_plmns: SupportedPlmnsList,
     pub gnb_cu_up_capacity: Option<GnbCuUpCapacity>,
     pub transport_layer_address_info: Option<TransportLayerAddressInfo>,
     pub extended_gnb_cu_up_name: Option<ExtendedGnbCuUpName>,
@@ -1100,7 +1100,7 @@ impl GnbCuCpE1SetupResponse {
         let mut gnb_cu_up_id: Option<GnbCuUpId> = None;
         let mut gnb_cu_up_name: Option<GnbCuUpName> = None;
         let mut cn_support: Option<CnSupport> = None;
-        let mut supported_plmn_s: Option<SupportedPlmnSList> = None;
+        let mut supported_plmns: Option<SupportedPlmnsList> = None;
         let mut gnb_cu_up_capacity: Option<GnbCuUpCapacity> = None;
         let mut transport_layer_address_info: Option<TransportLayerAddressInfo> = None;
         let mut extended_gnb_cu_up_name: Option<ExtendedGnbCuUpName> = None;
@@ -1114,7 +1114,7 @@ impl GnbCuCpE1SetupResponse {
                 7 => gnb_cu_up_id = Some(GnbCuUpId::decode(data)?),
                 8 => gnb_cu_up_name = Some(GnbCuUpName::decode(data)?),
                 10 => cn_support = Some(CnSupport::decode(data)?),
-                11 => supported_plmn_s = Some(SupportedPlmnSList::decode(data)?),
+                11 => supported_plmns = Some(SupportedPlmnsList::decode(data)?),
                 64 => gnb_cu_up_capacity = Some(GnbCuUpCapacity::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
                 130 => extended_gnb_cu_up_name = Some(ExtendedGnbCuUpName::decode(data)?),
@@ -1135,15 +1135,15 @@ impl GnbCuCpE1SetupResponse {
         let cn_support = cn_support.ok_or(aper::AperCodecError::new(format!(
             "Missing mandatory IE cn_support"
         )))?;
-        let supported_plmn_s = supported_plmn_s.ok_or(aper::AperCodecError::new(format!(
-            "Missing mandatory IE supported_plmn_s"
+        let supported_plmns = supported_plmns.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE supported_plmns"
         )))?;
         Ok(Self {
             transaction_id,
             gnb_cu_up_id,
             gnb_cu_up_name,
             cn_support,
-            supported_plmn_s,
+            supported_plmns,
             gnb_cu_up_capacity,
             transport_layer_address_info,
             extended_gnb_cu_up_name,
@@ -1188,7 +1188,7 @@ impl GnbCuCpE1SetupResponse {
         num_ies += 1;
 
         let ie = &mut AperCodecData::new();
-        self.supported_plmn_s.encode(ie)?;
+        self.supported_plmns.encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 11, false)?;
         Criticality::Reject.encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
@@ -1356,7 +1356,7 @@ pub struct GnbCuUpConfigurationUpdate {
     pub transaction_id: TransactionId,
     pub gnb_cu_up_id: GnbCuUpId,
     pub gnb_cu_up_name: Option<GnbCuUpName>,
-    pub supported_plmn_s: Option<SupportedPlmnSList>,
+    pub supported_plmns: Option<SupportedPlmnsList>,
     pub gnb_cu_up_capacity: Option<GnbCuUpCapacity>,
     pub gnb_cu_up_tnla_to_remove_list: Option<GnbCuUpTnlaToRemoveList>,
     pub transport_layer_address_info: Option<TransportLayerAddressInfo>,
@@ -1371,7 +1371,7 @@ impl GnbCuUpConfigurationUpdate {
         let mut transaction_id: Option<TransactionId> = None;
         let mut gnb_cu_up_id: Option<GnbCuUpId> = None;
         let mut gnb_cu_up_name: Option<GnbCuUpName> = None;
-        let mut supported_plmn_s: Option<SupportedPlmnSList> = None;
+        let mut supported_plmns: Option<SupportedPlmnsList> = None;
         let mut gnb_cu_up_capacity: Option<GnbCuUpCapacity> = None;
         let mut gnb_cu_up_tnla_to_remove_list: Option<GnbCuUpTnlaToRemoveList> = None;
         let mut transport_layer_address_info: Option<TransportLayerAddressInfo> = None;
@@ -1385,7 +1385,7 @@ impl GnbCuUpConfigurationUpdate {
                 57 => transaction_id = Some(TransactionId::decode(data)?),
                 7 => gnb_cu_up_id = Some(GnbCuUpId::decode(data)?),
                 8 => gnb_cu_up_name = Some(GnbCuUpName::decode(data)?),
-                11 => supported_plmn_s = Some(SupportedPlmnSList::decode(data)?),
+                11 => supported_plmns = Some(SupportedPlmnsList::decode(data)?),
                 64 => gnb_cu_up_capacity = Some(GnbCuUpCapacity::decode(data)?),
                 73 => gnb_cu_up_tnla_to_remove_list = Some(GnbCuUpTnlaToRemoveList::decode(data)?),
                 86 => transport_layer_address_info = Some(TransportLayerAddressInfo::decode(data)?),
@@ -1408,7 +1408,7 @@ impl GnbCuUpConfigurationUpdate {
             transaction_id,
             gnb_cu_up_id,
             gnb_cu_up_name,
-            supported_plmn_s,
+            supported_plmns,
             gnb_cu_up_capacity,
             gnb_cu_up_tnla_to_remove_list,
             transport_layer_address_info,
@@ -1445,7 +1445,7 @@ impl GnbCuUpConfigurationUpdate {
             num_ies += 1;
         }
 
-        if let Some(x) = &self.supported_plmn_s {
+        if let Some(x) = &self.supported_plmns {
             let ie = &mut AperCodecData::new();
             x.encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 11, false)?;

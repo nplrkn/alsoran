@@ -7124,11 +7124,11 @@ impl AperCodec for EndIndication {
             .map_err(|e: AperCodecError| e.push_context("EndIndication"))
     }
 }
-// EquivalentPlmnS
+// EquivalentPlmns
 #[derive(Clone, Debug)]
-pub struct EquivalentPlmnS(pub Vec<PlmnIdentity>);
+pub struct EquivalentPlmns(pub Vec<PlmnIdentity>);
 
-impl EquivalentPlmnS {
+impl EquivalentPlmns {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(15), false)?;
@@ -7148,15 +7148,15 @@ impl EquivalentPlmnS {
     }
 }
 
-impl AperCodec for EquivalentPlmnS {
+impl AperCodec for EquivalentPlmns {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        EquivalentPlmnS::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("EquivalentPlmnS"))
+        EquivalentPlmns::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("EquivalentPlmns"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("EquivalentPlmnS"))
+            .map_err(|e: AperCodecError| e.push_context("EquivalentPlmns"))
     }
 }
 // EpsTac
@@ -11855,7 +11855,7 @@ impl AperCodec for MobilityInformation {
 #[derive(Clone, Debug)]
 pub struct MobilityRestrictionList {
     pub serving_plmn: PlmnIdentity,
-    pub equivalent_plmn_s: Option<EquivalentPlmnS>,
+    pub equivalent_plmns: Option<EquivalentPlmns>,
     pub rat_restrictions: Option<RatRestrictions>,
     pub forbidden_area_information: Option<ForbiddenAreaInformation>,
     pub service_area_information: Option<ServiceAreaInformation>,
@@ -11865,8 +11865,8 @@ impl MobilityRestrictionList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 5)?;
         let serving_plmn = PlmnIdentity::decode(data)?;
-        let equivalent_plmn_s = if optionals[0] {
-            Some(EquivalentPlmnS::decode(data)?)
+        let equivalent_plmns = if optionals[0] {
+            Some(EquivalentPlmns::decode(data)?)
         } else {
             None
         };
@@ -11888,7 +11888,7 @@ impl MobilityRestrictionList {
 
         Ok(Self {
             serving_plmn,
-            equivalent_plmn_s,
+            equivalent_plmns,
             rat_restrictions,
             forbidden_area_information,
             service_area_information,
@@ -11896,7 +11896,7 @@ impl MobilityRestrictionList {
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
-        optionals.push(self.equivalent_plmn_s.is_some());
+        optionals.push(self.equivalent_plmns.is_some());
         optionals.push(self.rat_restrictions.is_some());
         optionals.push(self.forbidden_area_information.is_some());
         optionals.push(self.service_area_information.is_some());
@@ -11904,7 +11904,7 @@ impl MobilityRestrictionList {
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         self.serving_plmn.encode(data)?;
-        if let Some(x) = &self.equivalent_plmn_s {
+        if let Some(x) = &self.equivalent_plmns {
             x.encode(data)?;
         }
         if let Some(x) = &self.rat_restrictions {
