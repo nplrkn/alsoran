@@ -14,6 +14,7 @@ SPECIALS = [(re.compile("^DU"), "DU-"),
             (re.compile(r"UE(s?)"), r"-ue\1-"),
             (re.compile(r"SRB(s?)"), r"-srb\1-"),
             (re.compile(r"DRB(s?)"), r"-drb\1-"),
+            (re.compile(r"E-UTRAN"), r"EUTRAN"),
             ]
 
 
@@ -68,6 +69,10 @@ class TestCase(unittest.TestCase):
     def test_srbs(self):
         self.assertEqual(pascal_case("SRBs-FailedToBeSetup-List"),
                          "SrbsFailedToBeSetupList")
+
+    def test_eutran(self):
+        self.assertEqual(pascal_case(
+            "e-UTRAN-BearerContextSetupRequest"), "EutranBearerContextSetupRequest")
 
 
 if __name__ == '__main__':

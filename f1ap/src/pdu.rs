@@ -18,7 +18,6 @@ pub struct Reset {
 
 impl Reset {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -85,18 +84,9 @@ impl Reset {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -246,7 +236,6 @@ pub struct ResetAcknowledge {
 
 impl ResetAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -316,18 +305,9 @@ impl ResetAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -401,7 +381,6 @@ pub struct ErrorIndication {
 
 impl ErrorIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -492,18 +471,9 @@ impl ErrorIndication {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -534,7 +504,6 @@ pub struct F1SetupRequest {
 
 impl F1SetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -668,18 +637,9 @@ impl F1SetupRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -753,7 +713,6 @@ pub struct F1SetupResponse {
 
 impl F1SetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -886,18 +845,9 @@ impl F1SetupResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -967,7 +917,6 @@ pub struct F1SetupFailure {
 
 impl F1SetupFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1046,18 +995,9 @@ impl F1SetupFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1089,7 +1029,6 @@ pub struct GnbDuConfigurationUpdate {
 
 impl GnbDuConfigurationUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1242,18 +1181,9 @@ impl GnbDuConfigurationUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1542,7 +1472,6 @@ pub struct GnbDuConfigurationUpdateAcknowledge {
 
 impl GnbDuConfigurationUpdateAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1661,18 +1590,9 @@ impl GnbDuConfigurationUpdateAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1699,7 +1619,6 @@ pub struct GnbDuConfigurationUpdateFailure {
 
 impl GnbDuConfigurationUpdateFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1778,18 +1697,9 @@ impl GnbDuConfigurationUpdateFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -1824,7 +1734,6 @@ pub struct GnbCuConfigurationUpdate {
 
 impl GnbCuConfigurationUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2025,18 +1934,9 @@ impl GnbCuConfigurationUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2367,7 +2267,6 @@ pub struct GnbCuConfigurationUpdateAcknowledge {
 
 impl GnbCuConfigurationUpdateAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2501,18 +2400,9 @@ impl GnbCuConfigurationUpdateAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2668,7 +2558,6 @@ pub struct GnbCuConfigurationUpdateFailure {
 
 impl GnbCuConfigurationUpdateFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2747,18 +2636,9 @@ impl GnbCuConfigurationUpdateFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2786,7 +2666,6 @@ pub struct GnbDuResourceCoordinationRequest {
 
 impl GnbDuResourceCoordinationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2878,18 +2757,9 @@ impl GnbDuResourceCoordinationRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -2915,7 +2785,6 @@ pub struct GnbDuResourceCoordinationResponse {
 
 impl GnbDuResourceCoordinationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2978,18 +2847,9 @@ impl GnbDuResourceCoordinationResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3049,7 +2909,6 @@ pub struct UeContextSetupRequest {
 
 impl UeContextSetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -3591,18 +3450,9 @@ impl UeContextSetupRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -3902,7 +3752,6 @@ pub struct UeContextSetupResponse {
 
 impl UeContextSetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4177,18 +4026,9 @@ impl UeContextSetupResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4606,7 +4446,6 @@ pub struct UeContextSetupFailure {
 
 impl UeContextSetupFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4711,18 +4550,9 @@ impl UeContextSetupFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4792,7 +4622,6 @@ pub struct UeContextReleaseRequest {
 
 impl UeContextReleaseRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -4872,18 +4701,9 @@ impl UeContextReleaseRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -4915,7 +4735,6 @@ pub struct UeContextReleaseCommand {
 
 impl UeContextReleaseCommand {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5060,18 +4879,9 @@ impl UeContextReleaseCommand {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5097,7 +4907,6 @@ pub struct UeContextReleaseComplete {
 
 impl UeContextReleaseComplete {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5163,18 +4972,9 @@ impl UeContextReleaseComplete {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -5244,7 +5044,6 @@ pub struct UeContextModificationRequest {
 
 impl UeContextModificationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -5938,18 +5737,9 @@ impl UeContextModificationRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -6560,7 +6350,6 @@ pub struct UeContextModificationResponse {
 
 impl UeContextModificationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -6958,18 +6747,9 @@ impl UeContextModificationResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -7732,7 +7512,6 @@ pub struct UeContextModificationFailure {
 
 impl UeContextModificationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -7825,18 +7604,9 @@ impl UeContextModificationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -7871,7 +7641,6 @@ pub struct UeContextModificationRequired {
 
 impl UeContextModificationRequired {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -8080,18 +7849,9 @@ impl UeContextModificationRequired {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -8382,7 +8142,6 @@ pub struct UeContextModificationConfirm {
 
 impl UeContextModificationConfirm {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -8536,18 +8295,9 @@ impl UeContextModificationConfirm {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -8660,7 +8410,6 @@ pub struct UeContextModificationRefuse {
 
 impl UeContextModificationRefuse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -8740,18 +8489,9 @@ impl UeContextModificationRefuse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -8779,7 +8519,6 @@ pub struct WriteReplaceWarningRequest {
 
 impl WriteReplaceWarningRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -8873,18 +8612,9 @@ impl WriteReplaceWarningRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -8954,7 +8684,6 @@ pub struct WriteReplaceWarningResponse {
 
 impl WriteReplaceWarningResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -9039,18 +8768,9 @@ impl WriteReplaceWarningResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -9121,7 +8841,6 @@ pub struct PwsCancelRequest {
 
 impl PwsCancelRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -9219,18 +8938,9 @@ impl PwsCancelRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -9299,7 +9009,6 @@ pub struct PwsCancelResponse {
 
 impl PwsCancelResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -9367,18 +9076,9 @@ impl PwsCancelResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -9447,7 +9147,6 @@ pub struct UeInactivityNotification {
 
 impl UeInactivityNotification {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -9514,18 +9213,9 @@ impl UeInactivityNotification {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -9600,7 +9290,6 @@ pub struct InitialUlRrcMessageTransfer {
 
 impl InitialUlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -9750,18 +9439,9 @@ impl InitialUlRrcMessageTransfer {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -9797,7 +9477,6 @@ pub struct DlRrcMessageTransfer {
 
 impl DlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10003,18 +9682,9 @@ impl DlRrcMessageTransfer {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10043,7 +9713,6 @@ pub struct UlRrcMessageTransfer {
 
 impl UlRrcMessageTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10150,18 +9819,9 @@ impl UlRrcMessageTransfer {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10220,7 +9880,6 @@ pub struct SystemInformationDeliveryCommand {
 
 impl SystemInformationDeliveryCommand {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10301,18 +9960,9 @@ impl SystemInformationDeliveryCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10341,7 +9991,6 @@ pub struct Paging {
 
 impl Paging {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10447,18 +10096,9 @@ impl Paging {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10526,7 +10166,6 @@ pub struct Notify {
 
 impl Notify {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10593,18 +10232,9 @@ impl Notify {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10671,7 +10301,6 @@ pub struct NetworkAccessRateReduction {
 
 impl NetworkAccessRateReduction {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10724,18 +10353,9 @@ impl NetworkAccessRateReduction {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10760,7 +10380,6 @@ pub struct PwsRestartIndication {
 
 impl PwsRestartIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10813,18 +10432,9 @@ impl PwsRestartIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -10892,7 +10502,6 @@ pub struct PwsFailureIndication {
 
 impl PwsFailureIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -10944,18 +10553,9 @@ impl PwsFailureIndication {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11023,7 +10623,6 @@ pub struct GnbDuStatusIndication {
 
 impl GnbDuStatusIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11076,18 +10675,9 @@ impl GnbDuStatusIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11114,7 +10704,6 @@ pub struct RrcDeliveryReport {
 
 impl RrcDeliveryReport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11195,18 +10784,9 @@ impl RrcDeliveryReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11230,7 +10810,6 @@ pub struct F1RemovalRequest {
 
 impl F1RemovalRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11267,18 +10846,9 @@ impl F1RemovalRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11303,7 +10873,6 @@ pub struct F1RemovalResponse {
 
 impl F1RemovalResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11355,18 +10924,9 @@ impl F1RemovalResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11392,7 +10952,6 @@ pub struct F1RemovalFailure {
 
 impl F1RemovalFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11458,18 +11017,9 @@ impl F1RemovalFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11495,7 +11045,6 @@ pub struct TraceStart {
 
 impl TraceStart {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11562,18 +11111,9 @@ impl TraceStart {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11598,7 +11138,6 @@ pub struct DeactivateTrace {
 
 impl DeactivateTrace {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11665,18 +11204,9 @@ impl DeactivateTrace {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11705,7 +11235,6 @@ pub struct CellTrafficTrace {
 
 impl CellTrafficTrace {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11815,18 +11344,9 @@ impl CellTrafficTrace {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11851,7 +11371,6 @@ pub struct DuCuRadioInformationTransfer {
 
 impl DuCuRadioInformationTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11904,18 +11423,9 @@ impl DuCuRadioInformationTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -11940,7 +11450,6 @@ pub struct CuDuRadioInformationTransfer {
 
 impl CuDuRadioInformationTransfer {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -11993,18 +11502,9 @@ impl CuDuRadioInformationTransfer {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12031,7 +11531,6 @@ pub struct BapMappingConfiguration {
 
 impl BapMappingConfiguration {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12115,18 +11614,9 @@ impl BapMappingConfiguration {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12237,7 +11727,6 @@ pub struct BapMappingConfigurationAcknowledge {
 
 impl BapMappingConfigurationAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12289,18 +11778,9 @@ impl BapMappingConfigurationAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12327,7 +11807,6 @@ pub struct BapMappingConfigurationFailure {
 
 impl BapMappingConfigurationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12406,18 +11885,9 @@ impl BapMappingConfigurationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12443,7 +11913,6 @@ pub struct GnbDuResourceConfiguration {
 
 impl GnbDuResourceConfiguration {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12511,18 +11980,9 @@ impl GnbDuResourceConfiguration {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12547,7 +12007,6 @@ pub struct GnbDuResourceConfigurationAcknowledge {
 
 impl GnbDuResourceConfigurationAcknowledge {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12599,18 +12058,9 @@ impl GnbDuResourceConfigurationAcknowledge {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12637,7 +12087,6 @@ pub struct GnbDuResourceConfigurationFailure {
 
 impl GnbDuResourceConfigurationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12716,18 +12165,9 @@ impl GnbDuResourceConfigurationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12754,7 +12194,6 @@ pub struct IabtnlAddressRequest {
 
 impl IabtnlAddressRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12835,18 +12274,9 @@ impl IabtnlAddressRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -12914,7 +12344,6 @@ pub struct IabtnlAddressResponse {
 
 impl IabtnlAddressResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -12970,18 +12399,9 @@ impl IabtnlAddressResponse {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13051,7 +12471,6 @@ pub struct IabtnlAddressFailure {
 
 impl IabtnlAddressFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -13130,18 +12549,9 @@ impl IabtnlAddressFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13167,7 +12577,6 @@ pub struct IabupConfigurationUpdateRequest {
 
 impl IabupConfigurationUpdateRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -13238,18 +12647,9 @@ impl IabupConfigurationUpdateRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13362,7 +12762,6 @@ pub struct IabupConfigurationUpdateResponse {
 
 impl IabupConfigurationUpdateResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -13430,18 +12829,9 @@ impl IabupConfigurationUpdateResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13511,7 +12901,6 @@ pub struct IabupConfigurationUpdateFailure {
 
 impl IabupConfigurationUpdateFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -13590,18 +12979,9 @@ impl IabupConfigurationUpdateFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13631,7 +13011,6 @@ pub struct ResourceStatusRequest {
 
 impl ResourceStatusRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -13750,18 +13129,9 @@ impl ResourceStatusRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13788,7 +13158,6 @@ pub struct ResourceStatusResponse {
 
 impl ResourceStatusResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -13868,18 +13237,9 @@ impl ResourceStatusResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -13907,7 +13267,6 @@ pub struct ResourceStatusFailure {
 
 impl ResourceStatusFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14001,18 +13360,9 @@ impl ResourceStatusFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14041,7 +13391,6 @@ pub struct ResourceStatusUpdate {
 
 impl ResourceStatusUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14149,18 +13498,9 @@ impl ResourceStatusUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14186,7 +13526,6 @@ pub struct AccessAndMobilityIndication {
 
 impl AccessAndMobilityIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14253,18 +13592,9 @@ impl AccessAndMobilityIndication {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14289,7 +13619,6 @@ pub struct ReferenceTimeInformationReportingControl {
 
 impl ReferenceTimeInformationReportingControl {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14342,18 +13671,9 @@ impl ReferenceTimeInformationReportingControl {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14378,7 +13698,6 @@ pub struct ReferenceTimeInformationReport {
 
 impl ReferenceTimeInformationReport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14431,18 +13750,9 @@ impl ReferenceTimeInformationReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14468,7 +13778,6 @@ pub struct AccessSuccess {
 
 impl AccessSuccess {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14535,18 +13844,9 @@ impl AccessSuccess {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14574,7 +13874,6 @@ pub struct PositioningAssistanceInformationControl {
 
 impl PositioningAssistanceInformationControl {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14665,18 +13964,9 @@ impl PositioningAssistanceInformationControl {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14704,7 +13994,6 @@ pub struct PositioningAssistanceInformationFeedback {
 
 impl PositioningAssistanceInformationFeedback {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -14800,18 +14089,9 @@ impl PositioningAssistanceInformationFeedback {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -14846,7 +14126,6 @@ pub struct PositioningMeasurementRequest {
 
 impl PositioningMeasurementRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15037,18 +14316,9 @@ impl PositioningMeasurementRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15076,7 +14346,6 @@ pub struct PositioningMeasurementResponse {
 
 impl PositioningMeasurementResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15169,18 +14438,9 @@ impl PositioningMeasurementResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15208,7 +14468,6 @@ pub struct PositioningMeasurementFailure {
 
 impl PositioningMeasurementFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15302,18 +14561,9 @@ impl PositioningMeasurementFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15340,7 +14590,6 @@ pub struct PositioningMeasurementReport {
 
 impl PositioningMeasurementReport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15421,18 +14670,9 @@ impl PositioningMeasurementReport {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15458,7 +14698,6 @@ pub struct PositioningMeasurementAbort {
 
 impl PositioningMeasurementAbort {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15525,18 +14764,9 @@ impl PositioningMeasurementAbort {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15563,7 +14793,6 @@ pub struct PositioningMeasurementFailureIndication {
 
 impl PositioningMeasurementFailureIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15644,18 +14873,9 @@ impl PositioningMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15682,7 +14902,6 @@ pub struct PositioningMeasurementUpdate {
 
 impl PositioningMeasurementUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15762,18 +14981,9 @@ impl PositioningMeasurementUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15799,7 +15009,6 @@ pub struct TrpInformationRequest {
 
 impl TrpInformationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -15869,18 +15078,9 @@ impl TrpInformationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -15949,7 +15149,6 @@ pub struct TrpInformationResponse {
 
 impl TrpInformationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16018,18 +15217,9 @@ impl TrpInformationResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16099,7 +15289,6 @@ pub struct TrpInformationFailure {
 
 impl TrpInformationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16165,18 +15354,9 @@ impl TrpInformationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16202,7 +15382,6 @@ pub struct PositioningInformationRequest {
 
 impl PositioningInformationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16273,18 +15452,9 @@ impl PositioningInformationRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16312,7 +15482,6 @@ pub struct PositioningInformationResponse {
 
 impl PositioningInformationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16404,18 +15573,9 @@ impl PositioningInformationResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16442,7 +15602,6 @@ pub struct PositioningInformationFailure {
 
 impl PositioningInformationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16522,18 +15681,9 @@ impl PositioningInformationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16560,7 +15710,6 @@ pub struct PositioningActivationRequest {
 
 impl PositioningActivationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16640,18 +15789,9 @@ impl PositioningActivationRequest {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16822,7 +15962,6 @@ pub struct PositioningActivationResponse {
 
 impl PositioningActivationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -16914,18 +16053,9 @@ impl PositioningActivationResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -16952,7 +16082,6 @@ pub struct PositioningActivationFailure {
 
 impl PositioningActivationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17032,18 +16161,9 @@ impl PositioningActivationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17069,7 +16189,6 @@ pub struct PositioningDeactivation {
 
 impl PositioningDeactivation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17136,18 +16255,9 @@ impl PositioningDeactivation {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17174,7 +16284,6 @@ pub struct PositioningInformationUpdate {
 
 impl PositioningInformationUpdate {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17253,18 +16362,9 @@ impl PositioningInformationUpdate {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17294,7 +16394,6 @@ pub struct ECidMeasurementInitiationRequest {
 
 impl ECidMeasurementInitiationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17420,18 +16519,9 @@ impl ECidMeasurementInitiationRequest {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17461,7 +16551,6 @@ pub struct ECidMeasurementInitiationResponse {
 
 impl ECidMeasurementInitiationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17581,18 +16670,9 @@ impl ECidMeasurementInitiationResponse {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17621,7 +16701,6 @@ pub struct ECidMeasurementInitiationFailure {
 
 impl ECidMeasurementInitiationFailure {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17729,18 +16808,9 @@ impl ECidMeasurementInitiationFailure {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17768,7 +16838,6 @@ pub struct ECidMeasurementFailureIndication {
 
 impl ECidMeasurementFailureIndication {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -17863,18 +16932,9 @@ impl ECidMeasurementFailureIndication {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -17903,7 +16963,6 @@ pub struct ECidMeasurementReport {
 
 impl ECidMeasurementReport {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -18011,18 +17070,9 @@ impl ECidMeasurementReport {
             num_ies += 1;
         }
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }
@@ -18049,7 +17099,6 @@ pub struct ECidMeasurementTerminationCommand {
 
 impl ECidMeasurementTerminationCommand {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -18130,18 +17179,9 @@ impl ECidMeasurementTerminationCommand {
         ies.append_aligned(ie);
         num_ies += 1;
 
-        let container = &mut AperCodecData::new();
-        aper::encode::encode_sequence_header(container, true, &BitVec::new(), false)?;
-        aper::encode::encode_length_determinent(container, Some(0), Some(65535), false, num_ies)?;
-        container.append_aligned(ies);
-        aper::encode::encode_length_determinent(
-            data,
-            None,
-            None,
-            false,
-            container.length_in_bytes(),
-        )?;
-        data.append_aligned(container);
+        aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
+        aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        data.append_aligned(ies);
         Ok(())
     }
 }

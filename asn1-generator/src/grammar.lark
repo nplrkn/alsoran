@@ -63,7 +63,7 @@ enumerated.1:             "ENUMERATED" _items{enum_field}
 enum_field:              _identifier
 
 choice:                 "CHOICE" _items{_choice_item}
-_choice_item:            choice_field | extension_container | empty_sequence
+_choice_item:            choice_field | choice_ie_container | choice_extension_container | empty_sequence
 choice_field:           _identifier _field_type
 empty_sequence.3:       _identifier "SEQUENCE" "{}" -> extension_container
 
@@ -94,6 +94,7 @@ type_parameter:         "{" _identifier "}"
 type_parameterized_identifier: _identifier type_parameter
 
 ie_container.1:         "protocolIEs" "ProtocolIE-Container" "{" "{" _identifier "}" "}"
+choice_ie_container:    _identifier "ProtocolIE-Container" "{" "{" _identifier "}" "}"
 single_ie_container.1:  "ProtocolIE-SingleContainer" "{" "{" _identifier "}" "}"
 ies:                    "{" (ie | optional_ie)* [","] extension_marker? "}"
 _ie{p}:                 "{" "ID" _identifier "CRITICALITY" _identifier  ("TYPE" | "EXTENSION") _field_type+ "PRESENCE" p "}" ["|" | ","]
@@ -102,6 +103,7 @@ ie:                      _ie{"mandatory"}
 
 container:              _identifier "{" "{" _identifier "}" "}" 
 extension_container.0:  _identifier container "OPTIONAL"? ","?
+choice_extension_container: _identifier single_ie_container -> extension_container 
 
 _size:                  "(" "SIZE" "(" _constraints ")" ")"
 _constraints:           _range_options+

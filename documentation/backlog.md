@@ -15,6 +15,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ----PERFORMANCE----
 - Don't create 1 Redis connection per access
 -----ASN.1 GENERATOR------
+- Move to latest version of specs
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Generate procedures for Rrc and make F1AP a RequestProvider.
@@ -26,6 +27,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Parallel registration of two UEs
 - Have the integration test not use real sockets and run in parallel
 - Intermittent failure of live redis test
+- Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
 - Clean up Redis even if live redis test fails
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
@@ -37,6 +39,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- E1AP generation
 - Update Amf Mock to support multiple Ues
 - Registration of multiple UEs in FV
 - Tidy code e.g. in procedures, GnbcuOps
