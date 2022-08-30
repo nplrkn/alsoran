@@ -13,7 +13,7 @@ ngap = {path = "../ngap" }
 rrc = {path = "../rrc" }
 pdcp = {path = "../pdcp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
-async-trait = "0.1.51"
+async-trait = "0.1.57"
 slog = "2.7.0"
 stop-token = "0.6.1"
 async-channel = "1.6.1"

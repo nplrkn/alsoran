@@ -12,7 +12,7 @@ asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="fix-constrained
 bitvec = "1.0.1"
 hex = "0.4.3"
 num_enum = "0.5.7"
-async-trait = "0.1.51"
+async-trait = "0.1.57"
 net = { path = "../net" }
 slog = "2.7.0"
 anyhow = "1.0.52"

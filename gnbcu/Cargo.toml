@@ -16,7 +16,7 @@ f1ap = {path = "../f1ap" }
 ngap = {path = "../ngap" }
 rrc = {path = "../rrc" }
 pdcp = {path = "../pdcp" }
-async-trait = "0.1.51"
+async-trait = "0.1.57"
 bitvec = "1.0.1"
 common = { path = "../common" }
 async-channel = "1.6.1"
