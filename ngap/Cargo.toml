@@ -15,6 +15,6 @@ num_enum = "0.5.7"
 async-trait = "0.1.51"
 net = { path = "../net" }
 slog = "2.7.0"
-anyhow = "1.0.52"
+anyhow = "1.0.63"
 
 

@@ -11,7 +11,7 @@ net = { path = "../net" }
 stop-token = "0.6.1"
 async-std = { version = "1.10.0", features = ["attributes"] }
 slog = "2.7.0"
-anyhow = "1.0.52"
+anyhow = "1.0.63"
 f1ap = {path = "../f1ap" }
 ngap = {path = "../ngap" }
 rrc = {path = "../rrc" }
