@@ -2,14 +2,17 @@ use anyhow::Result;
 use common::ShutdownHandle;
 use gnbcu::{ConcreteGnbcu, Config};
 use gnbcu::{MockUeStore, RedisUeStore};
-use mocks::MockAmf;
-use mocks::MockDu;
+use mocks::{MockAmf, MockCuUp, MockDu};
 use slog::{info, o, trace, Logger};
 use std::{panic, process};
+
+const F1AP_SCTP_PPID: u32 = 62;
+const E1AP_SCTP_PPID: u32 = 64;
 
 pub struct TestContext {
     pub amf: MockAmf,
     pub du: MockDu,
+    pub cu_up: MockCuUp,
     pub logger: Logger,
     workers: Vec<InternalWorkerInfo>,
 }
@@ -21,6 +24,7 @@ struct InternalWorkerInfo {
 
 pub struct WorkerInfo {
     pub f1ap_host_port: String,
+    pub e1ap_host_port: String,
 }
 
 #[derive(PartialEq, PartialOrd)]
@@ -28,6 +32,7 @@ pub enum Stage {
     Init,
     AmfConnected,
     DuConnected,
+    CuUpConnected,
     Ue1Registered,
 }
 
@@ -53,10 +58,12 @@ impl TestContext {
         let amf_address = "127.0.0.1:38412";
         let amf = MockAmf::new(amf_address, &logger).await;
         let du = MockDu::new(&logger).await;
+        let cu_up = MockCuUp::new(&logger).await;
 
         let mut tc = TestContext {
             amf,
             du,
+            cu_up,
             logger,
             workers: vec![],
         };
@@ -72,8 +79,13 @@ impl TestContext {
         }
         if stage >= Stage::DuConnected {
             let address = self.worker_info(0).f1ap_host_port;
-            self.du.connect(address).await;
+            self.du.connect(address, F1AP_SCTP_PPID).await;
             self.du.perform_f1_setup().await?;
+        }
+        if stage >= Stage::CuUpConnected {
+            let address = self.worker_info(0).e1ap_host_port;
+            self.cu_up.connect(address, E1AP_SCTP_PPID).await;
+            self.cu_up.perform_e1_setup().await?;
         }
         if stage >= Stage::Ue1Registered {
             self.register_ue(1).await?;
@@ -84,6 +96,7 @@ impl TestContext {
     pub fn worker_info(&self, index: usize) -> WorkerInfo {
         WorkerInfo {
             f1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.f1ap_bind_port),
+            e1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.e1ap_bind_port),
         }
     }
 

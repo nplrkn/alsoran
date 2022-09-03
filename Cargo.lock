@@ -833,6 +833,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "bitvec",
+ "e1ap",
  "f1ap",
  "net",
  "ngap",

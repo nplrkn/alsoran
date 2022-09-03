@@ -17,14 +17,12 @@ use stop_token::StopSource;
 #[derive(Debug, Clone)]
 pub struct SctpTransportProvider {
     tnla_pool: SctpTnlaPool,
-    ppid: u32,
 }
 
 impl SctpTransportProvider {
-    pub fn new(ppid: u32) -> SctpTransportProvider {
+    pub fn new() -> SctpTransportProvider {
         SctpTransportProvider {
             tnla_pool: SctpTnlaPool::new(),
-            ppid,
         }
     }
 }
@@ -51,6 +49,7 @@ impl TransportProvider for SctpTransportProvider {
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
+        ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>
@@ -62,7 +61,7 @@ impl TransportProvider for SctpTransportProvider {
         let stop_token = stop_source.token();
         let join_handle = task::spawn(async move {
             loop {
-                match resolve_and_connect(&connect_addr_string, self.ppid, &logger).await {
+                match resolve_and_connect(&connect_addr_string, ppid, &logger).await {
                     Ok(assoc) => {
                         let logger = logger.new(o!("connection" => assoc_id));
                         trace!(logger, "Established connection");
@@ -106,6 +105,7 @@ impl TransportProvider for SctpTransportProvider {
     async fn serve<H>(
         self,
         listen_addr: String,
+        ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>
@@ -115,7 +115,7 @@ impl TransportProvider for SctpTransportProvider {
         let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
-        let stream = sctp::new_listen(addr, self.ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
+        let stream = sctp::new_listen(addr, ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
         let stream = stream.take_until(stop_token.clone());
 
         let join_handle = task::spawn(async move {

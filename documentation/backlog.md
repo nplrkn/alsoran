@@ -8,6 +8,9 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Rerun demo
 - Review all readmes as seen on Github
 - Set to public
+----E1 + session establishment----
+- GNB-CU-CP serves E1 and supports E1 Setup
+- GNB-CU-UP executable starts up and performs E1 Setup with GNB-CU-CP
 ----FUNCTION----
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID

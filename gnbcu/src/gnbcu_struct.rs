@@ -37,12 +37,15 @@ const NGAP_SCTP_PPID: u32 = 60;
 // and 68 for DTLS over SCTP (IETF RFC 6083 [9]).
 const F1AP_SCTP_PPID: u32 = 62;
 
+// TS38.462
+//const E1AP_SCTP_PPID: u32 = 64;
+
 impl<U: UeStateStore> ConcreteGnbcu<U> {
     pub fn spawn(config: Config, ue_store: U, logger: &Logger) -> Result<ShutdownHandle> {
         let gnbcu = ConcreteGnbcu {
             config,
-            ngap: Stack::new(SctpTransportProvider::new(NGAP_SCTP_PPID)),
-            f1ap: Stack::new(SctpTransportProvider::new(F1AP_SCTP_PPID)),
+            ngap: Stack::new(SctpTransportProvider::new()),
+            f1ap: Stack::new(SctpTransportProvider::new()),
             ue_store,
             logger: logger.clone(),
             rrc_transactions: PendingRrcTransactions::new(),
@@ -76,6 +79,7 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
         self.ngap
             .connect(
                 amf_address,
+                NGAP_SCTP_PPID,
                 NgapHandler::new_ngap_application(self.clone()),
                 self.logger.clone(),
             )
@@ -92,6 +96,7 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
         self.f1ap
             .listen(
                 f1_listen_address,
+                F1AP_SCTP_PPID,
                 F1apHandler::new_f1ap_application(self.clone(), rrc_handler),
                 self.logger.clone(),
             )

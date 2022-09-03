@@ -36,12 +36,10 @@ impl DerefMut for MockDu {
     }
 }
 
-const F1AP_SCTP_PPID: u32 = 62;
-
 impl MockDu {
     pub async fn new(logger: &Logger) -> MockDu {
         let logger = logger.new(o!("du" => 1));
-        let mock = Mock::new(logger, F1AP_SCTP_PPID).await;
+        let mock = Mock::new(logger).await;
         MockDu {
             mock,
             ues: HashMap::new(),

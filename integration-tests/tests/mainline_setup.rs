@@ -22,6 +22,14 @@ async fn du_can_connect_to_cu() -> Result<()> {
 
 #[async_std::test]
 #[serial]
+async fn up_can_connect_to_cp() -> Result<()> {
+    let tc = TestContext::new(Stage::CuUpConnected).await?;
+    tc.terminate().await;
+    Ok(())
+}
+
+#[async_std::test]
+#[serial]
 async fn ue_can_register() -> Result<()> {
     let tc = TestContext::new(Stage::Ue1Registered).await?;
     tc.terminate().await;

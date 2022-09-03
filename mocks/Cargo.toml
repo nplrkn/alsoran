@@ -9,6 +9,7 @@ doctest = false
 [dependencies]
 net = { path = "../net" }
 f1ap = {path = "../f1ap" }
+e1ap = {path = "../e1ap" }
 ngap = {path = "../ngap" }
 rrc = {path = "../rrc" }
 pdcp = {path = "../pdcp" }

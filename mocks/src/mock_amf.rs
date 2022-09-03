@@ -29,8 +29,8 @@ const NGAP_SCTP_PPID: u32 = 60;
 
 impl MockAmf {
     pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
-        let mut mock = Mock::new(logger.new(o!("amf" => 1)), NGAP_SCTP_PPID).await;
-        mock.serve(amf_address.to_string()).await;
+        let mut mock = Mock::new(logger.new(o!("amf" => 1))).await;
+        mock.serve(amf_address.to_string(), NGAP_SCTP_PPID).await;
         MockAmf {
             mock,
             ues: HashMap::new(),

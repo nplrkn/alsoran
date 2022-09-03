@@ -15,6 +15,7 @@ pub trait TransportProvider: Send + Sync + 'static {
     async fn serve<H>(
         self,
         listen_addr: String,
+        ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>
@@ -24,6 +25,7 @@ pub trait TransportProvider: Send + Sync + 'static {
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
+        ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>
