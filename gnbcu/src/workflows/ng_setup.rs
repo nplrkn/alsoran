@@ -13,7 +13,7 @@ pub async fn ng_setup<G: Gnbcu>(gnbcu: &G, logger: &Logger) {
             plmn_identity: PlmnIdentity(vec![0x2, 0xf8, 0x39]),
             gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
         }),
-        ran_node_name: None,
+        ran_node_name: gnbcu.config().clone().name.map(|x| RanNodeName(x)),
         supported_ta_list: SupportedTaList(vec![SupportedTaItem {
             tac: Tac(vec![0x0, 0x0, 0x1]),
             broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {

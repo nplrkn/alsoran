@@ -38,7 +38,7 @@ impl<G: Gnbcu> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
             gnb_cu_rrc_version: RrcVersion {
                 latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
             },
-            gnb_cu_name: None,
+            gnb_cu_name: self.gnbcu.config().clone().name.map(|x| GnbCuName(x)),
             cells_to_be_activated_list: None,
             transport_layer_address_info: None,
             ul_bh_non_up_traffic_mapping: None,

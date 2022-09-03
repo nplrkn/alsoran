@@ -9,8 +9,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Review all readmes as seen on Github
 - Set to public
 ----E1 + session establishment----
-- GNB-CU-CP serves E1 and supports E1 Setup
-- GNB-CU-UP executable starts up and performs E1 Setup with GNB-CU-CP
+- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
+- NG Setup is in workflows but F1 and E1 Setup aren't
 ----FUNCTION----
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
@@ -31,7 +31,6 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Have the integration test not use real sockets and run in parallel
 - Intermittent failure of live redis test
 - Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
-- Clean up Redis even if live redis test fails
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
 - Cleaner RRC interface in trait Gnbcu
@@ -42,6 +41,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- GNB-CU-CP serves E1 and supports E1 Setup
+- Clean up Redis even if live redis test fails
 - E1AP generation
 - Update Amf Mock to support multiple Ues
 - Registration of multiple UEs in FV

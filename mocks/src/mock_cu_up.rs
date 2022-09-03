@@ -52,13 +52,19 @@ impl MockCuUp {
     }
 
     async fn send_e1_setup_request(&self) -> Result<()> {
+        let supported_plmns = SupportedPlmnsList(vec![SupportedPlmnsItem {
+            plmn_identity: PlmnIdentity(vec![0, 1, 2]),
+            slice_support_list: None,
+            nr_cgi_support_list: None,
+            qos_parameters_support_list: None,
+        }]);
         let pdu = e1ap::E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuUpE1SetupRequest(
             GnbCuUpE1SetupRequest {
                 transaction_id: TransactionId(0),
                 gnb_cu_up_id: GnbCuUpId(232),
                 gnb_cu_up_name: Some(GnbCuUpName("TestCuUp".to_string())),
                 cn_support: CnSupport::C5gc,
-                supported_plmns: SupportedPlmnsList(vec![]),
+                supported_plmns,
                 gnb_cu_up_capacity: None,
                 transport_layer_address_info: None,
                 extended_gnb_cu_up_name: None,

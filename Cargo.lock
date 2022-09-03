@@ -641,6 +641,7 @@ dependencies = [
  "async-trait",
  "bitvec",
  "common",
+ "e1ap",
  "f1ap",
  "net",
  "ngap",
