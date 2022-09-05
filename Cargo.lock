@@ -936,9 +936,9 @@ checksum = "074864da206b4973b84eb91683020dbefd6a8c3f0f38e054d93954e891935e4e"
 
 [[package]]
 name = "os_socketaddr"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ab66122be3ca53ea5b120f5563eb7923fbdca168076e2fdab626cafeff91698"
+checksum = "465cf01099d4b72bb9ed20a3690c3d4e851865413c1f5dbe7c07d67870821dbf"
 dependencies = [
  "libc",
  "winapi",

@@ -9,7 +9,7 @@ doctest = false
 [dependencies]
 slog = "2.7.0"
 anyhow = "1.0.52"
-os_socketaddr = "0.2.0"
+os_socketaddr = "0.2.3"
 libc = "^0.2"
 async-io = "1.7.0"
 errno = "0.2.8"
