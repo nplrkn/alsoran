@@ -1,3 +1,5 @@
+//! mock_transport_provider - implements TransportProvider by using async channels (instead of SCTP/IP)
+
 use super::transport_provider::TransportProvider;
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use crate::ShutdownHandle;

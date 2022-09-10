@@ -1,3 +1,5 @@
+//! mock_amf - enables a test script to assume the role of the AMF on the NG reference point
+
 use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;

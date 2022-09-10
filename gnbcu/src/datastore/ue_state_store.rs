@@ -1,3 +1,5 @@
+//! ue_state_store - trait for UE state CRUD
+
 use super::UeState;
 use anyhow::Result;
 use async_trait::async_trait;

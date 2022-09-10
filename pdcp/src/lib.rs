@@ -1,3 +1,5 @@
+//! lib - wrap and unwrap PDCP packets
+
 use anyhow::{anyhow, Result};
 
 pub struct PdcpPdu(pub Vec<u8>);

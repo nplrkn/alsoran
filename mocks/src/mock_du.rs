@@ -1,3 +1,5 @@
+//! mock_du - enables a test script to assume the role of the GNB-DU on the F1 reference point
+
 use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;

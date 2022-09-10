@@ -1,3 +1,5 @@
+//! sctp_association - async SCTP association
+
 use super::sctp_bindings::*;
 use super::sock_opt;
 use super::try_io::try_io;

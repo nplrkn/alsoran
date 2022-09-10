@@ -1,4 +1,4 @@
-// NGAP or F1AP stack
+// stack - transaction layer allowing workflow business logic to await a response to its ??AP requests
 
 use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{

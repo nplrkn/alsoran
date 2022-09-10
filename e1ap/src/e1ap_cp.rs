@@ -1,3 +1,5 @@
+//! e1ap_cp - Collects together the procedures that are served by a GNB-CU-CP on the E1 reference point.
+
 use super::top_pdu::*;
 use crate::{E1apPdu, InitiatingMessage};
 use async_trait::async_trait;

@@ -1,3 +1,5 @@
+//! transport_provider - trait encapsulating the transport services needed by the RAN protocol stacks
+
 use crate::{tnla_event_handler::TnlaEventHandler, ShutdownHandle};
 use anyhow::Result;
 use async_net::SocketAddr;

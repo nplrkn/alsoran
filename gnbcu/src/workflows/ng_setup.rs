@@ -1,3 +1,5 @@
+//! ng_setup - the initial handshake that establishes an instance of the NG reference point between GNB and AMF
+
 use super::Gnbcu;
 use bitvec::prelude::*;
 use ngap::*;

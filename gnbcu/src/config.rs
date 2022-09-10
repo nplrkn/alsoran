@@ -1,3 +1,5 @@
+//! config - the config of a GNB-CU
+
 #[derive(Debug, Clone)]
 pub struct Config {
     // The port to which the worker should bind its F1AP server.

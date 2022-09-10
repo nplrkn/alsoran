@@ -1,3 +1,5 @@
+//! e1ap - E1AP entry points into the GNB-CU
+
 use super::Gnbcu;
 use async_trait::async_trait;
 use e1ap::*;

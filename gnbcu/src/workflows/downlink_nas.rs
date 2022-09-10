@@ -1,3 +1,5 @@
+//! downlink_nas - transfer of a Nas message from AMF to UE
+
 use super::Gnbcu;
 use net::AperSerde;
 use ngap::DownlinkNasTransport;

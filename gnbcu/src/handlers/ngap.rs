@@ -1,3 +1,5 @@
+//! ngap - NGAP entry points into the GNB-CU
+
 use super::Gnbcu;
 use crate::workflows;
 use anyhow::Result;

@@ -1,3 +1,5 @@
+//! ngap_gnb - Collects together the procedures that are served by a GNB on the NG reference point.
+
 use super::top_pdu::*;
 use crate::{InitiatingMessage, NgapPdu};
 use async_trait::async_trait;

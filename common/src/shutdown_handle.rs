@@ -1,3 +1,5 @@
+//! shutdown_handle - constructed for each long-running async task to simplify the job of gracefully shutting it down
+
 use async_std::task::JoinHandle;
 use stop_token::StopSource;
 

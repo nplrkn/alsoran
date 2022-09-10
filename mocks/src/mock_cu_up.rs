@@ -1,3 +1,5 @@
+//! mock_cu_up - enables a test script to assume the role of the GNB-CU-UP on the E1 reference point
+
 use crate::mock::{Mock, Pdu};
 use anyhow::Result;
 use e1ap::*;

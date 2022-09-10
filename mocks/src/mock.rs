@@ -1,3 +1,5 @@
+//! mock - 'base class' for the mocks
+
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{

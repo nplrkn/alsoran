@@ -1,3 +1,5 @@
+// main - sends in the necessary stimuli to drive UE registration through the GNB-CU
+
 mod ue;
 use anyhow::Result;
 use mocks::MockDu;

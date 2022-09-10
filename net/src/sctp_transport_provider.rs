@@ -1,3 +1,5 @@
+//! sctp_transport_provider - the standard TransportProvider used for SCTP-based protocols NGAP, F1AP and E1AP
+
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
 use crate::{ShutdownHandle, TransportProvider};

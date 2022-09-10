@@ -1,3 +1,5 @@
+//! gnbcu_struct - the struct that implements the Gnbcu trait
+
 use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};

@@ -1,3 +1,5 @@
+//! sctp_tnla_pool - global connection pool enabling a suitable TNLA to be selected for an outgoing message
+
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use anyhow::{anyhow, Result};
 use async_std::sync::{Arc, Mutex};

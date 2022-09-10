@@ -1,3 +1,5 @@
+//! ngap_amf - Collects together the procedures that are served by an AMF on the NG reference point.
+
 use super::top_pdu::*;
 use crate::{InitiatingMessage, NgapPdu};
 use async_trait::async_trait;

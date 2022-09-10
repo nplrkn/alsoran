@@ -1,3 +1,5 @@
+//! f1ap - F1AP entry points into the GNB-CU
+
 use super::Gnbcu;
 use super::RrcHandler;
 use crate::workflows;
