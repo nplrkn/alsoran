@@ -1,3 +1,5 @@
+//! initial_access - procedure in which UE makes first contact with the 5G core
+
 use super::Gnbcu;
 use crate::datastore::UeState;
 use anyhow::{anyhow, Result};

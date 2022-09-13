@@ -1,3 +1,5 @@
+//! mock_transport_provider - implements TransportProvider by using async channels (instead of SCTP/IP)
+
 use super::transport_provider::TransportProvider;
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use crate::ShutdownHandle;
@@ -46,6 +48,7 @@ impl TransportProvider for MockTransportProvider {
     async fn maintain_connection<H>(
         self,
         _connect_addr_string: String,
+        _ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>
@@ -82,6 +85,7 @@ impl TransportProvider for MockTransportProvider {
     async fn serve<H>(
         self,
         _listen_addr: String,
+        _ppid: u32,
         _handler: H,
         _logger: Logger,
     ) -> Result<ShutdownHandle>

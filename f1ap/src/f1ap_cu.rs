@@ -1,3 +1,5 @@
+//! f1ap_cu - Collects together the procedures that are served by a GNB-CU on the F1 reference point.
+
 use super::top_pdu::*;
 use crate::{F1apPdu, InitiatingMessage};
 use async_trait::async_trait;

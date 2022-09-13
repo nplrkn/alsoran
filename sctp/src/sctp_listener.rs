@@ -1,3 +1,5 @@
+//! sctp_listener - async listener for SCTP connections that produces SCTP associations
+
 use super::try_io::try_io;
 use super::SctpAssociation;
 use anyhow::{anyhow, Result};

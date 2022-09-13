@@ -1,3 +1,5 @@
+//! mock - 'base class' for the mocks
+
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
@@ -22,9 +24,9 @@ pub struct Mock<P: Pdu> {
 pub struct Handler<P: Pdu>(pub Sender<Option<P>>);
 
 impl<P: Pdu> Mock<P> {
-    pub async fn new(logger: Logger, ppid: u32) -> Self {
+    pub async fn new(logger: Logger) -> Self {
         let (sender, receiver) = async_channel::unbounded();
-        let transport = SctpTransportProvider::new(ppid);
+        let transport = SctpTransportProvider::new();
         let handler = Some(Handler(sender));
 
         Mock {
@@ -36,12 +38,13 @@ impl<P: Pdu> Mock<P> {
         }
     }
 
-    pub async fn serve(&mut self, address: String) {
+    pub async fn serve(&mut self, address: String, ppid: u32) {
         let transport_tasks = self
             .transport
             .clone()
             .serve(
                 address,
+                ppid,
                 std::mem::take(&mut self.handler).unwrap(),
                 self.logger.clone(),
             )
@@ -50,12 +53,13 @@ impl<P: Pdu> Mock<P> {
         self.transport_tasks = Some(transport_tasks);
     }
 
-    pub async fn connect(&mut self, address: String) {
+    pub async fn connect(&mut self, address: String, ppid: u32) {
         let transport_tasks = self
             .transport
             .clone()
             .maintain_connection(
                 address,
+                ppid,
                 std::mem::take(&mut self.handler).unwrap(),
                 self.logger.clone(),
             )

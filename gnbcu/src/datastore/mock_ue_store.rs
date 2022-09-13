@@ -1,3 +1,5 @@
+//! mock_ue_store - allows testing of UE stateful operations without needing to run a real datastore
+
 use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};

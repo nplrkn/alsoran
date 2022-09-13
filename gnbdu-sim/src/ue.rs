@@ -1,3 +1,5 @@
+//! ue - a simulated UE that talks Nas and implements a pre-canned setup sequence
+
 use hex;
 use slog::{debug, Logger};
 use std::{

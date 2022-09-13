@@ -1,3 +1,5 @@
+//! gnbcu_trait - the collection of services used by the GNB-CU workflow business logic.
+
 use super::Config;
 use crate::{
     datastore::{UeState, UeStateStore},

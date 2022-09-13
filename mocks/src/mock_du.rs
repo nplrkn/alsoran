@@ -1,3 +1,5 @@
+//! mock_du - enables a test script to assume the role of the GNB-DU on the F1 reference point
+
 use crate::mock::{Mock, Pdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
@@ -36,12 +38,10 @@ impl DerefMut for MockDu {
     }
 }
 
-const F1AP_SCTP_PPID: u32 = 62;
-
 impl MockDu {
     pub async fn new(logger: &Logger) -> MockDu {
         let logger = logger.new(o!("du" => 1));
-        let mock = Mock::new(logger, F1AP_SCTP_PPID).await;
+        let mock = Mock::new(logger).await;
         MockDu {
             mock,
             ues: HashMap::new(),

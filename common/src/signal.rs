@@ -1,3 +1,5 @@
+//! signal - a way to exit from main() when Ctrl-C is pressed (or some other signal is received).
+
 use anyhow::Result;
 use async_std::channel::Sender;
 use async_std::prelude::*;

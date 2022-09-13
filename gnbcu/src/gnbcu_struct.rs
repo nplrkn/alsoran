@@ -1,3 +1,5 @@
+//! gnbcu_struct - the struct that implements the Gnbcu trait
+
 use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
@@ -14,7 +16,7 @@ use rrc::UlDcchMessage;
 use slog::{debug, info, Logger};
 use stop_token::{StopSource, StopToken};
 
-use crate::handlers::{F1apHandler, NgapHandler};
+use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
 use crate::Gnbcu;
 
 #[derive(Clone)]
@@ -22,6 +24,7 @@ pub struct ConcreteGnbcu<U: UeStateStore> {
     config: Config,
     ngap: Stack,
     f1ap: Stack,
+    e1ap: Stack,
     ue_store: U,
     logger: Logger,
     rrc_transactions: PendingRrcTransactions,
@@ -37,12 +40,16 @@ const NGAP_SCTP_PPID: u32 = 60;
 // and 68 for DTLS over SCTP (IETF RFC 6083 [9]).
 const F1AP_SCTP_PPID: u32 = 62;
 
+// TS38.462
+const E1AP_SCTP_PPID: u32 = 64;
+
 impl<U: UeStateStore> ConcreteGnbcu<U> {
     pub fn spawn(config: Config, ue_store: U, logger: &Logger) -> Result<ShutdownHandle> {
         let gnbcu = ConcreteGnbcu {
             config,
-            ngap: Stack::new(SctpTransportProvider::new(NGAP_SCTP_PPID)),
-            f1ap: Stack::new(SctpTransportProvider::new(F1AP_SCTP_PPID)),
+            ngap: Stack::new(SctpTransportProvider::new()),
+            f1ap: Stack::new(SctpTransportProvider::new()),
+            e1ap: Stack::new(SctpTransportProvider::new()),
             ue_store,
             logger: logger.clone(),
             rrc_transactions: PendingRrcTransactions::new(),
@@ -64,9 +71,11 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let ngap_handle = self.connect_ngap().await?;
         let f1ap_handle = self.serve_f1ap().await?;
+        let e1ap_handle = self.serve_e1ap().await?;
         stop_token.await;
         ngap_handle.graceful_shutdown().await;
         f1ap_handle.graceful_shutdown().await;
+        e1ap_handle.graceful_shutdown().await;
         Ok(())
     }
 
@@ -76,6 +85,7 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
         self.ngap
             .connect(
                 amf_address,
+                NGAP_SCTP_PPID,
                 NgapHandler::new_ngap_application(self.clone()),
                 self.logger.clone(),
             )
@@ -92,7 +102,23 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
         self.f1ap
             .listen(
                 f1_listen_address,
+                F1AP_SCTP_PPID,
                 F1apHandler::new_f1ap_application(self.clone(), rrc_handler),
+                self.logger.clone(),
+            )
+            .await
+    }
+    async fn serve_e1ap(&self) -> Result<ShutdownHandle> {
+        let e1_listen_address = format!("0.0.0.0:{}", self.config.e1ap_bind_port).to_string();
+        info!(
+            &self.logger,
+            "Listen for connection from CU-UP on {}", e1_listen_address
+        );
+        self.e1ap
+            .listen(
+                e1_listen_address,
+                E1AP_SCTP_PPID,
+                E1apHandler::new_e1ap_application(self.clone()),
                 self.logger.clone(),
             )
             .await

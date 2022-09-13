@@ -2558,17 +2558,17 @@ impl AperCodec for BPlmnIdInfoItem {
             .map_err(|e: AperCodecError| e.push_context("BPlmnIdInfoItem"))
     }
 }
-// ServedPlmnSList
+// ServedPlmnsList
 #[derive(Clone, Debug)]
-pub struct ServedPlmnSList(pub Vec<ServedPlmnSItem>);
+pub struct ServedPlmnsList(pub Vec<ServedPlmnsItem>);
 
-impl ServedPlmnSList {
+impl ServedPlmnsList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(6), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(ServedPlmnSItem::decode(data)?);
+                items.push(ServedPlmnsItem::decode(data)?);
             }
             items
         }))
@@ -2582,24 +2582,24 @@ impl ServedPlmnSList {
     }
 }
 
-impl AperCodec for ServedPlmnSList {
+impl AperCodec for ServedPlmnsList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        ServedPlmnSList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ServedPlmnSList"))
+        ServedPlmnsList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ServedPlmnsList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ServedPlmnSList"))
+            .map_err(|e: AperCodecError| e.push_context("ServedPlmnsList"))
     }
 }
-// ServedPlmnSItem
+// ServedPlmnsItem
 #[derive(Clone, Debug)]
-pub struct ServedPlmnSItem {
+pub struct ServedPlmnsItem {
     pub plmn_identity: PlmnIdentity,
 }
 
-impl ServedPlmnSItem {
+impl ServedPlmnsItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
@@ -2618,15 +2618,15 @@ impl ServedPlmnSItem {
     }
 }
 
-impl AperCodec for ServedPlmnSItem {
+impl AperCodec for ServedPlmnsItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        ServedPlmnSItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ServedPlmnSItem"))
+        ServedPlmnsItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ServedPlmnsItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ServedPlmnSItem"))
+            .map_err(|e: AperCodecError| e.push_context("ServedPlmnsItem"))
     }
 }
 // BroadcastCagList
@@ -8068,17 +8068,17 @@ impl AperCodec for ExplicitFormat {
             .map_err(|e: AperCodecError| e.push_context("ExplicitFormat"))
     }
 }
-// ExtendedServedPlmnSList
+// ExtendedServedPlmnsList
 #[derive(Clone, Debug)]
-pub struct ExtendedServedPlmnSList(pub Vec<ExtendedServedPlmnSItem>);
+pub struct ExtendedServedPlmnsList(pub Vec<ExtendedServedPlmnsItem>);
 
-impl ExtendedServedPlmnSList {
+impl ExtendedServedPlmnsList {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(6), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(ExtendedServedPlmnSItem::decode(data)?);
+                items.push(ExtendedServedPlmnsItem::decode(data)?);
             }
             items
         }))
@@ -8092,25 +8092,25 @@ impl ExtendedServedPlmnSList {
     }
 }
 
-impl AperCodec for ExtendedServedPlmnSList {
+impl AperCodec for ExtendedServedPlmnsList {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        ExtendedServedPlmnSList::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnSList"))
+        ExtendedServedPlmnsList::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnsList"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnSList"))
+            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnsList"))
     }
 }
-// ExtendedServedPlmnSItem
+// ExtendedServedPlmnsItem
 #[derive(Clone, Debug)]
-pub struct ExtendedServedPlmnSItem {
+pub struct ExtendedServedPlmnsItem {
     pub plmn_identity: PlmnIdentity,
     pub tai_slice_support_list: Option<SliceSupportList>,
 }
 
-impl ExtendedServedPlmnSItem {
+impl ExtendedServedPlmnsItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
         let plmn_identity = PlmnIdentity::decode(data)?;
@@ -8140,15 +8140,15 @@ impl ExtendedServedPlmnSItem {
     }
 }
 
-impl AperCodec for ExtendedServedPlmnSItem {
+impl AperCodec for ExtendedServedPlmnsItem {
     type Output = Self;
     fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        ExtendedServedPlmnSItem::decode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnSItem"))
+        ExtendedServedPlmnsItem::decode_inner(data)
+            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnsItem"))
     }
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data)
-            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnSItem"))
+            .map_err(|e: AperCodecError| e.push_context("ExtendedServedPlmnsItem"))
     }
 }
 // ExtendedSliceSupportList
@@ -22652,7 +22652,7 @@ pub struct ServedCellInformation {
     pub nr_pci: NrPci,
     pub five_gs_tac: Option<FiveGsTac>,
     pub configured_eps_tac: Option<ConfiguredEpsTac>,
-    pub served_plmn_s: ServedPlmnSList,
+    pub served_plmns: ServedPlmnsList,
     pub nr_mode_info: NrModeInfo,
     pub measurement_timing_configuration: Vec<u8>,
 }
@@ -22672,7 +22672,7 @@ impl ServedCellInformation {
         } else {
             None
         };
-        let served_plmn_s = ServedPlmnSList::decode(data)?;
+        let served_plmns = ServedPlmnsList::decode(data)?;
         let nr_mode_info = NrModeInfo::decode(data)?;
         let measurement_timing_configuration =
             aper::decode::decode_octetstring(data, None, None, false)?;
@@ -22682,7 +22682,7 @@ impl ServedCellInformation {
             nr_pci,
             five_gs_tac,
             configured_eps_tac,
-            served_plmn_s,
+            served_plmns,
             nr_mode_info,
             measurement_timing_configuration,
         })
@@ -22702,7 +22702,7 @@ impl ServedCellInformation {
         if let Some(x) = &self.configured_eps_tac {
             x.encode(data)?;
         }
-        self.served_plmn_s.encode(data)?;
+        self.served_plmns.encode(data)?;
         self.nr_mode_info.encode(data)?;
         aper::encode::encode_octetstring(
             data,

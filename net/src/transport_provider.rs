@@ -1,3 +1,5 @@
+//! transport_provider - trait encapsulating the transport services needed by the RAN protocol stacks
+
 use crate::{tnla_event_handler::TnlaEventHandler, ShutdownHandle};
 use anyhow::Result;
 use async_net::SocketAddr;
@@ -15,6 +17,7 @@ pub trait TransportProvider: Send + Sync + 'static {
     async fn serve<H>(
         self,
         listen_addr: String,
+        ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>
@@ -24,6 +27,7 @@ pub trait TransportProvider: Send + Sync + 'static {
     async fn maintain_connection<H>(
         self,
         connect_addr_string: String,
+        ppid: u32,
         handler: H,
         logger: Logger,
     ) -> Result<ShutdownHandle>

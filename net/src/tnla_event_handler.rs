@@ -1,3 +1,5 @@
+//! tnla_event_handler - trait for dispatch of inbound messages and events to the user of a TransportProvider  
+
 use async_net::SocketAddr;
 use async_trait::async_trait;
 use sctp::Message;

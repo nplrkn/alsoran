@@ -1,3 +1,5 @@
+//! redis_ue_store - storage of UE state in Redis
+
 #![allow(dead_code, unused_variables)]
 use anyhow::Result;
 use async_trait::async_trait;

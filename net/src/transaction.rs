@@ -1,3 +1,5 @@
+//! transactions - allows definition of procedures using individual ASN.1 requests and responses
+
 use anyhow::{anyhow, Result};
 use asn1_codecs::aper::{self, AperCodecData};
 use async_channel::RecvError;

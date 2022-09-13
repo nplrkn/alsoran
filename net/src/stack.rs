@@ -1,4 +1,4 @@
-// NGAP or F1AP stack
+// stack - transaction layer allowing workflow business logic to await a response to its ??AP requests
 
 use crate::tnla_event_handler::TnlaEventHandler;
 use crate::{
@@ -39,6 +39,7 @@ impl Stack {
     pub async fn connect<A: Application>(
         &self,
         connect_address: String,
+        ppid: u32,
         application: A,
         logger: Logger,
     ) -> Result<ShutdownHandle> {
@@ -48,13 +49,14 @@ impl Stack {
         };
         self.transport_provider
             .clone()
-            .maintain_connection(connect_address, receiver, logger)
+            .maintain_connection(connect_address, ppid, receiver, logger)
             .await
     }
 
     pub async fn listen<A: Application>(
         &self,
         listen_address: String,
+        ppid: u32,
         application: A,
         logger: Logger,
     ) -> Result<ShutdownHandle> {
@@ -65,7 +67,7 @@ impl Stack {
 
         self.transport_provider
             .clone()
-            .serve(listen_address, receiver, logger)
+            .serve(listen_address, ppid, receiver, logger)
             .await
     }
 

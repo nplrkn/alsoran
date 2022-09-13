@@ -1,3 +1,5 @@
+//! rrc_transaction - enables workflow business logic to await a response to its Rrc request
+
 use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_std::sync::Mutex;

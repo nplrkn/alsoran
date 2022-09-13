@@ -1,3 +1,5 @@
+//! logging - functions for setting up the root logger
+
 use slog::Logger;
 use slog::{o, Drain};
 

@@ -1,3 +1,5 @@
+//! rrc - RRC entry points into the GNB-CU
+
 use crate::{Gnbcu, UeState};
 use anyhow::Result;
 use net::AperSerde;

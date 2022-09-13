@@ -1,3 +1,5 @@
+//! sock_opts - setsockops related helper functions
+
 use super::sctp_bindings::*;
 use super::try_io::try_io;
 use anyhow::{anyhow, Result};

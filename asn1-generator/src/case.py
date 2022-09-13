@@ -3,13 +3,15 @@ import unittest
 import re
 
 KNOWN_WORDS = [(re.compile(x, re.IGNORECASE), "-"+x+"-")
-               for x in ["ngran", "enb", "gnb", "eutran", "plmn", "qos", "rlf", "iwf", "iot", "rrc"]]
+               for x in ["ngran", "enb", "gnb", "eutran", "qos", "rlf", "iwf", "iot", "rrc"]]
 
 ACRONYMS = re.compile(r"([A-Z,0-9]*)(?=(?=[A-Z][a-z]*)|$|-|_)")
 
-KNOWN_WORDS_CASE_SENSITIVE = [(re.compile(x), "-"+x+"-") for x in ["NR", "CU"]]
+KNOWN_WORDS_CASE_SENSITIVE = [(re.compile(x), "-"+x+"-")
+                              for x in ["NR", "CU"]]
 
 SPECIALS = [(re.compile("^DU"), "DU-"),
+            (re.compile(r"PLMN(s?)"), r"-plmn\1-"),
             (re.compile(r"([^P])DU"), r"\1-DU-"),
             (re.compile(r"UE(s?)"), r"-ue\1-"),
             (re.compile(r"SRB(s?)"), r"-srb\1-"),
@@ -73,6 +75,10 @@ class TestCase(unittest.TestCase):
     def test_eutran(self):
         self.assertEqual(pascal_case(
             "e-UTRAN-BearerContextSetupRequest"), "EutranBearerContextSetupRequest")
+
+    def test_pmlns(self):
+        self.assertEqual(pascal_case(
+            "SupportedPLMNs-List"), "SupportedPlmnsList")
 
 
 if __name__ == '__main__':

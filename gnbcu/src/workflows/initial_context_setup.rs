@@ -1,3 +1,5 @@
+//! initial_context_setup - in which the secure signaling channel is established between UE and 5G core through the GNB
+
 use crate::datastore::UeState;
 
 use super::Gnbcu;

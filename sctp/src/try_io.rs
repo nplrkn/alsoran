@@ -1,3 +1,5 @@
+//! try_io - macro to reduce boilerplate involved in calling unsafe I/O functions
+
 // To use this macro you need to import as follows;
 // use super::try_io::try_io;
 // use anyhow::{anyhow, Result};

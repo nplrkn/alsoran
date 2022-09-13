@@ -1,3 +1,5 @@
+//! uplink_nas - transfer of a Nas message from UE to AMF
+
 use super::Gnbcu;
 use crate::datastore::UeState;
 use bitvec::prelude::*;

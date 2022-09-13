@@ -1,3 +1,5 @@
+//! ue_state - serializable model of GNB-CU's per UE state
+
 use f1ap::GnbDuUeF1apId;
 use ngap::AmfUeNgapId;
 use speedy::{Readable, Writable};
