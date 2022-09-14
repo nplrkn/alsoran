@@ -7,7 +7,7 @@ edition = "2021"
 mocks = { path = "../mocks" }
 gnbcu = { path = "../gnbcu" }
 slog = "2.7.0"
-anyhow = "1.0.52"
+anyhow = "1.0.65"
 async-std = { version = "1.10.0", features = ["attributes"] }
 common = { path = "../common" }
 stop-token = "0.6.1"
