@@ -240,6 +240,20 @@ impl MockDu {
         Ok(dl_rrc_message_transfer)
     }
 
+    pub async fn receive_security_mode_command(&self, ue_id: u32) -> Result<SecurityModeCommand> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
+        match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
+            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
+                info!(
+                    &self.logger,
+                    "UeContextSetupRequest(SecurityModeCommand) <<"
+                );
+                Ok(x)
+            }
+            x => Err(anyhow!("Expected security mode command - got {:?}", x)),
+        }
+    }
+
     pub async fn receive_ue_context_setup_request(
         &self,
         ue_id: u32,

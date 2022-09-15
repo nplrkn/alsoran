@@ -104,13 +104,10 @@ impl TestContext {
         self.du.perform_rrc_setup(ue_id, Vec::new()).await?;
         self.amf.receive_initial_ue_message(ue_id).await?;
         self.amf.send_initial_context_setup_request(ue_id).await?;
-        let security_mode_command = self.du.receive_ue_context_setup_request(ue_id).await?;
-        self.du.send_ue_context_setup_response(ue_id).await?;
+        let security_mode_command = self.du.receive_security_mode_command(ue_id).await?;
         self.du
             .send_security_mode_complete(ue_id, &security_mode_command)
             .await?;
-        let _nas = self.du.receive_rrc_reconfiguration(ue_id).await?;
-        self.du.send_rrc_reconfiguration_complete(ue_id).await?;
         self.amf
             .receive_initial_context_setup_response(ue_id)
             .await?;

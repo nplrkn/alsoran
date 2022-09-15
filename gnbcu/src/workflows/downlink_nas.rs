@@ -1,5 +1,7 @@
 //! downlink_nas - transfer of a Nas message from AMF to UE
 
+use crate::datastore::UeState;
+
 use super::Gnbcu;
 use net::AperSerde;
 use ngap::DownlinkNasTransport;
@@ -38,13 +40,21 @@ pub async fn downlink_nas<G: Gnbcu>(gnbcu: &G, i: DownlinkNasTransport, logger: 
             }
         }
     }
+    send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(i.nas_pdu.0), logger).await
+}
 
+pub async fn send_nas_to_ue<G: Gnbcu>(
+    gnbcu: &G,
+    ue: &UeState,
+    nas: DedicatedNasMessage,
+    logger: &Logger,
+) {
     let rrc = match (DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
             rrc_transaction_identifier: RrcTransactionIdentifier(2),
             critical_extensions: CriticalExtensions4::DlInformationTransfer(
                 DlInformationTransferIEs {
-                    dedicated_nas_message: Some(DedicatedNasMessage(i.nas_pdu.0)),
+                    dedicated_nas_message: Some(nas),
                     late_non_critical_extension: None,
                     non_critical_extension: None,
                 },
