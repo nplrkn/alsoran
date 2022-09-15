@@ -19,23 +19,23 @@ async fn main() -> Result<()> {
 
     let mut ue = Ue::new(1);
 
-    let registration_request = ue.recv_nas();
+    let registration_request = ue.build_next_nas_message();
     info!(&logger, ">> NAS Registration request");
     du.perform_rrc_setup(ue.id, registration_request).await?;
 
     let nas_authentication_request = du.receive_nas(ue.id).await?;
     info!(&logger, "<< NAS Authentication request");
-    ue.send_nas(nas_authentication_request, &logger);
+    ue.handle_nas(nas_authentication_request, &logger);
 
-    let nas_message = ue.recv_nas();
+    let nas_message = ue.build_next_nas_message();
     info!(&logger, ">> NAS Authentication response");
     du.send_nas(ue.id, nas_message).await?;
 
     let nas_security_mode_command = du.receive_nas(ue.id).await?;
     info!(&logger, "<< NAS Security mode command");
-    ue.send_nas(nas_security_mode_command, &logger);
+    ue.handle_nas(nas_security_mode_command, &logger);
 
-    let nas_message = ue.recv_nas();
+    let nas_message = ue.build_next_nas_message();
     info!(&logger, ">> NAS Security mode complete");
     du.send_nas(ue.id, nas_message).await?;
 
@@ -46,10 +46,10 @@ async fn main() -> Result<()> {
 
     let nas_registration_accept = du.receive_rrc_reconfiguration(ue.id).await?;
     info!(&logger, "<< NAS Registration Accept");
-    ue.send_nas(nas_registration_accept, &logger);
+    ue.handle_nas(nas_registration_accept, &logger);
     du.send_rrc_reconfiguration_complete(ue.id).await?;
 
-    let nas_message = ue.recv_nas();
+    let nas_message = ue.build_next_nas_message();
     info!(&logger, ">> NAS Registration Complete");
     du.send_nas(ue.id, nas_message).await?;
 
