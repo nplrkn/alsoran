@@ -4,7 +4,7 @@ use super::Gnbcu;
 use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
-use f1ap::InitialUlRrcMessageTransfer;
+use f1ap::{InitialUlRrcMessageTransfer, SrbId};
 use net::{AperSerde, Procedure};
 use ngap::*;
 use pdcp::PdcpPdu;
@@ -59,7 +59,9 @@ pub async fn initial_access<G: Gnbcu>(
     let bytes = RrcSetupProcedure::encode_request(rrc_setup)?;
     let pdcp_pdu = PdcpPdu::encode(&bytes);
     let rrc_container = f1ap::RrcContainer(pdcp_pdu.into());
-    gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
+    gnbcu
+        .send_rrc_to_ue(&ue, SrbId(0), rrc_container, logger)
+        .await;
     let rrc_setup_complete = match rrc_transaction.recv().await?.message {
         UlDcchMessageType::C1(C1_6::RrcSetupComplete(x)) => Ok(x),
         _ => Err(anyhow!("Expected Rrc Setup complete")),

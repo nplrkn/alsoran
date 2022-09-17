@@ -42,6 +42,7 @@ pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
     async fn send_rrc_to_ue(
         &self,
         ue: &UeState,
+        srb_id: f1ap::SrbId,
         rrc_container: f1ap::RrcContainer,
         logger: &Logger,
     );

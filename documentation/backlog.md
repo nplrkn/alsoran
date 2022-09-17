@@ -3,6 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
+- Fix up registration tests (inc live test)
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
@@ -42,6 +43,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- SRB set to 0 or 1 and checking of that in Mock DU
 - Add comments at top of files
 - GNB-CU-CP serves E1 and supports E1 Setup
 - Clean up Redis even if live redis test fails

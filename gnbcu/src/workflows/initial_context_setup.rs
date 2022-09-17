@@ -5,7 +5,7 @@ use crate::datastore::UeState;
 use super::Gnbcu;
 use anyhow::Result;
 use bitvec::prelude::*;
-use f1ap::{GnbCuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
+use f1ap::{GnbCuUeF1apId, SrbId, UeContextSetupProcedure, UeContextSetupRequest};
 use net::AperSerde;
 use ngap::*;
 use pdcp::PdcpPdu;
@@ -61,7 +61,9 @@ pub async fn initial_context_setup<G: Gnbcu>(
     } else {
         // --- No sessions needed ---
         debug!(&logger, "<< SecurityModeCommand");
-        gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
+        gnbcu
+            .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
+            .await;
     }
 
     // Receive Security Mode Complete.
@@ -85,7 +87,9 @@ pub async fn initial_context_setup<G: Gnbcu>(
 
         // Send to the UE and get back the response.
         debug!(&logger, "<< RrcReconfiguration");
-        gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
+        gnbcu
+            .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
+            .await;
         let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
             .recv()
             .await

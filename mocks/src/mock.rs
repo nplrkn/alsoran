@@ -97,6 +97,7 @@ impl<P: Pdu> Mock<P> {
     }
 
     /// Receive a Pdu, with a 0.5s timeout.
+    /// By default, this function asserts if there is a second message waiting after receiving the PDU.
     pub async fn receive_pdu(&self) -> P {
         let f = self.receiver.recv();
         async_std::future::timeout(std::time::Duration::from_millis(500), f)

@@ -101,16 +101,22 @@ impl TestContext {
     }
 
     pub async fn register_ue(&mut self, ue_id: u32) -> Result<()> {
-        self.du.perform_rrc_setup(ue_id, Vec::new()).await?;
-        self.amf.receive_initial_ue_message(ue_id).await?;
-        self.amf.send_initial_context_setup_request(ue_id).await?;
-        let security_mode_command = self.du.receive_security_mode_command(ue_id).await?;
+        self.du.perform_rrc_setup(ue_id, Vec::new()).await.unwrap();
+        self.amf.receive_initial_ue_message(ue_id).await.unwrap();
+        self.amf
+            .send_initial_context_setup_request(ue_id)
+            .await
+            .unwrap();
+        let security_mode_command = self.du.receive_security_mode_command(ue_id).await.unwrap();
         self.du
             .send_security_mode_complete(ue_id, &security_mode_command)
-            .await?;
+            .await
+            .unwrap();
         self.amf
             .receive_initial_context_setup_response(ue_id)
-            .await?;
+            .await
+            .unwrap();
+        self.du.receive_nas(ue_id).await.unwrap();
         Ok(())
     }
 

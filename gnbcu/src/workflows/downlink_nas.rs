@@ -3,6 +3,7 @@
 use crate::datastore::UeState;
 
 use super::Gnbcu;
+use f1ap::SrbId;
 use net::AperSerde;
 use ngap::DownlinkNasTransport;
 use pdcp::PdcpPdu;
@@ -74,5 +75,7 @@ pub async fn send_nas_to_ue<G: Gnbcu>(
     };
     let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
     debug!(&logger, "<< DlInformationTransfer(Nas)");
-    gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
+    gnbcu
+        .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
+        .await;
 }
