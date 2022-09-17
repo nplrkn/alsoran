@@ -6,7 +6,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
-- Review all readmes as seen on Github
+- Review all readmes as seen on Github, esp front page and roadmap
 - Set to public
 ----E1 + session establishment----
 - GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
