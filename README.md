@@ -24,6 +24,10 @@ The gNB-CU control and user plane (gNB-CU-CP and gNB-CU-UP) are interconnected b
 
 -  Storage of UE Context in Redis datastore.
 
+## Integration tests and Redis
+
+`cargo test` runs the integration test suite.  For this test suite to pass fully, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
+
 ## Up next
 
 -  E1 and sample userplane.
