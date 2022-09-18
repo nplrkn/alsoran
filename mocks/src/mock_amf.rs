@@ -240,8 +240,74 @@ impl MockAmf {
         Ok(())
     }
 
-    pub async fn send_pdu_session_resource_setup(&self, _ue_id: u32) -> Result<()> {
-        todo!()
+    pub async fn send_pdu_session_resource_setup(&self, ue_id: u32) -> Result<()> {
+        info!(&self.logger, "<< PduSessionResourceSetupRequest");
+
+        let ran_ue_ngap_id = self.ues[&ue_id].ran_ue_ngap_id.clone();
+
+        let transport_layer_address = TransportLayerAddress(bitvec![u8, Msb0;0,1,0,1,0,1]);
+
+        let pdu_session_resource_setup_request_transfer = PduSessionResourceSetupRequestTransfer {
+            pdu_session_aggregate_maximum_bit_rate: None,
+            ul_ngu_up_tnl_information: UpTransportLayerInformation::GtpTunnel(GtpTunnel {
+                transport_layer_address,
+                gtp_teid: GtpTeid(vec![1, 2, 3, 4]),
+            }),
+            additional_ul_ngu_up_tnl_information: None,
+            data_forwarding_not_possible: None,
+            pdu_session_type: PduSessionType::Ipv4,
+            security_indication: None,
+            network_instance: None,
+            qos_flow_setup_request_list: QosFlowSetupRequestList(vec![QosFlowSetupRequestItem {
+                qos_flow_identifier: QosFlowIdentifier(1),
+                qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
+                    qos_characteristics: QosCharacteristics::NonDynamic5qi(
+                        NonDynamic5qiDescriptor {
+                            five_qi: FiveQi(1),
+                            priority_level_qos: None,
+                            averaging_window: None,
+                            maximum_data_burst_volume: None,
+                        },
+                    ),
+                    allocation_and_retention_priority: AllocationAndRetentionPriority {
+                        priority_level_arp: PriorityLevelArp(3),
+                        pre_emption_capability: PreEmptionCapability::ShallNotTriggerPreEmption,
+                        pre_emption_vulnerability: PreEmptionVulnerability::PreEmptable,
+                    },
+                    gbr_qos_information: None,
+                    reflective_qos_attribute: None,
+                    additional_qos_flow_information: None,
+                },
+                e_rab_id: None,
+            }]),
+            common_network_instance: None,
+            direct_forwarding_path_availability: None,
+            redundant_ul_ngu_up_tnl_information: None,
+            additional_redundant_ul_ngu_up_tnl_information: None,
+            redundant_common_network_instance: None,
+            redundant_pdu_session_information: None,
+        }
+        .into_bytes()?;
+
+        let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceSetupRequest(
+            PduSessionResourceSetupRequest {
+                amf_ue_ngap_id: AmfUeNgapId(ue_id.into()),
+                ran_ue_ngap_id,
+                ran_paging_priority: None,
+                nas_pdu: None,
+                pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(vec![
+                    PduSessionResourceSetupItemSuReq {
+                        pdu_session_id: PduSessionId(1),
+                        pdu_session_nas_pdu: Some(NasPdu(vec![])),
+                        s_nssai: self.snssai(),
+                        pdu_session_resource_setup_request_transfer,
+                    },
+                ]),
+                ue_aggregate_maximum_bit_rate: None,
+            },
+        ));
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 
     pub async fn receive_pdu_session_resource_setup_response(&self, _ue_id: u32) -> Result<()> {
