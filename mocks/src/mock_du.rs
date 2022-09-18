@@ -264,6 +264,12 @@ impl MockDu {
         }
     }
 
+    pub async fn handle_ue_context_setup(&self, ue_id: u32) -> Result<()> {
+        let _ = self.receive_ue_context_setup_request(ue_id).await?;
+        self.send_ue_context_setup_response(ue_id).await?;
+        Ok(())
+    }
+
     pub async fn receive_ue_context_setup_request(
         &self,
         ue_id: u32,

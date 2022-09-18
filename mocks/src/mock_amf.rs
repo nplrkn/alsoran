@@ -239,4 +239,12 @@ impl MockAmf {
         self.send(pdu.into_bytes()?).await;
         Ok(())
     }
+
+    pub async fn send_pdu_session_resource_setup(&self, _ue_id: u32) -> Result<()> {
+        todo!()
+    }
+
+    pub async fn receive_pdu_session_resource_setup_response(&self, _ue_id: u32) -> Result<()> {
+        todo!()
+    }
 }

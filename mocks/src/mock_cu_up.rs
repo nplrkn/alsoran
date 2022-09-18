@@ -81,4 +81,20 @@ impl MockCuUp {
         let _response = self.receive_pdu().await;
         info!(self.logger, "E1SetupResponse <<");
     }
+
+    pub async fn handle_bearer_context_setup(&self, ue_id: u32) -> Result<()> {
+        self.receive_bearer_context_setup(ue_id).await?;
+        self.send_bearer_context_setup_response(ue_id).await
+    }
+
+    async fn receive_bearer_context_setup(&self, _ue_id: u32) -> Result<()> {
+        todo!()
+    }
+    async fn send_bearer_context_setup_response(&self, _ue_id: u32) -> Result<()> {
+        todo!()
+    }
+
+    pub async fn handle_bearer_context_modification(&self, _ue_id: u32) -> Result<()> {
+        todo!()
+    }
 }

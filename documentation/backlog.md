@@ -3,6 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
+- PDU session resource setup
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
