@@ -27,7 +27,7 @@ impl Ue {
         Ue { id, stdout, stdin }
     }
 
-    pub fn recv_nas(&mut self) -> Vec<u8> {
+    pub fn build_next_nas_message(&mut self) -> Vec<u8> {
         let mut s = String::new();
         let mut buf = [0];
         loop {
@@ -40,7 +40,7 @@ impl Ue {
         hex::decode(s.clone()).expect(&format!("String '{}' didn't decode to hex", s))
     }
 
-    pub fn send_nas(&mut self, nas_bytes: Vec<u8>, logger: &Logger) {
+    pub fn handle_nas(&mut self, nas_bytes: Vec<u8>, logger: &Logger) {
         let hex_string = hex::encode(nas_bytes) + "\n";
         debug!(&logger, "Send to ue-sim {}", hex_string);
         self.stdin

@@ -227,6 +227,7 @@ impl<U: UeStateStore> Gnbcu for ConcreteGnbcu<U> {
     async fn send_rrc_to_ue(
         &self,
         ue: &UeState,
+        srb_id: SrbId,
         rrc_container: f1ap::RrcContainer,
         logger: &Logger,
     ) {
@@ -234,7 +235,7 @@ impl<U: UeStateStore> Gnbcu for ConcreteGnbcu<U> {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
             gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id.clone(),
             old_gnb_du_ue_f1ap_id: None,
-            srb_id: SrbId(1),
+            srb_id,
             execute_duplication: None,
             rrc_container,
             rat_frequency_priority_information: None,

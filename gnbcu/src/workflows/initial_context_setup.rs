@@ -5,7 +5,7 @@ use crate::datastore::UeState;
 use super::Gnbcu;
 use anyhow::Result;
 use bitvec::prelude::*;
-use f1ap::{GnbCuUeF1apId, UeContextSetupProcedure, UeContextSetupRequest};
+use f1ap::{GnbCuUeF1apId, SrbId, UeContextSetupProcedure, UeContextSetupRequest};
 use net::AperSerde;
 use ngap::*;
 use pdcp::PdcpPdu;
@@ -13,12 +13,17 @@ use rrc::*;
 use slog::{debug, Logger};
 
 // Initial context setup procedure.
-// 1.    Ngap InitialContextSetupRequest(Nas) <<
+// 1.    Ngap InitialContextSetupRequest(maybe Nas) <<
+// --- CONDITIONAL IF PDUS ARE PRESENT -----
 // 2. << F1ap UeContextSetup(Rrc SecurityModeCommand)
 // 3. >> F1ap Ue Context Setup Response
+// -----------------------------------------
 // 4. >> Rrc SecurityModeComplete
-// 5. << Rrc RrcReconfiguration(Nas)
+// --- CONDITIONAL IF PDUS ARE PRESENT -----
+// 5. << Rrc RrcReconfiguration(maybe Nas)
 // 6. >> Rrc RrcReconfigurationComplete
+// ---- NO PDUS ---
+// -----------------------------------------
 // 7.    Ngap InitialContextSetupResponse >>
 pub async fn initial_context_setup<G: Gnbcu>(
     gnbcu: &G,
@@ -37,42 +42,64 @@ pub async fn initial_context_setup<G: Gnbcu>(
     // Build Security Mode command and wrap it in an RrcContainer.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
     let rrc_security_mode_command = build_rrc_security_mode_command(RrcTransactionIdentifier(2));
-    let rrc_container = Some(make_rrc_container(rrc_security_mode_command)?);
+    let rrc_container = make_rrc_container(rrc_security_mode_command)?;
 
-    // Build Ue Context Setup request and include the Rrc security mode command.
-    let ue_context_setup_request = build_ue_context_setup_request(&r, &ue, rrc_container);
+    if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {
+        // --- Sessions needed ---
+        // TODO: implementation incomplete and this arm not tested
 
-    // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
-    debug!(&logger, "<< UeContextSetup(SecurityModeCommand)");
-    let _ue_context_setup_response = gnbcu
-        .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, &logger)
-        .await
-        .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
-    debug!(&logger, ">> UeContextSetupResponse");
+        // Build Ue Context Setup request and include the Rrc security mode command.
+        let ue_context_setup_request = build_ue_context_setup_request(&r, &ue, Some(rrc_container));
 
-    // Also get back the response from the UE to the (inner) Security Mode Command.
+        // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
+        debug!(&logger, "<< UeContextSetup(SecurityModeCommand)");
+        let _ue_context_setup_response = gnbcu
+            .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, &logger)
+            .await
+            .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
+        debug!(&logger, ">> UeContextSetupResponse");
+    } else {
+        // --- No sessions needed ---
+        debug!(&logger, "<< SecurityModeCommand");
+        gnbcu
+            .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
+            .await;
+    }
+
+    // Receive Security Mode Complete.
     let _rrc_security_mode_complete = rrc_transaction
         .recv()
         .await
         .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
     debug!(&logger, ">> SecurityModeComplete");
 
-    // Build Rrc Reconfiguration including the Nas message from earlier.
-    let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
-    let rrc_reconfiguration = build_rrc_reconfiguration(
-        RrcTransactionIdentifier(3),
-        r.nas_pdu.clone().map(|x| DedicatedNasMessage(x.0)),
-    );
-    let rrc_container = make_rrc_container(rrc_reconfiguration)?;
+    if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {
+        // --- Sessions needed ---
+        // TODO: implementation incomplete and this arm not tested
 
-    // Send to the UE and get back the response.
-    debug!(&logger, "<< RrcReconfiguration");
-    gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
-    let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
-        .recv()
-        .await
-        .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
-    debug!(&logger, ">> RrcReconfigurationComplete");
+        // Build Rrc Reconfiguration including the Nas message from earlier.
+        let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
+        let rrc_reconfiguration = build_rrc_reconfiguration(
+            RrcTransactionIdentifier(3),
+            r.nas_pdu.clone().map(|x| DedicatedNasMessage(x.0)),
+        );
+        let rrc_container = make_rrc_container(rrc_reconfiguration)?;
+
+        // Send to the UE and get back the response.
+        debug!(&logger, "<< RrcReconfiguration");
+        gnbcu
+            .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
+            .await;
+        let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
+            .recv()
+            .await
+            .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
+        debug!(&logger, ">> RrcReconfigurationComplete");
+    } else if let Some(nas) = r.nas_pdu.clone() {
+        super::downlink_nas::send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(nas.0), logger).await;
+    } else {
+        debug!(&logger, "No Nas and no sessions on initial context create");
+    }
 
     // Reply to the AMF.
     debug!(&logger, "InitialContextSetupResponse >>");

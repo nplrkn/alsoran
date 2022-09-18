@@ -209,11 +209,13 @@ impl MockAmf {
     }
 
     pub async fn receive_initial_context_setup_response(&self, ue_id: u32) -> Result<()> {
-        info!(&self.logger, ">> InitialContextSetupResponse");
         let received_amf_ue_id = match self.receive_pdu().await {
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
                 InitialContextSetupResponse { amf_ue_ngap_id, .. },
-            )) => Ok(amf_ue_ngap_id.0),
+            )) => {
+                info!(&self.logger, ">> InitialContextSetupResponse");
+                Ok(amf_ue_ngap_id.0)
+            }
             x => Err(anyhow!(
                 "Expecting InitialContextSetupResponse, got unexpected message {:?}",
                 x

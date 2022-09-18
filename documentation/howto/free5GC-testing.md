@@ -44,6 +44,6 @@ In terminal 2, hit Ctrl-C to finish the tcpdump.  You can now view `alsoran.pcap
 
 To clean up,
 - Ctrl-C in terminal 3 to shut down Alsoran
-- `fg` and Ctrl-C in terminal 3 to shut down Redis, and `rm dump.rbd` to clean up its saved state
+- `fg` and Ctrl-C in terminal 3 to shut down Redis, and `rm dump.rdb` to clean up its saved state
 - in terminal 1, `kill $(jobs -p)` to terminate the free5GC network functions that are running in the background
 - `sudo service mongodb stop` to terminate MongoDB.

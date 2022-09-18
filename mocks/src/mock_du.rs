@@ -89,8 +89,8 @@ impl MockDu {
                 gnb_cu_ue_f1ap_id: None,
             },
         );
-        self.send_rrc_setup_request(ue_id).await?;
-        let rrc_setup = self.receive_rrc_setup(ue_id).await?;
+        self.send_rrc_setup_request(ue_id).await.unwrap();
+        let rrc_setup = self.receive_rrc_setup(ue_id).await.unwrap();
         self.send_rrc_setup_complete(ue_id, rrc_setup, nas_message)
             .await
     }
@@ -130,8 +130,8 @@ impl MockDu {
             })?;
 
         info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
-
         self.send(f1_indication).await;
+
         Ok(())
     }
 
@@ -141,11 +141,20 @@ impl MockDu {
             F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
+
+        // A Rrc Setup flows as a DlCcchMessage on SRB0.  Check this is indeed for SRB0.
+        assert_eq!(dl_rrc_message_transfer.srb_id.0, 0);
+
         self.ues.get_mut(&ue_id).unwrap().gnb_cu_ue_f1ap_id =
             Some(dl_rrc_message_transfer.gnb_cu_ue_f1ap_id);
         let pdcp_pdu = PdcpPdu(dl_rrc_message_transfer.rrc_container.0);
         let rrc_message_bytes = pdcp_pdu.view_inner()?;
-        let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)?.message {
+
+        // TODO - how to verify that this is indeed a DlCcchMessage rather than a DlDcchMessage.
+        let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)
+            .unwrap()
+            .message
+        {
             DlCcchMessageType::C1(C1_1::RrcSetup(x)) => Ok(x),
             x => Err(anyhow!("Unexpected RRC message {:?}", x)),
         }?;
@@ -238,6 +247,21 @@ impl MockDu {
 
         assert_eq!(dl_rrc_message_transfer.gnb_du_ue_f1ap_id.0, ue_id);
         Ok(dl_rrc_message_transfer)
+    }
+
+    pub async fn receive_security_mode_command(&self, ue_id: u32) -> Result<SecurityModeCommand> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
+
+        // A Rrc Setup flows as a DlDcchMessage on SRB1.  Check this is indeed for SRB1.
+        assert_eq!(dl_rrc_message_transfer.srb_id.0, 1);
+
+        match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
+            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
+                info!(&self.logger, "DlRrcMessageTransfer(SecurityModeCommand) <<");
+                Ok(x)
+            }
+            x => Err(anyhow!("Expected security mode command - got {:?}", x)),
+        }
     }
 
     pub async fn receive_ue_context_setup_request(

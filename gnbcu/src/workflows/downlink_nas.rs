@@ -1,6 +1,9 @@
 //! downlink_nas - transfer of a Nas message from AMF to UE
 
+use crate::datastore::UeState;
+
 use super::Gnbcu;
+use f1ap::SrbId;
 use net::AperSerde;
 use ngap::DownlinkNasTransport;
 use pdcp::PdcpPdu;
@@ -38,13 +41,21 @@ pub async fn downlink_nas<G: Gnbcu>(gnbcu: &G, i: DownlinkNasTransport, logger: 
             }
         }
     }
+    send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(i.nas_pdu.0), logger).await
+}
 
+pub async fn send_nas_to_ue<G: Gnbcu>(
+    gnbcu: &G,
+    ue: &UeState,
+    nas: DedicatedNasMessage,
+    logger: &Logger,
+) {
     let rrc = match (DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
             rrc_transaction_identifier: RrcTransactionIdentifier(2),
             critical_extensions: CriticalExtensions4::DlInformationTransfer(
                 DlInformationTransferIEs {
-                    dedicated_nas_message: Some(DedicatedNasMessage(i.nas_pdu.0)),
+                    dedicated_nas_message: Some(nas),
                     late_non_critical_extension: None,
                     non_critical_extension: None,
                 },
@@ -64,5 +75,7 @@ pub async fn downlink_nas<G: Gnbcu>(gnbcu: &G, i: DownlinkNasTransport, logger: 
     };
     let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
     debug!(&logger, "<< DlInformationTransfer(Nas)");
-    gnbcu.send_rrc_to_ue(&ue, rrc_container, logger).await;
+    gnbcu
+        .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
+        .await;
 }
