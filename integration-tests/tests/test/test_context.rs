@@ -120,7 +120,7 @@ impl TestContext {
         Ok(())
     }
 
-    pub async fn establish_pdu_session(&self, ue_id: u32) -> Result<()> {
+    pub async fn establish_pdu_session(&mut self, ue_id: u32) -> Result<()> {
         self.amf
             .send_pdu_session_resource_setup(ue_id)
             .await
