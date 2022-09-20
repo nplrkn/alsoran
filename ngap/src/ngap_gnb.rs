@@ -35,6 +35,7 @@ impl<T> Application for NgapGnb<T> where
         + IndicationHandler<DownlinkNasTransportProcedure>
         + RequestProvider<InitialContextSetupProcedure>
         + IndicationHandler<AmfStatusIndicationProcedure>
+        + RequestProvider<PduSessionResourceSetupProcedure>
 {
 }
 
@@ -46,7 +47,8 @@ where
         + RequestProvider<NgSetupProcedure>
         + IndicationHandler<DownlinkNasTransportProcedure>
         + RequestProvider<InitialContextSetupProcedure>
-        + IndicationHandler<AmfStatusIndicationProcedure>,
+        + IndicationHandler<AmfStatusIndicationProcedure>
+        + RequestProvider<PduSessionResourceSetupProcedure>,
 {
     type TopPdu = NgapPdu;
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
@@ -70,6 +72,10 @@ where
             }
             InitiatingMessage::AmfStatusIndication(req) => {
                 AmfStatusIndicationProcedure::call_provider(&self.0, req, logger).await;
+                None
+            }
+            InitiatingMessage::PduSessionResourceSetupRequest(req) => {
+                PduSessionResourceSetupProcedure::call_provider(&self.0, req, logger).await;
                 None
             }
             _ => todo!(),

@@ -72,3 +72,15 @@ impl<G: Gnbcu> IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler<G
         }
     }
 }
+
+#[async_trait]
+impl<G: Gnbcu> RequestProvider<PduSessionResourceSetupProcedure> for NgapHandler<G> {
+    async fn request(
+        &self,
+        r: PduSessionResourceSetupRequest,
+        logger: &Logger,
+    ) -> Result<PduSessionResourceSetupResponse, RequestError<()>> {
+        debug!(logger, "Initial Context Setup Procedure");
+        Ok(workflows::pdu_session_resource_setup(&self.gnbcu, &r, logger).await)
+    }
+}
