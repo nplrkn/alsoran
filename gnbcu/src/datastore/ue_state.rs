@@ -1,5 +1,6 @@
 //! ue_state - serializable model of GNB-CU's per UE state
 
+use bitvec::prelude::*;
 use f1ap::GnbDuUeF1apId;
 use ngap::AmfUeNgapId;
 use speedy::{Readable, Writable};
@@ -9,6 +10,7 @@ pub struct UeState {
     pub key: u32,
     pub gnb_du_ue_f1ap_id: GnbDuUeF1apId,
     pub amf_ue_ngap_id: Option<AmfUeNgapId>,
+    pub plmn: Vec<u8>,
 }
 
 #[derive(Readable, Writable)]
