@@ -85,7 +85,7 @@ pub async fn initial_access<G: Gnbcu>(
 
     // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk-convert?)
     let nr_cgi = ngap::NrCgi {
-        plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
+        plmn_identity: ngap::PlmnIdentity(gnbcu.config().plmn.clone()),
         nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
     };
 
@@ -97,7 +97,7 @@ pub async fn initial_access<G: Gnbcu>(
             UserLocationInformationNr {
                 nr_cgi,
                 tai: Tai {
-                    plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
+                    plmn_identity: ngap::PlmnIdentity(gnbcu.config().plmn.clone()),
                     tac: Tac(vec![0, 0, 1]),
                 },
                 time_stamp: None,

@@ -13,6 +13,9 @@ pub struct Config {
 
     // Human readable name signaled in NG Setup Request, E1 GnbCuUpE1SetupResponse and F1SetupResponse
     pub name: Option<String>,
+
+    // PLMN
+    pub plmn: Vec<u8>,
 }
 
 impl Default for Config {
@@ -22,6 +25,7 @@ impl Default for Config {
             e1ap_bind_port: 38462, // TS38.462
             initial_ue_ttl_secs: 5,
             name: Some("Alsoran".to_string()),
+            plmn: vec![0x2, 0xf8, 0x39],
         }
     }
 }

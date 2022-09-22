@@ -1,6 +1,6 @@
 //! pdu_session_resource_setup - AMF orders setup of PDU sessions and DRBs
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use e1ap::*;
 use net::AperSerde;
@@ -101,10 +101,10 @@ pub async fn setup_session<G: Gnbcu>(
     r: &PduSessionResourceSetupItemSuReq,
     logger: &Logger,
 ) -> Result<()> {
-    let session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
+    let _session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
         &r.pdu_session_resource_setup_request_transfer,
     )?;
-    let ue_dl_aggregate_maximum_bit_rate = BitRate(0);
+    let ue_dl_aggregate_maximum_bit_rate = BitRate(1000);
     let item = PduSessionResourceToSetupItem {
         pdu_session_id: PduSessionId(r.pdu_session_id.0),
         pdu_session_type: PduSessionType::Ipv4,
@@ -199,7 +199,7 @@ pub async fn setup_session<G: Gnbcu>(
         },
         ue_dl_aggregate_maximum_bit_rate,
         ue_dl_maximum_integrity_protected_data_rate: None,
-        serving_plmn: PlmnIdentity(ue.plmn.clone()),
+        serving_plmn: PlmnIdentity(gnbcu.config().plmn.clone()),
         activity_notification_level: ActivityNotificationLevel::PduSession,
         ue_inactivity_timer: None,
         bearer_context_status_change: None,
@@ -220,5 +220,18 @@ pub async fn setup_session<G: Gnbcu>(
         gnb_cu_up_ue_e1ap_id: None,
     };
 
-    Ok(())
+    debug!(&logger, "<< BearerContextSetupRequest");
+    match gnbcu
+        .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, logger)
+        .await
+    {
+        Ok(_) => {
+            debug!(&logger, ">> BearerContextSetupResponse");
+            Ok(())
+        }
+        Err(e) => {
+            debug!(&logger, "Failed bearer context setup - {:?}", e);
+            Err(anyhow!("Failed bearer context setup"))
+        }
+    }
 }

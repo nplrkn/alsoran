@@ -5,7 +5,7 @@ use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use e1ap::*;
 use net::AperSerde;
-use slog::{info, o, Logger};
+use slog::{debug, info, o, Logger};
 use std::{
     collections::HashMap,
     ops::{Deref, DerefMut},
@@ -19,7 +19,7 @@ pub struct MockCuUp {
 }
 
 struct UeContext {
-    gnb_cu_cp_ue_e1ap_id: Option<GnbCuCpUeE1apId>,
+    gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId,
 }
 
 impl Deref for MockCuUp {
@@ -91,18 +91,26 @@ impl MockCuUp {
     }
 
     async fn receive_bearer_context_setup(&mut self, ue_id: u32) -> Result<()> {
+        let logger = &self.logger;
+
         let bearer_context_setup = match self.receive_pdu().await {
             E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Expected BearerContextSetupRequest, got {:?}", x)),
         }?;
-        self.ues.get_mut(&ue_id).unwrap().gnb_cu_cp_ue_e1ap_id =
-            Some(bearer_context_setup.gnb_cu_cp_ue_e1ap_id);
+        let gnb_cu_cp_ue_e1ap_id = bearer_context_setup.gnb_cu_cp_ue_e1ap_id;
+        debug!(logger, "UE Id {:?}", gnb_cu_cp_ue_e1ap_id);
+        self.ues.insert(
+            ue_id,
+            UeContext {
+                gnb_cu_cp_ue_e1ap_id,
+            },
+        );
         info!(self.logger, "BearerContextSetupRequest <<");
         Ok(())
     }
 
     async fn send_bearer_context_setup_response(&self, ue_id: u32) -> Result<()> {
-        let gnb_cu_cp_ue_e1ap_id = self.ues[&ue_id].gnb_cu_cp_ue_e1ap_id.clone().unwrap();
+        let gnb_cu_cp_ue_e1ap_id = self.ues[&ue_id].gnb_cu_cp_ue_e1ap_id.clone();
 
         let upf_facing_transport_layer_address = bitvec![u8, Msb0;1, 0, 1, 0,1,0];
 

@@ -211,6 +211,17 @@ impl<U: UeStateStore> Gnbcu for ConcreteGnbcu<U> {
         <Stack as IndicationHandler<P>>::handle(&self.f1ap, r, logger).await
     }
 
+    async fn e1ap_request<P: Procedure>(
+        &self,
+        r: P::Request,
+        logger: &Logger,
+    ) -> Result<P::Success, RequestError<P::Failure>> {
+        <Stack as RequestProvider<P>>::request(&self.e1ap, r, logger).await
+    }
+    async fn e1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger) {
+        <Stack as IndicationHandler<P>>::handle(&self.e1ap, r, logger).await
+    }
+
     /// Start a new RRC transaction.
     async fn new_rrc_transaction(&self, ue: &UeState) -> RrcTransaction {
         self.rrc_transactions.new_transaction(ue.key).await

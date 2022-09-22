@@ -80,7 +80,6 @@ impl<G: Gnbcu> RequestProvider<PduSessionResourceSetupProcedure> for NgapHandler
         r: PduSessionResourceSetupRequest,
         logger: &Logger,
     ) -> Result<PduSessionResourceSetupResponse, RequestError<()>> {
-        debug!(logger, "Initial Context Setup Procedure");
         Ok(workflows::pdu_session_resource_setup(&self.gnbcu, r, logger).await)
     }
 }

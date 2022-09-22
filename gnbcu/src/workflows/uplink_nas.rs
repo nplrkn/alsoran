@@ -45,7 +45,7 @@ pub async fn uplink_nas<G: Gnbcu>(
 
     // Todo - should be from Ue context
     let nr_cgi = ngap::NrCgi {
-        plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
+        plmn_identity: ngap::PlmnIdentity(gnbcu.config().plmn.clone()),
         nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),
     };
 
@@ -57,7 +57,7 @@ pub async fn uplink_nas<G: Gnbcu>(
             UserLocationInformationNr {
                 nr_cgi,
                 tai: Tai {
-                    plmn_identity: ngap::PlmnIdentity(vec![0x02, 0xf8, 0x39]),
+                    plmn_identity: ngap::PlmnIdentity(gnbcu.config().plmn.clone()),
                     tac: Tac(vec![0, 0, 1]),
                 },
                 time_stamp: None,

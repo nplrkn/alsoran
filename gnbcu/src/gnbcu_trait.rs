@@ -30,6 +30,14 @@ pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
     ) -> Result<P::Success, RequestError<P::Failure>>;
     async fn f1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger);
 
+    async fn e1ap_request<P: Procedure>(
+        &self,
+        r: P::Request,
+        logger: &Logger,
+    ) -> Result<P::Success, RequestError<P::Failure>>;
+
+    async fn e1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger);
+
     // TODO - make RRC request and indication similar to the above?
     // See "This was an idea for a more elegant model" in initial_access.rs.
 
