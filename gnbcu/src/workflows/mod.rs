@@ -1,3 +1,5 @@
+mod build_f1ap;
+mod build_rrc;
 mod downlink_nas;
 mod initial_access;
 mod initial_context_setup;

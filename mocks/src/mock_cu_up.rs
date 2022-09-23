@@ -172,7 +172,54 @@ impl MockCuUp {
         Ok(())
     }
 
-    pub async fn handle_bearer_context_modification(&self, _ue_id: u32) -> Result<()> {
-        todo!()
+    pub async fn handle_bearer_context_modification(&self, ue_id: u32) -> Result<()> {
+        self.receive_bearer_context_modification(ue_id).await?;
+        self.send_bearer_context_modification_response(ue_id).await
+    }
+
+    async fn receive_bearer_context_modification(&self, ue_id: u32) -> Result<()> {
+        let bearer_context_modification = match self.receive_pdu().await {
+            E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextModificationRequest(x)) => {
+                Ok(x)
+            }
+            x => Err(anyhow!(
+                "Expected BearerContextModificationRequest, got {:?}",
+                x
+            )),
+        }?;
+        info!(self.logger, "BearerContextModificationRequest <<");
+
+        // Check the IDs.
+        let ue = &self.ues[&ue_id];
+        assert_eq!(bearer_context_modification.gnb_cu_up_ue_e1ap_id.0, ue_id);
+        assert_eq!(
+            bearer_context_modification.gnb_cu_cp_ue_e1ap_id.0,
+            ue.gnb_cu_cp_ue_e1ap_id.0
+        );
+        Ok(())
+    }
+
+    async fn send_bearer_context_modification_response(&self, ue_id: u32) -> Result<()> {
+        let ue = &self.ues[&ue_id];
+        let pdu = e1ap::E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextModificationResponse(BearerContextModificationResponse {
+            gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId(ue.gnb_cu_cp_ue_e1ap_id.0),
+            gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId(ue_id),
+            system_bearer_context_modification_response: Some(
+                SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(
+                    NgRanBearerContextModificationResponse {
+                        // TODO - supply these to make a proper reply to the request
+                        pdu_session_resource_setup_mod_list: None,
+                        pdu_session_resource_failed_mod_list: None,
+                        pdu_session_resource_modified_list: None,
+                        pdu_session_resource_failed_to_modify_list: None,
+                        retainability_measurements_info: None,
+                    },
+                ),
+            ),
+        }));
+        info!(self.logger, "BearerContextModificationResponse >>");
+        self.send(pdu.into_bytes()?).await;
+
+        Ok(())
     }
 }
