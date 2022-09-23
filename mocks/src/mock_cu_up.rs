@@ -132,7 +132,7 @@ impl MockCuUp {
                                             transport_layer_address: TransportLayerAddress(
                                                 upf_facing_transport_layer_address,
                                             ),
-                                            gtp_teid: GtpTeid(vec![2, 3, 2]),
+                                            gtp_teid: GtpTeid(vec![2, 3, 2, 1]),
                                         },
                                     ),
                                     pdu_session_data_forwarding_information_response: None,
@@ -147,7 +147,7 @@ impl MockCuUp {
                                                         GtpTunnel {
                                                             transport_layer_address:
                                                                 TransportLayerAddress(du_facing_transport_layer_address),
-                                                            gtp_teid: GtpTeid(vec![2, 3, 2]),
+                                                            gtp_teid: GtpTeid(vec![2, 3, 2, 1]),
                                                         },
                                                     ),
                                                     cell_group_id: CellGroupId(1),

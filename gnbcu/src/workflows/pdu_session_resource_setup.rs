@@ -1,6 +1,6 @@
 //! pdu_session_resource_setup - AMF orders setup of PDU sessions and DRBs
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use bitvec::prelude::*;
 use e1ap::*;
 use net::AperSerde;
@@ -35,26 +35,10 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
 ) -> PduSessionResourceSetupResponse {
     debug!(&logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-    let mut successful = Vec::<PduSessionResourceSetupItemSuReq>::new();
-    let mut unsuccessful = Vec::<PduSessionResourceSetupItemSuReq>::new();
-
-    // Retrieve UE context by ran_ue_ngap_id.
-    debug!(&logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
-    match gnbcu.retrieve(&r.ran_ue_ngap_id.0).await {
-        Ok(mut ue) => {
-            for session in r.pdu_session_resource_setup_list_su_req.0.into_iter() {
-                match setup_session(gnbcu, &mut ue, &session, logger).await {
-                    Ok(_) => successful.push(session),
-                    Err(_) => unsuccessful.push(session),
-                }
-            }
-            // write UE
-        }
-        Err(e) => {
-            debug!(logger, "Failed to retrieve UE context - {:?}", e);
-            unsuccessful = r.pdu_session_resource_setup_list_su_req.0;
-        }
-    }
+    // In the case where there are multiple sessions, we can have a partial failure.
+    let (successful, unsuccessful) = pdu_session_resource_setup_inner(gnbcu, &r, logger)
+        .await
+        .unwrap_or_else(|_| (Vec::new(), r.pdu_session_resource_setup_list_su_req.0));
 
     let pdu_session_resource_setup_list_su_res = if successful.is_empty() {
         None
@@ -95,17 +79,51 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
     }
 }
 
-pub async fn setup_session<G: Gnbcu>(
+pub async fn pdu_session_resource_setup_inner<G: Gnbcu>(
     gnbcu: &G,
-    ue: &mut UeState,
-    r: &PduSessionResourceSetupItemSuReq,
+    r: &PduSessionResourceSetupRequest,
     logger: &Logger,
-) -> Result<()> {
+) -> Result<(
+    Vec<PduSessionResourceSetupItemSuReq>,
+    Vec<PduSessionResourceSetupItemSuReq>,
+)> {
+    // Retrieve UE context by ran_ue_ngap_id.
+    debug!(&logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
+    let ue = gnbcu.retrieve(&r.ran_ue_ngap_id.0).await?;
+
+    // Build PduSessionResourceToSetupItems.
+    let mut items = vec![];
+    let mut unsuccessful = vec![];
+    for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
+        match build_setup_item(gnbcu, &ue, &x, logger) {
+            Ok(item) => items.push(item),
+            Err(e) => {
+                debug!(logger, "Failed to build session setup item {:?}", e);
+                unsuccessful.push(x);
+            }
+        };
+    }
+
+    let bearer_context_setup = build_bearer_context_setup(gnbcu, &ue, items, logger);
+    debug!(&logger, "<< BearerContextSetupRequest");
+    let _response = gnbcu
+        .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, logger)
+        .await;
+    debug!(&logger, ">> BearerContextSetupResponse");
+
+    Ok((vec![], vec![]))
+}
+
+pub fn build_setup_item<G: Gnbcu>(
+    _gnbcu: &G,
+    _ue: &UeState,
+    r: &PduSessionResourceSetupItemSuReq,
+    _logger: &Logger,
+) -> Result<PduSessionResourceToSetupItem> {
     let _session_params = PduSessionResourceSetupRequestTransfer::from_bytes(
         &r.pdu_session_resource_setup_request_transfer,
     )?;
-    let ue_dl_aggregate_maximum_bit_rate = BitRate(1000);
-    let item = PduSessionResourceToSetupItem {
+    Ok(PduSessionResourceToSetupItem {
         pdu_session_id: PduSessionId(r.pdu_session_id.0),
         pdu_session_type: PduSessionType::Ipv4,
         snssai: Snssai {
@@ -184,8 +202,18 @@ pub async fn setup_session<G: Gnbcu>(
             drb_inactivity_timer: None,
             pdcp_sn_status_information: None,
         }]),
-    };
-    let bearer_context_setup = BearerContextSetupRequest {
+    })
+}
+
+pub fn build_bearer_context_setup<G: Gnbcu>(
+    gnbcu: &G,
+    ue: &UeState,
+    items: Vec<PduSessionResourceToSetupItem>,
+    _logger: &Logger,
+) -> BearerContextSetupRequest {
+    let ue_dl_aggregate_maximum_bit_rate = BitRate(1000);
+
+    BearerContextSetupRequest {
         gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId(ue.key),
         security_information: SecurityInformation {
             security_algorithm: SecurityAlgorithm {
@@ -206,7 +234,7 @@ pub async fn setup_session<G: Gnbcu>(
         system_bearer_context_setup_request:
             SystemBearerContextSetupRequest::NgRanBearerContextSetupRequest(
                 NgRanBearerContextSetupRequest {
-                    pdu_session_resource_to_setup_list: PduSessionResourceToSetupList(vec![item]),
+                    pdu_session_resource_to_setup_list: PduSessionResourceToSetupList(items),
                 },
             ),
         ran_ue_id: None,
@@ -218,20 +246,5 @@ pub async fn setup_session<G: Gnbcu>(
         additional_handover_info: None,
         direct_forwarding_path_availability: None,
         gnb_cu_up_ue_e1ap_id: None,
-    };
-
-    debug!(&logger, "<< BearerContextSetupRequest");
-    match gnbcu
-        .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, logger)
-        .await
-    {
-        Ok(_) => {
-            debug!(&logger, ">> BearerContextSetupResponse");
-            Ok(())
-        }
-        Err(e) => {
-            debug!(&logger, "Failed bearer context setup - {:?}", e);
-            Err(anyhow!("Failed bearer context setup"))
-        }
     }
 }
