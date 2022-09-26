@@ -31,11 +31,7 @@ pub async fn initial_access<G: Gnbcu>(
     let _rrc_setup_request = expect_rrc_setup_request(&r.rrc_container.0)?;
     debug!(logger, ">> Rrc RrcSetupRequest");
 
-    let ue = UeState {
-        amf_ue_ngap_id: None,
-        gnb_du_ue_f1ap_id: r.gnb_du_ue_f1ap_id,
-        key: rand::thread_rng().gen::<u32>(),
-    };
+    let ue = UeState::new(rand::thread_rng().gen::<u32>(), r.gnb_du_ue_f1ap_id);
     debug!(&logger, "Created UE {:#010x}", ue.key);
 
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;

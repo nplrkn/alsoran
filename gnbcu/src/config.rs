@@ -11,6 +11,9 @@ pub struct Config {
     // TTL to set on the UE state during the initial access procedure
     pub initial_ue_ttl_secs: usize,
 
+    // TTL to set on the UE state once UE is configured
+    pub ue_ttl_secs: usize,
+
     // Human readable name signaled in NG Setup Request, E1 GnbCuUpE1SetupResponse and F1SetupResponse
     pub name: Option<String>,
 
@@ -24,6 +27,7 @@ impl Default for Config {
             f1ap_bind_port: 38472, // TS38.472
             e1ap_bind_port: 38462, // TS38.462
             initial_ue_ttl_secs: 5,
+            ue_ttl_secs: 86_400, // a day
             name: Some("Alsoran".to_string()),
             plmn: vec![0x2, 0xf8, 0x39],
         }

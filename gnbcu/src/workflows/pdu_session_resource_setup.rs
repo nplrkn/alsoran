@@ -1,6 +1,7 @@
 //! pdu_session_resource_setup - AMF orders setup of PDU sessions and DRBs
 
 use anyhow::Result;
+
 use bitvec::prelude::*;
 use e1ap::*;
 use f1ap::{
@@ -8,6 +9,7 @@ use f1ap::{
     UeContextSetupRequest,
 };
 use net::AperSerde;
+
 use ngap::{
     AmfUeNgapId, PduSessionResourceFailedToSetupItemSuRes,
     PduSessionResourceFailedToSetupListSuRes, PduSessionResourceSetupItemSuReq,
@@ -24,12 +26,14 @@ use crate::{datastore::UeState, gnbcu_trait::Gnbcu};
 // See documentation/session establishment.md
 //
 // 1.    Ngap PduSessionResourceSetupRequest(Nas) <<
-// 2. << E1ap BearerContextSetup
+// 2. << E1ap BearerContextSetupRequest
 // 3. >> E1ap BearerContextSetupResponse
 // 4. << F1ap UeContextSetupRequest
 // 5. >> F1ap UeContextSetupResponse
-// 6. << Dl Rrc Message Transfer + Rrc Reconfiguration + Nas PDU Session Establishment Accept
-// 7. >> Ul Rrc Message Transfer + Rrc Reconfiguration Complete
+// 6. << E1ap BearerContextModificationRequest
+// 7. >> E1ap BearerContextModificationResponse
+// 8. << Dl Rrc Message Transfer + Rrc Reconfiguration + Nas PDU Session Establishment Accept
+// 9. >> Ul Rrc Message Transfer + Rrc Reconfiguration Complete
 // 8.    Pdu Session Resource Setup Response >>
 
 pub async fn pdu_session_resource_setup<G: Gnbcu>(
@@ -39,10 +43,16 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
 ) -> PduSessionResourceSetupResponse {
     debug!(&logger, "PduSessionResourceSetupRequest(Nas) << ");
 
-    // In the case where there are multiple sessions, we can have a partial failure.
     let (successful, unsuccessful) = pdu_session_resource_setup_inner(gnbcu, &r, logger)
         .await
-        .unwrap_or_else(|_| (Vec::new(), r.pdu_session_resource_setup_list_su_req.0));
+        .unwrap_or_else(|_| {
+            (
+                Vec::new(),
+                r.pdu_session_resource_setup_list_su_req.0.iter().collect(),
+            )
+        });
+
+    // TODO: this is doable without cloning the pdu_session_resource_setup_request_transfer.
 
     let pdu_session_resource_setup_list_su_res = if successful.is_empty() {
         None
@@ -51,9 +61,10 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
             successful
                 .into_iter()
                 .map(|x| PduSessionResourceSetupItemSuRes {
-                    pdu_session_id: x.pdu_session_id,
+                    pdu_session_id: x.pdu_session_id.clone(),
                     pdu_session_resource_setup_response_transfer: x
-                        .pdu_session_resource_setup_request_transfer,
+                        .pdu_session_resource_setup_request_transfer
+                        .clone(),
                 })
                 .collect(),
         ))
@@ -66,9 +77,10 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
             unsuccessful
                 .into_iter()
                 .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                    pdu_session_id: x.pdu_session_id,
+                    pdu_session_id: x.pdu_session_id.clone(),
                     pdu_session_resource_setup_unsuccessful_transfer: x
-                        .pdu_session_resource_setup_request_transfer,
+                        .pdu_session_resource_setup_request_transfer
+                        .clone(),
                 })
                 .collect(),
         ))
@@ -83,24 +95,29 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
     }
 }
 
-pub async fn pdu_session_resource_setup_inner<G: Gnbcu>(
+pub async fn pdu_session_resource_setup_inner<'a, G: Gnbcu>(
     gnbcu: &G,
-    r: &PduSessionResourceSetupRequest,
+    r: &'a PduSessionResourceSetupRequest,
     logger: &Logger,
 ) -> Result<(
-    Vec<PduSessionResourceSetupItemSuReq>,
-    Vec<PduSessionResourceSetupItemSuReq>,
+    Vec<&'a PduSessionResourceSetupItemSuReq>,
+    Vec<&'a PduSessionResourceSetupItemSuReq>,
 )> {
     // Retrieve UE context by ran_ue_ngap_id.
     debug!(&logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
-    let ue = gnbcu.retrieve(&r.ran_ue_ngap_id.0).await?;
+    let mut ue = gnbcu.retrieve(&r.ran_ue_ngap_id.0).await?;
 
     // Build PduSessionResourceToSetupItems.
     let mut items = vec![];
     let mut unsuccessful = vec![];
+    let mut successful = vec![];
+
     for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
         match build_setup_item(gnbcu, &ue, &x, logger) {
-            Ok(item) => items.push(item),
+            Ok(item) => {
+                items.push(item);
+                successful.push(x);
+            }
             Err(e) => {
                 debug!(logger, "Failed to build session setup item {:?}", e);
                 unsuccessful.push(x);
@@ -113,25 +130,41 @@ pub async fn pdu_session_resource_setup_inner<G: Gnbcu>(
     // Send BearerContextSetup to CU-UP.
     let bearer_context_setup = build_bearer_context_setup(gnbcu, &ue, items, logger);
     debug!(&logger, "<< BearerContextSetupRequest");
-    let _response = gnbcu
+    let response = gnbcu
         .e1ap_request::<BearerContextSetupProcedure>(bearer_context_setup, logger)
-        .await;
+        .await?;
     debug!(&logger, ">> BearerContextSetupResponse");
+
+    // Store CU-UP's ID.
+    let gnb_cu_up_ue_e1ap_id = response.gnb_cu_up_ue_e1ap_id;
+    ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id.clone());
 
     // Send UeContextSetupRequest to DU.
     let ue_context_setup_request = build_ue_context_setup_request(gnbcu, &ue, None);
     debug!(&logger, "<< UeContextSetupRequest");
-    let _ue_context_setup_response = gnbcu
+    let ue_context_setup_response = gnbcu
         .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, &logger)
-        .await;
+        .await?;
     debug!(&logger, ">> UeContextSetupResponse");
+
+    // Send BearerContextModification to CU-UP.
+    let bearer_context_modification = build_bearer_context_modification(
+        gnbcu,
+        &ue,
+        gnb_cu_up_ue_e1ap_id,
+        ue_context_setup_response,
+        logger,
+    );
+    debug!(&logger, "<< BearerContextMdificationRequest");
+    let _response = gnbcu
+        .e1ap_request::<BearerContextModificationProcedure>(bearer_context_modification, logger)
+        .await?;
+    debug!(&logger, ">> BearerContextModificationResponse");
 
     // Perform Rrc Reconfiguration including the Nas message from earlier.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
     let rrc_container =
         super::build_rrc::build_rrc_reconfiguration(3, r.nas_pdu.clone().map(|x| x.0))?;
-
-    // Send to the UE and get back the response.
     debug!(&logger, "<< RrcReconfiguration");
     gnbcu
         .send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, logger)
@@ -139,7 +172,11 @@ pub async fn pdu_session_resource_setup_inner<G: Gnbcu>(
     let _rrc_reconfiguration_complete: rrc::UlDcchMessage = rrc_transaction.recv().await?;
     debug!(&logger, ">> RrcReconfigurationComplete");
 
-    Ok((vec![], vec![]))
+    // Write back UE.
+    debug!(logger, "Store UE {:#010x}", ue.key);
+    gnbcu.store(ue.key, ue, gnbcu.config().ue_ttl_secs).await?;
+
+    Ok((successful, unsuccessful))
 }
 
 pub fn build_setup_item<G: Gnbcu>(
@@ -274,6 +311,34 @@ pub fn build_bearer_context_setup<G: Gnbcu>(
         additional_handover_info: None,
         direct_forwarding_path_availability: None,
         gnb_cu_up_ue_e1ap_id: None,
+    }
+}
+
+pub fn build_bearer_context_modification<G: Gnbcu>(
+    _gnbcu: &G,
+    ue: &UeState,
+    gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId,
+    _ue_context_setup_response: f1ap::UeContextSetupResponse,
+    _logger: &Logger,
+) -> BearerContextModificationRequest {
+    // TODO incomplete - for example need to supply a system_bearer_context_modification_request
+    // with DrbToModifyListNgRan containing the UpTransportLayerInformation received in the
+    // DU's DrbsSetupList.
+
+    BearerContextModificationRequest {
+        gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId(ue.key),
+        gnb_cu_up_ue_e1ap_id,
+        security_information: None,
+        ue_dl_aggregate_maximum_bit_rate: None,
+        ue_dl_maximum_integrity_protected_data_rate: None,
+        bearer_context_status_change: None,
+        new_ul_tnl_information_required: None,
+        ue_inactivity_timer: None,
+        data_discard_required: None,
+        system_bearer_context_modification_request: None,
+        ran_ue_id: None,
+        gnb_du_id: None,
+        activity_notification_level: None,
     }
 }
 

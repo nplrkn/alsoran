@@ -24,3 +24,4 @@ stop-token = "0.6.1"
 async-stream = "0.3.2"
 futures-core = "0.3.19"
 asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="fix-constrained-u32-encode" }
+thiserror = "1.0.36"

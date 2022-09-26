@@ -52,11 +52,7 @@ mod tests {
     #[async_std::test]
     async fn test_mock_store() -> Result<()> {
         let m = MockUeStore::new();
-        let ue_state = UeState {
-            amf_ue_ngap_id: None,
-            gnb_du_ue_f1ap_id: GnbDuUeF1apId(3),
-            key: 2,
-        };
+        let ue_state = UeState::new(2, GnbDuUeF1apId(3));
         m.store(123, ue_state, 0).await?;
         let _ue_state = m.retrieve(&123).await.unwrap();
         assert!(m.retrieve(&0).await.is_err());

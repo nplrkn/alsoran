@@ -1,11 +1,12 @@
 //! transactions - allows definition of procedures using individual ASN.1 requests and responses
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodecData};
 use async_channel::RecvError;
 use async_trait::async_trait;
 use slog::{debug, warn, Logger};
 use std::fmt::Debug;
+use thiserror::Error;
 
 #[async_trait]
 pub trait Procedure {
@@ -55,9 +56,11 @@ impl<T: aper::AperCodec<Output = T>> AperSerde for T {
     }
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum RequestError<U> {
+    #[error("Unsuccessful outcome")]
     UnsuccessfulOutcome(U),
+    #[error("Other error {0}")]
     Other(String),
 }
 
@@ -76,12 +79,6 @@ impl<T> From<RecvError> for RequestError<T> {
 impl<T> From<anyhow::Error> for RequestError<T> {
     fn from(e: anyhow::Error) -> Self {
         RequestError::Other(format!("Transport error: {:?}", e))
-    }
-}
-
-impl<T: Debug> Into<anyhow::Error> for RequestError<T> {
-    fn into(self) -> anyhow::Error {
-        anyhow!(format!("Request error: {:?}", self))
     }
 }
 
