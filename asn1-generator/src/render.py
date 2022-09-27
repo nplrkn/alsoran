@@ -765,9 +765,10 @@ impl {name} {{
         print(orig_name)
         name = orig_name
         inner = type_and_constraints(tree.children[1]).typ
+        clone_copy = "Copy, " if is_copy_type(inner) else ""
         self.outfile += f"""
 // {orig_name}
-# [derive(Clone, Debug)]
+# [derive(Clone, {clone_copy}Debug)]
 pub struct {name}(pub {inner});
 
 impl {name} {{
@@ -1186,7 +1187,7 @@ ProcedureCode		::= INTEGER (0..255)
 """, """\
 
 // ProcedureCode
-# [derive(Clone, Debug)]
+# [derive(Clone, Copy, Debug)]
 pub struct ProcedureCode(pub u8);
 
 impl ProcedureCode {
@@ -1374,7 +1375,7 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
         output = """\
 
 // MaximumDataBurstVolume
-# [derive(Clone, Debug)]
+# [derive(Clone, Copy, Debug)]
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl MaximumDataBurstVolume {
@@ -1730,7 +1731,7 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 """, """\
 
 // ExpectedActivityPeriod
-# [derive(Clone, Debug)]
+# [derive(Clone, Copy, Debug)]
 pub struct ExpectedActivityPeriod(pub i128);
 
 impl ExpectedActivityPeriod {
