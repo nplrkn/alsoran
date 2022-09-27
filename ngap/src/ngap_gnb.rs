@@ -75,8 +75,7 @@ where
                 None
             }
             InitiatingMessage::PduSessionResourceSetupRequest(req) => {
-                PduSessionResourceSetupProcedure::call_provider(&self.0, req, logger).await;
-                None
+                PduSessionResourceSetupProcedure::call_provider(&self.0, req, logger).await
             }
             _ => todo!(),
         }

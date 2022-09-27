@@ -310,7 +310,29 @@ impl MockAmf {
         Ok(())
     }
 
-    pub async fn receive_pdu_session_resource_setup_response(&self, _ue_id: u32) -> Result<()> {
-        todo!()
+    pub async fn receive_pdu_session_resource_setup_response(&self, ue_id: u32) -> Result<()> {
+        match self.receive_pdu().await {
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceSetupResponse(
+                PduSessionResourceSetupResponse {
+                    amf_ue_ngap_id,
+                    pdu_session_resource_setup_list_su_res,
+                    ..
+                },
+            )) => {
+                info!(&self.logger, ">> PduSessionResourceSetupResponse");
+                assert_eq!(amf_ue_ngap_id.0, ue_id.into());
+                if let Some(xs) = pdu_session_resource_setup_list_su_res {
+                    // There should be exactly one successful session setup.
+                    assert!(xs.0.len() == 1);
+                } else {
+                    panic!("Expected pdu_session_resource_setup_list_su_res on PduSessionResourceSetupResponse")
+                }
+                Ok(())
+            }
+            x => panic!(
+                "Expecting PduSessionResourceSetupResponse, got unexpected message {:?}",
+                x
+            ),
+        }
     }
 }

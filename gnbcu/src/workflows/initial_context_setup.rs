@@ -76,7 +76,7 @@ pub async fn initial_context_setup<G: Gnbcu>(
         // Perform Rrc Reconfiguration including the Nas message from earlier.
         let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
         let rrc_container =
-            super::build_rrc::build_rrc_reconfiguration(3, r.nas_pdu.clone().map(|x| x.0))
+            super::build_rrc::build_rrc_reconfiguration(3, r.nas_pdu.clone().map(|x| vec![x.0]))
                 .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
 
         // Send to the UE and get back the response.

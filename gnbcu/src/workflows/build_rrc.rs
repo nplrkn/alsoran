@@ -33,10 +33,11 @@ pub fn build_rrc_security_mode_command(
 
 pub fn build_rrc_reconfiguration(
     rrc_transaction_identifier: u8,
-    nas_bytes: Option<Vec<u8>>,
+    nas_messages: Option<Vec<Vec<u8>>>,
 ) -> Result<f1ap::RrcContainer> {
     let rrc_transaction_identifier = RrcTransactionIdentifier(rrc_transaction_identifier);
-    let nas = nas_bytes.map(|x| DedicatedNasMessage(x));
+    let dedicated_nas_message_list =
+        nas_messages.map(|x| (x.into_iter().map(|x| DedicatedNasMessage(x)).collect()));
 
     make_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::RrcReconfiguration(rrc::RrcReconfiguration {
@@ -49,7 +50,7 @@ pub fn build_rrc_reconfiguration(
                 non_critical_extension: Some(RrcReconfigurationV1530IEs {
                     master_cell_group: None,
                     full_config: None,
-                    dedicated_nas_message_list: nas.map(|x| vec![x]),
+                    dedicated_nas_message_list,
                     master_key_update: None,
                     dedicated_sib1_delivery: None,
                     dedicated_system_information_delivery: None,

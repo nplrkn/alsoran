@@ -86,6 +86,7 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
         ))
     };
 
+    debug!(&logger, "PduSessionResourceSetupResponse >> ");
     PduSessionResourceSetupResponse {
         amf_ue_ngap_id: AmfUeNgapId(r.amf_ue_ngap_id.0), // TODO: type should be Copy
         ran_ue_ngap_id: RanUeNgapId(r.ran_ue_ngap_id.0), // TODO: type should be Copy
@@ -107,11 +108,12 @@ pub async fn pdu_session_resource_setup_inner<'a, G: Gnbcu>(
     debug!(&logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
     let mut ue = gnbcu.retrieve(&r.ran_ue_ngap_id.0).await?;
 
-    // Build PduSessionResourceToSetupItems.
-    let mut items = vec![];
+    // Keep track of which sessions we managed to set up, via references into the original message.
     let mut unsuccessful = vec![];
     let mut successful = vec![];
 
+    // Build PduSessionResourceToSetupItems.
+    let mut items = vec![];
     for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
         match build_setup_item(gnbcu, &ue, &x, logger) {
             Ok(item) => {
@@ -135,7 +137,7 @@ pub async fn pdu_session_resource_setup_inner<'a, G: Gnbcu>(
         .await?;
     debug!(&logger, ">> BearerContextSetupResponse");
 
-    // Store CU-UP's ID.
+    // Store CU-UP's UE ID.
     let gnb_cu_up_ue_e1ap_id = response.gnb_cu_up_ue_e1ap_id;
     ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id.clone());
 
@@ -161,10 +163,17 @@ pub async fn pdu_session_resource_setup_inner<'a, G: Gnbcu>(
         .await?;
     debug!(&logger, ">> BearerContextModificationResponse");
 
+    // Collect the Nas messages from the successful setups.
+    // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
+    // so that it doesn't have to clone.
+    let nas_messages = successful
+        .iter()
+        .filter_map(|x| x.pdu_session_nas_pdu.as_ref().map(|x| x.0.clone()))
+        .collect();
+
     // Perform Rrc Reconfiguration including the Nas message from earlier.
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
-    let rrc_container =
-        super::build_rrc::build_rrc_reconfiguration(3, r.nas_pdu.clone().map(|x| x.0))?;
+    let rrc_container = super::build_rrc::build_rrc_reconfiguration(3, Some(nas_messages))?;
     debug!(&logger, "<< RrcReconfiguration");
     gnbcu
         .send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, logger)
