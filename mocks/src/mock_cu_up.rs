@@ -202,7 +202,7 @@ impl MockCuUp {
     async fn send_bearer_context_modification_response(&self, ue_id: u32) -> Result<()> {
         let ue = &self.ues[&ue_id];
         let pdu = e1ap::E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextModificationResponse(BearerContextModificationResponse {
-            gnb_cu_cp_ue_e1ap_id: GnbCuCpUeE1apId(ue.gnb_cu_cp_ue_e1ap_id.0),
+            gnb_cu_cp_ue_e1ap_id: ue.gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId(ue_id),
             system_bearer_context_modification_response: Some(
                 SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(

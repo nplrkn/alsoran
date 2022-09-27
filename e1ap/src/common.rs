@@ -120,7 +120,7 @@ impl AperCodec for PrivateIeId {
     }
 }
 // ProcedureCode
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ProcedureCode(pub u8);
 
 impl ProcedureCode {
@@ -146,7 +146,7 @@ impl AperCodec for ProcedureCode {
     }
 }
 // ProtocolExtensionId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ProtocolExtensionId(pub u16);
 
 impl ProtocolExtensionId {
@@ -172,7 +172,7 @@ impl AperCodec for ProtocolExtensionId {
     }
 }
 // ProtocolIeId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ProtocolIeId(pub u16);
 
 impl ProtocolIeId {

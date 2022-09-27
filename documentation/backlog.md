@@ -3,7 +3,8 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- PDU session resource setup
+- PDU session resource setup - code review and tidy - make top level procedure really clean
+- Frunk
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
@@ -21,7 +22,6 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 -----ASN.1 GENERATOR------
 - Move to latest version of specs
 - Get rid of todo!() in top_pdu.rs and replace with a log
-- Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Generate procedures for Rrc and make F1AP a RequestProvider.
 - Implement setuprelease
 - Deduplicate inline definitions in RRC autogeneration
@@ -43,6 +43,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Registration sequence should not set up UE context in DU or invovle Rrc Reconfiguration
 - SRB set to 0 or 1 and checking of that in Mock DU
 - Add comments at top of files

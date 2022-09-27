@@ -392,7 +392,7 @@ impl AperCodec for AllowedTaCs {
     }
 }
 // AlternativeQosParaSetIndex
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct AlternativeQosParaSetIndex(pub u8);
 
 impl AlternativeQosParaSetIndex {
@@ -418,7 +418,7 @@ impl AperCodec for AlternativeQosParaSetIndex {
     }
 }
 // AlternativeQosParaSetNotifyIndex
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct AlternativeQosParaSetNotifyIndex(pub u8);
 
 impl AlternativeQosParaSetNotifyIndex {
@@ -1106,7 +1106,7 @@ impl AperCodec for AmfTnlAssociationToUpdateItem {
     }
 }
 // AmfUeNgapId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct AmfUeNgapId(pub u64);
 
 impl AmfUeNgapId {
@@ -1701,7 +1701,7 @@ impl AperCodec for AuthenticatedIndication {
     }
 }
 // AveragingWindow
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct AveragingWindow(pub u16);
 
 impl AveragingWindow {
@@ -1932,7 +1932,7 @@ impl AperCodec for AreaScopeOfNeighCellsItem {
     }
 }
 // BitRate
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct BitRate(pub u64);
 
 impl BitRate {
@@ -5595,7 +5595,7 @@ impl AperCodec for DirectForwardingPathAvailability {
     }
 }
 // DrbId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct DrbId(pub u8);
 
 impl DrbId {
@@ -6999,7 +6999,7 @@ impl AperCodec for EnhancedCoverageRestriction {
     }
 }
 // ExtendedConnectedTime
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ExtendedConnectedTime(pub u8);
 
 impl ExtendedConnectedTime {
@@ -7229,7 +7229,7 @@ impl AperCodec for EpsTai {
     }
 }
 // ERabId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ERabId(pub u8);
 
 impl ERabId {
@@ -7570,7 +7570,7 @@ impl AperCodec for EventType {
     }
 }
 // ExpectedActivityPeriod
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ExpectedActivityPeriod(pub u8);
 
 impl ExpectedActivityPeriod {
@@ -7633,7 +7633,7 @@ impl AperCodec for ExpectedHoInterval {
     }
 }
 // ExpectedIdlePeriod
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ExpectedIdlePeriod(pub u8);
 
 impl ExpectedIdlePeriod {
@@ -7972,7 +7972,7 @@ impl AperCodec for ExtendedAmfName {
     }
 }
 // ExtendedPacketDelayBudget
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ExtendedPacketDelayBudget(pub u16);
 
 impl ExtendedPacketDelayBudget {
@@ -8110,7 +8110,7 @@ impl AperCodec for ExtendedRatRestrictionInformation {
     }
 }
 // ExtendedRncId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ExtendedRncId(pub u16);
 
 impl ExtendedRncId {
@@ -8457,7 +8457,7 @@ impl AperCodec for FiveGTmsi {
     }
 }
 // FiveQi
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct FiveQi(pub u8);
 
 impl FiveQi {
@@ -9875,7 +9875,7 @@ impl AperCodec for HoReport {
     }
 }
 // Hysteresis
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Hysteresis(pub u8);
 
 impl Hysteresis {
@@ -10025,7 +10025,7 @@ impl AperCodec for ImsVoiceSupportIndicator {
     }
 }
 // IndexToRfsp
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct IndexToRfsp(pub u16);
 
 impl IndexToRfsp {
@@ -10159,7 +10159,7 @@ impl AperCodec for IntegrityProtectionResult {
     }
 }
 // IntendedNumberOfPagingAttempts
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct IntendedNumberOfPagingAttempts(pub u8);
 
 impl IntendedNumberOfPagingAttempts {
@@ -11189,7 +11189,7 @@ impl AperCodec for LocationReportingAdditionalInfo {
     }
 }
 // LocationReportingReferenceId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct LocationReportingReferenceId(pub u8);
 
 impl LocationReportingReferenceId {
@@ -11705,7 +11705,7 @@ impl AperCodec for MaskedImeisv {
     }
 }
 // MaximumDataBurstVolume
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl MaximumDataBurstVolume {
@@ -12774,7 +12774,7 @@ impl AperCodec for M7Configuration {
     }
 }
 // M7period
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct M7period(pub u8);
 
 impl M7period {
@@ -13172,7 +13172,7 @@ impl AperCodec for NbIotPagingEDrxInfo {
     }
 }
 // NbIotUePriority
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NbIotUePriority(pub u8);
 
 impl NbIotUePriority {
@@ -13198,7 +13198,7 @@ impl AperCodec for NbIotUePriority {
     }
 }
 // NetworkInstance
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NetworkInstance(pub u16);
 
 impl NetworkInstance {
@@ -13255,7 +13255,7 @@ impl AperCodec for NewSecurityContextInd {
     }
 }
 // NextHopChainingCount
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NextHopChainingCount(pub u8);
 
 impl NextHopChainingCount {
@@ -14228,7 +14228,7 @@ impl AperCodec for NrUeRlfReportContainer {
     }
 }
 // NumberOfBroadcasts
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NumberOfBroadcasts(pub u16);
 
 impl NumberOfBroadcasts {
@@ -14254,7 +14254,7 @@ impl AperCodec for NumberOfBroadcasts {
     }
 }
 // NumberOfBroadcastsRequested
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NumberOfBroadcastsRequested(pub u16);
 
 impl NumberOfBroadcastsRequested {
@@ -14280,7 +14280,7 @@ impl AperCodec for NumberOfBroadcastsRequested {
     }
 }
 // NrArfcn
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NrArfcn(pub u32);
 
 impl NrArfcn {
@@ -14305,7 +14305,7 @@ impl AperCodec for NrArfcn {
     }
 }
 // NrFrequencyBand
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NrFrequencyBand(pub u16);
 
 impl NrFrequencyBand {
@@ -14444,7 +14444,7 @@ impl AperCodec for NrFrequencyInfo {
     }
 }
 // NrPci
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NrPci(pub u16);
 
 impl NrPci {
@@ -14795,7 +14795,7 @@ impl AperCodec for OverloadStartNssaiItem {
     }
 }
 // PacketDelayBudget
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PacketDelayBudget(pub u16);
 
 impl PacketDelayBudget {
@@ -14870,7 +14870,7 @@ impl AperCodec for PacketErrorRate {
     }
 }
 // PacketLossRate
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PacketLossRate(pub u16);
 
 impl PacketLossRate {
@@ -14990,7 +14990,7 @@ impl AperCodec for PagingAttemptInformation {
     }
 }
 // PagingAttemptCount
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PagingAttemptCount(pub u8);
 
 impl PagingAttemptCount {
@@ -15791,7 +15791,7 @@ impl AperCodec for PduSessionAggregateMaximumBitRate {
     }
 }
 // PduSessionId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PduSessionId(pub u8);
 
 impl PduSessionId {
@@ -20150,7 +20150,7 @@ impl AperCodec for PduSessionUsageReport {
     }
 }
 // Periodicity
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Periodicity(pub u32);
 
 impl Periodicity {
@@ -20439,7 +20439,7 @@ impl AperCodec for PreEmptionVulnerability {
     }
 }
 // PriorityLevelArp
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PriorityLevelArp(pub u8);
 
 impl PriorityLevelArp {
@@ -20465,7 +20465,7 @@ impl AperCodec for PriorityLevelArp {
     }
 }
 // PriorityLevelQos
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PriorityLevelQos(pub u8);
 
 impl PriorityLevelQos {
@@ -20934,7 +20934,7 @@ impl AperCodec for QosFlowFeedbackItem {
     }
 }
 // QosFlowIdentifier
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct QosFlowIdentifier(pub u8);
 
 impl QosFlowIdentifier {
@@ -21150,7 +21150,7 @@ impl AperCodec for QosMonitoringRequest {
     }
 }
 // QosMonitoringReportingFrequency
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct QosMonitoringReportingFrequency(pub u16);
 
 impl QosMonitoringReportingFrequency {
@@ -22049,7 +22049,7 @@ impl AperCodec for RanNodeNameUtf8String {
     }
 }
 // RanPagingPriority
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct RanPagingPriority(pub u16);
 
 impl RanPagingPriority {
@@ -22113,7 +22113,7 @@ impl AperCodec for RanStatusTransferTransparentContainer {
     }
 }
 // RanUeNgapId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct RanUeNgapId(pub u32);
 
 impl RanUeNgapId {
@@ -22644,7 +22644,7 @@ impl AperCodec for ReflectiveQosAttribute {
     }
 }
 // RelativeAmfCapacity
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct RelativeAmfCapacity(pub u8);
 
 impl RelativeAmfCapacity {
@@ -22700,7 +22700,7 @@ impl AperCodec for ReportArea {
     }
 }
 // RepetitionPeriod
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct RepetitionPeriod(pub u32);
 
 impl RepetitionPeriod {
@@ -22913,7 +22913,7 @@ impl AperCodec for RgLevelWirelineAccessCharacteristics {
     }
 }
 // RncId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct RncId(pub u16);
 
 impl RncId {
@@ -24050,7 +24050,7 @@ impl AperCodec for ServiceAreaInformationItem {
     }
 }
 // SGnbUeX2apId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct SGnbUeX2apId(pub u32);
 
 impl SGnbUeX2apId {
@@ -26107,7 +26107,7 @@ impl AperCodec for TimeToWait {
     }
 }
 // TimeUeStayedInCell
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TimeUeStayedInCell(pub u16);
 
 impl TimeUeStayedInCell {
@@ -26133,7 +26133,7 @@ impl AperCodec for TimeUeStayedInCell {
     }
 }
 // TimeUeStayedInCellEnhancedGranularity
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TimeUeStayedInCellEnhancedGranularity(pub u16);
 
 impl TimeUeStayedInCellEnhancedGranularity {
@@ -26231,7 +26231,7 @@ impl AperCodec for TngfId {
     }
 }
 // TnlAddressWeightFactor
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TnlAddressWeightFactor(pub u8);
 
 impl TnlAddressWeightFactor {
@@ -26504,7 +26504,7 @@ impl AperCodec for TraceDepth {
     }
 }
 // TrafficLoadReductionIndication
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TrafficLoadReductionIndication(pub u8);
 
 impl TrafficLoadReductionIndication {
@@ -26729,7 +26729,7 @@ impl AperCodec for TaListforMdt {
     }
 }
 // ThresholdRsrp
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ThresholdRsrp(pub u8);
 
 impl ThresholdRsrp {
@@ -26755,7 +26755,7 @@ impl AperCodec for ThresholdRsrp {
     }
 }
 // ThresholdRsrq
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ThresholdRsrq(pub u8);
 
 impl ThresholdRsrq {
@@ -26781,7 +26781,7 @@ impl AperCodec for ThresholdRsrq {
     }
 }
 // ThresholdSiNr
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ThresholdSiNr(pub u8);
 
 impl ThresholdSiNr {

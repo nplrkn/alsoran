@@ -11,11 +11,10 @@ use f1ap::{
 use net::AperSerde;
 
 use ngap::{
-    AmfUeNgapId, PduSessionResourceFailedToSetupItemSuRes,
-    PduSessionResourceFailedToSetupListSuRes, PduSessionResourceSetupItemSuReq,
-    PduSessionResourceSetupItemSuRes, PduSessionResourceSetupListSuRes,
-    PduSessionResourceSetupRequest, PduSessionResourceSetupRequestTransfer,
-    PduSessionResourceSetupResponse, RanUeNgapId,
+    PduSessionResourceFailedToSetupItemSuRes, PduSessionResourceFailedToSetupListSuRes,
+    PduSessionResourceSetupItemSuReq, PduSessionResourceSetupItemSuRes,
+    PduSessionResourceSetupListSuRes, PduSessionResourceSetupRequest,
+    PduSessionResourceSetupRequestTransfer, PduSessionResourceSetupResponse,
 };
 use slog::{debug, Logger};
 
@@ -88,8 +87,8 @@ pub async fn pdu_session_resource_setup<G: Gnbcu>(
 
     debug!(&logger, "PduSessionResourceSetupResponse >> ");
     PduSessionResourceSetupResponse {
-        amf_ue_ngap_id: AmfUeNgapId(r.amf_ue_ngap_id.0), // TODO: type should be Copy
-        ran_ue_ngap_id: RanUeNgapId(r.ran_ue_ngap_id.0), // TODO: type should be Copy
+        amf_ue_ngap_id: r.amf_ue_ngap_id,
+        ran_ue_ngap_id: r.ran_ue_ngap_id,
         pdu_session_resource_setup_list_su_res,
         pdu_session_resource_failed_to_setup_list_su_res,
         criticality_diagnostics: None,
@@ -360,7 +359,7 @@ fn build_ue_context_setup_request<G: Gnbcu>(
 
     UeContextSetupRequest {
         gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
-        gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id.clone()),
+        gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id),
         sp_cell_id: f1ap::NrCgi {
             plmn_identity: f1ap::PlmnIdentity(gnbcu.config().plmn.clone()),
             nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),

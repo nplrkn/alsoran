@@ -190,7 +190,7 @@ impl AperCodec for AdditionalRrmPriorityIndex {
     }
 }
 // AveragingWindow
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct AveragingWindow(pub u16);
 
 impl AveragingWindow {
@@ -372,7 +372,7 @@ impl AperCodec for BearerContextStatusChange {
     }
 }
 // BitRate
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct BitRate(pub u64);
 
 impl BitRate {
@@ -727,7 +727,7 @@ impl AperCodec for CellGroupInformationItem {
     }
 }
 // CellGroupId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct CellGroupId(pub u8);
 
 impl CellGroupId {
@@ -783,7 +783,7 @@ impl AperCodec for ChoInitiation {
     }
 }
 // NumberOfTunnels
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NumberOfTunnels(pub u8);
 
 impl NumberOfTunnels {
@@ -2560,7 +2560,7 @@ impl AperCodec for DrbFailedToModifyItemNgRan {
     }
 }
 // DrbId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct DrbId(pub u8);
 
 impl DrbId {
@@ -5691,7 +5691,7 @@ impl AperCodec for EutranAllocationAndRetentionPriority {
     }
 }
 // ExtendedPacketDelayBudget
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct ExtendedPacketDelayBudget(pub u16);
 
 impl ExtendedPacketDelayBudget {
@@ -6052,7 +6052,7 @@ impl AperCodec for GnbCuCpNameUtf8String {
     }
 }
 // GnbCuCpUeE1apId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct GnbCuCpUeE1apId(pub u32);
 
 impl GnbCuCpUeE1apId {
@@ -6085,7 +6085,7 @@ impl AperCodec for GnbCuCpUeE1apId {
     }
 }
 // GnbCuUpCapacity
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct GnbCuUpCapacity(pub u8);
 
 impl GnbCuUpCapacity {
@@ -6199,7 +6199,7 @@ impl AperCodec for GnbCuUpCellGroupRelatedConfigurationItem {
     }
 }
 // GnbCuUpId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct GnbCuUpId(pub u64);
 
 impl GnbCuUpId {
@@ -6372,7 +6372,7 @@ impl AperCodec for GnbCuUpNameUtf8String {
     }
 }
 // GnbCuUpUeE1apId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct GnbCuUpUeE1apId(pub u32);
 
 impl GnbCuUpUeE1apId {
@@ -6959,7 +6959,7 @@ impl AperCodec for GnbCuUpOverloadInformation {
     }
 }
 // GnbDuId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct GnbDuId(pub u64);
 
 impl GnbDuId {
@@ -6991,7 +6991,7 @@ impl AperCodec for GnbDuId {
     }
 }
 // Hfn
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Hfn(pub u32);
 
 impl Hfn {
@@ -7237,7 +7237,7 @@ impl AperCodec for IntegrityProtectionResult {
     }
 }
 // InactivityTimer
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct InactivityTimer(pub u16);
 
 impl InactivityTimer {
@@ -7393,7 +7393,7 @@ impl AperCodec for LinksToLog {
     }
 }
 // MaxDataBurstVolume
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct MaxDataBurstVolume(pub i128);
 
 impl MaxDataBurstVolume {
@@ -7486,7 +7486,7 @@ impl AperCodec for MaxIPrate {
     }
 }
 // MaxPacketLossRate
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct MaxPacketLossRate(pub u16);
 
 impl MaxPacketLossRate {
@@ -7512,7 +7512,7 @@ impl AperCodec for MaxPacketLossRate {
     }
 }
 // MaxCidehcdl
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct MaxCidehcdl(pub u16);
 
 impl MaxCidehcdl {
@@ -7874,7 +7874,7 @@ impl AperCodec for M7Configuration {
     }
 }
 // M7period
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct M7period(pub u8);
 
 impl M7period {
@@ -8078,7 +8078,7 @@ impl AperCodec for MdtPlmnList {
     }
 }
 // NetworkInstance
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct NetworkInstance(pub u16);
 
 impl NetworkInstance {
@@ -8755,7 +8755,7 @@ impl AperCodec for OutOfOrderDelivery {
     }
 }
 // PacketDelayBudget
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PacketDelayBudget(pub u16);
 
 impl PacketDelayBudget {
@@ -8823,7 +8823,7 @@ impl AperCodec for PacketErrorRate {
     }
 }
 // PerScalar
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PerScalar(pub u8);
 
 impl PerScalar {
@@ -8848,7 +8848,7 @@ impl AperCodec for PerScalar {
     }
 }
 // PerExponent
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PerExponent(pub u8);
 
 impl PerExponent {
@@ -9257,7 +9257,7 @@ impl AperCodec for PduSessionResourceDataUsageItem {
     }
 }
 // PdcpSn
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PdcpSn(pub u32);
 
 impl PdcpSn {
@@ -9441,7 +9441,7 @@ impl AperCodec for DrbBStatusTransfer {
     }
 }
 // PduSessionId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PduSessionId(pub u8);
 
 impl PduSessionId {
@@ -11092,7 +11092,7 @@ impl AperCodec for PortNumber {
     }
 }
 // Ppi
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Ppi(pub u8);
 
 impl Ppi {
@@ -11117,7 +11117,7 @@ impl AperCodec for Ppi {
     }
 }
 // PriorityLevel
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PriorityLevel(pub u8);
 
 impl PriorityLevel {
@@ -11239,7 +11239,7 @@ impl AperCodec for PrivacyIndicator {
     }
 }
 // Qci
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Qci(pub u8);
 
 impl Qci {
@@ -11313,7 +11313,7 @@ impl AperCodec for QosCharacteristics {
     }
 }
 // QosFlowIdentifier
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct QosFlowIdentifier(pub u8);
 
 impl QosFlowIdentifier {
@@ -11657,7 +11657,7 @@ impl AperCodec for QosParametersSupportList {
     }
 }
 // QosPriorityLevel
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct QosPriorityLevel(pub u8);
 
 impl QosPriorityLevel {
@@ -11901,7 +11901,7 @@ impl AperCodec for QosMonitoringRequest {
     }
 }
 // QosMonitoringReportingFrequency
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct QosMonitoringReportingFrequency(pub u16);
 
 impl QosMonitoringReportingFrequency {
@@ -13099,7 +13099,7 @@ impl AperCodec for SdapHeaderUl {
     }
 }
 // SubscriberProfileIDforRfp
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct SubscriberProfileIDforRfp(pub u16);
 
 impl SubscriberProfileIDforRfp {
@@ -13380,7 +13380,7 @@ impl AperCodec for TscTrafficInformation {
     }
 }
 // Periodicity
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Periodicity(pub u32);
 
 impl Periodicity {
@@ -13573,7 +13573,7 @@ impl AperCodec for TransportLayerAddress {
     }
 }
 // TransactionId
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TransactionId(pub u8);
 
 impl TransactionId {
