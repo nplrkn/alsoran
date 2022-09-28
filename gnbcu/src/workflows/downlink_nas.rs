@@ -3,45 +3,47 @@
 use crate::datastore::UeState;
 
 use super::Gnbcu;
+use anyhow::Result;
 use f1ap::SrbId;
-use net::AperSerde;
-use ngap::DownlinkNasTransport;
-use pdcp::PdcpPdu;
+use ngap::{AmfUeNgapId, DownlinkNasTransport};
 use rrc::*;
-use slog::{debug, warn, Logger};
+use slog::{debug, Logger};
 
 // Downlink Nas Procedure
 // 1.    Ngap DownlinkNasTransport(Nas) <<
 // 2. << Rrc DlInformationTransfer(Nas)
-pub async fn downlink_nas<G: Gnbcu>(gnbcu: &G, i: DownlinkNasTransport, logger: &Logger) {
+pub async fn downlink_nas<G: Gnbcu>(
+    gnbcu: &G,
+    i: DownlinkNasTransport,
+    logger: &Logger,
+) -> Result<()> {
     debug!(&logger, "DownlinkNasTransport(Nas) <<");
+    let mut ue = gnbcu.retrieve(&i.ran_ue_ngap_id.0).await?;
+    maybe_learn_amf_ngap_id(gnbcu, &mut ue, i.amf_ue_ngap_id, logger).await;
+    send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(i.nas_pdu.0), logger).await
+}
 
-    let mut ue = match gnbcu.retrieve(&i.ran_ue_ngap_id.0).await {
-        Ok(x) => x,
-        _ => {
-            debug!(
-                &logger,
-                "Failed to get UE {:#010x} - can't carry out downlink Nas transfer",
-                i.ran_ue_ngap_id.0
-            );
-            return;
-        }
-    };
-
+// If we don't already know the AMF's ID for this UE, save it off now.
+async fn maybe_learn_amf_ngap_id<G: Gnbcu>(
+    gnbcu: &G,
+    ue: &mut UeState,
+    amf_ue_ngap_id: AmfUeNgapId,
+    logger: &Logger,
+) {
     match ue.amf_ue_ngap_id {
-        Some(ref x) if x.0 == i.amf_ue_ngap_id.0 => (),
+        Some(ref x) if x.0 == amf_ue_ngap_id.0 => (),
         _ => {
-            debug!(logger, "Learned AMF NGAP ID {:#x}", i.amf_ue_ngap_id.0);
-            ue.amf_ue_ngap_id = Some(i.amf_ue_ngap_id);
+            debug!(logger, "Learned AMF NGAP ID {:#x}", amf_ue_ngap_id.0);
+            ue.amf_ue_ngap_id = Some(amf_ue_ngap_id);
             if let Err(e) = gnbcu
                 .store(ue.key, ue.clone(), gnbcu.config().initial_ue_ttl_secs)
                 .await
             {
+                // We soldier on here as we might as well send the message onwards to the UE anyway.
                 debug!(logger, "Failed to store UE state - error {:?}", e);
             }
         }
     }
-    send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(i.nas_pdu.0), logger).await
 }
 
 pub async fn send_nas_to_ue<G: Gnbcu>(
@@ -49,33 +51,12 @@ pub async fn send_nas_to_ue<G: Gnbcu>(
     ue: &UeState,
     nas: DedicatedNasMessage,
     logger: &Logger,
-) {
-    let rrc = match (DlDcchMessage {
-        message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
-            rrc_transaction_identifier: RrcTransactionIdentifier(2),
-            critical_extensions: CriticalExtensions4::DlInformationTransfer(
-                DlInformationTransferIEs {
-                    dedicated_nas_message: Some(nas),
-                    late_non_critical_extension: None,
-                    non_critical_extension: None,
-                },
-            ),
-        })),
-    }
-    .into_bytes())
-    {
-        Ok(x) => x,
-        Err(e) => {
-            warn!(
-                logger,
-                "Failed to encode Rrc DlInformationTransfer - {:?}", e
-            );
-            return;
-        }
-    };
-    let rrc_container = f1ap::RrcContainer(PdcpPdu::encode(&rrc).into());
+) -> Result<()> {
+    let rrc_container = super::build_rrc::build_rrc_dl_information_transfer(2, Some(nas))?;
+
     debug!(&logger, "<< DlInformationTransfer(Nas)");
     gnbcu
         .send_rrc_to_ue(&ue, SrbId(1), rrc_container, logger)
         .await;
+    Ok(())
 }

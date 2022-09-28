@@ -5,10 +5,8 @@ use crate::datastore::UeState;
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use f1ap::{InitialUlRrcMessageTransfer, SrbId};
-use net::{AperSerde, Procedure};
+use net::AperSerde;
 use ngap::*;
-use pdcp::PdcpPdu;
-use rand::Rng;
 use rrc::*;
 use slog::{debug, Logger};
 
@@ -31,46 +29,18 @@ pub async fn initial_access<G: Gnbcu>(
     let _rrc_setup_request = expect_rrc_setup_request(&r.rrc_container.0)?;
     debug!(logger, ">> Rrc RrcSetupRequest");
 
-    let ue = UeState::new(rand::thread_rng().gen::<u32>(), r.gnb_du_ue_f1ap_id);
+    let ue = UeState::new(r.gnb_du_ue_f1ap_id);
     debug!(&logger, "Created UE {:#010x}", ue.key);
 
     let rrc_transaction = gnbcu.new_rrc_transaction(&ue).await;
-
-    let rrc_setup = RrcSetup {
-        rrc_transaction_identifier: RrcTransactionIdentifier(1),
-        critical_extensions: CriticalExtensions21::RrcSetup(RrcSetupIEs {
-            radio_bearer_config: RadioBearerConfig {
-                srb_to_add_mod_list: None,
-                srb_3_to_release: None,
-                drb_to_add_mod_list: None,
-                drb_to_release_list: None,
-                security_config: None,
-            },
-            master_cell_group: vec![],
-            late_non_critical_extension: None,
-        }),
-    };
+    let rrc_setup = super::build_rrc::build_rrc_setup(1)?;
 
     debug!(logger, "<< RrcSetup");
-    let bytes = RrcSetupProcedure::encode_request(rrc_setup)?;
-    let pdcp_pdu = PdcpPdu::encode(&bytes);
-    let rrc_container = f1ap::RrcContainer(pdcp_pdu.into());
-    gnbcu
-        .send_rrc_to_ue(&ue, SrbId(0), rrc_container, logger)
-        .await;
+    gnbcu.send_rrc_to_ue(&ue, SrbId(0), rrc_setup, logger).await;
     let rrc_setup_complete = match rrc_transaction.recv().await?.message {
         UlDcchMessageType::C1(C1_6::RrcSetupComplete(x)) => Ok(x),
         _ => Err(anyhow!("Expected Rrc Setup complete")),
     }?;
-
-    // This was an idea for a more elegant model.  See also TODO in gnbcu_trait.rs.
-    // let rrc_setup_complete = <UeRrcChannel as RequestProvider<RrcSetupProcedure>>::request(
-    //     gnbcu.ue_rrc_channel(),
-    //     rrc_setup,
-    //     &logger,
-    // )
-    // .await
-    // .map_err(|e| anyhow!(format!("Request error {:?}", e)))?;
 
     let rrc_setup_complete = match rrc_setup_complete.critical_extensions {
         CriticalExtensions22::RrcSetupComplete(x) => x,
@@ -79,7 +49,7 @@ pub async fn initial_access<G: Gnbcu>(
     // TODO: get establishment cause from the earlier Rrc Setup Request.
     let rrc_establishment_cause = RrcEstablishmentCause::MtAccess;
 
-    // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk-convert?)
+    // TODO: likewise get NrCgi from the F1AP UL Initial Transfer Request.  (Frunk transmogrify ideally.)
     let nr_cgi = ngap::NrCgi {
         plmn_identity: ngap::PlmnIdentity(gnbcu.config().plmn.clone()),
         nr_cell_identity: ngap::NrCellIdentity(bitvec![u8,Msb0;0;36]),

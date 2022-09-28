@@ -3,9 +3,28 @@ use net::AperSerde;
 use pdcp::PdcpPdu;
 use rrc::*;
 
-pub fn make_rrc_container(rrc: DlDcchMessage) -> Result<f1ap::RrcContainer> {
+pub fn make_rrc_container<T: AperSerde>(rrc: T) -> Result<f1ap::RrcContainer> {
     let rrc_bytes = rrc.into_bytes()?;
     Ok(f1ap::RrcContainer(PdcpPdu::encode(&rrc_bytes).into()))
+}
+
+pub fn build_rrc_setup(rrc_transaction_identifier: u8) -> Result<f1ap::RrcContainer> {
+    make_rrc_container(DlCcchMessage {
+        message: DlCcchMessageType::C1(C1_1::RrcSetup(RrcSetup {
+            rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
+            critical_extensions: CriticalExtensions21::RrcSetup(RrcSetupIEs {
+                radio_bearer_config: RadioBearerConfig {
+                    srb_to_add_mod_list: None,
+                    srb_3_to_release: None,
+                    drb_to_add_mod_list: None,
+                    drb_to_release_list: None,
+                    security_config: None,
+                },
+                master_cell_group: vec![],
+                late_non_critical_extension: None,
+            }),
+        })),
+    })
 }
 
 pub fn build_rrc_security_mode_command(
@@ -31,17 +50,34 @@ pub fn build_rrc_security_mode_command(
     })
 }
 
+pub fn build_rrc_dl_information_transfer(
+    rrc_transaction_identifier: u8,
+    dedicated_nas_message: Option<DedicatedNasMessage>,
+) -> Result<f1ap::RrcContainer> {
+    make_rrc_container(DlDcchMessage {
+        message: DlDcchMessageType::C1(C1_2::DlInformationTransfer(DlInformationTransfer {
+            rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
+            critical_extensions: CriticalExtensions4::DlInformationTransfer(
+                DlInformationTransferIEs {
+                    dedicated_nas_message,
+                    late_non_critical_extension: None,
+                    non_critical_extension: None,
+                },
+            ),
+        })),
+    })
+}
+
 pub fn build_rrc_reconfiguration(
     rrc_transaction_identifier: u8,
     nas_messages: Option<Vec<Vec<u8>>>,
 ) -> Result<f1ap::RrcContainer> {
-    let rrc_transaction_identifier = RrcTransactionIdentifier(rrc_transaction_identifier);
     let dedicated_nas_message_list =
-        nas_messages.map(|x| (x.into_iter().map(|x| DedicatedNasMessage(x)).collect()));
+        nas_messages.map(|x| (x.into_iter().map(DedicatedNasMessage).collect()));
 
     make_rrc_container(DlDcchMessage {
         message: DlDcchMessageType::C1(C1_2::RrcReconfiguration(rrc::RrcReconfiguration {
-            rrc_transaction_identifier,
+            rrc_transaction_identifier: RrcTransactionIdentifier(rrc_transaction_identifier),
             critical_extensions: CriticalExtensions15::RrcReconfiguration(RrcReconfigurationIEs {
                 radio_bearer_config: None,
                 secondary_cell_group: None,

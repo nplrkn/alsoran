@@ -3,6 +3,7 @@
 use e1ap::GnbCuUpUeE1apId;
 use f1ap::GnbDuUeF1apId;
 use ngap::AmfUeNgapId;
+use rand::Rng;
 use speedy::{Readable, Writable};
 
 #[derive(Clone, Debug)]
@@ -22,9 +23,9 @@ pub struct UeStateSerializable {
 }
 
 impl UeState {
-    pub fn new(key: u32, gnb_du_ue_f1ap_id: GnbDuUeF1apId) -> Self {
+    pub fn new(gnb_du_ue_f1ap_id: GnbDuUeF1apId) -> Self {
         UeState {
-            key,
+            key: rand::thread_rng().gen::<u32>(),
             gnb_du_ue_f1ap_id,
             gnb_cu_up_ue_e1ap_id: None,
             amf_ue_ngap_id: None,

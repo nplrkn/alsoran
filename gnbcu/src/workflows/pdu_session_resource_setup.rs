@@ -209,7 +209,7 @@ pub fn build_setup_item<G: Gnbcu>(
             maximum_i_pdatarate: None,
         },
         pdu_session_resource_dl_ambr: None,
-        // TODO: frunk convert
+        // TODO: Frunk transmogrify would be ideal
         ng_ul_up_tnl_information: UpTnlInformation::GtpTunnel(GtpTunnel {
             transport_layer_address: TransportLayerAddress(bitvec![u8,Msb0;0,1,1,0]),
             gtp_teid: GtpTeid(vec![1, 2, 3, 4]),
@@ -355,7 +355,7 @@ fn build_ue_context_setup_request<G: Gnbcu>(
     ue: &UeState,
     rrc_container: Option<f1ap::RrcContainer>,
 ) -> UeContextSetupRequest {
-    // TODO: derive and use frunk for the common ngap / f1ap structures seen here.
+    // TODO: derive and use frunk transmogrify for the common ngap / f1ap structures seen here.
 
     UeContextSetupRequest {
         gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),

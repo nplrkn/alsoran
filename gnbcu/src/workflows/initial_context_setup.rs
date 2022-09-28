@@ -90,7 +90,12 @@ pub async fn initial_context_setup<G: Gnbcu>(
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
         debug!(&logger, ">> RrcReconfigurationComplete");
     } else if let Some(nas) = r.nas_pdu.clone() {
-        super::downlink_nas::send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(nas.0), logger).await;
+        if let Err(e) =
+            super::downlink_nas::send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(nas.0), logger)
+                .await
+        {
+            debug!(&logger, "Failed to send NAS to UE- {:?}", e)
+        }
     } else {
         debug!(&logger, "No Nas and no sessions on initial context create");
     }

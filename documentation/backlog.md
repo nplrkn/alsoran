@@ -3,8 +3,7 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- PDU session resource setup - code review and tidy - make top level procedure really clean
-- Frunk
+- PDU session resource setup - code review and tidy
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
@@ -14,17 +13,18 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
 - NG Setup is in workflows but F1 and E1 Setup aren't
 ----FUNCTION----
-- Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
+- Generate RRC transaction IDs properly
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 ----PERFORMANCE----
 - Don't create 1 Redis connection per access
 -----ASN.1 GENERATOR------
-- Move to latest version of specs
+- Frunk transmogrify - awkward because of vecs, enums and bitstrings.
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Generate procedures for Rrc and make F1AP a RequestProvider.
 - Implement setuprelease
 - Deduplicate inline definitions in RRC autogeneration
+- Move to latest version of specs
 - Fix clippy
 -----TESTS------
 - free5GC demo can register 2 (N?) UEs
@@ -34,6 +34,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
+- Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - sock_opt.rs doesn't need to be a separate file
 - Cleaner RRC interface in trait Gnbcu
 - Break procedures into small functions

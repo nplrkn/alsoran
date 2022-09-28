@@ -37,7 +37,9 @@ impl<G: Gnbcu> EventHandler for NgapHandler<G> {
 #[async_trait]
 impl<G: Gnbcu> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
-        crate::workflows::downlink_nas(&self.gnbcu, i, logger).await;
+        if let Err(e) = crate::workflows::downlink_nas(&self.gnbcu, i, logger).await {
+            debug!(logger, "Downlink Nas Trasnport procedure failed - {:?}", e);
+        };
     }
 }
 
