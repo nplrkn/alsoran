@@ -144,11 +144,11 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
 
         // Send UeContextSetupRequest to DU.
         let ue_context_setup_request = self.build_ue_context_setup_request(&ue, None);
-        debug!(self.logger, "<< UeContextSetupRequest");
+        self.log_message("<< UeContextSetupRequest");
         let ue_context_setup_response = self
             .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
             .await?;
-        debug!(self.logger, ">> UeContextSetupResponse");
+        self.log_message(">> UeContextSetupResponse");
 
         // Send BearerContextModification to CU-UP.
         let bearer_context_modification = self.build_bearer_context_modification(
@@ -156,14 +156,14 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             gnb_cu_up_ue_e1ap_id,
             ue_context_setup_response,
         );
-        debug!(self.logger, "<< BearerContextMdificationRequest");
+        self.log_message("<< BearerContextMdificationRequest");
         let _response = self
             .e1ap_request::<BearerContextModificationProcedure>(
                 bearer_context_modification,
                 self.logger,
             )
             .await?;
-        debug!(self.logger, ">> BearerContextModificationResponse");
+        self.log_message(">> BearerContextModificationResponse");
 
         // Collect the Nas messages from the successful setups.
         // TODO - as per the similar comment in pdu_session_resource_setup(), we only need one copy of this data, so this code should be reorganized
@@ -176,11 +176,11 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         // Perform Rrc Reconfiguration including the Nas message from earlier.
         let rrc_transaction = self.new_rrc_transaction(&ue).await;
         let rrc_container = super::build_rrc::build_rrc_reconfiguration(3, Some(nas_messages))?;
-        debug!(self.logger, "<< RrcReconfiguration");
+        self.log_message("<< RrcReconfiguration");
         self.send_rrc_to_ue(&ue, f1ap::SrbId(1), rrc_container, self.logger)
             .await;
         let _rrc_reconfiguration_complete: rrc::UlDcchMessage = rrc_transaction.recv().await?;
-        debug!(self.logger, ">> RrcReconfigurationComplete");
+        self.log_message(">> RrcReconfigurationComplete");
 
         // Write back UE.
         debug!(self.logger, "Store UE {:#010x}", ue.key);

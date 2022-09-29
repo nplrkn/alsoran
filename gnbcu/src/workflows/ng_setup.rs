@@ -3,7 +3,7 @@
 use super::{Gnbcu, Workflow};
 use bitvec::prelude::*;
 use ngap::*;
-use slog::{debug, info, warn};
+use slog::{info, warn};
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
     // Ng Setup Procedure
@@ -34,13 +34,13 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             nb_iot_default_paging_drx: None,
             extended_ran_node_name: None,
         };
-        debug!(self.logger, "NgSetupRequest >>");
+        self.log_message("NgSetupRequest >>");
         match self
             .ngap_request::<NgSetupProcedure>(ng_setup_request, self.logger)
             .await
         {
             Ok(response) => {
-                debug!(self.logger, "NgSetupResponse <<");
+                self.log_message("NgSetupResponse <<");
                 info!(
                     self.logger,
                     "NGAP interface initialized with {:?}", response.amf_name
