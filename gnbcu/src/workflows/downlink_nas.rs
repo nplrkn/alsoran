@@ -18,8 +18,11 @@ pub async fn downlink_nas<G: Gnbcu>(
     logger: &Logger,
 ) -> Result<()> {
     debug!(&logger, "DownlinkNasTransport(Nas) <<");
+
     let mut ue = gnbcu.retrieve(&i.ran_ue_ngap_id.0).await?;
+
     maybe_learn_amf_ngap_id(gnbcu, &mut ue, i.amf_ue_ngap_id, logger).await;
+
     send_nas_to_ue(gnbcu, &ue, DedicatedNasMessage(i.nas_pdu.0), logger).await
 }
 
