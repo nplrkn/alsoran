@@ -2,7 +2,7 @@
 
 use super::Gnbcu;
 use super::RrcHandler;
-use crate::workflows;
+use crate::workflows::Workflow;
 use async_trait::async_trait;
 use bitvec::prelude::*;
 use f1ap::*;
@@ -54,7 +54,7 @@ impl<G: Gnbcu> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
 impl<G: Gnbcu> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
         debug!(logger, ">> InitialUlRrcMessageTransfer");
-        if let Err(e) = workflows::initial_access(&self.gnbcu, r, logger).await {
+        if let Err(e) = Workflow::new(&self.gnbcu, logger).initial_access(r).await {
             debug!(logger, "Inital access procedure failed - {:?}", e);
         }
     }

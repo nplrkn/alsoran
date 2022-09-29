@@ -1,6 +1,6 @@
 //! rrc - RRC entry points into the GNB-CU
 
-use crate::{Gnbcu, UeState};
+use crate::{workflows::Workflow, Gnbcu, UeState};
 use anyhow::Result;
 use net::AperSerde;
 use rrc::*;
@@ -59,7 +59,7 @@ impl<G: Gnbcu> RrcHandler<G> {
         req: UlInformationTransfer,
         logger: &Logger,
     ) -> Result<()> {
-        crate::workflows::uplink_nas(&self.gnbcu, ue, req, logger).await;
+        Workflow::new(&self.gnbcu, logger).uplink_nas(ue, req).await;
         Ok(())
     }
 }
