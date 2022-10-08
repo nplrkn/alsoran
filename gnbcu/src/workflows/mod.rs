@@ -1,5 +1,5 @@
 use super::Gnbcu;
-use slog::Logger;
+use slog::{debug, Logger};
 
 mod build_f1ap;
 mod build_rrc;
@@ -18,6 +18,9 @@ pub struct Workflow<'a, G: Gnbcu> {
 impl<'a, G: Gnbcu> Workflow<'a, G> {
     pub fn new(gnbcu: &'a G, logger: &'a Logger) -> Self {
         Workflow { gnbcu, logger }
+    }
+    pub fn log_message(&self, s: &str) {
+        debug!(self.logger, "{}", s)
     }
 }
 

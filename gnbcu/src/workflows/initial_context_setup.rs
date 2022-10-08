@@ -25,7 +25,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         &self,
         r: &InitialContextSetupRequest,
     ) -> Result<InitialContextSetupResponse, Cause> {
-        debug!(self.logger, "InitialContextSetupRequest(Nas) << ");
+        self.log_message("InitialContextSetupRequest(Nas) << ");
 
         // Retrieve UE context by ran_ue_ngap_id.
         debug!(self.logger, "Retrieve UE {:#010x}", r.ran_ue_ngap_id.0);
@@ -52,15 +52,15 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             );
 
             // Send to GNB-DU and get back the response to the (outer) UE Context Setup.
-            debug!(&self.logger, "<< UeContextSetup(SecurityModeCommand)");
+            self.log_message("<< UeContextSetup(SecurityModeCommand)");
             let _ue_context_setup_response = self
                 .f1ap_request::<UeContextSetupProcedure>(ue_context_setup_request, self.logger)
                 .await
                 .map_err(|_| Cause::RadioNetwork(CauseRadioNetwork::Unspecified))?;
-            debug!(self.logger, ">> UeContextSetupResponse");
+            self.log_message(">> UeContextSetupResponse");
         } else {
             // --- No sessions needed ---
-            debug!(self.logger, "<< SecurityModeCommand");
+            self.log_message("<< SecurityModeCommand");
             self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
                 .await;
         }
@@ -70,7 +70,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             .recv()
             .await
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
-        debug!(self.logger, ">> SecurityModeComplete");
+        self.log_message(">> SecurityModeComplete");
 
         if let Some(_sessions) = &r.pdu_session_resource_setup_list_cxt_req {
             // --- Sessions needed ---
@@ -85,14 +85,14 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
 
             // Send to the UE and get back the response.
-            debug!(self.logger, "<< RrcReconfiguration");
+            self.log_message("<< RrcReconfiguration");
             self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
                 .await;
             let _rrc_reconfiguration_complete: UlDcchMessage = rrc_transaction
                 .recv()
                 .await
                 .map_err(|_| Cause::Misc(CauseMisc::Unspecified))?;
-            debug!(self.logger, ">> RrcReconfigurationComplete");
+            self.log_message(">> RrcReconfigurationComplete");
         } else if let Some(nas) = r.nas_pdu.clone() {
             if let Err(e) = self.send_nas_to_ue(&ue, DedicatedNasMessage(nas.0)).await {
                 debug!(self.logger, "Failed to send NAS to UE- {:?}", e)
@@ -105,7 +105,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         }
 
         // Reply to the AMF.
-        debug!(self.logger, "InitialContextSetupResponse >>");
+        self.log_message("InitialContextSetupResponse >>");
         Ok(InitialContextSetupResponse {
             amf_ue_ngap_id: r.amf_ue_ngap_id.clone(),
             ran_ue_ngap_id: RanUeNgapId(ue.key),

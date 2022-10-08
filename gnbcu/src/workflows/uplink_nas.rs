@@ -26,7 +26,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             }
         };
 
-        debug!(self.logger, ">> UlInformationTransfer(Nas)");
+        self.log_message(">> UlInformationTransfer(Nas)");
 
         let amf_ue_ngap_id = match ue.amf_ue_ngap_id {
             Some(x) => x,
@@ -64,7 +64,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             twif_identity_information: None,
         };
 
-        debug!(self.logger, "UplinkNasTransport(Nas) >>");
+        self.log_message("UplinkNasTransport(Nas) >>");
         self.ngap_indication::<UplinkNasTransportProcedure>(m, self.logger)
             .await
     }

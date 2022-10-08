@@ -14,7 +14,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
     // 1.    Ngap DownlinkNasTransport(Nas) <<
     // 2. << Rrc DlInformationTransfer(Nas)
     pub async fn downlink_nas(&self, i: DownlinkNasTransport) -> Result<()> {
-        debug!(self.logger, "DownlinkNasTransport(Nas) <<");
+        self.log_message("DownlinkNasTransport(Nas) <<");
 
         let mut ue = self.retrieve(&i.ran_ue_ngap_id.0).await?;
 
@@ -47,7 +47,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
     pub async fn send_nas_to_ue(&self, ue: &UeState, nas: DedicatedNasMessage) -> Result<()> {
         let rrc_container = super::build_rrc::build_rrc_dl_information_transfer(2, Some(nas))?;
 
-        debug!(self.logger, "<< DlInformationTransfer(Nas)");
+        self.log_message("<< DlInformationTransfer(Nas)");
         self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
             .await;
         Ok(())

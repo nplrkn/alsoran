@@ -18,7 +18,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
     // 4.    Ngap InitialUeMessage >>
     pub async fn initial_access(&self, r: InitialUlRrcMessageTransfer) -> Result<()> {
         let _rrc_setup_request = expect_rrc_setup_request(&r.rrc_container.0)?;
-        debug!(self.logger, ">> Rrc RrcSetupRequest");
+        self.log_message(">> Rrc RrcSetupRequest");
 
         let ue = UeState::new(r.gnb_du_ue_f1ap_id);
         debug!(self.logger, "Created UE {:#010x}", ue.key);
@@ -31,7 +31,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         self.store(ue.key, ue, self.config().initial_ue_ttl_secs)
             .await?;
 
-        debug!(self.logger, "InitialUeMessage(Nas) >>");
+        self.log_message("InitialUeMessage(Nas) >>");
         self.ngap_indication::<InitialUeMessageProcedure>(initial_ue_message, self.logger)
             .await;
         Ok(())
@@ -41,7 +41,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         let rrc_transaction = self.gnbcu.new_rrc_transaction(&ue).await;
         let rrc_setup = super::build_rrc::build_rrc_setup(1)?;
 
-        debug!(self.logger, "<< RrcSetup");
+        self.log_message("<< RrcSetup");
         self.send_rrc_to_ue(&ue, SrbId(0), rrc_setup, self.logger)
             .await;
 
