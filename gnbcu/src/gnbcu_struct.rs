@@ -138,52 +138,6 @@ impl<U: UeStateStore> UeStateStore for ConcreteGnbcu<U> {
     }
 }
 
-// A first attempt at implementing RequestProvider for RRC.
-// New idea is to impl it on RrcTransaction and get rid of UeRrcChannel.
-
-// pub struct UeRrcChannel<'a> {
-//     gnb_cu_ue_f1ap_id: GnbCuUeF1apId,
-//     gnb_du_ue_f1ap_id: GnbDuUeF1apId,
-//     srb_id: SrbId,
-//     f1ap_stack: &'a Stack,
-//     rrc_transaction: RrcTransaction,
-// }
-
-// #[async_trait]
-// impl<P: Procedure, 'a> RequestProvider<P> for UeRrcChannel<'a> {
-//     async fn request(
-//         &self,
-//         r: P::Request,
-//         logger: &Logger,
-//     ) -> Result<P::Success, RequestError<P::Failure>> {
-//         let bytes = P::encode_request(r)?;
-//         let pdcp_pdu = PdcpPdu::encode(&bytes);
-//         let rrc_container = f1ap::RrcContainer(pdcp_pdu.into());
-//         let dl_message = DlRrcMessageTransfer {
-//             gnb_cu_ue_f1ap_id: self.gnb_cu_ue_f1ap_id.clone(),
-//             gnb_du_ue_f1ap_id: self.gnb_du_ue_f1ap_id.clone(),
-//             old_gnb_du_ue_f1ap_id: None,
-//             srb_id: self.srb_id.clone(),
-//             execute_duplication: None,
-//             rrc_container,
-//             rat_frequency_priority_information: None,
-//             rrc_delivery_status_request: None,
-//             ue_context_not_retrievable: None,
-//             redirected_rrc_message: None,
-//             plmn_assistance_info_for_net_shar: None,
-//             new_gnb_cu_ue_f1ap_id: None,
-//             additional_rrm_priority_index: None,
-//         };
-
-//         debug!(&logger, "<< DlRrcMessageTransfer");
-//         DlRrcMessageTransferProcedure::call_provider(self.f1ap_stack, dl_message, logger).await;
-
-//         // Receive response on the channel or timeout.
-//         let msg = self.rrc_transaction.recv().await?;
-//         P::decode_response(&msg)
-//     }
-// }
-
 #[async_trait]
 impl<U: UeStateStore> Gnbcu for ConcreteGnbcu<U> {
     fn config(&self) -> &Config {

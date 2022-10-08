@@ -34,6 +34,7 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
 - Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
+- Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - sock_opt.rs doesn't need to be a separate file
 - Cleaner RRC interface in trait Gnbcu
