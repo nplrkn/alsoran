@@ -1,3 +1,5 @@
+//! build_rrc - construction of RRC messages
+
 use anyhow::Result;
 use net::AperSerde;
 use pdcp::PdcpPdu;

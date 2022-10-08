@@ -1,10 +1,12 @@
 //! e1ap - E1AP entry points into the GNB-CU
 
+use crate::workflows::Workflow;
+
 use super::Gnbcu;
 use async_trait::async_trait;
 use e1ap::*;
 use net::{EventHandler, RequestError, RequestProvider, TnlaEvent};
-use slog::{debug, info, warn, Logger};
+use slog::{info, warn, Logger};
 
 #[derive(Clone)]
 pub struct E1apHandler<G: Gnbcu> {
@@ -24,18 +26,7 @@ impl<G: Gnbcu> RequestProvider<GnbCuUpE1SetupProcedure> for E1apHandler<G> {
         r: GnbCuUpE1SetupRequest,
         logger: &Logger,
     ) -> Result<GnbCuUpE1SetupResponse, RequestError<GnbCuUpE1SetupFailure>> {
-        debug!(logger, ">> GnbCuUpE1SetupRequest");
-        info!(
-            logger,
-            "E1AP interface initialized with {:?}", r.gnb_cu_up_id
-        );
-        debug!(logger, "<< GnbCuUpE1SetupResponse");
-        Ok(GnbCuUpE1SetupResponse {
-            transaction_id: r.transaction_id,
-            gnb_cu_cp_name: self.gnbcu.config().clone().name.map(|x| GnbCuCpName(x)),
-            transport_layer_address_info: None,
-            extended_gnb_cu_cp_name: None,
-        })
+        Workflow::new(&self.gnbcu, logger).e1_setup(r).await
     }
 }
 

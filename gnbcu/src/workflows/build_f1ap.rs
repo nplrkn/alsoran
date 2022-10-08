@@ -1,3 +1,5 @@
+//! build_f1ap - construction of F1AP messages
+
 use crate::datastore::UeState;
 
 use super::Gnbcu;

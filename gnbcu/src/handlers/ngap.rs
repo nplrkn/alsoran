@@ -50,7 +50,6 @@ impl<G: Gnbcu> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> 
         r: InitialContextSetupRequest,
         logger: &Logger,
     ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
-        debug!(logger, "Initial Context Setup Procedure");
         Workflow::new(&self.gnbcu, logger)
             .initial_context_setup(&r)
             .await
@@ -69,10 +68,9 @@ impl<G: Gnbcu> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> 
 #[async_trait]
 impl<G: Gnbcu> IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler<G> {
     async fn handle(&self, i: AmfStatusIndication, logger: &Logger) {
-        debug!(logger, "<< Amf Status Indication");
-        for guami_item in i.unavailable_guami_list.0 {
-            info!(logger, "GUAMI {} now unavailable", guami_item.guami);
-        }
+        Workflow::new(&self.gnbcu, logger)
+            .amf_status_indication(i)
+            .await;
     }
 }
 

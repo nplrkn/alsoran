@@ -1,9 +1,12 @@
 use super::Gnbcu;
 use slog::{debug, Logger};
 
+mod amf_status_indication;
 mod build_f1ap;
 mod build_rrc;
 mod downlink_nas;
+mod e1_setup;
+mod f1_setup;
 mod initial_access;
 mod initial_context_setup;
 mod ng_setup;

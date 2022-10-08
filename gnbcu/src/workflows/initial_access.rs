@@ -17,6 +17,8 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
     // 3. >> Rrc RrcSetupComplete
     // 4.    Ngap InitialUeMessage >>
     pub async fn initial_access(&self, r: InitialUlRrcMessageTransfer) -> Result<()> {
+        self.log_message(">> InitialUlRrcMessageTransfer");
+
         let _rrc_setup_request = expect_rrc_setup_request(&r.rrc_container.0)?;
         self.log_message(">> Rrc RrcSetupRequest");
 
