@@ -3,7 +3,6 @@
 This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
 
 ## TO DO
-- PDU session resource setup - code review and tidy
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
@@ -11,7 +10,6 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Set to public
 ----E1 + session establishment----
 - GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
-- NG Setup is in workflows but F1 and E1 Setup aren't
 ----FUNCTION----
 - Generate RRC transaction IDs properly
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
@@ -38,13 +36,15 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - sock_opt.rs doesn't need to be a separate file
 - Cleaner RRC interface in trait Gnbcu
-- Break procedures into small functions
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 ## RETEST
 
 ## DONE
+- PDU session resource setup - code review and tidy
+- Break procedures into small functions
+- NG Setup is in workflows but F1 and E1 Setup aren't
 - Ints should be Copy rather than Clone (e.g. AmfUeNgapId)
 - Registration sequence should not set up UE context in DU or invovle Rrc Reconfiguration
 - SRB set to 0 or 1 and checking of that in Mock DU

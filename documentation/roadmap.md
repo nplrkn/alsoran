@@ -1,27 +1,21 @@
 
-# Release 0.1 - NGAP and F1AP basics
+# Current - NGAP, F1AP, E1AP basic framework
 
-- GNB-CU-CP prototype.  No DU, no userplane.
+- GNB-CU-CP prototype.
 - UE registration demo against free5GC.
-
-# Release 0.2 - state storage
-
-- Ue state in datastore.
+- Ue state in Redis datastore.
 - Registration of multiple UEs
-
-# Release 0.3 - userplane
-- E1
-- Sample userplane
 - Session setup (23.502, figure 4.3.2.2.1-1).
 
-# Release 0.4 - Kubernetes
+# Next - GNB-CU-CP scale out
+
+- Interchangeable workers, each with TNLAs to AMF, DU, UP.
+- Triangular redirection
+
+# Future
 
 - Dockerfiles and Helm charts
-- Open source notices
+- Distributed timers?
+- Sample userplane 
 
-# Release 0.5 - GNB-CU-CP scale out
-
-- Interchangeable workers, each with TNLAs to AMF and DU.
-- Triangular redirection
-- Distributed timers? 
 
