@@ -120,6 +120,27 @@ impl TestContext {
         Ok(())
     }
 
+    pub async fn establish_pdu_session(&mut self, ue_id: u32) -> Result<()> {
+        self.amf
+            .send_pdu_session_resource_setup(ue_id)
+            .await
+            .unwrap();
+        self.cu_up.handle_bearer_context_setup(ue_id).await.unwrap();
+        self.du.handle_ue_context_setup(ue_id).await.unwrap();
+        self.cu_up
+            .handle_bearer_context_modification(ue_id)
+            .await
+            .unwrap();
+        let _nas = self.du.receive_rrc_reconfiguration(ue_id).await.unwrap();
+        self.du
+            .send_rrc_reconfiguration_complete(ue_id)
+            .await
+            .unwrap();
+        self.amf
+            .receive_pdu_session_resource_setup_response(ue_id)
+            .await
+    }
+
     pub async fn start_worker(&mut self, redis_port: Option<u16>) {
         let worker_number = self.workers.len() as u16;
 

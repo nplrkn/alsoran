@@ -1,7 +1,7 @@
 //! ngap - NGAP entry points into the GNB-CU
 
 use super::Gnbcu;
-use crate::workflows;
+use crate::workflows::Workflow;
 use anyhow::Result;
 use async_trait::async_trait;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
@@ -26,7 +26,7 @@ impl<G: Gnbcu> EventHandler for NgapHandler<G> {
         match event {
             TnlaEvent::Established(addr) => {
                 info!(logger, "NGAP TNLA {} established to {}", tnla_id, addr);
-                crate::workflows::ng_setup(&self.gnbcu, logger).await;
+                Workflow::new(&self.gnbcu, logger).ng_setup().await;
             }
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
         };
@@ -37,7 +37,9 @@ impl<G: Gnbcu> EventHandler for NgapHandler<G> {
 #[async_trait]
 impl<G: Gnbcu> IndicationHandler<DownlinkNasTransportProcedure> for NgapHandler<G> {
     async fn handle(&self, i: DownlinkNasTransport, logger: &Logger) {
-        crate::workflows::downlink_nas(&self.gnbcu, i, logger).await;
+        if let Err(e) = Workflow::new(&self.gnbcu, logger).downlink_nas(i).await {
+            debug!(logger, "Downlink Nas Trasnport procedure failed - {:?}", e);
+        };
     }
 }
 
@@ -48,8 +50,8 @@ impl<G: Gnbcu> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> 
         r: InitialContextSetupRequest,
         logger: &Logger,
     ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
-        debug!(logger, "Initial Context Setup Procedure");
-        workflows::initial_context_setup(&self.gnbcu, &r, logger)
+        Workflow::new(&self.gnbcu, logger)
+            .initial_context_setup(&r)
             .await
             .map_err(|cause| {
                 RequestError::UnsuccessfulOutcome(InitialContextSetupFailure {
@@ -66,9 +68,21 @@ impl<G: Gnbcu> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G> 
 #[async_trait]
 impl<G: Gnbcu> IndicationHandler<AmfStatusIndicationProcedure> for NgapHandler<G> {
     async fn handle(&self, i: AmfStatusIndication, logger: &Logger) {
-        debug!(logger, "<< Amf Status Indication");
-        for guami_item in i.unavailable_guami_list.0 {
-            info!(logger, "GUAMI {} now unavailable", guami_item.guami);
-        }
+        Workflow::new(&self.gnbcu, logger)
+            .amf_status_indication(i)
+            .await;
+    }
+}
+
+#[async_trait]
+impl<G: Gnbcu> RequestProvider<PduSessionResourceSetupProcedure> for NgapHandler<G> {
+    async fn request(
+        &self,
+        r: PduSessionResourceSetupRequest,
+        logger: &Logger,
+    ) -> Result<PduSessionResourceSetupResponse, RequestError<()>> {
+        Ok(Workflow::new(&self.gnbcu, logger)
+            .pdu_session_resource_setup(r)
+            .await)
     }
 }

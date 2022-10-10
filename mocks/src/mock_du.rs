@@ -264,10 +264,34 @@ impl MockDu {
         }
     }
 
+    pub async fn handle_ue_context_setup(&self, ue_id: u32) -> Result<()> {
+        let _ = self.receive_ue_context_setup_request(ue_id).await?;
+
+        // Code to check for an Rrc Container of a particular type
+        // match match rrc_container {
+        //     Some(x) => rrc_from_container(x)?,
+        //     None => return Err(anyhow!("Expected Rrc container on UeContextSetupRequest",)),
+        // }
+        // .message
+        // {
+        //     DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
+        //         info!(
+        //             &self.logger,
+        //             "UeContextSetupRequest(SecurityModeCommand) <<"
+        //         );
+        //         Ok(x)
+        //     }
+        //     x => Err(anyhow!("Expected security mode command - got {:?}", x)),
+        // }
+
+        self.send_ue_context_setup_response(ue_id).await?;
+        Ok(())
+    }
+
     pub async fn receive_ue_context_setup_request(
         &self,
         ue_id: u32,
-    ) -> Result<SecurityModeCommand> {
+    ) -> Result<Option<RrcContainer>> {
         let ue_context_setup_request = match self.receive_pdu().await {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
@@ -278,21 +302,7 @@ impl MockDu {
             _ => panic!("Bad ue id"),
         }
 
-        match match ue_context_setup_request.rrc_container {
-            Some(x) => rrc_from_container(x)?,
-            None => return Err(anyhow!("Expected Rrc container on UeContextSetupRequest",)),
-        }
-        .message
-        {
-            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
-                info!(
-                    &self.logger,
-                    "UeContextSetupRequest(SecurityModeCommand) <<"
-                );
-                Ok(x)
-            }
-            x => Err(anyhow!("Expected security mode command - got {:?}", x)),
-        }
+        Ok(ue_context_setup_request.rrc_container)
     }
 
     pub async fn send_ue_context_setup_response(&self, ue_id: u32) -> Result<()> {
