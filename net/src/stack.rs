@@ -38,7 +38,7 @@ impl Stack {
 
     pub async fn connect<A: Application>(
         &self,
-        connect_address: String,
+        connect_address: &String,
         ppid: u32,
         application: A,
         logger: Logger,

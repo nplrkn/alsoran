@@ -3,11 +3,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_std;
-use serial_test::serial;
 pub use test::*;
 
 #[async_std::test]
-#[serial]
 async fn amf_status_indication() -> Result<()> {
     let tc = TestContext::new(Stage::AmfConnected).await?;
     tc.amf.send_status_indication().await?;

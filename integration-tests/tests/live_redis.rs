@@ -3,11 +3,10 @@ use std::process;
 
 use anyhow::Result;
 use async_std;
-use serial_test::serial;
 pub use test::*;
 
 #[async_std::test]
-#[serial]
+#[ignore] // Requires Redis to be installed
 async fn live_redis() -> Result<()> {
     // Run Redis Server on a non-standard port
     let port = 23491;

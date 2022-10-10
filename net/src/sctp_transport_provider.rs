@@ -50,7 +50,7 @@ impl TransportProvider for SctpTransportProvider {
 
     async fn maintain_connection<H>(
         self,
-        connect_addr_string: String,
+        connect_addr_string: &String,
         ppid: u32,
         handler: H,
         logger: Logger,
@@ -61,6 +61,7 @@ impl TransportProvider for SctpTransportProvider {
         let assoc_id = 1; // TODO
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
+        let connect_addr_string = connect_addr_string.clone();
         let join_handle = task::spawn(async move {
             loop {
                 match resolve_and_connect(&connect_addr_string, ppid, &logger).await {

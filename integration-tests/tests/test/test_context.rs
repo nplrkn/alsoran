@@ -3,14 +3,17 @@ use common::ShutdownHandle;
 use gnbcu::{ConcreteGnbcu, Config};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu};
+use rand::Rng;
 use slog::{info, o, trace, Logger};
 use std::{panic, process};
 
 const F1AP_SCTP_PPID: u32 = 62;
 const E1AP_SCTP_PPID: u32 = 64;
+const PORT_ALLOCATION_RETRIES: u32 = 10;
 
 pub struct TestContext {
     pub amf: MockAmf,
+    pub amf_port: u16,
     pub du: MockDu,
     pub cu_up: MockCuUp,
     pub logger: Logger,
@@ -55,19 +58,19 @@ impl TestContext {
         }));
 
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
-        let amf_address = "127.0.0.1:38412";
-        let amf = MockAmf::new(amf_address, &logger).await;
+        let (amf, amf_port) = start_amf_on_random_port(&logger).await;
         let du = MockDu::new(&logger).await;
         let cu_up = MockCuUp::new(&logger).await;
 
         let mut tc = TestContext {
             amf,
+            amf_port,
             du,
             cu_up,
             logger,
             workers: vec![],
         };
-        tc.start_worker(redis).await;
+        tc.start_worker_with_random_ports(redis).await;
 
         tc.get_to_stage(stage).await
     }
@@ -79,12 +82,12 @@ impl TestContext {
         }
         if stage >= Stage::DuConnected {
             let address = self.worker_info(0).f1ap_host_port;
-            self.du.connect(address, F1AP_SCTP_PPID).await;
+            self.du.connect(&address, F1AP_SCTP_PPID).await;
             self.du.perform_f1_setup().await?;
         }
         if stage >= Stage::CuUpConnected {
             let address = self.worker_info(0).e1ap_host_port;
-            self.cu_up.connect(address, E1AP_SCTP_PPID).await;
+            self.cu_up.connect(&address, E1AP_SCTP_PPID).await;
             self.cu_up.perform_e1_setup().await?;
         }
         if stage >= Stage::Ue1Registered {
@@ -141,23 +144,28 @@ impl TestContext {
             .await
     }
 
-    pub async fn start_worker(&mut self, redis_port: Option<u16>) {
+    async fn start_worker_with_random_ports(&mut self, redis_port: Option<u16>) {
         let worker_number = self.workers.len() as u16;
-
-        let mut config = Config::default();
-        config.f1ap_bind_port += worker_number;
         let logger = self.logger.new(o!("cu-w"=> worker_number));
+        for _ in 0..PORT_ALLOCATION_RETRIES {
+            let mut config = Config::default();
+            config.amf_address = format!("127.0.0.1:{}", self.amf_port);
+            config.f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
+            config.e1ap_bind_port = config.f1ap_bind_port + 1;
 
-        let shutdown_handle = if let Some(port) = redis_port {
-            ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
-        } else {
-            ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+            if let Ok(shutdown_handle) = if let Some(port) = redis_port {
+                ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
+            } else {
+                ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+            } {
+                self.workers.push(InternalWorkerInfo {
+                    shutdown_handle,
+                    config,
+                });
+                return;
+            }
         }
-        .unwrap();
-        self.workers.push(InternalWorkerInfo {
-            shutdown_handle,
-            config,
-        })
+        panic!("Repeatedly failed to start worker with random ports");
     }
 
     pub async fn terminate(self) {
@@ -174,4 +182,16 @@ impl TestContext {
         info!(self.logger, "Terminate mock DU");
         self.du.terminate().await;
     }
+}
+
+async fn start_amf_on_random_port(logger: &Logger) -> (MockAmf, u16) {
+    for _ in 0..PORT_ALLOCATION_RETRIES {
+        let port = rand::thread_rng().gen_range(1024..65535);
+        let address = format!("127.0.0.1:{}", port);
+
+        if let Ok(amf) = MockAmf::new(address.as_str(), &logger).await {
+            return (amf, port);
+        };
+    }
+    panic!("Repeatedly failed to start Mock AMF")
 }
