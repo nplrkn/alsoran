@@ -1,5 +1,6 @@
 [package]
 name = "gnbdu-sim"
+build = false   # otherwise doesn't build on Github
 version = "0.1.0"
 edition = "2021"
 
