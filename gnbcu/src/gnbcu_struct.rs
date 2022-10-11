@@ -80,7 +80,7 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
     }
 
     async fn connect_ngap(&self) -> Result<ShutdownHandle> {
-        let amf_address = "127.0.0.1:38412".to_string();
+        let amf_address = &self.config.amf_address;
         info!(&self.logger, "Maintain connection to AMF {}", amf_address);
         self.ngap
             .connect(

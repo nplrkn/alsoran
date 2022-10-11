@@ -8,6 +8,9 @@ pub struct Config {
     // The port to which the worker should bind its E1AP server.
     pub e1ap_bind_port: u16,
 
+    // The AMF "<address>:<port>"
+    pub amf_address: String,
+
     // TTL to set on the UE state during the initial access procedure
     pub initial_ue_ttl_secs: usize,
 
@@ -26,6 +29,7 @@ impl Default for Config {
         Config {
             f1ap_bind_port: 38472, // TS38.472
             e1ap_bind_port: 38462, // TS38.462
+            amf_address: "127.0.0.1:38412".to_string(),
             initial_ue_ttl_secs: 5,
             ue_ttl_secs: 86_400, // a day
             name: Some("Alsoran".to_string()),

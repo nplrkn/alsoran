@@ -1,5 +1,6 @@
 //! mock - 'base class' for the mocks
 
+use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
@@ -38,7 +39,7 @@ impl<P: Pdu> Mock<P> {
         }
     }
 
-    pub async fn serve(&mut self, address: String, ppid: u32) {
+    pub async fn serve(&mut self, address: String, ppid: u32) -> Result<()> {
         let transport_tasks = self
             .transport
             .clone()
@@ -48,12 +49,12 @@ impl<P: Pdu> Mock<P> {
                 std::mem::take(&mut self.handler).unwrap(),
                 self.logger.clone(),
             )
-            .await
-            .expect("Server bind failed");
+            .await?;
         self.transport_tasks = Some(transport_tasks);
+        Ok(())
     }
 
-    pub async fn connect(&mut self, address: String, ppid: u32) {
+    pub async fn connect(&mut self, address: &String, ppid: u32) {
         let transport_tasks = self
             .transport
             .clone()

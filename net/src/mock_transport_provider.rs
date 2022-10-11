@@ -47,7 +47,7 @@ impl TransportProvider for MockTransportProvider {
 
     async fn maintain_connection<H>(
         self,
-        _connect_addr_string: String,
+        _connect_addr_string: &String,
         _ppid: u32,
         handler: H,
         logger: Logger,

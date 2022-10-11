@@ -26,7 +26,7 @@ pub trait TransportProvider: Send + Sync + 'static {
 
     async fn maintain_connection<H>(
         self,
-        connect_addr_string: String,
+        connect_addr_string: &String,
         ppid: u32,
         handler: H,
         logger: Logger,

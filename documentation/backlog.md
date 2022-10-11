@@ -42,6 +42,8 @@ This is focused on the next release (0.1).  For longer term items, put them in t
 ## RETEST
 
 ## DONE
+- Parallel tests
+- Don't run live redis test by default
 - PDU session resource setup - code review and tidy
 - Break procedures into small functions
 - NG Setup is in workflows but F1 and E1 Setup aren't

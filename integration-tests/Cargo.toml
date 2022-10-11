@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-std = { version = "1.10.0", features = ["attributes"] }
 mocks = { path = "../mocks" }
 gnbcu = { path = "../gnbcu" }
+common = { path = "../common" }
 slog = "2.7.0"
 anyhow = "1.0.52"
-async-std = { version = "1.10.0", features = ["attributes"] }
-common = { path = "../common" }
 stop-token = "0.6.1"
-serial_test = "0.8.0"
+rand = "0.8.5"

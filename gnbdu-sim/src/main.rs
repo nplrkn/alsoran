@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
     let logger = common::logging::init_terminal_logging();
     let mut du = MockDu::new(&logger).await;
 
-    du.connect("127.0.0.1:38472".to_string(), F1AP_SCTP_PPID)
+    du.connect(&"127.0.0.1:38472".to_string(), F1AP_SCTP_PPID)
         .await;
     du.perform_f1_setup().await?;
 

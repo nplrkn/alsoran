@@ -30,13 +30,13 @@ impl Deref for MockAmf {
 const NGAP_SCTP_PPID: u32 = 60;
 
 impl MockAmf {
-    pub async fn new(amf_address: &str, logger: &Logger) -> MockAmf {
+    pub async fn new(amf_address: &str, logger: &Logger) -> Result<MockAmf> {
         let mut mock = Mock::new(logger.new(o!("amf" => 1))).await;
-        mock.serve(amf_address.to_string(), NGAP_SCTP_PPID).await;
-        MockAmf {
+        mock.serve(amf_address.to_string(), NGAP_SCTP_PPID).await?;
+        Ok(MockAmf {
             mock,
             ues: HashMap::new(),
-        }
+        })
     }
 
     pub async fn terminate(self) {

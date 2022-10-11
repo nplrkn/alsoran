@@ -26,11 +26,12 @@ The gNB-CU control and user plane (gNB-CU-CP and gNB-CU-UP) are interconnected b
 
 ## Integration tests and Redis
 
-`cargo test` runs the integration test suite.  For this test suite to pass fully, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
+`cargo test` runs the integration test suite, minus the live Redis test.  
+
+To also run the live Redis test, run `cargo test -- --include-ignore`.  For this to pass, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
 
 ## Up next
 
--  E1 and sample userplane.
 -  Scale out of control plane.
 
 ## Contributing
