@@ -1,3 +1,6 @@
+//! This build script builds and installs the NAS processing helper executable.  This is in Go,
+//! scavenged from the Free5GC project - because no open source Rust library apparently exists
+//! and this seemed to be the quickest and easiest kludge to get the call flow we need.
 use std::process::Command;
 
 fn main() {
