@@ -7,6 +7,8 @@ The following instructions below were created for a WSL environment without inta
 ## Get free5GC (one-off)
 Follow the instructions at https://www.free5gc.org/installations/stage-3-free5gc-install/ to install mongodb and make free5GC.  Because we are not going to use the userplane, you can skip 'Setting up Networking', and the make install of the kernel module. 
 
+ 
+
 ## Alsoran demo
 Open four terminals.  
 
@@ -35,6 +37,9 @@ redis-server &
 cargo run --bin gnbcu
 ```
 
+The gnbdu-sim build script is currently disabled because it fails on as a Github build runner.  If not done already, edit Cargo.toml
+in the gnbdu-sim to say "build = true" instead of "build = false".
+
 In terminal 4, in the alsoran directory, run `gnbdu-sim` tool.  This provisions a UE in MongoDB, connects as a DU, drives a UE registration procedure and then exits.
 ```
 cargo run --bin gnbdu-sim
@@ -47,3 +52,5 @@ To clean up,
 - `fg` and Ctrl-C in terminal 3 to shut down Redis, and `rm dump.rdb` to clean up its saved state
 - in terminal 1, `kill $(jobs -p)` to terminate the free5GC network functions that are running in the background
 - `sudo service mongodb stop` to terminate MongoDB.
+
+You may also want to revert the gnbdu-sim Cargo.toml, e.g. `git checkout -- gnbdu-sim/Cargo.toml`.
