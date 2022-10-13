@@ -1,47 +1,44 @@
-# Backlog
-
-This is focused on the next release (0.1).  For longer term items, put them in the roadmap or put a TODO in the code.
-
-## TO DO
+# TO DO
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github, esp front page and roadmap
 - Set to public
-----E1 + session establishment----
-- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
 ----FUNCTION----
+- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
-- Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
-----PERFORMANCE----
-- Don't create 1 Redis connection per access
------ASN.1 GENERATOR------
-- Frunk transmogrify - awkward because of vecs, enums and bitstrings.
-- Get rid of todo!() in top_pdu.rs and replace with a log
-- Generate procedures for Rrc and make F1AP a RequestProvider.
-- Implement setuprelease
-- Deduplicate inline definitions in RRC autogeneration
-- Move to latest version of specs
-- Fix clippy
------TESTS------
-- free5GC demo can register 2 (N?) UEs
-- Parallel registration of two UEs
-- Have the integration test not use real sockets and run in parallel
-- Intermittent failure of live redis test
-- Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
-- Redis live test should not create Redis dump.rdb
 ----MAINTAINABILITY----
 - Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
-- sock_opt.rs doesn't need to be a separate file
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
+-----TESTS------
+- Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
+- Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
+-----ASN.1 GENERATOR------
+- Cope with extension marker being set
+- Frunk transmogrify - awkward because of vecs, enums and bitstrings.
+- Get rid of todo!() in top_pdu.rs and replace with a log
+- Implement Rrc setuprelease
+- Deduplicate inline definitions in RRC autogeneration
+- Generate procedures for Rrc and make F1AP a RequestProvider.
+- Move to latest version of specs
+- Fix clippy
+-----FREE5GC DEMO------
+- free5GC demo can register 2 (N?) UEs
+- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
+----REDIS----
+- Don't create 1 Redis connection per access
+- Intermittent failure of live redis test
+- Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
+- Redis live test should not create Redis dump.rdb
+----SCTP----
+- sock_opt.rs doesn't need to be a separate file
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
-## RETEST
-
-## DONE
+# DONE
+- Parallel registration of two UEs
 - Get build working on Github
 - Parallel tests
 - Don't run live redis test by default
