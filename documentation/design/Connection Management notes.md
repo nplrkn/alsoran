@@ -10,7 +10,7 @@ We then use NAPTR to find AMFs in the AMF Set as described in TS 29.303, 7.2.  T
 
 The GNB should connect to all AMFs in the AMF Set.  That means finding an address that works, setting up the first TNLA, doing an NG Setup over it, and then letting the AMF instruct it to set up more TNLAs if it so desires.  
 
-Does Kubernetes support NAPTR?  We could set up the same structure in local configuration as a stop gap.
+(Does Kubernetes support NAPTR?  We could set up the same structure in local configuration as a stop gap.)
 
 ## Non-UE associated signaling
 
@@ -30,7 +30,6 @@ i.e. everyone uses the association / stream chosen in the first place by the GNB
 TS 38.472 has almost identical text for F1AP, and additionally clarifies in TS38.473:
 > The F1AP UE TNLA binding is a binding between a F1AP UE association and a specific TNL association for a given UE. After the F1AP UE TNLA binding is created, the gNB-CU can update the UE TNLA binding by sending the F1AP message for the UE to the gNB-DU via a different TNLA. The gNB-DU shall update the F1AP UE TNLA binding with the new TNLA.
 The gNB-DU Configuration Update procedure also allows the gNB-DU to inform the gNB-CU that the indicated TNLA(s) will be removed by the gNB-DU.
-...perhaps to be used as a quiesce?
 
 F1AP specifies serialization of procedures for a UE.  From TS 38.473:
 > Unless explicitly indicated in the procedure specification, at any instance in time one protocol endpoint shall have a maximum of one ongoing F1AP procedure related to a certain UE.
@@ -81,6 +80,14 @@ To allow workers to coordinate, we could provide a coordinator microservice.  Th
   
 Key example of why a synchronization mechanism is needed is that otherwise two node controller instances might simultaneously try to send NG Setup.
 
+## Coordinator state
+
+The coordinator needs to know
+-  what workers, associations, peers and AMF endpoints exist
+-  what the initialization state of each association is.
+
+In a stateless model, it would have to learn all of this from worker nodes.
+
 ### Procedure trigger callback
 
 Consider a design where the worker on startup was informed whether the AMF has been contacted and the NG interface instance is up yet.  The worker can now autonomously decide whether to send NG Setup or RAN Configuration update.
@@ -100,7 +107,56 @@ Since the UE initiates the connection, this suggests setting up the NGAP interfa
 However, if this same policy is applied when adding the second worker, there is the danger that it will receive a triangular redirected response from the AMF and be unable to pass it back to a DU. 
 
 
-### Multiple TNLA endpoints from AMF
+### UE state retention
+
+When we tell AMF that UE state has been retained, this is on behalf of the entire GNB, not just the CU.
+
+According to the description of F1 Setup, this procedure always clears out state.  
+> This procedure also re-initialises the F1AP UE-related contexts (if any) and erases all related signalling connections in the two nodes like a Reset procedure would do. 
+
+So, when all CU workers die, we necessarily lose all F1 TNLAs, hence our F1 interface instance, hence all F1 state.
+
+The above shows that in the Alsoran design, ues-retained should only be set to true on NG Setup if all NGAP TNLAs are lost but
+workers, state and DU connections remain.
+
+
+### Coordinator startup and restart
+```mermaid
+sequenceDiagram
+  participant C
+  participant W1
+  participant W2
+  participant W3
+  participant AMF
+  W1->>C: Refresh (callback server, F1, E1, no TNLAs)
+  C->>W1: Refresh 200
+  C->>W1: NG Setup (ran node ID)
+  note over W1: no Ue state in Redis related to this node ID
+  W1->>AMF: NG Setup (ues-retained = false)
+  AMF->>W1: NG Setup response
+  note over W1: updates local coordination state - TNLA up to EP 1
+  W1->>C: NG Setup response
+  note over W1: stores Ue state in Redis
+  note over C: restarts 
+  W1->>C: Refresh (callback server, F1, E1, TNLA up to EP 1)
+  C->>W1: Refresh 200
+  note over W1: restarts as W2 - UE state still in Redis
+  W2->>C: Refresh (callback server, F1, E1, no TNLAs)
+  C->>W2: Refresh 200
+  W3->>C: Refresh (callback server, F1, E1, no TNLAs)
+  note over C: Still busy initializing W2 - will come back to W3 later
+  C->>W3: Refresh 200
+  C->>W1: Add F1 endpoint
+  note over C: timeout, W1 dead, all TNLAs to AMF dead
+  C->>W2: NG Setup (ran node id)
+  note over W2: Redis state exists related to this node ID
+  W2->>AMF: NG Setup (ues-retained = true)
+  AMF->>W2: NG Setup (ues-retained = false)
+  note over W2: AMF doesn't support retention - clear Redis state, F1 reset, E1 reset
+  W2->>C: NG Setup
+```
+
+### Multiple TNLA endpoints from AMF - orig design
 
 ```mermaid
 sequenceDiagram

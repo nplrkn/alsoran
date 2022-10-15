@@ -3,7 +3,25 @@
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github, esp front page and roadmap
-- Set to public
+- Go public
+----SCALE OUT / MULTPLE TNLA----
+- Two workers
+- Test one UE through each worker
+- Switchover of UE on dead worker - RAN initiated
+- Switchover of UE on dead worker - AMF initiated
+- Restart and catchup of coordinator
+- Allow AMF to specify 2nd endpoint - ask worker 1
+- Allow AMF to specify 2nd endpoint - ask worker 2
+- Load balance, stickiness and switchover between TNLAs to AMF
+- Allow DU / UP to set up multiple connections to same worker
+- Stickiness and switchover between TNLAs to DU / UP
+- Both workers die - reset
+- All NGAP TNLAs drop - don't reset, ues-retained = true. 
+- All F1AP TNLAs drop - reset. 
+- All E1AP TNLAs drop - ?
+- Triangular redirection from AMF
+- Selection and stickiness of SCTP streams
+- Specialized TNLAs for UE or non UE signaling only
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
