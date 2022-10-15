@@ -1,5 +1,6 @@
 use anyhow::Result;
-use common::ShutdownHandle;
+use common::{shutdown_handle, ShutdownHandle};
+use coordinator;
 use gnbcu::{ConcreteGnbcu, Config};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
@@ -18,6 +19,7 @@ pub struct TestContext {
     pub cu_up: MockCuUp,
     pub logger: Logger,
     workers: Vec<InternalWorkerInfo>,
+    coordinator: Option<InternalCoordinatorInfo>,
 }
 
 struct InternalWorkerInfo {
@@ -25,6 +27,9 @@ struct InternalWorkerInfo {
     pub config: Config,
 }
 
+struct InternalCoordinatorInfo {
+    pub shutdown_handle: ShutdownHandle,
+}
 pub struct WorkerInfo {
     pub f1ap_host_port: String,
     pub e1ap_host_port: String,
@@ -51,6 +56,7 @@ pub enum UeRegisterStage {
 pub struct TestContextBuilder {
     redis_port: Option<u16>,
     stage: Stage,
+    worker_count: isize,
 }
 
 impl TestContextBuilder {
@@ -58,6 +64,7 @@ impl TestContextBuilder {
         TestContextBuilder {
             redis_port: None,
             stage: Stage::Init,
+            worker_count: 1,
         }
     }
 
@@ -68,6 +75,11 @@ impl TestContextBuilder {
 
     pub fn stage<'a>(&'a mut self, stage: Stage) -> &'a mut TestContextBuilder {
         self.stage = stage;
+        self
+    }
+
+    pub fn worker_count<'a>(&'a mut self, worker_count: isize) -> &'a mut TestContextBuilder {
+        self.worker_count = worker_count;
         self
     }
 
@@ -92,14 +104,61 @@ impl TestContextBuilder {
             cu_up,
             logger,
             workers: vec![],
+            coordinator: None,
         };
-        tc.start_worker_with_random_ports(self.redis_port).await;
+
+        // Start coordinator if there will be multiple workers.
+        tc.start_coordinator().await;
+
+        // Start workers
+        for _ in 0..self.worker_count {
+            tc.start_worker_with_random_ports(self.redis_port).await;
+        }
+
         tc.get_to_stage(&self.stage).await?;
         Ok(tc)
     }
 }
 
 impl TestContext {
+    async fn start_coordinator(&mut self) {
+        let logger = self.logger.new(o!("coord" => 1));
+        for _ in 0..PORT_ALLOCATION_RETRIES {
+            let config = CoordinatorConfig {
+                bind_port: rand::thread_rng().gen_range(1024..65535),
+            };
+            if let Ok(shutdown_handle) = Coordinator::spawn(logger) {
+                self.coordinator = Some(InternalCoordinatorInfo { shutdown_handle });
+                return;
+            }
+        }
+        panic!("Repeatedly failed to start coordinator with random port");
+    }
+
+    async fn start_worker_with_random_ports(&mut self, redis_port: Option<u16>) {
+        let worker_number = self.workers.len() as u16;
+        let logger = self.logger.new(o!("cu-w"=> worker_number));
+        for _ in 0..PORT_ALLOCATION_RETRIES {
+            let mut config = Config::default();
+            config.amf_address = format!("127.0.0.1:{}", self.amf_port);
+            config.f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
+            config.e1ap_bind_port = config.f1ap_bind_port + 1;
+
+            if let Ok(shutdown_handle) = if let Some(port) = redis_port {
+                ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
+            } else {
+                ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+            } {
+                self.workers.push(InternalWorkerInfo {
+                    shutdown_handle,
+                    config,
+                });
+                return;
+            }
+        }
+        panic!("Repeatedly failed to start worker with random ports");
+    }
+
     async fn get_to_stage<'a>(&'a mut self, stage: &Stage) -> Result<&'a mut Self> {
         if stage >= &Stage::AmfConnected {
             self.amf.expect_connection().await;
@@ -197,30 +256,6 @@ impl TestContext {
         self.amf
             .receive_pdu_session_resource_setup_response(ue_id)
             .await
-    }
-
-    async fn start_worker_with_random_ports(&mut self, redis_port: Option<u16>) {
-        let worker_number = self.workers.len() as u16;
-        let logger = self.logger.new(o!("cu-w"=> worker_number));
-        for _ in 0..PORT_ALLOCATION_RETRIES {
-            let mut config = Config::default();
-            config.amf_address = format!("127.0.0.1:{}", self.amf_port);
-            config.f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
-            config.e1ap_bind_port = config.f1ap_bind_port + 1;
-
-            if let Ok(shutdown_handle) = if let Some(port) = redis_port {
-                ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
-            } else {
-                ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
-            } {
-                self.workers.push(InternalWorkerInfo {
-                    shutdown_handle,
-                    config,
-                });
-                return;
-            }
-        }
-        panic!("Repeatedly failed to start worker with random ports");
     }
 
     pub async fn terminate(self) {

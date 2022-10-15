@@ -5,9 +5,10 @@ edition = "2021"
 
 [dependencies]
 async-std = { version = "1.10.0", features = ["attributes"] }
+common = { path = "../common" }
 mocks = { path = "../mocks" }
 gnbcu = { path = "../gnbcu" }
-common = { path = "../common" }
+coordinator = { path = "../coordinator"}
 slog = "2.7.0"
 anyhow = "1.0.52"
 stop-token = "0.6.1"

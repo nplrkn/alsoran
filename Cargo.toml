@@ -3,14 +3,16 @@
 members = [
     "common",
     "sctp",
-    "mocks",
     "net",
+    "mocks",
     "ngap",
     "f1ap",
     "e1ap",
-    "gnbcu",
-    "gnbdu-sim",
     "rrc",
     "pdcp",
+    "node-control-api",
+    "gnbcu",
+    "coordinator",
+    "gnbdu-sim",
     "integration-tests"
 ]
