@@ -7,7 +7,10 @@ pub use test::*;
 
 #[async_std::test]
 async fn amf_status_indication() -> Result<()> {
-    let tc = TestContext::new(Stage::AmfConnected).await?;
+    let tc = TestContextBuilder::new()
+        .stage(Stage::AmfConnected)
+        .spawn()
+        .await?;
     tc.amf.send_status_indication().await?;
 
     // There's no good way to observe this, so wait a moment before we tear down the TNLA to give time for the

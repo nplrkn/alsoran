@@ -5,7 +5,10 @@ pub use test::*;
 
 #[async_std::test]
 async fn two_ues_register_sequentially() -> Result<()> {
-    let mut tc = TestContext::new(Stage::Ue1Registered).await.unwrap();
+    let mut tc = TestContextBuilder::new()
+        .stage(Stage::Ue1Registered)
+        .spawn()
+        .await?;
     tc.register_ue(2).await.unwrap();
     tc.terminate().await;
     Ok(())
@@ -13,7 +16,10 @@ async fn two_ues_register_sequentially() -> Result<()> {
 
 #[async_std::test]
 async fn two_ues_register_in_parallel() -> Result<()> {
-    let mut tc = TestContext::new(Stage::CuUpConnected).await.unwrap();
+    let mut tc = TestContextBuilder::new()
+        .stage(Stage::CuUpConnected)
+        .spawn()
+        .await?;
 
     let ue_1 = tc.register_ue_start(1);
     let ue_1 = tc.register_ue_next(ue_1).await?.unwrap();
