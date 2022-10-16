@@ -1,11 +1,11 @@
 use anyhow::Result;
-use common::{shutdown_handle, ShutdownHandle};
-use coordinator;
+use common::ShutdownHandle;
+use coordinator::{Config as CoordinatorConfig, Coordinator};
 use gnbcu::{ConcreteGnbcu, Config};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
 use rand::Rng;
-use slog::{info, o, trace, Logger};
+use slog::{info, o, Logger};
 use std::{panic, process};
 
 const F1AP_SCTP_PPID: u32 = 62;
@@ -108,9 +108,12 @@ impl TestContextBuilder {
         };
 
         // Start coordinator if there will be multiple workers.
-        tc.start_coordinator().await;
+        if self.worker_count > 1 {
+            tc.start_coordinator().await;
+        }
 
         // Start workers
+        info!(tc.logger, "Spawn {} workers", self.worker_count);
         for _ in 0..self.worker_count {
             tc.start_worker_with_random_ports(self.redis_port).await;
         }
@@ -122,12 +125,13 @@ impl TestContextBuilder {
 
 impl TestContext {
     async fn start_coordinator(&mut self) {
-        let logger = self.logger.new(o!("coord" => 1));
+        info!(self.logger, "Spawn coordinator");
         for _ in 0..PORT_ALLOCATION_RETRIES {
+            let logger = self.logger.new(o!("coord" => 1));
             let config = CoordinatorConfig {
                 bind_port: rand::thread_rng().gen_range(1024..65535),
             };
-            if let Ok(shutdown_handle) = Coordinator::spawn(logger) {
+            if let Ok(shutdown_handle) = Coordinator::spawn(config, logger) {
                 self.coordinator = Some(InternalCoordinatorInfo { shutdown_handle });
                 return;
             }
@@ -259,11 +263,15 @@ impl TestContext {
     }
 
     pub async fn terminate(self) {
-        trace!(self.logger, "Terminate workers");
+        info!(self.logger, "Terminate workers");
         for worker in self.workers {
             worker.shutdown_handle.graceful_shutdown().await;
-            trace!(self.logger, "Wait for worker to terminate connection");
             self.amf.expect_connection().await;
+        }
+
+        if let Some(c) = self.coordinator {
+            info!(self.logger, "Terminate coordinator");
+            c.shutdown_handle.graceful_shutdown().await;
         }
 
         info!(self.logger, "Terminate mock AMF");
