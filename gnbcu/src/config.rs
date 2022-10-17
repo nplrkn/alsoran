@@ -8,8 +8,12 @@ pub struct Config {
     // The port to which the worker should bind its E1AP server.
     pub e1ap_bind_port: u16,
 
-    // The AMF "<address>:<port>"
-    pub amf_address: String,
+    // Set this to ConnectToAmf("<address>:<port>"") to have a single worker that
+    // connects immediately to AMF on the given IP address and port.
+    //
+    // Set this to ServeConnectionApi(<bind_port>) to enable external control of
+    // connection management.
+    pub connection_style: ConnectionStyle,
 
     // TTL to set on the UE state during the initial access procedure
     pub initial_ue_ttl_secs: usize,
@@ -29,11 +33,17 @@ impl Default for Config {
         Config {
             f1ap_bind_port: 38472, // TS38.472
             e1ap_bind_port: 38462, // TS38.462
-            amf_address: "127.0.0.1:38412".to_string(),
+            connection_style: ConnectionStyle::ConnectToAmf("127.0.0.1:38412".to_string()),
             initial_ue_ttl_secs: 5,
             ue_ttl_secs: 86_400, // a day
             name: Some("Alsoran".to_string()),
             plmn: vec![0x2, 0xf8, 0x39],
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum ConnectionStyle {
+    ConnectToAmf(String),
+    ServeConnectionApi(u16),
 }

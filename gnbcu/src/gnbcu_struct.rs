@@ -1,5 +1,6 @@
 //! gnbcu_struct - the struct that implements the Gnbcu trait
 
+use super::config::ConnectionStyle;
 use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
@@ -69,18 +70,24 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
-        let ngap_handle = self.connect_ngap().await?;
         let f1ap_handle = self.serve_f1ap().await?;
         let e1ap_handle = self.serve_e1ap().await?;
+        let ngap_handle =
+            if let ConnectionStyle::ConnectToAmf(ref amf_address) = self.config.connection_style {
+                Some(self.connect_ngap(amf_address).await?)
+            } else {
+                None
+            };
         stop_token.await;
-        ngap_handle.graceful_shutdown().await;
+        if let Some(ngap_handle) = ngap_handle {
+            ngap_handle.graceful_shutdown().await;
+        }
         f1ap_handle.graceful_shutdown().await;
         e1ap_handle.graceful_shutdown().await;
         Ok(())
     }
 
-    async fn connect_ngap(&self) -> Result<ShutdownHandle> {
-        let amf_address = &self.config.amf_address;
+    async fn connect_ngap(&self, amf_address: &String) -> Result<ShutdownHandle> {
         info!(&self.logger, "Maintain connection to AMF {}", amf_address);
         self.ngap
             .connect(
