@@ -6,6 +6,9 @@
 - Go public
 ----SCALE OUT / MULTPLE TNLA----
 - Two workers
+- Only 1st worker initializes NG interface and 2nd worker joins in
+- 1st worker receives DU connection and adds 2nd worker
+- 2nd worker receives UP connection and adds 1st worker
 - Test one UE through each worker
 - Switchover of UE on dead worker - RAN initiated
 - Switchover of UE on dead worker - AMF initiated

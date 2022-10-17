@@ -8,6 +8,10 @@ To run,
 ~/bin/openapitools/openapi-generator-cli generate --generate-alias-as-model -i node-control.yaml -g rust-server --additional-properties=packageName="node-control-api"
 ```
 
+```bash
+~/bin/openapitools/openapi-generator-cli generate --generate-alias-as-model -i connection-api.yaml -g rust-server --additional-properties=packageName="connection-api"
+```
+
 # h2 compile error
 
 To fix compile error

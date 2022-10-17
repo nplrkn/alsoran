@@ -1,0 +1,136 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: AlsoRAN Connection API
+  license:
+    name: MIT
+servers:
+  - url: http://localhost/v1
+paths:
+  /setupNgap:
+    post:
+      summary: Instructs a worker to set up an NGAP interface instance with the AMF
+      operationId: setupNgap
+      requestBody:
+        description: AMF endpoint
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportAddress'
+            examples: 
+              example1:
+                value: 
+                  host: "127.0.0.1"
+                  port: 20000
+      responses:
+        '200':
+          description: Successful setup
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/AmfInfo"
+        '500':
+          description: Failed setup
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /joinNgap:
+    post:
+      summary: Instructs a worker to join an existing NGAP interface instance set up by another worker.
+      operationId: joinNgap
+      requestBody:
+        description: AMF endpoint
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportAddress'
+      responses:
+        '201':
+          description: Successful join
+        '500':
+          description: Failed join
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /addF1ap:
+    post: 
+      summary: Instructs a worker to add another worker to an existing F1AP interface instance 
+      operationId: addF1ap
+      requestBody:
+        description: Worker F1AP endpoint
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportAddress'
+      responses:
+        '201':
+          description: Du accepted worker addition
+        '404':
+          description: No connection
+        '500':
+          description: Failed to add worker
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /addE1ap:
+    post: 
+      summary: Instructs a worker to add another worker to an existing E1AP interface instance 
+      operationId: addE1ap
+      requestBody:
+        description: Worker E1AP endpoint
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportAddress'
+      responses:
+        '201':
+          description: Cu Up accepted worker addition
+        '404':
+          description: No connection
+        '500':
+          description: Failed add
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    AmfInfo:
+      type: object
+      properties:
+        amfName:
+          type: string
+    TransportAddress:
+      type: object
+      required: 
+        - host
+        - port
+      properties:
+        host:
+          type: string
+          format: hostname
+        port: 
+          type: integer
+          minimum: 1
+          maximum: 65535
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
