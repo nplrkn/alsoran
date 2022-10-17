@@ -5,28 +5,40 @@ pub use test::*;
 
 #[async_std::test]
 async fn cu_can_connect_to_amf() -> Result<()> {
-    let tc = TestContext::new(Stage::AmfConnected).await?;
+    let tc = TestContextBuilder::new()
+        .stage(Stage::AmfConnected)
+        .spawn()
+        .await?;
     tc.terminate().await;
     Ok(())
 }
 
 #[async_std::test]
 async fn du_can_connect_to_cu() -> Result<()> {
-    let tc = TestContext::new(Stage::DuConnected).await?;
+    let tc = TestContextBuilder::new()
+        .stage(Stage::DuConnected)
+        .spawn()
+        .await?;
     tc.terminate().await;
     Ok(())
 }
 
 #[async_std::test]
 async fn up_can_connect_to_cp() -> Result<()> {
-    let tc = TestContext::new(Stage::CuUpConnected).await?;
+    let tc = TestContextBuilder::new()
+        .stage(Stage::CuUpConnected)
+        .spawn()
+        .await?;
     tc.terminate().await;
     Ok(())
 }
 
 #[async_std::test]
 async fn ue_can_register() -> Result<()> {
-    let tc = TestContext::new(Stage::Ue1Registered).await?;
+    let tc = TestContextBuilder::new()
+        .stage(Stage::Ue1Registered)
+        .spawn()
+        .await?;
     tc.terminate().await;
     Ok(())
 }

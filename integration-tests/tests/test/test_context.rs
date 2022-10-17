@@ -48,16 +48,30 @@ pub enum UeRegisterStage {
     Stage1(SecurityModeCommand),
 }
 
-impl TestContext {
-    pub async fn new(stage: Stage) -> Result<Self> {
-        Self::new_with(stage, None).await
+pub struct TestContextBuilder {
+    redis_port: Option<u16>,
+    stage: Stage,
+}
+
+impl TestContextBuilder {
+    pub fn new() -> Self {
+        TestContextBuilder {
+            redis_port: None,
+            stage: Stage::Init,
+        }
     }
 
-    pub async fn new_with_redis(stage: Stage, redis_port: u16) -> Result<Self> {
-        Self::new_with(stage, Some(redis_port)).await
+    pub fn redis_port<'a>(&'a mut self, port: u16) -> &'a mut TestContextBuilder {
+        self.redis_port = Some(port);
+        self
     }
 
-    async fn new_with(stage: Stage, redis: Option<u16>) -> Result<Self> {
+    pub fn stage<'a>(&'a mut self, stage: Stage) -> &'a mut TestContextBuilder {
+        self.stage = stage;
+        self
+    }
+
+    pub async fn spawn(&self) -> Result<TestContext> {
         let logger = common::logging::test_init();
 
         let orig_hook = panic::take_hook();
@@ -79,27 +93,29 @@ impl TestContext {
             logger,
             workers: vec![],
         };
-        tc.start_worker_with_random_ports(redis).await;
-
-        tc.get_to_stage(stage).await
+        tc.start_worker_with_random_ports(self.redis_port).await;
+        tc.get_to_stage(&self.stage).await?;
+        Ok(tc)
     }
+}
 
-    async fn get_to_stage(mut self, stage: Stage) -> Result<Self> {
-        if stage >= Stage::AmfConnected {
+impl TestContext {
+    async fn get_to_stage<'a>(&'a mut self, stage: &Stage) -> Result<&'a mut Self> {
+        if stage >= &Stage::AmfConnected {
             self.amf.expect_connection().await;
             self.amf.handle_ng_setup().await?;
         }
-        if stage >= Stage::DuConnected {
+        if stage >= &Stage::DuConnected {
             let address = self.worker_info(0).f1ap_host_port;
             self.du.connect(&address, F1AP_SCTP_PPID).await;
             self.du.perform_f1_setup().await?;
         }
-        if stage >= Stage::CuUpConnected {
+        if stage >= &Stage::CuUpConnected {
             let address = self.worker_info(0).e1ap_host_port;
             self.cu_up.connect(&address, E1AP_SCTP_PPID).await;
             self.cu_up.perform_e1_setup().await?;
         }
-        if stage >= Stage::Ue1Registered {
+        if stage >= &Stage::Ue1Registered {
             self.register_ue(1).await?;
         }
         Ok(self)
