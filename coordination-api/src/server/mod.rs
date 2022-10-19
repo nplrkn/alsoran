@@ -25,18 +25,16 @@ use crate::{Api,
      RefreshWorkerResponse
 };
 
-pub mod callbacks;
-
 mod paths {
     use lazy_static::lazy_static;
 
     lazy_static! {
         pub static ref GLOBAL_REGEX_SET: regex::RegexSet = regex::RegexSet::new(vec![
-            r"^/v1/worker$"
+            r"^/v1/refreshWorker$"
         ])
         .expect("Unable to create global regex set");
     }
-    pub(crate) static ID_WORKER: usize = 0;
+    pub(crate) static ID_REFRESHWORKER: usize = 0;
 }
 
 pub struct MakeService<T, C> where
@@ -100,7 +98,7 @@ impl<T, C> Service<T, C> where
 {
     pub fn new(api_impl: T) -> Self {
         Service {
-            api_impl: api_impl,
+            api_impl,
             marker: PhantomData
         }
     }
@@ -113,7 +111,7 @@ impl<T, C> Clone for Service<T, C> where
     fn clone(&self) -> Self {
         Service {
             api_impl: self.api_impl.clone(),
-            marker: self.marker.clone(),
+            marker: self.marker,
         }
     }
 }
@@ -139,48 +137,48 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
         let (method, uri, headers) = (parts.method, parts.uri, parts.headers);
         let path = paths::GLOBAL_REGEX_SET.matches(uri.path());
 
-        match &method {
+        match method {
 
-            // RefreshWorker - POST /worker
-            &hyper::Method::POST if path.matched(paths::ID_WORKER) => {
+            // RefreshWorker - POST /refreshWorker
+            hyper::Method::POST if path.matched(paths::ID_REFRESHWORKER) => {
                 // Body parameters (note that non-required body parameters will ignore garbage
                 // values, rather than causing a 400 response). Produce warning header and logs for
                 // any unused fields.
-                let result = body.to_raw().await;
+                let result = body.into_raw().await;
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_refresh_worker_req: Option<models::RefreshWorkerReq> = if !body.is_empty() {
+                                let param_worker_info: Option<models::WorkerInfo> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_refresh_worker_req) => param_refresh_worker_req,
+                                        Ok(param_worker_info) => param_worker_info,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter RefreshWorkerReq - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter RefreshWorkerReq due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter WorkerInfo - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter WorkerInfo due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_refresh_worker_req = match param_refresh_worker_req {
-                                    Some(param_refresh_worker_req) => param_refresh_worker_req,
+                                let param_worker_info = match param_worker_info {
+                                    Some(param_worker_info) => param_worker_info,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter RefreshWorkerReq"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter RefreshWorkerReq")),
+                                                        .body(Body::from("Missing required body parameter WorkerInfo"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter WorkerInfo")),
                                 };
 
                                 let result = api_impl.refresh_worker(
-                                            param_refresh_worker_req,
+                                            param_worker_info,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
-                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().to_string().as_str())
+                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
                                                 .expect("Unable to create X-Span-ID header value"));
 
                                         if !unused_elements.is_empty() {
@@ -192,25 +190,18 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                RefreshWorkerResponse::RefreshWorkerResponse
-                                                    (body)
+                                                RefreshWorkerResponse::SuccessfulRefresh
                                                 => {
-                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
-                                                    response.headers_mut().insert(
-                                                        CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for REFRESH_WORKER_REFRESH_WORKER_RESPONSE"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.status_mut() = StatusCode::from_u16(204).expect("Unable to turn 204 into a StatusCode");
                                                 },
-                                                RefreshWorkerResponse::UnexpectedError
+                                                RefreshWorkerResponse::FailedRefresh
                                                     (body)
                                                 => {
-                                                    *response.status_mut() = StatusCode::from_u16(0).expect("Unable to turn 0 into a StatusCode");
+                                                    *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for REFRESH_WORKER_UNEXPECTED_ERROR"));
+                                                            .expect("Unable to create Content-Type header for REFRESH_WORKER_FAILED_REFRESH"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
@@ -227,12 +218,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter RefreshWorkerReq: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter RefreshWorkerReq")),
+                                                .body(Body::from(format!("Couldn't read body parameter WorkerInfo: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter WorkerInfo")),
                         }
             },
 
-            _ if path.matched(paths::ID_WORKER) => method_not_allowed(),
+            _ if path.matched(paths::ID_REFRESHWORKER) => method_not_allowed(),
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
                     .body(Body::empty())
                     .expect("Unable to create Not Found response"))
@@ -243,12 +234,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 /// Request parser for `Api`.
 pub struct ApiRequestParser;
 impl<T> RequestParser<T> for ApiRequestParser {
-    fn parse_operation_id(request: &Request<T>) -> Result<&'static str, ()> {
+    fn parse_operation_id(request: &Request<T>) -> Option<&'static str> {
         let path = paths::GLOBAL_REGEX_SET.matches(request.uri().path());
-        match request.method() {
-            // RefreshWorker - POST /worker
-            &hyper::Method::POST if path.matched(paths::ID_WORKER) => Ok("RefreshWorker"),
-            _ => Err(()),
+        match *request.method() {
+            // RefreshWorker - POST /refreshWorker
+            hyper::Method::POST if path.matched(paths::ID_REFRESHWORKER) => Some("RefreshWorker"),
+            _ => None,
         }
     }
 }

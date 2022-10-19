@@ -1,6 +1,6 @@
 use anyhow::Result;
 use common::ShutdownHandle;
-use coordinator::{Config as CoordinatorConfig, Coordinator};
+//use coordinator::{Config as CoordinatorConfig, Coordinator};
 use gnbcu::{ConcreteGnbcu, Config, ConnectionStyle};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
@@ -126,17 +126,18 @@ impl TestContextBuilder {
 impl TestContext {
     async fn start_coordinator(&mut self) {
         info!(self.logger, "Spawn coordinator");
-        for _ in 0..PORT_ALLOCATION_RETRIES {
-            let logger = self.logger.new(o!("coord" => 1));
-            let config = CoordinatorConfig {
-                bind_port: rand::thread_rng().gen_range(1024..65535),
-            };
-            if let Ok(shutdown_handle) = Coordinator::spawn(config, logger) {
-                self.coordinator = Some(InternalCoordinatorInfo { shutdown_handle });
-                return;
-            }
-        }
-        panic!("Repeatedly failed to start coordinator with random port");
+        todo!()
+        // for _ in 0..PORT_ALLOCATION_RETRIES {
+        //     let logger = self.logger.new(o!("coord" => 1));
+        //     let config = CoordinatorConfig {
+        //         bind_port: rand::thread_rng().gen_range(1024..65535),
+        //     };
+        //     if let Ok(shutdown_handle) = Coordinator::spawn(config, logger) {
+        //         self.coordinator = Some(InternalCoordinatorInfo { shutdown_handle });
+        //         return;
+        //     }
+        // }
+        //panic!("Repeatedly failed to start coordinator with random port");
     }
 
     async fn start_worker_with_random_ports(&mut self, redis_port: Option<u16>) {

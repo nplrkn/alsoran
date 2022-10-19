@@ -1,0 +1,89 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: AlsoRAN Coordination API
+  license:
+    name: MIT
+servers:
+  - url: http://localhost/v1
+paths:
+  /refreshWorker:
+    post:
+      summary: Updates coordinator with information about a worker instance
+      operationId: refreshWorker
+      requestBody:
+        description: Worker Information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkerInfo'
+      responses:
+        '204':
+          description: Successful refresh
+        '500':
+          description: Failed refresh
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  
+components:
+  schemas:
+    WorkerInfo:
+      type: object
+      required:
+        - workerUniqueId
+        - connectionApiUrl
+        - f1Address
+        - e1Address
+        - connectedAmfs
+        - connectedDus
+        - connectedUps
+      properties:
+        workerUniqueId:
+          type: string
+          format: uuid
+        connectionApiUrl:
+          type: string
+          format: url
+        f1Address:
+          $ref: '#/components/schemas/TransportAddress'
+        e1Address:
+          $ref: '#/components/schemas/TransportAddress'
+        connectedAmfs:
+          type: array
+          items: 
+            type: string
+        connectedDus:
+          type: array
+          items: 
+            type: string
+        connectedUps:
+          type: array
+          items: 
+            type: string
+    TransportAddress:
+      type: object
+      required: 
+        - host
+        - port
+      properties:
+        host:
+          type: string
+          format: hostname
+        port: 
+          type: integer
+          minimum: 1
+          maximum: 65535
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

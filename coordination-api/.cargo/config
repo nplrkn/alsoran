@@ -15,6 +15,4 @@ rustflags = [
     "-W", "unused_import_braces",  # unnecessary braces around an imported item
 
     "-D", "warnings", # all warnings should be denied
-
-    "--cfg=has_std"
 ]

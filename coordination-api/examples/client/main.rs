@@ -1,11 +1,10 @@
 #![allow(missing_docs, unused_variables, trivial_casts)]
 
-mod server;
 
 #[allow(unused_imports)]
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
-use node_control_api::{Api, ApiNoContext, Client, ContextWrapperExt, models,
+use coordination_api::{Api, ApiNoContext, Client, ContextWrapperExt, models,
                       RefreshWorkerResponse,
                      };
 use clap::{App, Arg};
@@ -69,9 +68,6 @@ fn main() {
     };
 
     let mut rt = tokio::runtime::Runtime::new().unwrap();
-
-    // We could do HTTPS here, but for simplicity we don't
-    rt.spawn(server::create("127.0.0.1:8081", false));
 
     match matches.value_of("operation") {
         /* Disabled because there's no example.

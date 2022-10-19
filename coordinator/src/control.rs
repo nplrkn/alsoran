@@ -1,15 +1,13 @@
 use async_channel::Receiver;
 use async_std::task::JoinHandle;
+use coordination_api::models::WorkerInfo;
 use futures::stream::StreamExt;
-use node_control_api::models::{InterfaceManagementReq, RefreshWorkerReq};
-use node_control_api::server::callbacks::Client;
-use node_control_api::{CallbackApi, TriggerInterfaceManagementResponse};
 use slog::{error, info, trace, Logger};
 use stop_token::StopToken;
 use swagger::{AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
 
 pub fn spawn(
-    receiver: Receiver<RefreshWorkerReq>,
+    receiver: Receiver<WorkerInfo>,
     stop_token: StopToken,
     logger: Logger,
 ) -> JoinHandle<()> {
@@ -31,7 +29,7 @@ type ClientContext = swagger::make_context_ty!(
     XSpanIdString
 );
 
-async fn control_task(receiver: Receiver<RefreshWorkerReq>, stop_token: StopToken, logger: Logger) {
+async fn control_task(receiver: Receiver<WorkerInfo>, stop_token: StopToken, logger: Logger) {
     let mut messages = receiver.take_until(stop_token);
     let mut controller = Controller {
         ngap_state: NgapState::Uninitialized,
@@ -42,7 +40,7 @@ async fn control_task(receiver: Receiver<RefreshWorkerReq>, stop_token: StopToke
 }
 
 impl Controller {
-    async fn process_worker_info(&mut self, message: RefreshWorkerReq, logger: &Logger) {
+    async fn process_worker_info(&mut self, message: WorkerInfo, logger: &Logger) {
         // If the connection list is empty, do nothing.
         // TODO: update the GNB-DU to remove a worker TNLA endpoint?
         if message.connected_amfs.is_empty() {

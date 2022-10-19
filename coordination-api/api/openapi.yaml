@@ -1,0 +1,110 @@
+openapi: 3.0.0
+info:
+  license:
+    name: MIT
+  title: AlsoRAN Coordination API
+  version: 1.0.0
+servers:
+- url: http://localhost/v1
+paths:
+  /refreshWorker:
+    post:
+      operationId: refreshWorker
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkerInfo'
+        description: Worker Information
+        required: true
+      responses:
+        "204":
+          description: Successful refresh
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Failed refresh
+      summary: Updates coordinator with information about a worker instance
+components:
+  schemas:
+    WorkerInfo:
+      example:
+        workerUniqueId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        e1Address:
+          port: 5249
+          host: host
+        connectedAmfs:
+        - connectedAmfs
+        - connectedAmfs
+        f1Address:
+          port: 5249
+          host: host
+        connectionApiUrl: http://example.com/aeiou
+        connectedDus:
+        - connectedDus
+        - connectedDus
+        connectedUps:
+        - connectedUps
+        - connectedUps
+      properties:
+        workerUniqueId:
+          format: uuid
+          type: string
+        connectionApiUrl:
+          format: url
+          type: string
+        f1Address:
+          $ref: '#/components/schemas/TransportAddress'
+        e1Address:
+          $ref: '#/components/schemas/TransportAddress'
+        connectedAmfs:
+          items:
+            type: string
+          type: array
+        connectedDus:
+          items:
+            type: string
+          type: array
+        connectedUps:
+          items:
+            type: string
+          type: array
+      required:
+      - connectedAmfs
+      - connectedDus
+      - connectedUps
+      - connectionApiUrl
+      - e1Address
+      - f1Address
+      - workerUniqueId
+      type: object
+    TransportAddress:
+      example:
+        port: 5249
+        host: host
+      properties:
+        host:
+          format: hostname
+          type: string
+        port:
+          maximum: 65535
+          minimum: 1
+          type: integer
+      required:
+      - host
+      - port
+      type: object
+    Error:
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+

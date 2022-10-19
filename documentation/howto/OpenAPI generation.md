@@ -5,7 +5,7 @@ openapitools was installed using the launcher script at [https://github.com/Open
 To run,
 
 ```bash
-~/bin/openapitools/openapi-generator-cli generate --generate-alias-as-model -i node-control.yaml -g rust-server --additional-properties=packageName="node-control-api"
+~/bin/openapitools/openapi-generator-cli generate --generate-alias-as-model -i coordination-api.yaml -g rust-server --additional-properties=packageName="coordination-api"
 ```
 
 ```bash

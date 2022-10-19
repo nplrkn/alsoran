@@ -4,22 +4,22 @@ All URIs are relative to *http://localhost/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-**refreshWorker**](default_api.md#refreshWorker) | **POST** /worker | Refresh worker request
+**refreshWorker**](default_api.md#refreshWorker) | **POST** /refreshWorker | Updates coordinator with information about a worker instance
 
 
 # **refreshWorker**
-> models::RefreshWorkerRsp refreshWorker(refresh_worker_req)
-Refresh worker request
+> refreshWorker(worker_info)
+Updates coordinator with information about a worker instance
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **refresh_worker_req** | [**RefreshWorkerReq**](RefreshWorkerReq.md)| Worker information | 
+  **worker_info** | [**WorkerInfo**](WorkerInfo.md)| Worker Information | 
 
 ### Return type
 
-[**models::RefreshWorkerRsp**](RefreshWorkerRsp.md)
+ (empty response body)
 
 ### Authorization
 

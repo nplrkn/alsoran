@@ -116,8 +116,7 @@ According to the description of F1 Setup, this procedure always clears out state
 
 So, when all CU workers die, we necessarily lose all F1 TNLAs, hence our F1 interface instance, hence all F1 state.
 
-The above shows that in the Alsoran design, ues-retained should only be set to true on NG Setup if all NGAP TNLAs are lost but
-workers, state and DU connections remain.
+The above shows that in the Alsoran design, ues-retained should only be set to true on NG Setup if all NGAP TNLAs are lost but workers, state and DU connections remain.
 
 
 ### Coordinator startup and restart
@@ -128,10 +127,9 @@ sequenceDiagram
   participant W2
   participant W3
   participant AMF
-  W1->>C: Refresh (callback server, F1, E1, no TNLAs)
-  C->>W1: Refresh 200
+  W1->>C: Refresh (conneciton api server, F1, E1, no TNLAs)
+  C->>W1: Refresh 204
   C->>W1: NG Setup (ran node ID)
-  note over W1: no Ue state in Redis related to this node ID
   W1->>AMF: NG Setup (ues-retained = false)
   AMF->>W1: NG Setup response
   note over W1: updates local coordination state - TNLA up to EP 1
@@ -139,13 +137,13 @@ sequenceDiagram
   note over W1: stores Ue state in Redis
   note over C: restarts 
   W1->>C: Refresh (callback server, F1, E1, TNLA up to EP 1)
-  C->>W1: Refresh 200
+  C->>W1: Refresh 204
   note over W1: restarts as W2 - UE state still in Redis
   W2->>C: Refresh (callback server, F1, E1, no TNLAs)
-  C->>W2: Refresh 200
+  C->>W2: Refresh 204
   W3->>C: Refresh (callback server, F1, E1, no TNLAs)
   note over C: Still busy initializing W2 - will come back to W3 later
-  C->>W3: Refresh 200
+  C->>W3: Refresh 204
   C->>W1: Add F1 endpoint
   note over C: timeout, W1 dead, all TNLAs to AMF dead
   C->>W2: NG Setup (ran node id)

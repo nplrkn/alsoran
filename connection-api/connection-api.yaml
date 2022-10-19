@@ -32,8 +32,6 @@ paths:
                 $ref: "#/components/schemas/AmfInfo"
         '500':
           description: Failed setup
-        default:
-          description: Unexpected error
           content:
             application/json:
               schema:

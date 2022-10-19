@@ -10,8 +10,9 @@ members = [
     "e1ap",
     "rrc",
     "pdcp",
-    "node-control-api",
     "gnbcu",
+    "connection-api",
+    "coordination-api",
     "coordinator",
     "gnbdu-sim",
     "integration-tests"
