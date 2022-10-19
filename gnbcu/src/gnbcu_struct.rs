@@ -5,6 +5,8 @@ use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use super::Config;
+use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
+use crate::Gnbcu;
 use anyhow::Result;
 use async_channel::Sender;
 use async_trait::async_trait;
@@ -16,9 +18,6 @@ use net::{
 use rrc::UlDcchMessage;
 use slog::{debug, info, Logger};
 use stop_token::{StopSource, StopToken};
-
-use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
-use crate::Gnbcu;
 
 #[derive(Clone)]
 pub struct ConcreteGnbcu<U: UeStateStore> {
@@ -72,16 +71,14 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let f1ap_handle = self.serve_f1ap().await?;
         let e1ap_handle = self.serve_e1ap().await?;
-        let ngap_handle =
-            if let ConnectionStyle::ConnectToAmf(ref amf_address) = self.config.connection_style {
-                Some(self.connect_ngap(amf_address).await?)
-            } else {
-                None
-            };
+        let ngap_or_connection_api_handle = match self.config.connection_style {
+            ConnectionStyle::ConnectToAmf(ref amf_address) => {
+                self.connect_ngap(amf_address).await?
+            }
+            ConnectionStyle::ServeConnectionApi(port) => self.serve_connection_api(port).await?,
+        };
         stop_token.await;
-        if let Some(ngap_handle) = ngap_handle {
-            ngap_handle.graceful_shutdown().await;
-        }
+        ngap_or_connection_api_handle.graceful_shutdown().await;
         f1ap_handle.graceful_shutdown().await;
         e1ap_handle.graceful_shutdown().await;
         Ok(())
@@ -129,6 +126,11 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
                 self.logger.clone(),
             )
             .await
+    }
+
+    async fn serve_connection_api(&self, port: u16) -> Result<ShutdownHandle> {
+        let addr = format!("127.0.0.1:{}", port).parse()?;
+        crate::handlers::connection_api::serve(addr, self.clone(), self.logger.clone()).await
     }
 }
 

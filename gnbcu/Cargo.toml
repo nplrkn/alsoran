@@ -17,10 +17,16 @@ f1ap = {path = "../f1ap" }
 ngap = {path = "../ngap" }
 rrc = {path = "../rrc" }
 pdcp = {path = "../pdcp" }
-async-trait = "0.1.51"
+async-trait = "0.1.24"
 bitvec = "1.0.1"
 common = { path = "../common" }
 async-channel = "1.6.1"
 rand = "0.8.5"
 redis = {version = "0.21.5", features = ["async-std-comp"]}
 speedy = "0.8.2"
+swagger = { version = "6.1", features = ["serdejson", "server"] }
+connection-api = { path = "../connection-api", features = ["server"] }
+hyper = {version = "0.14", features = ["full"]}
+serde_ignored = {version = "0.1.1"}
+url = {version = "2.1"}
+
