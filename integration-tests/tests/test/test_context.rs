@@ -1,7 +1,7 @@
 use anyhow::Result;
 use common::ShutdownHandle;
 //use coordinator::{Config as CoordinatorConfig, Coordinator};
-use gnbcu::{ConcreteGnbcu, Config, ConnectionStyle};
+use gnbcu::{Config, ConnectionStyle};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
 use rand::Rng;
@@ -151,9 +151,9 @@ impl TestContext {
             config.e1ap_bind_port = config.f1ap_bind_port + 1;
 
             if let Ok(shutdown_handle) = if let Some(port) = redis_port {
-                ConcreteGnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
+                gnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
             } else {
-                ConcreteGnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+                gnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
             } {
                 self.workers.push(InternalWorkerInfo {
                     shutdown_handle,

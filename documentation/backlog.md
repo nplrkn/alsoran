@@ -5,6 +5,7 @@
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
 ----SCALE OUT / MULTPLE TNLA----
+- Standalone single worker that runs built-in coordinator
 - Two workers
 - Only 1st worker initializes NG interface and 2nd worker joins in
 - 1st worker receives DU connection and adds 2nd worker

@@ -6,26 +6,41 @@ use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use super::Config;
 use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
-use crate::Gnbcu;
+use crate::{ConnectionApiServerConfig, Gnbcu};
 use anyhow::Result;
 use async_channel::Sender;
+use async_std::task::JoinHandle;
 use async_trait::async_trait;
+use coordination_api::models::{TransportAddress, WorkerInfo};
+use coordination_api::{
+    Api as CoordinationApi, Client as CoordinationApiClient, RefreshWorkerResponse,
+};
+use coordinator::Coordinator;
 use f1ap::{DlRrcMessageTransfer, DlRrcMessageTransferProcedure, GnbCuUeF1apId, SrbId};
 use net::{
     Indication, IndicationHandler, Procedure, RequestError, RequestProvider, SctpTransportProvider,
     ShutdownHandle, Stack,
 };
 use rrc::UlDcchMessage;
-use slog::{debug, info, Logger};
+use slog::{debug, info, warn, Logger};
 use stop_token::{StopSource, StopToken};
+use swagger::{ApiError, AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
+use uuid::Uuid;
 
+pub type ClientContext = swagger::make_context_ty!(
+    ContextBuilder,
+    EmptyContext,
+    Option<AuthData>,
+    XSpanIdString
+);
 #[derive(Clone)]
-pub struct ConcreteGnbcu<U: UeStateStore> {
+pub struct ConcreteGnbcu<A: CoordinationApi<ClientContext>, U: UeStateStore> {
     config: Config,
     ngap: Stack,
     f1ap: Stack,
     e1ap: Stack,
     ue_store: U,
+    coordinator: A,
     logger: Logger,
     rrc_transactions: PendingRrcTransactions,
 }
@@ -43,29 +58,66 @@ const F1AP_SCTP_PPID: u32 = 62;
 // TS38.462
 const E1AP_SCTP_PPID: u32 = 64;
 
-impl<U: UeStateStore> ConcreteGnbcu<U> {
-    pub fn spawn(config: Config, ue_store: U, logger: &Logger) -> Result<ShutdownHandle> {
-        let gnbcu = ConcreteGnbcu {
-            config,
-            ngap: Stack::new(SctpTransportProvider::new()),
-            f1ap: Stack::new(SctpTransportProvider::new()),
-            e1ap: Stack::new(SctpTransportProvider::new()),
-            ue_store,
-            logger: logger.clone(),
-            rrc_transactions: PendingRrcTransactions::new(),
-        };
+pub fn spawn<U: UeStateStore>(
+    config: Config,
+    ue_store: U,
+    logger: &Logger,
+) -> Result<ShutdownHandle> {
+    let stop_source = StopSource::new();
+    let stop_token = stop_source.token();
 
-        let stop_source = StopSource::new();
-        let stop_token = stop_source.token();
-        let handle = async_std::task::spawn(async move {
-            // Crash if this task exits with an error.  (Otherwise the GNBCU process will be up but the only
-            // thing running will be the initial thread waiting on signals.)
-            gnbcu
-                .serve(stop_token)
-                .await
-                .expect("Gnbcu startup failure");
-        });
-        Ok(ShutdownHandle::new(handle, stop_source))
+    let handle = match config.connection_style {
+        ConnectionStyle::ConnectToAmf(_) => {
+            let (coordinator, control_task) = Coordinator::new(stop_token.clone(), logger.clone());
+            ConcreteGnbcu::spawn(
+                config,
+                ue_store,
+                logger,
+                Some(control_task),
+                stop_token,
+                coordinator,
+            )
+        }
+
+        ConnectionStyle::ServeConnectionApi(_) => {
+            let coordinator = CoordinationApiClient::try_new_http("http://127.0.0.1:23156")?;
+            ConcreteGnbcu::spawn(config, ue_store, logger, None, stop_token, coordinator)
+        }
+    };
+
+    Ok(ShutdownHandle::new(handle, stop_source))
+}
+
+impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
+    ConcreteGnbcu<A, U>
+{
+    fn spawn(
+        config: Config,
+        ue_store: U,
+        logger: &Logger,
+        control_task: Option<JoinHandle<()>>,
+        stop_token: StopToken,
+        coordinator: A,
+    ) -> JoinHandle<()> {
+        let logger = logger.clone();
+        async_std::task::spawn(async move {
+            ConcreteGnbcu {
+                config,
+                ngap: Stack::new(SctpTransportProvider::new()),
+                f1ap: Stack::new(SctpTransportProvider::new()),
+                e1ap: Stack::new(SctpTransportProvider::new()),
+                ue_store,
+                coordinator,
+                logger,
+                rrc_transactions: PendingRrcTransactions::new(),
+            }
+            .serve(stop_token)
+            .await
+            .expect("Gnbcu startup failure");
+            if let Some(control_task) = control_task {
+                control_task.await;
+            }
+        })
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
@@ -75,13 +127,79 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
             ConnectionStyle::ConnectToAmf(ref amf_address) => {
                 self.connect_ngap(amf_address).await?
             }
-            ConnectionStyle::ServeConnectionApi(port) => self.serve_connection_api(port).await?,
+            ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
+                bind_port, ..
+            }) => self.serve_connection_api(bind_port).await?,
         };
+
+        // Connect to the coordinator.  It will bring this worker into service by making calls to the
+        // connection API.
+        self.connect_to_coordinator().await;
+
         stop_token.await;
         ngap_or_connection_api_handle.graceful_shutdown().await;
         f1ap_handle.graceful_shutdown().await;
         e1ap_handle.graceful_shutdown().await;
         Ok(())
+    }
+
+    async fn connect_to_coordinator(&self) {
+        // // TODO here we just send a single refresh.  This will need to be updated to send one on a timer.
+        // let stop_source = StopSource::new();
+        // let stop_token = stop_source.token();
+        // let (coordinator, control_task) = Coordinator::new(stop_token, self.logger.clone());
+
+        let context: ClientContext = swagger::make_context!(
+            ContextBuilder,
+            EmptyContext,
+            None as Option<AuthData>,
+            XSpanIdString::default()
+        );
+
+        if let Err(e) = self.send_refresh_worker(&context).await {
+            warn!(self.logger, "Failed initial refresh worker- {}", e);
+        }
+    }
+
+    async fn send_refresh_worker(
+        &self,
+        context: &ClientContext,
+    ) -> Result<RefreshWorkerResponse, ApiError> {
+        let connected_amfs = self
+            .ngap
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .map(|a| a.to_string())
+            .collect();
+
+        let connection_api_url = match &self.config.connection_style {
+            ConnectionStyle::ConnectToAmf(_) => "".to_string(),
+            ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
+                base_path, ..
+            }) => format!("{}/v1", base_path),
+        };
+
+        self.coordinator
+            .refresh_worker(
+                WorkerInfo {
+                    worker_unique_id: Uuid::new_v4(),
+                    connection_api_url,
+                    f1_address: TransportAddress {
+                        host: "127.0.0.1".to_string(),
+                        port: self.config.f1ap_bind_port,
+                    },
+                    e1_address: TransportAddress {
+                        host: "127.0.0.1".to_string(),
+                        port: self.config.e1ap_bind_port,
+                    },
+                    connected_amfs,
+                    connected_dus: vec![],
+                    connected_ups: vec![],
+                },
+                &context,
+            )
+            .await
     }
 
     async fn connect_ngap(&self, amf_address: &String) -> Result<ShutdownHandle> {
@@ -135,7 +253,9 @@ impl<U: UeStateStore> ConcreteGnbcu<U> {
 }
 
 #[async_trait]
-impl<U: UeStateStore> UeStateStore for ConcreteGnbcu<U> {
+impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
+    UeStateStore for ConcreteGnbcu<A, U>
+{
     async fn store(&self, k: u32, s: UeState, ttl_secs: usize) -> Result<()> {
         self.ue_store.store(k, s, ttl_secs).await
     }
@@ -148,7 +268,9 @@ impl<U: UeStateStore> UeStateStore for ConcreteGnbcu<U> {
 }
 
 #[async_trait]
-impl<U: UeStateStore> Gnbcu for ConcreteGnbcu<U> {
+impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore> Gnbcu
+    for ConcreteGnbcu<A, U>
+{
     fn config(&self) -> &Config {
         &self.config
     }

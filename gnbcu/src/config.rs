@@ -45,5 +45,14 @@ impl Default for Config {
 #[derive(Debug, Clone)]
 pub enum ConnectionStyle {
     ConnectToAmf(String),
-    ServeConnectionApi(u16),
+    ServeConnectionApi(ConnectionApiServerConfig),
+}
+
+#[derive(Debug, Clone)]
+pub struct ConnectionApiServerConfig {
+    // The port to bind the server to.
+    pub bind_port: u16,
+
+    // The base of the URL.  This could be formed from a service DNS name.
+    pub base_path: String,
 }

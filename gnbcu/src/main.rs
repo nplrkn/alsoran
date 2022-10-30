@@ -1,12 +1,12 @@
 use anyhow::Result;
 use common::{logging, signal};
-use gnbcu::{ConcreteGnbcu, Config, RedisUeStore};
+use gnbcu::{Config, RedisUeStore};
 use slog::info;
 
 #[async_std::main]
 async fn main() -> Result<()> {
     let root_logger = logging::init();
-    let shutdown_handle = ConcreteGnbcu::spawn(
+    let shutdown_handle = gnbcu::spawn(
         Config::default(),
         RedisUeStore::new(6379).unwrap(),
         &root_logger,

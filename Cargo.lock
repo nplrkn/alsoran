@@ -501,6 +501,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "common",
+ "connection-api",
  "coordination-api",
  "futures",
  "hyper",
@@ -999,6 +1000,8 @@ dependencies = [
  "bitvec",
  "common",
  "connection-api",
+ "coordination-api",
+ "coordinator",
  "e1ap",
  "f1ap",
  "hyper",
@@ -1014,6 +1017,7 @@ dependencies = [
  "stop-token",
  "swagger",
  "url",
+ "uuid",
 ]
 
 [[package]]

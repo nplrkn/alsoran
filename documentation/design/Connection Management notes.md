@@ -118,8 +118,11 @@ So, when all CU workers die, we necessarily lose all F1 TNLAs, hence our F1 inte
 
 The above shows that in the Alsoran design, ues-retained should only be set to true on NG Setup if all NGAP TNLAs are lost but workers, state and DU connections remain.
 
-
 ### Coordinator startup and restart
+
+A flaw in the below is that case where the coordinator restarts and a new worker starts.  In this case, we need to
+wait long enough to see if there is an existing worker with an NGAP connection.
+
 ```mermaid
 sequenceDiagram
   participant C
