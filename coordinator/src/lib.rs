@@ -2,7 +2,8 @@ mod config;
 mod control;
 mod server;
 
-pub use config::Config;
+pub use config::{Config, ConnectionControlConfig};
+pub use server::spawn;
 
 pub struct Context {}
 

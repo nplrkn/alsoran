@@ -1,5 +1,8 @@
 //! config - the config of a GNB-CU
 
+pub use connection_api::models::TransportAddress;
+pub use coordinator::ConnectionControlConfig;
+
 #[derive(Debug, Clone)]
 pub struct Config {
     // The port to which the worker should bind its F1AP server.
@@ -33,7 +36,9 @@ impl Default for Config {
         Config {
             f1ap_bind_port: 38472, // TS38.472
             e1ap_bind_port: 38462, // TS38.462
-            connection_style: ConnectionStyle::ConnectToAmf("127.0.0.1:38412".to_string()),
+            connection_style: ConnectionStyle::ConnectToAmf(ConnectionControlConfig {
+                amf_address: TransportAddress::new("127.0.0.1".to_string(), 38412),
+            }),
             initial_ue_ttl_secs: 5,
             ue_ttl_secs: 86_400, // a day
             name: Some("Alsoran".to_string()),
@@ -44,7 +49,7 @@ impl Default for Config {
 
 #[derive(Debug, Clone)]
 pub enum ConnectionStyle {
-    ConnectToAmf(String),
+    ConnectToAmf(ConnectionControlConfig),
     ServeConnectionApi(ConnectionApiServerConfig),
 }
 

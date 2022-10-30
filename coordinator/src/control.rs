@@ -1,3 +1,4 @@
+use crate::config::ConnectionControlConfig;
 use anyhow::Result;
 use async_channel::Receiver;
 use async_std::task::JoinHandle;
@@ -8,42 +9,54 @@ use slog::{error, info, warn, Logger};
 use stop_token::StopToken;
 use swagger::{AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
 
-use crate::Config;
-pub fn spawn(
+pub fn spawn<T: Api<ClientContext> + Clone + Send + Sync + 'static>(
     receiver: Receiver<WorkerInfo>,
-    config: Config,
+    config: ConnectionControlConfig,
     stop_token: StopToken,
+    local_api_provider: Option<T>,
     logger: Logger,
 ) -> JoinHandle<()> {
-    async_std::task::spawn(control_task(receiver, config, stop_token, logger))
+    async_std::task::spawn(control_task(
+        receiver,
+        config,
+        stop_token,
+        local_api_provider,
+        logger,
+    ))
 }
 
 enum NgapState {
     Uninitialized,
     Initialized,
 }
-struct Controller {
+struct Controller<T>
+where
+    T: Api<ClientContext>,
+{
     pub ngap_state: NgapState,
-    pub config: Config,
+    pub config: ConnectionControlConfig,
+    pub local_api_provider: Option<T>,
 }
 
-type ClientContext = swagger::make_context_ty!(
+pub type ClientContext = swagger::make_context_ty!(
     ContextBuilder,
     EmptyContext,
     Option<AuthData>,
     XSpanIdString
 );
 
-async fn control_task(
+async fn control_task<T: Api<ClientContext>>(
     receiver: Receiver<WorkerInfo>,
-    config: Config,
+    config: ConnectionControlConfig,
     stop_token: StopToken,
+    local_api_provider: Option<T>,
     logger: Logger,
 ) {
     let mut messages = receiver.take_until(stop_token);
     let mut controller = Controller {
         ngap_state: NgapState::Uninitialized,
         config,
+        local_api_provider,
     };
     while let Some(message) = messages.next().await {
         if let Err(e) = controller.process_worker_info(message, &logger).await {
@@ -52,7 +65,7 @@ async fn control_task(
     }
 }
 
-impl Controller {
+impl<T: Api<ClientContext>> Controller<T> {
     async fn process_worker_info(
         &mut self,
         worker_info: WorkerInfo,
@@ -87,12 +100,16 @@ impl Controller {
             XSpanIdString::default()
         );
 
-        let client = Client::try_new_http(&worker_info.connection_api_url)?;
-
-        match client
-            .setup_ngap(self.config.amf_address.clone(), &context)
-            .await
-        {
+        match if let Some(ref provider) = self.local_api_provider {
+            provider
+                .setup_ngap(self.config.amf_address.clone(), &context)
+                .await
+        } else {
+            let client = Client::try_new_http(&worker_info.connection_api_url)?;
+            client
+                .setup_ngap(self.config.amf_address.clone(), &context)
+                .await
+        } {
             Ok(_) => {
                 info!(logger, "Worker confirms successful TNLA initialization");
                 self.ngap_state = NgapState::Initialized

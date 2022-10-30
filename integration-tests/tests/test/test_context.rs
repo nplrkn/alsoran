@@ -1,7 +1,7 @@
 use anyhow::Result;
 use common::ShutdownHandle;
 //use coordinator::{Config as CoordinatorConfig, Coordinator};
-use gnbcu::{Config, ConnectionStyle};
+use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, TransportAddress};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
 use rand::Rng;
@@ -145,15 +145,20 @@ impl TestContext {
         let logger = self.logger.new(o!("cu-w"=> worker_number));
         for _ in 0..PORT_ALLOCATION_RETRIES {
             let mut config = Config::default();
-            config.connection_style =
-                ConnectionStyle::ConnectToAmf(format!("127.0.0.1:{}", self.amf_port));
+            config.connection_style = ConnectionStyle::ConnectToAmf(ConnectionControlConfig {
+                amf_address: TransportAddress::new("127.0.0.1".to_string(), self.amf_port),
+            });
             config.f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
             config.e1ap_bind_port = config.f1ap_bind_port + 1;
 
             if let Ok(shutdown_handle) = if let Some(port) = redis_port {
-                gnbcu::spawn(config.clone(), RedisUeStore::new(port).unwrap(), &logger)
+                gnbcu::spawn(
+                    config.clone(),
+                    RedisUeStore::new(port).unwrap(),
+                    logger.clone(),
+                )
             } else {
-                gnbcu::spawn(config.clone(), MockUeStore::new(), &logger)
+                gnbcu::spawn(config.clone(), MockUeStore::new(), logger.clone())
             } {
                 self.workers.push(InternalWorkerInfo {
                     shutdown_handle,

@@ -8,5 +8,22 @@ pub struct Config {
     pub bind_port: u16,
 
     // AMF address
+    pub connection_control_config: ConnectionControlConfig,
+}
+
+#[derive(Debug, Clone)]
+pub struct ConnectionControlConfig {
+    // AMF address
     pub amf_address: TransportAddress,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            bind_port: 43521, // TS38.472
+            connection_control_config: ConnectionControlConfig {
+                amf_address: TransportAddress::new("127.0.0.1".to_string(), 38412),
+            },
+        }
+    }
 }

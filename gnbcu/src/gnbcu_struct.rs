@@ -5,11 +5,11 @@ use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
 use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use super::Config;
+use crate::handlers::connection_api::ConnectionApiHandler;
 use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
 use crate::{ConnectionApiServerConfig, Gnbcu};
 use anyhow::Result;
 use async_channel::Sender;
-use async_std::task::JoinHandle;
 use async_trait::async_trait;
 use coordination_api::models::{TransportAddress, WorkerInfo};
 use coordination_api::{
@@ -61,83 +61,86 @@ const E1AP_SCTP_PPID: u32 = 64;
 pub fn spawn<U: UeStateStore>(
     config: Config,
     ue_store: U,
-    logger: &Logger,
+    logger: Logger,
 ) -> Result<ShutdownHandle> {
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
     let handle = match config.connection_style {
-        ConnectionStyle::ConnectToAmf(_) => {
-            let (coordinator, control_task) = Coordinator::new(stop_token.clone(), logger.clone());
-            ConcreteGnbcu::spawn(
-                config,
+        // Run a combined GNBCU and Coordinator.
+        ConnectionStyle::ConnectToAmf(ref connection_control_config) => {
+            let (coordinator, receiver) = Coordinator::new(logger.clone());
+            let gnbcu = ConcreteGnbcu::new(
+                config.clone(),
                 ue_store,
-                logger,
-                Some(control_task),
-                stop_token,
-                coordinator,
+                logger.clone(),
+                coordinator.clone(),
+            );
+            let handler = ConnectionApiHandler::new(gnbcu, logger);
+            coordinator.start_with_local_api_provider(
+                connection_control_config.clone(),
+                receiver,
+                handler,
             )
         }
 
+        // Run a worker and serve the connection API so that it can be managed by the coordinator.
         ConnectionStyle::ServeConnectionApi(_) => {
             let coordinator = CoordinationApiClient::try_new_http("http://127.0.0.1:23156")?;
-            ConcreteGnbcu::spawn(config, ue_store, logger, None, stop_token, coordinator)
+            let handle = async_std::task::spawn(async move {
+                let gnbcu = ConcreteGnbcu::new(config, ue_store, logger, coordinator);
+                gnbcu
+                    .serve(stop_token)
+                    .await
+                    .expect("Gnbcu startup failure");
+            });
+            ShutdownHandle::new(handle, stop_source)
         }
     };
 
-    Ok(ShutdownHandle::new(handle, stop_source))
+    Ok(handle)
 }
 
 impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
     ConcreteGnbcu<A, U>
 {
-    fn spawn(
-        config: Config,
-        ue_store: U,
-        logger: &Logger,
-        control_task: Option<JoinHandle<()>>,
-        stop_token: StopToken,
-        coordinator: A,
-    ) -> JoinHandle<()> {
-        let logger = logger.clone();
-        async_std::task::spawn(async move {
-            ConcreteGnbcu {
-                config,
-                ngap: Stack::new(SctpTransportProvider::new()),
-                f1ap: Stack::new(SctpTransportProvider::new()),
-                e1ap: Stack::new(SctpTransportProvider::new()),
-                ue_store,
-                coordinator,
-                logger,
-                rrc_transactions: PendingRrcTransactions::new(),
-            }
-            .serve(stop_token)
-            .await
-            .expect("Gnbcu startup failure");
-            if let Some(control_task) = control_task {
-                control_task.await;
-            }
-        })
+    fn new(config: Config, ue_store: U, logger: Logger, coordinator: A) -> ConcreteGnbcu<A, U> {
+        ConcreteGnbcu {
+            config,
+            ngap: Stack::new(SctpTransportProvider::new()),
+            f1ap: Stack::new(SctpTransportProvider::new()),
+            e1ap: Stack::new(SctpTransportProvider::new()),
+            ue_store,
+            coordinator,
+            logger,
+            rrc_transactions: PendingRrcTransactions::new(),
+        }
     }
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let f1ap_handle = self.serve_f1ap().await?;
         let e1ap_handle = self.serve_e1ap().await?;
-        let ngap_or_connection_api_handle = match self.config.connection_style {
-            ConnectionStyle::ConnectToAmf(ref amf_address) => {
-                self.connect_ngap(amf_address).await?
-            }
-            ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
-                bind_port, ..
-            }) => self.serve_connection_api(bind_port).await?,
-        };
+
+        let connection_api_handle =
+            if let ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
+                bind_port,
+                ..
+            }) = self.config.connection_style
+            {
+                Some(self.serve_connection_api(bind_port).await?)
+            } else {
+                None
+            };
 
         // Connect to the coordinator.  It will bring this worker into service by making calls to the
         // connection API.
         self.connect_to_coordinator().await;
 
         stop_token.await;
-        ngap_or_connection_api_handle.graceful_shutdown().await;
+
+        if let Some(connection_api_handle) = connection_api_handle {
+            connection_api_handle.graceful_shutdown().await;
+        }
         f1ap_handle.graceful_shutdown().await;
         e1ap_handle.graceful_shutdown().await;
         Ok(())

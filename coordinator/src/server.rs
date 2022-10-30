@@ -1,19 +1,21 @@
 use anyhow::Result;
-use async_channel::Sender;
-use async_std::task::JoinHandle;
+use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use common::ShutdownHandle;
+use connection_api::{Api as ConnectionApi, Client};
 use coordination_api::models::{self, WorkerInfo};
 use coordination_api::server::MakeService;
 use coordination_api::RefreshWorkerResponse;
 use coordination_api::{context::MakeAddContext, Api};
+use hyper::Body;
 use slog::{error, info, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;
-use stop_token::{StopSource, StopToken};
-use swagger::{ApiError, EmptyContext, Has, XSpanIdString};
+use stop_token::StopSource;
+use swagger::{ApiError, DropContextService, EmptyContext, Has, XSpanIdString};
 
-use crate::Config;
+use crate::control::ClientContext;
+use crate::{Config, ConnectionControlConfig};
 
 #[derive(Clone)]
 pub struct Server<C> {
@@ -22,29 +24,81 @@ pub struct Server<C> {
     sender: Sender<WorkerInfo>,
 }
 
-impl<C> Server<C> {
-    pub fn new(stop_token: StopToken, config: Config, logger: Logger) -> (Self, JoinHandle<()>) {
-        let (sender, receiver) = async_channel::bounded(1);
-        let control_task = super::control::spawn(receiver, config, stop_token, logger.clone());
+// To run local copy, we do new() then start().
+// To run standalone server... - spawn().
 
+impl<C> Server<C> {
+    pub fn new(logger: Logger) -> (Self, Receiver<WorkerInfo>) {
+        let (sender, receiver) = async_channel::bounded(1);
         (
             Server {
                 logger,
                 marker: PhantomData,
                 sender,
             },
-            control_task,
+            receiver,
         )
+    }
+
+    // Start the control task
+    pub fn start_with_local_api_provider<
+        T: ConnectionApi<ClientContext> + Clone + Send + Sync + 'static,
+    >(
+        &self,
+        connection_control_config: ConnectionControlConfig,
+        receiver: Receiver<WorkerInfo>,
+        local_api_provider: T,
+    ) -> ShutdownHandle {
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
+
+        let control_task = super::control::spawn(
+            receiver,
+            connection_control_config,
+            stop_token,
+            Some(local_api_provider),
+            self.logger.clone(),
+        );
+        ShutdownHandle::new(control_task, stop_source)
+    }
+
+    pub fn start(
+        &self,
+        connection_control_config: ConnectionControlConfig,
+        receiver: Receiver<WorkerInfo>,
+    ) -> ShutdownHandle {
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
+
+        // For the type parameter, we need any concrete type that implements the Api trait.
+        // An HTTP client will do.
+        let control_task = super::control::spawn::<
+            Client<
+                DropContextService<
+                    hyper::client::Client<hyper::client::HttpConnector, Body>,
+                    ClientContext,
+                >,
+                ClientContext,
+            >,
+        >(
+            receiver,
+            connection_control_config,
+            stop_token,
+            None,
+            self.logger.clone(),
+        );
+        ShutdownHandle::new(control_task, stop_source)
     }
 }
 
-pub fn _spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
+pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
     info!(logger, "Coordinator instance start");
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
     let addr = SocketAddr::new("127.0.0.1".parse()?, config.bind_port);
-    let (server, control_task) = Server::new(stop_token.clone(), config, logger.clone());
+    let (server, receiver) = Server::new(logger.clone());
+    let control_task = server.start(config.connection_control_config, receiver);
     let service = MakeService::new(server);
     let service = MakeAddContext::<_, EmptyContext>::new(service);
 
@@ -57,7 +111,7 @@ pub fn _spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
         } else {
             info!(logger, "Server graceful shutdown");
         }
-        control_task.await;
+        control_task.graceful_shutdown().await;
     });
     Ok(ShutdownHandle::new(server_task, stop_source))
 }
