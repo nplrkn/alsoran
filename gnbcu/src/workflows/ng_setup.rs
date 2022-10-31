@@ -1,15 +1,16 @@
 //! ng_setup - the initial handshake that establishes an instance of the NG reference point between GNB and AMF
 
 use super::{Gnbcu, Workflow};
+use anyhow::Result;
 use bitvec::prelude::*;
 use ngap::*;
-use slog::{info, warn};
+use slog::info;
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
     // Ng Setup Procedure
     // 1.    Ngap NgSetupRequest >>
     // 2.    Ngap NgSetupResponse <<
-    pub async fn ng_setup(&self) {
+    pub async fn ng_setup(&self) -> Result<AmfName> {
         // This uses the default expected values of free5GC.
         let ng_setup_request = NgSetupRequest {
             global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
@@ -35,19 +36,14 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             extended_ran_node_name: None,
         };
         self.log_message("NgSetupRequest >>");
-        match self
+        let response = self
             .ngap_request::<NgSetupProcedure>(ng_setup_request, self.logger)
-            .await
-        {
-            Ok(response) => {
-                self.log_message("NgSetupResponse <<");
-                info!(
-                    self.logger,
-                    "NGAP interface initialized with {:?}", response.amf_name
-                );
-            }
-
-            Err(e) => warn!(self.logger, "NG Setup failed - {:?}", e),
-        };
+            .await?;
+        self.log_message("NgSetupResponse <<");
+        info!(
+            self.logger,
+            "NGAP interface initialized with {:?}", response.amf_name
+        );
+        Ok(response.amf_name)
     }
 }

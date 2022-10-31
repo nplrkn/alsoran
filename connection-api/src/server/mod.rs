@@ -471,17 +471,13 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.body_mut() = Body::from(body);
                                                 },
                                                 SetupNgapResponse::FailedSetup
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
-                                                },
-                                                SetupNgapResponse::UnexpectedError
                                                     (body)
                                                 => {
-                                                    *response.status_mut() = StatusCode::from_u16(0).expect("Unable to turn 0 into a StatusCode");
+                                                    *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_UNEXPECTED_ERROR"));
+                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_FAILED_SETUP"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },

@@ -97,14 +97,5 @@ components:
       - port
       type: object
     Error:
-      properties:
-        code:
-          format: int32
-          type: integer
-        message:
-          type: string
-      required:
-      - code
-      - message
-      type: object
+      type: string
 

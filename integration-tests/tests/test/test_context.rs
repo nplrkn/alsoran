@@ -5,7 +5,7 @@ use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, TransportAddress};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
 use rand::Rng;
-use slog::{info, o, Logger};
+use slog::{debug, info, o, Logger};
 use std::{panic, process};
 
 const F1AP_SCTP_PPID: u32 = 62;
@@ -35,7 +35,7 @@ pub struct WorkerInfo {
     pub e1ap_host_port: String,
 }
 
-#[derive(PartialEq, PartialOrd)]
+#[derive(PartialEq, PartialOrd, Debug)]
 pub enum Stage {
     Init,
     AmfConnected,
@@ -144,12 +144,20 @@ impl TestContext {
         let worker_number = self.workers.len() as u16;
         let logger = self.logger.new(o!("cu-w"=> worker_number));
         for _ in 0..PORT_ALLOCATION_RETRIES {
-            let mut config = Config::default();
-            config.connection_style = ConnectionStyle::ConnectToAmf(ConnectionControlConfig {
-                amf_address: TransportAddress::new("127.0.0.1".to_string(), self.amf_port),
-            });
-            config.f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
-            config.e1ap_bind_port = config.f1ap_bind_port + 1;
+            let f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
+            let config = Config {
+                f1ap_bind_port,
+                e1ap_bind_port: f1ap_bind_port + 1,
+                connection_style: ConnectionStyle::ConnectToAmf(ConnectionControlConfig {
+                    fast_start: true,
+                    amf_address: TransportAddress {
+                        host: "127.0.0.1".to_string(),
+                        port: self.amf_port,
+                    },
+                    ..ConnectionControlConfig::default()
+                }),
+                ..Config::default()
+            };
 
             if let Ok(shutdown_handle) = if let Some(port) = redis_port {
                 gnbcu::spawn(
@@ -171,6 +179,8 @@ impl TestContext {
     }
 
     async fn get_to_stage<'a>(&'a mut self, stage: &Stage) -> Result<&'a mut Self> {
+        debug!(self.logger, "Get to stage {:?}", stage);
+
         if stage >= &Stage::AmfConnected {
             self.amf.expect_connection().await;
             self.amf.handle_ng_setup().await?;

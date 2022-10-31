@@ -8,7 +8,7 @@ use coordination_api::server::MakeService;
 use coordination_api::RefreshWorkerResponse;
 use coordination_api::{context::MakeAddContext, Api};
 use hyper::Body;
-use slog::{error, info, Logger};
+use slog::{debug, error, info, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;
 use stop_token::StopSource;
@@ -128,7 +128,7 @@ where
         context: &C,
     ) -> Result<RefreshWorkerResponse, ApiError> {
         //let _context = context.clone();
-        info!(
+        debug!(
             self.logger,
             "refresh_worker({:?}) - X-Span-ID: {:?}",
             worker_info,
@@ -138,7 +138,6 @@ where
         self.sender.send(worker_info).await.unwrap_or_else(|_| {
             error!(self.logger, "Internal control channel unexpectedly closed")
         });
-
-        Err(ApiError("Generic failure".into()))
+        Ok(RefreshWorkerResponse::SuccessfulRefresh)
     }
 }

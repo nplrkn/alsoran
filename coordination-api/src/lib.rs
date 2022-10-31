@@ -22,7 +22,7 @@ pub enum RefreshWorkerResponse {
     ,
     /// Failed refresh
     FailedRefresh
-    (models::Error)
+    (String)
 }
 
 /// API

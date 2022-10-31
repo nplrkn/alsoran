@@ -8,16 +8,15 @@ use crate::header;
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AmfInfo {
     #[serde(rename = "amfName")]
-    #[serde(skip_serializing_if="Option::is_none")]
-    pub amf_name: Option<String>,
+    pub amf_name: String,
 
 }
 
 impl AmfInfo {
     #[allow(clippy::new_without_default)]
-    pub fn new() -> AmfInfo {
+    pub fn new(amf_name: String, ) -> AmfInfo {
         AmfInfo {
-            amf_name: None,
+            amf_name,
         }
     }
 }
@@ -29,12 +28,8 @@ impl std::string::ToString for AmfInfo {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
 
-            self.amf_name.as_ref().map(|amf_name| {
-                vec![
-                    "amfName".to_string(),
-                    amf_name.to_string(),
-                ].join(",")
-            }),
+            Some("amfName".to_string()),
+            Some(self.amf_name.to_string()),
 
         ];
 
@@ -83,7 +78,7 @@ impl std::str::FromStr for AmfInfo {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(AmfInfo {
-            amf_name: intermediate_rep.amf_name.into_iter().next(),
+            amf_name: intermediate_rep.amf_name.into_iter().next().ok_or_else(|| "amfName missing in AmfInfo".to_string())?,
         })
     }
 }
@@ -127,132 +122,45 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
-pub struct Error {
-    #[serde(rename = "code")]
-    pub code: i32,
+pub struct Error(String);
 
-    #[serde(rename = "message")]
-    pub message: String,
-
-}
-
-impl Error {
-    #[allow(clippy::new_without_default)]
-    pub fn new(code: i32, message: String, ) -> Error {
-        Error {
-            code,
-            message,
-        }
+impl std::convert::From<String> for Error {
+    fn from(x: String) -> Self {
+        Error(x)
     }
 }
 
-/// Converts the Error value to the Query Parameters representation (style=form, explode=false)
-/// specified in https://swagger.io/docs/specification/serialization/
-/// Should be implemented in a serde serializer
 impl std::string::ToString for Error {
     fn to_string(&self) -> String {
-        let params: Vec<Option<String>> = vec![
-
-            Some("code".to_string()),
-            Some(self.code.to_string()),
-
-
-            Some("message".to_string()),
-            Some(self.message.to_string()),
-
-        ];
-
-        params.into_iter().flatten().collect::<Vec<_>>().join(",")
+       self.0.to_string()
     }
 }
 
-/// Converts Query Parameters representation (style=form, explode=false) to a Error value
-/// as specified in https://swagger.io/docs/specification/serialization/
-/// Should be implemented in a serde deserializer
 impl std::str::FromStr for Error {
-    type Err = String;
-
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        /// An intermediate representation of the struct to use for parsing.
-        #[derive(Default)]
-        #[allow(dead_code)]
-        struct IntermediateRep {
-            pub code: Vec<i32>,
-            pub message: Vec<String>,
-        }
-
-        let mut intermediate_rep = IntermediateRep::default();
-
-        // Parse into intermediate representation
-        let mut string_iter = s.split(',');
-        let mut key_result = string_iter.next();
-
-        while key_result.is_some() {
-            let val = match string_iter.next() {
-                Some(x) => x,
-                None => return std::result::Result::Err("Missing value while parsing Error".to_string())
-            };
-
-            if let Some(key) = key_result {
-                #[allow(clippy::match_single_binding)]
-                match key {
-                    #[allow(clippy::redundant_clone)]
-                    "code" => intermediate_rep.code.push(<i32 as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
-                    "message" => intermediate_rep.message.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    _ => return std::result::Result::Err("Unexpected key while parsing Error".to_string())
-                }
-            }
-
-            // Get the next key
-            key_result = string_iter.next();
-        }
-
-        // Use the intermediate representation to return the struct
-        std::result::Result::Ok(Error {
-            code: intermediate_rep.code.into_iter().next().ok_or_else(|| "code missing in Error".to_string())?,
-            message: intermediate_rep.message.into_iter().next().ok_or_else(|| "message missing in Error".to_string())?,
-        })
+    type Err = std::string::ParseError;
+    fn from_str(x: &str) -> std::result::Result<Self, Self::Err> {
+        std::result::Result::Ok(Error(x.to_string()))
     }
 }
 
-// Methods for converting between header::IntoHeaderValue<Error> and hyper::header::HeaderValue
-
-#[cfg(any(feature = "client", feature = "server"))]
-impl std::convert::TryFrom<header::IntoHeaderValue<Error>> for hyper::header::HeaderValue {
-    type Error = String;
-
-    fn try_from(hdr_value: header::IntoHeaderValue<Error>) -> std::result::Result<Self, Self::Error> {
-        let hdr_value = hdr_value.to_string();
-        match hyper::header::HeaderValue::from_str(&hdr_value) {
-             std::result::Result::Ok(value) => std::result::Result::Ok(value),
-             std::result::Result::Err(e) => std::result::Result::Err(
-                 format!("Invalid header value for Error - value: {} is invalid {}",
-                     hdr_value, e))
-        }
+impl std::convert::From<Error> for String {
+    fn from(x: Error) -> Self {
+        x.0
     }
 }
 
-#[cfg(any(feature = "client", feature = "server"))]
-impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderValue<Error> {
-    type Error = String;
+impl std::ops::Deref for Error {
+    type Target = String;
+    fn deref(&self) -> &String {
+        &self.0
+    }
+}
 
-    fn try_from(hdr_value: hyper::header::HeaderValue) -> std::result::Result<Self, Self::Error> {
-        match hdr_value.to_str() {
-             std::result::Result::Ok(value) => {
-                    match <Error as std::str::FromStr>::from_str(value) {
-                        std::result::Result::Ok(value) => std::result::Result::Ok(header::IntoHeaderValue(value)),
-                        std::result::Result::Err(err) => std::result::Result::Err(
-                            format!("Unable to convert header value '{}' into Error - {}",
-                                value, err))
-                    }
-             },
-             std::result::Result::Err(e) => std::result::Result::Err(
-                 format!("Unable to convert header: {:?} to string: {}",
-                     hdr_value, e))
-        }
+impl std::ops::DerefMut for Error {
+    fn deref_mut(&mut self) -> &mut String {
+        &mut self.0
     }
 }
 

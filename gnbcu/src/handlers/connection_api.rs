@@ -3,10 +3,11 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use common::ShutdownHandle;
-use connection_api::models;
+use connection_api::models::{self, AmfInfo};
 use connection_api::server::MakeService;
 use connection_api::{AddE1apResponse, AddF1apResponse, Api, JoinNgapResponse, SetupNgapResponse};
-use slog::{error, info, Logger};
+use ngap::AmfName;
+use slog::{error, info, warn, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;
 use stop_token::StopSource;
@@ -73,7 +74,7 @@ where
         Workflow::new(&self.gnbcu, &self.logger)
             .add_e1ap_endpoint()
             .await;
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError("Add E1AP Generic failure".into()))
     }
 
     /// Instructs a worker to add another worker to an existing F1AP interface instance
@@ -99,10 +100,29 @@ where
     /// Instructs a worker to set up an NGAP interface instance with the AMF
     async fn setup_ngap(
         &self,
-        _transport_address: models::TransportAddress,
+        transport_address: models::TransportAddress,
         _context: &C,
     ) -> Result<SetupNgapResponse, ApiError> {
-        //Workflow::new(&self.gnbcu, logger).???.await
-        Err(ApiError("Generic failure".into()))
+        // First establish a connection.
+        let amf_address = format!("{}:{}", transport_address.host, transport_address.port);
+        if let Err(e) = self.gnbcu.ngap_connect(&amf_address).await {
+            error!(self.logger, "Failed to connect- {}", e);
+            return Ok(SetupNgapResponse::FailedSetup(format!(
+                "Failed to connect to AMF at {}",
+                amf_address
+            )));
+        }
+
+        // Then carry out NG Setup
+        match Workflow::new(&self.gnbcu, &self.logger).ng_setup().await {
+            Ok(AmfName(amf_name)) => Ok(SetupNgapResponse::SuccessfulSetup(AmfInfo { amf_name })),
+
+            Err(e) => {
+                warn!(self.logger, "NG Setup failed - {:?}", e);
+                Ok(SetupNgapResponse::FailedSetup(
+                    "Failed NG Setup to AMF".to_string(),
+                ))
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ use crate::{
     datastore::{UeState, UeStateStore},
     rrc_transaction::RrcTransaction,
 };
+use anyhow::Result;
 use async_channel::Sender;
 use async_trait::async_trait;
 use net::{Indication, Procedure, RequestError};
@@ -15,6 +16,8 @@ use slog::Logger;
 #[async_trait]
 pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
     fn config(&self) -> &Config;
+
+    async fn ngap_connect(&self, amf_address: &String) -> Result<()>;
 
     async fn ngap_request<P: Procedure>(
         &self,

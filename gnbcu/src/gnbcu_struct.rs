@@ -1,5 +1,7 @@
 //! gnbcu_struct - the struct that implements the Gnbcu trait
 
+use std::sync::Arc;
+
 use super::config::ConnectionStyle;
 use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
@@ -10,6 +12,7 @@ use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
 use crate::{ConnectionApiServerConfig, Gnbcu};
 use anyhow::Result;
 use async_channel::Sender;
+use async_std::sync::Mutex;
 use async_trait::async_trait;
 use coordination_api::models::{TransportAddress, WorkerInfo};
 use coordination_api::{
@@ -43,6 +46,7 @@ pub struct ConcreteGnbcu<A: CoordinationApi<ClientContext>, U: UeStateStore> {
     coordinator: A,
     logger: Logger,
     rrc_transactions: PendingRrcTransactions,
+    shutdown_handles: Arc<Mutex<Vec<ShutdownHandle>>>,
 }
 
 // TS38.412, 7
@@ -63,6 +67,7 @@ pub fn spawn<U: UeStateStore>(
     ue_store: U,
     logger: Logger,
 ) -> Result<ShutdownHandle> {
+    info!(&logger, "Spawn GNBCU");
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
@@ -76,29 +81,34 @@ pub fn spawn<U: UeStateStore>(
                 logger.clone(),
                 coordinator.clone(),
             );
-            let handler = ConnectionApiHandler::new(gnbcu, logger);
-            coordinator.start_with_local_api_provider(
+            let handler = ConnectionApiHandler::new(gnbcu.clone(), logger);
+            let coordinator_shutdown_handle = coordinator.start_with_local_api_provider(
                 connection_control_config.clone(),
                 receiver,
                 handler,
-            )
+            );
+            async_std::task::spawn(async move {
+                gnbcu
+                    .serve(stop_token)
+                    .await
+                    .expect("Gnbcu startup failure");
+                coordinator_shutdown_handle.graceful_shutdown().await;
+            })
         }
 
         // Run a worker and serve the connection API so that it can be managed by the coordinator.
         ConnectionStyle::ServeConnectionApi(_) => {
             let coordinator = CoordinationApiClient::try_new_http("http://127.0.0.1:23156")?;
-            let handle = async_std::task::spawn(async move {
-                let gnbcu = ConcreteGnbcu::new(config, ue_store, logger, coordinator);
+            let gnbcu = ConcreteGnbcu::new(config, ue_store, logger, coordinator);
+            async_std::task::spawn(async move {
                 gnbcu
                     .serve(stop_token)
                     .await
                     .expect("Gnbcu startup failure");
-            });
-            ShutdownHandle::new(handle, stop_source)
+            })
         }
     };
-
-    Ok(handle)
+    Ok(ShutdownHandle::new(handle, stop_source))
 }
 
 impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
@@ -114,6 +124,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             coordinator,
             logger,
             rrc_transactions: PendingRrcTransactions::new(),
+            shutdown_handles: Arc::new(Mutex::new(Vec::new())),
         }
     }
 
@@ -205,18 +216,6 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             .await
     }
 
-    async fn connect_ngap(&self, amf_address: &String) -> Result<ShutdownHandle> {
-        info!(&self.logger, "Maintain connection to AMF {}", amf_address);
-        self.ngap
-            .connect(
-                amf_address,
-                NGAP_SCTP_PPID,
-                NgapHandler::new_ngap_application(self.clone()),
-                self.logger.clone(),
-            )
-            .await
-    }
-
     async fn serve_f1ap(&self) -> Result<ShutdownHandle> {
         let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
         info!(
@@ -277,6 +276,21 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     fn config(&self) -> &Config {
         &self.config
     }
+    async fn ngap_connect(&self, amf_address: &String) -> Result<()> {
+        info!(&self.logger, "Maintain connection to AMF {}", amf_address);
+        let shutdown_handle = self
+            .ngap
+            .connect(
+                amf_address,
+                NGAP_SCTP_PPID,
+                NgapHandler::new_ngap_application(self.clone()),
+                self.logger.clone(),
+            )
+            .await?;
+        self.shutdown_handles.lock().await.push(shutdown_handle);
+        Ok(())
+    }
+
     async fn ngap_request<P: Procedure>(
         &self,
         r: P::Request,

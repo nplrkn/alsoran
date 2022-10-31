@@ -36,9 +36,7 @@ impl Default for Config {
         Config {
             f1ap_bind_port: 38472, // TS38.472
             e1ap_bind_port: 38462, // TS38.462
-            connection_style: ConnectionStyle::ConnectToAmf(ConnectionControlConfig {
-                amf_address: TransportAddress::new("127.0.0.1".to_string(), 38412),
-            }),
+            connection_style: ConnectionStyle::ConnectToAmf(ConnectionControlConfig::default()),
             initial_ue_ttl_secs: 5,
             ue_ttl_secs: 86_400, // a day
             name: Some("Alsoran".to_string()),

@@ -30,13 +30,11 @@ paths:
                 $ref: '#/components/schemas/AmfInfo'
           description: Successful setup
         "500":
-          description: Failed setup
-        default:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Unexpected error
+          description: Failed setup
       summary: Instructs a worker to set up an NGAP interface instance with the AMF
   /joinNgap:
     post:
@@ -113,6 +111,8 @@ components:
       properties:
         amfName:
           type: string
+      required:
+      - amfName
       type: object
     TransportAddress:
       example:
@@ -131,14 +131,5 @@ components:
       - port
       type: object
     Error:
-      properties:
-        code:
-          format: int32
-          type: integer
-        message:
-          type: string
-      required:
-      - code
-      - message
-      type: object
+      type: string
 

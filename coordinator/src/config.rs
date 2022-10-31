@@ -15,15 +15,29 @@ pub struct Config {
 pub struct ConnectionControlConfig {
     // AMF address
     pub amf_address: TransportAddress,
+
+    // Worker refresh interval
+    pub worker_refresh_interval_secs: u16,
+
+    // Fast start - used to skip over initial learning time
+    pub fast_start: bool,
+}
+
+impl Default for ConnectionControlConfig {
+    fn default() -> Self {
+        ConnectionControlConfig {
+            amf_address: TransportAddress::new("127.0.0.1".to_string(), 38412),
+            worker_refresh_interval_secs: 30,
+            fast_start: false,
+        }
+    }
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             bind_port: 43521, // TS38.472
-            connection_control_config: ConnectionControlConfig {
-                amf_address: TransportAddress::new("127.0.0.1".to_string(), 38412),
-            },
+            connection_control_config: ConnectionControlConfig::default(),
         }
     }
 }

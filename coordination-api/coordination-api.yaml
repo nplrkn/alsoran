@@ -77,13 +77,4 @@ components:
           minimum: 1
           maximum: 65535
     Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
+      type: string

@@ -26,7 +26,6 @@ impl<G: Gnbcu> EventHandler for NgapHandler<G> {
         match event {
             TnlaEvent::Established(addr) => {
                 info!(logger, "NGAP TNLA {} established to {}", tnla_id, addr);
-                Workflow::new(&self.gnbcu, logger).ng_setup().await;
             }
             TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
         };

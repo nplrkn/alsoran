@@ -25,7 +25,7 @@ pub enum AddE1apResponse {
     ,
     /// Failed add
     FailedAdd
-    (models::Error)
+    (String)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -39,7 +39,7 @@ pub enum AddF1apResponse {
     ,
     /// Failed to add worker
     FailedToAddWorker
-    (models::Error)
+    (String)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -50,7 +50,7 @@ pub enum JoinNgapResponse {
     ,
     /// Failed join
     FailedJoin
-    (models::Error)
+    (String)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -62,10 +62,7 @@ pub enum SetupNgapResponse {
     ,
     /// Failed setup
     FailedSetup
-    ,
-    /// Unexpected error
-    UnexpectedError
-    (models::Error)
+    (String)
 }
 
 /// API
