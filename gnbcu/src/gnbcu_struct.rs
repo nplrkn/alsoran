@@ -7,7 +7,7 @@ use super::rrc_transaction::{PendingRrcTransactions, RrcTransaction};
 use super::Config;
 use crate::handlers::connection_api::ConnectionApiHandler;
 use crate::handlers::{E1apHandler, F1apHandler, NgapHandler};
-use crate::{ConnectionApiServerConfig, Gnbcu};
+use crate::{Gnbcu, WorkerConnectionManagementConfig};
 use anyhow::Result;
 use async_channel::Sender;
 use async_std::sync::Mutex;
@@ -72,7 +72,7 @@ pub fn spawn<U: UeStateStore>(
 
     let handle = match config.connection_style {
         // Run a combined GNBCU and Coordinator.
-        ConnectionStyle::ConnectToAmf(ref connection_control_config) => {
+        ConnectionStyle::Autonomous(ref connection_control_config) => {
             let (coordinator, receiver) = Coordinator::new(logger.clone());
             let gnbcu = ConcreteGnbcu::new(
                 config.clone(),
@@ -96,8 +96,11 @@ pub fn spawn<U: UeStateStore>(
         }
 
         // Run a worker and serve the connection API so that it can be managed by the coordinator.
-        ConnectionStyle::ServeConnectionApi(_) => {
-            let coordinator = CoordinationApiClient::try_new_http("http://127.0.0.1:23156")?;
+        ConnectionStyle::Coordinated(ref worker_connection_management_config) => {
+            let coordinator = CoordinationApiClient::try_new_http(
+                &worker_connection_management_config.coordinator_base_path,
+            )
+            .unwrap();
             let gnbcu = ConcreteGnbcu::new(config, ue_store, logger, coordinator);
             async_std::task::spawn(async move {
                 gnbcu
@@ -134,11 +137,12 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         let e1ap_handle = self.serve_e1ap().await?;
         self.add_shutdown_handle(e1ap_handle).await;
 
-        if let ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
-            bind_port, ..
+        if let ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
+            connection_api_bind_port,
+            ..
         }) = self.config.connection_style
         {
-            let connection_api_handle = self.serve_connection_api(bind_port).await?;
+            let connection_api_handle = self.serve_connection_api(connection_api_bind_port).await?;
             self.add_shutdown_handle(connection_api_handle).await;
         };
 
@@ -186,10 +190,11 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             .collect();
 
         let connection_api_url = match &self.config.connection_style {
-            ConnectionStyle::ConnectToAmf(_) => "".to_string(),
-            ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
-                base_path, ..
-            }) => format!("{}/v1", base_path),
+            ConnectionStyle::Autonomous(_) => "".to_string(),
+            ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
+                connection_api_base_path,
+                ..
+            }) => connection_api_base_path.clone(),
         };
 
         self.coordinator

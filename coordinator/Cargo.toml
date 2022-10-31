@@ -22,8 +22,7 @@ swagger = { version = "6.1", features = ["serdejson", "server"] }
 hyper = {version = "0.14", features = ["full"]}
 log = "0.4.0"
 mime = "0.3"
-async-std = { version = "1.10.0", features = ["attributes","tokio02"] }
-tokio = { version = "0.2", features = ["rt-threaded", "macros", "stream"] }
+async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
 slog = "2.7.0"
 stop-token = "0.6.1"
 async-channel = "1.6.1"

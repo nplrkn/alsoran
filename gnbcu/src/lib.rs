@@ -6,7 +6,7 @@ mod handlers;
 mod rrc_transaction;
 mod workflows;
 
-pub use config::{Config, ConnectionApiServerConfig, ConnectionStyle, TransportAddress};
+pub use config::{Config, ConnectionStyle, TransportAddress, WorkerConnectionManagementConfig};
 pub use coordinator::ConnectionControlConfig;
 use datastore::UeState;
 pub use datastore::{MockUeStore, RedisUeStore};

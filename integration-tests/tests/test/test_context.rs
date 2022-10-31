@@ -1,11 +1,14 @@
 use anyhow::Result;
 use common::ShutdownHandle;
-//use coordinator::{Config as CoordinatorConfig, Coordinator};
-use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, TransportAddress};
+use coordinator::Config as CoordinatorConfig;
+use gnbcu::{
+    Config, ConnectionControlConfig, ConnectionStyle, TransportAddress,
+    WorkerConnectionManagementConfig,
+};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
 use rand::Rng;
-use slog::{debug, info, o, Logger};
+use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
 
 const F1AP_SCTP_PPID: u32 = 62;
@@ -29,6 +32,7 @@ struct InternalWorkerInfo {
 
 struct InternalCoordinatorInfo {
     pub shutdown_handle: ShutdownHandle,
+    pub config: CoordinatorConfig,
 }
 pub struct WorkerInfo {
     pub f1ap_host_port: String,
@@ -126,40 +130,72 @@ impl TestContextBuilder {
 impl TestContext {
     async fn start_coordinator(&mut self) {
         info!(self.logger, "Spawn coordinator");
-        todo!()
-        // for _ in 0..PORT_ALLOCATION_RETRIES {
-        //     let logger = self.logger.new(o!("coord" => 1));
-        //     let config = CoordinatorConfig {
-        //         bind_port: rand::thread_rng().gen_range(1024..65535),
-        //     };
-        //     if let Ok(shutdown_handle) = Coordinator::spawn(config, logger) {
-        //         self.coordinator = Some(InternalCoordinatorInfo { shutdown_handle });
-        //         return;
-        //     }
-        // }
-        //panic!("Repeatedly failed to start coordinator with random port");
+        for _ in 0..PORT_ALLOCATION_RETRIES {
+            let logger = self.logger.new(o!("coord" => 1));
+            let config = CoordinatorConfig {
+                bind_port: rand::thread_rng().gen_range(1024..65535),
+                connection_control_config: ConnectionControlConfig {
+                    amf_address: TransportAddress {
+                        host: "127.0.0.1".to_string(),
+                        port: self.amf_port,
+                    },
+                    worker_refresh_interval_secs: 30,
+                    fast_start: true,
+                },
+            };
+            if let Ok(shutdown_handle) = coordinator::spawn(config.clone(), logger) {
+                self.coordinator = Some(InternalCoordinatorInfo {
+                    shutdown_handle,
+                    config,
+                });
+                return;
+            }
+        }
+        panic!("Repeatedly failed to start coordinator with random port");
     }
 
     async fn start_worker_with_random_ports(&mut self, redis_port: Option<u16>) {
         let worker_number = self.workers.len() as u16;
         let logger = self.logger.new(o!("cu-w"=> worker_number));
+
         for _ in 0..PORT_ALLOCATION_RETRIES {
             let f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
-            let config = Config {
-                f1ap_bind_port,
-                e1ap_bind_port: f1ap_bind_port + 1,
-                connection_style: ConnectionStyle::ConnectToAmf(ConnectionControlConfig {
+            let e1ap_bind_port = f1ap_bind_port + 1;
+            let connection_api_bind_port = f1ap_bind_port + 2;
+
+            let connection_style = if let Some(ref coordinator) = self.coordinator {
+                ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
+                    connection_api_bind_port,
+                    connection_api_base_path: format!(
+                        "http://127.0.0.1:{}",
+                        connection_api_bind_port
+                    ),
+                    coordinator_base_path: format!(
+                        "http://127.0.0.1:{}",
+                        coordinator.config.bind_port
+                    ),
+                })
+            } else {
+                ConnectionStyle::Autonomous(ConnectionControlConfig {
                     fast_start: true,
                     amf_address: TransportAddress {
                         host: "127.0.0.1".to_string(),
                         port: self.amf_port,
                     },
                     ..ConnectionControlConfig::default()
-                }),
+                })
+            };
+
+            let config = Config {
+                f1ap_bind_port,
+                e1ap_bind_port,
+                connection_style: connection_style.clone(),
                 ..Config::default()
             };
 
-            if let Ok(shutdown_handle) = if let Some(port) = redis_port {
+            debug!(logger, "Start worker with config {:?}", config);
+
+            let result = if let Some(port) = redis_port {
                 gnbcu::spawn(
                     config.clone(),
                     RedisUeStore::new(port).unwrap(),
@@ -167,12 +203,19 @@ impl TestContext {
                 )
             } else {
                 gnbcu::spawn(config.clone(), MockUeStore::new(), logger.clone())
-            } {
-                self.workers.push(InternalWorkerInfo {
-                    shutdown_handle,
-                    config,
-                });
-                return;
+            };
+
+            match result {
+                Ok(shutdown_handle) => {
+                    self.workers.push(InternalWorkerInfo {
+                        shutdown_handle,
+                        config,
+                    });
+                    return;
+                }
+                Err(e) => {
+                    warn!(logger, "Error creating worker {}", e);
+                }
             }
         }
         panic!("Repeatedly failed to start worker with random ports");
