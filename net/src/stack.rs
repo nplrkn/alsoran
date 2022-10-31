@@ -49,7 +49,7 @@ impl Stack {
         };
         self.transport_provider
             .clone()
-            .maintain_connection(connect_address, ppid, receiver, logger)
+            .connect(connect_address, ppid, receiver, logger)
             .await
     }
 

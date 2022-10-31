@@ -48,6 +48,36 @@ impl TransportProvider for SctpTransportProvider {
         self.tnla_pool.send_message(message, logger).await
     }
 
+    async fn connect<H>(
+        self,
+        connect_addr_string: &String,
+        ppid: u32,
+        handler: H,
+        logger: Logger,
+    ) -> Result<ShutdownHandle>
+    where
+        H: TnlaEventHandler,
+    {
+        let assoc_id = 1; // TODO
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
+        let connect_addr_string = connect_addr_string.clone();
+        let assoc = resolve_and_connect(&connect_addr_string, ppid, &logger).await?;
+        let logger = logger.new(o!("connection" => assoc_id));
+        let join_handle = self
+            .tnla_pool
+            .add_and_handle(
+                assoc_id,
+                Arc::new(assoc),
+                handler.clone(),
+                stop_token.clone(),
+                logger.clone(),
+            )
+            .await;
+
+        Ok(ShutdownHandle::new(join_handle, stop_source))
+    }
+
     async fn maintain_connection<H>(
         self,
         connect_addr_string: &String,

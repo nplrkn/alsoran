@@ -1,7 +1,5 @@
 //! gnbcu_struct - the struct that implements the Gnbcu trait
 
-use std::sync::Arc;
-
 use super::config::ConnectionStyle;
 use super::datastore::{UeState, UeStateStore};
 use super::handlers::RrcHandler;
@@ -26,6 +24,7 @@ use net::{
 };
 use rrc::UlDcchMessage;
 use slog::{debug, info, warn, Logger};
+use std::sync::Arc;
 use stop_token::{StopSource, StopToken};
 use swagger::{ApiError, AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
@@ -130,18 +129,18 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
     async fn serve(self, stop_token: StopToken) -> Result<()> {
         let f1ap_handle = self.serve_f1ap().await?;
-        let e1ap_handle = self.serve_e1ap().await?;
+        self.add_shutdown_handle(f1ap_handle).await;
 
-        let connection_api_handle =
-            if let ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
-                bind_port,
-                ..
-            }) = self.config.connection_style
-            {
-                Some(self.serve_connection_api(bind_port).await?)
-            } else {
-                None
-            };
+        let e1ap_handle = self.serve_e1ap().await?;
+        self.add_shutdown_handle(e1ap_handle).await;
+
+        if let ConnectionStyle::ServeConnectionApi(ConnectionApiServerConfig {
+            bind_port, ..
+        }) = self.config.connection_style
+        {
+            let connection_api_handle = self.serve_connection_api(bind_port).await?;
+            self.add_shutdown_handle(connection_api_handle).await;
+        };
 
         // Connect to the coordinator.  It will bring this worker into service by making calls to the
         // connection API.
@@ -149,11 +148,10 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
         stop_token.await;
 
-        if let Some(connection_api_handle) = connection_api_handle {
-            connection_api_handle.graceful_shutdown().await;
+        while let Some(item) = self.shutdown_handles.lock().await.pop() {
+            item.graceful_shutdown().await;
         }
-        f1ap_handle.graceful_shutdown().await;
-        e1ap_handle.graceful_shutdown().await;
+
         Ok(())
     }
 
@@ -252,6 +250,10 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         let addr = format!("127.0.0.1:{}", port).parse()?;
         crate::handlers::connection_api::serve(addr, self.clone(), self.logger.clone()).await
     }
+
+    async fn add_shutdown_handle(&self, shutdown_handle: ShutdownHandle) {
+        self.shutdown_handles.lock().await.push(shutdown_handle);
+    }
 }
 
 #[async_trait]
@@ -287,7 +289,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
                 self.logger.clone(),
             )
             .await?;
-        self.shutdown_handles.lock().await.push(shutdown_handle);
+        self.add_shutdown_handle(shutdown_handle).await;
         Ok(())
     }
 

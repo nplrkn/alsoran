@@ -45,6 +45,19 @@ impl TransportProvider for MockTransportProvider {
         Ok(())
     }
 
+    async fn connect<H>(
+        self,
+        _connect_addr_string: &String,
+        _ppid: u32,
+        _handler: H,
+        _logger: Logger,
+    ) -> Result<ShutdownHandle>
+    where
+        H: TnlaEventHandler,
+    {
+        unimplemented!()
+    }
+
     async fn maintain_connection<H>(
         self,
         _connect_addr_string: &String,

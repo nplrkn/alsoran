@@ -24,6 +24,16 @@ pub trait TransportProvider: Send + Sync + 'static {
     where
         H: TnlaEventHandler;
 
+    async fn connect<H>(
+        self,
+        connect_addr_string: &String,
+        ppid: u32,
+        handler: H,
+        logger: Logger,
+    ) -> Result<ShutdownHandle>
+    where
+        H: TnlaEventHandler;
+
     async fn maintain_connection<H>(
         self,
         connect_addr_string: &String,
