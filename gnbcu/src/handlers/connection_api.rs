@@ -107,7 +107,7 @@ where
         let amf_address = format!("{}:{}", transport_address.host, transport_address.port);
         if let Err(e) = self.gnbcu.ngap_connect(&amf_address).await {
             error!(self.logger, "Failed to connect- {}", e);
-            return Ok(SetupNgapResponse::FailedSetup(format!(
+            return Ok(SetupNgapResponse::Failure(format!(
                 "Failed to connect to AMF at {}",
                 amf_address
             )));
@@ -115,11 +115,11 @@ where
 
         // Then carry out NG Setup
         match Workflow::new(&self.gnbcu, &self.logger).ng_setup().await {
-            Ok(AmfName(amf_name)) => Ok(SetupNgapResponse::SuccessfulSetup(AmfInfo { amf_name })),
+            Ok(AmfName(amf_name)) => Ok(SetupNgapResponse::Success(AmfInfo { amf_name })),
 
             Err(e) => {
                 warn!(self.logger, "NG Setup failed - {:?}", e);
-                Ok(SetupNgapResponse::FailedSetup(
+                Ok(SetupNgapResponse::Failure(
                     "Failed NG Setup to AMF".to_string(),
                 ))
             }

@@ -25,13 +25,13 @@ paths:
                   port: 20000
       responses:
         '200':
-          description: Successful setup
+          description: Success
           content:
             application/json:    
               schema:
                 $ref: "#/components/schemas/AmfInfo"
         '500':
-          description: Failed setup
+          description: Failure
           content:
             application/json:
               schema:
@@ -49,9 +49,9 @@ paths:
               $ref: '#/components/schemas/TransportAddress'
       responses:
         '201':
-          description: Successful join
+          description: Success
         '500':
-          description: Failed join
+          description: Failure
           content:
             application/json:
               schema:

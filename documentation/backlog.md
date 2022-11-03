@@ -4,8 +4,7 @@
 - Rerun demo
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
-----SCALE OUT / MULTPLE TNLA----
-- Standalone single worker that runs built-in coordinator
+----SCALE OUT / MULTIPLE TNLA----
 - Two workers
 - Only 1st worker initializes NG interface and 2nd worker joins in
 - 1st worker receives DU connection and adds 2nd worker
@@ -60,6 +59,7 @@
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 # DONE
+- Standalone single worker that runs built-in coordinator
 - Parallel registration of two UEs
 - Get build working on Github
 - Parallel tests

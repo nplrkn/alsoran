@@ -28,13 +28,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AmfInfo'
-          description: Successful setup
+          description: Success
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Failed setup
+          description: Failure
       summary: Instructs a worker to set up an NGAP interface instance with the AMF
   /joinNgap:
     post:
@@ -48,13 +48,13 @@ paths:
         required: true
       responses:
         "201":
-          description: Successful join
+          description: Success
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Failed join
+          description: Failure
       summary: Instructs a worker to join an existing NGAP interface instance set
         up by another worker.
   /addF1ap:

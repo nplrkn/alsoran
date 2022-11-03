@@ -45,23 +45,23 @@ pub enum AddF1apResponse {
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[must_use]
 pub enum JoinNgapResponse {
-    /// Successful join
-    SuccessfulJoin
+    /// Success
+    Success
     ,
-    /// Failed join
-    FailedJoin
+    /// Failure
+    Failure
     (String)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[must_use]
 pub enum SetupNgapResponse {
-    /// Successful setup
-    SuccessfulSetup
+    /// Success
+    Success
     (models::AmfInfo)
     ,
-    /// Failed setup
-    FailedSetup
+    /// Failure
+    Failure
     (String)
 }
 

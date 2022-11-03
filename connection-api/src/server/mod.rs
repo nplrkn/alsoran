@@ -375,18 +375,18 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                JoinNgapResponse::SuccessfulJoin
+                                                JoinNgapResponse::Success
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
                                                 },
-                                                JoinNgapResponse::FailedJoin
+                                                JoinNgapResponse::Failure
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for JOIN_NGAP_FAILED_JOIN"));
+                                                            .expect("Unable to create Content-Type header for JOIN_NGAP_FAILURE"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
@@ -459,25 +459,25 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                SetupNgapResponse::SuccessfulSetup
+                                                SetupNgapResponse::Success
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_SUCCESSFUL_SETUP"));
+                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_SUCCESS"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
-                                                SetupNgapResponse::FailedSetup
+                                                SetupNgapResponse::Failure
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_FAILED_SETUP"));
+                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_FAILURE"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },

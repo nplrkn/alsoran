@@ -630,7 +630,7 @@ impl<S, C> Api<C> for Client<S, C> where
         match response.status().as_u16() {
             201 => {
                 Ok(
-                    JoinNgapResponse::SuccessfulJoin
+                    JoinNgapResponse::Success
                 )
             }
             500 => {
@@ -643,7 +643,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = serde_json::from_str::<String>(body).map_err(|e| {
                     ApiError(format!("Response body did not match the schema: {}", e))
                 })?;
-                Ok(JoinNgapResponse::FailedJoin
+                Ok(JoinNgapResponse::Failure
                     (body)
                 )
             }
@@ -731,7 +731,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = serde_json::from_str::<models::AmfInfo>(body).map_err(|e| {
                     ApiError(format!("Response body did not match the schema: {}", e))
                 })?;
-                Ok(SetupNgapResponse::SuccessfulSetup
+                Ok(SetupNgapResponse::Success
                     (body)
                 )
             }
@@ -745,7 +745,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = serde_json::from_str::<String>(body).map_err(|e| {
                     ApiError(format!("Response body did not match the schema: {}", e))
                 })?;
-                Ok(SetupNgapResponse::FailedSetup
+                Ok(SetupNgapResponse::Failure
                     (body)
                 )
             }
