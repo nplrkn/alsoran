@@ -7,7 +7,7 @@ use net::{
     AperSerde, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
     TransportProvider,
 };
-use slog::{trace, Logger};
+use slog::{debug, Logger};
 use std::fmt::Debug;
 
 pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
@@ -69,7 +69,7 @@ impl<P: Pdu> Mock<P> {
         self.transport_tasks = Some(transport_tasks);
 
         // Wait for the connection to be accepted.
-        trace!(self.logger, "Wait for connection to be accepted");
+        debug!(self.logger, "Wait for connection to be accepted");
         self.expect_connection().await;
     }
 
@@ -81,7 +81,7 @@ impl<P: Pdu> Mock<P> {
 
     /// Wait for connection to be established or terminated.
     pub async fn expect_connection(&self) {
-        trace!(self.logger, "Wait for connection from worker");
+        debug!(self.logger, "Wait for connection from worker");
         assert!(self
             .receiver
             .recv()

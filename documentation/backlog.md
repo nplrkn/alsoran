@@ -28,6 +28,7 @@
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
+- Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 ----MAINTAINABILITY----
 - Remove slog from workflow module and use log methods on Workflow instead

@@ -191,7 +191,7 @@ impl<T: Api<ClientContext>> Controller<T> {
                 worker_info.connected_amfs = vec![amf_name.clone()]
             }
             Ok(r) => error!(logger, "NGAP join failure - {:?}", r),
-            Err(e) => error!(logger, "NGAP setup error - {}", e),
+            Err(e) => error!(logger, "NGAP join error - {}", e),
         }
         Ok(())
     }

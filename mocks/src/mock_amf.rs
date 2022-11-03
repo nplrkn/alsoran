@@ -50,7 +50,7 @@ impl MockAmf {
         let pdu = self.receive_pdu().await;
 
         if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
-            info!(self.logger, "Got NG Setup, send setup response");
+            info!(logger, ">> NgSetup");
             Ok(())
         } else {
             Err(anyhow!("Not an NG setup"))
@@ -78,33 +78,15 @@ impl MockAmf {
                 extended_amf_name: None,
             }));
 
+        info!(logger, "<< NgSetupResponse");
         self.send(response.into_bytes()?).await;
 
         Ok(())
     }
 
-    fn guami(&self) -> Guami {
-        Guami {
-            plmn_identity: self.plmn_identity(),
-            amf_region_id: AmfRegionId(bitvec![u8,Msb0;1;8]),
-            amf_set_id: AmfSetId(bitvec![u8,Msb0;1;10]),
-            amf_pointer: AmfPointer(bitvec![u8,Msb0;1;6]),
-        }
-    }
-
-    fn plmn_identity(&self) -> PlmnIdentity {
-        PlmnIdentity(vec![2, 3, 2])
-    }
-
-    fn snssai(&self) -> SNssai {
-        SNssai {
-            sst: Sst(vec![0x01]),
-            sd: None,
-        }
-    }
-
-    pub async fn handle_ran_configuration_update(&self, logger: &Logger) -> Result<()> {
-        debug!(logger, "Wait for RAN Configuration Update from GNB");
+    pub async fn handle_ran_configuration_update(&self) -> Result<()> {
+        let logger = &self.logger;
+        info!(logger, "Wait for RAN Configuration Update from GNB");
 
         let pdu = self.receive_pdu().await;
 
@@ -129,6 +111,26 @@ impl MockAmf {
         self.send(response.into_bytes()?).await;
 
         Ok(())
+    }
+
+    fn guami(&self) -> Guami {
+        Guami {
+            plmn_identity: self.plmn_identity(),
+            amf_region_id: AmfRegionId(bitvec![u8,Msb0;1;8]),
+            amf_set_id: AmfSetId(bitvec![u8,Msb0;1;10]),
+            amf_pointer: AmfPointer(bitvec![u8,Msb0;1;6]),
+        }
+    }
+
+    fn plmn_identity(&self) -> PlmnIdentity {
+        PlmnIdentity(vec![2, 3, 2])
+    }
+
+    fn snssai(&self) -> SNssai {
+        SNssai {
+            sst: Sst(vec![0x01]),
+            sd: None,
+        }
     }
 
     pub async fn receive_initial_ue_message(&mut self, ue_id: u32) -> Result<()> {

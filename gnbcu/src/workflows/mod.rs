@@ -4,6 +4,7 @@ use slog::{debug, Logger};
 mod add_e1ap_endpoint;
 mod amf_status_indication;
 mod build_f1ap;
+mod build_ngap;
 mod build_rrc;
 mod downlink_nas;
 mod e1_setup;
@@ -12,6 +13,7 @@ mod initial_access;
 mod initial_context_setup;
 mod ng_setup;
 mod pdu_session_resource_setup;
+mod ran_configuration_update;
 mod uplink_nas;
 
 pub struct Workflow<'a, G: Gnbcu> {

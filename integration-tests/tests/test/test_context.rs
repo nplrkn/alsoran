@@ -224,20 +224,35 @@ impl TestContext {
     async fn get_to_stage<'a>(&'a mut self, stage: &Stage) -> Result<&'a mut Self> {
         debug!(self.logger, "Get to stage {:?}", stage);
 
-        if stage >= &Stage::AmfConnected {
-            self.amf.expect_connection().await;
-            self.amf.handle_ng_setup().await?;
+        for worker_index in 0..self.workers.len() {
+            if stage >= &Stage::AmfConnected {
+                self.amf.expect_connection().await;
+                if worker_index == 0 {
+                    self.amf.handle_ng_setup().await?;
+                } else {
+                    self.amf.handle_ran_configuration_update().await?;
+                }
+            }
+            if stage >= &Stage::DuConnected {
+                let address = self.worker_info(worker_index).f1ap_host_port;
+                if worker_index == 0 {
+                    self.du.connect(&address, F1AP_SCTP_PPID).await;
+                    self.du.perform_f1_setup().await?;
+                } else {
+                    todo!()
+                }
+            }
+            if stage >= &Stage::CuUpConnected {
+                let address = self.worker_info(worker_index).e1ap_host_port;
+                if worker_index == 0 {
+                    self.cu_up.connect(&address, E1AP_SCTP_PPID).await;
+                    self.cu_up.perform_e1_setup().await?;
+                } else {
+                    todo!()
+                }
+            }
         }
-        if stage >= &Stage::DuConnected {
-            let address = self.worker_info(0).f1ap_host_port;
-            self.du.connect(&address, F1AP_SCTP_PPID).await;
-            self.du.perform_f1_setup().await?;
-        }
-        if stage >= &Stage::CuUpConnected {
-            let address = self.worker_info(0).e1ap_host_port;
-            self.cu_up.connect(&address, E1AP_SCTP_PPID).await;
-            self.cu_up.perform_e1_setup().await?;
-        }
+
         if stage >= &Stage::Ue1Registered {
             self.register_ue(1).await?;
         }
@@ -326,7 +341,9 @@ impl TestContext {
         info!(self.logger, "Terminate workers");
         for worker in self.workers {
             worker.shutdown_handle.graceful_shutdown().await;
-            self.amf.expect_connection().await;
+            // We don't know if the worker has a connection up, so we can't assume we will see a connection
+            // hangup on the AMF.
+            //self.amf.expect_connection().await;
         }
 
         if let Some(c) = self.coordinator {

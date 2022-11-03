@@ -84,17 +84,38 @@ where
         _context: &C,
     ) -> Result<AddF1apResponse, ApiError> {
         //Workflow::new(&self.gnbcu, logger).???.await
-        Err(ApiError("Generic failure".into()))
+        unimplemented!()
     }
 
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
     async fn join_ngap(
         &self,
-        _transport_address: models::TransportAddress,
+        transport_address: models::TransportAddress,
         _context: &C,
     ) -> Result<JoinNgapResponse, ApiError> {
-        //Workflow::new(&self.gnbcu, logger).???.await
-        Err(ApiError("Generic failure".into()))
+        // First establish a connection.
+        let amf_address = format!("{}:{}", transport_address.host, transport_address.port);
+        if let Err(e) = self.gnbcu.ngap_connect(&amf_address).await {
+            error!(self.logger, "Failed to connect- {}", e);
+            return Ok(JoinNgapResponse::Failure(format!(
+                "Failed to connect to AMF at {}",
+                amf_address
+            )));
+        }
+
+        // Carry out Configuration Update.
+        match Workflow::new(&self.gnbcu, &self.logger)
+            .ran_configuration_update()
+            .await
+        {
+            Ok(()) => Ok(JoinNgapResponse::Success),
+            Err(e) => {
+                warn!(self.logger, "NG join failed - {:?}", e);
+                Ok(JoinNgapResponse::Failure(
+                    "Failed RAN configuration update with AMF".to_string(),
+                ))
+            }
+        }
     }
 
     /// Instructs a worker to set up an NGAP interface instance with the AMF
