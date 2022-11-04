@@ -7,7 +7,7 @@ use async_std::task::JoinHandle;
 use connection_api::{Api, Client, JoinNgapResponse, SetupNgapResponse};
 use coordination_api::models::WorkerInfo;
 use futures::stream::StreamExt;
-use slog::{error, info, warn, Logger};
+use slog::{debug, error, info, warn, Logger};
 use stop_token::StopToken;
 use swagger::{AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
@@ -72,7 +72,7 @@ impl<T: Api<ClientContext>> Controller<T> {
         mut worker_info: WorkerInfo,
         logger: &Logger,
     ) -> Result<()> {
-        let this_worker_key = worker_info.worker_unique_id;
+        let worker_id = worker_info.worker_unique_id;
 
         // Has a long enough period elapsed that we have heard from all workers?
         if (!self.config.fast_start)
@@ -85,13 +85,20 @@ impl<T: Api<ClientContext>> Controller<T> {
                 "Startup learning phase still in progress (uptime = {} secs)",
                 self.start_time.elapsed().as_secs()
             );
-            let _maybe_old_item = self.worker_info.insert(this_worker_key, worker_info);
+            let _maybe_old_item = self.worker_info.insert(worker_id, worker_info);
 
             return Ok(());
         }
 
+        let context: ClientContext = swagger::make_context!(
+            ContextBuilder,
+            EmptyContext,
+            None as Option<AuthData>,
+            XSpanIdString::default()
+        );
+
         // Delete the old item so that it doesn't interfere with our calculations that follow.
-        let _maybe_old_item = self.worker_info.remove(&this_worker_key);
+        let _maybe_old_item = self.worker_info.remove(&worker_id);
 
         // Does this worker have the NGAP interface up?
         if worker_info.connected_amfs.is_empty() {
@@ -106,15 +113,50 @@ impl<T: Api<ClientContext>> Controller<T> {
             {
                 // Yes.  Join the existing NGAP instance.
                 let amf_name = x.first().unwrap();
-                self.join_ngap(&mut worker_info, amf_name, logger).await?;
+                self.join_ngap(&mut worker_info, amf_name, &context, logger)
+                    .await?;
             } else {
                 // No.  Set up a new NGAP instance.
-                self.setup_ngap(&mut worker_info, logger).await?;
+                info!(logger, "Tell {:x} to set up NGAP interface", worker_id);
+
+                self.setup_ngap(&mut worker_info, &context, logger).await?;
+            }
+        }
+
+        // If this worker is not connected to the UP, try to set that up.
+        if worker_info.connected_ups.is_empty() {
+            // Find a worker that is connected.
+            if let Some(connected_worker) = self
+                .worker_info
+                .values()
+                .find(|x| !x.connected_ups.is_empty())
+            {
+                // Tell it to add this worker.
+                self.add_e1ap(&connected_worker, worker_info.e1_address, logger)
+                    .await;
+            } else {
+                debug!(logger, "No worker has a E1AP connection yet")
+            }
+        }
+
+        // Same routine for the F1.
+        if worker_info.connected_dus.is_empty() {
+            // Find a worker that is connected.
+            if let Some(connected_worker) = self
+                .worker_info
+                .values()
+                .find(|x| !x.connected_dus.is_empty())
+            {
+                // Tell it to add this worker.
+                self.add_f1ap(&connected_worker, worker_info.f1_address, logger)
+                    .await;
+            } else {
+                debug!(logger, "No worker has a F1AP connection yet")
             }
         }
 
         // Store the worker info.
-        let _ = self.worker_info.insert(this_worker_key, worker_info);
+        let _ = self.worker_info.insert(worker_id, worker_info);
 
         // TODO get TNLA ID from message
 
@@ -123,29 +165,25 @@ impl<T: Api<ClientContext>> Controller<T> {
         Ok(())
     }
 
-    async fn setup_ngap(&self, worker_info: &mut WorkerInfo, logger: &Logger) -> Result<()> {
-        let worker_id = worker_info.worker_unique_id;
-        info!(logger, "Tell {:x} to set up NGAP interface", worker_id);
-
-        let context: ClientContext = swagger::make_context!(
-            ContextBuilder,
-            EmptyContext,
-            None as Option<AuthData>,
-            XSpanIdString::default()
-        );
-
-        let response = if let Some(ref provider) = self.local_api_provider {
-            provider
-                .setup_ngap(self.config.amf_address.clone(), &context)
-                .await
+    fn provider(&self, base_path: &String) -> Result<Box<dyn Api<ClientContext>>> {
+        Ok(if let Some(ref provider) = self.local_api_provider {
+            Box::new(*provider)
         } else {
-            let client = Client::try_new_http(&worker_info.connection_api_url)?;
-            client
-                .setup_ngap(self.config.amf_address.clone(), &context)
-                .await
-        };
+            Box::new(Client::try_new_http(base_path)?)
+        })
+    }
 
-        match response {
+    async fn setup_ngap(
+        &self,
+        worker_info: &mut WorkerInfo,
+        context: &ClientContext,
+        logger: &Logger,
+    ) -> Result<()> {
+        match self
+            .provider(&worker_info.connection_api_url)?
+            .setup_ngap(self.config.amf_address.clone(), &context)
+            .await
+        {
             Ok(SetupNgapResponse::Success(amf_info)) => {
                 info!(logger, "Setup NGAP ok");
                 // Update the worker info to record that we now have a connected AMF.
@@ -161,30 +199,16 @@ impl<T: Api<ClientContext>> Controller<T> {
         &self,
         worker_info: &mut WorkerInfo,
         amf_name: &String,
+        context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
         let worker_id = worker_info.worker_unique_id;
         info!(logger, "Tell {:x} to join NGAP interface", worker_id);
-
-        let context: ClientContext = swagger::make_context!(
-            ContextBuilder,
-            EmptyContext,
-            None as Option<AuthData>,
-            XSpanIdString::default()
-        );
-
-        let response = if let Some(ref provider) = self.local_api_provider {
-            provider
-                .join_ngap(self.config.amf_address.clone(), &context)
-                .await
-        } else {
-            let client = Client::try_new_http(&worker_info.connection_api_url)?;
-            client
-                .join_ngap(self.config.amf_address.clone(), &context)
-                .await
-        };
-
-        match response {
+        match self
+            .provider(&worker_info.connection_api_url)?
+            .join_ngap(self.config.amf_address.clone(), context)
+            .await
+        {
             Ok(JoinNgapResponse::Success) => {
                 info!(logger, "Join NGAP ok");
                 // Update the worker info to record that we now have a connected AMF.

@@ -17,6 +17,7 @@
 - Allow AMF to specify 2nd endpoint - ask worker 2
 - Load balance, stickiness and switchover between TNLAs to AMF
 - Allow DU / UP to set up multiple connections to same worker
+- Connection API operations must be idempotent
 - Stickiness and switchover between TNLAs to DU / UP
 - Both workers die - reset
 - All NGAP TNLAs drop - don't reset, ues-retained = true. 
