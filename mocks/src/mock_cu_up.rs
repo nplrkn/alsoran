@@ -13,6 +13,8 @@ use std::{
 
 impl Pdu for E1apPdu {}
 
+const E1AP_SCTP_PPID: u32 = 64;
+
 pub struct MockCuUp {
     mock: Mock<E1apPdu>,
     ues: HashMap<u32, UeContext>,
@@ -83,6 +85,74 @@ impl MockCuUp {
     async fn receive_e1_setup_response(&self) {
         let _response = self.receive_pdu().await;
         info!(self.logger, "E1SetupResponse <<");
+    }
+
+    pub async fn handle_cu_cp_configuration_update(
+        &mut self,
+        expected_addr_string: &String,
+    ) -> Result<()> {
+        let expected_address = convert_transport_address(expected_addr_string);
+        let transaction_id = self
+            .receive_cu_cp_configuration_update(&expected_address)
+            .await?;
+        // connect
+        self.connect(&expected_addr_string, E1AP_SCTP_PPID).await;
+        self.send_cu_cp_configuration_update_acknowledge(transaction_id, expected_address)
+            .await
+    }
+
+    async fn receive_cu_cp_configuration_update(
+        &self,
+        expected_address: &TransportLayerAddress,
+    ) -> Result<TransactionId> {
+        let cu_cp_configuration_update = match self.receive_pdu().await {
+            E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuCpConfigurationUpdate(x)) => Ok(x),
+            x => Err(anyhow!("Expected GnbCuCpConfigurationUpdate, got {:?}", x)),
+        }?;
+        info!(self.logger, "GnbCuCpConfigurationUpdate <<");
+
+        let gnb_cu_cp_tnla_to_add_list = cu_cp_configuration_update
+            .gnb_cu_cp_tnla_to_add_list
+            .expect("Expected gnb_cu_cp_tnla_to_add_list to be present");
+        match &gnb_cu_cp_tnla_to_add_list
+            .0
+            .first()
+            .expect("Expected nonempty gnb_cu_cp_tnla_to_add_list list")
+            .tnl_association_transport_layer_address
+        {
+            CpTnlInformation::EndpointIpAddress(ref x) => {
+                assert_eq!(x.0, expected_address.0);
+            }
+        };
+
+        Ok(cu_cp_configuration_update.transaction_id)
+    }
+
+    async fn send_cu_cp_configuration_update_acknowledge(
+        &self,
+        transaction_id: TransactionId,
+        transport_layer_address: TransportLayerAddress,
+    ) -> Result<()> {
+        let pdu = e1ap::E1apPdu::SuccessfulOutcome(
+            SuccessfulOutcome::GnbCuCpConfigurationUpdateAcknowledge(
+                GnbCuCpConfigurationUpdateAcknowledge {
+                    transaction_id,
+                    criticality_diagnostics: None,
+                    gnb_cu_cp_tnla_setup_list: Some(GnbCuCpTnlaSetupList(vec![
+                        GnbCuCpTnlaSetupItem {
+                            tnl_association_transport_layer_address:
+                                CpTnlInformation::EndpointIpAddress(transport_layer_address),
+                        },
+                    ])),
+                    gnb_cu_cp_tnla_failed_to_setup_list: None,
+                    transport_layer_address_info: None,
+                },
+            ),
+        );
+
+        info!(self.logger, "GnbCuCpConfigurationUpdateAcknowledge >>");
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 
     pub async fn handle_bearer_context_setup(&mut self, ue_id: u32) -> Result<()> {
@@ -222,4 +292,8 @@ impl MockCuUp {
 
         Ok(())
     }
+}
+
+fn convert_transport_address(addr: &String) -> TransportLayerAddress {
+    todo!()
 }

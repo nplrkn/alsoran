@@ -1,15 +1,19 @@
-use std::{collections::HashMap, time::Instant};
-
 use crate::config::ConnectionControlConfig;
 use anyhow::Result;
 use async_channel::Receiver;
 use async_std::task::JoinHandle;
-use connection_api::{Api, Client, JoinNgapResponse, SetupNgapResponse};
+use connection_api::{
+    models::TransportAddress, AddE1apResponse, AddF1apResponse, Api, Client, JoinNgapResponse,
+    SetupNgapResponse,
+};
 use coordination_api::models::WorkerInfo;
+use frunk_core::labelled::Transmogrifier;
 use futures::stream::StreamExt;
+use hyper::Body;
 use slog::{debug, error, info, warn, Logger};
+use std::{collections::HashMap, marker::PhantomData, time::Instant};
 use stop_token::StopToken;
-use swagger::{AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
+use swagger::{AuthData, ContextBuilder, DropContextService, EmptyContext, Push, XSpanIdString};
 use uuid::Uuid;
 
 pub fn spawn<T: Api<ClientContext> + Clone + Send + Sync + 'static>(
@@ -19,23 +23,75 @@ pub fn spawn<T: Api<ClientContext> + Clone + Send + Sync + 'static>(
     local_api_provider: Option<T>,
     logger: Logger,
 ) -> JoinHandle<()> {
-    async_std::task::spawn(control_task(
-        receiver,
-        config,
-        stop_token,
-        local_api_provider,
-        logger,
-    ))
+    if let Some(local_api_provider) = local_api_provider {
+        async_std::task::spawn(control_task(
+            receiver,
+            config,
+            stop_token,
+            LocalApiProvider(local_api_provider),
+            logger,
+        ))
+    } else {
+        async_std::task::spawn(control_task(
+            receiver,
+            config,
+            stop_token,
+            RemoteApiProvider {},
+            logger,
+        ))
+    }
 }
 
-struct Controller<T>
+trait ConnectionApiProvider<T: Api<ClientContext>> {
+    fn client(&self, base_url: &String) -> Result<T>;
+}
+
+struct LocalApiProvider<T>(T);
+
+impl<T: Api<ClientContext> + Clone> ConnectionApiProvider<T> for LocalApiProvider<T> {
+    fn client(&self, _base_url: &String) -> Result<T> {
+        Ok(self.0.clone())
+    }
+}
+
+struct RemoteApiProvider {}
+impl
+    ConnectionApiProvider<
+        Client<
+            DropContextService<
+                hyper::client::Client<hyper::client::HttpConnector, Body>,
+                ClientContext,
+            >,
+            ClientContext,
+        >,
+    > for RemoteApiProvider
+{
+    fn client(
+        &self,
+        base_url: &String,
+    ) -> Result<
+        Client<
+            DropContextService<
+                hyper::client::Client<hyper::client::HttpConnector, Body>,
+                ClientContext,
+            >,
+            ClientContext,
+        >,
+    > {
+        Ok(Client::try_new_http(base_url)?)
+    }
+}
+
+struct Controller<T, P>
 where
     T: Api<ClientContext>,
+    P: ConnectionApiProvider<T>,
 {
     pub start_time: Instant,
     pub config: ConnectionControlConfig,
-    pub local_api_provider: Option<T>,
     pub worker_info: HashMap<Uuid, WorkerInfo>,
+    provider: P,
+    marker: PhantomData<T>,
 }
 
 pub type ClientContext = swagger::make_context_ty!(
@@ -45,19 +101,20 @@ pub type ClientContext = swagger::make_context_ty!(
     XSpanIdString
 );
 
-async fn control_task<T: Api<ClientContext>>(
+async fn control_task<T: Api<ClientContext>, P: ConnectionApiProvider<T>>(
     receiver: Receiver<WorkerInfo>,
     config: ConnectionControlConfig,
     stop_token: StopToken,
-    local_api_provider: Option<T>,
+    provider: P,
     logger: Logger,
 ) {
     let mut messages = receiver.take_until(stop_token);
     let mut controller = Controller {
         config,
-        local_api_provider,
         worker_info: HashMap::new(),
+        provider,
         start_time: Instant::now(),
+        marker: PhantomData,
     };
     while let Some(message) = messages.next().await {
         if let Err(e) = controller.process_worker_info(message, &logger).await {
@@ -66,7 +123,7 @@ async fn control_task<T: Api<ClientContext>>(
     }
 }
 
-impl<T: Api<ClientContext>> Controller<T> {
+impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
     async fn process_worker_info(
         &mut self,
         mut worker_info: WorkerInfo,
@@ -132,8 +189,14 @@ impl<T: Api<ClientContext>> Controller<T> {
                 .find(|x| !x.connected_ups.is_empty())
             {
                 // Tell it to add this worker.
-                self.add_e1ap(&connected_worker, worker_info.e1_address, logger)
-                    .await;
+                info!(logger, "Tell {:x} to join up NGAP interface", worker_id);
+                self.add_e1ap(
+                    connected_worker,
+                    worker_info.e1_address.clone().transmogrify(),
+                    &context,
+                    logger,
+                )
+                .await?;
             } else {
                 debug!(logger, "No worker has a E1AP connection yet")
             }
@@ -148,8 +211,13 @@ impl<T: Api<ClientContext>> Controller<T> {
                 .find(|x| !x.connected_dus.is_empty())
             {
                 // Tell it to add this worker.
-                self.add_f1ap(&connected_worker, worker_info.f1_address, logger)
-                    .await;
+                self.add_f1ap(
+                    &connected_worker,
+                    worker_info.f1_address.clone().transmogrify(),
+                    &context,
+                    logger,
+                )
+                .await?;
             } else {
                 debug!(logger, "No worker has a F1AP connection yet")
             }
@@ -158,19 +226,7 @@ impl<T: Api<ClientContext>> Controller<T> {
         // Store the worker info.
         let _ = self.worker_info.insert(worker_id, worker_info);
 
-        // TODO get TNLA ID from message
-
-        // Call the worker to initialize the interface
-
         Ok(())
-    }
-
-    fn provider(&self, base_path: &String) -> Result<Box<dyn Api<ClientContext>>> {
-        Ok(if let Some(ref provider) = self.local_api_provider {
-            Box::new(*provider)
-        } else {
-            Box::new(Client::try_new_http(base_path)?)
-        })
     }
 
     async fn setup_ngap(
@@ -180,7 +236,8 @@ impl<T: Api<ClientContext>> Controller<T> {
         logger: &Logger,
     ) -> Result<()> {
         match self
-            .provider(&worker_info.connection_api_url)?
+            .provider
+            .client(&worker_info.connection_api_url)?
             .setup_ngap(self.config.amf_address.clone(), &context)
             .await
         {
@@ -202,10 +259,9 @@ impl<T: Api<ClientContext>> Controller<T> {
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
-        let worker_id = worker_info.worker_unique_id;
-        info!(logger, "Tell {:x} to join NGAP interface", worker_id);
         match self
-            .provider(&worker_info.connection_api_url)?
+            .provider
+            .client(&worker_info.connection_api_url)?
             .join_ngap(self.config.amf_address.clone(), context)
             .await
         {
@@ -216,6 +272,50 @@ impl<T: Api<ClientContext>> Controller<T> {
             }
             Ok(r) => error!(logger, "NGAP join failure - {:?}", r),
             Err(e) => error!(logger, "NGAP join error - {}", e),
+        }
+        Ok(())
+    }
+
+    async fn add_e1ap(
+        &self,
+        worker_info: &WorkerInfo,
+        address: TransportAddress,
+        context: &ClientContext,
+        logger: &Logger,
+    ) -> Result<()> {
+        match self
+            .provider
+            .client(&worker_info.connection_api_url)?
+            .add_e1ap(address, context)
+            .await
+        {
+            Ok(AddE1apResponse::CuUpAcceptedWorkerAddition) => {
+                info!(logger, "Add E1ap ok");
+            }
+            Ok(r) => error!(logger, "Failure adding E1 endpoint - {:?}", r),
+            Err(e) => error!(logger, "API error adding E1 endpoint - {}", e),
+        }
+        Ok(())
+    }
+
+    async fn add_f1ap(
+        &self,
+        worker_info: &WorkerInfo,
+        address: TransportAddress,
+        context: &ClientContext,
+        logger: &Logger,
+    ) -> Result<()> {
+        match self
+            .provider
+            .client(&worker_info.connection_api_url)?
+            .add_f1ap(address, context)
+            .await
+        {
+            Ok(AddF1apResponse::DuAcceptedWorkerAddition) => {
+                info!(logger, "Add F1ap ok");
+            }
+            Ok(r) => error!(logger, "Failure adding F1 endpoint - {:?}", r),
+            Err(e) => error!(logger, "API error adding F1 endpoint - {}", e),
         }
         Ok(())
     }

@@ -43,8 +43,8 @@ pub struct WorkerInfo {
 pub enum Stage {
     Init,
     AmfConnected,
-    DuConnected,
     CuUpConnected,
+    DuConnected,
     Ue1Registered,
 }
 
@@ -233,20 +233,22 @@ impl TestContext {
                     self.amf.handle_ran_configuration_update().await?;
                 }
             }
-            if stage >= &Stage::DuConnected {
-                let address = self.worker_info(worker_index).f1ap_host_port;
-                if worker_index == 0 {
-                    self.du.connect(&address, F1AP_SCTP_PPID).await;
-                    self.du.perform_f1_setup().await?;
-                } else {
-                    todo!()
-                }
-            }
             if stage >= &Stage::CuUpConnected {
                 let address = self.worker_info(worker_index).e1ap_host_port;
                 if worker_index == 0 {
                     self.cu_up.connect(&address, E1AP_SCTP_PPID).await;
                     self.cu_up.perform_e1_setup().await?;
+                } else {
+                    self.cu_up
+                        .handle_cu_cp_configuration_update(&address)
+                        .await?;
+                }
+            }
+            if stage >= &Stage::DuConnected {
+                let address = self.worker_info(worker_index).f1ap_host_port;
+                if worker_index == 0 {
+                    self.du.connect(&address, F1AP_SCTP_PPID).await;
+                    self.du.perform_f1_setup().await?;
                 } else {
                     todo!()
                 }

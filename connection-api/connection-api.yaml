@@ -69,11 +69,11 @@ paths:
               $ref: '#/components/schemas/TransportAddress'
       responses:
         '201':
-          description: Du accepted worker addition
+          description: Success
         '404':
           description: No connection
         '500':
-          description: Failed to add worker
+          description: Failure
           content:
             application/json:
               schema:
@@ -91,11 +91,11 @@ paths:
               $ref: '#/components/schemas/TransportAddress'
       responses:
         '201':
-          description: Cu Up accepted worker addition
+          description: Success  
         '404':
           description: No connection
         '500':
-          description: Failed add
+          description: Failure
           content:
             application/json:
               schema:
