@@ -224,16 +224,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     }
 
     async fn serve_f1ap(&self) -> Result<ShutdownHandle> {
-        let f1_listen_address = format!(
-            "{}:{}",
-            self.config
-                .ip_addr
-                .unwrap_or(Ipv4Addr::UNSPECIFIED.into())
-                .to_string(),
-            F1AP_BIND_PORT
-        )
-        .to_string();
-
+        let f1_listen_address = self.worker_listen_address(F1AP_BIND_PORT);
         info!(
             &self.logger,
             "Listen for connection from DU on {}", f1_listen_address
@@ -249,17 +240,9 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             )
             .await
     }
-    async fn serve_e1ap(&self) -> Result<ShutdownHandle> {
-        let e1_listen_address = format!(
-            "{}:{}",
-            self.config
-                .ip_addr
-                .unwrap_or(Ipv4Addr::UNSPECIFIED.into())
-                .to_string(),
-            E1AP_BIND_PORT
-        )
-        .to_string();
 
+    async fn serve_e1ap(&self) -> Result<ShutdownHandle> {
+        let e1_listen_address = self.worker_listen_address(E1AP_BIND_PORT);
         info!(
             &self.logger,
             "Listen for connection from CU-UP on {}", e1_listen_address
@@ -276,8 +259,26 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     }
 
     async fn serve_connection_api(&self, port: u16) -> Result<ShutdownHandle> {
-        let addr = format!("127.0.0.1:{}", port).parse()?;
+        let connection_api_listen_address = self.worker_listen_address(port);
+
+        info!(
+            &self.logger,
+            "Serve connection API on {}", connection_api_listen_address
+        );
+
+        let addr = connection_api_listen_address.parse()?;
         crate::handlers::connection_api::serve(addr, self.clone(), self.logger.clone()).await
+    }
+
+    fn worker_listen_address(&self, port: u16) -> String {
+        format!(
+            "{}:{}",
+            self.config
+                .ip_addr
+                .unwrap_or(Ipv4Addr::UNSPECIFIED.into())
+                .to_string(),
+            port
+        )
     }
 
     async fn add_shutdown_handle(&self, shutdown_handle: ShutdownHandle) {
