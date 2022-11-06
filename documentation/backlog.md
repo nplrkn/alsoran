@@ -5,6 +5,7 @@
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
+- Use IP address instead of ports to distinguish NGAP, E1 and F1 endpoints
 - Two workers
 - Only 1st worker initializes NG interface and 2nd worker joins in
 - 1st worker receives DU connection and adds 2nd worker

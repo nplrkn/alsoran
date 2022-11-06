@@ -1,15 +1,14 @@
 //! config - the config of a GNB-CU
 
-pub use connection_api::models::TransportAddress;
 pub use coordinator::ConnectionControlConfig;
+use std::net::IpAddr;
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    // The port to which the worker should bind its F1AP server.
-    pub f1ap_bind_port: u16,
-
-    // The port to which the worker should bind its E1AP server.
-    pub e1ap_bind_port: u16,
+    // The IP address that the worker binds all of it listen ports to.  If there is only one worker
+    // running on the system, this may be omitted.  To test multiple workers running on a
+    // single system, each can be given a different 127.0.0.0/8 IP address.
+    pub ip_addr: Option<IpAddr>,
 
     // Set this to ConnectToAmf("<address>:<port>"") to have a single worker that
     // connects immediately to AMF on the given IP address and port.
@@ -34,8 +33,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            f1ap_bind_port: 38472, // TS38.472
-            e1ap_bind_port: 38462, // TS38.462
+            ip_addr: None,
             connection_style: ConnectionStyle::Autonomous(ConnectionControlConfig::default()),
             initial_ue_ttl_secs: 5,
             ue_ttl_secs: 86_400, // a day

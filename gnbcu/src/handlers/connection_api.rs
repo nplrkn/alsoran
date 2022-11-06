@@ -3,7 +3,7 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use common::ShutdownHandle;
-use connection_api::models::{self, AmfInfo};
+use connection_api::models::{AmfInfo, IpAddress};
 use connection_api::server::MakeService;
 use connection_api::{AddE1apResponse, AddF1apResponse, Api, JoinNgapResponse, SetupNgapResponse};
 use ngap::AmfName;
@@ -68,7 +68,7 @@ where
     /// Instructs a worker to add another worker to an existing E1AP interface instance
     async fn add_e1ap(
         &self,
-        _transport_address: models::TransportAddress,
+        _transport_address: IpAddress,
         _context: &C,
     ) -> Result<AddE1apResponse, ApiError> {
         Workflow::new(&self.gnbcu, &self.logger)
@@ -80,7 +80,7 @@ where
     /// Instructs a worker to add another worker to an existing F1AP interface instance
     async fn add_f1ap(
         &self,
-        _transport_address: models::TransportAddress,
+        _transport_address: IpAddress,
         _context: &C,
     ) -> Result<AddF1apResponse, ApiError> {
         //Workflow::new(&self.gnbcu, logger).???.await
@@ -90,16 +90,15 @@ where
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
     async fn join_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        transport_address: IpAddress,
         _context: &C,
     ) -> Result<JoinNgapResponse, ApiError> {
         // First establish a connection.
-        let amf_address = format!("{}:{}", transport_address.host, transport_address.port);
-        if let Err(e) = self.gnbcu.ngap_connect(&amf_address).await {
+        if let Err(e) = self.gnbcu.ngap_connect(&transport_address).await {
             error!(self.logger, "Failed to connect- {}", e);
             return Ok(JoinNgapResponse::Failure(format!(
                 "Failed to connect to AMF at {}",
-                amf_address
+                transport_address.to_string()
             )));
         }
 
@@ -121,16 +120,15 @@ where
     /// Instructs a worker to set up an NGAP interface instance with the AMF
     async fn setup_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        transport_address: IpAddress,
         _context: &C,
     ) -> Result<SetupNgapResponse, ApiError> {
         // First establish a connection.
-        let amf_address = format!("{}:{}", transport_address.host, transport_address.port);
-        if let Err(e) = self.gnbcu.ngap_connect(&amf_address).await {
-            error!(self.logger, "Failed to connect- {}", e);
+        if let Err(e) = self.gnbcu.ngap_connect(&transport_address).await {
+            error!(self.logger, "Failed to connect - {}", e);
             return Ok(SetupNgapResponse::Failure(format!(
                 "Failed to connect to AMF at {}",
-                amf_address
+                transport_address.to_string()
             )));
         }
 

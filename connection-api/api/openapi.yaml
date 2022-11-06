@@ -19,7 +19,7 @@ paths:
                   host: 127.0.0.1
                   port: 20000
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
         description: AMF endpoint
         required: true
       responses:
@@ -43,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
         description: AMF endpoint
         required: true
       responses:
@@ -64,12 +64,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
         description: Worker F1AP endpoint
         required: true
       responses:
         "201":
-          description: Du accepted worker addition
+          description: Success
         "404":
           description: No connection
         "500":
@@ -77,7 +77,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Failed to add worker
+          description: Failure
       summary: Instructs a worker to add another worker to an existing F1AP interface
         instance
   /addE1ap:
@@ -87,12 +87,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
         description: Worker E1AP endpoint
         required: true
       responses:
         "201":
-          description: Cu Up accepted worker addition
+          description: Success
         "404":
           description: No connection
         "500":
@@ -100,7 +100,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Failed add
+          description: Failure
       summary: Instructs a worker to add another worker to an existing E1AP interface
         instance
 components:
@@ -114,22 +114,8 @@ components:
       required:
       - amfName
       type: object
-    TransportAddress:
-      example:
-        port: 5249
-        host: host
-      properties:
-        host:
-          format: hostname
-          type: string
-        port:
-          maximum: 65535
-          minimum: 1
-          type: integer
-      required:
-      - host
-      - port
-      type: object
+    IpAddress:
+      type: string
     Error:
       type: string
 

@@ -12,7 +12,7 @@ use anyhow::Result;
 use async_channel::Sender;
 use async_std::sync::Mutex;
 use async_trait::async_trait;
-use coordination_api::models::{TransportAddress, WorkerInfo};
+use coordination_api::models::WorkerInfo;
 use coordination_api::{
     Api as CoordinationApi, Client as CoordinationApiClient, RefreshWorkerResponse,
 };
@@ -24,6 +24,7 @@ use net::{
 };
 use rrc::UlDcchMessage;
 use slog::{debug, info, warn, Logger};
+use std::net::Ipv4Addr;
 use std::sync::Arc;
 use stop_token::{StopSource, StopToken};
 use swagger::{ApiError, AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
@@ -52,14 +53,17 @@ pub struct ConcreteGnbcu<A: CoordinationApi<ClientContext>, U: UeStateStore> {
 // The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol NGAP
 // is 60, and 66 for DTLS over SCTP (IETF RFC 6083 [8]).
 const NGAP_SCTP_PPID: u32 = 60;
+const NGAP_BIND_PORT: u16 = 38412;
 
 // TS38.472, 7
 // The Payload Protocol Identifier (ppid) assigned by IANA to be used by SCTP for the application layer protocol F1AP is 62,
 // and 68 for DTLS over SCTP (IETF RFC 6083 [9]).
 const F1AP_SCTP_PPID: u32 = 62;
+const F1AP_BIND_PORT: u16 = 38472;
 
 // TS38.462
 const E1AP_SCTP_PPID: u32 = 64;
+const E1AP_BIND_PORT: u16 = 38462;
 
 pub fn spawn<U: UeStateStore>(
     config: Config,
@@ -197,19 +201,19 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             }) => connection_api_base_path.clone(),
         };
 
+        let worker_ip = self
+            .config
+            .ip_addr
+            .unwrap_or(Ipv4Addr::LOCALHOST.into())
+            .to_string();
+
         self.coordinator
             .refresh_worker(
                 WorkerInfo {
                     worker_unique_id: Uuid::new_v4(),
                     connection_api_url,
-                    f1_address: TransportAddress {
-                        host: "127.0.0.1".to_string(),
-                        port: self.config.f1ap_bind_port,
-                    },
-                    e1_address: TransportAddress {
-                        host: "127.0.0.1".to_string(),
-                        port: self.config.e1ap_bind_port,
-                    },
+                    f1_address: worker_ip.clone().into(),
+                    e1_address: worker_ip.into(),
                     connected_amfs,
                     connected_dus: vec![],
                     connected_ups: vec![],
@@ -220,11 +224,21 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     }
 
     async fn serve_f1ap(&self) -> Result<ShutdownHandle> {
-        let f1_listen_address = format!("0.0.0.0:{}", self.config.f1ap_bind_port).to_string();
+        let f1_listen_address = format!(
+            "{}:{}",
+            self.config
+                .ip_addr
+                .unwrap_or(Ipv4Addr::UNSPECIFIED.into())
+                .to_string(),
+            F1AP_BIND_PORT
+        )
+        .to_string();
+
         info!(
             &self.logger,
             "Listen for connection from DU on {}", f1_listen_address
         );
+
         let rrc_handler = RrcHandler::new(self.clone());
         self.f1ap
             .listen(
@@ -236,11 +250,21 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             .await
     }
     async fn serve_e1ap(&self) -> Result<ShutdownHandle> {
-        let e1_listen_address = format!("0.0.0.0:{}", self.config.e1ap_bind_port).to_string();
+        let e1_listen_address = format!(
+            "{}:{}",
+            self.config
+                .ip_addr
+                .unwrap_or(Ipv4Addr::UNSPECIFIED.into())
+                .to_string(),
+            E1AP_BIND_PORT
+        )
+        .to_string();
+
         info!(
             &self.logger,
             "Listen for connection from CU-UP on {}", e1_listen_address
         );
+
         self.e1ap
             .listen(
                 e1_listen_address,
@@ -283,12 +307,13 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     fn config(&self) -> &Config {
         &self.config
     }
-    async fn ngap_connect(&self, amf_address: &String) -> Result<()> {
+    async fn ngap_connect(&self, amf_ip_address: &String) -> Result<()> {
+        let amf_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
         info!(&self.logger, "Maintain connection to AMF {}", amf_address);
         let shutdown_handle = self
             .ngap
             .connect(
-                amf_address,
+                &amf_address,
                 NGAP_SCTP_PPID,
                 NgapHandler::new_ngap_application(self.clone()),
                 self.logger.clone(),

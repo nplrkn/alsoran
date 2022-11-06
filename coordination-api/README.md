@@ -14,7 +14,7 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 1.0.0
-- Build date: 2022-10-31T13:27:39.680949+01:00[Europe/Brussels]
+- Build date: 2022-11-06T12:00:21.085778+01:00[Europe/Brussels]
 
 
 
@@ -100,7 +100,7 @@ Method | HTTP request | Description
 ## Documentation For Models
 
  - [Error](docs/Error.md)
- - [TransportAddress](docs/TransportAddress.md)
+ - [IpAddress](docs/IpAddress.md)
  - [WorkerInfo](docs/WorkerInfo.md)
 
 

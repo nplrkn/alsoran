@@ -1,7 +1,5 @@
 //! config - the config of the GNB-CU Coordinator
 
-use connection_api::models::TransportAddress;
-
 #[derive(Debug, Clone)]
 pub struct Config {
     // The port on which to serve the coordination API.
@@ -14,7 +12,7 @@ pub struct Config {
 #[derive(Debug, Clone)]
 pub struct ConnectionControlConfig {
     // AMF address
-    pub amf_address: TransportAddress,
+    pub amf_address: String,
 
     // Worker refresh interval
     pub worker_refresh_interval_secs: u16,
@@ -26,7 +24,7 @@ pub struct ConnectionControlConfig {
 impl Default for ConnectionControlConfig {
     fn default() -> Self {
         ConnectionControlConfig {
-            amf_address: TransportAddress::new("127.0.0.1".to_string(), 38412),
+            amf_address: "127.0.0.1".to_string(),
             worker_refresh_interval_secs: 30,
             fast_start: false,
         }

@@ -4,7 +4,7 @@ Cargo.toml
 README.md
 api/openapi.yaml
 docs/Error.md
-docs/TransportAddress.md
+docs/IpAddress.md
 docs/WorkerInfo.md
 docs/default_api.md
 examples/ca.pem

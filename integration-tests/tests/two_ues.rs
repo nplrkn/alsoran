@@ -17,7 +17,7 @@ async fn two_ues_register_sequentially() -> Result<()> {
 #[async_std::test]
 async fn two_ues_register_in_parallel() -> Result<()> {
     let mut tc = TestContextBuilder::new()
-        .stage(Stage::CuUpConnected)
+        .stage(Stage::DuConnected)
         .spawn()
         .await?;
 

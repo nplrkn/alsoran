@@ -1,10 +1,7 @@
 use anyhow::Result;
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
-use gnbcu::{
-    Config, ConnectionControlConfig, ConnectionStyle, TransportAddress,
-    WorkerConnectionManagementConfig,
-};
+use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig};
 use gnbcu::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu, SecurityModeCommand};
 use rand::Rng;
@@ -12,12 +9,15 @@ use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
 
 const F1AP_SCTP_PPID: u32 = 62;
+const F1AP_BIND_PORT: u16 = 38472;
 const E1AP_SCTP_PPID: u32 = 64;
+const E1AP_BIND_PORT: u16 = 38462;
 const PORT_ALLOCATION_RETRIES: u32 = 10;
+const CONNECTION_API_PORT: u16 = 50312;
 
 pub struct TestContext {
     pub amf: MockAmf,
-    pub amf_port: u16,
+    pub amf_ip_addr: String,
     pub du: MockDu,
     pub cu_up: MockCuUp,
     pub logger: Logger,
@@ -34,11 +34,6 @@ struct InternalCoordinatorInfo {
     pub shutdown_handle: ShutdownHandle,
     pub config: CoordinatorConfig,
 }
-pub struct WorkerInfo {
-    pub f1ap_host_port: String,
-    pub e1ap_host_port: String,
-}
-
 #[derive(PartialEq, PartialOrd, Debug)]
 pub enum Stage {
     Init,
@@ -97,13 +92,13 @@ impl TestContextBuilder {
         }));
 
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
-        let (amf, amf_port) = start_amf_on_random_port(&logger).await;
+        let (amf, amf_ip_addr) = start_amf_on_random_ip(&logger).await;
         let du = MockDu::new(&logger).await;
         let cu_up = MockCuUp::new(&logger).await;
 
         let mut tc = TestContext {
             amf,
-            amf_port,
+            amf_ip_addr,
             du,
             cu_up,
             logger,
@@ -119,7 +114,7 @@ impl TestContextBuilder {
         // Start workers
         info!(tc.logger, "Spawn {} workers", self.worker_count);
         for _ in 0..self.worker_count {
-            tc.start_worker_with_random_ports(self.redis_port).await;
+            tc.start_worker_on_random_ip(self.redis_port).await;
         }
 
         tc.get_to_stage(&self.stage).await?;
@@ -135,10 +130,7 @@ impl TestContext {
             let config = CoordinatorConfig {
                 bind_port: rand::thread_rng().gen_range(1024..65535),
                 connection_control_config: ConnectionControlConfig {
-                    amf_address: TransportAddress {
-                        host: "127.0.0.1".to_string(),
-                        port: self.amf_port,
-                    },
+                    amf_address: self.amf_ip_addr.clone(),
                     worker_refresh_interval_secs: 30,
                     fast_start: true,
                 },
@@ -154,21 +146,20 @@ impl TestContext {
         panic!("Repeatedly failed to start coordinator with random port");
     }
 
-    async fn start_worker_with_random_ports(&mut self, redis_port: Option<u16>) {
+    async fn start_worker_on_random_ip(&mut self, redis_port: Option<u16>) {
         let worker_number = self.workers.len() as u16;
-        let logger = self.logger.new(o!("cu-w"=> worker_number));
 
         for _ in 0..PORT_ALLOCATION_RETRIES {
-            let f1ap_bind_port = rand::thread_rng().gen_range(1024..65535);
-            let e1ap_bind_port = f1ap_bind_port + 1;
-            let connection_api_bind_port = f1ap_bind_port + 2;
+            let worker_ip = random_local_ip();
+            let logger = self.logger.new(o!("cu-w"=> worker_number));
+            let connection_api_bind_port = CONNECTION_API_PORT;
 
             let connection_style = if let Some(ref coordinator) = self.coordinator {
                 ConnectionStyle::Coordinated(WorkerConnectionManagementConfig {
                     connection_api_bind_port,
                     connection_api_base_path: format!(
-                        "http://127.0.0.1:{}",
-                        connection_api_bind_port
+                        "http://{}:{}",
+                        worker_ip, connection_api_bind_port
                     ),
                     coordinator_base_path: format!(
                         "http://127.0.0.1:{}",
@@ -178,24 +169,20 @@ impl TestContext {
             } else {
                 ConnectionStyle::Autonomous(ConnectionControlConfig {
                     fast_start: true,
-                    amf_address: TransportAddress {
-                        host: "127.0.0.1".to_string(),
-                        port: self.amf_port,
-                    },
+                    amf_address: self.amf_ip_addr.clone(),
                     ..ConnectionControlConfig::default()
                 })
             };
 
             let config = Config {
-                f1ap_bind_port,
-                e1ap_bind_port,
+                ip_addr: Some(worker_ip.parse().unwrap()),
                 connection_style: connection_style.clone(),
                 ..Config::default()
             };
 
             debug!(logger, "Start worker with config {:?}", config);
 
-            let result = if let Some(port) = redis_port {
+            match if let Some(port) = redis_port {
                 gnbcu::spawn(
                     config.clone(),
                     RedisUeStore::new(port).unwrap(),
@@ -203,9 +190,7 @@ impl TestContext {
                 )
             } else {
                 gnbcu::spawn(config.clone(), MockUeStore::new(), logger.clone())
-            };
-
-            match result {
+            } {
                 Ok(shutdown_handle) => {
                     self.workers.push(InternalWorkerInfo {
                         shutdown_handle,
@@ -213,18 +198,22 @@ impl TestContext {
                     });
                     return;
                 }
-                Err(e) => {
-                    warn!(logger, "Error creating worker {}", e);
-                }
+                Err(e) => warn!(logger, "Worker creation failed - {}", e),
             }
         }
-        panic!("Repeatedly failed to start worker with random ports");
+        panic!("Repeatedly failed to create worker")
     }
 
     async fn get_to_stage<'a>(&'a mut self, stage: &Stage) -> Result<&'a mut Self> {
         debug!(self.logger, "Get to stage {:?}", stage);
 
         for worker_index in 0..self.workers.len() {
+            let worker_ip = self.workers[worker_index]
+                .config
+                .ip_addr
+                .unwrap()
+                .to_string();
+
             if stage >= &Stage::AmfConnected {
                 self.amf.expect_connection().await;
                 if worker_index == 0 {
@@ -234,20 +223,22 @@ impl TestContext {
                 }
             }
             if stage >= &Stage::CuUpConnected {
-                let address = self.worker_info(worker_index).e1ap_host_port;
                 if worker_index == 0 {
-                    self.cu_up.connect(&address, E1AP_SCTP_PPID).await;
+                    self.cu_up
+                        .connect(&format!("{}:{}", worker_ip, E1AP_BIND_PORT), E1AP_SCTP_PPID)
+                        .await;
                     self.cu_up.perform_e1_setup().await?;
                 } else {
                     self.cu_up
-                        .handle_cu_cp_configuration_update(&address)
+                        .handle_cu_cp_configuration_update(&worker_ip)
                         .await?;
                 }
             }
             if stage >= &Stage::DuConnected {
-                let address = self.worker_info(worker_index).f1ap_host_port;
                 if worker_index == 0 {
-                    self.du.connect(&address, F1AP_SCTP_PPID).await;
+                    self.du
+                        .connect(&format!("{}:{}", worker_ip, F1AP_BIND_PORT), F1AP_SCTP_PPID)
+                        .await;
                     self.du.perform_f1_setup().await?;
                 } else {
                     todo!()
@@ -259,13 +250,6 @@ impl TestContext {
             self.register_ue(1).await?;
         }
         Ok(self)
-    }
-
-    pub fn worker_info(&self, index: usize) -> WorkerInfo {
-        WorkerInfo {
-            f1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.f1ap_bind_port),
-            e1ap_host_port: format!("127.0.0.1:{}", self.workers[index].config.e1ap_bind_port),
-        }
     }
 
     pub async fn register_ue(&mut self, ue_id: u32) -> Result<()> {
@@ -361,14 +345,21 @@ impl TestContext {
     }
 }
 
-async fn start_amf_on_random_port(logger: &Logger) -> (MockAmf, u16) {
+async fn start_amf_on_random_ip(logger: &Logger) -> (MockAmf, String) {
     for _ in 0..PORT_ALLOCATION_RETRIES {
-        let port = rand::thread_rng().gen_range(1024..65535);
-        let address = format!("127.0.0.1:{}", port);
-
-        if let Ok(amf) = MockAmf::new(address.as_str(), &logger).await {
-            return (amf, port);
+        let address = random_local_ip();
+        if let Ok(amf) = MockAmf::new(&address, &logger).await {
+            return (amf, address);
         };
     }
     panic!("Repeatedly failed to start Mock AMF")
+}
+
+fn random_local_ip() -> String {
+    format!(
+        "127.{}.{}.{}",
+        rand::thread_rng().gen_range(0..255),
+        rand::thread_rng().gen_range(0..255),
+        rand::thread_rng().gen_range(1..255)
+    )
 }

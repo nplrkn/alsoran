@@ -14,7 +14,7 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 1.0.0
-- Build date: 2022-11-03T09:41:37.003861+01:00[Europe/Brussels]
+- Build date: 2022-11-06T11:59:07.758708+01:00[Europe/Brussels]
 
 
 
@@ -61,6 +61,9 @@ cargo run --example server
 To run a client, follow one of the following simple steps:
 
 ```
+cargo run --example client AddE1ap
+cargo run --example client AddF1ap
+cargo run --example client JoinNgap
 cargo run --example client SetupNgap
 ```
 
@@ -105,7 +108,7 @@ Method | HTTP request | Description
 
  - [AmfInfo](docs/AmfInfo.md)
  - [Error](docs/Error.md)
- - [TransportAddress](docs/TransportAddress.md)
+ - [IpAddress](docs/IpAddress.md)
 
 
 ## Documentation For Authorization

@@ -5,7 +5,7 @@ README.md
 api/openapi.yaml
 docs/AmfInfo.md
 docs/Error.md
-docs/TransportAddress.md
+docs/IpAddress.md
 docs/default_api.md
 examples/ca.pem
 examples/client/main.rs

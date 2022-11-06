@@ -30,6 +30,9 @@ fn main() {
         .arg(Arg::with_name("operation")
             .help("Sets the operation to run")
             .possible_values(&[
+                "AddE1ap",
+                "AddF1ap",
+                "JoinNgap",
                 "SetupNgap",
             ])
             .required(true)
@@ -74,33 +77,27 @@ fn main() {
     let mut rt = tokio::runtime::Runtime::new().unwrap();
 
     match matches.value_of("operation") {
-        /* Disabled because there's no example.
         Some("AddE1ap") => {
             let result = rt.block_on(client.add_e1ap(
-                  ???
+                  serde_json::from_str::<models::IpAddress>(r#"body_example"#).expect("Failed to parse JSON example")
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        */
-        /* Disabled because there's no example.
         Some("AddF1ap") => {
             let result = rt.block_on(client.add_f1ap(
-                  ???
+                  serde_json::from_str::<models::IpAddress>(r#"body_example"#).expect("Failed to parse JSON example")
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        */
-        /* Disabled because there's no example.
         Some("JoinNgap") => {
             let result = rt.block_on(client.join_ngap(
-                  ???
+                  serde_json::from_str::<models::IpAddress>(r#"body_example"#).expect("Failed to parse JSON example")
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        */
         Some("SetupNgap") => {
             let result = rt.block_on(client.setup_ngap(
-                  serde_json::from_str::<models::TransportAddress>(r#"{"host":"127.0.0.1","port":20000}"#).expect("Failed to parse JSON example")
+                  serde_json::from_str::<models::IpAddress>(r#"{"host":"127.0.0.1","port":20000}"#).expect("Failed to parse JSON example")
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },

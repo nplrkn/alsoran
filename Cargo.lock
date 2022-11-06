@@ -503,7 +503,6 @@ dependencies = [
  "common",
  "connection-api",
  "coordination-api",
- "frunk_core",
  "futures",
  "hyper",
  "log",

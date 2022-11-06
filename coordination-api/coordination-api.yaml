@@ -48,9 +48,9 @@ components:
           type: string
           format: url
         f1Address:
-          $ref: '#/components/schemas/TransportAddress'
+          $ref: '#/components/schemas/IpAddress'
         e1Address:
-          $ref: '#/components/schemas/TransportAddress'
+          $ref: '#/components/schemas/IpAddress'
         connectedAmfs:
           type: array
           items: 
@@ -63,18 +63,7 @@ components:
           type: array
           items: 
             type: string
-    TransportAddress:
-      type: object
-      required: 
-        - host
-        - port
-      properties:
-        host:
-          type: string
-          format: hostname
-        port: 
-          type: integer
-          minimum: 1
-          maximum: 65535
+    IpAddress:
+      type: string
     Error:
       type: string

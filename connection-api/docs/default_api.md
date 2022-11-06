@@ -11,14 +11,14 @@ Method | HTTP request | Description
 
 
 # **addE1ap**
-> addE1ap(transport_address)
+> addE1ap(body)
 Instructs a worker to add another worker to an existing E1AP interface instance
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **transport_address** | [**TransportAddress**](TransportAddress.md)| Worker E1AP endpoint | 
+  **body** | [**string**](string.md)| Worker E1AP endpoint | 
 
 ### Return type
 
@@ -36,14 +36,14 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **addF1ap**
-> addF1ap(transport_address)
+> addF1ap(body)
 Instructs a worker to add another worker to an existing F1AP interface instance
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **transport_address** | [**TransportAddress**](TransportAddress.md)| Worker F1AP endpoint | 
+  **body** | [**string**](string.md)| Worker F1AP endpoint | 
 
 ### Return type
 
@@ -61,14 +61,14 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **joinNgap**
-> joinNgap(transport_address)
+> joinNgap(body)
 Instructs a worker to join an existing NGAP interface instance set up by another worker.
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **transport_address** | [**TransportAddress**](TransportAddress.md)| AMF endpoint | 
+  **body** | [**string**](string.md)| AMF endpoint | 
 
 ### Return type
 
@@ -86,14 +86,14 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **setupNgap**
-> models::AmfInfo setupNgap(transport_address)
+> models::AmfInfo setupNgap(body)
 Instructs a worker to set up an NGAP interface instance with the AMF
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **transport_address** | [**TransportAddress**](TransportAddress.md)| AMF endpoint | 
+  **body** | [**string**](string.md)| AMF endpoint | 
 
 ### Return type
 

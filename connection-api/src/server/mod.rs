@@ -157,31 +157,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_transport_address: Option<models::TransportAddress> = if !body.is_empty() {
+                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_transport_address) => param_transport_address,
+                                        Ok(param_body) => param_body,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter TransportAddress - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter TransportAddress due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_transport_address = match param_transport_address {
-                                    Some(param_transport_address) => param_transport_address,
+                                let param_body = match param_body {
+                                    Some(param_body) => param_body,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter TransportAddress"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter TransportAddress")),
+                                                        .body(Body::from("Missing required body parameter body"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
                                 };
 
                                 let result = api_impl.add_e1ap(
-                                            param_transport_address,
+                                            param_body,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -199,7 +199,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                AddE1apResponse::CuUpAcceptedWorkerAddition
+                                                AddE1apResponse::Success
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
                                                 },
@@ -207,14 +207,14 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
-                                                AddE1apResponse::FailedAdd
+                                                AddE1apResponse::Failure
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for ADD_E1AP_FAILED_ADD"));
+                                                            .expect("Unable to create Content-Type header for ADD_E1AP_FAILURE"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
@@ -231,8 +231,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter TransportAddress: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter TransportAddress")),
+                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
                         }
             },
 
@@ -245,31 +245,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_transport_address: Option<models::TransportAddress> = if !body.is_empty() {
+                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_transport_address) => param_transport_address,
+                                        Ok(param_body) => param_body,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter TransportAddress - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter TransportAddress due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_transport_address = match param_transport_address {
-                                    Some(param_transport_address) => param_transport_address,
+                                let param_body = match param_body {
+                                    Some(param_body) => param_body,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter TransportAddress"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter TransportAddress")),
+                                                        .body(Body::from("Missing required body parameter body"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
                                 };
 
                                 let result = api_impl.add_f1ap(
-                                            param_transport_address,
+                                            param_body,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -287,7 +287,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                AddF1apResponse::DuAcceptedWorkerAddition
+                                                AddF1apResponse::Success
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
                                                 },
@@ -295,14 +295,14 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
-                                                AddF1apResponse::FailedToAddWorker
+                                                AddF1apResponse::Failure
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for ADD_F1AP_FAILED_TO_ADD_WORKER"));
+                                                            .expect("Unable to create Content-Type header for ADD_F1AP_FAILURE"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
@@ -319,8 +319,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter TransportAddress: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter TransportAddress")),
+                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
                         }
             },
 
@@ -333,31 +333,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_transport_address: Option<models::TransportAddress> = if !body.is_empty() {
+                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_transport_address) => param_transport_address,
+                                        Ok(param_body) => param_body,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter TransportAddress - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter TransportAddress due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_transport_address = match param_transport_address {
-                                    Some(param_transport_address) => param_transport_address,
+                                let param_body = match param_body {
+                                    Some(param_body) => param_body,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter TransportAddress"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter TransportAddress")),
+                                                        .body(Body::from("Missing required body parameter body"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
                                 };
 
                                 let result = api_impl.join_ngap(
-                                            param_transport_address,
+                                            param_body,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -403,8 +403,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter TransportAddress: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter TransportAddress")),
+                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
                         }
             },
 
@@ -417,31 +417,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_transport_address: Option<models::TransportAddress> = if !body.is_empty() {
+                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_transport_address) => param_transport_address,
+                                        Ok(param_body) => param_body,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter TransportAddress - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter TransportAddress due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_transport_address = match param_transport_address {
-                                    Some(param_transport_address) => param_transport_address,
+                                let param_body = match param_body {
+                                    Some(param_body) => param_body,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter TransportAddress"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter TransportAddress")),
+                                                        .body(Body::from("Missing required body parameter body"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
                                 };
 
                                 let result = api_impl.setup_ngap(
-                                            param_transport_address,
+                                            param_body,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -494,8 +494,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter TransportAddress: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter TransportAddress")),
+                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
                         }
             },
 

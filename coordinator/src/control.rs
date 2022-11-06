@@ -3,11 +3,9 @@ use anyhow::Result;
 use async_channel::Receiver;
 use async_std::task::JoinHandle;
 use connection_api::{
-    models::TransportAddress, AddE1apResponse, AddF1apResponse, Api, Client, JoinNgapResponse,
-    SetupNgapResponse,
+    AddE1apResponse, AddF1apResponse, Api, Client, JoinNgapResponse, SetupNgapResponse,
 };
 use coordination_api::models::WorkerInfo;
-use frunk_core::labelled::Transmogrifier;
 use futures::stream::StreamExt;
 use hyper::Body;
 use slog::{debug, error, info, warn, Logger};
@@ -192,7 +190,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 info!(logger, "Tell {:x} to join up NGAP interface", worker_id);
                 self.add_e1ap(
                     connected_worker,
-                    worker_info.e1_address.clone().transmogrify(),
+                    worker_info.e1_address.clone().into(),
                     &context,
                     logger,
                 )
@@ -213,7 +211,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 // Tell it to add this worker.
                 self.add_f1ap(
                     &connected_worker,
-                    worker_info.f1_address.clone().transmogrify(),
+                    worker_info.f1_address.clone().into(),
                     &context,
                     logger,
                 )
@@ -238,7 +236,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         match self
             .provider
             .client(&worker_info.connection_api_url)?
-            .setup_ngap(self.config.amf_address.clone(), &context)
+            .setup_ngap(self.config.amf_address.clone().into(), &context)
             .await
         {
             Ok(SetupNgapResponse::Success(amf_info)) => {
@@ -262,7 +260,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         match self
             .provider
             .client(&worker_info.connection_api_url)?
-            .join_ngap(self.config.amf_address.clone(), context)
+            .join_ngap(self.config.amf_address.clone().into(), context)
             .await
         {
             Ok(JoinNgapResponse::Success) => {
@@ -279,17 +277,17 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
     async fn add_e1ap(
         &self,
         worker_info: &WorkerInfo,
-        address: TransportAddress,
+        address: String,
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
         match self
             .provider
             .client(&worker_info.connection_api_url)?
-            .add_e1ap(address, context)
+            .add_e1ap(address.into(), context)
             .await
         {
-            Ok(AddE1apResponse::CuUpAcceptedWorkerAddition) => {
+            Ok(AddE1apResponse::Success) => {
                 info!(logger, "Add E1ap ok");
             }
             Ok(r) => error!(logger, "Failure adding E1 endpoint - {:?}", r),
@@ -301,17 +299,17 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
     async fn add_f1ap(
         &self,
         worker_info: &WorkerInfo,
-        address: TransportAddress,
+        address: String,
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
         match self
             .provider
             .client(&worker_info.connection_api_url)?
-            .add_f1ap(address, context)
+            .add_f1ap(address.into(), context)
             .await
         {
-            Ok(AddF1apResponse::DuAcceptedWorkerAddition) => {
+            Ok(AddF1apResponse::Success) => {
                 info!(logger, "Add F1ap ok");
             }
             Ok(r) => error!(logger, "Failure adding F1 endpoint - {:?}", r),

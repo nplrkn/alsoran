@@ -385,7 +385,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn add_e1ap(
         &self,
-        param_transport_address: models::TransportAddress,
+        param_body: models::IpAddress,
         context: &C) -> Result<AddE1apResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
@@ -418,7 +418,7 @@ impl<S, C> Api<C> for Client<S, C> where
         };
 
         // Body parameter
-        let body = serde_json::to_string(&param_transport_address).expect("impossible to fail to serialize");
+        let body = serde_json::to_string(&param_body).expect("impossible to fail to serialize");
                 *request.body_mut() = Body::from(body);
 
         let header = "application/json";
@@ -438,7 +438,7 @@ impl<S, C> Api<C> for Client<S, C> where
         match response.status().as_u16() {
             201 => {
                 Ok(
-                    AddE1apResponse::CuUpAcceptedWorkerAddition
+                    AddE1apResponse::Success
                 )
             }
             404 => {
@@ -456,7 +456,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = serde_json::from_str::<String>(body).map_err(|e| {
                     ApiError(format!("Response body did not match the schema: {}", e))
                 })?;
-                Ok(AddE1apResponse::FailedAdd
+                Ok(AddE1apResponse::Failure
                     (body)
                 )
             }
@@ -482,7 +482,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn add_f1ap(
         &self,
-        param_transport_address: models::TransportAddress,
+        param_body: models::IpAddress,
         context: &C) -> Result<AddF1apResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
@@ -514,7 +514,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
         };
 
-        let body = serde_json::to_string(&param_transport_address).expect("impossible to fail to serialize");
+        let body = serde_json::to_string(&param_body).expect("impossible to fail to serialize");
                 *request.body_mut() = Body::from(body);
 
         let header = "application/json";
@@ -534,7 +534,7 @@ impl<S, C> Api<C> for Client<S, C> where
         match response.status().as_u16() {
             201 => {
                 Ok(
-                    AddF1apResponse::DuAcceptedWorkerAddition
+                    AddF1apResponse::Success
                 )
             }
             404 => {
@@ -552,7 +552,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = serde_json::from_str::<String>(body).map_err(|e| {
                     ApiError(format!("Response body did not match the schema: {}", e))
                 })?;
-                Ok(AddF1apResponse::FailedToAddWorker
+                Ok(AddF1apResponse::Failure
                     (body)
                 )
             }
@@ -578,7 +578,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn join_ngap(
         &self,
-        param_transport_address: models::TransportAddress,
+        param_body: models::IpAddress,
         context: &C) -> Result<JoinNgapResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
@@ -610,7 +610,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
         };
 
-        let body = serde_json::to_string(&param_transport_address).expect("impossible to fail to serialize");
+        let body = serde_json::to_string(&param_body).expect("impossible to fail to serialize");
                 *request.body_mut() = Body::from(body);
 
         let header = "application/json";
@@ -669,7 +669,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn setup_ngap(
         &self,
-        param_transport_address: models::TransportAddress,
+        param_body: models::IpAddress,
         context: &C) -> Result<SetupNgapResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
@@ -701,7 +701,7 @@ impl<S, C> Api<C> for Client<S, C> where
                 Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
         };
 
-        let body = serde_json::to_string(&param_transport_address).expect("impossible to fail to serialize");
+        let body = serde_json::to_string(&param_body).expect("impossible to fail to serialize");
 
                 *request.body_mut() = Body::from(body);
 

@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
             examples: 
               example1:
                 value: 
@@ -46,7 +46,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
       responses:
         '201':
           description: Success
@@ -66,7 +66,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
       responses:
         '201':
           description: Success
@@ -88,7 +88,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransportAddress'
+              $ref: '#/components/schemas/IpAddress'
       responses:
         '201':
           description: Success  
@@ -110,18 +110,7 @@ components:
       properties:
         amfName:
           type: string
-    TransportAddress:
-      type: object
-      required: 
-        - host
-        - port
-      properties:
-        host:
-          type: string
-          format: hostname
-        port: 
-          type: integer
-          minimum: 1
-          maximum: 65535
+    IpAddress:
+      type: string
     Error:
       type: string

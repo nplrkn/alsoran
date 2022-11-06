@@ -28,11 +28,14 @@ impl Deref for MockAmf {
 }
 
 const NGAP_SCTP_PPID: u32 = 60;
+const NGAP_BIND_PORT: u16 = 38412;
 
 impl MockAmf {
-    pub async fn new(amf_address: &str, logger: &Logger) -> Result<MockAmf> {
+    pub async fn new(amf_ip_address: &str, logger: &Logger) -> Result<MockAmf> {
         let mut mock = Mock::new(logger.new(o!("amf" => 1))).await;
-        mock.serve(amf_address.to_string(), NGAP_SCTP_PPID).await?;
+        let listen_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
+        info!(logger, "Mock AMF listening on {}", listen_address);
+        mock.serve(listen_address, NGAP_SCTP_PPID).await?;
         Ok(MockAmf {
             mock,
             ues: HashMap::new(),

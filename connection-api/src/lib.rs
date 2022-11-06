@@ -17,28 +17,28 @@ pub const API_VERSION: &str = "1.0.0";
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[must_use]
 pub enum AddE1apResponse {
-    /// Cu Up accepted worker addition
-    CuUpAcceptedWorkerAddition
+    /// Success
+    Success
     ,
     /// No connection
     NoConnection
     ,
-    /// Failed add
-    FailedAdd
+    /// Failure
+    Failure
     (String)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[must_use]
 pub enum AddF1apResponse {
-    /// Du accepted worker addition
-    DuAcceptedWorkerAddition
+    /// Success
+    Success
     ,
     /// No connection
     NoConnection
     ,
-    /// Failed to add worker
-    FailedToAddWorker
+    /// Failure
+    Failure
     (String)
 }
 
@@ -76,25 +76,25 @@ pub trait Api<C: Send + Sync> {
     /// Instructs a worker to add another worker to an existing E1AP interface instance
     async fn add_e1ap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         context: &C) -> Result<AddE1apResponse, ApiError>;
 
     /// Instructs a worker to add another worker to an existing F1AP interface instance
     async fn add_f1ap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         context: &C) -> Result<AddF1apResponse, ApiError>;
 
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
     async fn join_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         context: &C) -> Result<JoinNgapResponse, ApiError>;
 
     /// Instructs a worker to set up an NGAP interface instance with the AMF
     async fn setup_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         context: &C) -> Result<SetupNgapResponse, ApiError>;
 
 }
@@ -111,25 +111,25 @@ pub trait ApiNoContext<C: Send + Sync> {
     /// Instructs a worker to add another worker to an existing E1AP interface instance
     async fn add_e1ap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<AddE1apResponse, ApiError>;
 
     /// Instructs a worker to add another worker to an existing F1AP interface instance
     async fn add_f1ap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<AddF1apResponse, ApiError>;
 
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
     async fn join_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<JoinNgapResponse, ApiError>;
 
     /// Instructs a worker to set up an NGAP interface instance with the AMF
     async fn setup_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<SetupNgapResponse, ApiError>;
 
 }
@@ -160,41 +160,41 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     /// Instructs a worker to add another worker to an existing E1AP interface instance
     async fn add_e1ap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<AddE1apResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().add_e1ap(transport_address, &context).await
+        self.api().add_e1ap(body, &context).await
     }
 
     /// Instructs a worker to add another worker to an existing F1AP interface instance
     async fn add_f1ap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<AddF1apResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().add_f1ap(transport_address, &context).await
+        self.api().add_f1ap(body, &context).await
     }
 
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
     async fn join_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<JoinNgapResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().join_ngap(transport_address, &context).await
+        self.api().join_ngap(body, &context).await
     }
 
     /// Instructs a worker to set up an NGAP interface instance with the AMF
     async fn setup_ngap(
         &self,
-        transport_address: models::TransportAddress,
+        body: models::IpAddress,
         ) -> Result<SetupNgapResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().setup_ngap(transport_address, &context).await
+        self.api().setup_ngap(body, &context).await
     }
 
 }
