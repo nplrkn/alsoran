@@ -11,6 +11,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
     // E1 Setup Procedure
     // 1.    E1ap GnbCuUpE1SetupRequest >>
     // 2.    E1ap GnbCuUpE1SetupResponse <<
+    // Then update coordinator as a follow-on task.
     pub async fn e1_setup(
         &self,
         r: GnbCuUpE1SetupRequest,
@@ -18,8 +19,12 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         self.log_message(">> GnbCuUpE1SetupRequest");
         info!(
             self.logger,
-            "E1AP interface initialized with {:?}", r.gnb_cu_up_id
+            "E1AP interface initialized with {:?} - will notify coordinator", r.gnb_cu_up_id
         );
+
+        // Associate this TNLA with the E1AP interface instance.
+        self.associate_connection();
+
         self.log_message("<< GnbCuUpE1SetupResponse");
         Ok(GnbCuUpE1SetupResponse {
             transaction_id: r.transaction_id,

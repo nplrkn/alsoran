@@ -78,14 +78,14 @@ impl MockCuUp {
                 extended_gnb_cu_up_name: None,
             },
         ));
-        info!(self.logger, "E1SetupRequest >>");
+        info!(self.logger, "GnbCuUpE1SetupRequest >>");
         self.send(pdu.into_bytes()?).await;
         Ok(())
     }
 
     async fn receive_e1_setup_response(&self) {
         let _response = self.receive_pdu().await;
-        info!(self.logger, "E1SetupResponse <<");
+        info!(self.logger, "GnbCuUpE1SetupResponse <<");
     }
 
     pub async fn handle_cu_cp_configuration_update(
@@ -96,7 +96,6 @@ impl MockCuUp {
         let transaction_id = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;
-        // connect
         self.connect(&expected_addr_string, E1AP_SCTP_PPID).await;
         self.send_cu_cp_configuration_update_acknowledge(transaction_id, expected_address)
             .await
@@ -106,6 +105,8 @@ impl MockCuUp {
         &self,
         expected_address: &TransportLayerAddress,
     ) -> Result<TransactionId> {
+        info!(self.logger, "Wait for Cu Cp Configuration Update");
+
         let cu_cp_configuration_update = match self.receive_pdu().await {
             E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuCpConfigurationUpdate(x)) => Ok(x),
             x => Err(anyhow!("Expected GnbCuCpConfigurationUpdate, got {:?}", x)),

@@ -5,8 +5,8 @@
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
-- Use IP address instead of ports to distinguish NGAP, E1 and F1 endpoints
 - Two workers
+- Timing bug causing cu_can_connect_to_amf() to sometimes hang when logging disabled.  Related to removal of expect_connection in test suite?
 - Only 1st worker initializes NG interface and 2nd worker joins in
 - 1st worker receives DU connection and adds 2nd worker
 - 2nd worker receives UP connection and adds 1st worker
@@ -16,6 +16,7 @@
 - Restart and catchup of coordinator
 - Allow AMF to specify 2nd endpoint - ask worker 1
 - Allow AMF to specify 2nd endpoint - ask worker 2
+- Coordinator ensures time gap between attempts to add workers 
 - Load balance, stickiness and switchover between TNLAs to AMF
 - Allow DU / UP to set up multiple connections to same worker
 - Connection API operations must be idempotent
@@ -62,6 +63,7 @@
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 # DONE
+- Use IP address instead of ports to distinguish NGAP, E1 and F1 endpoints
 - Standalone single worker that runs built-in coordinator
 - Parallel registration of two UEs
 - Get build working on Github

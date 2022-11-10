@@ -57,4 +57,9 @@ pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
         rrc_container: f1ap::RrcContainer,
         logger: &Logger,
     );
+
+    /// Associate a TNLA with the relevant interface instance.  For example, an NG Setup
+    /// associates a TNLA to an instance of the NG-C interface.
+    // TODO: add parameters that actually define the association.
+    fn associate_connection(&self);
 }

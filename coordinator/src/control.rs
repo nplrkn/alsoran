@@ -135,7 +135,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 < (self.config.worker_refresh_interval_secs * 2) as u64
         {
             // No - just store the information.
-            info!(
+            debug!(
                 logger,
                 "Startup learning phase still in progress (uptime = {} secs)",
                 self.start_time.elapsed().as_secs()
@@ -144,6 +144,8 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
 
             return Ok(());
         }
+
+        debug!(logger, "Process worker info {:?}", worker_info);
 
         let context: ClientContext = swagger::make_context!(
             ContextBuilder,
@@ -168,11 +170,12 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             {
                 // Yes.  Join the existing NGAP instance.
                 let amf_name = x.first().unwrap();
+                info!(logger, "{:x} to join existing NGAP interface", worker_id);
                 self.join_ngap(&mut worker_info, amf_name, &context, logger)
                     .await?;
             } else {
                 // No.  Set up a new NGAP instance.
-                info!(logger, "Tell {:x} to set up NGAP interface", worker_id);
+                info!(logger, "{:x} to set up new NGAP interface", worker_id);
 
                 self.setup_ngap(&mut worker_info, &context, logger).await?;
             }
@@ -187,7 +190,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 .find(|x| !x.connected_ups.is_empty())
             {
                 // Tell it to add this worker.
-                info!(logger, "Tell {:x} to join up NGAP interface", worker_id);
+                info!(logger, "{:x} to join existing E1AP interface", worker_id);
                 self.add_e1ap(
                     connected_worker,
                     worker_info.e1_address.clone().into(),
@@ -196,7 +199,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 )
                 .await?;
             } else {
-                debug!(logger, "No worker has a E1AP connection yet")
+                debug!(logger, "Waiting for the CU-UP to set up E1AP")
             }
         }
 
@@ -209,6 +212,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 .find(|x| !x.connected_dus.is_empty())
             {
                 // Tell it to add this worker.
+                info!(logger, "{:x} to join existing F1AP interface", worker_id);
                 self.add_f1ap(
                     &connected_worker,
                     worker_info.f1_address.clone().into(),
@@ -217,7 +221,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 )
                 .await?;
             } else {
-                debug!(logger, "No worker has a F1AP connection yet")
+                debug!(logger, "Waiting for the DU to set up F1AP")
             }
         }
 

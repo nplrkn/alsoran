@@ -165,10 +165,12 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
     async fn connect_to_coordinator(&self) {
         // // TODO here we just send a single refresh.  This will need to be updated to send one on a timer.
-        // let stop_source = StopSource::new();
-        // let stop_token = stop_source.token();
-        // let (coordinator, control_task) = Coordinator::new(stop_token, self.logger.clone());
+        if let Err(e) = self.send_refresh_worker().await {
+            warn!(self.logger, "Failed initial refresh worker- {}", e);
+        }
+    }
 
+    async fn send_refresh_worker(&self) -> Result<RefreshWorkerResponse, ApiError> {
         let context: ClientContext = swagger::make_context!(
             ContextBuilder,
             EmptyContext,
@@ -176,17 +178,24 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             XSpanIdString::default()
         );
 
-        if let Err(e) = self.send_refresh_worker(&context).await {
-            warn!(self.logger, "Failed initial refresh worker- {}", e);
-        }
-    }
-
-    async fn send_refresh_worker(
-        &self,
-        context: &ClientContext,
-    ) -> Result<RefreshWorkerResponse, ApiError> {
         let connected_amfs = self
             .ngap
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .map(|a| a.to_string())
+            .collect();
+
+        let connected_dus = self
+            .f1ap
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .map(|a| a.to_string())
+            .collect();
+
+        let connected_ups = self
+            .e1ap
             .remote_tnla_addresses()
             .await
             .iter()
@@ -215,8 +224,8 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
                     f1_address: worker_ip.clone().into(),
                     e1_address: worker_ip.into(),
                     connected_amfs,
-                    connected_dus: vec![],
-                    connected_ups: vec![],
+                    connected_dus,
+                    connected_ups,
                 },
                 &context,
             )
@@ -395,5 +404,20 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
         debug!(&logger, "<< DlRrcMessageTransfer");
         DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
+    }
+
+    fn associate_connection(&self) {
+        // The basic initial implementation of this function just sends a refresh to the coordinator and assumes
+        // that there is one instance of E1AP, F1AP, and NGAP.  This has the necessary effect of triggrering
+        // the coordinator to add all workers endpoints, but will need to be improved a) when we simultaneously
+        // support multiple different interface instances or b) if we want to deal with rogue connections that are
+        // not properly initialized according to the protocol procedures.
+        let self_clone = self.clone();
+        async_std::task::spawn(async move {
+            debug!(self_clone.logger, "Send refresh worker");
+            if let Err(e) = self_clone.send_refresh_worker().await {
+                warn!(self_clone.logger, "Failed refresh worker {}", e);
+            }
+        });
     }
 }

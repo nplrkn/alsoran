@@ -53,7 +53,7 @@ impl MockAmf {
         let pdu = self.receive_pdu().await;
 
         if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
-            info!(logger, ">> NgSetup");
+            info!(logger, ">> NgSetupRequest");
             Ok(())
         } else {
             Err(anyhow!("Not an NG setup"))
