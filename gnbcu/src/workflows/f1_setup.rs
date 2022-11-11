@@ -22,6 +22,9 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             "F1AP interface initialized with {:?}", r.gnb_du_id
         );
 
+        // Associate this TNLA with the F1AP interface instance.
+        self.associate_connection();
+
         self.log_message("<< F1SetupResponse");
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,

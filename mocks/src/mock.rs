@@ -17,7 +17,7 @@ pub struct Mock<P: Pdu> {
     transport: SctpTransportProvider,
     receiver: Receiver<Option<P>>,
     pub logger: Logger,
-    handler: Option<Handler<P>>,
+    handler: Handler<P>,
     transport_tasks: Option<ShutdownHandle>,
 }
 
@@ -28,13 +28,12 @@ impl<P: Pdu> Mock<P> {
     pub async fn new(logger: Logger) -> Self {
         let (sender, receiver) = async_channel::unbounded();
         let transport = SctpTransportProvider::new();
-        let handler = Some(Handler(sender));
 
         Mock {
             transport,
             receiver,
             logger,
-            handler,
+            handler: Handler(sender),
             transport_tasks: None,
         }
     }
@@ -43,12 +42,7 @@ impl<P: Pdu> Mock<P> {
         let transport_tasks = self
             .transport
             .clone()
-            .serve(
-                address,
-                ppid,
-                std::mem::take(&mut self.handler).unwrap(),
-                self.logger.clone(),
-            )
+            .serve(address, ppid, self.handler.clone(), self.logger.clone())
             .await?;
         self.transport_tasks = Some(transport_tasks);
         Ok(())
@@ -58,12 +52,7 @@ impl<P: Pdu> Mock<P> {
         let transport_tasks = self
             .transport
             .clone()
-            .maintain_connection(
-                address,
-                ppid,
-                std::mem::take(&mut self.handler).unwrap(),
-                self.logger.clone(),
-            )
+            .maintain_connection(address, ppid, self.handler.clone(), self.logger.clone())
             .await
             .expect("Connect failed");
         self.transport_tasks = Some(transport_tasks);

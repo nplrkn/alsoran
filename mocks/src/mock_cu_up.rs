@@ -14,6 +14,7 @@ use std::{
 impl Pdu for E1apPdu {}
 
 const E1AP_SCTP_PPID: u32 = 64;
+const E1AP_BIND_PORT: u16 = 38462;
 
 pub struct MockCuUp {
     mock: Mock<E1apPdu>,
@@ -40,7 +41,7 @@ impl DerefMut for MockCuUp {
 
 impl MockCuUp {
     pub async fn new(logger: &Logger) -> MockCuUp {
-        let logger = logger.new(o!("cuup" => 1));
+        let logger = logger.new(o!("cu-up" => 1));
         let mock = Mock::new(logger).await;
         MockCuUp {
             mock,
@@ -52,7 +53,9 @@ impl MockCuUp {
         self.mock.terminate().await
     }
 
-    pub async fn perform_e1_setup(&self) -> Result<()> {
+    pub async fn perform_e1_setup(&mut self, worker_ip: &String) -> Result<()> {
+        self.connect(&format!("{}:{}", worker_ip, E1AP_BIND_PORT), E1AP_SCTP_PPID)
+            .await;
         self.send_e1_setup_request().await?;
         self.receive_e1_setup_response().await;
         Ok(())
@@ -96,7 +99,11 @@ impl MockCuUp {
         let transaction_id = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;
-        self.connect(&expected_addr_string, E1AP_SCTP_PPID).await;
+        self.connect(
+            &format!("{}:{}", expected_addr_string, E1AP_BIND_PORT),
+            E1AP_SCTP_PPID,
+        )
+        .await;
         self.send_cu_cp_configuration_update_acknowledge(transaction_id, expected_address)
             .await
     }

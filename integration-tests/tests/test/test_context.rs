@@ -10,8 +10,6 @@ use std::{panic, process};
 
 const F1AP_SCTP_PPID: u32 = 62;
 const F1AP_BIND_PORT: u16 = 38472;
-const E1AP_SCTP_PPID: u32 = 64;
-const E1AP_BIND_PORT: u16 = 38462;
 const PORT_ALLOCATION_RETRIES: u32 = 10;
 const CONNECTION_API_PORT: u16 = 50312;
 
@@ -113,11 +111,12 @@ impl TestContextBuilder {
 
         // Start workers
         info!(tc.logger, "Spawn {} workers", self.worker_count);
-        for _ in 0..self.worker_count {
+        for worker_index in 0..self.worker_count {
             tc.start_worker_on_random_ip(self.redis_port).await;
+            tc.get_worker_to_stage(worker_index as usize, &self.stage)
+                .await?;
         }
 
-        tc.get_to_stage(&self.stage).await?;
         Ok(tc)
     }
 }
@@ -126,7 +125,7 @@ impl TestContext {
     async fn start_coordinator(&mut self) {
         info!(self.logger, "Spawn coordinator");
         for _ in 0..PORT_ALLOCATION_RETRIES {
-            let logger = self.logger.new(o!("coord" => 1));
+            let logger = self.logger.new(o!("cu-cp-coord" => 1));
             let config = CoordinatorConfig {
                 bind_port: rand::thread_rng().gen_range(1024..65535),
                 connection_control_config: ConnectionControlConfig {
@@ -151,7 +150,7 @@ impl TestContext {
 
         for _ in 0..PORT_ALLOCATION_RETRIES {
             let worker_ip = random_local_ip();
-            let logger = self.logger.new(o!("cu-w"=> worker_number));
+            let logger = self.logger.new(o!("cu-cp-w"=> worker_number));
             let connection_api_bind_port = CONNECTION_API_PORT;
 
             let connection_style = if let Some(ref coordinator) = self.coordinator {
@@ -204,45 +203,47 @@ impl TestContext {
         panic!("Repeatedly failed to create worker")
     }
 
-    async fn get_to_stage<'a>(&'a mut self, stage: &Stage) -> Result<&'a mut Self> {
-        debug!(self.logger, "Get to stage {:?}", stage);
+    async fn get_worker_to_stage<'a>(
+        &'a mut self,
+        worker_index: usize,
+        stage: &Stage,
+    ) -> Result<&'a mut Self> {
+        debug!(
+            self.logger,
+            "Get worker {} to stage {:?}", worker_index, stage
+        );
 
-        for worker_index in 0..self.workers.len() {
-            let worker_ip = self.workers[worker_index]
-                .config
-                .ip_addr
-                .unwrap()
-                .to_string();
+        let worker_ip = self.workers[worker_index]
+            .config
+            .ip_addr
+            .unwrap()
+            .to_string();
 
-            if stage >= &Stage::AmfConnected {
-                self.amf.expect_connection().await;
-                if worker_index == 0 {
-                    self.amf.handle_ng_setup().await?;
-                } else {
-                    self.amf.handle_ran_configuration_update().await?;
-                }
+        if stage >= &Stage::AmfConnected {
+            self.amf.expect_connection().await;
+            if worker_index == 0 {
+                self.amf.handle_ng_setup().await?;
+            } else {
+                self.amf.handle_ran_configuration_update().await?;
             }
-            if stage >= &Stage::CuUpConnected {
-                if worker_index == 0 {
-                    self.cu_up
-                        .connect(&format!("{}:{}", worker_ip, E1AP_BIND_PORT), E1AP_SCTP_PPID)
-                        .await;
-                    self.cu_up.perform_e1_setup().await?;
-                } else {
-                    self.cu_up
-                        .handle_cu_cp_configuration_update(&worker_ip)
-                        .await?;
-                }
+        }
+        if stage >= &Stage::CuUpConnected {
+            if worker_index == 0 {
+                self.cu_up.perform_e1_setup(&worker_ip).await?;
+            } else {
+                self.cu_up
+                    .handle_cu_cp_configuration_update(&worker_ip)
+                    .await?;
             }
-            if stage >= &Stage::DuConnected {
-                if worker_index == 0 {
-                    self.du
-                        .connect(&format!("{}:{}", worker_ip, F1AP_BIND_PORT), F1AP_SCTP_PPID)
-                        .await;
-                    self.du.perform_f1_setup().await?;
-                } else {
-                    todo!()
-                }
+        }
+        if stage >= &Stage::DuConnected {
+            if worker_index == 0 {
+                self.du
+                    .connect(&format!("{}:{}", worker_ip, F1AP_BIND_PORT), F1AP_SCTP_PPID)
+                    .await;
+                self.du.perform_f1_setup().await?;
+            } else {
+                todo!()
             }
         }
 
