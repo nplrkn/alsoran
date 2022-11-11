@@ -109,7 +109,7 @@ pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
         if let Err(e) = server.await {
             error!(logger, "Server error: {}", e);
         } else {
-            info!(logger, "Server graceful shutdown");
+            info!(logger, "Coordination API server graceful shutdown");
         }
         control_task.graceful_shutdown().await;
     });

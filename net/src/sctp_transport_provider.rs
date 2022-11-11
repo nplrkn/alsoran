@@ -138,7 +138,7 @@ impl TransportProvider for SctpTransportProvider {
     where
         H: TnlaEventHandler,
     {
-        let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
+        let addr = async_net::resolve(&listen_addr).await.map(|vec| vec[0])?;
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
         let stream = sctp::new_listen(addr, ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
@@ -170,7 +170,7 @@ impl TransportProvider for SctpTransportProvider {
                     }
                     Some(Err(e)) => warn!(logger, "Error on incoming connection - {:?}", e),
                     None => {
-                        info!(logger, "Graceful shutdown");
+                        info!(logger, "Graceful shutdown of listen {}", listen_addr);
                         break;
                     }
                 }

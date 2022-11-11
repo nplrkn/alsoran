@@ -53,7 +53,7 @@ pub async fn serve<G: Gnbcu>(addr: SocketAddr, gnbcu: G, logger: Logger) -> Resu
         if let Err(e) = server.await {
             error!(logger, "Server error: {}", e);
         } else {
-            info!(logger, "Server graceful shutdown");
+            info!(logger, "Connection API server graceful shutdown");
         }
     });
 
