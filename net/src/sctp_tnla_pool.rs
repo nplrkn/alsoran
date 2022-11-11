@@ -3,27 +3,36 @@
 use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
 use anyhow::{anyhow, Result};
 use async_std::sync::{Arc, Mutex};
-use async_std::task::JoinHandle;
+use common::ShutdownHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
 use slog::{trace, warn, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use stop_token::StopToken;
+use stop_token::{StopSource, StopToken};
 
 type TnlaId = u32;
 type SharedAssocHash = Arc<Mutex<Box<HashMap<TnlaId, Arc<SctpAssociation>>>>>;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct SctpTnlaPool {
     assocs: SharedAssocHash,
+    tasks: Arc<Mutex<Vec<ShutdownHandle>>>,
 }
 
 impl SctpTnlaPool {
     pub fn new() -> SctpTnlaPool {
-        let assocs = Arc::new(Mutex::new(Box::new(HashMap::new())));
-        SctpTnlaPool { assocs }
+        SctpTnlaPool {
+            assocs: Arc::new(Mutex::new(Box::new(HashMap::new()))),
+            tasks: Arc::new(Mutex::new(Vec::new())),
+        }
+    }
+
+    pub async fn graceful_shutdown(self) {
+        for task in self.tasks.lock().await.drain(..) {
+            task.graceful_shutdown().await;
+        }
     }
 
     pub async fn remote_addresses(&self) -> Vec<SocketAddr> {
@@ -97,20 +106,26 @@ impl SctpTnlaPool {
     }
 
     pub async fn add_and_handle<H>(
-        self,
+        &self,
         assoc_id: u32,
         assoc: Arc<SctpAssociation>,
         handler: H,
-        stop_token: StopToken,
         logger: Logger,
-    ) -> JoinHandle<()>
-    where
+    ) where
         H: TnlaEventHandler,
     {
-        async_std::task::spawn(async move {
-            self.add_and_handle_no_spawn(assoc_id, assoc, handler, stop_token, logger)
-                .await;
-        })
+        let stop_source = StopSource::new();
+        let stop_token = stop_source.token();
+        let self_clone = self.clone();
+        let shutdown_handle = ShutdownHandle::new(
+            async_std::task::spawn(async move {
+                self_clone
+                    .add_and_handle_no_spawn(assoc_id, assoc, handler, stop_token, logger)
+                    .await;
+            }),
+            stop_source,
+        );
+        self.tasks.lock().await.push(shutdown_handle);
     }
 }
 

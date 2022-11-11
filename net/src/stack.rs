@@ -42,7 +42,7 @@ impl Stack {
         ppid: u32,
         application: A,
         logger: Logger,
-    ) -> Result<ShutdownHandle> {
+    ) -> Result<()> {
         let receiver = StackReceiver {
             application,
             pending_requests: self.pending_requests.clone(),

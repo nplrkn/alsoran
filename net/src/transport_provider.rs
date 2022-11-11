@@ -30,7 +30,7 @@ pub trait TransportProvider: Send + Sync + 'static {
         ppid: u32,
         handler: H,
         logger: Logger,
-    ) -> Result<ShutdownHandle>
+    ) -> Result<()>
     where
         H: TnlaEventHandler;
 

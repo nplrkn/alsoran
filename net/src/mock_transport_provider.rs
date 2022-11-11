@@ -51,7 +51,7 @@ impl TransportProvider for MockTransportProvider {
         _ppid: u32,
         _handler: H,
         _logger: Logger,
-    ) -> Result<ShutdownHandle>
+    ) -> Result<()>
     where
         H: TnlaEventHandler,
     {

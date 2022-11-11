@@ -7,16 +7,15 @@ use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
+use futures::pin_mut;
 use futures::stream::StreamExt;
-use futures::{future, pin_mut};
 use sctp::{Message, SctpAssociation};
 use slog::{info, o, trace, warn, Logger};
-use std::fmt::Debug;
 use std::net::SocketAddr;
 use std::time::Duration;
 use stop_token::StopSource;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct SctpTransportProvider {
     tnla_pool: SctpTnlaPool,
 }
@@ -26,6 +25,9 @@ impl SctpTransportProvider {
         SctpTransportProvider {
             tnla_pool: SctpTnlaPool::new(),
         }
+    }
+    pub async fn graceful_shutdown(self) {
+        self.tnla_pool.graceful_shutdown().await
     }
 }
 
@@ -54,28 +56,19 @@ impl TransportProvider for SctpTransportProvider {
         ppid: u32,
         handler: H,
         logger: Logger,
-    ) -> Result<ShutdownHandle>
+    ) -> Result<()>
     where
         H: TnlaEventHandler,
     {
         let assoc_id = 1; // TODO
-        let stop_source = StopSource::new();
-        let stop_token = stop_source.token();
         let connect_addr_string = connect_addr_string.clone();
         let assoc = resolve_and_connect(&connect_addr_string, ppid, &logger).await?;
         let logger = logger.new(o!("connection" => assoc_id));
-        let join_handle = self
-            .tnla_pool
-            .add_and_handle(
-                assoc_id,
-                Arc::new(assoc),
-                handler.clone(),
-                stop_token.clone(),
-                logger.clone(),
-            )
+        self.tnla_pool
+            .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), logger.clone())
             .await;
 
-        Ok(ShutdownHandle::new(join_handle, stop_source))
+        Ok(())
     }
 
     async fn maintain_connection<H>(
@@ -154,7 +147,6 @@ impl TransportProvider for SctpTransportProvider {
         let join_handle = task::spawn(async move {
             trace!(logger, "Listening for SCTP connections on {:?}", addr);
             pin_mut!(stream);
-            let mut connection_tasks = vec![];
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
@@ -165,18 +157,10 @@ impl TransportProvider for SctpTransportProvider {
                             "Accepted SCTP connection from {}",
                             assoc.remote_address
                         );
-                        let task = self
-                            .tnla_pool
+                        self.tnla_pool
                             .clone()
-                            .add_and_handle(
-                                assoc_id,
-                                Arc::new(assoc),
-                                handler.clone(),
-                                stop_token.clone(),
-                                logger,
-                            )
+                            .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), logger)
                             .await;
-                        connection_tasks.push(task);
                     }
                     Some(Err(e)) => warn!(logger, "Error on incoming connection - {:?}", e),
                     None => {
@@ -187,7 +171,7 @@ impl TransportProvider for SctpTransportProvider {
             }
 
             trace!(logger, "Wait for connection tasks to finish");
-            future::join_all(connection_tasks).await;
+            self.tnla_pool.graceful_shutdown().await;
             trace!(logger, "Connection tasks finished");
         });
         Ok(ShutdownHandle::new(join_handle, stop_source))

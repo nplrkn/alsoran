@@ -49,13 +49,11 @@ impl<P: Pdu> Mock<P> {
     }
 
     pub async fn connect(&mut self, address: &String, ppid: u32) {
-        let transport_tasks = self
-            .transport
+        self.transport
             .clone()
-            .maintain_connection(address, ppid, self.handler.clone(), self.logger.clone())
+            .connect(address, ppid, self.handler.clone(), self.logger.clone())
             .await
             .expect("Connect failed");
-        self.transport_tasks = Some(transport_tasks);
 
         // Wait for the connection to be accepted.
         debug!(self.logger, "Wait for connection to be accepted");
@@ -66,6 +64,7 @@ impl<P: Pdu> Mock<P> {
         if let Some(transport_tasks) = self.transport_tasks {
             transport_tasks.graceful_shutdown().await;
         }
+        self.transport.graceful_shutdown().await;
     }
 
     /// Wait for connection to be established or terminated.

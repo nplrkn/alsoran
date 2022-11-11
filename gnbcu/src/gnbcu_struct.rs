@@ -322,8 +322,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     async fn ngap_connect(&self, amf_ip_address: &String) -> Result<()> {
         let amf_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
         info!(&self.logger, "Maintain connection to AMF {}", amf_address);
-        let shutdown_handle = self
-            .ngap
+        self.ngap
             .connect(
                 &amf_address,
                 NGAP_SCTP_PPID,
@@ -331,7 +330,6 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
                 self.logger.clone(),
             )
             .await?;
-        self.add_shutdown_handle(shutdown_handle).await;
         Ok(())
     }
 
