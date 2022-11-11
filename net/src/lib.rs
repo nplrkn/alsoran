@@ -1,3 +1,4 @@
+mod ip_bits_from_string;
 mod mock_transport_provider;
 mod sctp_tnla_pool;
 mod sctp_transport_provider;
@@ -6,6 +7,7 @@ mod tnla_event_handler;
 mod transaction;
 mod transport_provider;
 pub use common::ShutdownHandle;
+pub use ip_bits_from_string::ip_bits_from_string;
 pub use mock_transport_provider::MockTransportProvider;
 pub use sctp::Message;
 pub use sctp_transport_provider::SctpTransportProvider;

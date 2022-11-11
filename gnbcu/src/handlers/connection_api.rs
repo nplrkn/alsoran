@@ -68,13 +68,22 @@ where
     /// Instructs a worker to add another worker to an existing E1AP interface instance
     async fn add_e1ap(
         &self,
-        _transport_address: IpAddress,
+        transport_address: IpAddress,
         _context: &C,
     ) -> Result<AddE1apResponse, ApiError> {
-        Workflow::new(&self.gnbcu, &self.logger)
-            .add_e1ap_endpoint()
-            .await;
-        Err(ApiError("Add E1AP Generic failure".into()))
+        match Workflow::new(&self.gnbcu, &self.logger)
+            .add_e1ap_endpoint(&transport_address)
+            .await
+        {
+            Ok(_) => Ok(AddE1apResponse::Success),
+            Err(e) => {
+                warn!(self.logger, "E1AP add failed - {:?}", e);
+                Ok(AddE1apResponse::Failure(format!(
+                    "E1AP add of {} failed",
+                    transport_address.to_string()
+                )))
+            }
+        }
     }
 
     /// Instructs a worker to add another worker to an existing F1AP interface instance

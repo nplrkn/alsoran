@@ -38,6 +38,7 @@ pub type ClientContext = swagger::make_context_ty!(
 );
 #[derive(Clone)]
 pub struct ConcreteGnbcu<A: CoordinationApi<ClientContext>, U: UeStateStore> {
+    worker_id: Uuid,
     config: Config,
     ngap: Stack,
     f1ap: Stack,
@@ -122,6 +123,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 {
     fn new(config: Config, ue_store: U, logger: Logger, coordinator: A) -> ConcreteGnbcu<A, U> {
         ConcreteGnbcu {
+            worker_id: Uuid::new_v4(),
             config,
             ngap: Stack::new(SctpTransportProvider::new()),
             f1ap: Stack::new(SctpTransportProvider::new()),
@@ -219,7 +221,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         self.coordinator
             .refresh_worker(
                 WorkerInfo {
-                    worker_unique_id: Uuid::new_v4(),
+                    worker_unique_id: self.worker_id,
                     connection_api_url,
                     f1_address: worker_ip.clone().into(),
                     e1_address: worker_ip.into(),

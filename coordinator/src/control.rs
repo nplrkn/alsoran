@@ -124,10 +124,10 @@ async fn control_task<T: Api<ClientContext>, P: ConnectionApiProvider<T>>(
 impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
     async fn process_worker_info(
         &mut self,
-        mut worker_info: WorkerInfo,
+        mut this_worker: WorkerInfo,
         logger: &Logger,
     ) -> Result<()> {
-        let worker_id = worker_info.worker_unique_id;
+        let worker_id = this_worker.worker_unique_id;
 
         // Has a long enough period elapsed that we have heard from all workers?
         if (!self.config.fast_start)
@@ -140,12 +140,12 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 "Startup learning phase still in progress (uptime = {} secs)",
                 self.start_time.elapsed().as_secs()
             );
-            let _maybe_old_item = self.worker_info.insert(worker_id, worker_info);
+            let _maybe_old_item = self.worker_info.insert(worker_id, this_worker);
 
             return Ok(());
         }
 
-        debug!(logger, "Process worker info {:?}", worker_info);
+        debug!(logger, "Process worker info {:?}", this_worker);
 
         let context: ClientContext = swagger::make_context!(
             ContextBuilder,
@@ -158,7 +158,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         let _maybe_old_item = self.worker_info.remove(&worker_id);
 
         // Does this worker have the NGAP interface up?
-        if worker_info.connected_amfs.is_empty() {
+        if this_worker.connected_amfs.is_empty() {
             // No, so set it up.
 
             // Does _any_ worker have the NGAP interface up?
@@ -171,18 +171,20 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 // Yes.  Join the existing NGAP instance.
                 let amf_name = x.first().unwrap();
                 info!(logger, "{:x} to join existing NGAP interface", worker_id);
-                self.join_ngap(&mut worker_info, amf_name, &context, logger)
+                self.join_ngap(&mut this_worker, amf_name, &context, logger)
                     .await?;
             } else {
                 // No.  Set up a new NGAP instance.
                 info!(logger, "{:x} to set up new NGAP interface", worker_id);
 
-                self.setup_ngap(&mut worker_info, &context, logger).await?;
+                self.setup_ngap(&mut this_worker, &context, logger).await?;
             }
         }
 
         // If this worker is not connected to the UP, try to set that up.
-        if worker_info.connected_ups.is_empty() {
+        // If this worker is connected to the UP, see if there are any other workers
+        // that need its help in getting added.
+        if this_worker.connected_ups.is_empty() {
             // Find a worker that is connected.
             if let Some(connected_worker) = self
                 .worker_info
@@ -193,7 +195,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 info!(logger, "{:x} to join existing E1AP interface", worker_id);
                 self.add_e1ap(
                     connected_worker,
-                    worker_info.e1_address.clone().into(),
+                    this_worker.e1_address.clone().into(),
                     &context,
                     logger,
                 )
@@ -201,10 +203,32 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             } else {
                 debug!(logger, "Waiting for the CU-UP to set up E1AP")
             }
+        } else {
+            // Find all workers that are not connected and attempt to add them.
+            let unconnected_workers = self
+                .worker_info
+                .values()
+                .filter(|x| x.connected_ups.is_empty());
+            for unconnected_worker in unconnected_workers {
+                info!(
+                    logger,
+                    "{:x} to join existing E1AP interface", unconnected_worker.worker_unique_id
+                );
+                let _ = self
+                    .add_e1ap(
+                        &this_worker,
+                        unconnected_worker.e1_address.clone().into(),
+                        &context,
+                        logger,
+                    )
+                    .await;
+                // TODO - record current time of connection attempt in the unconnected worker state
+                // Or rather pass & mut into add_e1ap() and do it there?
+            }
         }
 
         // Same routine for the F1.
-        if worker_info.connected_dus.is_empty() {
+        if this_worker.connected_dus.is_empty() {
             // Find a worker that is connected.
             if let Some(connected_worker) = self
                 .worker_info
@@ -215,7 +239,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 info!(logger, "{:x} to join existing F1AP interface", worker_id);
                 self.add_f1ap(
                     &connected_worker,
-                    worker_info.f1_address.clone().into(),
+                    this_worker.f1_address.clone().into(),
                     &context,
                     logger,
                 )
@@ -223,10 +247,30 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             } else {
                 debug!(logger, "Waiting for the DU to set up F1AP")
             }
+        } else {
+            // Find all workers that are not connected and attempt to add them.
+            let unconnected_workers = self
+                .worker_info
+                .values()
+                .filter(|x| x.connected_dus.is_empty());
+            for unconnected_worker in unconnected_workers {
+                info!(
+                    logger,
+                    "{:x} to join existing F1AP interface", unconnected_worker.worker_unique_id
+                );
+                let _ = self.add_f1ap(
+                    &this_worker,
+                    unconnected_worker.f1_address.clone().into(),
+                    &context,
+                    logger,
+                );
+                // TODO - record current time of connection attempt in the unconnected worker state
+                // Or rather pass & mut into add_e1ap() and do it there?
+            }
         }
 
         // Store the worker info.
-        let _ = self.worker_info.insert(worker_id, worker_info);
+        let _ = self.worker_info.insert(worker_id, this_worker);
 
         Ok(())
     }

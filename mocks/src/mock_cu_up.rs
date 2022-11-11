@@ -8,7 +8,6 @@ use net::AperSerde;
 use slog::{debug, info, o, Logger};
 use std::{
     collections::HashMap,
-    net::IpAddr,
     ops::{Deref, DerefMut},
 };
 
@@ -92,7 +91,8 @@ impl MockCuUp {
         &mut self,
         expected_addr_string: &String,
     ) -> Result<()> {
-        let expected_address = convert_transport_address(expected_addr_string)?;
+        let expected_address =
+            TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
         let transaction_id = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;
@@ -294,11 +294,4 @@ impl MockCuUp {
 
         Ok(())
     }
-}
-
-fn convert_transport_address(addr: &String) -> Result<TransportLayerAddress> {
-    Ok(TransportLayerAddress(match addr.parse()? {
-        IpAddr::V4(x) => BitVec::<_, Msb0>::from_slice(&x.octets()),
-        IpAddr::V6(x) => BitVec::<_, Msb0>::from_slice(&x.octets()),
-    }))
 }
