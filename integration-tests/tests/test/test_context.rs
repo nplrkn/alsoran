@@ -8,8 +8,6 @@ use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
 
-const F1AP_SCTP_PPID: u32 = 62;
-const F1AP_BIND_PORT: u16 = 38472;
 const PORT_ALLOCATION_RETRIES: u32 = 10;
 const CONNECTION_API_PORT: u16 = 50312;
 
@@ -146,11 +144,8 @@ impl TestContext {
     }
 
     async fn start_worker_on_random_ip(&mut self, redis_port: Option<u16>) {
-        let worker_number = self.workers.len() as u16;
-
         for _ in 0..PORT_ALLOCATION_RETRIES {
             let worker_ip = random_local_ip();
-            let logger = self.logger.new(o!("cu-cp-w"=> worker_number));
             let connection_api_bind_port = CONNECTION_API_PORT;
 
             let connection_style = if let Some(ref coordinator) = self.coordinator {
@@ -179,16 +174,16 @@ impl TestContext {
                 ..Config::default()
             };
 
-            debug!(logger, "Start worker with config {:?}", config);
+            debug!(self.logger, "Start worker with config {:?}", config);
 
             match if let Some(port) = redis_port {
                 gnbcu::spawn(
                     config.clone(),
                     RedisUeStore::new(port).unwrap(),
-                    logger.clone(),
+                    self.logger.clone(),
                 )
             } else {
-                gnbcu::spawn(config.clone(), MockUeStore::new(), logger.clone())
+                gnbcu::spawn(config.clone(), MockUeStore::new(), self.logger.clone())
             } {
                 Ok(shutdown_handle) => {
                     self.workers.push(InternalWorkerInfo {
@@ -197,7 +192,7 @@ impl TestContext {
                     });
                     return;
                 }
-                Err(e) => warn!(logger, "Worker creation failed - {}", e),
+                Err(e) => warn!(self.logger, "Worker creation failed - {}", e),
             }
         }
         panic!("Repeatedly failed to create worker")
@@ -238,12 +233,9 @@ impl TestContext {
         }
         if stage >= &Stage::DuConnected {
             if worker_index == 0 {
-                self.du
-                    .connect(&format!("{}:{}", worker_ip, F1AP_BIND_PORT), F1AP_SCTP_PPID)
-                    .await;
-                self.du.perform_f1_setup().await?;
+                self.du.perform_f1_setup(&worker_ip).await?;
             } else {
-                todo!()
+                self.du.handle_cu_configuration_update(&worker_ip).await?;
             }
         }
 
@@ -265,6 +257,7 @@ impl TestContext {
     }
 
     pub fn register_ue_start(&mut self, ue_id: u32) -> UeRegister {
+        info!(self.logger, "Register UE {}", ue_id);
         UeRegister {
             stage: UeRegisterStage::Init,
             ue_id,
@@ -297,6 +290,7 @@ impl TestContext {
                     .await
                     .unwrap();
                 self.du.receive_nas(ue_id).await.unwrap();
+                info!(self.logger, "Register UE {} complete", ue_id);
                 return Ok(None);
             }
         };
@@ -304,6 +298,7 @@ impl TestContext {
     }
 
     pub async fn establish_pdu_session(&mut self, ue_id: u32) -> Result<()> {
+        info!(self.logger, "Establish PDU session for UE {}", ue_id);
         self.amf
             .send_pdu_session_resource_setup(ue_id)
             .await
@@ -322,6 +317,12 @@ impl TestContext {
         self.amf
             .receive_pdu_session_resource_setup_response(ue_id)
             .await
+            .unwrap();
+        info!(
+            self.logger,
+            "Finished establishing PDU session for UE {}", ue_id
+        );
+        Ok(())
     }
 
     pub async fn terminate(self) {

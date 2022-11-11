@@ -54,8 +54,9 @@ impl MockCuUp {
     }
 
     pub async fn perform_e1_setup(&mut self, worker_ip: &String) -> Result<()> {
-        self.connect(&format!("{}:{}", worker_ip, E1AP_BIND_PORT), E1AP_SCTP_PPID)
-            .await;
+        let transport_address = format!("{}:{}", worker_ip, E1AP_BIND_PORT);
+        info!(self.logger, "Connect to CU-CP {}", transport_address);
+        self.connect(&transport_address, E1AP_SCTP_PPID).await;
         self.send_e1_setup_request().await?;
         self.receive_e1_setup_response().await;
         Ok(())
@@ -99,11 +100,9 @@ impl MockCuUp {
         let transaction_id = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;
-        self.connect(
-            &format!("{}:{}", expected_addr_string, E1AP_BIND_PORT),
-            E1AP_SCTP_PPID,
-        )
-        .await;
+        let transport_address = format!("{}:{}", expected_addr_string, E1AP_BIND_PORT);
+        info!(self.logger, "Connect to CU-CP {}", transport_address);
+        self.connect(&transport_address, E1AP_SCTP_PPID).await;
         self.send_cu_cp_configuration_update_acknowledge(transaction_id, expected_address)
             .await
     }

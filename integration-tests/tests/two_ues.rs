@@ -30,5 +30,6 @@ async fn two_ues_register_in_parallel() -> Result<()> {
     assert!(tc.register_ue_next(ue_1).await?.is_none());
     assert!(tc.register_ue_next(ue_2).await?.is_none());
 
+    tc.terminate().await;
     Ok(())
 }

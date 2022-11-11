@@ -19,7 +19,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         self.log_message(">> GnbCuUpE1SetupRequest");
         info!(
             self.logger,
-            "E1AP interface initialized with {:?} - will notify coordinator", r.gnb_cu_up_id
+            "E1AP interface initialized with {:?}", r.gnb_cu_up_id
         );
 
         // Associate this TNLA with the E1AP interface instance.

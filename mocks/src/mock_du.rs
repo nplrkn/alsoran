@@ -13,6 +13,9 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
+const F1AP_SCTP_PPID: u32 = 62;
+const F1AP_BIND_PORT: u16 = 38472;
+
 impl Pdu for F1apPdu {}
 
 pub struct MockDu {
@@ -52,7 +55,10 @@ impl MockDu {
         self.mock.terminate().await
     }
 
-    pub async fn perform_f1_setup(&self) -> Result<()> {
+    pub async fn perform_f1_setup(&mut self, worker_ip: &String) -> Result<()> {
+        let transport_address = format!("{}:{}", worker_ip, F1AP_BIND_PORT);
+        info!(self.logger, "Connect to CU {}", transport_address);
+        self.connect(&transport_address, F1AP_SCTP_PPID).await;
         self.send_f1_setup_request().await?;
         self.receive_f1_setup_response().await;
         Ok(())
@@ -418,6 +424,83 @@ impl MockDu {
             "UlRrcMessageTransfer(RrcReconfigurationComplete) >>"
         );
         self.send_ul_rrc(ue_id, rrc_reconfiguration_complete).await
+    }
+
+    pub async fn handle_cu_configuration_update(
+        &mut self,
+        expected_addr_string: &String,
+    ) -> Result<()> {
+        let expected_address =
+            TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
+        let transaction_id = self
+            .receive_gnb_cu_configuration_update(&expected_address)
+            .await?;
+        let transport_address = format!("{}:{}", expected_addr_string, F1AP_BIND_PORT);
+        info!(self.logger, "Connect to CU {}", transport_address);
+        self.connect(&transport_address, F1AP_SCTP_PPID).await;
+        self.send_gnb_cu_configuration_update_acknowledge(transaction_id, expected_address)
+            .await
+    }
+
+    async fn receive_gnb_cu_configuration_update(
+        &self,
+        expected_address: &TransportLayerAddress,
+    ) -> Result<TransactionId> {
+        info!(self.logger, "Wait for Du Configuration Update");
+
+        let cu_configuration_update = match self.receive_pdu().await {
+            F1apPdu::InitiatingMessage(InitiatingMessage::GnbCuConfigurationUpdate(x)) => Ok(x),
+            x => Err(anyhow!("Expected GnbCuConfigurationUpdate, got {:?}", x)),
+        }?;
+        info!(self.logger, "GnbCuConfigurationUpdate <<");
+
+        let gnb_cu_tnl_association_to_add_list = cu_configuration_update
+            .gnb_cu_tnl_association_to_add_list
+            .expect("Expected gnb_cu_cp_tnla_to_add_list to be present");
+        match &gnb_cu_tnl_association_to_add_list
+            .0
+            .first()
+            .expect("Expected nonempty gnb_cu_tnl_association_to_add_list")
+            .tnl_association_transport_layer_address
+        {
+            CpTransportLayerAddress::EndpointIpAddress(ref x) => {
+                assert_eq!(x.0, expected_address.0);
+            }
+            CpTransportLayerAddress::EndpointIpAddressAndPort(_) => {
+                panic!("Alsoran CU-CP doesn't specify a port")
+            }
+        };
+
+        Ok(cu_configuration_update.transaction_id)
+    }
+
+    async fn send_gnb_cu_configuration_update_acknowledge(
+        &self,
+        transaction_id: TransactionId,
+        transport_layer_address: TransportLayerAddress,
+    ) -> Result<()> {
+        let pdu = f1ap::F1apPdu::SuccessfulOutcome(
+            SuccessfulOutcome::GnbCuConfigurationUpdateAcknowledge(
+                GnbCuConfigurationUpdateAcknowledge {
+                    transaction_id,
+                    cells_failed_to_be_activated_list: None,
+                    criticality_diagnostics: None,
+                    gnb_cu_tnl_association_setup_list: Some(GnbCuTnlAssociationSetupList(vec![
+                        GnbCuTnlAssociationSetupItem {
+                            tnl_association_transport_layer_address:
+                                CpTransportLayerAddress::EndpointIpAddress(transport_layer_address),
+                        },
+                    ])),
+                    gnb_cu_tnl_association_failed_to_setup_list: None,
+                    dedicated_si_delivery_needed_ue_list: None,
+                    transport_layer_address_info: None,
+                },
+            ),
+        );
+
+        info!(self.logger, "GnbCuConfigurationUpdateAcknowledge >>");
+        self.send(pdu.into_bytes()?).await;
+        Ok(())
     }
 }
 

@@ -23,7 +23,7 @@ use net::{
     ShutdownHandle, Stack,
 };
 use rrc::UlDcchMessage;
-use slog::{debug, info, warn, Logger};
+use slog::{debug, info, o, warn, Logger};
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use stop_token::{StopSource, StopToken};
@@ -75,6 +75,11 @@ pub fn spawn<U: UeStateStore>(
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
+    // We allocate the worker ID and logger here rather than inside ConcreteGnbcu::new() in order that we can give the
+    // coordinator the same logger as the worker.
+    let worker_id = Uuid::new_v4();
+    let logger = logger.new(o!("cu-cp-w"=> worker_id.to_string()));
+
     let handle = match config.connection_style {
         // Run a combined GNBCU and Coordinator.
         ConnectionStyle::Autonomous(ref connection_control_config) => {
@@ -82,6 +87,7 @@ pub fn spawn<U: UeStateStore>(
             let gnbcu = ConcreteGnbcu::new(
                 config.clone(),
                 ue_store,
+                worker_id,
                 logger.clone(),
                 coordinator.clone(),
             );
@@ -106,7 +112,7 @@ pub fn spawn<U: UeStateStore>(
                 &worker_connection_management_config.coordinator_base_path,
             )
             .unwrap();
-            let gnbcu = ConcreteGnbcu::new(config, ue_store, logger, coordinator);
+            let gnbcu = ConcreteGnbcu::new(config, ue_store, worker_id, logger, coordinator);
             async_std::task::spawn(async move {
                 gnbcu
                     .serve(stop_token)
@@ -121,9 +127,15 @@ pub fn spawn<U: UeStateStore>(
 impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeStateStore>
     ConcreteGnbcu<A, U>
 {
-    fn new(config: Config, ue_store: U, logger: Logger, coordinator: A) -> ConcreteGnbcu<A, U> {
+    fn new(
+        config: Config,
+        ue_store: U,
+        worker_id: Uuid,
+        logger: Logger,
+        coordinator: A,
+    ) -> ConcreteGnbcu<A, U> {
         ConcreteGnbcu {
-            worker_id: Uuid::new_v4(),
+            worker_id,
             config,
             ngap: Stack::new(SctpTransportProvider::new()),
             f1ap: Stack::new(SctpTransportProvider::new()),
@@ -321,7 +333,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     }
     async fn ngap_connect(&self, amf_ip_address: &String) -> Result<()> {
         let amf_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
-        info!(&self.logger, "Maintain connection to AMF {}", amf_address);
+        info!(&self.logger, "Connect to AMF {}", amf_address);
         self.ngap
             .connect(
                 &amf_address,

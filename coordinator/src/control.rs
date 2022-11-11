@@ -170,12 +170,12 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             {
                 // Yes.  Join the existing NGAP instance.
                 let amf_name = x.first().unwrap();
-                info!(logger, "{:x} to join existing NGAP interface", worker_id);
+                debug!(logger, "{:x} to join existing NGAP interface", worker_id);
                 self.join_ngap(&mut this_worker, amf_name, &context, logger)
                     .await?;
             } else {
                 // No.  Set up a new NGAP instance.
-                info!(logger, "{:x} to set up new NGAP interface", worker_id);
+                debug!(logger, "{:x} to set up new NGAP interface", worker_id);
 
                 self.setup_ngap(&mut this_worker, &context, logger).await?;
             }
@@ -288,7 +288,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             .await
         {
             Ok(SetupNgapResponse::Success(amf_info)) => {
-                info!(logger, "Setup NGAP ok");
+                debug!(logger, "Setup NGAP ok");
                 // Update the worker info to record that we now have a connected AMF.
                 worker_info.connected_amfs = vec![amf_info.amf_name]
             }

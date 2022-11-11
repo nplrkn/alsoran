@@ -64,6 +64,7 @@
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 # DONE
+- Prevent log interleaving when RUST_LOG=debug and multiple tests run in parallel - RUST_TEST_THREADS=1
 - Use IP address instead of ports to distinguish NGAP, E1 and F1 endpoints
 - Standalone single worker that runs built-in coordinator
 - Parallel registration of two UEs

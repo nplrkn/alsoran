@@ -10,7 +10,7 @@ use async_trait::async_trait;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{info, o, trace, warn, Logger};
+use slog::{info, trace, warn, Logger};
 use std::net::SocketAddr;
 use std::time::Duration;
 use stop_token::StopSource;
@@ -63,7 +63,7 @@ impl TransportProvider for SctpTransportProvider {
         let assoc_id = 1; // TODO
         let connect_addr_string = connect_addr_string.clone();
         let assoc = resolve_and_connect(&connect_addr_string, ppid, &logger).await?;
-        let logger = logger.new(o!("connection" => assoc_id));
+        //let logger = logger.new(o!("connection" => assoc_id));
         self.tnla_pool
             .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), logger.clone())
             .await;
@@ -89,7 +89,7 @@ impl TransportProvider for SctpTransportProvider {
             loop {
                 match resolve_and_connect(&connect_addr_string, ppid, &logger).await {
                     Ok(assoc) => {
-                        let logger = logger.new(o!("connection" => assoc_id));
+                        //let logger = logger.new(o!("connection" => assoc_id));
                         trace!(logger, "Established connection");
 
                         self.tnla_pool
@@ -150,8 +150,9 @@ impl TransportProvider for SctpTransportProvider {
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
-                        let assoc_id = 1; // TODO
-                        let logger = logger.new(o!("connection" => assoc_id));
+                        // TODO: don't hardcode ID
+                        let assoc_id = 1;
+                        //let logger = logger.new(o!("connection" => assoc_id));
                         trace!(
                             logger,
                             "Accepted SCTP connection from {}",
@@ -159,7 +160,12 @@ impl TransportProvider for SctpTransportProvider {
                         );
                         self.tnla_pool
                             .clone()
-                            .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), logger)
+                            .add_and_handle(
+                                assoc_id,
+                                Arc::new(assoc),
+                                handler.clone(),
+                                logger.clone(),
+                            )
                             .await;
                     }
                     Some(Err(e)) => warn!(logger, "Error on incoming connection - {:?}", e),
