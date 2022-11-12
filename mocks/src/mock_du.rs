@@ -1,6 +1,6 @@
 //! mock_du - enables a test script to assume the role of the GNB-DU on the F1 reference point
 
-use crate::mock::{Mock, Pdu};
+use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use f1ap::*;
@@ -79,7 +79,7 @@ impl MockDu {
                 extended_gnb_cu_name: None,
             }));
         info!(self.logger, "F1SetupRequest >>");
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, None).await;
         Ok(())
     }
 
@@ -136,7 +136,7 @@ impl MockDu {
             })?;
 
         info!(logger, "InitialUlRrcMessageTransfer(RrcSetupRequest) >>");
-        self.send(f1_indication).await;
+        self.send(f1_indication, None).await;
 
         Ok(())
     }
@@ -232,7 +232,7 @@ impl MockDu {
             new_gnb_du_ue_f1ap_id: None,
         })?;
 
-        self.send(f1_indication).await;
+        self.send(f1_indication, None).await;
         Ok(())
     }
 
@@ -271,7 +271,9 @@ impl MockDu {
     }
 
     pub async fn handle_ue_context_setup(&self, ue_id: u32) -> Result<()> {
-        let _ = self.receive_ue_context_setup_request(ue_id).await?;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let _ = self.check_ue_context_setup_request(pdu, ue_id)?;
+        info!(&self.logger, "UeContextSetupRequest <<");
 
         // Code to check for an Rrc Container of a particular type
         // match match rrc_container {
@@ -290,15 +292,20 @@ impl MockDu {
         //     x => Err(anyhow!("Expected security mode command - got {:?}", x)),
         // }
 
-        self.send_ue_context_setup_response(ue_id).await?;
+        let ue_context_setup_response = self.build_ue_context_setup_response(ue_id);
+        info!(&self.logger, "UeContextSetupResponse >>");
+        self.send(ue_context_setup_response.into_bytes()?, Some(assoc_id))
+            .await;
+
         Ok(())
     }
 
-    pub async fn receive_ue_context_setup_request(
+    pub fn check_ue_context_setup_request(
         &self,
+        pdu: F1apPdu,
         ue_id: u32,
     ) -> Result<Option<RrcContainer>> {
-        let ue_context_setup_request = match self.receive_pdu().await {
+        let ue_context_setup_request = match pdu {
             F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
         }?;
@@ -311,12 +318,12 @@ impl MockDu {
         Ok(ue_context_setup_request.rrc_container)
     }
 
-    pub async fn send_ue_context_setup_response(&self, ue_id: u32) -> Result<()> {
+    pub fn build_ue_context_setup_response(&self, ue_id: u32) -> F1apPdu {
         let gnb_cu_ue_f1ap_id = self.ues[&ue_id].gnb_cu_ue_f1ap_id.clone().unwrap();
         let cell_group_config =
             f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
-        let ue_context_setup_response = F1apPdu::SuccessfulOutcome(
-            SuccessfulOutcome::UeContextSetupResponse(UeContextSetupResponse {
+        F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextSetupResponse(
+            UeContextSetupResponse {
                 gnb_cu_ue_f1ap_id,
                 gnb_du_ue_f1ap_id: GnbDuUeF1apId(ue_id),
                 du_to_cu_rrc_information: DuToCuRrcInformation {
@@ -339,13 +346,8 @@ impl MockDu {
                 sl_drbs_setup_list: None,
                 sl_drbs_failed_to_be_setup_list: None,
                 requested_target_cell_global_id: None,
-            }),
-        )
-        .into_bytes()?;
-        info!(&self.logger, "UeContextSetupResponse >>");
-
-        self.send(ue_context_setup_response).await;
-        Ok(())
+            },
+        ))
     }
 
     pub async fn send_security_mode_complete(
@@ -432,23 +434,28 @@ impl MockDu {
     ) -> Result<()> {
         let expected_address =
             TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
-        let transaction_id = self
+        let (transaction_id, assoc_id) = self
             .receive_gnb_cu_configuration_update(&expected_address)
             .await?;
         let transport_address = format!("{}:{}", expected_addr_string, F1AP_BIND_PORT);
         info!(self.logger, "Connect to CU {}", transport_address);
         self.connect(&transport_address, F1AP_SCTP_PPID).await;
-        self.send_gnb_cu_configuration_update_acknowledge(transaction_id, expected_address)
-            .await
+        self.send_gnb_cu_configuration_update_acknowledge(
+            transaction_id,
+            expected_address,
+            assoc_id,
+        )
+        .await
     }
 
     async fn receive_gnb_cu_configuration_update(
         &self,
         expected_address: &TransportLayerAddress,
-    ) -> Result<TransactionId> {
-        info!(self.logger, "Wait for Du Configuration Update");
+    ) -> Result<(TransactionId, u32)> {
+        info!(self.logger, "Wait for Cu Configuration Update");
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        let cu_configuration_update = match self.receive_pdu().await {
+        let cu_configuration_update = match pdu {
             F1apPdu::InitiatingMessage(InitiatingMessage::GnbCuConfigurationUpdate(x)) => Ok(x),
             x => Err(anyhow!("Expected GnbCuConfigurationUpdate, got {:?}", x)),
         }?;
@@ -471,13 +478,14 @@ impl MockDu {
             }
         };
 
-        Ok(cu_configuration_update.transaction_id)
+        Ok((cu_configuration_update.transaction_id, assoc_id))
     }
 
     async fn send_gnb_cu_configuration_update_acknowledge(
         &self,
         transaction_id: TransactionId,
         transport_layer_address: TransportLayerAddress,
+        assoc_id: u32,
     ) -> Result<()> {
         let pdu = f1ap::F1apPdu::SuccessfulOutcome(
             SuccessfulOutcome::GnbCuConfigurationUpdateAcknowledge(
@@ -499,7 +507,7 @@ impl MockDu {
         );
 
         info!(self.logger, "GnbCuConfigurationUpdateAcknowledge >>");
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
         Ok(())
     }
 }

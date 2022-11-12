@@ -41,8 +41,8 @@ where
     async fn route_request(&self, p: E1apPdu, logger: &Logger) -> Option<E1apPdu> {
         let initiating_message = match p {
             E1apPdu::InitiatingMessage(m) => m,
-            _ => {
-                error!(logger, "Not a request!");
+            x => {
+                error!(logger, "Not a request! {:?}", x);
                 return None;
             }
         };

@@ -97,11 +97,24 @@ impl SctpTnlaPool {
         self.assocs.lock().await.remove(&assoc_id);
     }
 
-    pub async fn send_message(&self, message: Message, _logger: &Logger) -> Result<()> {
-        if let Some(assoc) = self.assocs.lock().await.values().next() {
+    pub async fn send_message(
+        &self,
+        message: Message,
+        assoc_id: Option<u32>,
+        _logger: &Logger,
+    ) -> Result<()> {
+        let assocs = self.assocs.lock().await;
+        let assoc = if let Some(assoc_id) = assoc_id {
+            // Use the specified association
+            assocs.get(&assoc_id)
+        } else {
+            // Use the first one
+            assocs.values().next()
+        };
+        if let Some(assoc) = assoc {
             Ok(assoc.send_msg(message).await?)
         } else {
-            Err(anyhow!("No association up"))
+            Err(anyhow!("No association found"))
         }
     }
 

@@ -46,8 +46,13 @@ async fn resolve_and_connect(
 
 #[async_trait]
 impl TransportProvider for SctpTransportProvider {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
-        self.tnla_pool.send_message(message, logger).await
+    async fn send_message(
+        &self,
+        message: Message,
+        assoc_id: Option<u32>,
+        logger: &Logger,
+    ) -> Result<()> {
+        self.tnla_pool.send_message(message, assoc_id, logger).await
     }
 
     async fn connect<H>(

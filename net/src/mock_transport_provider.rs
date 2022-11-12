@@ -39,7 +39,12 @@ impl MockTransportProvider {
 
 #[async_trait]
 impl TransportProvider for MockTransportProvider {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
+    async fn send_message(
+        &self,
+        message: Message,
+        _assoc_id: Option<u32>,
+        logger: &Logger,
+    ) -> Result<()> {
         debug!(logger, "MockTransportProvider send message {:?}", message);
         self.sender.send(message).await.unwrap();
         Ok(())

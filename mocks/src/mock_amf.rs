@@ -1,6 +1,6 @@
 //! mock_amf - enables a test script to assume the role of the AMF on the NG reference point
 
-use crate::mock::{Mock, Pdu};
+use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use net::AperSerde;
@@ -50,7 +50,7 @@ impl MockAmf {
         let logger = &self.logger;
         info!(logger, "Wait for NG Setup from GNB");
 
-        let pdu = self.receive_pdu().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
         if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
             info!(logger, ">> NgSetupRequest");
@@ -82,7 +82,7 @@ impl MockAmf {
             }));
 
         info!(logger, "<< NgSetupResponse");
-        self.send(response.into_bytes()?).await;
+        self.send(response.into_bytes()?, Some(assoc_id)).await;
 
         Ok(())
     }
@@ -91,7 +91,7 @@ impl MockAmf {
         let logger = &self.logger;
         info!(logger, "Wait for RAN Configuration Update from GNB");
 
-        let pdu = self.receive_pdu().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
         if let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
             _ran_configuration_update,
@@ -111,7 +111,7 @@ impl MockAmf {
             ));
 
         info!(logger, "<< RanConfigurationUpdateAcknowledge");
-        self.send(response.into_bytes()?).await;
+        self.send(response.into_bytes()?, Some(assoc_id)).await;
 
         Ok(())
     }
@@ -209,7 +209,7 @@ impl MockAmf {
         ));
 
         info!(logger, "<< InitialContextSetupRequest");
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, None).await;
         Ok(())
     }
 
@@ -241,7 +241,7 @@ impl MockAmf {
                 }]),
             },
         ));
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, None).await;
         Ok(())
     }
 
@@ -311,7 +311,7 @@ impl MockAmf {
                 ue_aggregate_maximum_bit_rate: None,
             },
         ));
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, None).await;
         Ok(())
     }
 

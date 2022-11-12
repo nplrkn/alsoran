@@ -1,6 +1,6 @@
 //! mock_cu_up - enables a test script to assume the role of the GNB-CU-UP on the E1 reference point
 
-use crate::mock::{Mock, Pdu};
+use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use e1ap::*;
@@ -82,7 +82,7 @@ impl MockCuUp {
             },
         ));
         info!(self.logger, "GnbCuUpE1SetupRequest >>");
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, None).await;
         Ok(())
     }
 
@@ -97,23 +97,24 @@ impl MockCuUp {
     ) -> Result<()> {
         let expected_address =
             TransportLayerAddress(net::ip_bits_from_string(expected_addr_string)?);
-        let transaction_id = self
+        let (transaction_id, assoc_id) = self
             .receive_cu_cp_configuration_update(&expected_address)
             .await?;
         let transport_address = format!("{}:{}", expected_addr_string, E1AP_BIND_PORT);
         info!(self.logger, "Connect to CU-CP {}", transport_address);
         self.connect(&transport_address, E1AP_SCTP_PPID).await;
-        self.send_cu_cp_configuration_update_acknowledge(transaction_id, expected_address)
+        self.send_cu_cp_configuration_update_acknowledge(transaction_id, expected_address, assoc_id)
             .await
     }
 
     async fn receive_cu_cp_configuration_update(
         &self,
         expected_address: &TransportLayerAddress,
-    ) -> Result<TransactionId> {
+    ) -> Result<(TransactionId, u32)> {
         info!(self.logger, "Wait for Cu Cp Configuration Update");
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        let cu_cp_configuration_update = match self.receive_pdu().await {
+        let cu_cp_configuration_update = match pdu {
             E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuCpConfigurationUpdate(x)) => Ok(x),
             x => Err(anyhow!("Expected GnbCuCpConfigurationUpdate, got {:?}", x)),
         }?;
@@ -133,13 +134,14 @@ impl MockCuUp {
             }
         };
 
-        Ok(cu_cp_configuration_update.transaction_id)
+        Ok((cu_cp_configuration_update.transaction_id, assoc_id))
     }
 
     async fn send_cu_cp_configuration_update_acknowledge(
         &self,
         transaction_id: TransactionId,
         transport_layer_address: TransportLayerAddress,
+        assoc_id: u32,
     ) -> Result<()> {
         let pdu = e1ap::E1apPdu::SuccessfulOutcome(
             SuccessfulOutcome::GnbCuCpConfigurationUpdateAcknowledge(
@@ -159,19 +161,24 @@ impl MockCuUp {
         );
 
         info!(self.logger, "GnbCuCpConfigurationUpdateAcknowledge >>");
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
         Ok(())
     }
 
     pub async fn handle_bearer_context_setup(&mut self, ue_id: u32) -> Result<()> {
-        self.receive_bearer_context_setup(ue_id).await?;
-        self.send_bearer_context_setup_response(ue_id).await
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        self.process_bearer_context_setup(pdu, ue_id).await?;
+        info!(self.logger, "BearerContextSetupRequest <<");
+        let pdu = self.build_bearer_context_setup_response(ue_id);
+        info!(self.logger, "BearerContextSetupResponse >>");
+        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
+        Ok(())
     }
 
-    async fn receive_bearer_context_setup(&mut self, ue_id: u32) -> Result<()> {
+    async fn process_bearer_context_setup(&mut self, pdu: E1apPdu, ue_id: u32) -> Result<()> {
         let logger = &self.logger;
 
-        let bearer_context_setup = match self.receive_pdu().await {
+        let bearer_context_setup = match pdu {
             E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextSetupRequest(x)) => Ok(x),
             x => Err(anyhow!("Expected BearerContextSetupRequest, got {:?}", x)),
         }?;
@@ -183,18 +190,17 @@ impl MockCuUp {
                 gnb_cu_cp_ue_e1ap_id,
             },
         );
-        info!(self.logger, "BearerContextSetupRequest <<");
         Ok(())
     }
 
-    async fn send_bearer_context_setup_response(&self, ue_id: u32) -> Result<()> {
+    fn build_bearer_context_setup_response(&self, ue_id: u32) -> E1apPdu {
         let gnb_cu_cp_ue_e1ap_id = self.ues[&ue_id].gnb_cu_cp_ue_e1ap_id.clone();
 
         let upf_facing_transport_layer_address = bitvec![u8, Msb0;1, 0, 1, 0,1,0];
 
         let du_facing_transport_layer_address = bitvec![u8, Msb0;1, 1, 1, 0,0,0];
 
-        let pdu = e1ap::E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextSetupResponse(
+        e1ap::E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextSetupResponse(
             BearerContextSetupResponse {
                 gnb_cu_cp_ue_e1ap_id,
                 gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId(ue_id),
@@ -244,19 +250,21 @@ impl MockCuUp {
                         },
                     ),
             },
-        ));
-        info!(self.logger, "BearerContextSetupResponse >>");
-        self.send(pdu.into_bytes()?).await;
-        Ok(())
+        ))
     }
 
     pub async fn handle_bearer_context_modification(&self, ue_id: u32) -> Result<()> {
-        self.receive_bearer_context_modification(ue_id).await?;
-        self.send_bearer_context_modification_response(ue_id).await
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        self.check_bearer_context_modification(pdu, ue_id).await?;
+        info!(self.logger, "BearerContextModificationRequest <<");
+        let pdu = self.build_bearer_context_modification_response(ue_id);
+        info!(self.logger, "BearerContextModificationResponse >>");
+        self.send(pdu.into_bytes()?, Some(assoc_id)).await;
+        Ok(())
     }
 
-    async fn receive_bearer_context_modification(&self, ue_id: u32) -> Result<()> {
-        let bearer_context_modification = match self.receive_pdu().await {
+    async fn check_bearer_context_modification(&self, pdu: E1apPdu, ue_id: u32) -> Result<()> {
+        let bearer_context_modification = match pdu {
             E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextModificationRequest(x)) => {
                 Ok(x)
             }
@@ -265,7 +273,6 @@ impl MockCuUp {
                 x
             )),
         }?;
-        info!(self.logger, "BearerContextModificationRequest <<");
 
         // Check the IDs.
         let ue = &self.ues[&ue_id];
@@ -277,27 +284,25 @@ impl MockCuUp {
         Ok(())
     }
 
-    async fn send_bearer_context_modification_response(&self, ue_id: u32) -> Result<()> {
+    fn build_bearer_context_modification_response(&self, ue_id: u32) -> E1apPdu {
         let ue = &self.ues[&ue_id];
-        let pdu = e1ap::E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextModificationResponse(BearerContextModificationResponse {
-            gnb_cu_cp_ue_e1ap_id: ue.gnb_cu_cp_ue_e1ap_id,
-            gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId(ue_id),
-            system_bearer_context_modification_response: Some(
-                SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(
-                    NgRanBearerContextModificationResponse {
-                        // TODO - supply these to make a proper reply to the request
-                        pdu_session_resource_setup_mod_list: None,
-                        pdu_session_resource_failed_mod_list: None,
-                        pdu_session_resource_modified_list: None,
-                        pdu_session_resource_failed_to_modify_list: None,
-                        retainability_measurements_info: None,
-                    },
+        e1ap::E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextModificationResponse(
+            BearerContextModificationResponse {
+                gnb_cu_cp_ue_e1ap_id: ue.gnb_cu_cp_ue_e1ap_id,
+                gnb_cu_up_ue_e1ap_id: GnbCuUpUeE1apId(ue_id),
+                system_bearer_context_modification_response: Some(
+                    SystemBearerContextModificationResponse::NgRanBearerContextModificationResponse(
+                        NgRanBearerContextModificationResponse {
+                            // TODO - supply these to make a proper reply to the request
+                            pdu_session_resource_setup_mod_list: None,
+                            pdu_session_resource_failed_mod_list: None,
+                            pdu_session_resource_modified_list: None,
+                            pdu_session_resource_failed_to_modify_list: None,
+                            retainability_measurements_info: None,
+                        },
+                    ),
                 ),
-            ),
-        }));
-        info!(self.logger, "BearerContextModificationResponse >>");
-        self.send(pdu.into_bytes()?).await;
-
-        Ok(())
+            },
+        ))
     }
 }

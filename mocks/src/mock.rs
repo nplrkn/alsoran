@@ -15,14 +15,19 @@ pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
     transport: SctpTransportProvider,
-    receiver: Receiver<Option<P>>,
+    receiver: Receiver<Option<ReceivedPdu<P>>>,
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Option<ShutdownHandle>,
 }
 
+pub struct ReceivedPdu<P: Pdu> {
+    pub pdu: P,
+    pub assoc_id: u32,
+}
+
 #[derive(Debug, Clone)]
-pub struct Handler<P: Pdu>(pub Sender<Option<P>>);
+pub struct Handler<P: Pdu>(pub Sender<Option<ReceivedPdu<P>>>);
 
 impl<P: Pdu> Mock<P> {
     pub async fn new(logger: Logger) -> Self {
@@ -78,15 +83,20 @@ impl<P: Pdu> Mock<P> {
             .is_none());
     }
 
-    pub async fn send(&self, message: Vec<u8>) {
+    pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {
         self.transport
-            .send_message(message, &self.logger)
+            .send_message(message, assoc_id, &self.logger)
             .await
             .expect("Failed to send message");
     }
 
     /// Receive a Pdu, with a 0.5s timeout.
     pub async fn receive_pdu(&self) -> P {
+        self.receive_pdu_with_assoc_id().await.pdu
+    }
+
+    /// Receive a Pdu, with a 0.5s timeout.
+    pub async fn receive_pdu_with_assoc_id(&self) -> ReceivedPdu<P> {
         let f = self.receiver.recv();
         async_std::future::timeout(std::time::Duration::from_millis(500), f)
             .await
@@ -105,11 +115,14 @@ impl<P: Pdu> TnlaEventHandler for Handler<P> {
     async fn handle_message(
         &self,
         message: Vec<u8>,
-        _tnla_id: u32,
+        tnla_id: u32,
         _logger: &Logger,
     ) -> Option<Vec<u8>> {
         self.0
-            .send(Some(P::from_bytes(&message).unwrap()))
+            .send(Some(ReceivedPdu {
+                pdu: P::from_bytes(&message).unwrap(),
+                assoc_id: tnla_id,
+            }))
             .await
             .unwrap();
         None

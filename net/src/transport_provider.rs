@@ -12,7 +12,12 @@ use slog::Logger;
 /// The TransportProvider trait abstracts the transport, for example, to allow a non-SCTP test transport to be used.
 #[async_trait]
 pub trait TransportProvider: Send + Sync + 'static {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()>;
+    async fn send_message(
+        &self,
+        message: Message,
+        assoc_id: Option<u32>,
+        logger: &Logger,
+    ) -> Result<()>;
 
     async fn serve<H>(
         self,
