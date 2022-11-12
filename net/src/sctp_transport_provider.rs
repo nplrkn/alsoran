@@ -65,12 +65,16 @@ impl TransportProvider for SctpTransportProvider {
     where
         H: TnlaEventHandler,
     {
-        let assoc_id = 1; // TODO
         let connect_addr_string = connect_addr_string.clone();
         let assoc = resolve_and_connect(&connect_addr_string, ppid, &logger).await?;
         //let logger = logger.new(o!("connection" => assoc_id));
         self.tnla_pool
-            .add_and_handle(assoc_id, Arc::new(assoc), handler.clone(), logger.clone())
+            .add_and_handle(
+                assoc.fd as u32,
+                Arc::new(assoc),
+                handler.clone(),
+                logger.clone(),
+            )
             .await;
 
         Ok(())
@@ -86,7 +90,6 @@ impl TransportProvider for SctpTransportProvider {
     where
         H: TnlaEventHandler,
     {
-        let assoc_id = 1; // TODO
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
         let connect_addr_string = connect_addr_string.clone();
@@ -99,7 +102,7 @@ impl TransportProvider for SctpTransportProvider {
 
                         self.tnla_pool
                             .add_and_handle_no_spawn(
-                                assoc_id,
+                                assoc.fd as u32,
                                 Arc::new(assoc),
                                 handler.clone(),
                                 stop_token.clone(),
@@ -155,8 +158,6 @@ impl TransportProvider for SctpTransportProvider {
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
-                        // TODO: don't hardcode ID
-                        let assoc_id = 1;
                         //let logger = logger.new(o!("connection" => assoc_id));
                         trace!(
                             logger,
@@ -166,7 +167,7 @@ impl TransportProvider for SctpTransportProvider {
                         self.tnla_pool
                             .clone()
                             .add_and_handle(
-                                assoc_id,
+                                assoc.fd as u32,
                                 Arc::new(assoc),
                                 handler.clone(),
                                 logger.clone(),

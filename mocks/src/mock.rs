@@ -102,6 +102,10 @@ impl<P: Pdu> Mock<P> {
             .await
             .unwrap()
             .expect("Expected message")
+            .map(|x| {
+                debug!(self.logger, "Received message on assoc {}", x.assoc_id);
+                x
+            })
             .expect("Expected message")
     }
 }
