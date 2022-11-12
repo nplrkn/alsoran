@@ -89,11 +89,22 @@ where
     /// Instructs a worker to add another worker to an existing F1AP interface instance
     async fn add_f1ap(
         &self,
-        _transport_address: IpAddress,
+        transport_address: IpAddress,
         _context: &C,
     ) -> Result<AddF1apResponse, ApiError> {
-        //Workflow::new(&self.gnbcu, logger).???.await
-        unimplemented!()
+        match Workflow::new(&self.gnbcu, &self.logger)
+            .add_f1ap_endpoint(&transport_address)
+            .await
+        {
+            Ok(_) => Ok(AddF1apResponse::Success),
+            Err(e) => {
+                warn!(self.logger, "F1AP add failed - {:?}", e);
+                Ok(AddF1apResponse::Failure(format!(
+                    "F1AP add of {} failed",
+                    transport_address.to_string()
+                )))
+            }
+        }
     }
 
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.

@@ -2,6 +2,7 @@ use super::Gnbcu;
 use slog::{debug, Logger};
 
 mod add_e1ap_endpoint;
+mod add_f1ap_endpoint;
 mod amf_status_indication;
 mod build_f1ap;
 mod build_ngap;
