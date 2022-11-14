@@ -7,7 +7,10 @@ use async_trait::async_trait;
 use sctp::Message;
 use slog::Logger;
 
-//pub struct Binding;
+pub type AssocId = u32;
+pub struct Binding {
+    pub assoc_id: AssocId,
+}
 
 /// The TransportProvider trait abstracts the transport, for example, to allow a non-SCTP test transport to be used.
 #[async_trait]
@@ -39,15 +42,8 @@ pub trait TransportProvider: Send + Sync + 'static {
     where
         H: TnlaEventHandler;
 
-    async fn maintain_connection<H>(
-        self,
-        connect_addr_string: &String,
-        ppid: u32,
-        handler: H,
-        logger: Logger,
-    ) -> Result<ShutdownHandle>
-    where
-        H: TnlaEventHandler;
+    // Pick a new UE binding.
+    async fn new_ue_binding(&self, seed: u32) -> Result<Binding>;
 
     // Return the set of TNLA remote address to which we are currently connected
     async fn remote_tnla_addresses(&self) -> Vec<SocketAddr>;

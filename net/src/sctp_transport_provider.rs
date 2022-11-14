@@ -2,6 +2,7 @@
 
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
+use crate::transport_provider::Binding;
 use crate::{ShutdownHandle, TransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
@@ -12,7 +13,6 @@ use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
 use slog::{info, trace, warn, Logger};
 use std::net::SocketAddr;
-use std::time::Duration;
 use stop_token::StopSource;
 
 #[derive(Clone)]
@@ -80,55 +80,9 @@ impl TransportProvider for SctpTransportProvider {
         Ok(())
     }
 
-    async fn maintain_connection<H>(
-        self,
-        connect_addr_string: &String,
-        ppid: u32,
-        handler: H,
-        logger: Logger,
-    ) -> Result<ShutdownHandle>
-    where
-        H: TnlaEventHandler,
-    {
-        let stop_source = StopSource::new();
-        let stop_token = stop_source.token();
-        let connect_addr_string = connect_addr_string.clone();
-        let join_handle = task::spawn(async move {
-            loop {
-                match resolve_and_connect(&connect_addr_string, ppid, &logger).await {
-                    Ok(assoc) => {
-                        //let logger = logger.new(o!("connection" => assoc_id));
-                        trace!(logger, "Established connection");
-
-                        self.tnla_pool
-                            .add_and_handle_no_spawn(
-                                assoc.fd as u32,
-                                Arc::new(assoc),
-                                handler.clone(),
-                                stop_token.clone(),
-                                logger.clone(),
-                            )
-                            .await;
-                    }
-                    Err(e) => {
-                        warn!(
-                            logger,
-                            "Couldn't establish connection to {} - will retry ({:?})",
-                            connect_addr_string,
-                            e
-                        );
-                    }
-                };
-                let retry_duration = Duration::from_secs(30);
-                if async_std::future::timeout(retry_duration, stop_token.clone())
-                    .await
-                    .is_ok()
-                {
-                    break;
-                }
-            }
-        });
-        Ok(ShutdownHandle::new(join_handle, stop_source))
+    // Pick a new UE binding.
+    async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
+        self.tnla_pool.new_ue_binding(seed).await
     }
 
     // Return the set of TNLA remote address to which we are currently connected

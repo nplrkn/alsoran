@@ -1,6 +1,6 @@
 mod mock;
 mod mock_du;
-pub use mock_du::MockDu;
+pub use mock_du::{MockDu, UeContext as DuUeContext};
 mod mock_amf;
 pub use mock_amf::MockAmf;
 mod mock_cu_up;

@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
+    AperSerde, Binding, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
     TransportProvider,
 };
 use slog::{debug, Logger};
@@ -81,6 +81,10 @@ impl<P: Pdu> Mock<P> {
             .await
             .expect("Failed mock recv")
             .is_none());
+    }
+
+    pub async fn new_ue_binding(&self, ue_id: u32) -> Binding {
+        self.transport.new_ue_binding(ue_id).await.unwrap()
     }
 
     pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {

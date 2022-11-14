@@ -29,10 +29,11 @@ async fn live_redis() -> Result<()> {
 
     // Run test
     let tc = TestContextBuilder::new()
-        .stage(Stage::Ue1Registered)
+        .stage(Stage::DuConnected)
         .redis_port(port)
         .spawn()
         .await?;
+    let _ = tc.create_and_register_ue(1).await?;
     tc.terminate().await;
 
     // Terminate Redis

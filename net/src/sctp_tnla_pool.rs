@@ -1,6 +1,9 @@
 //! sctp_tnla_pool - global connection pool enabling a suitable TNLA to be selected for an outgoing message
 
-use crate::tnla_event_handler::{TnlaEvent, TnlaEventHandler};
+use crate::{
+    tnla_event_handler::{TnlaEvent, TnlaEventHandler},
+    transport_provider::{AssocId, Binding},
+};
 use anyhow::{anyhow, Result};
 use async_std::sync::{Arc, Mutex};
 use common::ShutdownHandle;
@@ -11,9 +14,7 @@ use slog::{trace, warn, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::{StopSource, StopToken};
-
-type TnlaId = u32;
-type SharedAssocHash = Arc<Mutex<Box<HashMap<TnlaId, Arc<SctpAssociation>>>>>;
+type SharedAssocHash = Arc<Mutex<Box<HashMap<AssocId, Arc<SctpAssociation>>>>>;
 
 #[derive(Clone)]
 pub struct SctpTnlaPool {
@@ -46,7 +47,7 @@ impl SctpTnlaPool {
 
     pub async fn add_and_handle_no_spawn<H>(
         &self,
-        assoc_id: u32,
+        assoc_id: AssocId,
         assoc: Arc<SctpAssociation>,
         handler: H,
         stop_token: StopToken,
@@ -95,6 +96,19 @@ impl SctpTnlaPool {
         }
 
         self.assocs.lock().await.remove(&assoc_id);
+    }
+
+    /// Picks a new binding (association and in future stream ID).  
+    /// To load balance among different associations, use a different seed.
+    pub async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
+        let assocs = self.assocs.lock().await;
+        if assocs.len() == 0 {
+            return Err(anyhow!("No associations up"));
+        }
+        let nth = seed as usize % assocs.len();
+        Ok(Binding {
+            assoc_id: *assocs.keys().nth(nth).unwrap(),
+        })
     }
 
     pub async fn send_message(
