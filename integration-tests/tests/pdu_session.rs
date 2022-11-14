@@ -6,10 +6,11 @@ pub use test::*;
 #[async_std::test]
 async fn successful_pdu_session_setup() -> Result<()> {
     let mut tc = TestContextBuilder::new()
-        .stage(Stage::Ue1Registered)
+        .stage(Stage::DuConnected)
         .spawn()
         .await?;
-    tc.establish_pdu_session(1).await?;
+    let mut ue = tc.create_and_register_ue(1).await?;
+    tc.establish_pdu_session(&mut ue).await?;
     tc.terminate().await;
     Ok(())
 }

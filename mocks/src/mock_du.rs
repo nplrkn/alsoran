@@ -8,10 +8,7 @@ use net::{AperSerde, Binding, Indication};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{info, o, Logger};
-use std::{
-    collections::HashMap,
-    ops::{Deref, DerefMut},
-};
+use std::ops::{Deref, DerefMut};
 
 const F1AP_SCTP_PPID: u32 = 62;
 const F1AP_BIND_PORT: u16 = 38472;
@@ -95,7 +92,7 @@ impl MockDu {
     }
 
     pub async fn perform_rrc_setup(
-        &mut self,
+        &self,
         ue_context: &mut UeContext,
         nas_message: Vec<u8>,
     ) -> Result<()> {

@@ -3,7 +3,9 @@ use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
 use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig};
 use gnbcu::{MockUeStore, RedisUeStore};
-use mocks::{DuUeContext, MockAmf, MockCuUp, MockDu, SecurityModeCommand};
+use mocks::{
+    AmfUeContext, CuUpUeContext, DuUeContext, MockAmf, MockCuUp, MockDu, SecurityModeCommand,
+};
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
@@ -41,6 +43,8 @@ pub enum Stage {
 pub struct UeContext {
     ue_id: u32,
     du_ue_context: DuUeContext,
+    amf_ue_context: Option<AmfUeContext>,
+    cu_up_ue_context: Option<CuUpUeContext>,
 }
 
 pub struct UeRegister<'a> {
@@ -246,11 +250,17 @@ impl TestContext {
         Ok(self)
     }
 
-    pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<UeContext> {
-        let mut ue_context = UeContext {
+    pub async fn new_ue(&self, ue_id: u32) -> UeContext {
+        UeContext {
             ue_id,
             du_ue_context: self.du.new_ue_context(ue_id).await,
-        };
+            amf_ue_context: None,
+            cu_up_ue_context: None,
+        }
+    }
+
+    pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<UeContext> {
+        let mut ue_context = self.new_ue(ue_id).await;
         let mut register_ue = self.register_ue_start(&mut ue_context).await;
         loop {
             if let UeRegisterStage::End = register_ue.stage {
@@ -281,7 +291,7 @@ impl TestContext {
     }
 
     pub async fn register_ue_next<'a>(
-        &mut self,
+        &self,
         mut ue_register: UeRegister<'a>,
     ) -> Result<UeRegister<'a>> {
         let ue_id = ue_register.ue_context.ue_id;
@@ -291,12 +301,13 @@ impl TestContext {
                     .perform_rrc_setup(&mut ue_register.ue_context.du_ue_context, Vec::new())
                     .await
                     .unwrap();
-                self.amf.receive_initial_ue_message(ue_id).await.unwrap();
+                let amf_ue_context = self.amf.receive_initial_ue_message(ue_id).await.unwrap();
                 self.amf
-                    .send_initial_context_setup_request(ue_id)
+                    .send_initial_context_setup_request(&amf_ue_context)
                     .await
                     .unwrap();
                 let security_mode_command = self.du.receive_security_mode_command(ue_id).await?;
+                ue_register.ue_context.amf_ue_context = Some(amf_ue_context);
                 UeRegisterStage::Stage1(security_mode_command)
             }
             UeRegisterStage::Stage1(security_mode_command) => {
@@ -307,8 +318,9 @@ impl TestContext {
                     )
                     .await
                     .unwrap();
+                let amf_ue_context = ue_register.ue_context.amf_ue_context.as_ref().unwrap();
                 self.amf
-                    .receive_initial_context_setup_response(ue_id)
+                    .receive_initial_context_setup_response(amf_ue_context)
                     .await
                     .unwrap();
                 self.du.receive_nas(ue_id).await.unwrap();
@@ -326,29 +338,32 @@ impl TestContext {
     //     ue_register.ue_context
     // }
 
-    pub async fn establish_pdu_session(&mut self, ue_context: &UeContext) -> Result<()> {
+    pub async fn establish_pdu_session(&mut self, ue_context: &mut UeContext) -> Result<()> {
         let ue_id = ue_context.ue_id;
+        let amf_ue_context = ue_context.amf_ue_context.as_ref().unwrap();
+
         info!(self.logger, "Establish PDU session for UE {}", ue_id);
         self.amf
-            .send_pdu_session_resource_setup(ue_id)
+            .send_pdu_session_resource_setup(amf_ue_context)
             .await
             .unwrap();
-        self.cu_up.handle_bearer_context_setup(ue_id).await.unwrap();
+        let cu_up_ue_context = self.cu_up.handle_bearer_context_setup(ue_id).await.unwrap();
         self.du
             .handle_ue_context_setup(&ue_context.du_ue_context)
             .await
             .unwrap();
         self.cu_up
-            .handle_bearer_context_modification(ue_id)
+            .handle_bearer_context_modification(&cu_up_ue_context)
             .await
             .unwrap();
+        ue_context.cu_up_ue_context = Some(cu_up_ue_context);
         let _nas = self.du.receive_rrc_reconfiguration(ue_id).await.unwrap();
         self.du
             .send_rrc_reconfiguration_complete(&ue_context.du_ue_context)
             .await
             .unwrap();
         self.amf
-            .receive_pdu_session_resource_setup_response(ue_id)
+            .receive_pdu_session_resource_setup_response(amf_ue_context)
             .await
             .unwrap();
         info!(
