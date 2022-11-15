@@ -13,11 +13,12 @@ async fn main() -> Result<()> {
 
     du.perform_f1_setup(&"127.0.0.1".to_string()).await?;
 
-    let mut ue = Ue::new(1);
+    let mut ue = Ue::new(1, &du).await;
 
     let registration_request = ue.build_next_nas_message();
     info!(&logger, ">> NAS Registration request");
-    du.perform_rrc_setup(ue.id, registration_request).await?;
+    du.perform_rrc_setup(&mut ue.du_context, registration_request)
+        .await?;
 
     let nas_authentication_request = du.receive_nas(ue.id).await?;
     info!(&logger, "<< NAS Authentication request");
@@ -25,7 +26,7 @@ async fn main() -> Result<()> {
 
     let nas_message = ue.build_next_nas_message();
     info!(&logger, ">> NAS Authentication response");
-    du.send_nas(ue.id, nas_message).await?;
+    du.send_nas(&ue.du_context, nas_message).await?;
 
     let nas_security_mode_command = du.receive_nas(ue.id).await?;
     info!(&logger, "<< NAS Security mode command");
@@ -33,10 +34,10 @@ async fn main() -> Result<()> {
 
     let nas_message = ue.build_next_nas_message();
     info!(&logger, ">> NAS Security mode complete");
-    du.send_nas(ue.id, nas_message).await?;
+    du.send_nas(&ue.du_context, nas_message).await?;
 
     let security_mode_command = du.receive_security_mode_command(ue.id).await?;
-    du.send_security_mode_complete(ue.id, &security_mode_command)
+    du.send_security_mode_complete(&ue.du_context, &security_mode_command)
         .await?;
 
     let nas_registration_accept = du.receive_nas(ue.id).await?;
@@ -45,7 +46,7 @@ async fn main() -> Result<()> {
 
     let nas_message = ue.build_next_nas_message();
     info!(&logger, ">> NAS Registration Complete");
-    du.send_nas(ue.id, nas_message).await?;
+    du.send_nas(&ue.du_context, nas_message).await?;
 
     du.terminate().await;
 

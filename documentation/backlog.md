@@ -5,11 +5,9 @@
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
-- Only 1st worker initializes NG interface and 2nd worker joins in
-- 1st worker receives DU connection and adds 2nd worker
+- Test one UE through each worker - step through trace
 - 2nd worker receives UP connection and adds 1st worker
 - 1st worker sets up NGAP but 2nd worker gets E1 - run through multiple permutations of control logic?
-- Test one UE through each worker
 - Switchover of UE on dead worker - RAN initiated
 - Switchover of UE on dead worker - AMF initiated
 - Restart and catchup of coordinator
@@ -62,7 +60,10 @@
 - Remodel SCTP API to follow the one in the webrtc-sctp crate.
 
 # DONE
-- Timing bug causing cu_can_connect_to_amf() to sometimes hang when logging disabled.  Related to removal of expect_connection in test suite? - no repro
+- 1st worker initializes NG interface and 2nd worker joins in
+- 1st worker receives UP connection and adds 2nd worker
+- 1st worker receives DU connection and adds 2nd worker
+- Timing bug causing cu_can_connect_to_amf() to sometimes hang when logging disabled.  No repro
 - Log interleaving when RUST_LOG=debug and multiple tests run in parallel - noop - just do RUST_TEST_THREADS=1
 - Two workers up
 - Use IP address instead of ports to distinguish NGAP, E1 and F1 endpoints

@@ -6,19 +6,19 @@ use test_context::UeRegisterStage;
 
 #[async_std::test]
 async fn two_ues_register_sequentially() -> Result<()> {
-    let mut tc = TestContextBuilder::new()
+    let tc = TestContextBuilder::new()
         .stage(Stage::DuConnected)
         .spawn()
         .await?;
-    let ue_1 = tc.create_and_register_ue(1).await?;
-    let ue_2 = tc.create_and_register_ue(2).await?;
+    let _ue_1 = tc.create_and_register_ue(1).await?;
+    let _ue_2 = tc.create_and_register_ue(2).await?;
     tc.terminate().await;
     Ok(())
 }
 
 #[async_std::test]
 async fn two_ues_register_in_parallel() -> Result<()> {
-    let mut tc = TestContextBuilder::new()
+    let tc = TestContextBuilder::new()
         .stage(Stage::DuConnected)
         .spawn()
         .await?;
