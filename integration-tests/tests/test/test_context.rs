@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
 use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig};
@@ -90,6 +90,7 @@ impl TestContextBuilder {
     pub async fn spawn(&self) -> Result<TestContext> {
         let logger = common::logging::test_init();
 
+        // Exit on panic
         let orig_hook = panic::take_hook();
         panic::set_hook(Box::new(move |panic_info| {
             orig_hook(panic_info);
@@ -116,16 +117,28 @@ impl TestContextBuilder {
             tc.start_coordinator().await;
         }
 
+        // Maybe create a mock datastore to be shared by the workers (unless we're doing a live Redis test).
+        let datastore = if let Some(port) = self.redis_port {
+            WorkerDatastoreSetup::RedisPort(port)
+        } else {
+            WorkerDatastoreSetup::MockUeStore(MockUeStore::new())
+        };
+
         // Start workers
         info!(tc.logger, "Spawn {} workers", self.worker_count);
         for worker_index in 0..self.worker_count {
-            tc.start_worker_on_random_ip(self.redis_port).await;
+            tc.start_worker_on_random_ip(&datastore).await;
             tc.get_worker_to_stage(worker_index as usize, &self.stage)
                 .await?;
         }
 
         Ok(tc)
     }
+}
+
+pub enum WorkerDatastoreSetup {
+    RedisPort(u16),
+    MockUeStore(MockUeStore),
 }
 
 impl TestContext {
@@ -152,7 +165,7 @@ impl TestContext {
         panic!("Repeatedly failed to start coordinator with random port");
     }
 
-    async fn start_worker_on_random_ip(&mut self, redis_port: Option<u16>) {
+    async fn start_worker_on_random_ip(&mut self, datastore: &WorkerDatastoreSetup) {
         for _ in 0..PORT_ALLOCATION_RETRIES {
             let worker_ip = random_local_ip();
             let connection_api_bind_port = CONNECTION_API_PORT;
@@ -185,14 +198,15 @@ impl TestContext {
 
             debug!(self.logger, "Start worker with config {:?}", config);
 
-            match if let Some(port) = redis_port {
-                gnbcu::spawn(
+            match match datastore {
+                WorkerDatastoreSetup::RedisPort(port) => gnbcu::spawn(
                     config.clone(),
-                    RedisUeStore::new(port).unwrap(),
+                    RedisUeStore::new(*port).unwrap(),
                     self.logger.clone(),
-                )
-            } else {
-                gnbcu::spawn(config.clone(), MockUeStore::new(), self.logger.clone())
+                ),
+                WorkerDatastoreSetup::MockUeStore(ue_store) => {
+                    gnbcu::spawn(config.clone(), ue_store.clone(), self.logger.clone())
+                }
             } {
                 Ok(shutdown_handle) => {
                     self.workers.push(InternalWorkerInfo {
@@ -327,9 +341,7 @@ impl TestContext {
                 info!(self.logger, "Register UE {} complete", ue_id);
                 UeRegisterStage::End
             }
-            UeRegisterStage::End => {
-                panic!("Do not call in state End")
-            }
+            UeRegisterStage::End => return Err(anyhow!("Do not call in state End")),
         };
         Ok(ue_register)
     }

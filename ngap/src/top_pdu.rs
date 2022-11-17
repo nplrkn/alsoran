@@ -5,7 +5,7 @@ use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 use async_trait::async_trait;
 use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
-use slog::Logger;
+use slog::{warn, Logger};
 
 // NgapPdu
 #[derive(Clone, Debug)]
@@ -566,7 +566,16 @@ impl Procedure for InitialContextSetupProcedure {
             Ok(x) => Some(NgapPdu::SuccessfulOutcome(
                 SuccessfulOutcome::InitialContextSetupResponse(x),
             )),
-            Err(_) => todo!(),
+            Err(RequestError::UnsuccessfulOutcome(f)) => Some(NgapPdu::UnsuccessfulOutcome(
+                UnsuccessfulOutcome::InitialContextSetupFailure(f),
+            )),
+            Err(RequestError::Other(e)) => {
+                warn!(
+                    logger,
+                    "Error processing InitialContextSetupRequest - {}", e
+                );
+                None
+            }
         }
     }
 

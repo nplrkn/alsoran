@@ -31,11 +31,13 @@
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 ----MAINTAINABILITY----
+- Errors are too easy to miss - call_provider() to optionally warn! on failure
 - Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 -----TESTS------
+- Failure to retrieve UE for each kind of request
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 -----ASN.1 GENERATOR------

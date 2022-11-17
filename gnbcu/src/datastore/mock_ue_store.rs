@@ -8,7 +8,7 @@ use async_trait::async_trait;
 
 use super::{UeState, UeStateStore};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MockUeStore {
     kvs: Arc<Mutex<HashMap<u32, UeState>>>,
 }
