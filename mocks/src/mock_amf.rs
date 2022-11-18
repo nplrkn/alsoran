@@ -3,7 +3,7 @@
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
-use net::AperSerde;
+use net::{AperSerde, Binding};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::Deref;
@@ -17,6 +17,7 @@ pub struct MockAmf {
 pub struct UeContext {
     ue_id: u32,
     ran_ue_ngap_id: RanUeNgapId,
+    binding: Binding,
 }
 
 impl Deref for MockAmf {
@@ -45,7 +46,7 @@ impl MockAmf {
 
     pub async fn handle_ng_setup(&self) -> Result<()> {
         let logger = &self.logger;
-        info!(logger, "Wait for NG Setup from GNB");
+        debug!(logger, "Wait for NG Setup from GNB");
 
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
@@ -86,7 +87,7 @@ impl MockAmf {
 
     pub async fn handle_ran_configuration_update(&self) -> Result<()> {
         let logger = &self.logger;
-        info!(logger, "Wait for RAN Configuration Update from GNB");
+        debug!(logger, "Wait for RAN Configuration Update from GNB");
 
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
@@ -135,19 +136,24 @@ impl MockAmf {
 
     pub async fn receive_initial_ue_message(&self, ue_id: u32) -> Result<UeContext> {
         let logger = &self.logger;
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
-            ran_ue_ngap_id,
-            ..
-        })) = self.receive_pdu().await
-        {
-            info!(logger, ">> InitialUeMessage");
-            debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
-            Ok(UeContext {
-                ue_id,
-                ran_ue_ngap_id,
-            })
-        } else {
-            Err(anyhow!("Not an initial UE message"))
+        match self.receive_pdu_with_assoc_id().await {
+            ReceivedPdu {
+                pdu:
+                    NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
+                        ran_ue_ngap_id,
+                        ..
+                    })),
+                assoc_id,
+            } => {
+                info!(logger, ">> InitialUeMessage");
+                debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
+                Ok(UeContext {
+                    ue_id,
+                    ran_ue_ngap_id,
+                    binding: Binding { assoc_id },
+                })
+            }
+            _ => Err(anyhow!("Not an initial UE message")),
         }
     }
 
@@ -207,7 +213,8 @@ impl MockAmf {
         ));
 
         info!(logger, "<< InitialContextSetupRequest");
-        self.send(pdu.into_bytes()?, None).await;
+        self.send(pdu.into_bytes()?, Some(ue_context.binding.assoc_id))
+            .await;
         Ok(())
     }
 
@@ -310,7 +317,8 @@ impl MockAmf {
                 ue_aggregate_maximum_bit_rate: None,
             },
         ));
-        self.send(pdu.into_bytes()?, None).await;
+        self.send(pdu.into_bytes()?, Some(ue_context.binding.assoc_id))
+            .await;
         Ok(())
     }
 

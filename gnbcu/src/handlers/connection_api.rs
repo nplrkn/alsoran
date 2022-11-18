@@ -7,7 +7,7 @@ use connection_api::models::{AmfInfo, IpAddress};
 use connection_api::server::MakeService;
 use connection_api::{AddE1apResponse, AddF1apResponse, Api, JoinNgapResponse, SetupNgapResponse};
 use ngap::AmfName;
-use slog::{error, info, warn, Logger};
+use slog::{debug, error, warn, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;
 use stop_token::StopSource;
@@ -53,7 +53,7 @@ pub async fn serve<G: Gnbcu>(addr: SocketAddr, gnbcu: G, logger: Logger) -> Resu
         if let Err(e) = server.await {
             error!(logger, "Server error: {}", e);
         } else {
-            info!(logger, "Connection API server graceful shutdown");
+            debug!(logger, "Connection API server graceful shutdown");
         }
     });
 

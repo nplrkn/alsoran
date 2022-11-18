@@ -8,7 +8,7 @@ use coordination_api::server::MakeService;
 use coordination_api::RefreshWorkerResponse;
 use coordination_api::{context::MakeAddContext, Api};
 use hyper::Body;
-use slog::{error, info, Logger};
+use slog::{debug, error, info, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;
 use stop_token::StopSource;
@@ -109,7 +109,7 @@ pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
         if let Err(e) = server.await {
             error!(logger, "Server error: {}", e);
         } else {
-            info!(logger, "Coordination API server graceful shutdown");
+            debug!(logger, "Coordination API server graceful shutdown");
         }
         control_task.graceful_shutdown().await;
     });

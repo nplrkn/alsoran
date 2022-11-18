@@ -10,6 +10,7 @@ use slog::Logger;
 pub type AssocId = u32;
 pub struct Binding {
     pub assoc_id: AssocId,
+    // stream will go here
 }
 
 /// The TransportProvider trait abstracts the transport, for example, to allow a non-SCTP test transport to be used.

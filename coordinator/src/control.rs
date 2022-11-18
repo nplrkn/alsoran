@@ -312,7 +312,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             .await
         {
             Ok(JoinNgapResponse::Success) => {
-                info!(logger, "Join NGAP ok");
+                debug!(logger, "Join NGAP ok");
                 // Update the worker info to record that we now have a connected AMF.
                 worker_info.connected_amfs = vec![amf_name.clone()]
             }
@@ -336,7 +336,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             .await
         {
             Ok(AddE1apResponse::Success) => {
-                info!(logger, "Add E1ap ok");
+                debug!(logger, "Add E1ap ok");
             }
             Ok(r) => error!(logger, "Failure adding E1 endpoint - {:?}", r),
             Err(e) => error!(logger, "API error adding E1 endpoint - {}", e),
@@ -358,7 +358,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             .await
         {
             Ok(AddF1apResponse::Success) => {
-                info!(logger, "Add F1ap ok");
+                debug!(logger, "Add F1ap ok");
             }
             Ok(r) => error!(logger, "Failure adding F1 endpoint - {:?}", r),
             Err(e) => error!(logger, "API error adding F1 endpoint - {}", e),

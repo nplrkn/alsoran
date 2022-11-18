@@ -7,7 +7,7 @@ use f1ap::*;
 use net::{AperSerde, Binding, Indication};
 use pdcp::PdcpPdu;
 use rrc::*;
-use slog::{info, o, Logger};
+use slog::{debug, info, o, Logger};
 use std::ops::{Deref, DerefMut};
 
 const F1AP_SCTP_PPID: u32 = 62;
@@ -456,7 +456,7 @@ impl MockDu {
         &self,
         expected_address: &TransportLayerAddress,
     ) -> Result<(TransactionId, u32)> {
-        info!(self.logger, "Wait for Cu Configuration Update");
+        debug!(self.logger, "Wait for Cu Configuration Update");
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
         let cu_configuration_update = match pdu {

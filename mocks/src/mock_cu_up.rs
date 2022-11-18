@@ -105,7 +105,7 @@ impl MockCuUp {
         &self,
         expected_address: &TransportLayerAddress,
     ) -> Result<(TransactionId, u32)> {
-        info!(self.logger, "Wait for Cu Cp Configuration Update");
+        debug!(self.logger, "Wait for Cu Cp Configuration Update");
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
         let cu_cp_configuration_update = match pdu {
