@@ -35,6 +35,6 @@ impl<'a, G: Gnbcu> std::ops::Deref for Workflow<'a, G> {
     type Target = G;
 
     fn deref(&self) -> &Self::Target {
-        &self.gnbcu
+        self.gnbcu
     }
 }

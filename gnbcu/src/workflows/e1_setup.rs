@@ -28,7 +28,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         self.log_message("<< GnbCuUpE1SetupResponse");
         Ok(GnbCuUpE1SetupResponse {
             transaction_id: r.transaction_id,
-            gnb_cu_cp_name: self.gnbcu.config().clone().name.map(|x| GnbCuCpName(x)),
+            gnb_cu_cp_name: self.gnbcu.config().clone().name.map(GnbCuCpName),
             transport_layer_address_info: None,
             extended_gnb_cu_cp_name: None,
         })

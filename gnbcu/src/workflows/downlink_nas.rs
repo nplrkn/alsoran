@@ -48,7 +48,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         let rrc_container = super::build_rrc::build_rrc_dl_information_transfer(2, Some(nas))?;
 
         self.log_message("<< DlInformationTransfer(Nas)");
-        self.send_rrc_to_ue(&ue, SrbId(1), rrc_container, self.logger)
+        self.send_rrc_to_ue(ue, SrbId(1), rrc_container, self.logger)
             .await;
         Ok(())
     }

@@ -96,9 +96,9 @@ impl MockDu {
         ue_context: &mut UeContext,
         nas_message: Vec<u8>,
     ) -> Result<()> {
-        self.send_rrc_setup_request(&ue_context).await.unwrap();
+        self.send_rrc_setup_request(ue_context).await.unwrap();
         let rrc_setup = self.receive_rrc_setup(ue_context).await.unwrap();
-        self.send_rrc_setup_complete(&ue_context, rrc_setup, nas_message)
+        self.send_rrc_setup_complete(ue_context, rrc_setup, nas_message)
             .await?;
         Ok(())
     }
@@ -218,7 +218,7 @@ impl MockDu {
     }
 
     async fn send_ul_rrc(&self, ue_context: &UeContext, rrc: UlDcchMessage) -> Result<()> {
-        let gnb_cu_ue_f1ap_id = ue_context.gnb_cu_ue_f1ap_id.clone().unwrap();
+        let gnb_cu_ue_f1ap_id = ue_context.gnb_cu_ue_f1ap_id.unwrap();
 
         // Encapsulate RRC message in PDCP PDU.
         let rrc_bytes = rrc.into_bytes()?;
@@ -295,7 +295,7 @@ impl MockDu {
         //     x => Err(anyhow!("Expected security mode command - got {:?}", x)),
         // }
 
-        let ue_context_setup_response = self.build_ue_context_setup_response(&ue_context);
+        let ue_context_setup_response = self.build_ue_context_setup_response(ue_context);
         info!(&self.logger, "UeContextSetupResponse >>");
         self.send(ue_context_setup_response.into_bytes()?, Some(assoc_id))
             .await;
@@ -322,7 +322,7 @@ impl MockDu {
     }
 
     pub fn build_ue_context_setup_response(&self, ue_context: &UeContext) -> F1apPdu {
-        let gnb_cu_ue_f1ap_id = ue_context.gnb_cu_ue_f1ap_id.clone().unwrap();
+        let gnb_cu_ue_f1ap_id = ue_context.gnb_cu_ue_f1ap_id.unwrap();
         let cell_group_config =
             f1ap::CellGroupConfig(make_rrc_cell_group_config().into_bytes().unwrap());
         F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextSetupResponse(
@@ -360,9 +360,7 @@ impl MockDu {
     ) -> Result<()> {
         let security_mode_complete = UlDcchMessage {
             message: UlDcchMessageType::C1(C1_6::SecurityModeComplete(SecurityModeComplete {
-                rrc_transaction_identifier: security_mode_command
-                    .rrc_transaction_identifier
-                    .clone(),
+                rrc_transaction_identifier: security_mode_command.rrc_transaction_identifier,
                 critical_extensions: CriticalExtensions27::SecurityModeComplete(
                     SecurityModeCompleteIEs {
                         late_non_critical_extension: None,

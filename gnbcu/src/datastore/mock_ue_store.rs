@@ -21,6 +21,12 @@ impl MockUeStore {
     }
 }
 
+impl Default for MockUeStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[async_trait]
 impl UeStateStore for MockUeStore {
     async fn store(&self, k: u32, s: UeState, _ttl_secs: usize) -> Result<()> {
@@ -32,8 +38,8 @@ impl UeStateStore for MockUeStore {
             .lock()
             .await
             .get(k)
-            .map(|x| x.clone())
-            .ok_or(anyhow!("No such key)"))
+            .cloned()
+            .ok_or_else(|| anyhow!("No such key)"))
     }
     async fn delete(&self, k: &u32) -> Result<()> {
         self.kvs.lock().await.remove(k);

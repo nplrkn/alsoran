@@ -17,10 +17,7 @@ pub struct F1apHandler<G: Gnbcu> {
 
 impl<G: Gnbcu> F1apHandler<G> {
     pub fn new_f1ap_application(gnbcu: G, rrc_handler: RrcHandler<G>) -> F1apCu<F1apHandler<G>> {
-        F1apCu::new(F1apHandler {
-            gnbcu: gnbcu,
-            rrc_handler,
-        })
+        F1apCu::new(F1apHandler { gnbcu, rrc_handler })
     }
 }
 

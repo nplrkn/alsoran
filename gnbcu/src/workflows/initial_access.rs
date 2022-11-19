@@ -40,11 +40,11 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
     }
 
     async fn perform_rrc_setup_procedure(&self, ue: &UeState) -> Result<RrcSetupCompleteIEs> {
-        let rrc_transaction = self.gnbcu.new_rrc_transaction(&ue).await;
+        let rrc_transaction = self.gnbcu.new_rrc_transaction(ue).await;
         let rrc_setup = super::build_rrc::build_rrc_setup(1)?;
 
         self.log_message("<< RrcSetup");
-        self.send_rrc_to_ue(&ue, SrbId(0), rrc_setup, self.logger)
+        self.send_rrc_to_ue(ue, SrbId(0), rrc_setup, self.logger)
             .await;
 
         rrc_transaction.recv().await.and_then(|x| match x.message {

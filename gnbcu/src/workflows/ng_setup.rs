@@ -13,7 +13,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         // This uses the default expected values of free5GC.
         let ng_setup_request = NgSetupRequest {
             global_ran_node_id: super::build_ngap::build_global_ran_node_id(self.gnbcu),
-            ran_node_name: self.config().name.clone().map(|x| RanNodeName(x)),
+            ran_node_name: self.config().name.clone().map(RanNodeName),
             supported_ta_list: SupportedTaList(vec![SupportedTaItem {
                 tac: Tac(vec![0x0, 0x0, 0x1]),
                 broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {

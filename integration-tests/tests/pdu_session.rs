@@ -1,6 +1,5 @@
 mod test;
 use anyhow::Result;
-use async_std;
 pub use test::*;
 
 #[async_std::test]

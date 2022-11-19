@@ -17,7 +17,7 @@ pub fn build_ue_context_setup_request<G: Gnbcu>(
 
     UeContextSetupRequest {
         gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
-        gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id.clone()),
+        gnb_du_ue_f1ap_id: Some(ue.gnb_du_ue_f1ap_id),
         sp_cell_id: f1ap::NrCgi {
             plmn_identity: f1ap::PlmnIdentity(gnbcu.config().plmn.clone()),
             nr_cell_identity: f1ap::NrCellIdentity(bitvec![u8,Msb0;0;36]),

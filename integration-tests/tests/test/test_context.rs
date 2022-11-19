@@ -32,7 +32,7 @@ struct InternalCoordinatorInfo {
     pub shutdown_handle: ShutdownHandle,
     pub config: CoordinatorConfig,
 }
-#[derive(PartialEq, PartialOrd, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Debug)]
 pub enum Stage {
     Init,
     AmfConnected,
@@ -72,17 +72,17 @@ impl TestContextBuilder {
         }
     }
 
-    pub fn redis_port<'a>(&'a mut self, port: u16) -> &'a mut TestContextBuilder {
+    pub fn redis_port(&mut self, port: u16) -> &mut TestContextBuilder {
         self.redis_port = Some(port);
         self
     }
 
-    pub fn stage<'a>(&'a mut self, stage: Stage) -> &'a mut TestContextBuilder {
+    pub fn stage(&mut self, stage: Stage) -> &mut TestContextBuilder {
         self.stage = stage;
         self
     }
 
-    pub fn worker_count<'a>(&'a mut self, worker_count: isize) -> &'a mut TestContextBuilder {
+    pub fn worker_count(&mut self, worker_count: isize) -> &mut TestContextBuilder {
         self.worker_count = worker_count;
         self
     }
@@ -133,6 +133,12 @@ impl TestContextBuilder {
         }
 
         Ok(tc)
+    }
+}
+
+impl Default for TestContextBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -327,8 +333,8 @@ impl TestContext {
             UeRegisterStage::Stage1(security_mode_command) => {
                 self.du
                     .send_security_mode_complete(
-                        &mut ue_register.ue_context.du_ue_context,
-                        &security_mode_command,
+                        &ue_register.ue_context.du_ue_context,
+                        security_mode_command,
                     )
                     .await
                     .unwrap();
@@ -410,7 +416,7 @@ impl TestContext {
 async fn start_amf_on_random_ip(logger: &Logger) -> (MockAmf, String) {
     for _ in 0..PORT_ALLOCATION_RETRIES {
         let address = random_local_ip();
-        if let Ok(amf) = MockAmf::new(&address, &logger).await {
+        if let Ok(amf) = MockAmf::new(&address, logger).await {
             return (amf, address);
         };
     }

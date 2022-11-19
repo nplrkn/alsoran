@@ -227,7 +227,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         let worker_ip = self
             .config
             .ip_addr
-            .unwrap_or(Ipv4Addr::LOCALHOST.into())
+            .unwrap_or_else(|| Ipv4Addr::LOCALHOST.into())
             .to_string();
 
         self.coordinator
@@ -235,8 +235,8 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
                 WorkerInfo {
                     worker_unique_id: self.worker_id,
                     connection_api_url,
-                    f1_address: worker_ip.clone().into(),
-                    e1_address: worker_ip.into(),
+                    f1_address: worker_ip.clone(),
+                    e1_address: worker_ip,
                     connected_amfs,
                     connected_dus,
                     connected_ups,
@@ -298,8 +298,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             "{}:{}",
             self.config
                 .ip_addr
-                .unwrap_or(Ipv4Addr::UNSPECIFIED.into())
-                .to_string(),
+                .unwrap_or_else(|| Ipv4Addr::UNSPECIFIED.into()),
             port
         )
     }
@@ -331,7 +330,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     fn config(&self) -> &Config {
         &self.config
     }
-    async fn ngap_connect(&self, amf_ip_address: &String) -> Result<()> {
+    async fn ngap_connect(&self, amf_ip_address: &str) -> Result<()> {
         let amf_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
         info!(&self.logger, "Connect to AMF {}", amf_address);
         self.ngap
@@ -400,7 +399,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     ) {
         let dl_message = DlRrcMessageTransfer {
             gnb_cu_ue_f1ap_id: GnbCuUeF1apId(ue.key),
-            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id.clone(),
+            gnb_du_ue_f1ap_id: ue.gnb_du_ue_f1ap_id,
             old_gnb_du_ue_f1ap_id: None,
             srb_id,
             execute_duplication: None,

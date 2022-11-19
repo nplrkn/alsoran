@@ -53,7 +53,7 @@ impl<P: Pdu> Mock<P> {
         Ok(())
     }
 
-    pub async fn connect(&mut self, address: &String, ppid: u32) {
+    pub async fn connect(&mut self, address: &str, ppid: u32) {
         self.transport
             .clone()
             .connect(address, ppid, self.handler.clone(), self.logger.clone())

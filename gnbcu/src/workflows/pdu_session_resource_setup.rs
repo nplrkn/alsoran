@@ -63,7 +63,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
                 successful
                     .into_iter()
                     .map(|x| PduSessionResourceSetupItemSuRes {
-                        pdu_session_id: x.pdu_session_id.clone(),
+                        pdu_session_id: x.pdu_session_id,
                         pdu_session_resource_setup_response_transfer: x
                             .pdu_session_resource_setup_request_transfer
                             .clone(),
@@ -79,7 +79,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
                 unsuccessful
                     .into_iter()
                     .map(|x| PduSessionResourceFailedToSetupItemSuRes {
-                        pdu_session_id: x.pdu_session_id.clone(),
+                        pdu_session_id: x.pdu_session_id,
                         pdu_session_resource_setup_unsuccessful_transfer: x
                             .pdu_session_resource_setup_request_transfer
                             .clone(),
@@ -116,7 +116,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         // Build PduSessionResourceToSetupItems.
         let mut items = vec![];
         for x in r.pdu_session_resource_setup_list_su_req.0.iter() {
-            match self.build_setup_item(&ue, &x) {
+            match self.build_setup_item(&ue, x) {
                 Ok(item) => {
                     items.push(item);
                     successful.push(x);
@@ -140,7 +140,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
 
         // Store CU-UP's UE ID.
         let gnb_cu_up_ue_e1ap_id = response.gnb_cu_up_ue_e1ap_id;
-        ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id.clone());
+        ue.gnb_cu_up_ue_e1ap_id = Some(gnb_cu_up_ue_e1ap_id);
 
         // Send UeContextSetupRequest to DU.
         let ue_context_setup_request = self.build_ue_context_setup_request(&ue, None);

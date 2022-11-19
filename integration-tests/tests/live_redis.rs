@@ -1,8 +1,6 @@
 mod test;
-use std::process;
-
 use anyhow::Result;
-use async_std;
+use std::process;
 pub use test::*;
 
 #[async_std::test]

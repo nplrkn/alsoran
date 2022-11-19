@@ -117,8 +117,8 @@ where
         if let Err(e) = self.gnbcu.ngap_connect(&transport_address).await {
             error!(self.logger, "Failed to connect- {}", e);
             return Ok(JoinNgapResponse::Failure(format!(
-                "Failed to connect to AMF at {}",
-                transport_address.to_string()
+                "Failed to connect to AMF at {:?}",
+                transport_address
             )));
         }
 

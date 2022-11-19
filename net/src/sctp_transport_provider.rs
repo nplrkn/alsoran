@@ -57,7 +57,7 @@ impl TransportProvider for SctpTransportProvider {
 
     async fn connect<H>(
         self,
-        connect_addr_string: &String,
+        connect_addr_string: &str,
         ppid: u32,
         handler: H,
         logger: Logger,

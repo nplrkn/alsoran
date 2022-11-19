@@ -17,7 +17,7 @@ use slog::Logger;
 pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
     fn config(&self) -> &Config;
 
-    async fn ngap_connect(&self, amf_address: &String) -> Result<()>;
+    async fn ngap_connect(&self, amf_address: &str) -> Result<()>;
 
     async fn ngap_request<P: Procedure>(
         &self,

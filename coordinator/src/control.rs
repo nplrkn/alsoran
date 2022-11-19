@@ -41,13 +41,13 @@ pub fn spawn<T: Api<ClientContext> + Clone + Send + Sync + 'static>(
 }
 
 trait ConnectionApiProvider<T: Api<ClientContext>> {
-    fn client(&self, base_url: &String) -> Result<T>;
+    fn client(&self, base_url: &str) -> Result<T>;
 }
 
 struct LocalApiProvider<T>(T);
 
 impl<T: Api<ClientContext> + Clone> ConnectionApiProvider<T> for LocalApiProvider<T> {
-    fn client(&self, _base_url: &String) -> Result<T> {
+    fn client(&self, _base_url: &str) -> Result<T> {
         Ok(self.0.clone())
     }
 }
@@ -66,7 +66,7 @@ impl
 {
     fn client(
         &self,
-        base_url: &String,
+        base_url: &str,
     ) -> Result<
         Client<
             DropContextService<
@@ -195,7 +195,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 info!(logger, "{:x} to join existing E1AP interface", worker_id);
                 self.add_e1ap(
                     connected_worker,
-                    this_worker.e1_address.clone().into(),
+                    this_worker.e1_address.clone(),
                     &context,
                     logger,
                 )
@@ -217,7 +217,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 let _ = self
                     .add_e1ap(
                         &this_worker,
-                        unconnected_worker.e1_address.clone().into(),
+                        unconnected_worker.e1_address.clone(),
                         &context,
                         logger,
                     )
@@ -238,8 +238,8 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 // Tell it to add this worker.
                 info!(logger, "{:x} to join existing F1AP interface", worker_id);
                 self.add_f1ap(
-                    &connected_worker,
-                    this_worker.f1_address.clone().into(),
+                    connected_worker,
+                    this_worker.f1_address.clone(),
                     &context,
                     logger,
                 )
@@ -260,7 +260,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
                 );
                 let _ = self.add_f1ap(
                     &this_worker,
-                    unconnected_worker.f1_address.clone().into(),
+                    unconnected_worker.f1_address.clone(),
                     &context,
                     logger,
                 );
@@ -284,7 +284,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         match self
             .provider
             .client(&worker_info.connection_api_url)?
-            .setup_ngap(self.config.amf_address.clone().into(), &context)
+            .setup_ngap(self.config.amf_address.clone().into(), context)
             .await
         {
             Ok(SetupNgapResponse::Success(amf_info)) => {
@@ -301,7 +301,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
     async fn join_ngap(
         &self,
         worker_info: &mut WorkerInfo,
-        amf_name: &String,
+        amf_name: &str,
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
@@ -314,7 +314,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             Ok(JoinNgapResponse::Success) => {
                 debug!(logger, "Join NGAP ok");
                 // Update the worker info to record that we now have a connected AMF.
-                worker_info.connected_amfs = vec![amf_name.clone()]
+                worker_info.connected_amfs = vec![amf_name.to_string()]
             }
             Ok(r) => error!(logger, "NGAP join failure - {:?}", r),
             Err(e) => error!(logger, "NGAP join error - {}", e),
