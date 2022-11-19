@@ -36,7 +36,7 @@ RUST_LOG=info cargo test two_ues_register_sequentially --test two_ues -- --nocap
 
 To reduce linker memory needs, `lld` is used as the linker.  You will either need to install lld (`sudo apt install lld` or similar), or edit .cargo/config to remove the `target.x86_64-unknown-linux-gnu` config to revert to plain `cc` linking. 
 
-To also run the live Redis test, run `cargo test -- --include-ignore`.  For this to pass, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
+The live Redis test is ignored by default.  To run it, `cargo test live_redis -- --ignored`.  For this to pass, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
 
 ## Up next
 
