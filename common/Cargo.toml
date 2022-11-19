@@ -9,7 +9,6 @@ doctest = false
 [dependencies]
 async-std = { version = "1.10.0", features = ["attributes"] }
 slog = "2.7.0"
-sloggers = "2.1.1"
 slog-term = "2.8.0"
 slog-async = "2.7.0"
 signal-hook = "0.3.13"

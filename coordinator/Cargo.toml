@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../common" }
-coordination-api = { path = "../coordination-api", features = ["server", "conversion"] }
-connection-api = { path = "../connection-api", features = ["client", "conversion"] }
+coordination-api = { path = "../coordination-api", features = ["server"] }
+connection-api = { path = "../connection-api", features = ["client"] }
 serde_ignored = "0.1.1"
 anyhow = "1.0.52"
 url = "2.1"
