@@ -170,12 +170,12 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             {
                 // Yes.  Join the existing NGAP instance.
                 let amf_name = x.first().unwrap();
-                debug!(logger, "{:x} to join existing NGAP interface", worker_id);
+                info!(logger, "{:x} to join existing NGAP interface", worker_id);
                 self.join_ngap(&mut this_worker, amf_name, &context, logger)
                     .await?;
             } else {
                 // No.  Set up a new NGAP instance.
-                debug!(logger, "{:x} to set up new NGAP interface", worker_id);
+                info!(logger, "{:x} to set up new NGAP interface", worker_id);
 
                 self.setup_ngap(&mut this_worker, &context, logger).await?;
             }

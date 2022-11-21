@@ -1,4 +1,4 @@
-# TO DO
+# NEXT UP
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
@@ -25,6 +25,8 @@
 - Triangular redirection from AMF
 - Selection and stickiness of SCTP streams
 - Specialized TNLAs for UE or non UE signaling only
+
+# TECH DEBT
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
@@ -42,16 +44,14 @@
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 -----ASN.1 GENERATOR------
 - Cope with extension marker being set
-- Frunk transmogrify - awkward because of vecs, enums and bitstrings.
+- Frunk transmogrify - awkward because of vecs, enums and bitstrings - or equivalent
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Implement Rrc setuprelease
+- Move to latest asn1-codecs crate version
 - Deduplicate inline definitions in RRC autogeneration
 - Generate procedures for Rrc and make F1AP a RequestProvider.
 - Move to latest version of specs
 - Fix clippy
------FREE5GC DEMO------
-- free5GC demo can register 2 (N?) UEs
-- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
 ----REDIS----
 - Don't create 1 Redis connection per access
 - Intermittent failure of live redis test
@@ -59,7 +59,10 @@
 - Redis live test should not create Redis dump.rdb
 ----SCTP----
 - sock_opt.rs doesn't need to be a separate file
-- Remodel SCTP API to follow the one in the webrtc-sctp crate.
+- Remodel SCTP API to look like the one in the webrtc-sctp crate?
+-----FREE5GC DEMO------
+- free5GC demo can register 2 (N?) UEs
+- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
 
 # DONE
 - 1st worker initializes NG interface and 2nd worker joins in

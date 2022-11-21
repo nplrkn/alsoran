@@ -71,7 +71,6 @@ pub fn spawn<U: UeStateStore>(
     ue_store: U,
     logger: Logger,
 ) -> Result<ShutdownHandle> {
-    info!(&logger, "Spawn GNBCU");
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
@@ -79,6 +78,7 @@ pub fn spawn<U: UeStateStore>(
     // coordinator the same logger as the worker.
     let worker_id = Uuid::new_v4();
     let logger = logger.new(o!("cu-cp-w"=> worker_id.to_string()));
+    info!(&logger, "Started");
 
     let handle = match config.connection_style {
         // Run a combined GNBCU and Coordinator.

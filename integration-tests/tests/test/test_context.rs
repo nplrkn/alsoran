@@ -125,7 +125,7 @@ impl TestContextBuilder {
         };
 
         // Start workers
-        info!(tc.logger, "Spawn {} workers", self.worker_count);
+        info!(tc.logger, "Spawn {} worker(s)", self.worker_count);
         for worker_index in 0..self.worker_count {
             tc.start_worker_on_random_ip(&datastore).await;
             tc.get_worker_to_stage(worker_index as usize, &self.stage)
@@ -392,7 +392,7 @@ impl TestContext {
     }
 
     pub async fn terminate(self) {
-        info!(self.logger, "Terminate workers");
+        info!(self.logger, "Terminate worker(s)");
         for worker in self.workers {
             worker.shutdown_handle.graceful_shutdown().await;
             // We don't know if the worker has a connection up, so we can't assume we will see a connection

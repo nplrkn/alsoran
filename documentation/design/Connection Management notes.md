@@ -207,6 +207,7 @@ According to the description of F1 Setup, this procedure always clears out state
 So, when all CU workers die, we necessarily lose all F1 TNLAs, hence our F1 interface instance, hence all F1 state.
 
 The above shows that in the Alsoran design, ues-retained should only be set to true on NG Setup if all NGAP TNLAs are lost but workers, state and DU connections remain.
+
 ### Overload
 
 The AMF may order the gNB to reduce the signalling load.  This needs to propagate to all workers.

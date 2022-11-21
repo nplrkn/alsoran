@@ -12,31 +12,57 @@ In the control plane, the gNB-CU communicates with
 
 The gNB-CU control and user plane (gNB-CU-CP and gNB-CU-UP) are interconnected by the E1 interface.  However, Alsoran CU has no userplane, yet. 
 
-## Current status
+## What is different about Alsoran?
 
--  Alsoran can perform some basic procedures: NG Setup, F1 Setup, and registration of a single UE.
+It's written in Rust and it has a "scale-out single hop" design.
 
--  The supported procedures can be demonstrated against open source 5G core Free5GC.  
+"Scale-out" means that it has multiple interchangeable stateless worker processes.  Any request can be processed by any worker and no worker is a single point of failure.  A Coordinator process coordinates the interface management exchanges of the workers when the topology changes.  The motivation is scalability and fault tolerance.
 
--  There is functional but incomplete SCTP connection management and ASN.1 libraries for NGAP, F1AP and RRC.
+"Single hop" means that, in the mainline case, a message is processed by a single worker (rather than chained through multiple microservices or load balancers).  Consequently each Alsoran CU-CP worker has to have its own SCTP connections to the AMF, the DU and the CU-UP.  The motivation is execution speed and system simplicity.
 
--  The ASN.1 generator is also included in the project.  Functional but incomplete, most notably in the area of extension fields (forward compatibility).  This is in Python, and is rather messy.
+Rust is an obviously attractive choice of language for new O-RAN development.  The main barrier to entry is the SCTP and ASN.1 based protocols.  This project attempts to prove that this barrier is surmountable!
 
--  Storage of UE Context in Redis datastore.
+## Current support
 
-## Integration tests and Redis
+- UE registration demo against free5GC.
+- Scale out of GNB-CU workers using multiple TNLAs.
+- Ue state in Redis datastore.
+- Session setup (TS 23.502, figure 4.3.2.2.1-1).
+- Procedures: NG Setup, RAN configuration update, F1 Setup, E1 Setup, Initial Access, Uplink Nas, Downlink NAS, Initial Context Setup, Pdu session resource setup, AMF status indication.
+- Async SCTP connection management and ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
+- Python ASN.1 autogenerator.
+
+Generally only the success cases are covered, and there are a lot of 'To Dos'!
+
+## Building and running integration tests
+
+The build currently relies on `lld` to reduce linker memory needs.  You will either need to install it (`sudo apt install lld` or similar), or edit .cargo/config to remove the target.x86_64-unknown-linux-gnu config and revert to plain cc linking.
 
 `cargo test` runs the integration test suite, minus the live Redis test.  
 
-When running an individual test it is recommended to enable info level tracing.  For example,
+To run the live Redis test, `cargo test live_redis -- --ignored`.  For this to pass, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
 
+## A quick tour
+
+The follwoing test shows the Alsoran CU-CP carrying out UE registration and session establishment.
 ```
-RUST_LOG=info cargo test two_ues_register_sequentially --test two_ues -- --nocapture
+RUST_LOG=info cargo test successful_pdu_session_setup --test pdu_session -- --nocapture
 ```
 
-To reduce linker memory needs, `lld` is used as the linker.  You will either need to install lld (`sudo apt install lld` or similar), or edit .cargo/config to remove the `target.x86_64-unknown-linux-gnu` config to revert to plain `cc` linking. 
+This test shows two workers starting up, and the Coordinator instructing the workers how to initialize their NGAP, E1AP and F1AP interfaces.
+```
+RUST_LOG=info cargo test two_workers --test two_workers -- --nocapture
+```
 
-The live Redis test is ignored by default.  To run it, `cargo test live_redis -- --ignored`.  For this to pass, you need to have `redis-server` in your path.  Get Redis here: https://redis.io/docs/getting-started/.
+You can packet capture during this test by running the following in parallel. 
+```
+sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462
+```
+...then Ctrl-C at the end of the test and open alsoran.pcap in Wireshark.
+
+To run the live registration against free5GC takes a bit more setup - see the [demo instructions](documentation/howto/free5GC-testing.md).
+
+Finally you might want to browse the design docs in documentation/design.  They are not perfectly maintained but give a good idea of the design thinking that has gone into Alsoran so far.
 
 ## Up next
 
@@ -44,19 +70,24 @@ The live Redis test is ignored by default.  To run it, `cargo test live_redis --
 
 ## Contributing
 
-So far, Alsoran has been developed by a single person, with only a few hours a week to spare, so progress is slow.  If you want to speed it up or make it more useful for your own project, please consider contributing!  Start by creating a Github issue to propose the change you want to make.
+So far, Alsoran has been developed by a single person, with only a few hours a week to spare, so progress is slow.  If you want to make it more useful for your own project, please consider contributing!  Start by creating a Github issue or discusion to propose the change you want to make.
 
-## 3GPP specifications
+The [backlog](documentation/backlog.md) shows the main items being worked on and also tracks areas of tech debt. 
 
-The key 3GPP specifications are as follows.
+## 3GPP and O-RAN specifications
 
--  TS23.501 - System architecture for the 5G System
--  TS23.502 - Procedures for the 5G System
--  TS38.300 - NR and NG-RAN Overall Description
--  TS38.323 - Packet Data Convergence Protocol (PDCP) Specification
--  TS38.331 - Radio Resource Control (RRC) protocol specification
--  TS38.401 - NG-RAN; Architecture description 
--  TS38.412 - NG signalling transport 
--  TS38.413 - NG Application Protocol (NGAP)
--  TS38.472 - F1 signalling transport
--  TS38.473 - F1 Application Protocol (F1AP)
+Alsoran protocol handling and business logic is based on the following specifications.  
+
+-  3GPP TS23.501 - System architecture for the 5G System
+-  3GPP TS23.502 - Procedures for the 5G System
+-  3GPP TS38.300 - NR and NG-RAN Overall Description
+-  3GPP TS38.323 - Packet Data Convergence Protocol (PDCP) Specification
+-  3GPP TS38.331 - Radio Resource Control (RRC) protocol specification
+-  3GPP TS38.401 - NG-RAN; Architecture description 
+-  3GPP TS38.412 - NG signalling transport 
+-  3GPP TS38.413 - NG Application Protocol (NGAP)
+-  3GPP TS38.462 - E1 signalling transport
+-  3GPP TS38.463 - E1 Application Protocol (E1AP)
+-  3GPP TS38.472 - F1 signalling transport
+-  3GPP TS38.473 - F1 Application Protocol (F1AP)
+-  O-RAN.WG5.C.1 - NR C-plane profile
