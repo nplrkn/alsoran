@@ -8,8 +8,7 @@ Alsoran makes use of a 5G feature called _multiple TNLAs_, which means that each
 
 It is by no means guaranteed that everyone will support this feature.  At the time of writing, neither free5GC nor Open5GS support multiple TNLAs.  Commercial AMFs may not support support multiple TNLAs either.  DUs and GNB-CU-UP implementations may not support it either.
 
-It is technically possible to fail over a single SCTP connection between two processes by adding a second tier of proxies in front of them.  Such a design adds extra complexity to the system and incurs the inefficiency of extra signaling hops, and so is not a priority for Alsoran.  If you want to use Alsoran as a basis for a highly available, scale-out RAN, then you need to get a packet core, DU, and CU-UP that support multiple TNLAs. 
-
+It is technically possible to fail over a single SCTP connection between two processes by adding a second tier of proxies in front of them.  Such a design adds extra complexity to the system and incurs the inefficiency of extra signaling hops, and so is not a priority for Alsoran.  
 
 ## The need for coordination
 
@@ -211,46 +210,3 @@ The above shows that in the Alsoran design, ues-retained should only be set to t
 ### Overload
 
 The AMF may order the gNB to reduce the signalling load.  This needs to propagate to all workers.
-
-
-### Multiple TNLA endpoints from AMF - orig design
-
-```mermaid
-sequenceDiagram
-  participant C
-  participant W1
-  participant W2
-  participant AMF
-  participant AMFb
-  participant AMFc
-  W1->>C: F1AP port, no AMFs connected
-  W2->>C: F1AP port, no AMFs connected
-  C->>W1: AMF address, you may setup 
-  C->>W2: refresh in 5s
-  W1->>AMF: connect
-  W1->>AMF: NG Setup
-  AMF->>W1: Ack
-  W1->>C: F1AP port, AMF connected
-  C->>W1: refresh in 30s
-  AMF->>W1: AMF Configuration Update (2 new ports)
-  W1->>AMFb: connect
-  W1->>AMFc: connect
-  AMF->>W1: AMF Configuration Update ok
-  W1->>C: F1AP port, AMF a, b, c connected
-  C->>W1: refresh in 30s
-  W2->>C: F1AP port, no AMFs connected
-  C->>W2: AMF addresses a, b, c, add yourself
-  W2->>AMF: connect
-  W2->>AMF: RAN configuration update
-  AMF->>W2: ack
-  W2->>AMFb: connect
-  W2->>AMFb: RAN configuration update
-  AMFb->>W2: ack
-  W2->>AMFc: connect
-  W2->>AMFc: RAN configuration update
-  AMFc->>W2: ack
-  W2->>C: F1AP port, AMF a, b, c connected
-  C->>W1: ok, refresh in 30s
-
-```
-

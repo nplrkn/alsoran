@@ -22,11 +22,9 @@
 - All NGAP TNLAs drop - don't reset, ues-retained = true. 
 - All F1AP TNLAs drop - reset. 
 - All E1AP TNLAs drop - ?
-- Triangular redirection from AMF
-- Selection and stickiness of SCTP streams
-- Specialized TNLAs for UE or non UE signaling only
 
 # TECH DEBT
+- Two bugs that show up in Wireshark capture of session establishment test.
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
@@ -54,8 +52,7 @@
 - Fix clippy
 ----REDIS----
 - Don't create 1 Redis connection per access
-- Intermittent failure of live redis test
-- Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
+- Live redis test returns ok even after "# Failed listening on port 23491 (TCP), aborting."
 - Redis live test should not create Redis dump.rdb
 ----SCTP----
 - sock_opt.rs doesn't need to be a separate file
@@ -63,6 +60,13 @@
 -----FREE5GC DEMO------
 - free5GC demo can register 2 (N?) UEs
 - GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
+
+# MEDIUM TERM
+- Selection and stickiness of SCTP streams
+- Triangular redirection and upstream messages on old binding
+- Sample userplane 
+- Dockerfiles and Helm charts
+- Distributed timers and failure path cleanup mechanism
 
 # DONE
 - 1st worker initializes NG interface and 2nd worker joins in

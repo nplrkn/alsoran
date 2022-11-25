@@ -64,10 +64,6 @@ To run the live registration against free5GC takes a bit more setup - see the [d
 
 Finally you might want to browse the design docs in documentation/design.  They are not perfectly maintained but give a good idea of the design thinking that has gone into Alsoran so far.
 
-## Up next
-
--  Scale out of control plane.
-
 ## Contributing
 
 So far, Alsoran has been developed by a single person, with only a few hours a week to spare, so progress is slow.  If you want to make it more useful for your own project, please consider contributing!  Start by creating a Github issue or discusion to propose the change you want to make.
