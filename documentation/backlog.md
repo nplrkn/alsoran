@@ -69,6 +69,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Assoc should be in pool by the point that the connect call returns
 - 1st worker initializes NG interface and 2nd worker joins in
 - 1st worker receives UP connection and adds 2nd worker
 - 1st worker receives DU connection and adds 2nd worker

@@ -2,7 +2,7 @@
 
 Alsoran is a Rust implementation of the gNodeB Centralized Unit (gNB-CU) of the 5G Radio Access Network (RAN).
 
-This is the component that helps 5G endpoints (UEs) manage their radio connections and request network access.  It connects UEs to the 5G Core that is responsible for the local radio coverage where the UE finds itself. 
+This is the component that manages the radio access of 5G endpoints (UEs).  It connects UEs to a 5G Core. 
 
 In the control plane, the gNB-CU communicates with  
 - the 5G Core Access Management and Mobility function (AMF) using the NGAP protocol

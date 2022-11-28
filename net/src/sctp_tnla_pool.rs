@@ -45,59 +45,6 @@ impl SctpTnlaPool {
             .collect()
     }
 
-    pub async fn add_and_handle_no_spawn<H>(
-        &self,
-        assoc_id: AssocId,
-        assoc: Arc<SctpAssociation>,
-        handler: H,
-        stop_token: StopToken,
-        logger: Logger,
-    ) where
-        H: TnlaEventHandler,
-    {
-        self.assocs.lock().await.insert(assoc_id, assoc.clone());
-
-        trace!(logger, "Notify TNLA established");
-        spawn_handle_event(
-            handler.clone(),
-            TnlaEvent::Established(assoc.remote_address),
-            assoc_id,
-            logger.clone(),
-        );
-
-        trace!(logger, "Start TNLA event loop");
-        let message_stream = assoc.recv_msg_stream().take_until(stop_token);
-        pin_mut!(message_stream);
-        loop {
-            match message_stream.next().await {
-                // Graceful shutdown
-                None => break,
-                // Remote end terminated connection
-                Some(Err(_)) => {
-                    spawn_handle_event(
-                        handler.clone(),
-                        TnlaEvent::Terminated,
-                        assoc_id,
-                        logger.clone(),
-                    );
-                    break;
-                }
-                // Received a message
-                Some(Ok(message)) => {
-                    async_std::task::spawn(handle_message(
-                        handler.clone(),
-                        message,
-                        assoc.clone(),
-                        assoc_id,
-                        logger.clone(),
-                    ));
-                }
-            }
-        }
-
-        self.assocs.lock().await.remove(&assoc_id);
-    }
-
     /// Picks a new binding (association and in future stream ID).  
     /// To load balance among different associations, use a different seed.
     pub async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
@@ -144,15 +91,66 @@ impl SctpTnlaPool {
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
         let self_clone = self.clone();
+        self.assocs.lock().await.insert(assoc_id, assoc.clone());
         let shutdown_handle = ShutdownHandle::new(
             async_std::task::spawn(async move {
                 self_clone
-                    .add_and_handle_no_spawn(assoc_id, assoc, handler, stop_token, logger)
+                    .handle_assoc(assoc_id, assoc, handler, stop_token, logger)
                     .await;
             }),
             stop_source,
         );
         self.tasks.lock().await.push(shutdown_handle);
+    }
+
+    async fn handle_assoc<H>(
+        &self,
+        assoc_id: AssocId,
+        assoc: Arc<SctpAssociation>,
+        handler: H,
+        stop_token: StopToken,
+        logger: Logger,
+    ) where
+        H: TnlaEventHandler,
+    {
+        spawn_handle_event(
+            handler.clone(),
+            TnlaEvent::Established(assoc.remote_address),
+            assoc_id,
+            logger.clone(),
+        );
+
+        trace!(logger, "Start TNLA event loop");
+        let message_stream = assoc.recv_msg_stream().take_until(stop_token);
+        pin_mut!(message_stream);
+        loop {
+            match message_stream.next().await {
+                // Graceful shutdown
+                None => break,
+                // Remote end terminated connection
+                Some(Err(_)) => {
+                    spawn_handle_event(
+                        handler.clone(),
+                        TnlaEvent::Terminated,
+                        assoc_id,
+                        logger.clone(),
+                    );
+                    break;
+                }
+                // Received a message
+                Some(Ok(message)) => {
+                    async_std::task::spawn(handle_message(
+                        handler.clone(),
+                        message,
+                        assoc.clone(),
+                        assoc_id,
+                        logger.clone(),
+                    ));
+                }
+            }
+        }
+
+        self.assocs.lock().await.remove(&assoc_id);
     }
 }
 
