@@ -40,6 +40,10 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             self.logger,
             "NGAP interface initialized with {:?}", response.amf_name
         );
+
+        // Associate this TNLA with the NGAP interface instance.
+        self.associate_connection();
+
         Ok(response.amf_name)
     }
 }

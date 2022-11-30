@@ -10,9 +10,7 @@ use f1ap::{
 };
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
-    pub async fn add_f1ap_endpoint(&self, f1ap_endpoint_ip_addr: &String) -> Result<()> {
-        self.log_message("Add F1AP endpoint");
-
+    pub async fn gnb_cu_configuration_update(&self, f1ap_endpoint_ip_addr: &String) -> Result<()> {
         let gnb_cu_configuration_update = GnbCuConfigurationUpdate {
             transaction_id: TransactionId(1), // TODO
             cells_to_be_activated_list: None,
@@ -44,6 +42,10 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             )
             .await?;
         self.log_message(">> GnbCuConfigurationUpdateAcknowledge");
+
+        // Associate this TNLA with the F1AP interface instance.
+        self.associate_connection();
+
         Ok(())
     }
 }

@@ -28,6 +28,10 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             .ngap_request::<RanConfigurationUpdateProcedure>(ran_configuration_update, self.logger)
             .await?;
         self.log_message("RanConfigurationUpdateAcknowledge <<");
+
+        // Associate this TNLA with the NGAP interface instance.
+        self.associate_connection();
+
         Ok(())
     }
 }

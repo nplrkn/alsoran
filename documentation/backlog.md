@@ -5,19 +5,19 @@
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
-- Test one UE through each worker - step through trace
-- 2nd worker receives UP connection and adds 1st worker
-- 1st worker sets up NGAP but 2nd worker gets E1 - run through multiple permutations of control logic?
+- UP / DU connections in either order
+- Coordinator ensures time gap between attempts to add workers 
+- Failure and retry to set up / join NG / F1 / E1
 - Switchover of UE on dead worker - RAN initiated
 - Switchover of UE on dead worker - AMF initiated
 - Restart and catchup of coordinator
 - Allow AMF to specify 2nd endpoint - ask worker 1
 - Allow AMF to specify 2nd endpoint - ask worker 2
-- Coordinator ensures time gap between attempts to add workers 
 - Load balance, stickiness and switchover between TNLAs to AMF
 - Allow DU / UP to set up multiple connections to same worker
 - Connection API operations must be idempotent
 - Stickiness and switchover between TNLAs to DU / UP
+- AMF not started at point workers start
 - Both workers die - reset
 - All NGAP TNLAs drop - don't reset, ues-retained = true. 
 - All F1AP TNLAs drop - reset. 
@@ -69,6 +69,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- 2nd worker receives UP / DU connection and adds 1st worker
+- Test one UE through each worker
 - Assoc should be in pool by the point that the connect call returns
 - 1st worker initializes NG interface and 2nd worker joins in
 - 1st worker receives UP connection and adds 2nd worker

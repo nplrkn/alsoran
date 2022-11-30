@@ -10,9 +10,10 @@ use e1ap::{
 };
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
-    pub async fn add_e1ap_endpoint(&self, e1ap_endpoint_ip_addr: &String) -> Result<()> {
-        self.log_message("Add E1AP endpoint");
-
+    pub async fn gnb_cu_cp_configuration_update(
+        &self,
+        e1ap_endpoint_ip_addr: &String,
+    ) -> Result<()> {
         let gnb_cu_cp_configuration_update = GnbCuCpConfigurationUpdate {
             transaction_id: TransactionId(1), // TODO
             gnb_cu_cp_name: None,
@@ -36,6 +37,10 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             )
             .await?;
         self.log_message(">> GnbCuCpConfigurationUpdateAcknowledge");
+
+        // Associate this TNLA with the E1AP interface instance.
+        self.associate_connection();
+
         Ok(())
     }
 }

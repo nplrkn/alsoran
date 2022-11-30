@@ -420,7 +420,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
     fn associate_connection(&self) {
         // The basic initial implementation of this function just sends a refresh to the coordinator and assumes
         // that there is one instance of E1AP, F1AP, and NGAP.  This has the necessary effect of triggrering
-        // the coordinator to add all workers endpoints, but will need to be improved a) when we simultaneously
+        // the coordinator to add all worker endpoints, but will need to be improved a) when we simultaneously
         // support multiple different interface instances or b) if we want to deal with rogue connections that are
         // not properly initialized according to the protocol procedures.
         let self_clone = self.clone();

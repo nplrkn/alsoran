@@ -72,7 +72,7 @@ where
         _context: &C,
     ) -> Result<AddE1apResponse, ApiError> {
         match Workflow::new(&self.gnbcu, &self.logger)
-            .add_e1ap_endpoint(&transport_address)
+            .gnb_cu_cp_configuration_update(&transport_address)
             .await
         {
             Ok(_) => Ok(AddE1apResponse::Success),
@@ -93,7 +93,7 @@ where
         _context: &C,
     ) -> Result<AddF1apResponse, ApiError> {
         match Workflow::new(&self.gnbcu, &self.logger)
-            .add_f1ap_endpoint(&transport_address)
+            .gnb_cu_configuration_update(&transport_address)
             .await
         {
             Ok(_) => Ok(AddF1apResponse::Success),
@@ -115,7 +115,7 @@ where
     ) -> Result<JoinNgapResponse, ApiError> {
         // First establish a connection.
         if let Err(e) = self.gnbcu.ngap_connect(&transport_address).await {
-            error!(self.logger, "Failed to connect- {}", e);
+            error!(self.logger, "Failed to connect - {}", e);
             return Ok(JoinNgapResponse::Failure(format!(
                 "Failed to connect to AMF at {:?}",
                 transport_address

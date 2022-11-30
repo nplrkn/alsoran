@@ -128,7 +128,7 @@ impl TestContextBuilder {
         info!(tc.logger, "Spawn {} worker(s)", self.worker_count);
         for worker_index in 0..self.worker_count {
             tc.start_worker_on_random_ip(&datastore).await;
-            tc.get_worker_to_stage(worker_index as usize, &self.stage)
+            tc.get_worker_to_stage(worker_index as usize, &self.stage, worker_index == 0)
                 .await?;
         }
 
@@ -227,45 +227,71 @@ impl TestContext {
         panic!("Repeatedly failed to create worker")
     }
 
-    async fn get_worker_to_stage<'a>(
+    pub async fn interface_setup_stage<'a>(
         &'a mut self,
         worker_index: usize,
         stage: &Stage,
+        setup_interface: bool,
     ) -> Result<&'a mut Self> {
-        debug!(
-            self.logger,
-            "Get worker {} to stage {:?}", worker_index, stage
-        );
-
         let worker_ip = self.workers[worker_index]
             .config
             .ip_addr
             .unwrap()
             .to_string();
 
-        if stage >= &Stage::AmfConnected {
-            self.amf.expect_connection().await;
-            if worker_index == 0 {
-                self.amf.handle_ng_setup().await?;
-            } else {
-                self.amf.handle_ran_configuration_update().await?;
+        match stage {
+            &Stage::Init => (),
+            &Stage::AmfConnected => {
+                self.amf.expect_connection().await;
+                if setup_interface {
+                    self.amf.handle_ng_setup().await?;
+                } else {
+                    self.amf.handle_ran_configuration_update().await?;
+                }
             }
+            &Stage::CuUpConnected => {
+                if setup_interface {
+                    self.cu_up.perform_e1_setup(&worker_ip).await?;
+                } else {
+                    self.cu_up
+                        .handle_cu_cp_configuration_update(&worker_ip)
+                        .await?;
+                }
+            }
+            &Stage::DuConnected => {
+                if setup_interface {
+                    self.du.perform_f1_setup(&worker_ip).await?;
+                } else {
+                    self.du.handle_cu_configuration_update(&worker_ip).await?;
+                }
+            }
+        }
+
+        Ok(self)
+    }
+
+    async fn get_worker_to_stage<'a>(
+        &'a mut self,
+        worker_index: usize,
+        stage: &Stage,
+        setup_interface: bool,
+    ) -> Result<&'a mut Self> {
+        debug!(
+            self.logger,
+            "Get worker {} to stage {:?}", worker_index, stage
+        );
+
+        if stage >= &Stage::AmfConnected {
+            self.interface_setup_stage(worker_index, &Stage::AmfConnected, setup_interface)
+                .await?;
         }
         if stage >= &Stage::CuUpConnected {
-            if worker_index == 0 {
-                self.cu_up.perform_e1_setup(&worker_ip).await?;
-            } else {
-                self.cu_up
-                    .handle_cu_cp_configuration_update(&worker_ip)
-                    .await?;
-            }
+            self.interface_setup_stage(worker_index, &Stage::CuUpConnected, setup_interface)
+                .await?;
         }
         if stage >= &Stage::DuConnected {
-            if worker_index == 0 {
-                self.du.perform_f1_setup(&worker_ip).await?;
-            } else {
-                self.du.handle_cu_configuration_update(&worker_ip).await?;
-            }
+            self.interface_setup_stage(worker_index, &Stage::DuConnected, setup_interface)
+                .await?;
         }
         Ok(self)
     }
