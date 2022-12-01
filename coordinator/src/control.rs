@@ -3,12 +3,13 @@ use anyhow::Result;
 use async_channel::Receiver;
 use async_std::task::JoinHandle;
 use connection_api::{
-    AddE1apResponse, AddF1apResponse, Api, Client, JoinNgapResponse, SetupNgapResponse,
+    models::{ConnectionInfo, OperationType},
+    AddConnectionResponse, Api, Client,
 };
 use coordination_api::models::WorkerInfo;
 use futures::stream::StreamExt;
 use hyper::Body;
-use slog::{debug, error, info, warn, Logger};
+use slog::{debug, info, warn, Logger};
 use std::{collections::HashMap, marker::PhantomData, time::Instant};
 use stop_token::StopToken;
 use swagger::{AuthData, ContextBuilder, DropContextService, EmptyContext, Push, XSpanIdString};
@@ -100,20 +101,26 @@ pub type ClientContext = swagger::make_context_ty!(
 
 struct WorkerState {
     info: WorkerInfo,
-    last_e1_attempt: Option<Instant>,
-    last_f1_attempt: Option<Instant>,
-    last_ng_attempt: Option<Instant>,
+    e1: ConnectionState,
+    f1: ConnectionState,
+    ng: ConnectionState,
 }
 
 impl WorkerState {
     fn new(info: WorkerInfo) -> Self {
         WorkerState {
             info,
-            last_e1_attempt: None,
-            last_f1_attempt: None,
-            last_ng_attempt: None,
+            e1: ConnectionState::default(),
+            f1: ConnectionState::default(),
+            ng: ConnectionState::default(),
         }
     }
+}
+
+#[derive(Default)]
+struct ConnectionState {
+    last_attempt: Option<Instant>,
+    up: bool,
 }
 
 async fn control_task<T: Api<ClientContext>, P: ConnectionApiProvider<T>>(
@@ -258,43 +265,20 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         logger: &Logger,
         setup: bool,
     ) -> Result<()> {
-        let id = worker.info.worker_unique_id;
-        if self.recently_attempted(worker.last_ng_attempt) {
-            info!(logger, "Recently tried to set up NGAP for {:x} - wait", id);
-            return Ok(());
-        }
-
-        info!(
+        self.add_connection(
+            &worker.info.connection_api_url,
+            &worker.info.worker_unique_id,
+            &self.config.amf_address,
+            &mut worker.ng,
+            if setup {
+                OperationType::SetupNg
+            } else {
+                OperationType::JoinNg
+            },
+            context,
             logger,
-            "{:x} to {} NGAP interface",
-            id,
-            if setup { "setup" } else { "join" }
-        );
-        worker.last_ng_attempt = Some(Instant::now());
-
-        let client = self.provider.client(&worker.info.connection_api_url)?;
-        let amf_address = self.config.amf_address.clone().into();
-
-        if setup {
-            match client.setup_ngap(amf_address, context).await {
-                Ok(SetupNgapResponse::Success(_)) => {
-                    debug!(logger, "Setup NGAP ok");
-                    worker.info.connected_amfs = vec!["amf".to_string()];
-                }
-                Ok(r) => error!(logger, "NGAP setup failure - {:?}", r),
-                Err(e) => error!(logger, "NGAP setup error - {}", e),
-            }
-        } else {
-            match client.join_ngap(amf_address, context).await {
-                Ok(JoinNgapResponse::Success) => {
-                    debug!(logger, "Join NGAP ok");
-                    worker.info.connected_amfs = vec!["amf".to_string()];
-                }
-                Ok(r) => error!(logger, "NGAP join failure - {:?}", r),
-                Err(e) => error!(logger, "NGAP join error - {}", e),
-            }
-        }
-        Ok(())
+        )
+        .await
     }
 
     async fn add_e1ap(
@@ -304,34 +288,16 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
-        let id = new_worker.info.worker_unique_id;
-        if self.recently_attempted(new_worker.last_e1_attempt) {
-            info!(logger, "Recently tried to set up E1AP for {:x} - wait", id);
-            return Ok(());
-        }
-
-        info!(logger, "{:x} to join existing E1AP interface", id);
-        new_worker.last_e1_attempt = Some(Instant::now());
-
-        match self
-            .provider
-            .client(&helper.info.connection_api_url)?
-            .add_e1ap(new_worker.info.e1_address.clone().into(), context)
-            .await
-        {
-            Ok(AddE1apResponse::Success) => {
-                debug!(logger, "Add E1ap ok");
-            }
-            Ok(r) => warn!(
-                logger,
-                "Failure adding E1AP interface for {:x} - {:?}", id, r
-            ),
-            Err(e) => warn!(
-                logger,
-                "API error adding E1AP interface for {:x} - {}", id, e
-            ),
-        }
-        Ok(())
+        self.add_connection(
+            &helper.info.connection_api_url,
+            &new_worker.info.worker_unique_id,
+            &new_worker.info.e1_address,
+            &mut new_worker.e1,
+            OperationType::AddE1,
+            context,
+            logger,
+        )
+        .await
     }
 
     async fn add_f1ap(
@@ -341,33 +307,62 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
-        let id = new_worker.info.worker_unique_id;
-        if self.recently_attempted(new_worker.last_f1_attempt) {
-            info!(logger, "Recently tried to set up F1AP for {:x} - wait", id);
+        self.add_connection(
+            &helper.info.connection_api_url,
+            &new_worker.info.worker_unique_id,
+            &new_worker.info.f1_address,
+            &mut new_worker.f1,
+            OperationType::AddF1,
+            context,
+            logger,
+        )
+        .await
+    }
+
+    async fn add_connection(
+        &self,
+        url: &str,
+        added_worker_id: &Uuid,
+        ip_address: &str,
+        connection_state: &mut ConnectionState,
+        op: OperationType,
+        context: &ClientContext,
+        logger: &Logger,
+    ) -> Result<()> {
+        let id = added_worker_id;
+        if self.recently_attempted(connection_state.last_attempt) {
+            info!(logger, "Skip {} for {:x} - recently attempted", op, id);
             return Ok(());
         }
 
-        info!(logger, "{:x} to join existing F1AP interface", id);
-        new_worker.last_f1_attempt = Some(Instant::now());
+        info!(logger, "{:x} to add connection with {}", id, op);
+        connection_state.last_attempt = Some(Instant::now());
 
         match self
             .provider
-            .client(&helper.info.connection_api_url)?
-            .add_f1ap(new_worker.info.f1_address.clone().into(), context)
+            .client(url)?
+            .add_connection(
+                ConnectionInfo {
+                    operation_type: op,
+                    ip_address: ip_address.into(),
+                },
+                context,
+            )
             .await
         {
-            Ok(AddF1apResponse::Success) => {
-                debug!(logger, "Add F1ap ok");
+            Ok(AddConnectionResponse::Success(_revision_number)) => {
+                debug!(logger, "Ok");
+
+                // Update our local view of whether this connection is up.
+                connection_state.up = true;
+
+                // TODO: store the revision number so that this doesn't get overwritten by an
+                // out of date refresh.
             }
-            Ok(r) => warn!(
-                logger,
-                "Failure adding F1AP interface for {:x} - {:?}", id, r
-            ),
-            Err(e) => warn!(
-                logger,
-                "API error adding F1AP interface for {:x} - {}", id, e
-            ),
+            Ok(r) => warn!(logger, "Failure of {} for {:x} - {:?}", op, id, r),
+            Err(e) => warn!(logger, "API error in {} for {:x} - {}", op, id, e),
         }
+
         Ok(())
     }
 }

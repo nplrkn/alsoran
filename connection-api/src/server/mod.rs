@@ -22,10 +22,7 @@ pub use crate::context;
 type ServiceFuture = BoxFuture<'static, Result<Response<Body>, crate::ServiceError>>;
 
 use crate::{Api,
-     AddE1apResponse,
-     AddF1apResponse,
-     JoinNgapResponse,
-     SetupNgapResponse
+     AddConnectionResponse
 };
 
 mod paths {
@@ -33,17 +30,11 @@ mod paths {
 
     lazy_static! {
         pub static ref GLOBAL_REGEX_SET: regex::RegexSet = regex::RegexSet::new(vec![
-            r"^/v1/addE1ap$",
-            r"^/v1/addF1ap$",
-            r"^/v1/joinNgap$",
-            r"^/v1/setupNgap$"
+            r"^/v1/addConnection$"
         ])
         .expect("Unable to create global regex set");
     }
-    pub(crate) static ID_ADDE1AP: usize = 0;
-    pub(crate) static ID_ADDF1AP: usize = 1;
-    pub(crate) static ID_JOINNGAP: usize = 2;
-    pub(crate) static ID_SETUPNGAP: usize = 3;
+    pub(crate) static ID_ADDCONNECTION: usize = 0;
 }
 
 pub struct MakeService<T, C> where
@@ -148,8 +139,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
         match method {
 
-            // AddE1ap - POST /addE1ap
-            hyper::Method::POST if path.matched(paths::ID_ADDE1AP) => {
+            // AddConnection - POST /addConnection
+            hyper::Method::POST if path.matched(paths::ID_ADDCONNECTION) => {
                 // Body parameters (note that non-required body parameters will ignore garbage
                 // values, rather than causing a 400 response). Produce warning header and logs for
                 // any unused fields.
@@ -157,31 +148,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
+                                let param_connection_info: Option<models::ConnectionInfo> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_body) => param_body,
+                                        Ok(param_connection_info) => param_connection_info,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter ConnectionInfo - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter ConnectionInfo due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_body = match param_body {
-                                    Some(param_body) => param_body,
+                                let param_connection_info = match param_connection_info {
+                                    Some(param_connection_info) => param_connection_info,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter body"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
+                                                        .body(Body::from("Missing required body parameter ConnectionInfo"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter ConnectionInfo")),
                                 };
 
-                                let result = api_impl.add_e1ap(
-                                            param_body,
+                                let result = api_impl.add_connection(
+                                            param_connection_info,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -199,285 +190,25 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                AddE1apResponse::Success
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
-                                                },
-                                                AddE1apResponse::NoConnection
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
-                                                },
-                                                AddE1apResponse::Failure
-                                                    (body)
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
-                                                    response.headers_mut().insert(
-                                                        CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for ADD_E1AP_FAILURE"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
-                                                },
-                                            },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
-                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
-                                            },
-                                        }
-
-                                        Ok(response)
-                            },
-                            Err(e) => Ok(Response::builder()
-                                                .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
-                        }
-            },
-
-            // AddF1ap - POST /addF1ap
-            hyper::Method::POST if path.matched(paths::ID_ADDF1AP) => {
-                // Body parameters (note that non-required body parameters will ignore garbage
-                // values, rather than causing a 400 response). Produce warning header and logs for
-                // any unused fields.
-                let result = body.into_raw().await;
-                match result {
-                            Ok(body) => {
-                                let mut unused_elements = Vec::new();
-                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
-                                    let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
-                                    match serde_ignored::deserialize(deserializer, |path| {
-                                            warn!("Ignoring unknown field in body: {}", path);
-                                            unused_elements.push(path.to_string());
-                                    }) {
-                                        Ok(param_body) => param_body,
-                                        Err(e) => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
-                                    }
-                                } else {
-                                    None
-                                };
-                                let param_body = match param_body {
-                                    Some(param_body) => param_body,
-                                    None => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter body"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
-                                };
-
-                                let result = api_impl.add_f1ap(
-                                            param_body,
-                                        &context
-                                    ).await;
-                                let mut response = Response::new(Body::empty());
-                                response.headers_mut().insert(
-                                            HeaderName::from_static("x-span-id"),
-                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
-                                                .expect("Unable to create X-Span-ID header value"));
-
-                                        if !unused_elements.is_empty() {
-                                            response.headers_mut().insert(
-                                                HeaderName::from_static("warning"),
-                                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
-                                                    .expect("Unable to create Warning header value"));
-                                        }
-
-                                        match result {
-                                            Ok(rsp) => match rsp {
-                                                AddF1apResponse::Success
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
-                                                },
-                                                AddF1apResponse::NoConnection
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
-                                                },
-                                                AddF1apResponse::Failure
-                                                    (body)
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
-                                                    response.headers_mut().insert(
-                                                        CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for ADD_F1AP_FAILURE"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
-                                                },
-                                            },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
-                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
-                                            },
-                                        }
-
-                                        Ok(response)
-                            },
-                            Err(e) => Ok(Response::builder()
-                                                .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
-                        }
-            },
-
-            // JoinNgap - POST /joinNgap
-            hyper::Method::POST if path.matched(paths::ID_JOINNGAP) => {
-                // Body parameters (note that non-required body parameters will ignore garbage
-                // values, rather than causing a 400 response). Produce warning header and logs for
-                // any unused fields.
-                let result = body.into_raw().await;
-                match result {
-                            Ok(body) => {
-                                let mut unused_elements = Vec::new();
-                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
-                                    let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
-                                    match serde_ignored::deserialize(deserializer, |path| {
-                                            warn!("Ignoring unknown field in body: {}", path);
-                                            unused_elements.push(path.to_string());
-                                    }) {
-                                        Ok(param_body) => param_body,
-                                        Err(e) => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
-                                    }
-                                } else {
-                                    None
-                                };
-                                let param_body = match param_body {
-                                    Some(param_body) => param_body,
-                                    None => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter body"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
-                                };
-
-                                let result = api_impl.join_ngap(
-                                            param_body,
-                                        &context
-                                    ).await;
-                                let mut response = Response::new(Body::empty());
-                                response.headers_mut().insert(
-                                            HeaderName::from_static("x-span-id"),
-                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
-                                                .expect("Unable to create X-Span-ID header value"));
-
-                                        if !unused_elements.is_empty() {
-                                            response.headers_mut().insert(
-                                                HeaderName::from_static("warning"),
-                                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
-                                                    .expect("Unable to create Warning header value"));
-                                        }
-
-                                        match result {
-                                            Ok(rsp) => match rsp {
-                                                JoinNgapResponse::Success
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
-                                                },
-                                                JoinNgapResponse::Failure
-                                                    (body)
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
-                                                    response.headers_mut().insert(
-                                                        CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for JOIN_NGAP_FAILURE"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
-                                                },
-                                            },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
-                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
-                                            },
-                                        }
-
-                                        Ok(response)
-                            },
-                            Err(e) => Ok(Response::builder()
-                                                .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
-                        }
-            },
-
-            // SetupNgap - POST /setupNgap
-            hyper::Method::POST if path.matched(paths::ID_SETUPNGAP) => {
-                // Body parameters (note that non-required body parameters will ignore garbage
-                // values, rather than causing a 400 response). Produce warning header and logs for
-                // any unused fields.
-                let result = body.into_raw().await;
-                match result {
-                            Ok(body) => {
-                                let mut unused_elements = Vec::new();
-                                let param_body: Option<models::IpAddress> = if !body.is_empty() {
-                                    let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
-                                    match serde_ignored::deserialize(deserializer, |path| {
-                                            warn!("Ignoring unknown field in body: {}", path);
-                                            unused_elements.push(path.to_string());
-                                    }) {
-                                        Ok(param_body) => param_body,
-                                        Err(e) => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter body - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to schema")),
-                                    }
-                                } else {
-                                    None
-                                };
-                                let param_body = match param_body {
-                                    Some(param_body) => param_body,
-                                    None => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter body"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
-                                };
-
-                                let result = api_impl.setup_ngap(
-                                            param_body,
-                                        &context
-                                    ).await;
-                                let mut response = Response::new(Body::empty());
-                                response.headers_mut().insert(
-                                            HeaderName::from_static("x-span-id"),
-                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
-                                                .expect("Unable to create X-Span-ID header value"));
-
-                                        if !unused_elements.is_empty() {
-                                            response.headers_mut().insert(
-                                                HeaderName::from_static("warning"),
-                                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
-                                                    .expect("Unable to create Warning header value"));
-                                        }
-
-                                        match result {
-                                            Ok(rsp) => match rsp {
-                                                SetupNgapResponse::Success
+                                                AddConnectionResponse::Success
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_SUCCESS"));
+                                                            .expect("Unable to create Content-Type header for ADD_CONNECTION_SUCCESS"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
-                                                SetupNgapResponse::Failure
+                                                AddConnectionResponse::Failure
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(500).expect("Unable to turn 500 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for SETUP_NGAP_FAILURE"));
+                                                            .expect("Unable to create Content-Type header for ADD_CONNECTION_FAILURE"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
                                                 },
@@ -494,15 +225,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter body: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter body")),
+                                                .body(Body::from(format!("Couldn't read body parameter ConnectionInfo: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter ConnectionInfo")),
                         }
             },
 
-            _ if path.matched(paths::ID_ADDE1AP) => method_not_allowed(),
-            _ if path.matched(paths::ID_ADDF1AP) => method_not_allowed(),
-            _ if path.matched(paths::ID_JOINNGAP) => method_not_allowed(),
-            _ if path.matched(paths::ID_SETUPNGAP) => method_not_allowed(),
+            _ if path.matched(paths::ID_ADDCONNECTION) => method_not_allowed(),
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
                     .body(Body::empty())
                     .expect("Unable to create Not Found response"))
@@ -516,14 +244,8 @@ impl<T> RequestParser<T> for ApiRequestParser {
     fn parse_operation_id(request: &Request<T>) -> Option<&'static str> {
         let path = paths::GLOBAL_REGEX_SET.matches(request.uri().path());
         match *request.method() {
-            // AddE1ap - POST /addE1ap
-            hyper::Method::POST if path.matched(paths::ID_ADDE1AP) => Some("AddE1ap"),
-            // AddF1ap - POST /addF1ap
-            hyper::Method::POST if path.matched(paths::ID_ADDF1AP) => Some("AddF1ap"),
-            // JoinNgap - POST /joinNgap
-            hyper::Method::POST if path.matched(paths::ID_JOINNGAP) => Some("JoinNgap"),
-            // SetupNgap - POST /setupNgap
-            hyper::Method::POST if path.matched(paths::ID_SETUPNGAP) => Some("SetupNgap"),
+            // AddConnection - POST /addConnection
+            hyper::Method::POST if path.matched(paths::ID_ADDCONNECTION) => Some("AddConnection"),
             _ => None,
         }
     }

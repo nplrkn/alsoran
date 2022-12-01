@@ -7,93 +7,28 @@ info:
 servers:
   - url: http://localhost/v1
 paths:
-  /setupNgap:
+  /addConnection:
     post:
-      summary: Instructs a worker to set up an NGAP interface instance with the AMF
-      operationId: setupNgap
+      summary: Instructs a worker to add a connection
+      operationId: addConnection
       requestBody:
-        description: AMF endpoint
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IpAddress'
+              $ref: '#/components/schemas/ConnectionInfo'
             examples: 
               example1:
                 value: 
-                  host: "127.0.0.1"
-                  port: 20000
+                  operationType: "setupNg"
+                  ipAddress: "12.13.14.15"
       responses:
         '200':
           description: Success
           content:
             application/json:    
               schema:
-                $ref: "#/components/schemas/AmfInfo"
-        '500':
-          description: Failure
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /joinNgap:
-    post:
-      summary: Instructs a worker to join an existing NGAP interface instance set up by another worker.
-      operationId: joinNgap
-      requestBody:
-        description: AMF endpoint
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IpAddress'
-      responses:
-        '201':
-          description: Success
-        '500':
-          description: Failure
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /addF1ap:
-    post: 
-      summary: Instructs a worker to add another worker to an existing F1AP interface instance 
-      operationId: addF1ap
-      requestBody:
-        description: Worker F1AP endpoint
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IpAddress'
-      responses:
-        '201':
-          description: Success
-        '404':
-          description: No connection
-        '500':
-          description: Failure
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /addE1ap:
-    post: 
-      summary: Instructs a worker to add another worker to an existing E1AP interface instance 
-      operationId: addE1ap
-      requestBody:
-        description: Worker E1AP endpoint
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IpAddress'
-      responses:
-        '201':
-          description: Success  
-        '404':
-          description: No connection
+                $ref: "#/components/schemas/RevisionNumber"
         '500':
           description: Failure
           content:
@@ -103,14 +38,25 @@ paths:
 
 components:
   schemas:
-    AmfInfo:
+    ConnectionInfo:
       type: object
       required: 
-        - amfName
+        - operationType
+        - ipAddress
       properties:
-        amfName:
+        operationType:
+          $ref: "#/components/schemas/OperationType"
+        ipAddress: 
           type: string
-    IpAddress:
+    OperationType: 
       type: string
+      enum:
+        - setupNg
+        - joinNg
+        - addF1
+        - addE1
+    RevisionNumber: 
+      description: Revision number of the worker refresh just sent by this worker
+      type: integer
     Error:
       type: string

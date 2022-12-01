@@ -5,10 +5,7 @@
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
 use connection_api::{Api, ApiNoContext, Client, ContextWrapperExt, models,
-                      AddE1apResponse,
-                      AddF1apResponse,
-                      JoinNgapResponse,
-                      SetupNgapResponse,
+                      AddConnectionResponse,
                      };
 use clap::{App, Arg};
 
@@ -30,10 +27,7 @@ fn main() {
         .arg(Arg::with_name("operation")
             .help("Sets the operation to run")
             .possible_values(&[
-                "AddE1ap",
-                "AddF1ap",
-                "JoinNgap",
-                "SetupNgap",
+                "AddConnection",
             ])
             .required(true)
             .index(1))
@@ -77,27 +71,9 @@ fn main() {
     let mut rt = tokio::runtime::Runtime::new().unwrap();
 
     match matches.value_of("operation") {
-        Some("AddE1ap") => {
-            let result = rt.block_on(client.add_e1ap(
-                  serde_json::from_str::<models::IpAddress>(r#"body_example"#).expect("Failed to parse JSON example")
-            ));
-            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
-        },
-        Some("AddF1ap") => {
-            let result = rt.block_on(client.add_f1ap(
-                  serde_json::from_str::<models::IpAddress>(r#"body_example"#).expect("Failed to parse JSON example")
-            ));
-            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
-        },
-        Some("JoinNgap") => {
-            let result = rt.block_on(client.join_ngap(
-                  serde_json::from_str::<models::IpAddress>(r#"body_example"#).expect("Failed to parse JSON example")
-            ));
-            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
-        },
-        Some("SetupNgap") => {
-            let result = rt.block_on(client.setup_ngap(
-                  serde_json::from_str::<models::IpAddress>(r#"{"host":"127.0.0.1","port":20000}"#).expect("Failed to parse JSON example")
+        Some("AddConnection") => {
+            let result = rt.block_on(client.add_connection(
+                  serde_json::from_str::<models::ConnectionInfo>(r#"{"operationType":"setupNg","ipAddress":"12.13.14.15"}"#).expect("Failed to parse JSON example")
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },

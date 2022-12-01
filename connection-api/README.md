@@ -14,7 +14,7 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 1.0.0
-- Build date: 2022-11-06T11:59:07.758708+01:00[Europe/Brussels]
+- Build date: 2022-12-01T08:40:46.286208+01:00[Europe/Brussels]
 
 
 
@@ -61,10 +61,7 @@ cargo run --example server
 To run a client, follow one of the following simple steps:
 
 ```
-cargo run --example client AddE1ap
-cargo run --example client AddF1ap
-cargo run --example client JoinNgap
-cargo run --example client SetupNgap
+cargo run --example client AddConnection
 ```
 
 ### HTTPS
@@ -98,17 +95,15 @@ All URIs are relative to *http://localhost/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**addE1ap**](docs/default_api.md#addE1ap) | **POST** /addE1ap | Instructs a worker to add another worker to an existing E1AP interface instance
-[**addF1ap**](docs/default_api.md#addF1ap) | **POST** /addF1ap | Instructs a worker to add another worker to an existing F1AP interface instance
-[**joinNgap**](docs/default_api.md#joinNgap) | **POST** /joinNgap | Instructs a worker to join an existing NGAP interface instance set up by another worker.
-[**setupNgap**](docs/default_api.md#setupNgap) | **POST** /setupNgap | Instructs a worker to set up an NGAP interface instance with the AMF
+[**addConnection**](docs/default_api.md#addConnection) | **POST** /addConnection | Instructs a worker to add a connection
 
 
 ## Documentation For Models
 
- - [AmfInfo](docs/AmfInfo.md)
+ - [ConnectionInfo](docs/ConnectionInfo.md)
  - [Error](docs/Error.md)
- - [IpAddress](docs/IpAddress.md)
+ - [OperationType](docs/OperationType.md)
+ - [RevisionNumber](docs/RevisionNumber.md)
 
 
 ## Documentation For Authorization

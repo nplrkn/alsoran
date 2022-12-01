@@ -3,9 +3,11 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use common::ShutdownHandle;
-use connection_api::models::{AmfInfo, IpAddress};
+use connection_api::models::ConnectionInfo;
+use connection_api::models::OperationType;
 use connection_api::server::MakeService;
-use connection_api::{AddE1apResponse, AddF1apResponse, Api, JoinNgapResponse, SetupNgapResponse};
+use connection_api::AddConnectionResponse;
+use connection_api::Api;
 use ngap::AmfName;
 use slog::{debug, error, warn, Logger};
 use std::marker::PhantomData;
@@ -65,47 +67,75 @@ impl<C: Clone, G: Gnbcu> Api<C> for ConnectionApiHandler<C, G>
 where
     C: Has<XSpanIdString> + Send + Sync,
 {
-    /// Instructs a worker to add another worker to an existing E1AP interface instance
-    async fn add_e1ap(
+    /// Instructs a worker to add a connection
+    async fn add_connection(
         &self,
-        transport_address: IpAddress,
-        _context: &C,
-    ) -> Result<AddE1apResponse, ApiError> {
-        match Workflow::new(&self.gnbcu, &self.logger)
-            .gnb_cu_cp_configuration_update(&transport_address)
-            .await
-        {
-            Ok(_) => Ok(AddE1apResponse::Success),
-            Err(e) => {
-                warn!(self.logger, "E1AP add failed - {:?}", e);
-                Ok(AddE1apResponse::Failure(format!(
-                    "E1AP add of {} failed",
-                    transport_address.to_string()
-                )))
+        connection_info: ConnectionInfo,
+        context: &C,
+    ) -> Result<AddConnectionResponse, ApiError> {
+        match connection_info.operation_type {
+            OperationType::AddE1 => {
+                Workflow::new(&self.gnbcu, &self.logger)
+                    .gnb_cu_cp_configuration_update(&connection_info.ip_address)
+                    .await
+            }
+            OperationType::AddF1 => {
+                Workflow::new(&self.gnbcu, &self.logger)
+                    .gnb_cu_configuration_update(&connection_info.ip_address)
+                    .await
+            }
+            OperationType::SetupNg => {
+                todo!()
+            }
+            OperationType::JoinNg => {
+                todo!()
             }
         }
+        .map(|revision_number| AddConnectionResponse::Success(revision_number))
+        .or_else(|e| Ok(AddConnectionResponse::Failure(e.to_string())))
     }
 
+    /// Instructs a worker to add another worker to an existing E1AP interface instance
+    // async fn add_e1ap(
+    //     &self,
+    //     transport_address: IpAddress,
+    //     _context: &C,
+    // ) -> Result<AddE1apResponse, ApiError> {
+    //     match Workflow::new(&self.gnbcu, &self.logger)
+    //         .gnb_cu_cp_configuration_update(&transport_address)
+    //         .await
+    //     {
+    //         Ok(_) => Ok(AddE1apResponse::Success),
+    //         Err(e) => {
+    //             warn!(self.logger, "E1AP add failed - {:?}", e);
+    //             Ok(AddE1apResponse::Failure(format!(
+    //                 "E1AP add of {} failed",
+    //                 transport_address.to_string()
+    //             )))
+    //         }
+    //     }
+    // }
+
     /// Instructs a worker to add another worker to an existing F1AP interface instance
-    async fn add_f1ap(
-        &self,
-        transport_address: IpAddress,
-        _context: &C,
-    ) -> Result<AddF1apResponse, ApiError> {
-        match Workflow::new(&self.gnbcu, &self.logger)
-            .gnb_cu_configuration_update(&transport_address)
-            .await
-        {
-            Ok(_) => Ok(AddF1apResponse::Success),
-            Err(e) => {
-                warn!(self.logger, "F1AP add failed - {:?}", e);
-                Ok(AddF1apResponse::Failure(format!(
-                    "F1AP add of {} failed",
-                    transport_address.to_string()
-                )))
-            }
-        }
-    }
+    // async fn add_f1ap(
+    //     &self,
+    //     transport_address: IpAddress,
+    //     _context: &C,
+    // ) -> Result<AddF1apResponse, ApiError> {
+    //     match Workflow::new(&self.gnbcu, &self.logger)
+    //         .gnb_cu_configuration_update(&transport_address)
+    //         .await
+    //     {
+    //         Ok(_) => Ok(AddF1apResponse::Success),
+    //         Err(e) => {
+    //             warn!(self.logger, "F1AP add failed - {:?}", e);
+    //             Ok(AddF1apResponse::Failure(format!(
+    //                 "F1AP add of {} failed",
+    //                 transport_address.to_string()
+    //             )))
+    //         }
+    //     }
+    // }
 
     /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
     async fn join_ngap(

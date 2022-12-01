@@ -1,12 +1,12 @@
 # NEXT UP
+- Simplify and add revision number to connection API
+- Use revision number to ignore out of date refreshes
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github, esp front page and roadmap
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
-- UP / DU connections in either order
-- Coordinator ensures time gap between attempts to add workers 
 - Failure and retry to set up / join NG / F1 / E1
 - Switchover of UE on dead worker - RAN initiated
 - Switchover of UE on dead worker - AMF initiated
@@ -69,6 +69,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- UP / DU connections in either order
+- Coordinator ensures time gap between attempts to add workers 
 - 2nd worker receives UP / DU connection and adds 1st worker
 - Test one UE through each worker
 - Assoc should be in pool by the point that the connect call returns

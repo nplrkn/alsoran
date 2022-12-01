@@ -94,10 +94,7 @@ impl<C> Server<C> {
 
 use connection_api::{
     Api,
-    AddE1apResponse,
-    AddF1apResponse,
-    JoinNgapResponse,
-    SetupNgapResponse,
+    AddConnectionResponse,
 };
 use connection_api::server::MakeService;
 use std::error::Error;
@@ -106,47 +103,14 @@ use swagger::ApiError;
 #[async_trait]
 impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 {
-    /// Instructs a worker to add another worker to an existing E1AP interface instance
-    async fn add_e1ap(
+    /// Instructs a worker to add a connection
+    async fn add_connection(
         &self,
-        body: models::IpAddress,
-        context: &C) -> Result<AddE1apResponse, ApiError>
+        connection_info: models::ConnectionInfo,
+        context: &C) -> Result<AddConnectionResponse, ApiError>
     {
         let context = context.clone();
-        info!("add_e1ap({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
-    }
-
-    /// Instructs a worker to add another worker to an existing F1AP interface instance
-    async fn add_f1ap(
-        &self,
-        body: models::IpAddress,
-        context: &C) -> Result<AddF1apResponse, ApiError>
-    {
-        let context = context.clone();
-        info!("add_f1ap({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
-    }
-
-    /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
-    async fn join_ngap(
-        &self,
-        body: models::IpAddress,
-        context: &C) -> Result<JoinNgapResponse, ApiError>
-    {
-        let context = context.clone();
-        info!("join_ngap({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
-    }
-
-    /// Instructs a worker to set up an NGAP interface instance with the AMF
-    async fn setup_ngap(
-        &self,
-        body: models::IpAddress,
-        context: &C) -> Result<SetupNgapResponse, ApiError>
-    {
-        let context = context.clone();
-        info!("setup_ngap({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
+        info!("add_connection({:?}) - X-Span-ID: {:?}", connection_info, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
 

@@ -3,9 +3,10 @@
 Cargo.toml
 README.md
 api/openapi.yaml
-docs/AmfInfo.md
+docs/ConnectionInfo.md
 docs/Error.md
-docs/IpAddress.md
+docs/OperationType.md
+docs/RevisionNumber.md
 docs/default_api.md
 examples/ca.pem
 examples/client/main.rs
