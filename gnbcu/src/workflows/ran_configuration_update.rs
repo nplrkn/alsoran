@@ -30,7 +30,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         self.log_message("RanConfigurationUpdateAcknowledge <<");
 
         // Associate this TNLA with the NGAP interface instance.
-        self.associate_connection();
+        //self.associate_connection();
 
         Ok(())
     }

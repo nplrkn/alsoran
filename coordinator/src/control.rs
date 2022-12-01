@@ -266,7 +266,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
 
         info!(
             logger,
-            "{:x} to {} existing E1AP interface",
+            "{:x} to {} NGAP interface",
             id,
             if setup { "setup" } else { "join" }
         );
@@ -279,6 +279,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             match client.setup_ngap(amf_address, context).await {
                 Ok(SetupNgapResponse::Success(_)) => {
                     debug!(logger, "Setup NGAP ok");
+                    worker.info.connected_amfs = vec!["amf".to_string()];
                 }
                 Ok(r) => error!(logger, "NGAP setup failure - {:?}", r),
                 Err(e) => error!(logger, "NGAP setup error - {}", e),
@@ -287,6 +288,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             match client.join_ngap(amf_address, context).await {
                 Ok(JoinNgapResponse::Success) => {
                     debug!(logger, "Join NGAP ok");
+                    worker.info.connected_amfs = vec!["amf".to_string()];
                 }
                 Ok(r) => error!(logger, "NGAP join failure - {:?}", r),
                 Err(e) => error!(logger, "NGAP join error - {}", e),
@@ -305,11 +307,11 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         let id = new_worker.info.worker_unique_id;
         if self.recently_attempted(new_worker.last_e1_attempt) {
             info!(logger, "Recently tried to set up E1AP for {:x} - wait", id);
-        } else {
-            new_worker.last_e1_attempt = Some(Instant::now());
+            return Ok(());
         }
 
         info!(logger, "{:x} to join existing E1AP interface", id);
+        new_worker.last_e1_attempt = Some(Instant::now());
 
         match self
             .provider
@@ -342,11 +344,11 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         let id = new_worker.info.worker_unique_id;
         if self.recently_attempted(new_worker.last_f1_attempt) {
             info!(logger, "Recently tried to set up F1AP for {:x} - wait", id);
-        } else {
-            new_worker.last_f1_attempt = Some(Instant::now());
+            return Ok(());
         }
 
         info!(logger, "{:x} to join existing F1AP interface", id);
+        new_worker.last_f1_attempt = Some(Instant::now());
 
         match self
             .provider

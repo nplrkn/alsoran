@@ -42,7 +42,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         );
 
         // Associate this TNLA with the NGAP interface instance.
-        self.associate_connection();
+        //self.associate_connection();
 
         Ok(response.amf_name)
     }
