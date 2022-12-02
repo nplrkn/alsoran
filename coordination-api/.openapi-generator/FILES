@@ -3,8 +3,10 @@
 Cargo.toml
 README.md
 api/openapi.yaml
+docs/ConnectionState.md
 docs/Error.md
 docs/IpAddress.md
+docs/RefreshWorker.md
 docs/WorkerInfo.md
 docs/default_api.md
 examples/ca.pem

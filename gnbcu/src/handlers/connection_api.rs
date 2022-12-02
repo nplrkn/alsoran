@@ -8,7 +8,6 @@ use connection_api::models::OperationType;
 use connection_api::server::MakeService;
 use connection_api::AddConnectionResponse;
 use connection_api::Api;
-use ngap::AmfName;
 use slog::{debug, error, warn, Logger};
 use std::marker::PhantomData;
 use std::net::SocketAddr;
@@ -63,15 +62,15 @@ pub async fn serve<G: Gnbcu>(addr: SocketAddr, gnbcu: G, logger: Logger) -> Resu
 }
 
 #[async_trait]
-impl<C: Clone, G: Gnbcu> Api<C> for ConnectionApiHandler<C, G>
+impl<C, G: Gnbcu> Api<C> for ConnectionApiHandler<C, G>
 where
-    C: Has<XSpanIdString> + Send + Sync,
+    C: Clone + Has<XSpanIdString> + Send + Sync,
 {
     /// Instructs a worker to add a connection
     async fn add_connection(
         &self,
         connection_info: ConnectionInfo,
-        context: &C,
+        _context: &C,
     ) -> Result<AddConnectionResponse, ApiError> {
         match connection_info.operation_type {
             OperationType::AddE1 => {
@@ -85,113 +84,24 @@ where
                     .await
             }
             OperationType::SetupNg => {
-                todo!()
+                Workflow::new(&self.gnbcu, &self.logger)
+                    .ng_setup(&connection_info.ip_address)
+                    .await
             }
             OperationType::JoinNg => {
-                todo!()
+                Workflow::new(&self.gnbcu, &self.logger)
+                    .ran_configuration_update(&connection_info.ip_address)
+                    .await
             }
         }
         .map(|revision_number| AddConnectionResponse::Success(revision_number))
-        .or_else(|e| Ok(AddConnectionResponse::Failure(e.to_string())))
-    }
-
-    /// Instructs a worker to add another worker to an existing E1AP interface instance
-    // async fn add_e1ap(
-    //     &self,
-    //     transport_address: IpAddress,
-    //     _context: &C,
-    // ) -> Result<AddE1apResponse, ApiError> {
-    //     match Workflow::new(&self.gnbcu, &self.logger)
-    //         .gnb_cu_cp_configuration_update(&transport_address)
-    //         .await
-    //     {
-    //         Ok(_) => Ok(AddE1apResponse::Success),
-    //         Err(e) => {
-    //             warn!(self.logger, "E1AP add failed - {:?}", e);
-    //             Ok(AddE1apResponse::Failure(format!(
-    //                 "E1AP add of {} failed",
-    //                 transport_address.to_string()
-    //             )))
-    //         }
-    //     }
-    // }
-
-    /// Instructs a worker to add another worker to an existing F1AP interface instance
-    // async fn add_f1ap(
-    //     &self,
-    //     transport_address: IpAddress,
-    //     _context: &C,
-    // ) -> Result<AddF1apResponse, ApiError> {
-    //     match Workflow::new(&self.gnbcu, &self.logger)
-    //         .gnb_cu_configuration_update(&transport_address)
-    //         .await
-    //     {
-    //         Ok(_) => Ok(AddF1apResponse::Success),
-    //         Err(e) => {
-    //             warn!(self.logger, "F1AP add failed - {:?}", e);
-    //             Ok(AddF1apResponse::Failure(format!(
-    //                 "F1AP add of {} failed",
-    //                 transport_address.to_string()
-    //             )))
-    //         }
-    //     }
-    // }
-
-    /// Instructs a worker to join an existing NGAP interface instance set up by another worker.
-    async fn join_ngap(
-        &self,
-        transport_address: IpAddress,
-        _context: &C,
-    ) -> Result<JoinNgapResponse, ApiError> {
-        // First establish a connection.
-        if let Err(e) = self.gnbcu.ngap_connect(&transport_address).await {
-            error!(self.logger, "Failed to connect - {}", e);
-            return Ok(JoinNgapResponse::Failure(format!(
-                "Failed to connect to AMF at {:?}",
-                transport_address
-            )));
-        }
-
-        // Carry out Configuration Update.
-        match Workflow::new(&self.gnbcu, &self.logger)
-            .ran_configuration_update()
-            .await
-        {
-            Ok(()) => Ok(JoinNgapResponse::Success),
-            Err(e) => {
-                warn!(self.logger, "NG join failed - {:?}", e);
-                Ok(JoinNgapResponse::Failure(
-                    "Failed RAN configuration update with AMF".to_string(),
-                ))
-            }
-        }
-    }
-
-    /// Instructs a worker to set up an NGAP interface instance with the AMF
-    async fn setup_ngap(
-        &self,
-        transport_address: IpAddress,
-        _context: &C,
-    ) -> Result<SetupNgapResponse, ApiError> {
-        // First establish a connection.
-        if let Err(e) = self.gnbcu.ngap_connect(&transport_address).await {
-            error!(self.logger, "Failed to connect - {}", e);
-            return Ok(SetupNgapResponse::Failure(format!(
-                "Failed to connect to AMF at {}",
-                transport_address.to_string()
-            )));
-        }
-
-        // Then carry out NG Setup
-        match Workflow::new(&self.gnbcu, &self.logger).ng_setup().await {
-            Ok(AmfName(amf_name)) => Ok(SetupNgapResponse::Success(AmfInfo { amf_name })),
-
-            Err(e) => {
-                warn!(self.logger, "NG Setup failed - {:?}", e);
-                Ok(SetupNgapResponse::Failure(
-                    "Failed NG Setup to AMF".to_string(),
-                ))
-            }
-        }
+        .or_else(|e| {
+            warn!(
+                self.logger,
+                "Error trying to add connection - {}",
+                e.to_string()
+            );
+            Ok(AddConnectionResponse::Failure(e.to_string()))
+        })
     }
 }

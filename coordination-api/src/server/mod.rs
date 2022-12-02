@@ -148,31 +148,31 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 match result {
                             Ok(body) => {
                                 let mut unused_elements = Vec::new();
-                                let param_worker_info: Option<models::WorkerInfo> = if !body.is_empty() {
+                                let param_refresh_worker: Option<models::RefreshWorker> = if !body.is_empty() {
                                     let deserializer = &mut serde_json::Deserializer::from_slice(&*body);
                                     match serde_ignored::deserialize(deserializer, |path| {
                                             warn!("Ignoring unknown field in body: {}", path);
                                             unused_elements.push(path.to_string());
                                     }) {
-                                        Ok(param_worker_info) => param_worker_info,
+                                        Ok(param_refresh_worker) => param_refresh_worker,
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter WorkerInfo - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter WorkerInfo due to schema")),
+                                                        .body(Body::from(format!("Couldn't parse body parameter RefreshWorker - doesn't match schema: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter RefreshWorker due to schema")),
                                     }
                                 } else {
                                     None
                                 };
-                                let param_worker_info = match param_worker_info {
-                                    Some(param_worker_info) => param_worker_info,
+                                let param_refresh_worker = match param_refresh_worker {
+                                    Some(param_refresh_worker) => param_refresh_worker,
                                     None => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter WorkerInfo"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter WorkerInfo")),
+                                                        .body(Body::from("Missing required body parameter RefreshWorker"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter RefreshWorker")),
                                 };
 
                                 let result = api_impl.refresh_worker(
-                                            param_worker_info,
+                                            param_refresh_worker,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -218,8 +218,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(e) => Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter WorkerInfo: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter WorkerInfo")),
+                                                .body(Body::from(format!("Couldn't read body parameter RefreshWorker: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body parameter RefreshWorker")),
                         }
             },
 

@@ -106,11 +106,11 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /// Updates coordinator with information about a worker instance
     async fn refresh_worker(
         &self,
-        worker_info: models::WorkerInfo,
+        refresh_worker: models::RefreshWorker,
         context: &C) -> Result<RefreshWorkerResponse, ApiError>
     {
         let context = context.clone();
-        info!("refresh_worker({:?}) - X-Span-ID: {:?}", worker_info, context.get().0.clone());
+        info!("refresh_worker({:?}) - X-Span-ID: {:?}", refresh_worker, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
 

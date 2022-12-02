@@ -3,7 +3,7 @@ use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use common::ShutdownHandle;
 use connection_api::{Api as ConnectionApi, Client};
-use coordination_api::models::{self, WorkerInfo};
+use coordination_api::models::{self, RefreshWorker};
 use coordination_api::server::MakeService;
 use coordination_api::RefreshWorkerResponse;
 use coordination_api::{context::MakeAddContext, Api};
@@ -21,14 +21,14 @@ use crate::{Config, ConnectionControlConfig};
 pub struct Server<C> {
     logger: Logger,
     marker: PhantomData<C>,
-    sender: Sender<WorkerInfo>,
+    sender: Sender<RefreshWorker>,
 }
 
 // To run local copy, we do new() then start().
 // To run standalone server... - spawn().
 
 impl<C> Server<C> {
-    pub fn new(logger: Logger) -> (Self, Receiver<WorkerInfo>) {
+    pub fn new(logger: Logger) -> (Self, Receiver<RefreshWorker>) {
         let (sender, receiver) = async_channel::bounded(1);
         (
             Server {
@@ -46,7 +46,7 @@ impl<C> Server<C> {
     >(
         &self,
         connection_control_config: ConnectionControlConfig,
-        receiver: Receiver<WorkerInfo>,
+        receiver: Receiver<RefreshWorker>,
         local_api_provider: T,
     ) -> ShutdownHandle {
         let stop_source = StopSource::new();
@@ -65,7 +65,7 @@ impl<C> Server<C> {
     pub fn start(
         &self,
         connection_control_config: ConnectionControlConfig,
-        receiver: Receiver<WorkerInfo>,
+        receiver: Receiver<RefreshWorker>,
     ) -> ShutdownHandle {
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
@@ -124,7 +124,7 @@ where
     /// Updates coordinator with information about a worker instance
     async fn refresh_worker(
         &self,
-        worker_info: models::WorkerInfo,
+        refresh_worker: models::RefreshWorker,
         _context: &C,
     ) -> Result<RefreshWorkerResponse, ApiError> {
         //let _context = context.clone();
@@ -135,7 +135,7 @@ where
         //     context.get().0.clone()
         // );
         // Signal the control task
-        self.sender.send(worker_info).await.unwrap_or_else(|_| {
+        self.sender.send(refresh_worker).await.unwrap_or_else(|_| {
             error!(self.logger, "Internal control channel unexpectedly closed")
         });
         Ok(RefreshWorkerResponse::SuccessfulRefresh)

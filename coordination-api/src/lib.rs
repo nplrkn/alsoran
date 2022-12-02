@@ -36,7 +36,7 @@ pub trait Api<C: Send + Sync> {
     /// Updates coordinator with information about a worker instance
     async fn refresh_worker(
         &self,
-        worker_info: models::WorkerInfo,
+        refresh_worker: models::RefreshWorker,
         context: &C) -> Result<RefreshWorkerResponse, ApiError>;
 
 }
@@ -53,7 +53,7 @@ pub trait ApiNoContext<C: Send + Sync> {
     /// Updates coordinator with information about a worker instance
     async fn refresh_worker(
         &self,
-        worker_info: models::WorkerInfo,
+        refresh_worker: models::RefreshWorker,
         ) -> Result<RefreshWorkerResponse, ApiError>;
 
 }
@@ -84,11 +84,11 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     /// Updates coordinator with information about a worker instance
     async fn refresh_worker(
         &self,
-        worker_info: models::WorkerInfo,
+        refresh_worker: models::RefreshWorker,
         ) -> Result<RefreshWorkerResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().refresh_worker(worker_info, &context).await
+        self.api().refresh_worker(refresh_worker, &context).await
     }
 
 }

@@ -12,7 +12,7 @@ use anyhow::Result;
 use async_channel::Sender;
 use async_std::sync::Mutex;
 use async_trait::async_trait;
-use coordination_api::models::WorkerInfo;
+use coordination_api::models::{ConnectionState, RefreshWorker, WorkerInfo};
 use coordination_api::{
     Api as CoordinationApi, Client as CoordinationApiClient, RefreshWorkerResponse,
 };
@@ -192,29 +192,9 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             XSpanIdString::default()
         );
 
-        let connected_amfs = self
-            .ngap
-            .remote_tnla_addresses()
-            .await
-            .iter()
-            .map(|a| a.to_string())
-            .collect();
-
-        let connected_dus = self
-            .f1ap
-            .remote_tnla_addresses()
-            .await
-            .iter()
-            .map(|a| a.to_string())
-            .collect();
-
-        let connected_ups = self
-            .e1ap
-            .remote_tnla_addresses()
-            .await
-            .iter()
-            .map(|a| a.to_string())
-            .collect();
+        let ng_up = !self.ngap.remote_tnla_addresses().await.is_empty();
+        let f1_up = !self.f1ap.remote_tnla_addresses().await.is_empty();
+        let e1_up = !self.e1ap.remote_tnla_addresses().await.is_empty();
 
         let connection_api_url = match &self.config.connection_style {
             ConnectionStyle::Autonomous(_) => "".to_string(),
@@ -232,14 +212,19 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
         self.coordinator
             .refresh_worker(
-                WorkerInfo {
-                    worker_unique_id: self.worker_id,
-                    connection_api_url,
-                    f1_address: worker_ip.clone(),
-                    e1_address: worker_ip,
-                    connected_amfs,
-                    connected_dus,
-                    connected_ups,
+                RefreshWorker {
+                    worker_id: self.worker_id,
+                    revision_number: 1, // TODO
+                    worker_info: WorkerInfo {
+                        connection_api_url,
+                        f1_address: worker_ip.clone(),
+                        e1_address: worker_ip,
+                    },
+                    connection_state: ConnectionState {
+                        ng_up,
+                        f1_up,
+                        e1_up,
+                    },
                 },
                 &context,
             )
@@ -417,7 +402,7 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
     }
 
-    fn associate_connection(&self) {
+    fn associate_connection(&self) -> i32 {
         // The basic initial implementation of this function just sends a refresh to the coordinator and assumes
         // that there is one instance of E1AP, F1AP, and NGAP.  This has the necessary effect of triggrering
         // the coordinator to add all worker endpoints, but will need to be improved a) when we simultaneously
@@ -430,5 +415,6 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
                 warn!(self_clone.logger, "Failed refresh worker {}", e);
             }
         });
+        return 1; // TODO
     }
 }

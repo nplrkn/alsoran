@@ -14,8 +14,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkerInfo'
-        description: Worker Information
+              $ref: '#/components/schemas/RefreshWorker'
         required: true
       responses:
         "204":
@@ -29,25 +28,57 @@ paths:
       summary: Updates coordinator with information about a worker instance
 components:
   schemas:
-    WorkerInfo:
+    RefreshWorker:
       example:
-        workerUniqueId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
-        e1Address: e1Address
-        connectedAmfs:
-        - connectedAmfs
-        - connectedAmfs
-        f1Address: f1Address
-        connectionApiUrl: http://example.com/aeiou
-        connectedDus:
-        - connectedDus
-        - connectedDus
-        connectedUps:
-        - connectedUps
-        - connectedUps
+        workerId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        revisionNumber: 0
+        connectionState:
+          ngUp: ""
+          e1Up: ""
+          f1Up: ""
+        workerInfo:
+          e1Address: e1Address
+          f1Address: f1Address
+          connectionApiUrl: http://example.com/aeiou
       properties:
-        workerUniqueId:
+        workerId:
           format: uuid
           type: string
+        revisionNumber:
+          type: integer
+        workerInfo:
+          $ref: '#/components/schemas/WorkerInfo'
+        connectionState:
+          $ref: '#/components/schemas/ConnectionState'
+      required:
+      - connectionState
+      - revisionNumber
+      - workerId
+      - workerInfo
+      type: object
+    ConnectionState:
+      example:
+        ngUp: ""
+        e1Up: ""
+        f1Up: ""
+      properties:
+        ngUp:
+          type: bool
+        e1Up:
+          type: bool
+        f1Up:
+          type: bool
+      required:
+      - e1Up
+      - f1Up
+      - ngUp
+      type: object
+    WorkerInfo:
+      example:
+        e1Address: e1Address
+        f1Address: f1Address
+        connectionApiUrl: http://example.com/aeiou
+      properties:
         connectionApiUrl:
           format: url
           type: string
@@ -55,26 +86,10 @@ components:
           type: string
         e1Address:
           type: string
-        connectedAmfs:
-          items:
-            type: string
-          type: array
-        connectedDus:
-          items:
-            type: string
-          type: array
-        connectedUps:
-          items:
-            type: string
-          type: array
       required:
-      - connectedAmfs
-      - connectedDus
-      - connectedUps
       - connectionApiUrl
       - e1Address
       - f1Address
-      - workerUniqueId
       type: object
     IpAddress:
       type: string

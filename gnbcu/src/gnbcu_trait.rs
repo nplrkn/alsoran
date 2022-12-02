@@ -60,6 +60,8 @@ pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
 
     /// Associate a TNLA with the relevant interface instance.  For example, an NG Setup
     /// associates a TNLA to an instance of the NG-C interface.
+    /// Returns a revision number.  Each change in the interface state results in a new
+    /// number.
     // TODO: add parameters that actually define the association.
-    fn associate_connection(&self);
+    fn associate_connection(&self) -> i32;
 }

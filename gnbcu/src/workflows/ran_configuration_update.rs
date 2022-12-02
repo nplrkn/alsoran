@@ -6,9 +6,13 @@ use ngap::*;
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
     // Ran Configuration Update Procedure
-    // 1.    Ngap RanConfigurationUpdate >>
-    // 2.    Ngap RanConfigurationUpdateAcknowledge <<
-    pub async fn ran_configuration_update(&self) -> Result<()> {
+    // 1.    Connect to the AMF
+    // 2.    Ngap RanConfigurationUpdate >>
+    // 3.    Ngap RanConfigurationUpdateAcknowledge <<
+    pub async fn ran_configuration_update(&self, amf_ip_address: &str) -> Result<i32> {
+        // Connect to the AMF
+        self.gnbcu.ngap_connect(amf_ip_address).await?;
+
         // This uses the default expected values of free5GC.
 
         // TS38.413, 8.7.2.2.
@@ -30,8 +34,8 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         self.log_message("RanConfigurationUpdateAcknowledge <<");
 
         // Associate this TNLA with the NGAP interface instance.
-        //self.associate_connection();
+        let revision_number = 1; // self.associate_connection();
 
-        Ok(())
+        Ok(revision_number)
     }
 }

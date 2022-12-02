@@ -42,19 +42,18 @@ async fn second_worker_gets_du_connection() -> Result<()> {
 
 #[async_std::test]
 async fn second_worker_gets_up_connection() -> Result<()> {
-    // Set up NGAP with the first worker going first.
+    // Set up NGAP with worker 0 going first.
     let mut tc = TestContextBuilder::new()
         .worker_count(2)
         .stage(AmfConnected)
         .spawn()
         .await?;
 
-    // Send the E1AP connection to the second worker and check the
-    // first worker then gets added.
+    // Setup E1AP with worker 1 going first.
     tc.interface_setup_stage(1, &CuUpConnected, true).await?;
     tc.interface_setup_stage(0, &CuUpConnected, false).await?;
 
-    // Setup F1AP.
+    // Setup F1AP with worker 0 going first.
     tc.interface_setup_stage(0, &DuConnected, true).await?;
     tc.interface_setup_stage(1, &DuConnected, false).await?;
 
@@ -64,18 +63,18 @@ async fn second_worker_gets_up_connection() -> Result<()> {
 
 #[async_std::test]
 async fn two_workers_f1_before_e1() -> Result<()> {
-    // Set up NGAP with the first worker going first.
+    // Setup NGAP with worker 0 going first.
     let mut tc = TestContextBuilder::new()
         .worker_count(2)
         .stage(AmfConnected)
         .spawn()
         .await?;
 
-    // Setup F1AP.
+    // Setup F1AP with worker 0 going first.
     tc.interface_setup_stage(0, &DuConnected, true).await?;
     tc.interface_setup_stage(1, &DuConnected, false).await?;
 
-    // Setup E1AP.
+    // Setup E1AP with worker 1 going first.
     tc.interface_setup_stage(1, &CuUpConnected, true).await?;
     tc.interface_setup_stage(0, &CuUpConnected, false).await?;
 

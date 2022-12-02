@@ -8,14 +8,14 @@ Method | HTTP request | Description
 
 
 # **refreshWorker**
-> refreshWorker(worker_info)
+> refreshWorker(refresh_worker)
 Updates coordinator with information about a worker instance
 
 ### Required Parameters
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **worker_info** | [**WorkerInfo**](WorkerInfo.md)| Worker Information | 
+  **refresh_worker** | [**RefreshWorker**](RefreshWorker.md)|  | 
 
 ### Return type
 

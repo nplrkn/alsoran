@@ -7,9 +7,13 @@ use slog::info;
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
     // Ng Setup Procedure
-    // 1.    Ngap NgSetupRequest >>
-    // 2.    Ngap NgSetupResponse <<
-    pub async fn ng_setup(&self) -> Result<AmfName> {
+    // 1.    Connect to the AMF
+    // 2.    Ngap NgSetupRequest >>
+    // 3.    Ngap NgSetupResponse <<
+    pub async fn ng_setup(&self, amf_ip_address: &str) -> Result<i32> {
+        // Connect to the AMF
+        self.gnbcu.ngap_connect(amf_ip_address).await?;
+
         // This uses the default expected values of free5GC.
         let ng_setup_request = NgSetupRequest {
             global_ran_node_id: super::build_ngap::build_global_ran_node_id(self.gnbcu),
@@ -42,8 +46,8 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         );
 
         // Associate this TNLA with the NGAP interface instance.
-        //self.associate_connection();
+        let revision_number = 1; //self.associate_connection();
 
-        Ok(response.amf_name)
+        Ok(revision_number)
     }
 }

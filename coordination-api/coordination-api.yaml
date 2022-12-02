@@ -12,12 +12,11 @@ paths:
       summary: Updates coordinator with information about a worker instance
       operationId: refreshWorker
       requestBody:
-        description: Worker Information
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkerInfo'
+              $ref: '#/components/schemas/RefreshWorker'
       responses:
         '204':
           description: Successful refresh
@@ -30,20 +29,43 @@ paths:
   
 components:
   schemas:
+    RefreshWorker:
+      type: object
+      required:
+        - workerId
+        - revisionNumber
+        - workerInfo
+        - connectionState
+      properties:
+        workerId:
+          type: string
+          format: uuid
+        revisionNumber:
+          type: integer
+        workerInfo:
+          $ref: '#/components/schemas/WorkerInfo'
+        connectionState:
+          $ref: '#/components/schemas/ConnectionState'
+    ConnectionState: 
+      type: object
+      required: 
+        - ngUp
+        - e1Up
+        - f1Up
+      properties:
+        ngUp:
+          type: bool
+        e1Up:
+          type: bool
+        f1Up:
+          type: bool 
     WorkerInfo:
       type: object
       required:
-        - workerUniqueId
         - connectionApiUrl
         - f1Address
         - e1Address
-        - connectedAmfs
-        - connectedDus
-        - connectedUps
       properties:
-        workerUniqueId:
-          type: string
-          format: uuid
         connectionApiUrl:
           type: string
           format: url
@@ -51,18 +73,6 @@ components:
           $ref: '#/components/schemas/IpAddress'
         e1Address:
           $ref: '#/components/schemas/IpAddress'
-        connectedAmfs:
-          type: array
-          items: 
-            type: string
-        connectedDus:
-          type: array
-          items: 
-            type: string
-        connectedUps:
-          type: array
-          items: 
-            type: string
     IpAddress:
       type: string
     Error:
