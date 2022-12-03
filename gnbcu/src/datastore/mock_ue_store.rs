@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Context, Result};
 use async_std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 
@@ -39,7 +39,7 @@ impl UeStateStore for MockUeStore {
             .await
             .get(k)
             .cloned()
-            .ok_or_else(|| anyhow!("No such key)"))
+            .context("No such key)")
     }
     async fn delete(&self, k: &u32) -> Result<()> {
         self.kvs.lock().await.remove(k);
