@@ -250,7 +250,6 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             // Find a worker that is connected.
             if let Some(connected_worker) = workers.values().find(|x| x.f1.up) {
                 // Tell it to add this worker.
-                info!(logger, "{:x} to join existing F1AP interface", worker_id);
                 let _ = self
                     .add_f1ap(
                         &connected_worker,
@@ -299,6 +298,12 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         logger: &Logger,
         setup: bool,
     ) -> Result<()> {
+        info!(
+            logger,
+            "{:x} to {} NG interface",
+            worker_id,
+            if setup { "setup" } else { "join" }
+        );
         self.add_connection(
             &worker.info.connection_api_url,
             &worker_id,
@@ -323,6 +328,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
+        info!(logger, "{:x} to get added to E1 interface", new_worker_id);
         self.add_connection(
             &helper.info.connection_api_url,
             new_worker_id,
@@ -343,6 +349,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         context: &ClientContext,
         logger: &Logger,
     ) -> Result<()> {
+        info!(logger, "{:x} to get added to F1 interface", new_worker_id);
         self.add_connection(
             &helper.info.connection_api_url,
             new_worker_id,
@@ -371,7 +378,6 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             return Ok(());
         }
 
-        info!(logger, "{:x} to add connection with {}", id, op);
         connection_state.last_attempt = Some(Instant::now());
 
         match self

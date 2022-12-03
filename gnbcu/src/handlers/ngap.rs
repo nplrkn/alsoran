@@ -6,7 +6,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use ngap::*;
-use slog::{debug, info, warn, Logger};
+use slog::{debug, info, Logger};
 
 impl<G: Gnbcu> RequestProvider<NgSetupProcedure> for NgapHandler<G> {}
 
@@ -27,7 +27,7 @@ impl<G: Gnbcu> EventHandler for NgapHandler<G> {
             TnlaEvent::Established(addr) => {
                 info!(logger, "NGAP TNLA {} established to {}", tnla_id, addr);
             }
-            TnlaEvent::Terminated => warn!(logger, "NGAP TNLA {} closed", tnla_id),
+            TnlaEvent::Terminated => info!(logger, "NGAP TNLA {} closed", tnla_id),
         };
         // TODO
     }

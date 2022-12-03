@@ -130,7 +130,7 @@ impl TransportProvider for SctpTransportProvider {
                     }
                     Some(Err(e)) => warn!(logger, "Error on incoming connection - {:?}", e),
                     None => {
-                        info!(logger, "Graceful shutdown of listen {}", listen_addr);
+                        info!(logger, "End listen {}", listen_addr);
                         break;
                     }
                 }

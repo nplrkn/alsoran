@@ -174,6 +174,8 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             item.graceful_shutdown().await;
         }
 
+        self.ngap.graceful_shutdown().await;
+
         Ok(())
     }
 
@@ -268,12 +270,10 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
 
     async fn serve_connection_api(&self, port: u16) -> Result<ShutdownHandle> {
         let connection_api_listen_address = self.worker_listen_address(port);
-
         info!(
             &self.logger,
             "Serve connection API on {}", connection_api_listen_address
         );
-
         let addr = connection_api_listen_address.parse()?;
         crate::handlers::connection_api::serve(addr, self.clone(), self.logger.clone()).await
     }
