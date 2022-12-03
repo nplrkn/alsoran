@@ -1,7 +1,7 @@
 //! mock_du - enables a test script to assume the role of the GNB-DU on the F1 reference point
 
 use crate::mock::{Mock, Pdu, ReceivedPdu};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use bitvec::prelude::*;
 use f1ap::*;
 use net::{AperSerde, Binding, Indication};
@@ -146,10 +146,11 @@ impl MockDu {
 
     async fn receive_rrc_setup(&self, ue_context: &mut UeContext) -> Result<RrcSetup> {
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let dl_rrc_message_transfer = match self.receive_pdu().await {
-            F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
-            x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
-        }?;
+        let pdu = self.receive_pdu().await;
+        let F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(dl_rrc_message_transfer)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
 
         // A Rrc Setup flows as a DlCcchMessage on SRB0.  Check this is indeed for SRB0.
         assert_eq!(dl_rrc_message_transfer.srb_id.0, 0);
@@ -159,13 +160,13 @@ impl MockDu {
         let rrc_message_bytes = pdcp_pdu.view_inner()?;
 
         // TODO - how to verify that this is indeed a DlCcchMessage rather than a DlDcchMessage.
-        let rrc_setup = match DlCcchMessage::from_bytes(rrc_message_bytes)
+        let message = DlCcchMessage::from_bytes(rrc_message_bytes)
             .unwrap()
-            .message
-        {
-            DlCcchMessageType::C1(C1_1::RrcSetup(x)) => Ok(x),
-            x => Err(anyhow!("Unexpected RRC message {:?}", x)),
-        }?;
+            .message;
+
+        let DlCcchMessageType::C1(C1_1::RrcSetup(rrc_setup)) = message else {
+            bail!("Unexpected RRC message {:?}", message)
+        };
         info!(&self.logger, "DlRrcMessageTransfer(RrcSetup) <<");
         Ok(rrc_setup)
     }
@@ -249,10 +250,11 @@ impl MockDu {
     }
 
     async fn receive_dl_rrc(&self, ue_id: u32) -> Result<DlRrcMessageTransfer> {
-        let dl_rrc_message_transfer = match self.receive_pdu().await {
-            F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(x)) => Ok(x),
-            x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
-        }?;
+        let pdu = self.receive_pdu().await;
+        let F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(dl_rrc_message_transfer)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
 
         assert_eq!(dl_rrc_message_transfer.gnb_du_ue_f1ap_id.0, ue_id);
         Ok(dl_rrc_message_transfer)
@@ -264,13 +266,12 @@ impl MockDu {
         // A Rrc Setup flows as a DlDcchMessage on SRB1.  Check this is indeed for SRB1.
         assert_eq!(dl_rrc_message_transfer.srb_id.0, 1);
 
-        match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
-            DlDcchMessageType::C1(C1_2::SecurityModeCommand(x)) => {
-                info!(&self.logger, "DlRrcMessageTransfer(SecurityModeCommand) <<");
-                Ok(x)
-            }
-            x => Err(anyhow!("Expected security mode command - got {:?}", x)),
-        }
+        let message = rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message;
+        let DlDcchMessageType::C1(C1_2::SecurityModeCommand(security_mode_command)) = message else {
+            bail!("Expected security mode command - got {:?}", message)
+        };
+        info!(&self.logger, "DlRrcMessageTransfer(SecurityModeCommand) <<");
+        Ok(security_mode_command)
     }
 
     pub async fn handle_ue_context_setup(&self, ue_context: &UeContext) -> Result<()> {
@@ -308,15 +309,15 @@ impl MockDu {
         pdu: F1apPdu,
         ue_context: &UeContext,
     ) -> Result<Option<RrcContainer>> {
-        let ue_context_setup_request = match pdu {
-            F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(x)) => Ok(x),
-            x => Err(anyhow!("Unexpected F1ap message {:?}", x)),
-        }?;
+        let F1apPdu::InitiatingMessage(InitiatingMessage::UeContextSetupRequest(ue_context_setup_request)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
 
-        match ue_context_setup_request.gnb_du_ue_f1ap_id {
-            Some(GnbDuUeF1apId(x)) if x == ue_context.ue_id => (),
-            _ => panic!("Bad ue id"),
-        }
+        ensure!(
+            matches!(ue_context_setup_request.gnb_du_ue_f1ap_id, Some(GnbDuUeF1apId(x)) if x == ue_context.ue_id),
+            "Bad Ue Id"
+        );
 
         Ok(ue_context_setup_request.rrc_container)
     }
@@ -402,9 +403,10 @@ impl MockDu {
                 )),
             }?;
 
-        if nas_messages.len() != 1 {
-            return Err(anyhow!("Expected a single NAS message in list"));
-        };
+        ensure!(
+            nas_messages.len() == 1,
+            "Expected a single NAS message in list"
+        );
         Ok(nas_messages.remove(0).0)
     }
 
@@ -457,10 +459,10 @@ impl MockDu {
         debug!(self.logger, "Wait for Cu Configuration Update");
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        let cu_configuration_update = match pdu {
-            F1apPdu::InitiatingMessage(InitiatingMessage::GnbCuConfigurationUpdate(x)) => Ok(x),
-            x => Err(anyhow!("Expected GnbCuConfigurationUpdate, got {:?}", x)),
-        }?;
+        let F1apPdu::InitiatingMessage(InitiatingMessage::GnbCuConfigurationUpdate(cu_configuration_update)) = pdu
+        else {
+            bail!("Expected GnbCuConfigurationUpdate, got {:?}", pdu)
+        };
         info!(self.logger, "GnbCuConfigurationUpdate <<");
 
         let gnb_cu_tnl_association_to_add_list = cu_configuration_update

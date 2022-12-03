@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{bail, Result};
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
 use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig};
@@ -373,7 +373,7 @@ impl TestContext {
                 info!(self.logger, "Register UE {} complete", ue_id);
                 UeRegisterStage::End
             }
-            UeRegisterStage::End => return Err(anyhow!("Do not call in state End")),
+            UeRegisterStage::End => bail!("Do not call in state End"),
         };
         Ok(ue_register)
     }

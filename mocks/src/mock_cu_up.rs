@@ -1,7 +1,7 @@
 //! mock_cu_up - enables a test script to assume the role of the GNB-CU-UP on the E1 reference point
 
 use crate::mock::{Mock, Pdu, ReceivedPdu};
-use anyhow::{anyhow, Result};
+use anyhow::{bail, Result};
 use bitvec::prelude::*;
 use e1ap::*;
 use net::AperSerde;
@@ -108,10 +108,10 @@ impl MockCuUp {
         debug!(self.logger, "Wait for Cu Cp Configuration Update");
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        let cu_cp_configuration_update = match pdu {
-            E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuCpConfigurationUpdate(x)) => Ok(x),
-            x => Err(anyhow!("Expected GnbCuCpConfigurationUpdate, got {:?}", x)),
-        }?;
+        let E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuCpConfigurationUpdate(cu_cp_configuration_update)) = pdu
+        else {
+            bail!("Expected GnbCuCpConfigurationUpdate, got {:?}", pdu)
+        };
         info!(self.logger, "GnbCuCpConfigurationUpdate <<");
 
         let gnb_cu_cp_tnla_to_add_list = cu_cp_configuration_update
@@ -174,14 +174,10 @@ impl MockCuUp {
         pdu: E1apPdu,
         ue_id: u32,
     ) -> Result<UeContext> {
-        let logger = &self.logger;
-
-        let bearer_context_setup = match pdu {
-            E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextSetupRequest(x)) => Ok(x),
-            x => Err(anyhow!("Expected BearerContextSetupRequest, got {:?}", x)),
-        }?;
+        let E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextSetupRequest(bearer_context_setup)) = pdu
+        else { bail!("Expected BearerContextSetupRequest, got {:?}", pdu) };
         let gnb_cu_cp_ue_e1ap_id = bearer_context_setup.gnb_cu_cp_ue_e1ap_id;
-        debug!(logger, "UE Id {:?}", gnb_cu_cp_ue_e1ap_id);
+        debug!(&self.logger, "UE Id {:?}", gnb_cu_cp_ue_e1ap_id);
         Ok(UeContext {
             ue_id,
             gnb_cu_cp_ue_e1ap_id,
@@ -262,15 +258,13 @@ impl MockCuUp {
         pdu: E1apPdu,
         ue_context: &UeContext,
     ) -> Result<()> {
-        let bearer_context_modification = match pdu {
-            E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextModificationRequest(x)) => {
-                Ok(x)
-            }
-            x => Err(anyhow!(
+        let E1apPdu::InitiatingMessage(InitiatingMessage::BearerContextModificationRequest(bearer_context_modification)) = pdu
+        else {
+            bail!(
                 "Expected BearerContextModificationRequest, got {:?}",
-                x
-            )),
-        }?;
+                pdu
+            )
+        };
 
         // Check the IDs.
         assert_eq!(

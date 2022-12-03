@@ -1,7 +1,7 @@
 //! mock_amf - enables a test script to assume the role of the AMF on the NG reference point
 
 use crate::mock::{Mock, Pdu, ReceivedPdu};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use bitvec::prelude::*;
 use net::{AperSerde, Binding};
 use ngap::*;
@@ -50,12 +50,11 @@ impl MockAmf {
 
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
-            info!(logger, ">> NgSetupRequest");
-            Ok(())
-        } else {
-            Err(anyhow!("Not an NG setup"))
-        }?;
+        let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu
+        else {
+            bail!("Not an NG setup")
+        };
+        info!(logger, ">> NgSetupRequest");
 
         let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
             guami: self.guami(),
@@ -91,15 +90,13 @@ impl MockAmf {
 
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
+        let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
             _ran_configuration_update,
         )) = pdu
-        {
-            info!(logger, ">> RanConfigurationUpdate");
-            Ok(())
-        } else {
-            Err(anyhow!("Not a RAN configuration update"))
-        }?;
+        else {
+            bail!("Not a RAN configuration update")
+        };
+        info!(logger, ">> RanConfigurationUpdate");
 
         let response =
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome::RanConfigurationUpdateAcknowledge(
@@ -222,19 +219,17 @@ impl MockAmf {
         &self,
         ue_context: &UeContext,
     ) -> Result<()> {
-        let received_amf_ue_id = match self.receive_pdu().await {
-            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
-                InitialContextSetupResponse { amf_ue_ngap_id, .. },
-            )) => {
-                info!(&self.logger, ">> InitialContextSetupResponse");
-                Ok(amf_ue_ngap_id.0)
-            }
-            x => Err(anyhow!(
+        let pdu = self.receive_pdu().await;
+        let NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
+            InitialContextSetupResponse { amf_ue_ngap_id, .. },
+        )) = pdu else {
+            bail!(
                 "Expecting InitialContextSetupResponse, got unexpected message {:?}",
-                x
-            )),
-        }?;
-        assert_eq!(received_amf_ue_id, ue_context.ue_id.into());
+                pdu
+            )
+        };
+        info!(&self.logger, ">> InitialContextSetupResponse");
+        assert_eq!(amf_ue_ngap_id.0, ue_context.ue_id.into());
         Ok(())
     }
 

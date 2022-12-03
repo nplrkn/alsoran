@@ -1,6 +1,6 @@
 //! lib - wrap and unwrap PDCP packets
 
-use anyhow::{anyhow, Result};
+use anyhow::{ensure, Result};
 
 pub struct PdcpPdu(pub Vec<u8>);
 
@@ -15,9 +15,7 @@ impl PdcpPdu {
 
     /// View the inner packet in a PDCP packet.
     pub fn view_inner(&self) -> Result<&[u8]> {
-        if self.0.len() < 6 {
-            return Err(anyhow!("Too short for PDCP PDU".to_string()));
-        }
+        ensure!(self.0.len() >= 6, "Too short for PDCP PDU");
         Ok(&self.0[2..self.0.len() - 4])
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     tnla_event_handler::{TnlaEvent, TnlaEventHandler},
     transport_provider::{AssocId, Binding},
 };
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, ensure, Result};
 use async_std::sync::{Arc, Mutex};
 use common::ShutdownHandle;
 use futures::pin_mut;
@@ -49,9 +49,7 @@ impl SctpTnlaPool {
     /// To load balance among different associations, use a different seed.
     pub async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
         let assocs = self.assocs.lock().await;
-        if assocs.len() == 0 {
-            return Err(anyhow!("No associations up"));
-        }
+        ensure!(assocs.len() > 0, "No associations up");
         let nth = seed as usize % assocs.len();
         Ok(Binding {
             assoc_id: *assocs.keys().nth(nth).unwrap(),
