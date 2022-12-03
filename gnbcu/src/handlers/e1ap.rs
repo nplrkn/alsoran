@@ -6,7 +6,7 @@ use super::Gnbcu;
 use async_trait::async_trait;
 use e1ap::*;
 use net::{EventHandler, RequestError, RequestProvider, TnlaEvent};
-use slog::{info, warn, Logger};
+use slog::{info, Logger};
 
 #[derive(Clone)]
 pub struct E1apHandler<G: Gnbcu> {
@@ -37,7 +37,7 @@ impl<G: Gnbcu> EventHandler for E1apHandler<G> {
             TnlaEvent::Established(addr) => {
                 info!(logger, "E1AP TNLA {} established from {}", tnla_id, addr)
             }
-            TnlaEvent::Terminated => warn!(logger, "E1AP TNLA {} closed", tnla_id),
+            TnlaEvent::Terminated => info!(logger, "E1AP TNLA {} closed", tnla_id),
         };
     }
 }

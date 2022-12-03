@@ -10,7 +10,6 @@ use coordination_api::{context::MakeAddContext, Api};
 use hyper::Body;
 use slog::{debug, error, info, Logger};
 use std::marker::PhantomData;
-use std::net::SocketAddr;
 use stop_token::StopSource;
 use swagger::{ApiError, DropContextService, EmptyContext, Has, XSpanIdString};
 
@@ -96,14 +95,16 @@ pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
-    let addr = SocketAddr::new("127.0.0.1".parse()?, config.bind_port);
+    let listen_addr = format!("0.0.0.0:{}", config.bind_port);
+    info!(logger, "Serve coordination API on {}", listen_addr);
+    let listen_addr = listen_addr.parse()?;
     let (server, receiver) = Server::new(logger.clone());
     let control_task = server.start(config.connection_control_config, receiver);
     let service = MakeService::new(server);
     let service = MakeAddContext::<_, EmptyContext>::new(service);
 
     let server_task = async_std::task::spawn(async move {
-        let server = hyper::server::Server::bind(&addr)
+        let server = hyper::server::Server::bind(&listen_addr)
             .serve(service)
             .with_graceful_shutdown(stop_token);
         if let Err(e) = server.await {

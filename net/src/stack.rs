@@ -74,6 +74,10 @@ impl Stack {
     pub async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
         self.transport_provider.remote_tnla_addresses().await
     }
+
+    pub async fn graceful_shutdown(self) {
+        self.transport_provider.graceful_shutdown().await
+    }
 }
 
 #[async_trait]

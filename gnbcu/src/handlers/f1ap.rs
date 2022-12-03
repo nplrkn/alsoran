@@ -68,7 +68,7 @@ impl<G: Gnbcu> EventHandler for F1apHandler<G> {
             TnlaEvent::Established(addr) => {
                 info!(logger, "F1AP TNLA {} established from {}", tnla_id, addr)
             }
-            TnlaEvent::Terminated => warn!(logger, "F1AP TNLA {} closed", tnla_id),
+            TnlaEvent::Terminated => info!(logger, "F1AP TNLA {} closed", tnla_id),
         };
     }
 }

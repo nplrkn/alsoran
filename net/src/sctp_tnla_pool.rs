@@ -123,8 +123,16 @@ impl SctpTnlaPool {
         pin_mut!(message_stream);
         loop {
             match message_stream.next().await {
-                // Graceful shutdown
-                None => break,
+                // Local graceful shutdown
+                None => {
+                    spawn_handle_event(
+                        handler.clone(),
+                        TnlaEvent::Terminated,
+                        assoc_id,
+                        logger.clone(),
+                    );
+                    break;
+                }
                 // Remote end terminated connection
                 Some(Err(_)) => {
                     spawn_handle_event(

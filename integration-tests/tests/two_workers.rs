@@ -5,7 +5,20 @@ use std::time::Duration;
 pub use test::*;
 
 #[async_std::test]
-async fn two_workers() -> Result<()> {
+async fn two_workers_base() -> Result<()> {
+    // Set up two workers.
+    let tc = TestContextBuilder::new()
+        .worker_count(2)
+        .stage(DuConnected)
+        .spawn()
+        .await?;
+
+    tc.terminate().await;
+    Ok(())
+}
+
+#[async_std::test]
+async fn two_workers_with_ue_registration() -> Result<()> {
     // Set up two workers.
     let tc = TestContextBuilder::new()
         .worker_count(2)
