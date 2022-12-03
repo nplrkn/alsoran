@@ -191,8 +191,11 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
         // Delete the old item so that it doesn't interfere with our calculations that follow.
         let old_item = workers.remove(&worker_id);
         let mut this_worker = if let Some(mut x) = old_item {
-            // TODO - instead, discard refreshes with out of date revision number
+            // TODO - instead, skip if revision number is out of date
             x.info = refresh.worker_info;
+            x.e1.up = refresh.connection_state.e1_up;
+            x.f1.up = refresh.connection_state.f1_up;
+            x.ng.up = refresh.connection_state.ng_up;
             x
         } else {
             WorkerState::new(refresh)
