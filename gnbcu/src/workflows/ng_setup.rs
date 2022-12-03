@@ -1,22 +1,23 @@
 //! ng_setup - the initial handshake that establishes an instance of the NG reference point between GNB and AMF
 
 use super::{Gnbcu, Workflow};
-use bitvec::prelude::*;
+use anyhow::Result;
 use ngap::*;
-use slog::{info, warn};
+use slog::info;
 
 impl<'a, G: Gnbcu> Workflow<'a, G> {
     // Ng Setup Procedure
-    // 1.    Ngap NgSetupRequest >>
-    // 2.    Ngap NgSetupResponse <<
-    pub async fn ng_setup(&self) {
+    // 1.    Connect to the AMF
+    // 2.    Ngap NgSetupRequest >>
+    // 3.    Ngap NgSetupResponse <<
+    pub async fn ng_setup(&self, amf_ip_address: &str) -> Result<i32> {
+        // Connect to the AMF
+        self.gnbcu.ngap_connect(amf_ip_address).await?;
+
         // This uses the default expected values of free5GC.
         let ng_setup_request = NgSetupRequest {
-            global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
-                plmn_identity: PlmnIdentity(self.config().plmn.clone()),
-                gnb_id: GnbId::GnbId(bitvec![u8,Msb0; 1; 22]),
-            }),
-            ran_node_name: self.config().clone().name.map(|x| RanNodeName(x)),
+            global_ran_node_id: super::build_ngap::build_global_ran_node_id(self.gnbcu),
+            ran_node_name: self.config().name.clone().map(RanNodeName),
             supported_ta_list: SupportedTaList(vec![SupportedTaItem {
                 tac: Tac(vec![0x0, 0x0, 0x1]),
                 broadcast_plmn_list: BroadcastPlmnList(vec![BroadcastPlmnItem {
@@ -35,19 +36,18 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             extended_ran_node_name: None,
         };
         self.log_message("NgSetupRequest >>");
-        match self
+        let response = self
             .ngap_request::<NgSetupProcedure>(ng_setup_request, self.logger)
-            .await
-        {
-            Ok(response) => {
-                self.log_message("NgSetupResponse <<");
-                info!(
-                    self.logger,
-                    "NGAP interface initialized with {:?}", response.amf_name
-                );
-            }
+            .await?;
+        self.log_message("NgSetupResponse <<");
+        info!(
+            self.logger,
+            "NGAP interface initialized with {:?}", response.amf_name
+        );
 
-            Err(e) => warn!(self.logger, "NG Setup failed - {:?}", e),
-        };
+        // Associate this TNLA with the NGAP interface instance.
+        let revision_number = 1; //self.associate_connection();
+
+        Ok(revision_number)
     }
 }

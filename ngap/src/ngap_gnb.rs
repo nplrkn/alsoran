@@ -54,8 +54,8 @@ where
     async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
         let initiating_message = match p {
             NgapPdu::InitiatingMessage(m) => m,
-            _ => {
-                error!(logger, "Not a request!");
+            x => {
+                error!(logger, "Not a request! {:?}", x);
                 return None;
             }
         };

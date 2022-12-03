@@ -42,14 +42,14 @@ impl Stack {
         ppid: u32,
         application: A,
         logger: Logger,
-    ) -> Result<ShutdownHandle> {
+    ) -> Result<()> {
         let receiver = StackReceiver {
             application,
             pending_requests: self.pending_requests.clone(),
         };
         self.transport_provider
             .clone()
-            .maintain_connection(connect_address, ppid, receiver, logger)
+            .connect(connect_address, ppid, receiver, logger)
             .await
     }
 
@@ -93,7 +93,9 @@ impl<P: Procedure> RequestProvider<P> for Stack {
             .await
             .push((Box::new(match_fn), sender));
 
-        self.transport_provider.send_message(bytes, logger).await?;
+        self.transport_provider
+            .send_message(bytes, None, logger)
+            .await?;
 
         // TODO - timeout
         let msg = receiver.recv().await?;
@@ -105,7 +107,7 @@ impl<P: Procedure> RequestProvider<P> for Stack {
 impl<I: Indication> IndicationHandler<I> for Stack {
     async fn handle(&self, i: I::Request, logger: &Logger) {
         match I::encode_request(i) {
-            Ok(m) => match self.transport_provider.send_message(m, logger).await {
+            Ok(m) => match self.transport_provider.send_message(m, None, logger).await {
                 Ok(()) => (),
                 Err(e) => warn!(logger, "Error sending indication - {:?}", e),
             },

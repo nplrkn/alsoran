@@ -1,8 +1,6 @@
 mod test;
-use std::time::Duration;
-
 use anyhow::Result;
-use async_std;
+use std::time::Duration;
 pub use test::*;
 
 #[async_std::test]

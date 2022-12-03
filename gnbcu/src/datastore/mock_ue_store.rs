@@ -2,13 +2,13 @@
 
 use std::collections::HashMap;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Context, Result};
 use async_std::sync::{Arc, Mutex};
 use async_trait::async_trait;
 
 use super::{UeState, UeStateStore};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MockUeStore {
     kvs: Arc<Mutex<HashMap<u32, UeState>>>,
 }
@@ -18,6 +18,12 @@ impl MockUeStore {
         MockUeStore {
             kvs: Arc::new(Mutex::new(HashMap::new())),
         }
+    }
+}
+
+impl Default for MockUeStore {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -32,8 +38,8 @@ impl UeStateStore for MockUeStore {
             .lock()
             .await
             .get(k)
-            .map(|x| x.clone())
-            .ok_or(anyhow!("No such key)"))
+            .cloned()
+            .context("No such key)")
     }
     async fn delete(&self, k: &u32) -> Result<()> {
         self.kvs.lock().await.remove(k);

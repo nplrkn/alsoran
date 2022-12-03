@@ -22,13 +22,16 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             "F1AP interface initialized with {:?}", r.gnb_du_id
         );
 
+        // Associate this TNLA with the F1AP interface instance.
+        self.associate_connection();
+
         self.log_message("<< F1SetupResponse");
         Ok(F1SetupResponse {
             transaction_id: r.transaction_id,
             gnb_cu_rrc_version: RrcVersion {
                 latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
             },
-            gnb_cu_name: self.gnbcu.config().clone().name.map(|x| GnbCuName(x)),
+            gnb_cu_name: self.gnbcu.config().clone().name.map(GnbCuName),
             cells_to_be_activated_list: None,
             transport_layer_address_info: None,
             ul_bh_non_up_traffic_mapping: None,

@@ -5,6 +5,7 @@ use crate::{
     datastore::{UeState, UeStateStore},
     rrc_transaction::RrcTransaction,
 };
+use anyhow::Result;
 use async_channel::Sender;
 use async_trait::async_trait;
 use net::{Indication, Procedure, RequestError};
@@ -15,6 +16,8 @@ use slog::Logger;
 #[async_trait]
 pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
     fn config(&self) -> &Config;
+
+    async fn ngap_connect(&self, amf_address: &str) -> Result<()>;
 
     async fn ngap_request<P: Procedure>(
         &self,
@@ -54,4 +57,11 @@ pub trait Gnbcu: Send + Sync + Clone + 'static + UeStateStore {
         rrc_container: f1ap::RrcContainer,
         logger: &Logger,
     );
+
+    /// Associate a TNLA with the relevant interface instance.  For example, an NG Setup
+    /// associates a TNLA to an instance of the NG-C interface.
+    /// Returns a revision number.  Each change in the interface state results in a new
+    /// number.
+    // TODO: add parameters that actually define the association.
+    fn associate_connection(&self) -> i32;
 }

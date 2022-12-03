@@ -1,0 +1,79 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: AlsoRAN Coordination API
+  license:
+    name: MIT
+servers:
+  - url: http://localhost/v1
+paths:
+  /refreshWorker:
+    post:
+      summary: Updates coordinator with information about a worker instance
+      operationId: refreshWorker
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshWorker'
+      responses:
+        '204':
+          description: Successful refresh
+        '500':
+          description: Failed refresh
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  
+components:
+  schemas:
+    RefreshWorker:
+      type: object
+      required:
+        - workerId
+        - revisionNumber
+        - workerInfo
+        - connectionState
+      properties:
+        workerId:
+          type: string
+          format: uuid
+        revisionNumber:
+          type: integer
+        workerInfo:
+          $ref: '#/components/schemas/WorkerInfo'
+        connectionState:
+          $ref: '#/components/schemas/ConnectionState'
+    ConnectionState: 
+      type: object
+      required: 
+        - ngUp
+        - e1Up
+        - f1Up
+      properties:
+        ngUp:
+          type: bool
+        e1Up:
+          type: bool
+        f1Up:
+          type: bool 
+    WorkerInfo:
+      type: object
+      required:
+        - connectionApiUrl
+        - f1Address
+        - e1Address
+      properties:
+        connectionApiUrl:
+          type: string
+          format: url
+        f1Address:
+          $ref: '#/components/schemas/IpAddress'
+        e1Address:
+          $ref: '#/components/schemas/IpAddress'
+    IpAddress:
+      type: string
+    Error:
+      type: string

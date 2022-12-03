@@ -1,7 +1,7 @@
 //! redis_ue_store - storage of UE state in Redis
 
 #![allow(dead_code, unused_variables)]
-use anyhow::{anyhow, Result};
+use anyhow::{Context, Result};
 use async_trait::async_trait;
 use redis::{AsyncCommands, Client};
 use speedy::{Readable, Writable};
@@ -34,7 +34,7 @@ impl UeStateStore for RedisUeStore {
         let v: Vec<u8> = conn
             .get(k)
             .await
-            .map_err(|e| anyhow!("Failed Redis get on UE {:#010x}? - {:?}", k, e))?;
+            .with_context(|| format!("Failed Redis get on UE {:#010x}?", k))?;
         let v = UeStateSerializable::read_from_buffer(&v)?;
         Ok(v.into())
     }

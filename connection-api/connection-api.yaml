@@ -1,0 +1,62 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: AlsoRAN Connection API
+  license:
+    name: MIT
+servers:
+  - url: http://localhost/v1
+paths:
+  /addConnection:
+    post:
+      summary: Instructs a worker to add a connection
+      operationId: addConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionInfo'
+            examples: 
+              example1:
+                value: 
+                  operationType: "setupNg"
+                  ipAddress: "12.13.14.15"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/RevisionNumber"
+        '500':
+          description: Failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    ConnectionInfo:
+      type: object
+      required: 
+        - operationType
+        - ipAddress
+      properties:
+        operationType:
+          $ref: "#/components/schemas/OperationType"
+        ipAddress: 
+          type: string
+    OperationType: 
+      type: string
+      enum:
+        - setupNg
+        - joinNg
+        - addF1
+        - addE1
+    RevisionNumber: 
+      description: Revision number of the worker refresh just sent by this worker
+      type: integer
+    Error:
+      type: string

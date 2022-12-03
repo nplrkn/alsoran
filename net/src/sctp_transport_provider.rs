@@ -2,21 +2,20 @@
 
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
+use crate::transport_provider::Binding;
 use crate::{ShutdownHandle, TransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
+use futures::pin_mut;
 use futures::stream::StreamExt;
-use futures::{future, pin_mut};
 use sctp::{Message, SctpAssociation};
-use slog::{info, o, trace, warn, Logger};
-use std::fmt::Debug;
+use slog::{info, trace, warn, Logger};
 use std::net::SocketAddr;
-use std::time::Duration;
 use stop_token::StopSource;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct SctpTransportProvider {
     tnla_pool: SctpTnlaPool,
 }
@@ -26,6 +25,9 @@ impl SctpTransportProvider {
         SctpTransportProvider {
             tnla_pool: SctpTnlaPool::new(),
         }
+    }
+    pub async fn graceful_shutdown(self) {
+        self.tnla_pool.graceful_shutdown().await
     }
 }
 
@@ -44,60 +46,43 @@ async fn resolve_and_connect(
 
 #[async_trait]
 impl TransportProvider for SctpTransportProvider {
-    async fn send_message(&self, message: Message, logger: &Logger) -> Result<()> {
-        self.tnla_pool.send_message(message, logger).await
+    async fn send_message(
+        &self,
+        message: Message,
+        assoc_id: Option<u32>,
+        logger: &Logger,
+    ) -> Result<()> {
+        self.tnla_pool.send_message(message, assoc_id, logger).await
     }
 
-    async fn maintain_connection<H>(
+    async fn connect<H>(
         self,
-        connect_addr_string: &String,
+        connect_addr_string: &str,
         ppid: u32,
         handler: H,
         logger: Logger,
-    ) -> Result<ShutdownHandle>
+    ) -> Result<()>
     where
         H: TnlaEventHandler,
     {
-        let assoc_id = 1; // TODO
-        let stop_source = StopSource::new();
-        let stop_token = stop_source.token();
         let connect_addr_string = connect_addr_string.clone();
-        let join_handle = task::spawn(async move {
-            loop {
-                match resolve_and_connect(&connect_addr_string, ppid, &logger).await {
-                    Ok(assoc) => {
-                        let logger = logger.new(o!("connection" => assoc_id));
-                        trace!(logger, "Established connection");
+        let assoc = resolve_and_connect(&connect_addr_string, ppid, &logger).await?;
+        //let logger = logger.new(o!("connection" => assoc_id));
+        self.tnla_pool
+            .add_and_handle(
+                assoc.fd as u32,
+                Arc::new(assoc),
+                handler.clone(),
+                logger.clone(),
+            )
+            .await;
 
-                        self.tnla_pool
-                            .add_and_handle_no_spawn(
-                                assoc_id,
-                                Arc::new(assoc),
-                                handler.clone(),
-                                stop_token.clone(),
-                                logger.clone(),
-                            )
-                            .await;
-                    }
-                    Err(e) => {
-                        warn!(
-                            logger,
-                            "Couldn't establish connection to {} - will retry ({:?})",
-                            connect_addr_string,
-                            e
-                        );
-                    }
-                };
-                let retry_duration = Duration::from_secs(30);
-                if async_std::future::timeout(retry_duration, stop_token.clone())
-                    .await
-                    .is_ok()
-                {
-                    break;
-                }
-            }
-        });
-        Ok(ShutdownHandle::new(join_handle, stop_source))
+        Ok(())
+    }
+
+    // Pick a new UE binding.
+    async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
+        self.tnla_pool.new_ue_binding(seed).await
     }
 
     // Return the set of TNLA remote address to which we are currently connected
@@ -115,7 +100,7 @@ impl TransportProvider for SctpTransportProvider {
     where
         H: TnlaEventHandler,
     {
-        let addr = async_net::resolve(listen_addr).await.map(|vec| vec[0])?;
+        let addr = async_net::resolve(&listen_addr).await.map(|vec| vec[0])?;
         let stop_source = StopSource::new();
         let stop_token = stop_source.token();
         let stream = sctp::new_listen(addr, ppid, MAX_LISTEN_BACKLOG, logger.clone())?;
@@ -124,40 +109,35 @@ impl TransportProvider for SctpTransportProvider {
         let join_handle = task::spawn(async move {
             trace!(logger, "Listening for SCTP connections on {:?}", addr);
             pin_mut!(stream);
-            let mut connection_tasks = vec![];
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
-                        let assoc_id = 1; // TODO
-                        let logger = logger.new(o!("connection" => assoc_id));
+                        //let logger = logger.new(o!("connection" => assoc_id));
                         trace!(
                             logger,
                             "Accepted SCTP connection from {}",
                             assoc.remote_address
                         );
-                        let task = self
-                            .tnla_pool
+                        self.tnla_pool
                             .clone()
                             .add_and_handle(
-                                assoc_id,
+                                assoc.fd as u32,
                                 Arc::new(assoc),
                                 handler.clone(),
-                                stop_token.clone(),
-                                logger,
+                                logger.clone(),
                             )
                             .await;
-                        connection_tasks.push(task);
                     }
                     Some(Err(e)) => warn!(logger, "Error on incoming connection - {:?}", e),
                     None => {
-                        info!(logger, "Graceful shutdown");
+                        info!(logger, "Graceful shutdown of listen {}", listen_addr);
                         break;
                     }
                 }
             }
 
             trace!(logger, "Wait for connection tasks to finish");
-            future::join_all(connection_tasks).await;
+            self.tnla_pool.graceful_shutdown().await;
             trace!(logger, "Connection tasks finished");
         });
         Ok(ShutdownHandle::new(join_handle, stop_source))

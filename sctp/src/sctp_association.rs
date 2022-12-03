@@ -19,7 +19,7 @@ use std::{io, mem};
 // Cannot be Cloned since it is the owner of the fd.  Instead use Arc.
 #[derive(Debug)]
 pub struct SctpAssociation {
-    fd: i32,
+    pub fd: i32,
     ppid: u32,
     pub remote_address: SocketAddr,
 }

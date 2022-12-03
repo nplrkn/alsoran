@@ -1,43 +1,87 @@
-# TO DO
+# NEXT UP
+- Simplify and add revision number to connection API
+- Use revision number to ignore out of date refreshes
 ----PUBLICATION----
 - Get approval to publish
 - Rerun demo
 - Review all readmes as seen on Github, esp front page and roadmap
-- Set to public
+- Go public
+----SCALE OUT / MULTIPLE TNLA----
+- Failure and retry to set up / join NG / F1 / E1
+- Switchover of UE on dead worker - RAN initiated
+- Switchover of UE on dead worker - AMF initiated
+- Restart and catchup of coordinator
+- Allow AMF to specify 2nd endpoint - ask worker 1
+- Allow AMF to specify 2nd endpoint - ask worker 2
+- Load balance, stickiness and switchover between TNLAs to AMF
+- Allow DU / UP to set up multiple connections to same worker
+- Connection API operations must be idempotent
+- Stickiness and switchover between TNLAs to DU / UP
+- AMF not started at point workers start
+- Both workers die - reset
+- All NGAP TNLAs drop - don't reset, ues-retained = true. 
+- All F1AP TNLAs drop - reset. 
+- All E1AP TNLAs drop - ?
+
+# TECH DEBT
+- Two bugs that show up in Wireshark capture of session establishment test.
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
+- Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 ----MAINTAINABILITY----
+- Errors are too easy to miss - call_provider() to optionally warn! on failure
 - Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
 -----TESTS------
+- Failure to retrieve UE for each kind of request
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 -----ASN.1 GENERATOR------
 - Cope with extension marker being set
-- Frunk transmogrify - awkward because of vecs, enums and bitstrings.
+- Frunk transmogrify - awkward because of vecs, enums and bitstrings - or equivalent
 - Get rid of todo!() in top_pdu.rs and replace with a log
 - Implement Rrc setuprelease
+- Move to latest asn1-codecs crate version
 - Deduplicate inline definitions in RRC autogeneration
 - Generate procedures for Rrc and make F1AP a RequestProvider.
 - Move to latest version of specs
 - Fix clippy
------FREE5GC DEMO------
-- free5GC demo can register 2 (N?) UEs
-- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
 ----REDIS----
 - Don't create 1 Redis connection per access
-- Intermittent failure of live redis test
-- Live redis test returns ok after "# Failed listening on port 23491 (TCP), aborting."
+- Live redis test returns ok even after "# Failed listening on port 23491 (TCP), aborting."
 - Redis live test should not create Redis dump.rdb
 ----SCTP----
 - sock_opt.rs doesn't need to be a separate file
-- Remodel SCTP API to follow the one in the webrtc-sctp crate.
+- Remodel SCTP API to look like the one in the webrtc-sctp crate?
+-----FREE5GC DEMO------
+- free5GC demo can register 2 (N?) UEs
+- GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
+
+# MEDIUM TERM
+- Selection and stickiness of SCTP streams
+- Triangular redirection and upstream messages on old binding
+- Sample userplane 
+- Dockerfiles and Helm charts
+- Distributed timers and failure path cleanup mechanism
 
 # DONE
+- UP / DU connections in either order
+- Coordinator ensures time gap between attempts to add workers 
+- 2nd worker receives UP / DU connection and adds 1st worker
+- Test one UE through each worker
+- Assoc should be in pool by the point that the connect call returns
+- 1st worker initializes NG interface and 2nd worker joins in
+- 1st worker receives UP connection and adds 2nd worker
+- 1st worker receives DU connection and adds 2nd worker
+- Timing bug causing cu_can_connect_to_amf() to sometimes hang when logging disabled.  No repro
+- Log interleaving when RUST_LOG=debug and multiple tests run in parallel - noop - just do RUST_TEST_THREADS=1
+- Two workers up
+- Use IP address instead of ports to distinguish NGAP, E1 and F1 endpoints
+- Standalone single worker that runs built-in coordinator
 - Parallel registration of two UEs
 - Get build working on Github
 - Parallel tests

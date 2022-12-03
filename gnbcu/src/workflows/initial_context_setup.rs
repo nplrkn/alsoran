@@ -46,7 +46,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
             // Build Ue Context Setup request and include the Rrc security mode command.
             let ue_context_setup_request = super::build_f1ap::build_ue_context_setup_request(
                 self.gnbcu,
-                &r,
+                r,
                 &ue,
                 Some(rrc_container),
             );
@@ -107,7 +107,7 @@ impl<'a, G: Gnbcu> Workflow<'a, G> {
         // Reply to the AMF.
         self.log_message("InitialContextSetupResponse >>");
         Ok(InitialContextSetupResponse {
-            amf_ue_ngap_id: r.amf_ue_ngap_id.clone(),
+            amf_ue_ngap_id: r.amf_ue_ngap_id,
             ran_ue_ngap_id: RanUeNgapId(ue.key),
             pdu_session_resource_setup_list_cxt_res: None,
             pdu_session_resource_failed_to_setup_list_cxt_res: None,

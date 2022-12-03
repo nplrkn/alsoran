@@ -1,22 +1,23 @@
 //! mock_amf - enables a test script to assume the role of the AMF on the NG reference point
 
-use crate::mock::{Mock, Pdu};
-use anyhow::{anyhow, Result};
+use crate::mock::{Mock, Pdu, ReceivedPdu};
+use anyhow::{anyhow, bail, Result};
 use bitvec::prelude::*;
-use net::AperSerde;
+use net::{AperSerde, Binding};
 use ngap::*;
 use slog::{debug, info, o, Logger};
-use std::{collections::HashMap, ops::Deref};
+use std::ops::Deref;
 
 impl Pdu for NgapPdu {}
 
 pub struct MockAmf {
     mock: Mock<NgapPdu>,
-    ues: HashMap<u32, UeContext>,
 }
 
-struct UeContext {
+pub struct UeContext {
+    ue_id: u32,
     ran_ue_ngap_id: RanUeNgapId,
+    binding: Binding,
 }
 
 impl Deref for MockAmf {
@@ -28,15 +29,15 @@ impl Deref for MockAmf {
 }
 
 const NGAP_SCTP_PPID: u32 = 60;
+const NGAP_BIND_PORT: u16 = 38412;
 
 impl MockAmf {
-    pub async fn new(amf_address: &str, logger: &Logger) -> Result<MockAmf> {
+    pub async fn new(amf_ip_address: &str, logger: &Logger) -> Result<MockAmf> {
         let mut mock = Mock::new(logger.new(o!("amf" => 1))).await;
-        mock.serve(amf_address.to_string(), NGAP_SCTP_PPID).await?;
-        Ok(MockAmf {
-            mock,
-            ues: HashMap::new(),
-        })
+        let listen_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
+        info!(logger, "Mock AMF listening on {}", listen_address);
+        mock.serve(listen_address, NGAP_SCTP_PPID).await?;
+        Ok(MockAmf { mock })
     }
 
     pub async fn terminate(self) {
@@ -45,16 +46,15 @@ impl MockAmf {
 
     pub async fn handle_ng_setup(&self) -> Result<()> {
         let logger = &self.logger;
-        info!(logger, "Wait for NG Setup from GNB");
+        debug!(logger, "Wait for NG Setup from GNB");
 
-        let pdu = self.receive_pdu().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu {
-            info!(self.logger, "Got NG Setup, send setup response");
-            Ok(())
-        } else {
-            Err(anyhow!("Not an NG setup"))
-        }?;
+        let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu
+        else {
+            bail!("Not an NG setup")
+        };
+        info!(logger, ">> NgSetupRequest");
 
         let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
             guami: self.guami(),
@@ -78,7 +78,35 @@ impl MockAmf {
                 extended_amf_name: None,
             }));
 
-        self.send(response.into_bytes()?).await;
+        info!(logger, "<< NgSetupResponse");
+        self.send(response.into_bytes()?, Some(assoc_id)).await;
+
+        Ok(())
+    }
+
+    pub async fn handle_ran_configuration_update(&self) -> Result<()> {
+        let logger = &self.logger;
+        debug!(logger, "Wait for RAN Configuration Update from GNB");
+
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+
+        let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
+            _ran_configuration_update,
+        )) = pdu
+        else {
+            bail!("Not a RAN configuration update")
+        };
+        info!(logger, ">> RanConfigurationUpdate");
+
+        let response =
+            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::RanConfigurationUpdateAcknowledge(
+                RanConfigurationUpdateAcknowledge {
+                    criticality_diagnostics: None,
+                },
+            ));
+
+        info!(logger, "<< RanConfigurationUpdateAcknowledge");
+        self.send(response.into_bytes()?, Some(assoc_id)).await;
 
         Ok(())
     }
@@ -103,57 +131,35 @@ impl MockAmf {
         }
     }
 
-    pub async fn handle_ran_configuration_update(&self, logger: &Logger) -> Result<()> {
-        debug!(logger, "Wait for RAN Configuration Update from GNB");
-
-        let pdu = self.receive_pdu().await;
-
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
-            _ran_configuration_update,
-        )) = pdu
-        {
-            info!(logger, ">> RanConfigurationUpdate");
-            Ok(())
-        } else {
-            Err(anyhow!("Not a RAN configuration update"))
-        }?;
-
-        let response =
-            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::RanConfigurationUpdateAcknowledge(
-                RanConfigurationUpdateAcknowledge {
-                    criticality_diagnostics: None,
-                },
-            ));
-
-        info!(logger, "<< RanConfigurationUpdateAcknowledge");
-        self.send(response.into_bytes()?).await;
-
-        Ok(())
-    }
-
-    pub async fn receive_initial_ue_message(&mut self, ue_id: u32) -> Result<()> {
+    pub async fn receive_initial_ue_message(&self, ue_id: u32) -> Result<UeContext> {
         let logger = &self.logger;
-        if let NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
-            ran_ue_ngap_id,
-            ..
-        })) = self.receive_pdu().await
-        {
-            info!(logger, ">> InitialUeMessage");
-            debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
-            self.ues.insert(ue_id, UeContext { ran_ue_ngap_id });
-            Ok(())
-        } else {
-            Err(anyhow!("Not an initial UE message"))
+        match self.receive_pdu_with_assoc_id().await {
+            ReceivedPdu {
+                pdu:
+                    NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
+                        ran_ue_ngap_id,
+                        ..
+                    })),
+                assoc_id,
+            } => {
+                info!(logger, ">> InitialUeMessage");
+                debug!(logger, "UE Id {:?}", ran_ue_ngap_id);
+                Ok(UeContext {
+                    ue_id,
+                    ran_ue_ngap_id,
+                    binding: Binding { assoc_id },
+                })
+            }
+            _ => Err(anyhow!("Not an initial UE message")),
         }
     }
 
-    pub async fn send_initial_context_setup_request(&self, ue_id: u32) -> Result<()> {
+    pub async fn send_initial_context_setup_request(&self, ue_context: &UeContext) -> Result<()> {
         let logger = &self.logger;
-        let ran_ue_ngap_id = self.ues[&ue_id].ran_ue_ngap_id.clone();
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(
             InitialContextSetupRequest {
-                amf_ue_ngap_id: AmfUeNgapId(ue_id.into()),
-                ran_ue_ngap_id,
+                amf_ue_ngap_id: AmfUeNgapId(ue_context.ue_id.into()),
+                ran_ue_ngap_id: ue_context.ran_ue_ngap_id,
                 old_amf: None,
                 ue_aggregate_maximum_bit_rate: None,
                 core_network_assistance_information_for_inactive: None,
@@ -204,24 +210,26 @@ impl MockAmf {
         ));
 
         info!(logger, "<< InitialContextSetupRequest");
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, Some(ue_context.binding.assoc_id))
+            .await;
         Ok(())
     }
 
-    pub async fn receive_initial_context_setup_response(&self, ue_id: u32) -> Result<()> {
-        let received_amf_ue_id = match self.receive_pdu().await {
-            NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
-                InitialContextSetupResponse { amf_ue_ngap_id, .. },
-            )) => {
-                info!(&self.logger, ">> InitialContextSetupResponse");
-                Ok(amf_ue_ngap_id.0)
-            }
-            x => Err(anyhow!(
+    pub async fn receive_initial_context_setup_response(
+        &self,
+        ue_context: &UeContext,
+    ) -> Result<()> {
+        let pdu = self.receive_pdu().await;
+        let NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
+            InitialContextSetupResponse { amf_ue_ngap_id, .. },
+        )) = pdu else {
+            bail!(
                 "Expecting InitialContextSetupResponse, got unexpected message {:?}",
-                x
-            )),
-        }?;
-        assert_eq!(received_amf_ue_id, ue_id.into());
+                pdu
+            )
+        };
+        info!(&self.logger, ">> InitialContextSetupResponse");
+        assert_eq!(amf_ue_ngap_id.0, ue_context.ue_id.into());
         Ok(())
     }
 
@@ -236,14 +244,12 @@ impl MockAmf {
                 }]),
             },
         ));
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, None).await;
         Ok(())
     }
 
-    pub async fn send_pdu_session_resource_setup(&self, ue_id: u32) -> Result<()> {
+    pub async fn send_pdu_session_resource_setup(&self, ue_context: &UeContext) -> Result<()> {
         info!(&self.logger, "<< PduSessionResourceSetupRequest");
-
-        let ran_ue_ngap_id = self.ues[&ue_id].ran_ue_ngap_id.clone();
 
         let transport_layer_address = TransportLayerAddress(bitvec![u8, Msb0;0,1,0,1,0,1]);
 
@@ -291,8 +297,8 @@ impl MockAmf {
 
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::PduSessionResourceSetupRequest(
             PduSessionResourceSetupRequest {
-                amf_ue_ngap_id: AmfUeNgapId(ue_id.into()),
-                ran_ue_ngap_id,
+                amf_ue_ngap_id: AmfUeNgapId(ue_context.ue_id.into()),
+                ran_ue_ngap_id: ue_context.ran_ue_ngap_id,
                 ran_paging_priority: None,
                 nas_pdu: None,
                 pdu_session_resource_setup_list_su_req: PduSessionResourceSetupListSuReq(vec![
@@ -306,11 +312,15 @@ impl MockAmf {
                 ue_aggregate_maximum_bit_rate: None,
             },
         ));
-        self.send(pdu.into_bytes()?).await;
+        self.send(pdu.into_bytes()?, Some(ue_context.binding.assoc_id))
+            .await;
         Ok(())
     }
 
-    pub async fn receive_pdu_session_resource_setup_response(&self, ue_id: u32) -> Result<()> {
+    pub async fn receive_pdu_session_resource_setup_response(
+        &self,
+        ue_context: &UeContext,
+    ) -> Result<()> {
         match self.receive_pdu().await {
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceSetupResponse(
                 PduSessionResourceSetupResponse {
@@ -320,7 +330,7 @@ impl MockAmf {
                 },
             )) => {
                 info!(&self.logger, ">> PduSessionResourceSetupResponse");
-                assert_eq!(amf_ue_ngap_id.0, ue_id.into());
+                assert_eq!(amf_ue_ngap_id.0, ue_context.ue_id.into());
                 if let Some(xs) = pdu_session_resource_setup_list_su_res {
                     // There should be exactly one successful session setup.
                     assert!(xs.0.len() == 1);

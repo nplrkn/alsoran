@@ -16,3 +16,11 @@ rustflags = [
 
     "-D", "warnings", # all warnings should be denied
 ]
+
+
+# To reduce linker memory needs, `lld` is used as the linker.  
+# Requires lld to be installed (`sudo apt install lld` or similar).
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-C", "link-arg=-fuse-ld=lld",
+]

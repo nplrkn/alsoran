@@ -49,8 +49,8 @@ impl From<UeStateSerializable> for UeState {
         UeState {
             key: x.key,
             gnb_du_ue_f1ap_id: GnbDuUeF1apId(x.gnb_du_ue_f1ap_id),
-            amf_ue_ngap_id: x.amf_ue_ngap_id.map(|x| AmfUeNgapId(x)),
-            gnb_cu_up_ue_e1ap_id: x.gnb_cu_up_ue_e1ap_id.map(|x| GnbCuUpUeE1apId(x)),
+            amf_ue_ngap_id: x.amf_ue_ngap_id.map(AmfUeNgapId),
+            gnb_cu_up_ue_e1ap_id: x.gnb_cu_up_ue_e1ap_id.map(GnbCuUpUeE1apId),
         }
     }
 }

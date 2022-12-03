@@ -15,7 +15,7 @@ pub struct E1apHandler<G: Gnbcu> {
 
 impl<G: Gnbcu> E1apHandler<G> {
     pub fn new_e1ap_application(gnbcu: G) -> E1apCp<E1apHandler<G>> {
-        E1apCp::new(E1apHandler { gnbcu: gnbcu })
+        E1apCp::new(E1apHandler { gnbcu })
     }
 }
 
