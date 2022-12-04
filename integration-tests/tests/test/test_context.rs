@@ -1,8 +1,10 @@
 use anyhow::{bail, Result};
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
-use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig};
-use gnbcu::{MockUeStore, RedisUeStore};
+use gnb_cu_cp::{
+    Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig,
+};
+use gnb_cu_cp::{MockUeStore, RedisUeStore};
 use mocks::{
     AmfUeContext, CuUpUeContext, DuUeContext, MockAmf, MockCuUp, MockDu, SecurityModeCommand,
 };
@@ -205,13 +207,13 @@ impl TestContext {
             debug!(self.logger, "Start worker with config {:?}", config);
 
             match match datastore {
-                WorkerDatastoreSetup::RedisPort(port) => gnbcu::spawn(
+                WorkerDatastoreSetup::RedisPort(port) => gnb_cu_cp::spawn(
                     config.clone(),
                     RedisUeStore::new(*port).unwrap(),
                     self.logger.clone(),
                 ),
                 WorkerDatastoreSetup::MockUeStore(ue_store) => {
-                    gnbcu::spawn(config.clone(), ue_store.clone(), self.logger.clone())
+                    gnb_cu_cp::spawn(config.clone(), ue_store.clone(), self.logger.clone())
                 }
             } {
                 Ok(shutdown_handle) => {

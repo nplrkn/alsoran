@@ -963,7 +963,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gnbcu"
+name = "gnb-cu-cp"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1221,7 +1221,7 @@ dependencies = [
  "async-std",
  "common",
  "coordinator",
- "gnbcu",
+ "gnb-cu-cp",
  "mocks",
  "rand",
  "slog",

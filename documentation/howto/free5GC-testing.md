@@ -7,8 +7,6 @@ The following instructions below were created for a WSL environment without inta
 ## Get free5GC (one-off)
 Follow the instructions at https://www.free5gc.org/installations/stage-3-free5gc-install/ to install mongodb and make free5GC.  Because we are not going to use the userplane, you can skip 'Setting up Networking', and the make install of the kernel module. 
 
- 
-
 ## Alsoran demo
 Open four terminals.  
 
@@ -34,7 +32,7 @@ sudo tcpdump -w alsoran.pcap  -i lo port 38472 or port 38412
 In terminal 3, in the alsoran directory, run Redis and the Alsoran GNB-CU.  On startup the GNB-CU will connect to the AMF and perform NG Setup.
 ```
 redis-server &
-cargo run --bin gnbcu
+cargo run --bin gnb-cu-cp
 ```
 
 The gnbdu-sim build script is currently disabled because it fails on as a Github build runner.  If not done already, edit Cargo.toml

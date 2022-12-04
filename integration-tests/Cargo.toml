@@ -7,8 +7,8 @@ edition = "2021"
 async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
 common = { path = "../common" }
 mocks = { path = "../mocks" }
-gnbcu = { path = "../gnbcu" }
-coordinator = { path = "../coordinator"}
+gnb-cu-cp = { path = "../gnb-cu-cp" }
+coordinator = { path = "../gnb-cu-cp-coordinator"}
 slog = "2.7.0"
 anyhow = "1.0.52"
 stop-token = "0.6.1"

@@ -11,7 +11,7 @@ use async_trait::async_trait;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{info, trace, warn, Logger};
+use slog::{info, warn, Logger};
 use std::net::SocketAddr;
 use stop_token::StopSource;
 
@@ -107,17 +107,11 @@ impl TransportProvider for SctpTransportProvider {
         let stream = stream.take_until(stop_token.clone());
 
         let join_handle = task::spawn(async move {
-            trace!(logger, "Listening for SCTP connections on {:?}", addr);
             pin_mut!(stream);
             loop {
                 match stream.next().await {
                     Some(Ok(assoc)) => {
                         //let logger = logger.new(o!("connection" => assoc_id));
-                        trace!(
-                            logger,
-                            "Accepted SCTP connection from {}",
-                            assoc.remote_address
-                        );
                         self.tnla_pool
                             .clone()
                             .add_and_handle(
@@ -136,9 +130,7 @@ impl TransportProvider for SctpTransportProvider {
                 }
             }
 
-            trace!(logger, "Wait for connection tasks to finish");
             self.tnla_pool.graceful_shutdown().await;
-            trace!(logger, "Connection tasks finished");
         });
         Ok(ShutdownHandle::new(join_handle, stop_source))
     }
