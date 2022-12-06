@@ -20,7 +20,7 @@ rrc = {path = "../rrc" }
 pdcp = {path = "../pdcp" }
 connection-api = { path = "../connection-api", features = ["server"] }
 coordination-api = { path = "../coordination-api", features = ["client"] }
-coordinator = {path = "../gnb-cu-cp-coordinator" }  # for standalone single worker mode
+coordinator = {path = "../gnb-cu-cp-coordinator", package = "gnb-cu-cp-coordinator" }  # for standalone single worker mode
 async-trait = "0.1.24"
 bitvec = "1.0.1"
 async-channel = "1.6.1"

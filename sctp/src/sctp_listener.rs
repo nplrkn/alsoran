@@ -8,7 +8,7 @@ use async_stream::try_stream;
 use futures_core::stream::Stream;
 use libc::{accept, bind, listen, socket, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
-use slog::{trace, Logger};
+use slog::Logger;
 use std::io::Error;
 use std::net::SocketAddr;
 

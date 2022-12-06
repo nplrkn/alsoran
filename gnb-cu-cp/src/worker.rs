@@ -23,7 +23,7 @@ use net::{
     ShutdownHandle, Stack,
 };
 use rrc::UlDcchMessage;
-use slog::{debug, info, o, warn, Logger};
+use slog::{debug, info, warn, Logger};
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use stop_token::{StopSource, StopToken};
@@ -67,6 +67,7 @@ const E1AP_SCTP_PPID: u32 = 64;
 const E1AP_BIND_PORT: u16 = 38462;
 
 pub fn spawn<U: UeStateStore>(
+    worker_id: Uuid,
     config: Config,
     ue_store: U,
     logger: Logger,
@@ -74,11 +75,7 @@ pub fn spawn<U: UeStateStore>(
     let stop_source = StopSource::new();
     let stop_token = stop_source.token();
 
-    // We allocate the worker ID and logger here rather than inside Worker::new() in order that we can give the
-    // coordinator the same logger as the worker.
-    let worker_id = Uuid::new_v4();
-    let logger = logger.new(o!("cu-cp-w"=> worker_id.to_string()));
-    info!(&logger, "Started");
+    info!(&logger, "Started gNB-CU-CP worker {}", worker_id);
 
     let handle = match config.connection_style {
         // Run a combined worker and coordinator.

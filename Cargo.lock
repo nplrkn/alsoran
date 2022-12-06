@@ -485,32 +485,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "coordinator"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-channel",
- "async-std",
- "async-trait",
- "chrono",
- "common",
- "connection-api",
- "coordination-api",
- "futures",
- "hyper",
- "log",
- "mime",
- "openssl",
- "serde_ignored",
- "slog",
- "stop-token",
- "swagger",
- "tokio-openssl 0.4.0",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "core-foundation"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -974,9 +948,9 @@ dependencies = [
  "common",
  "connection-api",
  "coordination-api",
- "coordinator",
  "e1ap",
  "f1ap",
+ "gnb-cu-cp-coordinator",
  "hyper",
  "net",
  "ngap",
@@ -994,7 +968,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "gnbdu-sim"
+name = "gnb-cu-cp-coordinator"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-channel",
+ "async-std",
+ "async-trait",
+ "chrono",
+ "common",
+ "connection-api",
+ "coordination-api",
+ "futures",
+ "hyper",
+ "log",
+ "mime",
+ "openssl",
+ "serde_ignored",
+ "slog",
+ "stop-token",
+ "swagger",
+ "tokio-openssl 0.4.0",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "gnb-du-sim"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1220,12 +1220,13 @@ dependencies = [
  "anyhow",
  "async-std",
  "common",
- "coordinator",
  "gnb-cu-cp",
+ "gnb-cu-cp-coordinator",
  "mocks",
  "rand",
  "slog",
  "stop-token",
+ "uuid",
 ]
 
 [[package]]

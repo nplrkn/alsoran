@@ -8,8 +8,10 @@ async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
 common = { path = "../common" }
 mocks = { path = "../mocks" }
 gnb-cu-cp = { path = "../gnb-cu-cp" }
-coordinator = { path = "../gnb-cu-cp-coordinator"}
+coordinator = { path = "../gnb-cu-cp-coordinator", package = "gnb-cu-cp-coordinator" }
 slog = "2.7.0"
 anyhow = "1.0.52"
 stop-token = "0.6.1"
 rand = "0.8.5"
+uuid = {version = "0.8", features = ["v4"]}
+

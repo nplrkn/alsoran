@@ -19,5 +19,6 @@ pub fn init_terminal_logging() -> Logger {
     let decorator = slog_term::TermDecorator::new().build();
     let drain = slog_term::FullFormat::new(decorator).build().fuse();
     let drain = slog_async::Async::new(drain).build().fuse();
+    let drain = slog_envlogger::new(drain);
     slog::Logger::root(drain, o!())
 }

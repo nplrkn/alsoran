@@ -1,5 +1,6 @@
 # NEXT UP
 - Rerun demo
+- Get gnb-du-sim building in Github
 - Add readmes + review as they appear on Github
 - Get approval to publish
 - Go public

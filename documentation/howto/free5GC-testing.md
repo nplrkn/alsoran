@@ -35,12 +35,11 @@ redis-server &
 cargo run --bin gnb-cu-cp
 ```
 
-The gnbdu-sim build script is currently disabled because it fails on as a Github build runner.  If not done already, edit Cargo.toml
-in the gnbdu-sim to say "build = true" instead of "build = false".
+The gnb-du-sim build script is currently disabled because it fails on as a Github build runner.  If not done already, edit gnb-du-sim/Cargo.toml to say "build = true" instead of "build = false".
 
 In terminal 4, in the alsoran directory, run `gnbdu-sim` tool.  This provisions a UE in MongoDB, connects as a DU, drives a UE registration procedure and then exits.
 ```
-cargo run --bin gnbdu-sim
+cargo run --bin gnb-du-sim
 ```
 
 In terminal 2, hit Ctrl-C to finish the tcpdump.  You can now view `alsoran.pcap` in Wireshark.  The 'Malformed Packet' errors are a known problem.

@@ -2,11 +2,17 @@ use anyhow::Result;
 use common::{logging, signal};
 use gnb_cu_cp::{Config, RedisUeStore};
 use slog::info;
+use uuid::Uuid;
 
 #[async_std::main]
 async fn main() -> Result<()> {
+    // Use info level logging by default
+    if std::env::var("RUST_LOG").is_err() {
+        std::env::set_var("RUST_LOG", "info")
+    }
     let root_logger = logging::init();
     let shutdown_handle = gnb_cu_cp::spawn(
+        Uuid::new_v4(),
         Config::default(),
         RedisUeStore::new(6379).unwrap(),
         root_logger.clone(),
