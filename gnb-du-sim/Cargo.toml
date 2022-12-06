@@ -2,6 +2,7 @@
 name = "gnb-du-sim"
 version = "0.1.0"
 edition = "2021"
+build = false
 
 [dependencies]
 mocks = { path = "../mocks" }
