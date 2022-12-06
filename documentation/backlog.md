@@ -1,8 +1,6 @@
 # NEXT UP
 - Rerun demo
-- Get gnb-du-sim building in Github
 - Add readmes + review as they appear on Github
-- Get approval to publish
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
 - Use revision number to ignore out of date refreshes
@@ -23,7 +21,6 @@
 - All E1AP TNLAs drop - ?
 
 # TECH DEBT
-- Two bugs that show up in Wireshark capture of session establishment test.
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
@@ -40,6 +37,7 @@
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 -----ASN.1 GENERATOR------
+- Bugs that show up in Wireshark capture of session establishment test (PrintableString issue is a wireshark bug??).
 - Cope with extension marker being set
 - Frunk transmogrify - awkward because of vecs, enums and bitstrings - or equivalent
 - Get rid of todo!() in top_pdu.rs and replace with a log
