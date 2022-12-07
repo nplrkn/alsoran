@@ -1,0 +1,35 @@
+[package]
+name = "gnb-cu-cp"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+doctest = false
+
+[dependencies]
+net = { path = "../net" }
+stop-token = "0.6.1"
+async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
+slog = "2.7.0"
+anyhow = "1.0.52"
+common = { path = "../common" }
+e1ap = {path = "../e1ap" }
+f1ap = {path = "../f1ap" }
+ngap = {path = "../ngap" }
+rrc = {path = "../rrc" }
+pdcp = {path = "../pdcp" }
+connection-api = { path = "../connection-api", features = ["server"] }
+coordination-api = { path = "../coordination-api", features = ["client"] }
+coordinator = {path = "../gnb-cu-cp-coordinator", package = "gnb-cu-cp-coordinator" }  # for standalone single worker mode
+async-trait = "0.1.24"
+bitvec = "1.0.1"
+async-channel = "1.6.1"
+rand = "0.8.5"
+redis = {version = "0.21.5", features = ["async-std-comp"]}
+speedy = "0.8.2"
+swagger = { version = "6.1", features = ["serdejson", "server", "client"] }
+hyper = {version = "0.14", features = ["full"]}
+serde_ignored = {version = "0.1.1"}
+url = {version = "2.1"}
+uuid = {version = "0.8", features = ["serde", "v4"]}
+

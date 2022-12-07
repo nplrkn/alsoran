@@ -1,14 +1,17 @@
 use anyhow::{bail, Result};
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
-use gnbcu::{Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig};
-use gnbcu::{MockUeStore, RedisUeStore};
+use gnb_cu_cp::{
+    Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig,
+};
+use gnb_cu_cp::{MockUeStore, RedisUeStore};
 use mocks::{
     AmfUeContext, CuUpUeContext, DuUeContext, MockAmf, MockCuUp, MockDu, SecurityModeCommand,
 };
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
+use uuid::Uuid;
 
 const PORT_ALLOCATION_RETRIES: u32 = 10;
 const CONNECTION_API_PORT: u16 = 50312;
@@ -204,14 +207,19 @@ impl TestContext {
 
             debug!(self.logger, "Start worker with config {:?}", config);
 
+            // We allocate the worker ID and logger here rather than inside Worker::new() in order that we can give the
+            // coordinator the same logger as the worker.
+            let worker_id = Uuid::new_v4();
+            let worker_logger = self.logger.new(o!("cu-cp-w"=> worker_id.to_string()));
             match match datastore {
-                WorkerDatastoreSetup::RedisPort(port) => gnbcu::spawn(
+                WorkerDatastoreSetup::RedisPort(port) => gnb_cu_cp::spawn(
+                    worker_id,
                     config.clone(),
                     RedisUeStore::new(*port).unwrap(),
-                    self.logger.clone(),
+                    worker_logger,
                 ),
                 WorkerDatastoreSetup::MockUeStore(ue_store) => {
-                    gnbcu::spawn(config.clone(), ue_store.clone(), self.logger.clone())
+                    gnb_cu_cp::spawn(worker_id, config.clone(), ue_store.clone(), worker_logger)
                 }
             } {
                 Ok(shutdown_handle) => {

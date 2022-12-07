@@ -116,15 +116,3 @@ This means that if we index by F1 interface instance, there is an efficient way 
 
 When a TNLA fails, all of its TNLA bindings are broken.  This might suggest a walk of UE State by TNLA.  
 However, in fact we can instead wait until the UE is looked up for some other reason and rebind it then.
-
-## Deletion
-
-TODO
-
-1) The UE context will disappear from the datastore on TTL expiry.
-2) Explicit deletion by NGAP Ue Context Release procedure.
-3) NG Reset from the AMF.  "the NG-RAN node shall release all allocated resources on NG and Uu related to the UE association(s) indicated explicitly or implicitly in the NG RESET message and remove the indicated UE contexts including NGAP ID."
-4) When UE drops off the network?
-5) The AMF or DU disappears for an extended period.  This could be treated as a self triggered NG Reset.
-
-Given case 3), it is necessary for the NG-RAN to be able to walk all UE contexts by NGAP interface instance. 

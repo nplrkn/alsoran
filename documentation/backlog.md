@@ -1,12 +1,9 @@
 # NEXT UP
-- Simplify and add revision number to connection API
-- Use revision number to ignore out of date refreshes
-----PUBLICATION----
-- Get approval to publish
 - Rerun demo
-- Review all readmes as seen on Github, esp front page and roadmap
+- Add readmes + review as they appear on Github
 - Go public
 ----SCALE OUT / MULTIPLE TNLA----
+- Use revision number to ignore out of date refreshes
 - Failure and retry to set up / join NG / F1 / E1
 - Switchover of UE on dead worker - RAN initiated
 - Switchover of UE on dead worker - AMF initiated
@@ -24,7 +21,6 @@
 - All E1AP TNLAs drop - ?
 
 # TECH DEBT
-- Two bugs that show up in Wireshark capture of session establishment test.
 ----FUNCTION----
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
@@ -41,6 +37,7 @@
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
 -----ASN.1 GENERATOR------
+- Bugs that show up in Wireshark capture of session establishment test (PrintableString issue is a wireshark bug??).
 - Cope with extension marker being set
 - Frunk transmogrify - awkward because of vecs, enums and bitstrings - or equivalent
 - Get rid of todo!() in top_pdu.rs and replace with a log
@@ -69,6 +66,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Rename gnbcu to gnb-cu-cp
+- Simplify and add revision number to connection API
 - UP / DU connections in either order
 - Coordinator ensures time gap between attempts to add workers 
 - 2nd worker receives UP / DU connection and adds 1st worker

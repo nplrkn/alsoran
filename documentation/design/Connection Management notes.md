@@ -48,7 +48,7 @@ TNLA coordination needs to be synchronized, which explains the use of the actor 
 ### Coordinator startup 
 
 When the coordinator starts, it waits for a learning period before acting, to give it a chance to hear from all existing workers.
-For speed of testing, this startup period can be skipped with the fast start configuration flag.  
+For speed of testing, this startup period can be skipped with the fast_start configuration flag.  
 
 ### Mainline startup with two workers
 
@@ -128,15 +128,13 @@ If the controller restarts, this timestamp will be lost.  However, because the c
 
 The starting point is the AMF Set.  Either we get it from the UE (GUAMI, S-TMSI) or from configuration/policy, or from a previous message from the AMF indicating what to do in the event of failure.  (ref 23.501, 6.3.5).
 
-We then use NAPTR to find AMFs in the AMF Set as described in TS 29.303, 7.2.  To quote:
+The gNB then uses NAPTR (or equivalent local configuration) to find AMFs in the AMF Set as described in TS 29.303, 7.2.  To quote:
 
   The S-NAPTR procedure outputs a list of host names (AMFs) each with a service, protocol, port and a list of IPv4 and IPv6 addresses.
 
 The GNB should connect to all AMFs in the AMF Set.  That means finding an address that works, setting up the first TNLA, doing an NG Setup over it, and then letting the AMF instruct it to set up more TNLAs if it so desires.  
 
 To further complicate matters, an AMF may provide a backup AMF name per GUAMI in its served GUAMI list.
-
-(Does Kubernetes support NAPTR?  We could set up the same structure in local configuration as a stop gap.)
 
 ## SCTP stream use, UE and Non-UE associated signaling, TNLA binding 
 
@@ -149,7 +147,7 @@ A comment on Github suggests that it is normal practice to use stream ID 0 for n
 TS 38.413 on UE-associated signaling:
 > For a single UE-associated signalling, the NG-RAN node shall use one SCTP association and one SCTP stream, and the SCTP association/stream should not be changed during the communication of the UE-associated signalling until after current SCTP association is failed, or TNL binding update is performed as described in TS 23.502.
 
-i.e. everyone uses the association / stream chosen in the first place by the GNB... until they don't.
+i.e. all messages use the association / stream chosen in the first place by the GNB... until they don't.
 
 TS 38.472 has almost identical text for F1AP, and additionally clarifies in TS38.473:
 > The F1AP UE TNLA binding is a binding between a F1AP UE association and a specific TNL association for a given UE. After the F1AP UE TNLA binding is created, the gNB-CU can update the UE TNLA binding by sending the F1AP message for the UE to the gNB-DU via a different TNLA. The gNB-DU shall update the F1AP UE TNLA binding with the new TNLA.
@@ -161,7 +159,7 @@ F1AP specifies serialization of procedures for a UE.  From TS 38.473:
 ## Other design ideas - not currently in use, for further study
 ### 2nd worker doesn't know who has connected to it
 
-One curiosity that becomes apparent from the flow above is that a worker being added to an F1 or E1 interface doesn't know anything about the identity of the peer that has connected to it on its E1/F1 port.  This is because it just gets a bare connect.  The most obvious way for it to find out this identity is by the coordinator contacting it to associate the connection either before or after the connection comes in.  
+One curiosity that becomes apparent from the F1/E1 configuration update flow is that a worker being added to an F1 or E1 interface doesn't know anything about the identity of the peer that has connected to it on its E1/F1 port.  This is because it just gets a bare connect.  The most obvious way for it to find out this identity is by the coordinator contacting it to associate the connection either before or after the connection comes in.  
 
 Doing so before seems to lead to a simpler error handling design, in that an unassociated connection never needs to exist (...actually for a split second, if we accept() and then close(), or literally never, if we don't even accept()).  
 
@@ -191,9 +189,10 @@ This idea is not implemented yet.
 
 Can new workers be set up in such a way as to minimize the situation where UE associated messages can't be passed through?
 
-Since the UE initiates the connection, this suggests setting up the NGAP interface before allowing a new DU to finish initializing its connection.
+Since the UE initiates the connection, this suggests setting up the E1 and NG interface before allowing a new DU to finish initializing its F1 connection.
 
-However, if this same policy is applied when adding the second worker, there is the danger that it will receive a triangular redirected response from the AMF and be unable to pass it back to a DU. 
+If this same policy is applied when adding the second worker, there is the danger that it will receive a triangular redirected response from the AMF and be unable to pass it back to a DU - but this is a rare case so still seems to give the highest
+probability of not having to reject new UE messages from the DU.
 
 
 ### UE state retention

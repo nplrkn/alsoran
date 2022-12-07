@@ -10,7 +10,7 @@ use async_channel::Sender;
 use async_net::SocketAddr;
 use async_std::sync::{Arc, Mutex};
 use async_trait::async_trait;
-use slog::{trace, warn, Logger};
+use slog::{warn, Logger};
 
 type TransactionMatchFn = Box<dyn Fn(&Message) -> bool + Send + Sync>;
 type SharedTransactions = Arc<Mutex<Box<Vec<(TransactionMatchFn, Sender<Message>)>>>>;
@@ -151,7 +151,6 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
 
         match position {
             Some(index) => {
-                trace!(logger, "Matched the transaction at position {}", index);
                 let (_, response_channel) = self.pending_requests.lock().await.swap_remove(index);
                 response_channel
                     .send(message)

@@ -113,7 +113,7 @@ impl<P: Pdu> Mock<P> {
 #[async_trait]
 impl<P: Pdu> TnlaEventHandler for Handler<P> {
     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-        self.0.send(None).await.unwrap();
+        let _ = self.0.send(None).await;
     }
 
     async fn handle_message(

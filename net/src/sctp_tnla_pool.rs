@@ -10,7 +10,7 @@ use common::ShutdownHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{debug, trace, warn, Logger};
+use slog::{debug, warn, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::{StopSource, StopToken};
@@ -118,7 +118,6 @@ impl SctpTnlaPool {
             logger.clone(),
         );
 
-        trace!(logger, "Start TNLA event loop");
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
         pin_mut!(message_stream);
         loop {

@@ -1,0 +1,13 @@
+[package]
+name = "gnb-du-sim"
+version = "0.1.0"
+edition = "2021"
+build = false
+
+[dependencies]
+mocks = { path = "../mocks" }
+slog = "2.7.0"
+anyhow = "1.0.52"
+async-std = { version = "1.10.0", features = ["attributes"] }
+common = { path = "../common" }
+hex = "0.4.3"
