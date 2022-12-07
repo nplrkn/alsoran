@@ -25,7 +25,7 @@ async-trait = "0.1.24"
 bitvec = "1.0.1"
 async-channel = "1.6.1"
 rand = "0.8.5"
-redis = {version = "0.21.5", features = ["async-std-comp"]}
+redis = {version = "0.22.1", features = ["async-std-comp"]}
 speedy = "0.8.2"
 swagger = { version = "6.1", features = ["serdejson", "server", "client"] }
 hyper = {version = "0.14", features = ["full"]}
