@@ -29,14 +29,15 @@ Rust is an obviously attractive choice of language for new O-RAN development.  T
 - Ue state in Redis datastore.
 - Session setup (TS 23.502, figure 4.3.2.2.1-1).
 - Procedures: NG Setup, RAN Configuration Update, F1 Setup, E1 Setup, Initial Access, Uplink NAS, Downlink NAS, Initial Context Setup, Pdu Session Resource Setup, AMF Status Indication, GNB CU Configuration Update, GNB CU CP Configuration Update.
-- Async SCTP connection management and ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
+- Connection management stack 
+- ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
 - Rust ASN.1 autogenerator (written in Python).
 
-Generally only the success cases are covered, and there are a lot of 'To Dos'!
+Generally only the success cases are covered, and there are a lot of 'To Dos'.
 
 ## Building and running integration tests
 
-The build currently relies on `lld` to reduce linker memory needs.  You will either need to install it (`sudo apt install lld` or similar), or edit .cargo/config to remove the target.x86_64-unknown-linux-gnu config and revert to plain cc linking.
+The build relies on `lld` to reduce linker memory needs.  You will either need to install it (`sudo apt install lld` or similar), or edit .cargo/config to remove the `target.x86_64-unknown-linux-gnu` config and revert to plain `cc` linking.
 
 `cargo test` runs the integration test suite, minus the live Redis test.  
 
@@ -62,7 +63,7 @@ sudo tcpdump -w alsoran.pcap -i lo port 38472 or port 38412 or port 38462
 
 To run the live registration against free5GC takes a bit more setup - see the [demo instructions](documentation/howto/free5GC-testing.md).
 
-Finally you might want to browse the design docs in documentation/design.  They are not perfectly maintained but give a good idea of the design thinking that has gone into Alsoran so far.
+Finally you might want to browse the design notes in documentation/design, which give an idea of the design thinking that has gone into Alsoran so far.
 
 ## Contributing
 
@@ -70,9 +71,11 @@ So far, Alsoran has been developed by a single person, with a few hours a week t
 
 The [backlog](documentation/backlog.md) shows the main items being worked on and also tracks areas of tech debt. 
 
+The instructions for regenerating the two OpenAPI interfaces are in [OpenAPI generation](documentation/howto/OpenAPI%20generation.md).
+
 ## 3GPP and O-RAN specifications
 
-Alsoran protocol handling and business logic is based on the following specifications.  
+Alsoran protocol handling and workflow logic is based on the following specifications.  
 
 -  3GPP TS23.501 - System architecture for the 5G System
 -  3GPP TS23.502 - Procedures for the 5G System
