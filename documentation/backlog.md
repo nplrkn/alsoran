@@ -1,7 +1,4 @@
 # NEXT UP
-- Rerun demo
-- Add readmes + review as they appear on Github
-- Go public
 ----SCALE OUT / MULTIPLE TNLA----
 - Use revision number to ignore out of date refreshes
 - Failure and retry to set up / join NG / F1 / E1
@@ -66,6 +63,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Go public
+- Add readmes + review as they appear on Github
 - Rename gnbcu to gnb-cu-cp
 - Simplify and add revision number to connection API
 - UP / DU connections in either order
