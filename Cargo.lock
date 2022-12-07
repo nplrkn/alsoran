@@ -423,7 +423,7 @@ dependencies = [
  "frunk",
  "frunk-enum-core",
  "frunk-enum-derive",
- "frunk_core",
+ "frunk_core 0.4.1",
  "frunk_derives",
  "futures",
  "hyper",
@@ -456,7 +456,7 @@ dependencies = [
  "frunk",
  "frunk-enum-core",
  "frunk-enum-derive",
- "frunk_core",
+ "frunk_core 0.4.1",
  "frunk_derives",
  "futures",
  "hyper",
@@ -706,7 +706,7 @@ version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd01808c133782ef54e23f527c997819c7825e9f698c3175ae8f9f013aa756ca"
 dependencies = [
- "frunk_core",
+ "frunk_core 0.3.2",
  "frunk_derives",
  "frunk_proc_macros",
 ]
@@ -740,6 +740,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd8c14d645fa326a22a08400b896663e4efb7c92139f09eeccfffffa239d5858"
 
 [[package]]
+name = "frunk_core"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a446d01a558301dca28ef43222864a9fa2bd9a2e71370f769d5d5d5ec9f3537"
+
+[[package]]
 name = "frunk_derives"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -756,7 +762,7 @@ version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e24546dac1974be0df3e61144eff911672404bad46a76f39f6c72829f6254dbe"
 dependencies = [
- "frunk_core",
+ "frunk_core 0.3.2",
  "proc-macro2 0.4.30",
  "quote 0.6.13",
  "syn 0.15.44",
@@ -768,7 +774,7 @@ version = "0.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d60db7eb6dd2ac8de66c09118788482343970d0d9ad86938bca97279a6ddee5c"
 dependencies = [
- "frunk_core",
+ "frunk_core 0.3.2",
  "proc-macro2 0.4.30",
  "quote 0.6.13",
  "syn 0.15.44",
@@ -780,7 +786,7 @@ version = "0.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4735f7fbe65ed61442264f1d2cc98c93c5df4ca1a308851a645351c4912ebeb9"
 dependencies = [
- "frunk_core",
+ "frunk_core 0.3.2",
  "frunk_proc_macros_impl",
  "proc-macro-hack",
 ]
@@ -791,7 +797,7 @@ version = "0.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e0dd6736f34da423e773fe1276fd5e58aed45cb2386c670d6a106be6eef1d1cb"
 dependencies = [
- "frunk_core",
+ "frunk_core 0.3.2",
  "frunk_proc_macro_helpers 0.0.5",
  "proc-macro-hack",
  "quote 0.6.13",
