@@ -2,38 +2,35 @@
 
 Alsoran is a Rust implementation of the gNodeB Centralized Unit (gNB-CU) of the 5G Radio Access Network (RAN).
 
-This is the component that manages the radio access of 5G User Equipment (UEs).  It connects UEs to a 5G Core. 
+The gNodeB is the component that manages the radio access of 5G User Equipment (UEs) and connects them to a 5G Core. 
 
-In the control plane, the gNB-CU communicates with  
-- the 5G Core Access Management and Mobility function (AMF) using the NGAP protocol
-- the gNodeB Distributed Unit (gNB-DU) using the F1AP protocol
-- User Equipment (UEs) using the RRC protocol, encapsulated in F1AP
-- other gNodeB using the Xn-C interface.
-
-The gNB-CU control and user plane (gNB-CU-CP and gNB-CU-UP) are interconnected by the E1 interface.  However, Alsoran CU has no userplane, yet. 
-
-## What is different about Alsoran?
-
-It's written in Rust and it has a "scale-out single hop" design.
-
-"Scale-out" means that it has multiple interchangeable stateless worker processes.  Any request can be processed by any worker and no worker is a single point of failure.  A Coordinator process coordinates the interface management exchanges of the workers when the topology changes.  The motivation is scalability and fault tolerance.
-
-"Single hop" means that, in the mainline case, a message is processed by a single worker (rather than chained through multiple microservices or load balancers).  Consequently each Alsoran CU-CP worker has to have its own SCTP connections to the AMF, the DU and the CU-UP.  The motivation is execution speed and system simplicity.
-
-Rust is an obviously attractive choice of language for new O-RAN development.  The main barrier to entry is the SCTP and ASN.1 based protocols.  This project attempts to prove that this barrier is surmountable.
+This project is currently a proof of concept and not yet a fully functional gNB-CU.
 
 ## Current support
 
 - UE registration demo against free5GC.
-- Scale out of GNB-CU workers using multiple TNLAs.
-- Ue state in Redis datastore.
 - Session setup (TS 23.502, figure 4.3.2.2.1-1).
-- Procedures: NG Setup, RAN Configuration Update, F1 Setup, E1 Setup, Initial Access, Uplink NAS, Downlink NAS, Initial Context Setup, Pdu Session Resource Setup, AMF Status Indication, GNB CU Configuration Update, GNB CU CP Configuration Update.
-- Connection management stack 
+- UE state in Redis datastore.
 - ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
+- Connection management stack 
+- Scale-out of GNB-CU-CP workers using multiple TNLAs.
+- Procedures: NG Setup, RAN Configuration Update, F1 Setup, E1 Setup, Initial Access, Uplink NAS, Downlink NAS, Initial Context Setup, Pdu Session Resource Setup, AMF Status Indication, GNB CU Configuration Update, GNB CU CP Configuration Update.
 - Rust ASN.1 autogenerator (written in Python).
 
-Generally only the success cases are covered, and there are a lot of 'To Dos'.
+The gNB-CU-UP does not exist yet.
+
+Generally only the success cases are covered, and there are a lot of 'To Dos'.  
+
+## What's different about Alsoran?
+
+It's written in Rust and it has a "scale-out single hop" design.
+
+"Scale-out" means that it has multiple interchangeable stateless worker processes.  A request can be processed by any worker and no worker is a single point of failure.  A Coordinator process coordinates the interface management exchanges of the workers when the topology changes.  The motivation is scalability and fault tolerance.
+
+"Single hop" means that, in the mainline case, a message is processed by a single worker (rather than chained through multiple microservices or load balancers).  Each Alsoran CU-CP worker has its own SCTP connection to the AMF, the DU and the CU-UP.  The motivation is speed and system simplicity.
+
+Rust is an attractive choice of language for new O-RAN development.  The main barrier to entry is the ASN.1 and SCTP based protocols.  This project attempts to prove that this barrier is surmountable.
+
 
 ## Building and running integration tests
 
@@ -67,7 +64,7 @@ Finally you might want to browse the design notes in documentation/design, which
 
 ## Contributing
 
-So far, Alsoran has been developed by a single person, with a few hours a week to spare.  If you want to make it more useful for your own project, please consider contributing.  Start by creating a Github issue or discusion to propose the change you want to make.
+If you would like to contribute, start by creating a Github issue or discusion to propose the change you want to make.
 
 The [backlog](documentation/backlog.md) shows the main items being worked on and also tracks areas of tech debt. 
 
