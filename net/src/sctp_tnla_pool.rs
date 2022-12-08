@@ -111,18 +111,26 @@ impl SctpTnlaPool {
     ) where
         H: TnlaEventHandler,
     {
-        spawn_handle_event(
-            handler.clone(),
-            TnlaEvent::Established(assoc.remote_address),
-            assoc_id,
-            logger.clone(),
-        );
+        // Notify new association establishment.  Note that we do not spawn a separate task for this event.  This is
+        // to guarantee that the establishment event is processed before we move onto delivering any packets to the handler.
+        handler
+            .handle_event(
+                TnlaEvent::Established(assoc.remote_address),
+                assoc_id,
+                &logger,
+            )
+            .await;
 
         let message_stream = assoc.recv_msg_stream().take_until(stop_token);
         pin_mut!(message_stream);
         loop {
             match message_stream.next().await {
-                // Local graceful shutdown
+                // TODO - this does not implement graceful shutdown.  For one thing, the Terminated events below
+                // may overtake message events.  For another, graceful shutdown implies that procedures currently underway
+                // will allowed to complete sucessfully, which means we need to keep receiving on the association until
+                // they are complete.  But above, we just cut off the stream as soon as the stop token fired.
+
+                // Local shutdown
                 None => {
                     spawn_handle_event(
                         handler.clone(),
