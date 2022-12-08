@@ -1,5 +1,5 @@
 # NEXT UP
-----SCALE OUT / MULTIPLE TNLA----
+## SCALE OUT / MULTIPLE TNLA
 - Use revision number to ignore out of date refreshes
 - Failure and retry to set up / join NG / F1 / E1
 - Switchover of UE on dead worker - RAN initiated
@@ -18,22 +18,22 @@
 - All E1AP TNLAs drop - ?
 
 # TECH DEBT
-----FUNCTION----
+## FUNCTION
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
-----MAINTAINABILITY----
+## MAINTAINABILITY
 - Errors are too easy to miss - call_provider() to optionally warn! on failure
 - Remove slog from workflow module and use log methods on Workflow instead
 - Ue logging level should be settable to allow warnings to show up.  UE context should appear in logs / be stored in Logger.
 - Cleaner RRC interface in trait Gnbcu
 - Enforce Rust docs (see .cargo/config commented out compiler option)
------TESTS------
+## TESTS
 - Failure to retrieve UE for each kind of request
 - Efficient monolithic GNB-DU + GNB-CU can be built without a F1AP Stack or TransportProvider
 - Efficient monolithic GNB-CU-CP + GNB-CU-UP can be built without an E1AP Stack or TransportProvider
------ASN.1 GENERATOR------
+## ASN.1 GENERATOR
 - Bugs that show up in Wireshark capture of session establishment test (PrintableString issue is a wireshark bug??).
 - Cope with extension marker being set
 - Frunk transmogrify - awkward because of vecs, enums and bitstrings - or equivalent
@@ -44,14 +44,14 @@
 - Generate procedures for Rrc and make F1AP a RequestProvider.
 - Move to latest version of specs
 - Fix clippy
-----REDIS----
+## REDIS
 - Don't create 1 Redis connection per access
 - Live redis test returns ok even after "# Failed listening on port 23491 (TCP), aborting."
 - Redis live test should not create Redis dump.rdb
-----SCTP----
+## SCTP
 - sock_opt.rs doesn't need to be a separate file
 - Remodel SCTP API to look like the one in the webrtc-sctp crate?
------FREE5GC DEMO------
+## FREE5GC DEMO
 - free5GC demo can register 2 (N?) UEs
 - GNB-CU-UP executable can be started in demo and performs E1 Setup with GNB-CU-CP
 
