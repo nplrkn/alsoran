@@ -64,6 +64,7 @@
 
 # DONE
 - Go public
+- Fix TNLA established event so that it is always processed before first packet 
 - Add readmes + review as they appear on Github
 - Rename gnbcu to gnb-cu-cp
 - Simplify and add revision number to connection API
