@@ -12,7 +12,7 @@ To run,
 rm -rf api docs examples .gitignore .openapi-generator .openapi-generator-ignore README.md
 
 # Remove the examples targets from Cargo.toml
-awk '/\[\[example\]\]/{exit}' Cargo.toml > tempfile
+awk '/\[\[example\]\]/{exit} 1' Cargo.toml > tempfile
 mv tempfile Cargo.toml
 ```
 
@@ -24,6 +24,6 @@ mv tempfile Cargo.toml
 rm -rf api docs examples .gitignore .openapi-generator .openapi-generator-ignore README.md
 
 # Remove the examples targets from Cargo.toml
-awk '/\[\[example\]\]/{exit}' Cargo.toml > tempfile
+awk '/\[\[example\]\]/{exit} 1' Cargo.toml > tempfile
 mv tempfile Cargo.toml
 ```

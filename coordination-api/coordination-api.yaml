@@ -33,15 +33,12 @@ components:
       type: object
       required:
         - workerId
-        - revisionNumber
         - workerInfo
         - connectionState
       properties:
         workerId:
           type: string
           format: uuid
-        revisionNumber:
-          type: integer
         workerInfo:
           $ref: '#/components/schemas/WorkerInfo'
         connectionState:

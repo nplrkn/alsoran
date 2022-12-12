@@ -19,7 +19,6 @@ pub const API_VERSION: &str = "1.0.0";
 pub enum AddConnectionResponse {
     /// Success
     Success
-    (i32)
     ,
     /// Failure
     Failure

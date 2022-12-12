@@ -217,34 +217,3 @@ impl std::str::FromStr for OperationType {
         }
     }
 }
-
-/// Revision number of the worker refresh just sent by this worker
-#[derive(Debug, Clone, PartialEq, PartialOrd, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
-pub struct RevisionNumber(i32);
-
-impl std::convert::From<i32> for RevisionNumber {
-    fn from(x: i32) -> Self {
-        RevisionNumber(x)
-    }
-}
-
-impl std::convert::From<RevisionNumber> for i32 {
-    fn from(x: RevisionNumber) -> Self {
-        x.0
-    }
-}
-
-impl std::ops::Deref for RevisionNumber {
-    type Target = i32;
-    fn deref(&self) -> &i32 {
-        &self.0
-    }
-}
-
-impl std::ops::DerefMut for RevisionNumber {
-    fn deref_mut(&mut self) -> &mut i32 {
-        &mut self.0
-    }
-}
-

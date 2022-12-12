@@ -13,7 +13,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     pub async fn gnb_cu_cp_configuration_update(
         &self,
         e1ap_endpoint_ip_addr: &String,
-    ) -> Result<i32> {
+    ) -> Result<()> {
         let gnb_cu_cp_configuration_update = GnbCuCpConfigurationUpdate {
             transaction_id: TransactionId(1), // TODO
             gnb_cu_cp_name: None,
@@ -39,8 +39,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         self.log_message(">> GnbCuCpConfigurationUpdateAcknowledge");
 
         // Associate this TNLA with the E1AP interface instance.
-        let revision_number = self.associate_connection();
+        self.associate_connection();
 
-        Ok(revision_number)
+        Ok(())
     }
 }

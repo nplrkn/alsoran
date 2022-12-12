@@ -213,7 +213,6 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
             .refresh_worker(
                 RefreshWorker {
                     worker_id: self.worker_id,
-                    revision_number: 1, // TODO
                     worker_info: WorkerInfo {
                         connection_api_url,
                         f1_address: worker_ip.clone(),

@@ -23,12 +23,8 @@ paths:
                   operationType: "setupNg"
                   ipAddress: "12.13.14.15"
       responses:
-        '200':
+        '201':
           description: Success
-          content:
-            application/json:    
-              schema:
-                $ref: "#/components/schemas/RevisionNumber"
         '500':
           description: Failure
           content:
@@ -55,8 +51,5 @@ components:
         - joinNg
         - addF1
         - addE1
-    RevisionNumber: 
-      description: Revision number of the worker refresh just sent by this worker
-      type: integer
     Error:
       type: string
