@@ -238,9 +238,6 @@ pub struct RefreshWorker {
     #[serde(rename = "workerId")]
     pub worker_id: uuid::Uuid,
 
-    #[serde(rename = "revisionNumber")]
-    pub revision_number: i32,
-
     #[serde(rename = "workerInfo")]
     pub worker_info: models::WorkerInfo,
 
@@ -251,10 +248,9 @@ pub struct RefreshWorker {
 
 impl RefreshWorker {
     #[allow(clippy::new_without_default)]
-    pub fn new(worker_id: uuid::Uuid, revision_number: i32, worker_info: models::WorkerInfo, connection_state: models::ConnectionState, ) -> RefreshWorker {
+    pub fn new(worker_id: uuid::Uuid, worker_info: models::WorkerInfo, connection_state: models::ConnectionState, ) -> RefreshWorker {
         RefreshWorker {
             worker_id,
-            revision_number,
             worker_info,
             connection_state,
         }
@@ -268,10 +264,6 @@ impl std::string::ToString for RefreshWorker {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
             // Skipping workerId in query parameter serialization
-
-
-            Some("revisionNumber".to_string()),
-            Some(self.revision_number.to_string()),
 
             // Skipping workerInfo in query parameter serialization
 
@@ -295,7 +287,6 @@ impl std::str::FromStr for RefreshWorker {
         #[allow(dead_code)]
         struct IntermediateRep {
             pub worker_id: Vec<uuid::Uuid>,
-            pub revision_number: Vec<i32>,
             pub worker_info: Vec<models::WorkerInfo>,
             pub connection_state: Vec<models::ConnectionState>,
         }
@@ -318,8 +309,6 @@ impl std::str::FromStr for RefreshWorker {
                     #[allow(clippy::redundant_clone)]
                     "workerId" => intermediate_rep.worker_id.push(<uuid::Uuid as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "revisionNumber" => intermediate_rep.revision_number.push(<i32 as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
                     "workerInfo" => intermediate_rep.worker_info.push(<models::WorkerInfo as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
                     "connectionState" => intermediate_rep.connection_state.push(<models::ConnectionState as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
@@ -334,7 +323,6 @@ impl std::str::FromStr for RefreshWorker {
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(RefreshWorker {
             worker_id: intermediate_rep.worker_id.into_iter().next().ok_or_else(|| "workerId missing in RefreshWorker".to_string())?,
-            revision_number: intermediate_rep.revision_number.into_iter().next().ok_or_else(|| "revisionNumber missing in RefreshWorker".to_string())?,
             worker_info: intermediate_rep.worker_info.into_iter().next().ok_or_else(|| "workerInfo missing in RefreshWorker".to_string())?,
             connection_state: intermediate_rep.connection_state.into_iter().next().ok_or_else(|| "connectionState missing in RefreshWorker".to_string())?,
         })

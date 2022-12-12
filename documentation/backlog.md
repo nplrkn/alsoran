@@ -1,6 +1,5 @@
 # NEXT UP
 ## SCALE OUT / MULTIPLE TNLA
-- Use revision number to ignore out of date refreshes
 - Failure and retry to set up / join NG / F1 / E1
 - Switchover of UE on dead worker - RAN initiated
 - Switchover of UE on dead worker - AMF initiated
@@ -63,6 +62,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Get rid of revision number
 - Go public
 - Fix TNLA established event so that it is always processed before first packet 
 - Add readmes + review as they appear on Github

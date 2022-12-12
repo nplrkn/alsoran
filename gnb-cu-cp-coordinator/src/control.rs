@@ -392,7 +392,7 @@ impl<T: Api<ClientContext>, P: ConnectionApiProvider<T>> Controller<T, P> {
             )
             .await
         {
-            Ok(AddConnectionResponse::Success(_revision_number)) => {
+            Ok(AddConnectionResponse::Success) => {
                 debug!(logger, "Ok");
 
                 // Update our local view of whether this connection is up.

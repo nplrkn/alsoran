@@ -9,7 +9,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     // 1.    Connect to the AMF
     // 2.    Ngap RanConfigurationUpdate >>
     // 3.    Ngap RanConfigurationUpdateAcknowledge <<
-    pub async fn ran_configuration_update(&self, amf_ip_address: &str) -> Result<i32> {
+    pub async fn ran_configuration_update(&self, amf_ip_address: &str) -> Result<()> {
         // Connect to the AMF
         self.gnb_cu_cp.ngap_connect(amf_ip_address).await?;
 
@@ -34,8 +34,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         self.log_message("RanConfigurationUpdateAcknowledge <<");
 
         // Associate this TNLA with the NGAP interface instance.
-        let revision_number = 1; // self.associate_connection();
+        // self.associate_connection();
 
-        Ok(revision_number)
+        Ok(())
     }
 }

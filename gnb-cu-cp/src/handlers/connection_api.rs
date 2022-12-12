@@ -98,7 +98,7 @@ where
                     .await
             }
         }
-        .map(|revision_number| AddConnectionResponse::Success(revision_number))
+        .map(|()| AddConnectionResponse::Success)
         .or_else(|e| {
             warn!(
                 self.logger,
