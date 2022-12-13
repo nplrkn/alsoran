@@ -1,14 +1,14 @@
 # NEXT UP
 ## SCALE OUT / MULTIPLE TNLA
-- Failure and retry to set up / join NG / F1 / E1
-- Switchover of UE on dead worker - RAN initiated
-- Switchover of UE on dead worker - AMF initiated
-- Restart and catchup of coordinator
 - Allow AMF to specify 2nd endpoint - ask worker 1
 - Allow AMF to specify 2nd endpoint - ask worker 2
 - Load balance, stickiness and switchover between TNLAs to AMF
 - Allow DU / UP to set up multiple connections to same worker
-- Connection API operations must be idempotent
+- Restart and catchup of coordinator
+- Failure and retry to set up / join NG / F1 / E1
+- Switchover of UE on dead worker - RAN initiated
+- Switchover of UE on dead worker - AMF initiated
+- Connection API operations should be idempotent
 - Stickiness and switchover between TNLAs to DU / UP
 - AMF not started at point workers start
 - Both workers die - reset

@@ -12,6 +12,7 @@ impl Pdu for NgapPdu {}
 
 pub struct MockAmf {
     mock: Mock<NgapPdu>,
+    ips: Vec<String>,
 }
 
 pub struct UeContext {
@@ -32,12 +33,25 @@ const NGAP_SCTP_PPID: u32 = 60;
 const NGAP_BIND_PORT: u16 = 38412;
 
 impl MockAmf {
-    pub async fn new(amf_ip_address: &str, logger: &Logger) -> Result<MockAmf> {
-        let mut mock = Mock::new(logger.new(o!("amf" => 1))).await;
-        let listen_address = format!("{}:{}", amf_ip_address, NGAP_BIND_PORT);
-        info!(logger, "Mock AMF listening on {}", listen_address);
-        mock.serve(listen_address, NGAP_SCTP_PPID).await?;
-        Ok(MockAmf { mock })
+    pub async fn new(logger: &Logger) -> MockAmf {
+        MockAmf {
+            mock: Mock::new(logger.new(o!("amf" => 1))).await,
+            ips: vec![],
+        }
+    }
+
+    pub async fn add_endpoint(&mut self, ip_address: &str) -> Result<()> {
+        let listen_address = format!("{}:{}", ip_address, NGAP_BIND_PORT);
+        info!(self.logger, "Mock AMF listening on {}", listen_address);
+        self.mock
+            .serve(listen_address.clone(), NGAP_SCTP_PPID)
+            .await?;
+        self.ips.push(ip_address.to_string());
+        Ok(())
+    }
+
+    pub fn ips(&self) -> &Vec<String> {
+        &self.ips
     }
 
     pub async fn terminate(self) {

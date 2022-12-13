@@ -18,7 +18,7 @@ pub struct Mock<P: Pdu> {
     receiver: Receiver<Option<ReceivedPdu<P>>>,
     pub logger: Logger,
     handler: Handler<P>,
-    transport_tasks: Option<ShutdownHandle>,
+    transport_tasks: Vec<ShutdownHandle>,
 }
 
 pub struct ReceivedPdu<P: Pdu> {
@@ -39,7 +39,7 @@ impl<P: Pdu> Mock<P> {
             receiver,
             logger,
             handler: Handler(sender),
-            transport_tasks: None,
+            transport_tasks: Vec::new(),
         }
     }
 
@@ -49,7 +49,7 @@ impl<P: Pdu> Mock<P> {
             .clone()
             .serve(address, ppid, self.handler.clone(), self.logger.clone())
             .await?;
-        self.transport_tasks = Some(transport_tasks);
+        self.transport_tasks.push(transport_tasks);
         Ok(())
     }
 
@@ -65,9 +65,9 @@ impl<P: Pdu> Mock<P> {
         self.expect_connection().await;
     }
 
-    pub async fn terminate(self) {
-        if let Some(transport_tasks) = self.transport_tasks {
-            transport_tasks.graceful_shutdown().await;
+    pub async fn terminate(mut self) {
+        for t in self.transport_tasks.drain(..) {
+            t.graceful_shutdown().await;
         }
         self.transport.graceful_shutdown().await;
     }
