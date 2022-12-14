@@ -92,6 +92,8 @@ Suppose the E1/F1 interface is initialized by E1/F1 Setup at a worker shortly af
 
 Furthermore, the coordinator must proactively act on this and try to get all known workers connected.  If we were just refresh-driven, we would again be needlessly waiting for their next refresh.  Instead, the coordinator must make an attempt to connect all known workers the moment it knows of a viable E1 / F1 connection.
 
+### Connection delay
+
 What if the coordinator queues up a worker refresh for processing and in the meantime takes action that will invalidate the information in that refresh?  We want to avoid a situation in which the coordinator will add the connection, then gets a refresh indicating no connection, and needlessly adds it again.  
 
 This is shown in the following flow (some responses omitted).
@@ -121,6 +123,17 @@ sequenceDiagram
 The approach taken is for the coordinator to enforce a delay between any two attempts to connect a given worker.  To do this, it stores a last attempt timestamp for both F1 and E1.  
 
 If the controller restarts, this timestamp will be lost.  However, because the coordinator will wait for the 'learning period' before taking action, it will typically avoid trying to add a TNLA endpoint that it has already added before the restart.  
+
+### Failure and retry
+
+#### NGAP failure handling
+
+(Not yet implemented.)
+
+When an AMF connection fails to a single worker, that triggers an "ng join" retry after 10 seconds (Ran configuration update).  If that fails, there is a 30 second endless retry of "ng join".
+
+When an AMF connection fails to all workers, that triggers an immediate "ng setup" reattempt (NG setup).  If that fails, there is a 10 second endless retry of "ng setup".
+
 
 ## Spec references
 

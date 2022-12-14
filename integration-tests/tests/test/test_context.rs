@@ -13,12 +13,11 @@ use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
 use uuid::Uuid;
 
-const PORT_ALLOCATION_RETRIES: u32 = 10;
+const IP_OR_PORT_RETRIES: usize = 10;
 const CONNECTION_API_PORT: u16 = 50312;
 
 pub struct TestContext {
     pub amf: MockAmf,
-    pub amf_ip_addr: String,
     pub du: MockDu,
     pub cu_up: MockCuUp,
     pub logger: Logger,
@@ -39,6 +38,7 @@ struct InternalCoordinatorInfo {
 pub enum Stage {
     Init,
     AmfConnected,
+    AmfSecondaryEndpointsConnected,
     CuUpConnected,
     DuConnected,
 }
@@ -63,7 +63,8 @@ pub enum UeRegisterStage {
 pub struct TestContextBuilder {
     redis_port: Option<u16>,
     stage: Stage,
-    worker_count: isize,
+    worker_count: usize,
+    amf_endpoint_count: usize,
 }
 
 impl TestContextBuilder {
@@ -72,6 +73,7 @@ impl TestContextBuilder {
             redis_port: None,
             stage: Stage::Init,
             worker_count: 1,
+            amf_endpoint_count: 1,
         }
     }
 
@@ -85,8 +87,13 @@ impl TestContextBuilder {
         self
     }
 
-    pub fn worker_count(&mut self, worker_count: isize) -> &mut TestContextBuilder {
+    pub fn worker_count(&mut self, worker_count: usize) -> &mut TestContextBuilder {
         self.worker_count = worker_count;
+        self
+    }
+
+    pub fn amf_endpoint_count(&mut self, amf_endpoint_count: usize) -> &mut TestContextBuilder {
+        self.amf_endpoint_count = amf_endpoint_count;
         self
     }
 
@@ -101,13 +108,12 @@ impl TestContextBuilder {
         }));
 
         // Listen on the AMF SCTP port so that when the worker starts up it will be able to connect.
-        let (amf, amf_ip_addr) = start_amf_on_random_ip(&logger).await;
+        let amf = start_amf_with_random_ips(&logger, self.amf_endpoint_count).await;
         let du = MockDu::new(&logger).await;
         let cu_up = MockCuUp::new(&logger).await;
 
         let mut tc = TestContext {
             amf,
-            amf_ip_addr,
             du,
             cu_up,
             logger,
@@ -153,12 +159,12 @@ pub enum WorkerDatastoreSetup {
 impl TestContext {
     async fn start_coordinator(&mut self) {
         info!(self.logger, "Spawn coordinator");
-        for _ in 0..PORT_ALLOCATION_RETRIES {
+        for _ in 0..IP_OR_PORT_RETRIES {
             let logger = self.logger.new(o!("cu-cp-coord" => 1));
             let config = CoordinatorConfig {
                 bind_port: rand::thread_rng().gen_range(1024..65535),
                 connection_control_config: ConnectionControlConfig {
-                    amf_address: self.amf_ip_addr.clone(),
+                    amf_address: self.amf.ips()[0].clone(),
                     worker_refresh_interval_secs: 30,
                     fast_start: true,
                 },
@@ -175,7 +181,7 @@ impl TestContext {
     }
 
     async fn start_worker_on_random_ip(&mut self, datastore: &WorkerDatastoreSetup) {
-        for _ in 0..PORT_ALLOCATION_RETRIES {
+        for _ in 0..IP_OR_PORT_RETRIES {
             let worker_ip = random_local_ip();
             let connection_api_bind_port = CONNECTION_API_PORT;
 
@@ -194,7 +200,7 @@ impl TestContext {
             } else {
                 ConnectionStyle::Autonomous(ConnectionControlConfig {
                     fast_start: true,
-                    amf_address: self.amf_ip_addr.clone(),
+                    amf_address: self.amf.ips()[0].clone(),
                     ..ConnectionControlConfig::default()
                 })
             };
@@ -257,6 +263,7 @@ impl TestContext {
                     self.amf.handle_ran_configuration_update().await?;
                 }
             }
+            &Stage::AmfSecondaryEndpointsConnected => todo!(),
             &Stage::CuUpConnected => {
                 if setup_interface {
                     self.cu_up.perform_e1_setup(&worker_ip).await?;
@@ -292,6 +299,11 @@ impl TestContext {
         if stage >= &Stage::AmfConnected {
             self.interface_setup_stage(worker_index, &Stage::AmfConnected, setup_interface)
                 .await?;
+        }
+        if stage >= &Stage::AmfSecondaryEndpointsConnected {
+            if self.amf.ips().len() > 1 {
+                todo!()
+            }
         }
         if stage >= &Stage::CuUpConnected {
             self.interface_setup_stage(worker_index, &Stage::CuUpConnected, setup_interface)
@@ -447,14 +459,17 @@ impl TestContext {
     }
 }
 
-async fn start_amf_on_random_ip(logger: &Logger) -> (MockAmf, String) {
-    for _ in 0..PORT_ALLOCATION_RETRIES {
-        let address = random_local_ip();
-        if let Ok(amf) = MockAmf::new(&address, logger).await {
-            return (amf, address);
-        };
+async fn start_amf_with_random_ips(logger: &Logger, num_endpoints: usize) -> MockAmf {
+    assert!(num_endpoints > 0);
+    let mut amf = MockAmf::new(logger).await;
+
+    for _ in 0..(IP_OR_PORT_RETRIES + num_endpoints) {
+        let _ = amf.add_endpoint(&random_local_ip()).await;
+        if amf.ips().len() == num_endpoints {
+            return amf;
+        }
     }
-    panic!("Repeatedly failed to start Mock AMF")
+    panic!("Failed to bind to {} random IPs", num_endpoints)
 }
 
 fn random_local_ip() -> String {
