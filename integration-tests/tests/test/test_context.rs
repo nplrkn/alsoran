@@ -1,13 +1,12 @@
-use anyhow::{bail, Result};
+use super::ue_registration::*;
+use anyhow::Result;
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
 use gnb_cu_cp::{
     Config, ConnectionControlConfig, ConnectionStyle, WorkerConnectionManagementConfig,
 };
 use gnb_cu_cp::{MockUeStore, RedisUeStore};
-use mocks::{
-    AmfUeContext, CuUpUeContext, DuUeContext, MockAmf, MockCuUp, MockDu, SecurityModeCommand,
-};
+use mocks::{MockAmf, MockCuUp, MockDu};
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
 use std::{panic, process};
@@ -43,22 +42,15 @@ pub enum Stage {
     DuConnected,
 }
 
-pub struct UeContext {
-    ue_id: u32,
-    du_ue_context: DuUeContext,
-    amf_ue_context: Option<AmfUeContext>,
-    cu_up_ue_context: Option<CuUpUeContext>,
-}
-
-pub struct UeRegister<'a> {
-    pub stage: UeRegisterStage,
-    ue_context: &'a mut UeContext,
-}
-pub enum UeRegisterStage {
-    Init,
-    Stage1(SecurityModeCommand),
-    End,
-}
+// pub struct UeRegister<'a> {
+//     pub stage: UeRegisterStage,
+//     ue_context: &'a mut UeContext,
+// }
+// pub enum UeRegisterStage {
+//     Init,
+//     Stage1(SecurityModeCommand),
+//     End,
+// }
 
 pub struct TestContextBuilder {
     redis_port: Option<u16>,
@@ -241,17 +233,21 @@ impl TestContext {
         panic!("Repeatedly failed to create worker")
     }
 
+    pub fn worker_ip(&self, worker_index: usize) -> String {
+        self.workers[worker_index]
+            .config
+            .ip_addr
+            .unwrap()
+            .to_string()
+    }
+
     pub async fn interface_setup_stage<'a>(
         &'a mut self,
         worker_index: usize,
         stage: &Stage,
         setup_interface: bool,
     ) -> Result<&'a mut Self> {
-        let worker_ip = self.workers[worker_index]
-            .config
-            .ip_addr
-            .unwrap()
-            .to_string();
+        let worker_ip = self.worker_ip(worker_index);
 
         match stage {
             &Stage::Init => (),
@@ -316,126 +312,101 @@ impl TestContext {
         Ok(self)
     }
 
-    pub async fn new_ue(&self, ue_id: u32) -> UeContext {
-        UeContext {
-            ue_id,
-            du_ue_context: self.du.new_ue_context(ue_id).await,
-            amf_ue_context: None,
-            cu_up_ue_context: None,
-        }
+    // pub async fn new_ue(&self, ue_id: u32) -> UeContext {
+    //     UeContext {
+    //         ue_id,
+    //         du_ue_context: self.du.new_ue_context(ue_id).await,
+    //         amf_ue_context: None,
+    //         cu_up_ue_context: None,
+    //     }
+    // }
+
+    pub async fn new_ue(&self, ue_id: u32) -> DetachedUe {
+        DetachedUe::new(ue_id, self.du.new_ue_context(ue_id).await)
     }
 
-    pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<UeContext> {
-        let mut ue_context = self.new_ue(ue_id).await;
-        let mut register_ue = self.register_ue_start(&mut ue_context).await;
-        loop {
-            if let UeRegisterStage::End = register_ue.stage {
-                break;
-            }
-            register_ue = self.register_ue_next(register_ue).await?;
-        }
-        Ok(ue_context)
+    pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<RegisteredUe> {
+        let ue_1 = self.new_ue(ue_id).await;
+        let ue_1 = ue_1.initial_access(self).await?;
+        let (ue_1, security_mode_command) = ue_1.initiate_registration(self).await?;
+        let ue_1 = ue_1
+            .complete_registration(self, &security_mode_command)
+            .await?;
+        Ok(ue_1)
     }
 
-    pub async fn register_ue(&mut self, ue_context: &mut UeContext) -> Result<()> {
-        let mut register_ue = self.register_ue_start(ue_context).await;
-        loop {
-            if let UeRegisterStage::End = register_ue.stage {
-                break;
-            }
-            register_ue = self.register_ue_next(register_ue).await?;
-        }
-        Ok(())
-    }
+    // pub async fn register_ue(&mut self, ue_context: &mut UeContext) -> Result<()> {
 
-    pub async fn register_ue_start<'a>(&self, ue_context: &'a mut UeContext) -> UeRegister<'a> {
-        info!(self.logger, "Register UE {}", ue_context.ue_id);
-        UeRegister {
-            stage: UeRegisterStage::Init,
-            ue_context,
-        }
-    }
+    //     let mut register_ue = self.register_ue_start(ue_context).await;
+    //     loop {
+    //         if let UeRegisterStage::End = register_ue.stage {
+    //             break;
+    //         }
+    //         register_ue = self.register_ue_next(register_ue).await?;
+    //     }
+    //     Ok(())
+    // }
 
-    pub async fn register_ue_next<'a>(
-        &self,
-        mut ue_register: UeRegister<'a>,
-    ) -> Result<UeRegister<'a>> {
-        let ue_id = ue_register.ue_context.ue_id;
-        ue_register.stage = match &ue_register.stage {
-            UeRegisterStage::Init => {
-                self.du
-                    .perform_rrc_setup(&mut ue_register.ue_context.du_ue_context, Vec::new())
-                    .await
-                    .unwrap();
-                let amf_ue_context = self.amf.receive_initial_ue_message(ue_id).await.unwrap();
-                self.amf
-                    .send_initial_context_setup_request(&amf_ue_context)
-                    .await
-                    .unwrap();
-                let security_mode_command = self.du.receive_security_mode_command(ue_id).await?;
-                ue_register.ue_context.amf_ue_context = Some(amf_ue_context);
-                UeRegisterStage::Stage1(security_mode_command)
-            }
-            UeRegisterStage::Stage1(security_mode_command) => {
-                self.du
-                    .send_security_mode_complete(
-                        &ue_register.ue_context.du_ue_context,
-                        security_mode_command,
-                    )
-                    .await
-                    .unwrap();
-                let amf_ue_context = ue_register.ue_context.amf_ue_context.as_ref().unwrap();
-                self.amf
-                    .receive_initial_context_setup_response(amf_ue_context)
-                    .await
-                    .unwrap();
-                self.du.receive_nas(ue_id).await.unwrap();
-                info!(self.logger, "Register UE {} complete", ue_id);
-                UeRegisterStage::End
-            }
-            UeRegisterStage::End => bail!("Do not call in state End"),
-        };
-        Ok(ue_register)
-    }
+    // pub async fn ue_initial_access(&self, ue_context: &mut UeContext) -> Result<AmfUeContext> {
+    //     self.du
+    //         .perform_rrc_setup(&mut ue_context.du_ue_context, Vec::new())
+    //         .await
+    //         .unwrap();
+    //     self.amf.receive_initial_ue_message(ue_context.ue_id).await
+    // }
+
+    // pub async fn register_ue_start<'a>(&self, ue_context: &'a mut UeContext) -> UeRegister<'a> {
+    //     info!(self.logger, "Register UE {}", ue_context.ue_id);
+    //     UeRegister {
+    //         stage: UeRegisterStage::Init,
+    //         ue_context,
+    //     }
+    // }
+
+    // pub async fn register_ue_next<'a>(
+    //     &self,
+    //     mut ue_register: UeRegister<'a>,
+    // ) -> Result<UeRegister<'a>> {
+    //     let ue_id = ue_register.ue_context.ue_id;
+    //     ue_register.stage = match &ue_register.stage {
+    //         UeRegisterStage::InitialAccess => {
+    //             let amf_ue_context = self
+    //                 .ue_initial_access(&mut ue_register.ue_context)
+    //                 .await
+    //                 .unwrap();
+    //             self.amf
+    //                 .send_initial_context_setup_request(&amf_ue_context)
+    //                 .await
+    //                 .unwrap();
+    //             let security_mode_command = self.du.receive_security_mode_command(ue_id).await?;
+    //             ue_register.ue_context.amf_ue_context = Some(amf_ue_context);
+    //             UeRegisterStage::Stage1(security_mode_command)
+    //         }
+    //         UeRegisterStage::Stage1(security_mode_command) => {
+    //             self.du
+    //                 .send_security_mode_complete(
+    //                     &ue_register.ue_context.du_ue_context,
+    //                     security_mode_command,
+    //                 )
+    //                 .await
+    //                 .unwrap();
+    //             let amf_ue_context = ue_register.ue_context.amf_ue_context.as_ref().unwrap();
+    //             self.amf
+    //                 .receive_initial_context_setup_response(amf_ue_context)
+    //                 .await
+    //                 .unwrap();
+    //             self.du.receive_nas(ue_id).await.unwrap();
+    //             info!(self.logger, "Register UE {} complete", ue_id);
+    //             UeRegisterStage::End
+    //         }
+    //         UeRegisterStage::End => bail!("Do not call in state End"),
+    //     };
+    //     Ok(ue_register)
+    // }
 
     // pub async fn register_ue_end(&self, ue_register: UeRegister) -> UeContext {
     //     ue_register.ue_context
     // }
-
-    pub async fn establish_pdu_session(&mut self, ue_context: &mut UeContext) -> Result<()> {
-        let ue_id = ue_context.ue_id;
-        let amf_ue_context = ue_context.amf_ue_context.as_ref().unwrap();
-
-        info!(self.logger, "Establish PDU session for UE {}", ue_id);
-        self.amf
-            .send_pdu_session_resource_setup(amf_ue_context)
-            .await
-            .unwrap();
-        let cu_up_ue_context = self.cu_up.handle_bearer_context_setup(ue_id).await.unwrap();
-        self.du
-            .handle_ue_context_setup(&ue_context.du_ue_context)
-            .await
-            .unwrap();
-        self.cu_up
-            .handle_bearer_context_modification(&cu_up_ue_context)
-            .await
-            .unwrap();
-        ue_context.cu_up_ue_context = Some(cu_up_ue_context);
-        let _nas = self.du.receive_rrc_reconfiguration(ue_id).await.unwrap();
-        self.du
-            .send_rrc_reconfiguration_complete(&ue_context.du_ue_context)
-            .await
-            .unwrap();
-        self.amf
-            .receive_pdu_session_resource_setup_response(amf_ue_context)
-            .await
-            .unwrap();
-        info!(
-            self.logger,
-            "Finished establishing PDU session for UE {}", ue_id
-        );
-        Ok(())
-    }
 
     pub async fn terminate(self) {
         info!(self.logger, "Terminate worker(s)");

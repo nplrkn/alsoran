@@ -161,11 +161,15 @@ impl MockAmf {
                 Ok(UeContext {
                     ue_id,
                     ran_ue_ngap_id,
-                    binding: Binding { assoc_id },
+                    binding: self.mock.new_ue_binding_from_assoc(assoc_id).await,
                 })
             }
             _ => Err(anyhow!("Not an initial UE message")),
         }
+    }
+
+    pub fn rebind_ue_context(&self, ue_context: &mut UeContext, ip_addr: &str) {
+        todo!()
     }
 
     pub async fn send_initial_context_setup_request(&self, ue_context: &UeContext) -> Result<()> {
@@ -358,5 +362,11 @@ impl MockAmf {
                 x
             ),
         }
+    }
+}
+
+impl UeContext {
+    pub fn binding_remote_ip(&self) -> &String {
+        &self.binding.remote_ip
     }
 }

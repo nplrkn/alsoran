@@ -87,6 +87,13 @@ impl<P: Pdu> Mock<P> {
         self.transport.new_ue_binding(ue_id).await.unwrap()
     }
 
+    pub async fn new_ue_binding_from_assoc(&self, assoc_id: u32) -> Binding {
+        self.transport
+            .new_ue_binding_from_assoc(assoc_id)
+            .await
+            .unwrap()
+    }
+
     pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {
         self.transport
             .send_message(message, assoc_id, &self.logger)

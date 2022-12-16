@@ -4,7 +4,7 @@ use crate::{
     tnla_event_handler::{TnlaEvent, TnlaEventHandler},
     transport_provider::{AssocId, Binding},
 };
-use anyhow::{anyhow, ensure, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use async_std::sync::{Arc, Mutex};
 use common::ShutdownHandle;
 use futures::pin_mut;
@@ -51,9 +51,22 @@ impl SctpTnlaPool {
         let assocs = self.assocs.lock().await;
         ensure!(assocs.len() > 0, "No associations up");
         let nth = seed as usize % assocs.len();
+        let assoc_id = *assocs.keys().nth(nth).unwrap();
         Ok(Binding {
-            assoc_id: *assocs.keys().nth(nth).unwrap(),
+            assoc_id,
+            remote_ip: assocs[&assoc_id].remote_address.ip().to_string(),
         })
+    }
+
+    pub async fn new_ue_binding_from_assoc(&self, assoc_id: AssocId) -> Result<Binding> {
+        if let Some(assoc) = self.assocs.lock().await.get(&assoc_id) {
+            Ok(Binding {
+                assoc_id,
+                remote_ip: assoc.remote_address.ip().to_string(),
+            })
+        } else {
+            bail!("No such association")
+        }
     }
 
     pub async fn send_message(

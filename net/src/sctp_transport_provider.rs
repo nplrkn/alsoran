@@ -2,7 +2,7 @@
 
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
-use crate::transport_provider::Binding;
+use crate::transport_provider::{AssocId, Binding};
 use crate::{ShutdownHandle, TransportProvider};
 use anyhow::{anyhow, Result};
 use async_std::sync::Arc;
@@ -83,6 +83,10 @@ impl TransportProvider for SctpTransportProvider {
     // Pick a new UE binding.
     async fn new_ue_binding(&self, seed: u32) -> Result<Binding> {
         self.tnla_pool.new_ue_binding(seed).await
+    }
+
+    async fn new_ue_binding_from_assoc(&self, assoc_id: AssocId) -> Result<Binding> {
+        self.tnla_pool.new_ue_binding_from_assoc(assoc_id).await
     }
 
     // Return the set of TNLA remote address to which we are currently connected
