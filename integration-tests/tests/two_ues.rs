@@ -21,7 +21,7 @@ async fn two_ues_register_in_parallel() -> Result<()> {
         .spawn()
         .await?;
 
-    let (ue_1, msg_1) = tc
+    let ue_1 = tc
         .new_ue(1)
         .await
         .initial_access(&tc)
@@ -29,7 +29,7 @@ async fn two_ues_register_in_parallel() -> Result<()> {
         .initiate_registration(&tc)
         .await?;
 
-    let (ue_2, msg_2) = tc
+    let ue_2 = tc
         .new_ue(2)
         .await
         .initial_access(&tc)
@@ -38,8 +38,8 @@ async fn two_ues_register_in_parallel() -> Result<()> {
         .await?;
 
     // Complete the initial context setup for both UEs.
-    ue_2.complete_registration(&tc, &msg_2).await?;
-    ue_1.complete_registration(&tc, &msg_1).await?;
+    ue_2.complete_registration(&tc).await?;
+    ue_1.complete_registration(&tc).await?;
 
     tc.terminate().await;
     Ok(())

@@ -1,30 +1,14 @@
+use crate::TestContext;
 use anyhow::Result;
 use mocks::{AmfUeContext, CuUpUeContext, DuUeContext, SecurityModeCommand};
 use slog::info;
 
-use crate::TestContext;
+// This module has a succession of struct representing the UE's progress towards registered.
 
+/// DetchedUe - the initial state of a UE.  Call initial_access() to get a SetupUe.
 pub struct DetachedUe {
     ue_id: u32,
     du_ue_context: DuUeContext,
-}
-
-pub struct RegisteredUe {
-    pub ue_id: u32,
-    pub du_ue_context: DuUeContext,
-    pub amf_ue_context: AmfUeContext,
-}
-
-type WithAmfContext = RegisteredUe;
-
-pub struct SetupUe(WithAmfContext);
-pub struct HalfRegisteredUe(WithAmfContext);
-
-pub struct UeWithSession {
-    pub ue_id: u32,
-    pub du_ue_context: DuUeContext,
-    pub amf_ue_context: AmfUeContext,
-    pub cu_up_ue_context: CuUpUeContext,
 }
 
 impl DetachedUe {
@@ -48,30 +32,28 @@ impl DetachedUe {
     }
 }
 
+/// SetupUe - UE that has underone RRC setup.  Call initiate_registration() to get a HalfRegisteredUe.
+pub struct SetupUe(WithAmfContext);
 impl SetupUe {
-    pub async fn initiate_registration(
-        self,
-        tc: &TestContext,
-    ) -> Result<(HalfRegisteredUe, SecurityModeCommand)> {
+    pub async fn initiate_registration(self, tc: &TestContext) -> Result<HalfRegisteredUe> {
         tc.amf
             .send_initial_context_setup_request(&self.0.amf_ue_context)
             .await?;
         let security_mode_command = tc.du.receive_security_mode_command(self.0.ue_id).await?;
-        Ok((HalfRegisteredUe(self.0), security_mode_command))
+        Ok(HalfRegisteredUe(self.0, security_mode_command))
     }
     pub fn amf_ue_context(&mut self) -> &mut AmfUeContext {
         &mut self.0.amf_ue_context
     }
 }
 
+/// HalfRegisteredUe - UE that has received security mode command as part of the registration procedure.  
+/// Call complete_registration() to get a RegisteredUe.
+pub struct HalfRegisteredUe(WithAmfContext, SecurityModeCommand);
 impl HalfRegisteredUe {
-    pub async fn complete_registration(
-        self,
-        tc: &TestContext,
-        security_mode_command: &SecurityModeCommand,
-    ) -> Result<RegisteredUe> {
+    pub async fn complete_registration(self, tc: &TestContext) -> Result<RegisteredUe> {
         tc.du
-            .send_security_mode_complete(&self.0.du_ue_context, security_mode_command)
+            .send_security_mode_complete(&self.0.du_ue_context, &self.1)
             .await?;
         tc.amf
             .receive_initial_context_setup_response(&self.0.amf_ue_context)
@@ -81,7 +63,12 @@ impl HalfRegisteredUe {
         Ok(self.0)
     }
 }
-
+/// RegisteredUe - registered UE.  Call establish_pdu_session() to get a UeWithSession.
+pub struct RegisteredUe {
+    pub ue_id: u32,
+    pub du_ue_context: DuUeContext,
+    pub amf_ue_context: AmfUeContext,
+}
 impl RegisteredUe {
     pub async fn establish_pdu_session(self, tc: &mut TestContext) -> Result<UeWithSession> {
         let logger = &tc.logger;
@@ -112,4 +99,15 @@ impl RegisteredUe {
             cu_up_ue_context,
         })
     }
+}
+
+// The RegisteredUe fields get reused in some of the other structs too.  Supply a more generic name for that case.
+type WithAmfContext = RegisteredUe;
+
+/// UeWithSession - UE with a session set up (and hence a CuUpUeContext).
+pub struct UeWithSession {
+    pub ue_id: u32,
+    pub du_ue_context: DuUeContext,
+    pub amf_ue_context: AmfUeContext,
+    pub cu_up_ue_context: CuUpUeContext,
 }
