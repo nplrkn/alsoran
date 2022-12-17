@@ -36,12 +36,12 @@ impl SctpTnlaPool {
         }
     }
 
-    pub async fn remote_addresses(&self) -> Vec<SocketAddr> {
+    pub async fn remote_addresses(&self) -> Vec<(AssocId, SocketAddr)> {
         self.assocs
             .lock()
             .await
-            .values()
-            .map(|assoc| assoc.remote_address)
+            .iter()
+            .map(|(id, assoc)| (*id, assoc.remote_address))
             .collect()
     }
 
@@ -58,10 +58,10 @@ impl SctpTnlaPool {
         })
     }
 
-    pub async fn new_ue_binding_from_assoc(&self, assoc_id: AssocId) -> Result<Binding> {
-        if let Some(assoc) = self.assocs.lock().await.get(&assoc_id) {
+    pub async fn new_ue_binding_from_assoc(&self, assoc_id: &AssocId) -> Result<Binding> {
+        if let Some(assoc) = self.assocs.lock().await.get(assoc_id) {
             Ok(Binding {
-                assoc_id,
+                assoc_id: *assoc_id,
                 remote_ip: assoc.remote_address.ip().to_string(),
             })
         } else {

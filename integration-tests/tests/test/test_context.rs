@@ -303,13 +303,13 @@ impl TestContext {
         Ok(self)
     }
 
-    pub async fn new_ue(&self, ue_id: u32) -> DetachedUe {
-        DetachedUe::new(ue_id, self.du.new_ue_context(ue_id).await)
+    pub async fn new_ue(&self, ue_id: u32) -> Result<DetachedUe> {
+        Ok(DetachedUe::new(ue_id, self.du.new_ue_context(ue_id).await?))
     }
 
     pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<RegisteredUe> {
         self.new_ue(ue_id)
-            .await
+            .await?
             .initial_access(self)
             .await?
             .initiate_registration(self)

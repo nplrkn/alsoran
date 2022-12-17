@@ -23,7 +23,7 @@ async fn two_ues_register_in_parallel() -> Result<()> {
 
     let ue_1 = tc
         .new_ue(1)
-        .await
+        .await?
         .initial_access(&tc)
         .await?
         .initiate_registration(&tc)
@@ -31,7 +31,7 @@ async fn two_ues_register_in_parallel() -> Result<()> {
 
     let ue_2 = tc
         .new_ue(2)
-        .await
+        .await?
         .initial_access(&tc)
         .await?
         .initiate_registration(&tc)

@@ -3,7 +3,7 @@
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, Result};
 use bitvec::prelude::*;
-use net::{AperSerde, Binding};
+use net::{AperSerde, Binding, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::Deref;
@@ -161,15 +161,35 @@ impl MockAmf {
                 Ok(UeContext {
                     ue_id,
                     ran_ue_ngap_id,
-                    binding: self.mock.new_ue_binding_from_assoc(assoc_id).await,
+                    binding: self
+                        .mock
+                        .transport
+                        .new_ue_binding_from_assoc(&assoc_id)
+                        .await?,
                 })
             }
             _ => Err(anyhow!("Not an initial UE message")),
         }
     }
 
-    pub fn rebind_ue_context(&self, ue_context: &mut UeContext, ip_addr: &str) {
-        todo!()
+    pub async fn rebind_ue_context(&self, ue_context: &mut UeContext, ip_addr: &str) -> Result<()> {
+        if let Some((assoc_id, _)) = self
+            .mock
+            .transport
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .find(|(_, x)| x.ip().to_string() == ip_addr)
+        {
+            ue_context.binding = self
+                .mock
+                .transport
+                .new_ue_binding_from_assoc(assoc_id)
+                .await?;
+        } else {
+            bail!("No such remote ip addr");
+        }
+        Ok(())
     }
 
     pub async fn send_initial_context_setup_request(&self, ue_context: &UeContext) -> Result<()> {

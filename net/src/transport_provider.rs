@@ -46,8 +46,8 @@ pub trait TransportProvider: Send + Sync + 'static {
 
     // Pick a new UE binding.
     async fn new_ue_binding(&self, seed: u32) -> Result<Binding>;
-    async fn new_ue_binding_from_assoc(&self, assoc_id: AssocId) -> Result<Binding>;
+    async fn new_ue_binding_from_assoc(&self, assoc_id: &AssocId) -> Result<Binding>;
 
     // Return the set of TNLA remote address to which we are currently connected
-    async fn remote_tnla_addresses(&self) -> Vec<SocketAddr>;
+    async fn remote_tnla_addresses(&self) -> Vec<(AssocId, SocketAddr)>;
 }

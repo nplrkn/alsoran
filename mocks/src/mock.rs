@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, Binding, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
+    AperSerde, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
     TransportProvider,
 };
 use slog::{debug, Logger};
@@ -14,7 +14,7 @@ pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
 
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
-    transport: SctpTransportProvider,
+    pub transport: SctpTransportProvider,
     receiver: Receiver<Option<ReceivedPdu<P>>>,
     pub logger: Logger,
     handler: Handler<P>,
@@ -81,17 +81,6 @@ impl<P: Pdu> Mock<P> {
             .await
             .expect("Failed mock recv")
             .is_none());
-    }
-
-    pub async fn new_ue_binding(&self, ue_id: u32) -> Binding {
-        self.transport.new_ue_binding(ue_id).await.unwrap()
-    }
-
-    pub async fn new_ue_binding_from_assoc(&self, assoc_id: u32) -> Binding {
-        self.transport
-            .new_ue_binding_from_assoc(assoc_id)
-            .await
-            .unwrap()
     }
 
     pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {

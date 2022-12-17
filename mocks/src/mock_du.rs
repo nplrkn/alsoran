@@ -4,7 +4,7 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, ensure, Result};
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Binding, Indication};
+use net::{AperSerde, Binding, Indication, TransportProvider};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
@@ -50,12 +50,12 @@ impl MockDu {
         self.mock.terminate().await
     }
 
-    pub async fn new_ue_context(&self, ue_id: u32) -> UeContext {
-        UeContext {
+    pub async fn new_ue_context(&self, ue_id: u32) -> Result<UeContext> {
+        Ok(UeContext {
             ue_id,
-            binding: self.new_ue_binding(ue_id).await,
+            binding: self.transport.new_ue_binding(ue_id).await?,
             gnb_cu_ue_f1ap_id: None,
-        }
+        })
     }
 
     pub async fn perform_f1_setup(&mut self, worker_ip: &String) -> Result<()> {

@@ -71,7 +71,7 @@ impl Stack {
             .await
     }
 
-    pub async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
+    pub async fn remote_tnla_addresses(&self) -> Vec<(u32, SocketAddr)> {
         self.transport_provider.remote_tnla_addresses().await
     }
 
