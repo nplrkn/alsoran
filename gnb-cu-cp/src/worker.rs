@@ -317,6 +317,11 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         self.ngap
             .connect(
                 &amf_address,
+                &self
+                    .config
+                    .ip_addr
+                    .map(|x| x.to_string())
+                    .unwrap_or("0.0.0.0".to_string()),
                 NGAP_SCTP_PPID,
                 NgapHandler::new_ngap_application(self.clone()),
                 self.logger.clone(),

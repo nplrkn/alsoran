@@ -76,7 +76,7 @@ where
         connection_info: ConnectionInfo,
         _context: &C,
     ) -> Result<AddConnectionResponse, ApiError> {
-        match connection_info.operation_type {
+        match match connection_info.operation_type {
             OperationType::AddE1 => {
                 Workflow::new(&self.gnb_cu_cp, &self.logger)
                     .gnb_cu_cp_configuration_update(&connection_info.ip_address)
@@ -97,15 +97,16 @@ where
                     .ran_configuration_update(&connection_info.ip_address)
                     .await
             }
+        } {
+            Ok(()) => Ok(AddConnectionResponse::Success),
+            Err(e) => {
+                warn!(
+                    self.logger,
+                    "Error trying to add connection - {}",
+                    e.to_string()
+                );
+                Ok(AddConnectionResponse::Failure(e.to_string()))
+            }
         }
-        .map(|()| AddConnectionResponse::Success)
-        .or_else(|e| {
-            warn!(
-                self.logger,
-                "Error trying to add connection - {}",
-                e.to_string()
-            );
-            Ok(AddConnectionResponse::Failure(e.to_string()))
-        })
     }
 }

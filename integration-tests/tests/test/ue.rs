@@ -33,13 +33,16 @@ impl DetachedUe {
 }
 
 /// SetupUe - UE that has underone RRC setup.  Call initiate_registration() to get a HalfRegisteredUe.
-pub struct SetupUe(WithAmfContext);
+pub struct SetupUe(pub WithAmfContext);
 impl SetupUe {
     pub async fn initiate_registration(self, tc: &TestContext) -> Result<HalfRegisteredUe> {
         tc.amf
             .send_initial_context_setup_request(&self.0.amf_ue_context)
             .await?;
-        let security_mode_command = tc.du.receive_security_mode_command(self.0.ue_id).await?;
+        let security_mode_command = tc
+            .du
+            .receive_security_mode_command(&self.0.du_ue_context)
+            .await?;
         Ok(HalfRegisteredUe(self.0, security_mode_command))
     }
     pub fn amf_ue_context(&mut self) -> &mut AmfUeContext {

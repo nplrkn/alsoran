@@ -38,7 +38,8 @@ impl Stack {
 
     pub async fn connect<A: Application>(
         &self,
-        connect_address: &String,
+        connect_address: &str,
+        bind_address: &str,
         ppid: u32,
         application: A,
         logger: Logger,
@@ -49,7 +50,7 @@ impl Stack {
         };
         self.transport_provider
             .clone()
-            .connect(connect_address, ppid, receiver, logger)
+            .connect(connect_address, bind_address, ppid, receiver, logger)
             .await
     }
 

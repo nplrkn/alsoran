@@ -304,7 +304,11 @@ impl TestContext {
     }
 
     pub async fn new_ue(&self, ue_id: u32) -> Result<DetachedUe> {
-        Ok(DetachedUe::new(ue_id, self.du.new_ue_context(ue_id).await?))
+        assert!(ue_id > 0);
+        let num_workers = self.workers.len() as u32;
+        let worker_ip = self.worker_ip(((ue_id - 1) % num_workers) as usize);
+        let du_ue_context = self.du.new_ue_context(ue_id, &worker_ip).await?;
+        Ok(DetachedUe::new(ue_id, du_ue_context))
     }
 
     pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<RegisteredUe> {

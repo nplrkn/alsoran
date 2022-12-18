@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     info!(&logger, ">> NAS Security mode complete");
     du.send_nas(&ue.du_context, nas_message).await?;
 
-    let security_mode_command = du.receive_security_mode_command(ue.id).await?;
+    let security_mode_command = du.receive_security_mode_command(&ue.du_context).await?;
     du.send_security_mode_complete(&ue.du_context, &security_mode_command)
         .await?;
 

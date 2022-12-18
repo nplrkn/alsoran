@@ -1,13 +1,13 @@
 //! mock - 'base class' for the mocks
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
+    AperSerde, Binding, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
     TransportProvider,
 };
-use slog::{debug, Logger};
+use slog::{debug, info, Logger};
 use std::fmt::Debug;
 
 pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
@@ -53,10 +53,16 @@ impl<P: Pdu> Mock<P> {
         Ok(())
     }
 
-    pub async fn connect(&mut self, address: &str, ppid: u32) {
+    pub async fn connect(&mut self, connect_address: &str, bind_address: &str, ppid: u32) {
         self.transport
             .clone()
-            .connect(address, ppid, self.handler.clone(), self.logger.clone())
+            .connect(
+                connect_address,
+                bind_address,
+                ppid,
+                self.handler.clone(),
+                self.logger.clone(),
+            )
             .await
             .expect("Connect failed");
 
@@ -81,6 +87,11 @@ impl<P: Pdu> Mock<P> {
             .await
             .expect("Failed mock recv")
             .is_none());
+        info!(
+            self.logger,
+            "Association list is now {:?}",
+            self.transport.remote_tnla_addresses().await
+        );
     }
 
     pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {
@@ -103,6 +114,25 @@ impl<P: Pdu> Mock<P> {
             .unwrap()
             .expect("Expected message")
             .expect("Expected message")
+    }
+
+    pub async fn binding_from_ip(&self, ip_addr: &str) -> Result<Binding> {
+        if let Some((assoc_id, _)) = self
+            .transport
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .find(|(_, x)| x.ip().to_string() == ip_addr)
+        {
+            self.transport.new_ue_binding_from_assoc(assoc_id).await
+        } else {
+            bail!("No such remote ip addr");
+        }
+    }
+
+    pub async fn rebind(&self, binding: &mut Binding, ip_addr: &str) -> Result<()> {
+        *binding = self.binding_from_ip(ip_addr).await?;
+        Ok(())
     }
 }
 

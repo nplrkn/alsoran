@@ -9,6 +9,7 @@ use async_io::Async;
 use async_stream::try_stream;
 use futures_core::stream::Stream;
 use io::Error;
+use libc::bind;
 use libc::{connect, getpeername, read, socket, socklen_t, AF_INET, IPPROTO_SCTP, SOCK_STREAM};
 use os_socketaddr::OsSocketAddr;
 use slog::{warn, Logger};
@@ -34,6 +35,7 @@ impl SctpAssociation {
     // Establish an association as a client
     pub async fn establish(
         remote_address: SocketAddr,
+        bind_addr: SocketAddr,
         ppid: u32,
         logger: &Logger,
     ) -> Result<SctpAssociation> {
@@ -45,6 +47,11 @@ impl SctpAssociation {
             ppid,
             remote_address,
         };
+
+        // Bind.  This is useful when there are multiple local addresses available to ensure that the remote
+        // end of the connection sees the IP address we want it to.
+        let addr: OsSocketAddr = bind_addr.try_into()?;
+        try_io!(bind(fd, addr.as_ptr(), addr.len()), "bind")?;
 
         // Connect
         // See https://cr.yp.to/docs/connect.html.

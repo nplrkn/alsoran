@@ -4,7 +4,7 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, ensure, Result};
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Binding, Indication, TransportProvider};
+use net::{AperSerde, Binding, Indication};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
@@ -22,7 +22,7 @@ pub struct MockDu {
 pub struct UeContext {
     ue_id: u32,
     gnb_cu_ue_f1ap_id: Option<GnbCuUeF1apId>,
-    binding: Binding,
+    pub binding: Binding,
 }
 
 impl Deref for MockDu {
@@ -50,10 +50,10 @@ impl MockDu {
         self.mock.terminate().await
     }
 
-    pub async fn new_ue_context(&self, ue_id: u32) -> Result<UeContext> {
+    pub async fn new_ue_context(&self, ue_id: u32, worker_ip: &str) -> Result<UeContext> {
         Ok(UeContext {
             ue_id,
-            binding: self.transport.new_ue_binding(ue_id).await?,
+            binding: self.mock.binding_from_ip(worker_ip).await?,
             gnb_cu_ue_f1ap_id: None,
         })
     }
@@ -61,7 +61,8 @@ impl MockDu {
     pub async fn perform_f1_setup(&mut self, worker_ip: &String) -> Result<()> {
         let transport_address = format!("{}:{}", worker_ip, F1AP_BIND_PORT);
         info!(self.logger, "Connect to CU {}", transport_address);
-        self.connect(&transport_address, F1AP_SCTP_PPID).await;
+        self.connect(&transport_address, "0.0.0.0", F1AP_SCTP_PPID)
+            .await;
         self.send_f1_setup_request().await?;
         self.receive_f1_setup_response().await;
         Ok(())
@@ -260,8 +261,29 @@ impl MockDu {
         Ok(dl_rrc_message_transfer)
     }
 
-    pub async fn receive_security_mode_command(&self, ue_id: u32) -> Result<SecurityModeCommand> {
-        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
+    async fn receive_dl_rrc2(&self, ue_context: &UeContext) -> Result<DlRrcMessageTransfer> {
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+
+        // Check that the PDU arrived on the expected binding.
+        assert_eq!(assoc_id, ue_context.binding.assoc_id);
+
+        let F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(dl_rrc_message_transfer)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
+
+        assert_eq!(
+            dl_rrc_message_transfer.gnb_du_ue_f1ap_id.0,
+            ue_context.ue_id
+        );
+        Ok(dl_rrc_message_transfer)
+    }
+
+    pub async fn receive_security_mode_command(
+        &self,
+        ue_context: &UeContext,
+    ) -> Result<SecurityModeCommand> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc2(ue_context).await?;
 
         // A Rrc Setup flows as a DlDcchMessage on SRB1.  Check this is indeed for SRB1.
         assert_eq!(dl_rrc_message_transfer.srb_id.0, 1);
@@ -443,7 +465,8 @@ impl MockDu {
             .await?;
         let transport_address = format!("{}:{}", expected_addr_string, F1AP_BIND_PORT);
         info!(self.logger, "Connect to CU {}", transport_address);
-        self.connect(&transport_address, F1AP_SCTP_PPID).await;
+        self.connect(&transport_address, "0.0.0.0", F1AP_SCTP_PPID)
+            .await;
         self.send_gnb_cu_configuration_update_acknowledge(
             transaction_id,
             expected_address,

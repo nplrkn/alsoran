@@ -18,7 +18,7 @@ pub struct MockAmf {
 pub struct UeContext {
     ue_id: u32,
     ran_ue_ngap_id: RanUeNgapId,
-    binding: Binding,
+    pub binding: Binding,
 }
 
 impl Deref for MockAmf {
@@ -173,22 +173,7 @@ impl MockAmf {
     }
 
     pub async fn rebind_ue_context(&self, ue_context: &mut UeContext, ip_addr: &str) -> Result<()> {
-        if let Some((assoc_id, _)) = self
-            .mock
-            .transport
-            .remote_tnla_addresses()
-            .await
-            .iter()
-            .find(|(_, x)| x.ip().to_string() == ip_addr)
-        {
-            ue_context.binding = self
-                .mock
-                .transport
-                .new_ue_binding_from_assoc(assoc_id)
-                .await?;
-        } else {
-            bail!("No such remote ip addr");
-        }
+        ue_context.binding = self.mock.binding_from_ip(ip_addr).await?;
         Ok(())
     }
 
