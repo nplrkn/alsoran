@@ -12,6 +12,11 @@ pub fn test_init() -> Logger {
 }
 
 pub fn init() -> Logger {
+    // Use info level logging by default
+    if std::env::var("RUST_LOG").is_err() {
+        std::env::set_var("RUST_LOG", "info")
+    }
+
     init_terminal_logging()
 }
 

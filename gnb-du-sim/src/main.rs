@@ -8,7 +8,7 @@ use ue::Ue;
 
 #[async_std::main]
 async fn main() -> Result<()> {
-    let logger = common::logging::init_terminal_logging();
+    let logger = common::logging::init();
     let mut du = MockDu::new(&logger).await;
 
     du.perform_f1_setup(&"127.0.0.1".to_string()).await?;
