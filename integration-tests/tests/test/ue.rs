@@ -1,5 +1,6 @@
 use crate::TestContext;
 use anyhow::Result;
+use async_trait::async_trait;
 use mocks::{AmfUeContext, CuUpUeContext, DuUeContext, SecurityModeCommand};
 use slog::info;
 
@@ -9,6 +10,11 @@ use slog::info;
 pub struct DetachedUe {
     ue_id: u32,
     du_ue_context: DuUeContext,
+}
+
+#[async_trait]
+pub trait RebindUe {
+    async fn rebind(&mut self, tc: &TestContext, ip_addr: &str) -> Result<()>;
 }
 
 impl DetachedUe {
@@ -33,7 +39,7 @@ impl DetachedUe {
 }
 
 /// SetupUe - UE that has underone RRC setup.  Call initiate_registration() to get a HalfRegisteredUe.
-pub struct SetupUe(pub WithAmfContext);
+pub struct SetupUe(WithAmfContext);
 impl SetupUe {
     pub async fn initiate_registration(self, tc: &TestContext) -> Result<HalfRegisteredUe> {
         tc.amf
@@ -45,8 +51,17 @@ impl SetupUe {
             .await?;
         Ok(HalfRegisteredUe(self.0, security_mode_command))
     }
-    pub fn amf_ue_context(&mut self) -> &mut AmfUeContext {
-        &mut self.0.amf_ue_context
+}
+
+#[async_trait]
+impl RebindUe for SetupUe {
+    async fn rebind(&mut self, tc: &TestContext, ip_addr: &str) -> Result<()> {
+        tc.amf
+            .rebind(&mut self.0.amf_ue_context.binding, ip_addr)
+            .await?;
+        tc.du
+            .rebind(&mut self.0.du_ue_context.binding, ip_addr)
+            .await
     }
 }
 
@@ -61,8 +76,7 @@ impl HalfRegisteredUe {
         tc.amf
             .receive_initial_context_setup_response(&self.0.amf_ue_context)
             .await?;
-        tc.du.receive_nas(self.0.ue_id).await?;
-        //info!(self.logger, "Register UE {} complete", ue_id);
+        tc.du.receive_nas(&self.0.du_ue_context).await?;
         Ok(self.0)
     }
 }
@@ -84,7 +98,10 @@ impl RegisteredUe {
         tc.cu_up
             .handle_bearer_context_modification(&cu_up_ue_context)
             .await?;
-        let _nas = tc.du.receive_rrc_reconfiguration(self.ue_id).await?;
+        let _nas = tc
+            .du
+            .receive_rrc_reconfiguration(&self.du_ue_context)
+            .await?;
         tc.du
             .send_rrc_reconfiguration_complete(&self.du_ue_context)
             .await?;

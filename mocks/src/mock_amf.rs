@@ -172,11 +172,6 @@ impl MockAmf {
         }
     }
 
-    pub async fn rebind_ue_context(&self, ue_context: &mut UeContext, ip_addr: &str) -> Result<()> {
-        ue_context.binding = self.mock.binding_from_ip(ip_addr).await?;
-        Ok(())
-    }
-
     pub async fn send_initial_context_setup_request(&self, ue_context: &UeContext) -> Result<()> {
         let logger = &self.logger;
         let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::InitialContextSetupRequest(

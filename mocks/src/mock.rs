@@ -1,6 +1,6 @@
 //! mock - 'base class' for the mocks
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
@@ -116,22 +116,8 @@ impl<P: Pdu> Mock<P> {
             .expect("Expected message")
     }
 
-    pub async fn binding_from_ip(&self, ip_addr: &str) -> Result<Binding> {
-        if let Some((assoc_id, _)) = self
-            .transport
-            .remote_tnla_addresses()
-            .await
-            .iter()
-            .find(|(_, x)| x.ip().to_string() == ip_addr)
-        {
-            self.transport.new_ue_binding_from_assoc(assoc_id).await
-        } else {
-            bail!("No such remote ip addr");
-        }
-    }
-
     pub async fn rebind(&self, binding: &mut Binding, ip_addr: &str) -> Result<()> {
-        *binding = self.binding_from_ip(ip_addr).await?;
+        *binding = self.transport.new_ue_binding_from_ip(ip_addr).await?;
         Ok(())
     }
 }

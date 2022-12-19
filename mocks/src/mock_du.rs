@@ -4,7 +4,7 @@ use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, ensure, Result};
 use bitvec::prelude::*;
 use f1ap::*;
-use net::{AperSerde, Binding, Indication};
+use net::{AperSerde, Binding, Indication, TransportProvider};
 use pdcp::PdcpPdu;
 use rrc::*;
 use slog::{debug, info, o, Logger};
@@ -53,7 +53,7 @@ impl MockDu {
     pub async fn new_ue_context(&self, ue_id: u32, worker_ip: &str) -> Result<UeContext> {
         Ok(UeContext {
             ue_id,
-            binding: self.mock.binding_from_ip(worker_ip).await?,
+            binding: self.transport.new_ue_binding_from_ip(worker_ip).await?,
             gnb_cu_ue_f1ap_id: None,
         })
     }
@@ -241,8 +241,8 @@ impl MockDu {
         Ok(())
     }
 
-    pub async fn receive_nas(&self, ue_id: u32) -> Result<Vec<u8>> {
-        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
+    pub async fn receive_nas(&self, ue_context: &UeContext) -> Result<Vec<u8>> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_context).await?;
         info!(
             &self.logger,
             "DlRrcMessageTransfer(DlInformationTransfer(Nas)) <<"
@@ -250,18 +250,7 @@ impl MockDu {
         nas_from_dl_transfer_rrc_container(dl_rrc_message_transfer.rrc_container)
     }
 
-    async fn receive_dl_rrc(&self, ue_id: u32) -> Result<DlRrcMessageTransfer> {
-        let pdu = self.receive_pdu().await;
-        let F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(dl_rrc_message_transfer)) = pdu
-        else {
-            bail!("Unexpected F1ap message {:?}", pdu)
-        };
-
-        assert_eq!(dl_rrc_message_transfer.gnb_du_ue_f1ap_id.0, ue_id);
-        Ok(dl_rrc_message_transfer)
-    }
-
-    async fn receive_dl_rrc2(&self, ue_context: &UeContext) -> Result<DlRrcMessageTransfer> {
+    async fn receive_dl_rrc(&self, ue_context: &UeContext) -> Result<DlRrcMessageTransfer> {
         let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
 
         // Check that the PDU arrived on the expected binding.
@@ -283,7 +272,7 @@ impl MockDu {
         &self,
         ue_context: &UeContext,
     ) -> Result<SecurityModeCommand> {
-        let dl_rrc_message_transfer = self.receive_dl_rrc2(ue_context).await?;
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_context).await?;
 
         // A Rrc Setup flows as a DlDcchMessage on SRB1.  Check this is indeed for SRB1.
         assert_eq!(dl_rrc_message_transfer.srb_id.0, 1);
@@ -398,8 +387,8 @@ impl MockDu {
         self.send_ul_rrc(ue_context, security_mode_complete).await
     }
 
-    pub async fn receive_rrc_reconfiguration(&self, ue_id: u32) -> Result<Vec<u8>> {
-        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_id).await?;
+    pub async fn receive_rrc_reconfiguration(&self, ue_context: &UeContext) -> Result<Vec<u8>> {
+        let dl_rrc_message_transfer = self.receive_dl_rrc(ue_context).await?;
         let mut nas_messages =
             match rrc_from_container(dl_rrc_message_transfer.rrc_container)?.message {
                 DlDcchMessageType::C1(C1_2::RrcReconfiguration(RrcReconfiguration {

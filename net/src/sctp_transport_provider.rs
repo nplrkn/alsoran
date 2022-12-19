@@ -4,7 +4,7 @@ use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
 use crate::transport_provider::{AssocId, Binding};
 use crate::{ShutdownHandle, TransportProvider};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
@@ -91,6 +91,19 @@ impl TransportProvider for SctpTransportProvider {
 
     async fn new_ue_binding_from_assoc(&self, assoc_id: &AssocId) -> Result<Binding> {
         self.tnla_pool.new_ue_binding_from_assoc(assoc_id).await
+    }
+
+    async fn new_ue_binding_from_ip(&self, ip_addr: &str) -> Result<Binding> {
+        if let Some((assoc_id, _)) = self
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .find(|(_, x)| x.ip().to_string() == ip_addr)
+        {
+            self.new_ue_binding_from_assoc(assoc_id).await
+        } else {
+            bail!("No such remote ip addr");
+        }
     }
 
     // Return the set of TNLA remote address to which we are currently connected

@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     du.perform_rrc_setup(&mut ue.du_context, registration_request)
         .await?;
 
-    let nas_authentication_request = du.receive_nas(ue.id).await?;
+    let nas_authentication_request = du.receive_nas(&ue.du_context).await?;
     info!(&logger, "<< NAS Authentication request");
     ue.handle_nas(nas_authentication_request, &logger);
 
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     info!(&logger, ">> NAS Authentication response");
     du.send_nas(&ue.du_context, nas_message).await?;
 
-    let nas_security_mode_command = du.receive_nas(ue.id).await?;
+    let nas_security_mode_command = du.receive_nas(&ue.du_context).await?;
     info!(&logger, "<< NAS Security mode command");
     ue.handle_nas(nas_security_mode_command, &logger);
 
@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
     du.send_security_mode_complete(&ue.du_context, &security_mode_command)
         .await?;
 
-    let nas_registration_accept = du.receive_nas(ue.id).await?;
+    let nas_registration_accept = du.receive_nas(&ue.du_context).await?;
     info!(&logger, "<< NAS Registration Accept");
     ue.handle_nas(nas_registration_accept, &logger);
 

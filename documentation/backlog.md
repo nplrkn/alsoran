@@ -56,12 +56,12 @@
 
 # MEDIUM TERM
 - Selection and stickiness of SCTP streams
-- Triangular redirection and upstream messages on old binding
 - Sample userplane 
 - Dockerfiles and Helm charts
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Triangular redirection 
 - Get rid of revision number
 - Go public
 - Fix TNLA established event so that it is always processed before first packet 

@@ -225,6 +225,7 @@ impl TestContext {
     }
 
     pub fn worker_ip(&self, worker_index: usize) -> String {
+        let worker_index = worker_index % self.workers.len();
         self.workers[worker_index]
             .config
             .ip_addr
@@ -305,10 +306,17 @@ impl TestContext {
 
     pub async fn new_ue(&self, ue_id: u32) -> Result<DetachedUe> {
         assert!(ue_id > 0);
-        let num_workers = self.workers.len() as u32;
-        let worker_ip = self.worker_ip(((ue_id - 1) % num_workers) as usize);
+        let worker_ip = self.worker_ip((ue_id - 1) as usize);
         let du_ue_context = self.du.new_ue_context(ue_id, &worker_ip).await?;
         Ok(DetachedUe::new(ue_id, du_ue_context))
+    }
+
+    pub async fn use_worker_for_ue<T: RebindUe>(
+        &self,
+        worker_index: usize,
+        ue: &mut T,
+    ) -> Result<()> {
+        ue.rebind(&self, &self.worker_ip(worker_index)).await
     }
 
     pub async fn create_and_register_ue(&self, ue_id: u32) -> Result<RegisteredUe> {
