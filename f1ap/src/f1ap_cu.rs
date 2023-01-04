@@ -5,7 +5,7 @@ use crate::{F1apPdu, InitiatingMessage};
 use async_trait::async_trait;
 use net::{
     Application, EventHandler, Indication, IndicationHandler, InterfaceProvider, Procedure,
-    RequestProvider, TnlaEvent,
+    RequestProvider, ResponseAction, TnlaEvent,
 };
 use slog::{error, Logger};
 
@@ -51,7 +51,7 @@ where
     // Todo - add all other procedures
 {
     type TopPdu = F1apPdu;
-    async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Option<F1apPdu> {
+    async fn route_request(&self, p: F1apPdu, logger: &Logger) -> Option<ResponseAction<F1apPdu>> {
         let initiating_message = match p {
             F1apPdu::InitiatingMessage(m) => m,
             x => {

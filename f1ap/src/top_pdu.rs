@@ -4,7 +4,10 @@ use crate::common::Criticality;
 use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 use async_trait::async_trait;
-use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
+use net::{
+    AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider,
+    ResponseAction,
+};
 use slog::Logger;
 
 // F1apPdu
@@ -77,10 +80,11 @@ impl Procedure for ResetProcedure {
         provider: &T,
         req: Reset,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<ResetProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::ResetAcknowledge(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::ResetAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -114,10 +118,11 @@ impl Procedure for F1SetupProcedure {
         provider: &T,
         req: F1SetupRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<F1SetupProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::F1SetupResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::F1SetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -153,14 +158,17 @@ impl Procedure for GnbDuConfigurationUpdateProcedure {
         provider: &T,
         req: GnbDuConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<GnbDuConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbDuConfigurationUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbDuConfigurationUpdateAcknowledge(
+                    r,
+                )),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -198,14 +206,17 @@ impl Procedure for GnbCuConfigurationUpdateProcedure {
         provider: &T,
         req: GnbCuConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<GnbCuConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbCuConfigurationUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbCuConfigurationUpdateAcknowledge(
+                    r,
+                )),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -243,11 +254,12 @@ impl Procedure for UeContextSetupProcedure {
         provider: &T,
         req: UeContextSetupRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<UeContextSetupProcedure>>::request(provider, req, logger).await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextSetupResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextSetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -283,12 +295,13 @@ impl Procedure for UeContextReleaseProcedure {
         provider: &T,
         req: UeContextReleaseCommand,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<UeContextReleaseProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextReleaseComplete(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextReleaseComplete(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -322,12 +335,13 @@ impl Procedure for UeContextModificationProcedure {
         provider: &T,
         req: UeContextModificationRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<UeContextModificationProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextModificationResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextModificationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -365,14 +379,15 @@ impl Procedure for UeContextModificationRequiredProcedure {
         provider: &T,
         req: UeContextModificationRequired,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<UeContextModificationRequiredProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextModificationConfirm(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextModificationConfirm(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -408,12 +423,13 @@ impl Procedure for WriteReplaceWarningProcedure {
         provider: &T,
         req: WriteReplaceWarningRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<WriteReplaceWarningProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::WriteReplaceWarningResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::WriteReplaceWarningResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -447,10 +463,11 @@ impl Procedure for PwsCancelProcedure {
         provider: &T,
         req: PwsCancelRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<PwsCancelProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PwsCancelResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::PwsCancelResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -617,14 +634,15 @@ impl Procedure for GnbDuResourceCoordinationProcedure {
         provider: &T,
         req: GnbDuResourceCoordinationRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<GnbDuResourceCoordinationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbDuResourceCoordinationResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbDuResourceCoordinationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -829,10 +847,11 @@ impl Procedure for F1RemovalProcedure {
         provider: &T,
         req: F1RemovalRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<F1RemovalProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::F1RemovalResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::F1RemovalResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -958,14 +977,17 @@ impl Procedure for BapMappingConfigurationProcedure {
         provider: &T,
         req: BapMappingConfiguration,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<BapMappingConfigurationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::BapMappingConfigurationAcknowledge(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::BapMappingConfigurationAcknowledge(
+                    r,
+                )),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1003,14 +1025,17 @@ impl Procedure for GnbDuResourceConfigurationProcedure {
         provider: &T,
         req: GnbDuResourceConfiguration,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<GnbDuResourceConfigurationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbDuResourceConfigurationAcknowledge(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(
+                    SuccessfulOutcome::GnbDuResourceConfigurationAcknowledge(r),
+                ),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1048,14 +1073,15 @@ impl Procedure for IabtnlAddressAllocationProcedure {
         provider: &T,
         req: IabtnlAddressRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<IabtnlAddressAllocationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::IabtnlAddressResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabtnlAddressResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1091,14 +1117,15 @@ impl Procedure for IabupConfigurationUpdateProcedure {
         provider: &T,
         req: IabupConfigurationUpdateRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<IabupConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::IabupConfigurationUpdateResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabupConfigurationUpdateResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1137,14 +1164,15 @@ impl Procedure for ResourceStatusReportingInitiationProcedure {
         provider: &T,
         req: ResourceStatusRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<ResourceStatusReportingInitiationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::ResourceStatusResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::ResourceStatusResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1374,14 +1402,15 @@ impl Procedure for PositioningMeasurementExchangeProcedure {
         provider: &T,
         req: PositioningMeasurementRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<PositioningMeasurementExchangeProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PositioningMeasurementResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::PositioningMeasurementResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1518,14 +1547,15 @@ impl Procedure for TrpInformationExchangeProcedure {
         provider: &T,
         req: TrpInformationRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<TrpInformationExchangeProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::TrpInformationResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::TrpInformationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1561,14 +1591,15 @@ impl Procedure for PositioningInformationExchangeProcedure {
         provider: &T,
         req: PositioningInformationRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<PositioningInformationExchangeProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PositioningInformationResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::PositioningInformationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1606,12 +1637,13 @@ impl Procedure for PositioningActivationProcedure {
         provider: &T,
         req: PositioningActivationRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<PositioningActivationProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PositioningActivationResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::PositioningActivationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1671,14 +1703,15 @@ impl Procedure for ECidMeasurementInitiationProcedure {
         provider: &T,
         req: ECidMeasurementInitiationRequest,
         logger: &Logger,
-    ) -> Option<F1apPdu> {
+    ) -> Option<ResponseAction<F1apPdu>> {
         match <T as RequestProvider<ECidMeasurementInitiationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(F1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::ECidMeasurementInitiationResponse(x),
+            Ok((r, f)) => Some((
+                F1apPdu::SuccessfulOutcome(SuccessfulOutcome::ECidMeasurementInitiationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }

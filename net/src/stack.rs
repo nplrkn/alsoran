@@ -1,6 +1,6 @@
 // stack - transaction layer allowing workflow business logic to await a response to its ??AP requests
 
-use crate::tnla_event_handler::TnlaEventHandler;
+use crate::tnla_event_handler::{ResponseAction, TnlaEventHandler};
 use crate::{
     Indication, IndicationHandler, Message, Procedure, RequestError, RequestMessageHandler,
     RequestProvider, SctpTransportProvider, ShutdownHandle, TnlaEvent, TransportProvider,
@@ -87,7 +87,7 @@ impl<P: Procedure> RequestProvider<P> for Stack {
         &self,
         r: P::Request,
         logger: &Logger,
-    ) -> Result<P::Success, RequestError<P::Failure>> {
+    ) -> Result<ResponseAction<P::Success>, RequestError<P::Failure>> {
         let bytes = P::encode_request(r)?;
 
         // Create a channel to receive the response.
@@ -104,7 +104,7 @@ impl<P: Procedure> RequestProvider<P> for Stack {
 
         // TODO - timeout
         let msg = receiver.recv().await?;
-        P::decode_response(&msg)
+        P::decode_response(&msg).map(|x| (x, None))
     }
 }
 
@@ -138,7 +138,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
         message: Message,
         _tnla_id: u32,
         logger: &Logger,
-    ) -> Option<Message> {
+    ) -> Option<ResponseAction<Message>> {
         // TODO figure out if it is a response and warn / drop if there are no matches
 
         // If it matches a pending request, route it back over the response channel.

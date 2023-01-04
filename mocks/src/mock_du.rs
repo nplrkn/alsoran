@@ -64,8 +64,7 @@ impl MockDu {
         self.connect(&transport_address, "0.0.0.0", F1AP_SCTP_PPID)
             .await;
         self.send_f1_setup_request().await?;
-        self.receive_f1_setup_response().await;
-        Ok(())
+        self.receive_f1_setup_response().await
     }
 
     async fn send_f1_setup_request(&self) -> Result<()> {
@@ -87,9 +86,14 @@ impl MockDu {
         Ok(())
     }
 
-    async fn receive_f1_setup_response(&self) {
-        let _response = self.receive_pdu().await;
+    async fn receive_f1_setup_response(&self) -> Result<()> {
+        let pdu = self.receive_pdu().await;
+        let F1apPdu::SuccessfulOutcome(SuccessfulOutcome::F1SetupResponse(_)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
         info!(self.logger, "F1SetupResponse <<");
+        Ok(())
     }
 
     pub async fn perform_rrc_setup(

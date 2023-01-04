@@ -197,9 +197,12 @@ async fn handle_message<H: TnlaEventHandler>(
     logger: Logger,
 ) {
     debug!(logger, "Received message on assoc {}", assoc_id);
-    if let Some(response) = handler.handle_message(message, assoc_id, &logger).await {
+    if let Some((response, future)) = handler.handle_message(message, assoc_id, &logger).await {
         if let Err(e) = assoc.send_msg(response).await {
-            warn!(logger, "Failed to send response - {}", e)
+            warn!(logger, "Failed to send response - {}", e);
+        } else if let Some(future) = future {
+            debug!(logger, "Post response action - run it");
+            future.await;
         }
     }
 }

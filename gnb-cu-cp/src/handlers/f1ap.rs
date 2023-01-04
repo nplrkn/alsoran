@@ -5,6 +5,7 @@ use super::RrcHandler;
 use crate::workflows::Workflow;
 use async_trait::async_trait;
 use f1ap::*;
+use net::ResponseAction;
 use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
 use pdcp::PdcpPdu;
 use slog::{debug, info, warn, Logger};
@@ -33,7 +34,7 @@ impl<G: GnbCuCp> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
         &self,
         r: F1SetupRequest,
         logger: &Logger,
-    ) -> Result<F1SetupResponse, RequestError<F1SetupFailure>> {
+    ) -> Result<ResponseAction<F1SetupResponse>, RequestError<F1SetupFailure>> {
         Workflow::new(&self.gnb_cu_cp, logger).f1_setup(r).await
     }
 }

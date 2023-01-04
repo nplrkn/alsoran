@@ -39,7 +39,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         self.log_message(">> GnbCuCpConfigurationUpdateAcknowledge");
 
         // Associate this TNLA with the E1AP interface instance.
-        self.associate_connection();
+        self.associate_connection().await;
 
         Ok(())
     }

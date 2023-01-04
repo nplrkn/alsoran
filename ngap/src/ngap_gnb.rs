@@ -5,7 +5,7 @@ use crate::{InitiatingMessage, NgapPdu};
 use async_trait::async_trait;
 use net::{
     Application, EventHandler, Indication, IndicationHandler, InterfaceProvider, Procedure,
-    RequestProvider, TnlaEvent,
+    RequestProvider, ResponseAction, TnlaEvent,
 };
 use slog::{error, Logger};
 
@@ -51,7 +51,7 @@ where
         + RequestProvider<PduSessionResourceSetupProcedure>,
 {
     type TopPdu = NgapPdu;
-    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<NgapPdu> {
+    async fn route_request(&self, p: NgapPdu, logger: &Logger) -> Option<ResponseAction<NgapPdu>> {
         let initiating_message = match p {
             NgapPdu::InitiatingMessage(m) => m,
             x => {

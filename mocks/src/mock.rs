@@ -4,8 +4,8 @@ use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, Binding, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
-    TransportProvider,
+    AperSerde, Binding, ResponseAction, SctpTransportProvider, ShutdownHandle, TnlaEvent,
+    TnlaEventHandler, TransportProvider,
 };
 use slog::{debug, info, Logger};
 use std::fmt::Debug;
@@ -133,7 +133,7 @@ impl<P: Pdu> TnlaEventHandler for Handler<P> {
         message: Vec<u8>,
         tnla_id: u32,
         _logger: &Logger,
-    ) -> Option<Vec<u8>> {
+    ) -> Option<ResponseAction<Vec<u8>>> {
         self.0
             .send(Some(ReceivedPdu {
                 pdu: P::from_bytes(&message).unwrap(),

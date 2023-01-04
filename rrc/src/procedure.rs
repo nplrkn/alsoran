@@ -3,7 +3,7 @@ use crate::{RrcSetupComplete, UlDcchMessage};
 use crate::*;
 use asn1_codecs::aper::AperCodecError;
 use async_trait::async_trait;
-use net::{AperSerde, Procedure, RequestError, RequestProvider};
+use net::{AperSerde, Procedure, RequestError, RequestProvider, ResponseAction};
 use slog::Logger;
 
 pub struct RrcSetupProcedure {}
@@ -20,7 +20,7 @@ impl Procedure for RrcSetupProcedure {
         _provider: &T,
         _req: RrcSetup,
         _logger: &Logger,
-    ) -> Option<UlDcchMessage> {
+    ) -> Option<ResponseAction<UlDcchMessage>> {
         todo!()
     }
 

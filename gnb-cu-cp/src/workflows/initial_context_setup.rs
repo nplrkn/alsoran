@@ -3,6 +3,7 @@
 use super::{GnbCuCp, Workflow};
 use anyhow::Result;
 use f1ap::{SrbId, UeContextSetupProcedure};
+use net::ResponseAction;
 use ngap::*;
 use rrc::*;
 use slog::debug;
@@ -24,7 +25,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
     pub async fn initial_context_setup(
         &self,
         r: &InitialContextSetupRequest,
-    ) -> Result<InitialContextSetupResponse, Cause> {
+    ) -> Result<ResponseAction<InitialContextSetupResponse>, Cause> {
         self.log_message("InitialContextSetupRequest(Nas) << ");
 
         // Retrieve UE context by ran_ue_ngap_id.
@@ -106,12 +107,15 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         // Reply to the AMF.
         self.log_message("InitialContextSetupResponse >>");
-        Ok(InitialContextSetupResponse {
-            amf_ue_ngap_id: r.amf_ue_ngap_id,
-            ran_ue_ngap_id: RanUeNgapId(ue.key),
-            pdu_session_resource_setup_list_cxt_res: None,
-            pdu_session_resource_failed_to_setup_list_cxt_res: None,
-            criticality_diagnostics: None,
-        })
+        Ok((
+            InitialContextSetupResponse {
+                amf_ue_ngap_id: r.amf_ue_ngap_id,
+                ran_ue_ngap_id: RanUeNgapId(ue.key),
+                pdu_session_resource_setup_list_cxt_res: None,
+                pdu_session_resource_failed_to_setup_list_cxt_res: None,
+                criticality_diagnostics: None,
+            },
+            None,
+        ))
     }
 }
