@@ -1,5 +1,6 @@
 use super::ue::*;
 use anyhow::Result;
+use async_std::future;
 use common::ShutdownHandle;
 use coordinator::Config as CoordinatorConfig;
 use gnb_cu_cp::{
@@ -9,6 +10,7 @@ use gnb_cu_cp::{MockUeStore, RedisUeStore};
 use mocks::{MockAmf, MockCuUp, MockDu};
 use rand::Rng;
 use slog::{debug, info, o, warn, Logger};
+use std::time::Duration;
 use std::{panic, process};
 use uuid::Uuid;
 
@@ -330,8 +332,7 @@ impl TestContext {
             .await
     }
 
-    pub async fn terminate(self) {
-        info!(self.logger, "Terminate worker(s)");
+    async fn graceful_terminate(self) {
         for worker in self.workers {
             worker.shutdown_handle.graceful_shutdown().await;
             // We don't know if the worker has a connection up, so we can't assume we will see a connection
@@ -349,6 +350,13 @@ impl TestContext {
 
         info!(self.logger, "Terminate mock DU");
         self.du.terminate().await;
+    }
+
+    pub async fn terminate(self) {
+        info!(self.logger, "Terminate worker(s)");
+        future::timeout(Duration::from_secs(10), self.graceful_terminate())
+            .await
+            .expect("Graceful shutdown took more than 10 seconds");
     }
 }
 
