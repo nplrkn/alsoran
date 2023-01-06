@@ -335,9 +335,6 @@ impl TestContext {
     async fn graceful_terminate(self) {
         for worker in self.workers {
             worker.shutdown_handle.graceful_shutdown().await;
-            // We don't know if the worker has a connection up, so we can't assume we will see a connection
-            // hangup on the AMF.
-            //self.amf.expect_connection().await;
         }
 
         if let Some(c) = self.coordinator {

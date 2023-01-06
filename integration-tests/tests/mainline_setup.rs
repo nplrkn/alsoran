@@ -1,4 +1,6 @@
 mod test;
+use std::time::Duration;
+
 use anyhow::Result;
 pub use test::*;
 
@@ -8,6 +10,11 @@ async fn cu_can_connect_to_amf() -> Result<()> {
         .stage(Stage::AmfConnected)
         .spawn()
         .await?;
+
+    // There's no good way to ensure that the NG Setup Response has been processed by the worker, so wait a moment before we
+    // terminate.  The worker won't complete a graceful shutdown if its NG Setup exchange is still pending.
+    async_std::task::sleep(Duration::from_millis(250)).await;
+
     tc.terminate().await;
     Ok(())
 }
