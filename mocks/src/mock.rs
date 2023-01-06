@@ -4,17 +4,17 @@ use anyhow::Result;
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
-    AperSerde, Binding, SctpTransportProvider, ShutdownHandle, TnlaEvent, TnlaEventHandler,
-    TransportProvider,
+    AperSerde, Binding, ResponseAction, SctpTransportProvider, ShutdownHandle, TnlaEvent,
+    TnlaEventHandler, TransportProvider,
 };
-use slog::{debug, Logger};
+use slog::{debug, info, Logger};
 use std::fmt::Debug;
 
 pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
 
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
-    transport: SctpTransportProvider,
+    pub transport: SctpTransportProvider,
     receiver: Receiver<Option<ReceivedPdu<P>>>,
     pub logger: Logger,
     handler: Handler<P>,
@@ -53,10 +53,16 @@ impl<P: Pdu> Mock<P> {
         Ok(())
     }
 
-    pub async fn connect(&mut self, address: &str, ppid: u32) {
+    pub async fn connect(&mut self, connect_address: &str, bind_address: &str, ppid: u32) {
         self.transport
             .clone()
-            .connect(address, ppid, self.handler.clone(), self.logger.clone())
+            .connect(
+                connect_address,
+                bind_address,
+                ppid,
+                self.handler.clone(),
+                self.logger.clone(),
+            )
             .await
             .expect("Connect failed");
 
@@ -81,10 +87,11 @@ impl<P: Pdu> Mock<P> {
             .await
             .expect("Failed mock recv")
             .is_none());
-    }
-
-    pub async fn new_ue_binding(&self, ue_id: u32) -> Binding {
-        self.transport.new_ue_binding(ue_id).await.unwrap()
+        info!(
+            self.logger,
+            "Association list is now {:?}",
+            self.transport.remote_tnla_addresses().await
+        );
     }
 
     pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {
@@ -108,6 +115,11 @@ impl<P: Pdu> Mock<P> {
             .expect("Expected message")
             .expect("Expected message")
     }
+
+    pub async fn rebind(&self, binding: &mut Binding, ip_addr: &str) -> Result<()> {
+        *binding = self.transport.new_ue_binding_from_ip(ip_addr).await?;
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -121,7 +133,7 @@ impl<P: Pdu> TnlaEventHandler for Handler<P> {
         message: Vec<u8>,
         tnla_id: u32,
         _logger: &Logger,
-    ) -> Option<Vec<u8>> {
+    ) -> Option<ResponseAction<Vec<u8>>> {
         self.0
             .send(Some(ReceivedPdu {
                 pdu: P::from_bytes(&message).unwrap(),

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 async-std = { version = "1.10.0", features = ["attributes","tokio1"] }
+async-trait = "0.1.24"
 common = { path = "../common" }
 mocks = { path = "../mocks" }
 gnb-cu-cp = { path = "../gnb-cu-cp" }

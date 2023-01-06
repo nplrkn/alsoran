@@ -1,5 +1,7 @@
 //! gnb_cu_cp - the collection of services used by the GNB-CU-CP workflow business logic.
 
+use std::{future::Future, pin::Pin};
+
 use super::Config;
 use crate::{
     datastore::{UeState, UeStateStore},
@@ -63,5 +65,5 @@ pub trait GnbCuCp: Send + Sync + Clone + 'static + UeStateStore {
     /// Returns a revision number.  Each change in the interface state results in a new
     /// number.
     // TODO: add parameters that actually define the association.
-    fn associate_connection(&self) -> i32;
+    fn associate_connection(&self) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }

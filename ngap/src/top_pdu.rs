@@ -4,8 +4,11 @@ use crate::common::Criticality;
 use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 use async_trait::async_trait;
-use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
-use slog::{warn, Logger};
+use net::{
+    AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider,
+    ResponseAction,
+};
+use slog::Logger;
 
 // NgapPdu
 #[derive(Clone, Debug)]
@@ -74,14 +77,15 @@ impl Procedure for AmfConfigurationUpdateProcedure {
         provider: &T,
         req: AmfConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<AmfConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::AmfConfigurationUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::AmfConfigurationUpdateAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -394,11 +398,12 @@ impl Procedure for HandoverCancelProcedure {
         provider: &T,
         req: HandoverCancel,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<HandoverCancelProcedure>>::request(provider, req, logger).await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::HandoverCancelAcknowledge(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::HandoverCancelAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -454,12 +459,13 @@ impl Procedure for HandoverPreparationProcedure {
         provider: &T,
         req: HandoverRequired,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<HandoverPreparationProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::HandoverCommand(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::HandoverCommand(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -495,14 +501,15 @@ impl Procedure for HandoverResourceAllocationProcedure {
         provider: &T,
         req: HandoverRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<HandoverResourceAllocationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::HandoverRequestAcknowledge(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::HandoverRequestAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -559,23 +566,15 @@ impl Procedure for InitialContextSetupProcedure {
         provider: &T,
         req: InitialContextSetupRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<InitialContextSetupProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::InitialContextSetupResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(r)),
+                f,
             )),
-            Err(RequestError::UnsuccessfulOutcome(f)) => Some(NgapPdu::UnsuccessfulOutcome(
-                UnsuccessfulOutcome::InitialContextSetupFailure(f),
-            )),
-            Err(RequestError::Other(e)) => {
-                warn!(
-                    logger,
-                    "Error processing InitialContextSetupRequest - {}", e
-                );
-                None
-            }
+            Err(_) => todo!(),
         }
     }
 
@@ -720,10 +719,11 @@ impl Procedure for NgResetProcedure {
         provider: &T,
         req: NgReset,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<NgResetProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::NgResetAcknowledge(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::NgResetAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -757,10 +757,11 @@ impl Procedure for NgSetupProcedure {
         provider: &T,
         req: NgSetupRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<NgSetupProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::NgSetupResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::NgSetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -855,12 +856,13 @@ impl Procedure for PathSwitchRequestProcedure {
         provider: &T,
         req: PathSwitchRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<PathSwitchRequestProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PathSwitchRequestAcknowledge(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PathSwitchRequestAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -896,14 +898,15 @@ impl Procedure for PduSessionResourceModifyProcedure {
         provider: &T,
         req: PduSessionResourceModifyRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<PduSessionResourceModifyProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PduSessionResourceModifyResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceModifyResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -940,14 +943,15 @@ impl Procedure for PduSessionResourceModifyIndicationProcedure {
         provider: &T,
         req: PduSessionResourceModifyIndication,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<PduSessionResourceModifyIndicationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PduSessionResourceModifyConfirm(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceModifyConfirm(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1006,14 +1010,15 @@ impl Procedure for PduSessionResourceReleaseProcedure {
         provider: &T,
         req: PduSessionResourceReleaseCommand,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<PduSessionResourceReleaseProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PduSessionResourceReleaseResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceReleaseResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1050,14 +1055,15 @@ impl Procedure for PduSessionResourceSetupProcedure {
         provider: &T,
         req: PduSessionResourceSetupRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<PduSessionResourceSetupProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PduSessionResourceSetupResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceSetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1094,10 +1100,11 @@ impl Procedure for PwsCancelProcedure {
         provider: &T,
         req: PwsCancelRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<PwsCancelProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::PwsCancelResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PwsCancelResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1175,14 +1182,15 @@ impl Procedure for RanConfigurationUpdateProcedure {
         provider: &T,
         req: RanConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<RanConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::RanConfigurationUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::RanConfigurationUpdateAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1376,12 +1384,13 @@ impl Procedure for UeContextModificationProcedure {
         provider: &T,
         req: UeContextModificationRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<UeContextModificationProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextModificationResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextModificationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1419,12 +1428,13 @@ impl Procedure for UeContextReleaseProcedure {
         provider: &T,
         req: UeContextReleaseCommand,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<UeContextReleaseProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextReleaseComplete(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextReleaseComplete(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1480,11 +1490,12 @@ impl Procedure for UeContextResumeProcedure {
         provider: &T,
         req: UeContextResumeRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<UeContextResumeProcedure>>::request(provider, req, logger).await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextResumeResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextResumeResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1520,12 +1531,13 @@ impl Procedure for UeContextSuspendProcedure {
         provider: &T,
         req: UeContextSuspendRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<UeContextSuspendProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeContextSuspendResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::UeContextSuspendResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1583,14 +1595,15 @@ impl Procedure for UeRadioCapabilityCheckProcedure {
         provider: &T,
         req: UeRadioCapabilityCheckRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<UeRadioCapabilityCheckProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeRadioCapabilityCheckResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::UeRadioCapabilityCheckResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1626,14 +1639,17 @@ impl Procedure for UeRadioCapabilityIdMappingProcedure {
         provider: &T,
         req: UeRadioCapabilityIdMappingRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<UeRadioCapabilityIdMappingProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::UeRadioCapabilityIdMappingResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::UeRadioCapabilityIdMappingResponse(
+                    r,
+                )),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -1859,12 +1875,13 @@ impl Procedure for WriteReplaceWarningProcedure {
         provider: &T,
         req: WriteReplaceWarningRequest,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<WriteReplaceWarningProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(
-                SuccessfulOutcome::WriteReplaceWarningResponse(x),
+            Ok((r, f)) => Some((
+                NgapPdu::SuccessfulOutcome(SuccessfulOutcome::WriteReplaceWarningResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }

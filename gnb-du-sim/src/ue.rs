@@ -30,7 +30,7 @@ impl Ue {
             id,
             stdout,
             stdin,
-            du_context: du.new_ue_context(id).await,
+            du_context: du.new_ue_context(id, "127.0.0.1").await.unwrap(),
         }
     }
 

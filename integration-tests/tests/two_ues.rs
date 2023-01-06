@@ -1,7 +1,6 @@
 mod test;
 use anyhow::Result;
 pub use test::*;
-use test_context::UeRegisterStage;
 
 #[async_std::test]
 async fn two_ues_register_sequentially() -> Result<()> {
@@ -22,22 +21,25 @@ async fn two_ues_register_in_parallel() -> Result<()> {
         .spawn()
         .await?;
 
-    let mut ue_1 = tc.new_ue(1).await;
+    let ue_1 = tc
+        .new_ue(1)
+        .await?
+        .initial_access(&tc)
+        .await?
+        .initiate_registration(&tc)
+        .await?;
 
-    // Get to an the initial context setup requests for both UEs
-    let mut registration_1 = tc.register_ue_start(&mut ue_1).await;
-    registration_1 = tc.register_ue_next(registration_1).await?;
-    let mut ue_2 = tc.new_ue(2).await;
-    let mut registration_2 = tc.register_ue_start(&mut ue_2).await;
-    registration_2 = tc.register_ue_next(registration_2).await?;
+    let ue_2 = tc
+        .new_ue(2)
+        .await?
+        .initial_access(&tc)
+        .await?
+        .initiate_registration(&tc)
+        .await?;
 
     // Complete the initial context setup for both UEs.
-    registration_2 = tc.register_ue_next(registration_2).await?;
-    registration_1 = tc.register_ue_next(registration_1).await?;
-
-    // These will fail when more stages are added to Ue registration.
-    assert!(matches!(registration_1.stage, UeRegisterStage::End));
-    assert!(matches!(registration_2.stage, UeRegisterStage::End));
+    ue_2.complete_registration(&tc).await?;
+    ue_1.complete_registration(&tc).await?;
 
     tc.terminate().await;
     Ok(())

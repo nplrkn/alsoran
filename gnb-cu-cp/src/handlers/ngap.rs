@@ -4,7 +4,9 @@ use super::GnbCuCp;
 use crate::workflows::Workflow;
 use anyhow::Result;
 use async_trait::async_trait;
-use net::{EventHandler, IndicationHandler, RequestError, RequestProvider, TnlaEvent};
+use net::{
+    EventHandler, IndicationHandler, RequestError, RequestProvider, ResponseAction, TnlaEvent,
+};
 use ngap::*;
 use slog::{debug, info, Logger};
 
@@ -48,7 +50,8 @@ impl<G: GnbCuCp> RequestProvider<InitialContextSetupProcedure> for NgapHandler<G
         &self,
         r: InitialContextSetupRequest,
         logger: &Logger,
-    ) -> Result<InitialContextSetupResponse, RequestError<InitialContextSetupFailure>> {
+    ) -> Result<ResponseAction<InitialContextSetupResponse>, RequestError<InitialContextSetupFailure>>
+    {
         Workflow::new(&self.gnb_cu_cp, logger)
             .initial_context_setup(&r)
             .await
@@ -79,9 +82,12 @@ impl<G: GnbCuCp> RequestProvider<PduSessionResourceSetupProcedure> for NgapHandl
         &self,
         r: PduSessionResourceSetupRequest,
         logger: &Logger,
-    ) -> Result<PduSessionResourceSetupResponse, RequestError<()>> {
-        Ok(Workflow::new(&self.gnb_cu_cp, logger)
-            .pdu_session_resource_setup(r)
-            .await)
+    ) -> Result<ResponseAction<PduSessionResourceSetupResponse>, RequestError<()>> {
+        Ok((
+            Workflow::new(&self.gnb_cu_cp, logger)
+                .pdu_session_resource_setup(r)
+                .await,
+            None,
+        ))
     }
 }

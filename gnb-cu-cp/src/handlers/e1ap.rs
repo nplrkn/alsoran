@@ -5,7 +5,7 @@ use crate::workflows::Workflow;
 use super::GnbCuCp;
 use async_trait::async_trait;
 use e1ap::*;
-use net::{EventHandler, RequestError, RequestProvider, TnlaEvent};
+use net::{EventHandler, RequestError, RequestProvider, ResponseAction, TnlaEvent};
 use slog::{info, Logger};
 
 #[derive(Clone)]
@@ -25,7 +25,7 @@ impl<G: GnbCuCp> RequestProvider<GnbCuUpE1SetupProcedure> for E1apHandler<G> {
         &self,
         r: GnbCuUpE1SetupRequest,
         logger: &Logger,
-    ) -> Result<GnbCuUpE1SetupResponse, RequestError<GnbCuUpE1SetupFailure>> {
+    ) -> Result<ResponseAction<GnbCuUpE1SetupResponse>, RequestError<GnbCuUpE1SetupFailure>> {
         Workflow::new(&self.gnb_cu_cp, logger).e1_setup(r).await
     }
 }

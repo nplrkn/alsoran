@@ -24,7 +24,9 @@ use net::{
 };
 use rrc::UlDcchMessage;
 use slog::{debug, info, warn, Logger};
+use std::future::Future;
 use std::net::Ipv4Addr;
+use std::pin::Pin;
 use std::sync::Arc;
 use stop_token::{StopSource, StopToken};
 use swagger::{ApiError, AuthData, ContextBuilder, EmptyContext, Push, XSpanIdString};
@@ -317,6 +319,11 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         self.ngap
             .connect(
                 &amf_address,
+                &self
+                    .config
+                    .ip_addr
+                    .map(|x| x.to_string())
+                    .unwrap_or("0.0.0.0".to_string()),
                 NGAP_SCTP_PPID,
                 NgapHandler::new_ngap_application(self.clone()),
                 self.logger.clone(),
@@ -330,7 +337,9 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         r: P::Request,
         logger: &Logger,
     ) -> Result<P::Success, RequestError<P::Failure>> {
-        <Stack as RequestProvider<P>>::request(&self.ngap, r, logger).await
+        <Stack as RequestProvider<P>>::request(&self.ngap, r, logger)
+            .await
+            .map(|(x, _)| x)
     }
     async fn ngap_indication<P: Indication>(&self, r: P::Request, logger: &Logger) {
         <Stack as IndicationHandler<P>>::handle(&self.ngap, r, logger).await
@@ -341,7 +350,9 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         r: P::Request,
         logger: &Logger,
     ) -> Result<P::Success, RequestError<P::Failure>> {
-        <Stack as RequestProvider<P>>::request(&self.f1ap, r, logger).await
+        <Stack as RequestProvider<P>>::request(&self.f1ap, r, logger)
+            .await
+            .map(|(x, _)| x)
     }
     async fn f1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger) {
         <Stack as IndicationHandler<P>>::handle(&self.f1ap, r, logger).await
@@ -352,7 +363,9 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         r: P::Request,
         logger: &Logger,
     ) -> Result<P::Success, RequestError<P::Failure>> {
-        <Stack as RequestProvider<P>>::request(&self.e1ap, r, logger).await
+        <Stack as RequestProvider<P>>::request(&self.e1ap, r, logger)
+            .await
+            .map(|(x, _)| x)
     }
     async fn e1ap_indication<P: Indication>(&self, r: P::Request, logger: &Logger) {
         <Stack as IndicationHandler<P>>::handle(&self.e1ap, r, logger).await
@@ -398,19 +411,19 @@ impl<A: Clone + Send + Sync + 'static + CoordinationApi<ClientContext>, U: UeSta
         DlRrcMessageTransferProcedure::call_provider(&self.f1ap, dl_message, logger).await
     }
 
-    fn associate_connection(&self) -> i32 {
+    fn associate_connection(&self) -> Pin<Box<dyn Future<Output = ()> + Send>> {
         // The basic initial implementation of this function just sends a refresh to the coordinator and assumes
         // that there is one instance of E1AP, F1AP, and NGAP.  This has the necessary effect of triggrering
         // the coordinator to add all worker endpoints, but will need to be improved a) when we simultaneously
         // support multiple different interface instances or b) if we want to deal with rogue connections that are
         // not properly initialized according to the protocol procedures.
         let self_clone = self.clone();
-        async_std::task::spawn(async move {
+        let future = async move {
             debug!(self_clone.logger, "Send refresh worker");
             if let Err(e) = self_clone.send_refresh_worker().await {
                 warn!(self_clone.logger, "Failed refresh worker {}", e);
             }
-        });
-        return 1; // TODO
+        };
+        Box::pin(future)
     }
 }

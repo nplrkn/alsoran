@@ -18,9 +18,11 @@
 
 # TECH DEBT
 ## FUNCTION
+- Proper graceful shutdown (waiting for / sending responses to pending requests)
 - Make values in NG Setup configurable rather than hard coded (Tac, Plmn Id, slices, etc)
 - Generate RRC transaction IDs properly
 - Don't hang indefinitely waiting for response (e.g. NG Setup response)
+- Don't allow unlimited pending requests
 - Handle -ve response to InitialContextSetupRequest with bad RAN UE ID
 ## MAINTAINABILITY
 - Errors are too easy to miss - call_provider() to optionally warn! on failure
@@ -56,12 +58,12 @@
 
 # MEDIUM TERM
 - Selection and stickiness of SCTP streams
-- Triangular redirection and upstream messages on old binding
 - Sample userplane 
 - Dockerfiles and Helm charts
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Triangular redirection 
 - Get rid of revision number
 - Go public
 - Fix TNLA established event so that it is always processed before first packet 

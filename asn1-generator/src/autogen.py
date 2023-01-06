@@ -23,7 +23,7 @@ USE_IES = "use super::ies::*;\n"
 USE_PDUS = """\
 use crate::common::Criticality;
 use super::pdu::*;
-use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
+use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider, ResponseAction};
 use async_trait::async_trait;
 use slog::Logger;
 use anyhow::Result;

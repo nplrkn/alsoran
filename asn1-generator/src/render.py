@@ -641,9 +641,9 @@ impl Procedure for {p.name} {{
         provider: &T,
         req: {p.initiating},
         logger: &Logger,
-    ) -> Option<{top_pdu}> {{
+    ) -> Option<ResponseAction<{top_pdu}>> {{
         match <T as RequestProvider<{p.name}>>::request(provider, req, logger).await {{
-            Ok(x) => Some({top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(x))),
+            Ok((r, f)) => Some(({top_pdu}::SuccessfulOutcome(SuccessfulOutcome::{p.successful}(r)),f)),
             Err(_) => todo!(),
         }}
     }}
@@ -1006,9 +1006,9 @@ impl Procedure for AmfConfigurationUpdateProcedure {
         provider: &T,
         req: AmfConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<NgapPdu> {
+    ) -> Option<ResponseAction<NgapPdu>> {
         match <T as RequestProvider<AmfConfigurationUpdateProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(NgapPdu::SuccessfulOutcome(SuccessfulOutcome::AmfConfigurationUpdateAcknowledge(x))),
+            Ok((r, f)) => Some((NgapPdu::SuccessfulOutcome(SuccessfulOutcome::AmfConfigurationUpdateAcknowledge(r)),f)),
             Err(_) => todo!(),
         }
     }

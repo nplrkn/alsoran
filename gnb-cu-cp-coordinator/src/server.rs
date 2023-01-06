@@ -103,8 +103,10 @@ pub fn spawn(config: Config, logger: Logger) -> Result<ShutdownHandle> {
     let service = MakeService::new(server);
     let service = MakeAddContext::<_, EmptyContext>::new(service);
 
+    let bound_server = hyper::server::Server::try_bind(&listen_addr)?;
+
     let server_task = async_std::task::spawn(async move {
-        let server = hyper::server::Server::bind(&listen_addr)
+        let server = bound_server
             .serve(service)
             .with_graceful_shutdown(stop_token);
         if let Err(e) = server.await {

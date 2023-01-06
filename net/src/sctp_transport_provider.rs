@@ -2,9 +2,9 @@
 
 use super::sctp_tnla_pool::SctpTnlaPool;
 use super::tnla_event_handler::TnlaEventHandler;
-use crate::transport_provider::Binding;
+use crate::transport_provider::{AssocId, Binding};
 use crate::{ShutdownHandle, TransportProvider};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use async_std::sync::Arc;
 use async_std::task;
 use async_trait::async_trait;
@@ -33,15 +33,17 @@ impl SctpTransportProvider {
 
 async fn resolve_and_connect(
     connect_addr_string: &str,
+    bind_addr_string: &str,
     ppid: u32,
     logger: &Logger,
 ) -> Result<SctpAssociation> {
-    let addr = async_net::resolve(connect_addr_string)
+    let connect_addr = async_net::resolve(connect_addr_string)
         .await?
         .into_iter()
         .next()
         .ok_or(anyhow!("Address resolved to empty array"))?; // Don't know if this is actually hittable
-    SctpAssociation::establish(addr, ppid, logger).await
+    let bind_addr = format!("{}:0", bind_addr_string).parse()?;
+    SctpAssociation::establish(connect_addr, bind_addr, ppid, logger).await
 }
 
 #[async_trait]
@@ -58,6 +60,7 @@ impl TransportProvider for SctpTransportProvider {
     async fn connect<H>(
         self,
         connect_addr_string: &str,
+        bind_addr_string: &str,
         ppid: u32,
         handler: H,
         logger: Logger,
@@ -66,7 +69,8 @@ impl TransportProvider for SctpTransportProvider {
         H: TnlaEventHandler,
     {
         let connect_addr_string = connect_addr_string.clone();
-        let assoc = resolve_and_connect(&connect_addr_string, ppid, &logger).await?;
+        let assoc =
+            resolve_and_connect(connect_addr_string, bind_addr_string, ppid, &logger).await?;
         //let logger = logger.new(o!("connection" => assoc_id));
         self.tnla_pool
             .add_and_handle(
@@ -85,8 +89,25 @@ impl TransportProvider for SctpTransportProvider {
         self.tnla_pool.new_ue_binding(seed).await
     }
 
+    async fn new_ue_binding_from_assoc(&self, assoc_id: &AssocId) -> Result<Binding> {
+        self.tnla_pool.new_ue_binding_from_assoc(assoc_id).await
+    }
+
+    async fn new_ue_binding_from_ip(&self, ip_addr: &str) -> Result<Binding> {
+        if let Some((assoc_id, _)) = self
+            .remote_tnla_addresses()
+            .await
+            .iter()
+            .find(|(_, x)| x.ip().to_string() == ip_addr)
+        {
+            self.new_ue_binding_from_assoc(assoc_id).await
+        } else {
+            bail!("No such remote ip addr");
+        }
+    }
+
     // Return the set of TNLA remote address to which we are currently connected
-    async fn remote_tnla_addresses(&self) -> Vec<SocketAddr> {
+    async fn remote_tnla_addresses(&self) -> Vec<(AssocId, SocketAddr)> {
         self.tnla_pool.remote_addresses().await
     }
 

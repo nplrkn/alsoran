@@ -3,7 +3,10 @@
 use super::top_pdu::*;
 use crate::{E1apPdu, InitiatingMessage};
 use async_trait::async_trait;
-use net::{Application, EventHandler, InterfaceProvider, Procedure, RequestProvider, TnlaEvent};
+use net::{
+    Application, EventHandler, InterfaceProvider, Procedure, RequestProvider, ResponseAction,
+    TnlaEvent,
+};
 use slog::{error, Logger};
 
 #[derive(Clone)]
@@ -38,7 +41,7 @@ where
     T: Send + Sync + EventHandler + RequestProvider<GnbCuUpE1SetupProcedure>, // Todo - add all other procedures
 {
     type TopPdu = E1apPdu;
-    async fn route_request(&self, p: E1apPdu, logger: &Logger) -> Option<E1apPdu> {
+    async fn route_request(&self, p: E1apPdu, logger: &Logger) -> Option<ResponseAction<E1apPdu>> {
         let initiating_message = match p {
             E1apPdu::InitiatingMessage(m) => m,
             x => {

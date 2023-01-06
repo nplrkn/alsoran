@@ -4,7 +4,10 @@ use crate::common::Criticality;
 use anyhow::Result;
 use asn1_codecs::aper::{self, AperCodec, AperCodecData, AperCodecError};
 use async_trait::async_trait;
-use net::{AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider};
+use net::{
+    AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider,
+    ResponseAction,
+};
 use slog::Logger;
 
 // E1apPdu
@@ -74,10 +77,11 @@ impl Procedure for ResetProcedure {
         provider: &T,
         req: Reset,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<ResetProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::ResetAcknowledge(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::ResetAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -132,11 +136,12 @@ impl Procedure for GnbCuUpE1SetupProcedure {
         provider: &T,
         req: GnbCuUpE1SetupRequest,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<GnbCuUpE1SetupProcedure>>::request(provider, req, logger).await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbCuUpE1SetupResponse(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbCuUpE1SetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -172,11 +177,12 @@ impl Procedure for GnbCuCpE1SetupProcedure {
         provider: &T,
         req: GnbCuCpE1SetupRequest,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<GnbCuCpE1SetupProcedure>>::request(provider, req, logger).await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbCuCpE1SetupResponse(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbCuCpE1SetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -212,14 +218,17 @@ impl Procedure for GnbCuUpConfigurationUpdateProcedure {
         provider: &T,
         req: GnbCuUpConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<GnbCuUpConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbCuUpConfigurationUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(
+                    SuccessfulOutcome::GnbCuUpConfigurationUpdateAcknowledge(r),
+                ),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -257,14 +266,17 @@ impl Procedure for GnbCuCpConfigurationUpdateProcedure {
         provider: &T,
         req: GnbCuCpConfigurationUpdate,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<GnbCuCpConfigurationUpdateProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::GnbCuCpConfigurationUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(
+                    SuccessfulOutcome::GnbCuCpConfigurationUpdateAcknowledge(r),
+                ),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -302,10 +314,11 @@ impl Procedure for E1ReleaseProcedure {
         provider: &T,
         req: E1ReleaseRequest,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<E1ReleaseProcedure>>::request(provider, req, logger).await {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::E1ReleaseResponse(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::E1ReleaseResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -339,12 +352,13 @@ impl Procedure for BearerContextSetupProcedure {
         provider: &T,
         req: BearerContextSetupRequest,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<BearerContextSetupProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::BearerContextSetupResponse(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextSetupResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -380,14 +394,15 @@ impl Procedure for BearerContextModificationProcedure {
         provider: &T,
         req: BearerContextModificationRequest,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<BearerContextModificationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::BearerContextModificationResponse(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextModificationResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -426,14 +441,15 @@ impl Procedure for BearerContextModificationRequiredProcedure {
         provider: &T,
         req: BearerContextModificationRequired,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<BearerContextModificationRequiredProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::BearerContextModificationConfirm(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextModificationConfirm(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -470,12 +486,13 @@ impl Procedure for BearerContextReleaseProcedure {
         provider: &T,
         req: BearerContextReleaseCommand,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<BearerContextReleaseProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::BearerContextReleaseComplete(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::BearerContextReleaseComplete(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -752,14 +769,15 @@ impl Procedure for ResourceStatusReportingInitiationProcedure {
         provider: &T,
         req: ResourceStatusRequest,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<ResourceStatusReportingInitiationProcedure>>::request(
             provider, req, logger,
         )
         .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::ResourceStatusResponse(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::ResourceStatusResponse(r)),
+                f,
             )),
             Err(_) => todo!(),
         }
@@ -817,12 +835,13 @@ impl Procedure for IabUptnlAddressUpdateProcedure {
         provider: &T,
         req: IabUptnlAddressUpdate,
         logger: &Logger,
-    ) -> Option<E1apPdu> {
+    ) -> Option<ResponseAction<E1apPdu>> {
         match <T as RequestProvider<IabUptnlAddressUpdateProcedure>>::request(provider, req, logger)
             .await
         {
-            Ok(x) => Some(E1apPdu::SuccessfulOutcome(
-                SuccessfulOutcome::IabUptnlAddressUpdateAcknowledge(x),
+            Ok((r, f)) => Some((
+                E1apPdu::SuccessfulOutcome(SuccessfulOutcome::IabUptnlAddressUpdateAcknowledge(r)),
+                f,
             )),
             Err(_) => todo!(),
         }

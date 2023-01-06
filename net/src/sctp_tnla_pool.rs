@@ -4,7 +4,7 @@ use crate::{
     tnla_event_handler::{TnlaEvent, TnlaEventHandler},
     transport_provider::{AssocId, Binding},
 };
-use anyhow::{anyhow, ensure, Result};
+use anyhow::{anyhow, bail, ensure, Result};
 use async_std::sync::{Arc, Mutex};
 use common::ShutdownHandle;
 use futures::pin_mut;
@@ -36,12 +36,12 @@ impl SctpTnlaPool {
         }
     }
 
-    pub async fn remote_addresses(&self) -> Vec<SocketAddr> {
+    pub async fn remote_addresses(&self) -> Vec<(AssocId, SocketAddr)> {
         self.assocs
             .lock()
             .await
-            .values()
-            .map(|assoc| assoc.remote_address)
+            .iter()
+            .map(|(id, assoc)| (*id, assoc.remote_address))
             .collect()
     }
 
@@ -51,9 +51,22 @@ impl SctpTnlaPool {
         let assocs = self.assocs.lock().await;
         ensure!(assocs.len() > 0, "No associations up");
         let nth = seed as usize % assocs.len();
+        let assoc_id = *assocs.keys().nth(nth).unwrap();
         Ok(Binding {
-            assoc_id: *assocs.keys().nth(nth).unwrap(),
+            assoc_id,
+            remote_ip: assocs[&assoc_id].remote_address.ip().to_string(),
         })
+    }
+
+    pub async fn new_ue_binding_from_assoc(&self, assoc_id: &AssocId) -> Result<Binding> {
+        if let Some(assoc) = self.assocs.lock().await.get(assoc_id) {
+            Ok(Binding {
+                assoc_id: *assoc_id,
+                remote_ip: assoc.remote_address.ip().to_string(),
+            })
+        } else {
+            bail!("No such association")
+        }
     }
 
     pub async fn send_message(
@@ -184,9 +197,12 @@ async fn handle_message<H: TnlaEventHandler>(
     logger: Logger,
 ) {
     debug!(logger, "Received message on assoc {}", assoc_id);
-    if let Some(response) = handler.handle_message(message, assoc_id, &logger).await {
+    if let Some((response, future)) = handler.handle_message(message, assoc_id, &logger).await {
         if let Err(e) = assoc.send_msg(response).await {
-            warn!(logger, "Failed to send response - {}", e)
+            warn!(logger, "Failed to send response - {}", e);
+        } else if let Some(future) = future {
+            debug!(logger, "Post response action - run it");
+            future.await;
         }
     }
 }

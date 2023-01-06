@@ -21,7 +21,7 @@ pub trait Procedure {
         provider: &T,
         req: Self::Request,
         logger: &Logger,
-    ) -> Option<Self::TopPdu>;
+    ) -> Option<ResponseAction<Self::TopPdu>>;
 }
 
 #[async_trait]
@@ -42,6 +42,8 @@ pub trait AperSerde: Sized {
     fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError>;
 }
 pub use aper::AperCodecError;
+
+use crate::ResponseAction;
 
 impl<T: aper::AperCodec<Output = T>> AperSerde for T {
     fn into_bytes(self) -> Result<Vec<u8>, AperCodecError> {
@@ -89,7 +91,7 @@ pub trait RequestProvider<P: Procedure + ?Sized>: Send + Sync {
         &self,
         r: P::Request,
         logger: &Logger,
-    ) -> Result<P::Success, RequestError<P::Failure>> {
+    ) -> Result<ResponseAction<P::Success>, RequestError<P::Failure>> {
         debug!(logger, "Received unimplemented request {:?}", r);
         Err(RequestError::Other("Not implemented".to_string()))
     }
@@ -107,19 +109,31 @@ pub trait IndicationHandler<I: Indication + ?Sized>: Send + Sync {
 #[async_trait]
 pub trait InterfaceProvider: Send + Sync {
     type TopPdu: AperSerde;
-    async fn route_request(&self, p: Self::TopPdu, logger: &Logger) -> Option<Self::TopPdu>;
+    async fn route_request(
+        &self,
+        p: Self::TopPdu,
+        logger: &Logger,
+    ) -> Option<ResponseAction<Self::TopPdu>>;
 }
 
 /// Trait representing the ability to handle and respond to a request in wire format.
 #[async_trait]
 pub trait RequestMessageHandler: Send + Sync {
-    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Option<Vec<u8>>;
+    async fn handle_request(
+        &self,
+        message: &[u8],
+        logger: &Logger,
+    ) -> Option<ResponseAction<Vec<u8>>>;
 }
 
 // An interface provider is a request message handler.
 #[async_trait]
 impl<T: AperSerde + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessageHandler for I {
-    async fn handle_request(&self, message: &[u8], logger: &Logger) -> Option<Vec<u8>> {
+    async fn handle_request(
+        &self,
+        message: &[u8],
+        logger: &Logger,
+    ) -> Option<ResponseAction<Vec<u8>>> {
         let pdu = match T::from_bytes(message) {
             Ok(p) => p,
             Err(e) => {
@@ -130,11 +144,11 @@ impl<T: AperSerde + Send + Sync, I: InterfaceProvider<TopPdu = T>> RequestMessag
         match self
             .route_request(pdu, logger)
             .await
-            .map(|x| x.into_bytes())
+            .map(|(m, a)| (m.into_bytes(), a))
         {
             None => None,
-            Some(Ok(bytes)) => Some(bytes),
-            Some(Err(e)) => {
+            Some((Ok(bytes), a)) => Some((bytes, a)),
+            Some((Err(e), _)) => {
                 warn!(logger, "ASN.1 encode failed - {:?}", e);
                 None
             }

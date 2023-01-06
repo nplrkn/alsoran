@@ -1214,6 +1214,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-std",
+ "async-trait",
  "common",
  "gnb-cu-cp",
  "gnb-cu-cp-coordinator",

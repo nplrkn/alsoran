@@ -3,7 +3,7 @@
 use crate::mock::{Mock, Pdu, ReceivedPdu};
 use anyhow::{anyhow, bail, Result};
 use bitvec::prelude::*;
-use net::{AperSerde, Binding};
+use net::{AperSerde, Binding, TransportProvider};
 use ngap::*;
 use slog::{debug, info, o, Logger};
 use std::ops::Deref;
@@ -18,7 +18,7 @@ pub struct MockAmf {
 pub struct UeContext {
     ue_id: u32,
     ran_ue_ngap_id: RanUeNgapId,
-    binding: Binding,
+    pub binding: Binding,
 }
 
 impl Deref for MockAmf {
@@ -161,7 +161,11 @@ impl MockAmf {
                 Ok(UeContext {
                     ue_id,
                     ran_ue_ngap_id,
-                    binding: Binding { assoc_id },
+                    binding: self
+                        .mock
+                        .transport
+                        .new_ue_binding_from_assoc(&assoc_id)
+                        .await?,
                 })
             }
             _ => Err(anyhow!("Not an initial UE message")),
@@ -358,5 +362,11 @@ impl MockAmf {
                 x
             ),
         }
+    }
+}
+
+impl UeContext {
+    pub fn binding_remote_ip(&self) -> &String {
+        &self.binding.remote_ip
     }
 }
