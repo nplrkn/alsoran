@@ -2601,9 +2601,20 @@ pub struct ServedPlmnsItem {
 
 impl ServedPlmnsItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (_optionals, _extensions_present) =
-            aper::decode::decode_sequence_header(data, true, 1)?;
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let plmn_identity = PlmnIdentity::decode(data)?;
+
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[0] {
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {
+                let _ignored_protocol_extension_id =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ignored_criticality_ = Criticality::decode(data)?;
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }
+        };
 
         Ok(Self { plmn_identity })
     }
@@ -9380,10 +9391,16 @@ impl FreqBandNrItem {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
             aper::decode::decode_sequence_header(data, true, 1)?;
+        println!("after sequence header");
+        data.dump();
         let freq_band_indicator_nr =
             aper::decode::decode_integer(data, Some(1), Some(1024), true)?.0 as u16;
+        println!("after freq band indicator");
+        data.dump();
         let supported_sul_band_list = {
             let length = aper::decode::decode_length_determinent(data, Some(0), Some(32), false)?;
+            println!("after length determinent");
+            data.dump();
             let mut items = vec![];
             for _ in 0..length {
                 items.push(SupportedSulFreqBandItem::decode(data)?);

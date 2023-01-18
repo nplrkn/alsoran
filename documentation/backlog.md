@@ -1,6 +1,6 @@
 # NEXT UP
 ## O-RAN O-DU interop
-- ASN.1 decode failed - Error { msg: "For a signed number in 2's compliment form, requested bits 512 not supported!", context: ["FreqBandNrItem", "NrFreqInfo", "FddInfo", "NrModeInfo", "ServedCellInformation", "GnbDuServedCellsItem", "GnbDuServedCellsList", "F1SetupRequest", "InitiatingMessage", "F1apPdu"] }
+- ASN.1 decoder should cope protocol extensions being present.
 
 
 ## SCALE OUT / MULTIPLE TNLA
