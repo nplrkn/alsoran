@@ -179,12 +179,33 @@ class StructFieldsFrom(Interpreter):
 """
         self.optional_idx += 1
 
+    def extension_container(self, tree):
+        self.fields_from += f"""\
+
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[{self.optional_idx}] {{
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {{
+                let (protocol_extension_id, _) =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                if matches!(Criticality::decode(data)?, Criticality::Reject) {{
+                    return Err(AperCodecError::new(format!(
+                        "Unknown protocol extension {{}} with criticality reject",
+                        protocol_extension_id
+                    )));
+                }}
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }}
+        }};
+"""
+        self.optional_idx += 1
+
 
 class StructFindOptionals(Interpreter):
     def __init__(self):
         self.find_optionals = ""
         self.num_optionals = 0
-        self.has_extension_container = False
 
     def optional_field(self, tree):
         name = tree.children[0]
@@ -198,7 +219,6 @@ class StructFindOptionals(Interpreter):
         optionals.set({self.num_optionals}, false);
 """
         self.num_optionals += 1
-        self.has_extension_container = True
 
 
 class EnumFields(Interpreter):
@@ -894,7 +914,7 @@ impl {orig_name} {{
         # fields_to_interpreter.visit(tree.children[1])
         num_optionals = find_opt_interpreter.num_optionals
         optionals_var = "optionals"
-        if num_optionals == 0 or (num_optionals == 1 and find_opt_interpreter.has_extension_container):
+        if num_optionals == 0:
             optionals_var = "_optionals"
 
         self.outfile += f"""
@@ -1276,6 +1296,23 @@ impl WlanMeasurementConfiguration {
             Some(WlanRtt::decode(data)?)
         } else {
             None
+        };
+
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[1] {
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {
+                let (protocol_extension_id, _) =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                if matches!(Criticality::decode(data)?, Criticality::Reject) {
+                    return Err(AperCodecError::new(format!(
+                        "Unknown protocol extension {} with criticality reject",
+                        protocol_extension_id
+                    )));
+                }
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }
         };
 
         Ok(Self {
@@ -2083,6 +2120,23 @@ impl GnbCuSystemInformation {
             items
         };
 
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[0] {
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {
+                let (protocol_extension_id, _) =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                if matches!(Criticality::decode(data)?, Criticality::Reject) {
+                    return Err(AperCodecError::new(format!(
+                        "Unknown protocol extension {} with criticality reject",
+                        protocol_extension_id
+                    )));
+                }
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }
+        };
+
         Ok(Self {
             sibtypetobeupdatedlist,
         })
@@ -2275,6 +2329,23 @@ impl LocationMeasurementIndicationIEs {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
         let measurement_indication = SetupRelease::<LocationMeasurementInfo>::decode(data)?;
+
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[0] {
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {
+                let (protocol_extension_id, _) =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                if matches!(Criticality::decode(data)?, Criticality::Reject) {
+                    return Err(AperCodecError::new(format!(
+                        "Unknown protocol extension {} with criticality reject",
+                        protocol_extension_id
+                    )));
+                }
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }
+        };
 
         Ok(Self {
             measurement_indication,

@@ -9844,13 +9844,12 @@ pub struct PrivateMessage {}
 impl PrivateMessage {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
         let (_optionals, _extensions_present) =
-            aper::decode::decode_sequence_header(data, true, 1)?;
+            aper::decode::decode_sequence_header(data, true, 0)?;
 
         Ok(Self {})
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        let mut optionals = BitVec::new();
-        optionals.push(false);
+        let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
 
@@ -15872,6 +15871,23 @@ impl SemipersistentSrs {
             None
         };
 
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[1] {
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {
+                let (protocol_extension_id, _) =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                if matches!(Criticality::decode(data)?, Criticality::Reject) {
+                    return Err(AperCodecError::new(format!(
+                        "Unknown protocol extension {} with criticality reject",
+                        protocol_extension_id
+                    )));
+                }
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }
+        };
+
         Ok(Self {
             srs_resource_set_id,
             srs_spatial_relation,
@@ -15918,6 +15934,23 @@ impl AperiodicSrs {
             Some(SrsResourceTrigger::decode(data)?)
         } else {
             None
+        };
+
+        // Skip over the ProtocolExtensionContainer if present.
+        if optionals[1] {
+            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
+            for _ in 0..num_fields {
+                let (protocol_extension_id, _) =
+                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                if matches!(Criticality::decode(data)?, Criticality::Reject) {
+                    return Err(AperCodecError::new(format!(
+                        "Unknown protocol extension {} with criticality reject",
+                        protocol_extension_id
+                    )));
+                }
+                data.decode_align()?;
+                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+            }
         };
 
         Ok(Self {
