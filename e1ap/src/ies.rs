@@ -11,13 +11,15 @@ use num_enum::TryFromPrimitive;
 #[derive(Clone, Debug)]
 pub enum ActivityInformation {
     DrbActivityList(DrbActivityList),
+
     PduSessionResourceActivityList(PduSessionResourceActivityList),
+
     UeActivity(UeActivity),
 }
 
 impl ActivityInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -29,24 +31,23 @@ impl ActivityInformation {
                 PduSessionResourceActivityList::decode(data)?,
             )),
             2 => Ok(Self::UeActivity(UeActivity::decode(data)?)),
-            3 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::DrbActivityList(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::PduSessionResourceActivityList(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
+
             Self::UeActivity(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
                 x.encode(data)
             }
         }
@@ -69,7 +70,9 @@ impl AperCodec for ActivityInformation {
 #[repr(u8)]
 pub enum ActivityNotificationLevel {
     Drb,
+
     PduSession,
+
     Ue,
 }
 
@@ -133,6 +136,7 @@ impl AperCodec for AdditionalHandoverInfo {
 #[repr(u8)]
 pub enum AdditionalPdcPduplicationInformation {
     Three,
+
     Four,
 }
 
@@ -286,23 +290,24 @@ impl AlternativeQosParaSetItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[4] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[4] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             alternative_qos_parameter_index,
             guaranteed_flow_bit_rate_dl,
@@ -361,6 +366,7 @@ impl AperCodec for AlternativeQosParaSetItem {
 #[repr(u8)]
 pub enum BearerContextStatusChange {
     Suspend,
+
     Resume,
 }
 
@@ -424,14 +430,17 @@ impl AperCodec for BitRate {
 #[derive(Clone, Debug)]
 pub enum Cause {
     RadioNetwork(CauseRadioNetwork),
+
     Transport(CauseTransport),
+
     Protocol(CauseProtocol),
+
     Misc(CauseMisc),
 }
 
 impl Cause {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -442,28 +451,28 @@ impl Cause {
             1 => Ok(Self::Transport(CauseTransport::decode(data)?)),
             2 => Ok(Self::Protocol(CauseProtocol::decode(data)?)),
             3 => Ok(Self::Misc(CauseMisc::decode(data)?)),
-            4 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::RadioNetwork(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::Transport(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.encode(data)
             }
+
             Self::Protocol(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.encode(data)
             }
+
             Self::Misc(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
                 x.encode(data)
             }
         }
@@ -485,9 +494,13 @@ impl AperCodec for Cause {
 #[repr(u8)]
 pub enum CauseMisc {
     ControlProcessingOverload,
+
     NotEnoughUserPlaneProcessingResources,
+
     HardwareFailure,
+
     OmIntervention,
+
     Unspecified,
 }
 
@@ -519,11 +532,17 @@ impl AperCodec for CauseMisc {
 #[repr(u8)]
 pub enum CauseProtocol {
     TransferSyntaxError,
+
     AbstractSyntaxErrorReject,
+
     AbstractSyntaxErrorIgnoreAndNotify,
+
     MessageNotCompatibleWithReceiverState,
+
     SemanticError,
+
     AbstractSyntaxErrorFalselyConstructedMessage,
+
     Unspecified,
 }
 
@@ -556,29 +575,53 @@ impl AperCodec for CauseProtocol {
 #[repr(u8)]
 pub enum CauseRadioNetwork {
     Unspecified,
+
     UnknownOrAlreadyAllocatedGnbCuCpUeE1apId,
+
     UnknownOrAlreadyAllocatedGnbCuUpUeE1apId,
+
     UnknownOrInconsistentPairOfUeE1apId,
+
     InteractionWithOtherProcedure,
+
     PpdcpCountWrapAround,
+
     NotSupportedQciValue,
+
     NotSupported5qiValue,
+
     EncryptionAlgorithmsNotSupported,
+
     IntegrityProtectionAlgorithmsNotSupported,
+
     UpIntegrityProtectionNotPossible,
+
     UpConfidentialityProtectionNotPossible,
+
     MultiplePduSessionIdInstances,
+
     UnknownPduSessionId,
+
     MultipleQosFlowIdInstances,
+
     UnknownQosFlowId,
+
     MultipleDrbIdInstances,
+
     UnknownDrbId,
+
     InvalidQosCombination,
+
     ProcedureCancelled,
+
     NormalRelease,
+
     NoRadioResourcesAvailable,
+
     ActionDesirableForRadioReasons,
+
     ResourcesNotAvailableForTheSlice,
+
     PdcpConfigurationNotSupported,
 }
 
@@ -611,6 +654,7 @@ impl AperCodec for CauseRadioNetwork {
 #[repr(u8)]
 pub enum CauseTransport {
     Unspecified,
+
     TransportResourceUnavailable,
 }
 
@@ -680,6 +724,7 @@ pub struct CellGroupInformationItem {
     pub ul_configuration: Option<UlConfiguration>,
     pub dl_tx_stop: Option<DlTxStop>,
     pub rat_type: Option<RatType>,
+    pub number_of_tunnels: Option<NumberOfTunnels>,
 }
 
 impl CellGroupInformationItem {
@@ -702,28 +747,32 @@ impl CellGroupInformationItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut number_of_tunnels: Option<NumberOfTunnels> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    127 => number_of_tunnels = Some(NumberOfTunnels::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             cell_group_id,
             ul_configuration,
             dl_tx_stop,
             rat_type,
+            number_of_tunnels,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -847,8 +896,11 @@ impl AperCodec for NumberOfTunnels {
 #[repr(u8)]
 pub enum CipheringAlgorithm {
     Nea0,
+
     C128Nea1,
+
     C128Nea2,
+
     C128Nea3,
 }
 
@@ -881,7 +933,9 @@ impl AperCodec for CipheringAlgorithm {
 #[repr(u8)]
 pub enum CnSupport {
     CEpc,
+
     C5gc,
+
     Both,
 }
 
@@ -939,7 +993,9 @@ impl AperCodec for CommonNetworkInstance {
 #[repr(u8)]
 pub enum ConfidentialityProtectionIndication {
     Required,
+
     Preferred,
+
     NotNeeded,
 }
 
@@ -972,6 +1028,7 @@ impl AperCodec for ConfidentialityProtectionIndication {
 #[repr(u8)]
 pub enum ConfidentialityProtectionResult {
     Performed,
+
     NotPerformed,
 }
 
@@ -1007,7 +1064,7 @@ pub enum CpTnlInformation {
 
 impl CpTnlInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -1017,16 +1074,13 @@ impl CpTnlInformation {
             0 => Ok(Self::EndpointIpAddress(TransportLayerAddress::decode(
                 data,
             )?)),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EndpointIpAddress(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -1083,23 +1137,24 @@ impl CriticalityDiagnostics {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[5] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[5] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             procedure_code,
             triggering_message,
@@ -1195,23 +1250,24 @@ impl DapsRequestInfo {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let daps_indicator = DapsIndicator::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { daps_indicator })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1253,23 +1309,24 @@ impl DataForwardingInformationRequest {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             data_forwarding_request,
             qos_flows_forwarded_on_fwd_tunnels,
@@ -1306,6 +1363,8 @@ impl AperCodec for DataForwardingInformationRequest {
 pub struct DataForwardingInformation {
     pub ul_data_forwarding: Option<UpTnlInformation>,
     pub dl_data_forwarding: Option<UpTnlInformation>,
+    pub data_forwardingto_ng_ran_qos_flow_information_list:
+        Option<DataForwardingtoNgRanQosFlowInformationList>,
 }
 
 impl DataForwardingInformation {
@@ -1322,26 +1381,35 @@ impl DataForwardingInformation {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut data_forwardingto_ng_ran_qos_flow_information_list: Option<
+            DataForwardingtoNgRanQosFlowInformationList,
+        > = None;
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    136 => {
+                        data_forwardingto_ng_ran_qos_flow_information_list =
+                            Some(DataForwardingtoNgRanQosFlowInformationList::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             ul_data_forwarding,
             dl_data_forwarding,
+            data_forwardingto_ng_ran_qos_flow_information_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -1378,7 +1446,9 @@ impl AperCodec for DataForwardingInformation {
 #[repr(u8)]
 pub enum DataForwardingRequest {
     Ul,
+
     Dl,
+
     Both,
 }
 
@@ -1456,23 +1526,24 @@ impl DataForwardingtoEutranInformationListItem {
         let data_forwarding_tunnel_information = UpTnlInformation::decode(data)?;
         let qos_flows_to_be_forwarded_list = QosFlowsToBeForwardedList::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             data_forwarding_tunnel_information,
             qos_flows_to_be_forwarded_list,
@@ -1523,23 +1594,24 @@ impl DataUsagePerPduSessionReport {
             items
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             secondary_rat_type,
             pdu_session_timed_report_list,
@@ -1635,23 +1707,24 @@ impl DataUsagePerQosFlowItem {
             items
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
             secondary_rat_type,
@@ -1742,23 +1815,24 @@ impl DataUsageReportItem {
         let rat_type = RatType::decode(data)?;
         let drb_usage_report_list = DrbUsageReportList::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             rat_type,
@@ -1794,6 +1868,7 @@ impl AperCodec for DataUsageReportItem {
 #[repr(u8)]
 pub enum DefaultDrb {
     True,
+
     False,
 }
 
@@ -1856,20 +1931,35 @@ impl AperCodec for DirectForwardingPathAvailability {
 #[repr(u8)]
 pub enum DiscardTimer {
     Ms10,
+
     Ms20,
+
     Ms30,
+
     Ms40,
+
     Ms50,
+
     Ms60,
+
     Ms75,
+
     Ms100,
+
     Ms150,
+
     Ms200,
+
     Ms250,
+
     Ms300,
+
     Ms500,
+
     Ms750,
+
     Ms1500,
+
     Infinity,
 }
 
@@ -1908,23 +1998,24 @@ impl DlDiscarding {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let dl_discarding_count_val = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             dl_discarding_count_val,
         })
@@ -1963,23 +2054,24 @@ impl DluptnlAddressToUpdateItem {
         let old_tnl_adress = TransportLayerAddress::decode(data)?;
         let new_tnl_adress = TransportLayerAddress::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             old_tnl_adress,
             new_tnl_adress,
@@ -2013,6 +2105,7 @@ impl AperCodec for DluptnlAddressToUpdateItem {
 #[repr(u8)]
 pub enum DlTxStop {
     Stop,
+
     Resume,
 }
 
@@ -2044,6 +2137,7 @@ impl AperCodec for DlTxStop {
 #[repr(u8)]
 pub enum DrbActivity {
     Active,
+
     NotActive,
 }
 
@@ -2118,23 +2212,24 @@ impl DrbActivityItem {
         let drb_id = DrbId::decode(data)?;
         let drb_activity = DrbActivity::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             drb_activity,
@@ -2215,23 +2310,24 @@ impl DrbConfirmModifiedItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             cell_group_information,
@@ -2315,23 +2411,24 @@ impl DrbConfirmModifiedItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             cell_group_information,
@@ -2411,23 +2508,24 @@ impl DrbFailedItemEutran {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2501,23 +2599,24 @@ impl DrbFailedModItemEutran {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2591,23 +2690,24 @@ impl DrbFailedItemNgRan {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2681,23 +2781,24 @@ impl DrbFailedModItemNgRan {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2771,23 +2872,24 @@ impl DrbFailedToModifyItemEutran {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2861,23 +2963,24 @@ impl DrbFailedToModifyItemNgRan {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2980,23 +3083,24 @@ impl DrbMeasurementResultsInformationItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             ul_d1_result,
@@ -3092,23 +3196,24 @@ impl DrbModifiedItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             s1_dl_up_tnl_information,
@@ -3193,6 +3298,8 @@ pub struct DrbModifiedItemNgRan {
     pub pdcp_sn_status_information: Option<PdcpSnStatusInformation>,
     pub flow_setup_list: Option<QosFlowList>,
     pub flow_failed_list: Option<QosFlowFailedList>,
+    pub early_forwarding_count_info: Option<EarlyForwardingCountInfo>,
+    pub old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList>,
 }
 
 impl DrbModifiedItemNgRan {
@@ -3220,29 +3327,38 @@ impl DrbModifiedItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[4] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut early_forwarding_count_info: Option<EarlyForwardingCountInfo> = None;
+        let mut old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList> = None;
 
+        if optionals[4] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    123 => {
+                        early_forwarding_count_info = Some(EarlyForwardingCountInfo::decode(data)?)
+                    }
+                    71 => old_qos_flow_map_u_lendmarkerexpected = Some(QosFlowList::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             ul_up_transport_parameters,
             pdcp_sn_status_information,
             flow_setup_list,
             flow_failed_list,
+            early_forwarding_count_info,
+            old_qos_flow_map_u_lendmarkerexpected,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -3325,23 +3441,24 @@ impl DrbRemovedItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             drb_released_in_session,
@@ -3451,23 +3568,24 @@ impl DrbRequiredToModifyItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             s1_dl_up_tnl_information,
@@ -3573,23 +3691,24 @@ impl DrbRequiredToModifyItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             gnb_cu_up_cell_group_related_configuration,
@@ -3693,23 +3812,24 @@ impl DrbSetupItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             s1_dl_up_tnl_information,
@@ -3806,23 +3926,24 @@ impl DrbSetupModItemEutran {
         };
         let ul_up_transport_parameters = UpParameters::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             s1_dl_up_tnl_information,
@@ -3920,23 +4041,24 @@ impl DrbSetupItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             drb_data_forwarding_information_response,
@@ -4039,23 +4161,24 @@ impl DrbSetupModItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             drb_data_forwarding_information_response,
@@ -4119,23 +4242,24 @@ impl DrbStatusItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             pdcp_dl_count,
@@ -4222,23 +4346,24 @@ impl DrbsSubjectToCounterCheckItemEutran {
         let pdcp_ul_count = PdcpCount::decode(data)?;
         let pdcp_dl_count = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             pdcp_ul_count,
@@ -4321,23 +4446,24 @@ impl DrbsSubjectToCounterCheckItemNgRan {
         let pdcp_ul_count = PdcpCount::decode(data)?;
         let pdcp_dl_count = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             drb_id,
@@ -4418,23 +4544,24 @@ impl DrbsSubjectToEarlyForwardingItem {
         let drb_id = DrbId::decode(data)?;
         let dl_count_value = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             dl_count_value,
@@ -4576,23 +4703,24 @@ impl DrbToModifyItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[11] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[11] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             pdcp_configuration,
@@ -4724,6 +4852,10 @@ pub struct DrbToModifyItemNgRan {
     pub cell_group_to_remove: Option<CellGroupInformation>,
     pub flow_mapping_information: Option<QosFlowQosParameterList>,
     pub drb_inactivity_timer: Option<InactivityTimer>,
+    pub old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList>,
+    pub drb_qos: Option<QosFlowLevelQosParameters>,
+    pub early_forwarding_count_req: Option<EarlyForwardingCountReq>,
+    pub early_forwarding_count_info: Option<EarlyForwardingCountInfo>,
 }
 
 impl DrbToModifyItemNgRan {
@@ -4787,23 +4919,36 @@ impl DrbToModifyItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[11] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut old_qos_flow_map_u_lendmarkerexpected: Option<QosFlowList> = None;
+        let mut drb_qos: Option<QosFlowLevelQosParameters> = None;
+        let mut early_forwarding_count_req: Option<EarlyForwardingCountReq> = None;
+        let mut early_forwarding_count_info: Option<EarlyForwardingCountInfo> = None;
 
+        if optionals[11] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    71 => old_qos_flow_map_u_lendmarkerexpected = Some(QosFlowList::decode(data)?),
+                    72 => drb_qos = Some(QosFlowLevelQosParameters::decode(data)?),
+                    122 => {
+                        early_forwarding_count_req = Some(EarlyForwardingCountReq::decode(data)?)
+                    }
+                    123 => {
+                        early_forwarding_count_info = Some(EarlyForwardingCountInfo::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             sdap_configuration,
@@ -4817,6 +4962,10 @@ impl DrbToModifyItemNgRan {
             cell_group_to_remove,
             flow_mapping_information,
             drb_inactivity_timer,
+            old_qos_flow_map_u_lendmarkerexpected,
+            drb_qos,
+            early_forwarding_count_req,
+            early_forwarding_count_info,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -4931,23 +5080,24 @@ impl DrbToRemoveItemEutran {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let drb_id = DrbId::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5020,23 +5170,24 @@ impl DrbRequiredToRemoveItemEutran {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5108,23 +5259,24 @@ impl DrbToRemoveItemNgRan {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let drb_id = DrbId::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5197,23 +5349,24 @@ impl DrbRequiredToRemoveItemNgRan {
         let drb_id = DrbId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { drb_id, cause })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5317,23 +5470,24 @@ impl DrbToSetupItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[4] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[4] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             pdcp_configuration,
@@ -5460,23 +5614,24 @@ impl DrbToSetupModItemEutran {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             pdcp_configuration,
@@ -5572,6 +5727,9 @@ pub struct DrbToSetupItemNgRan {
     pub drb_data_forwarding_information_request: Option<DataForwardingInformationRequest>,
     pub drb_inactivity_timer: Option<InactivityTimer>,
     pub pdcp_sn_status_information: Option<PdcpSnStatusInformation>,
+    pub drb_qos: Option<QosFlowLevelQosParameters>,
+    pub daps_request_info: Option<DapsRequestInfo>,
+    pub ignore_mapping_rule_indication: Option<IgnoreMappingRuleIndication>,
 }
 
 impl DrbToSetupItemNgRan {
@@ -5598,23 +5756,33 @@ impl DrbToSetupItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut drb_qos: Option<QosFlowLevelQosParameters> = None;
+        let mut daps_request_info: Option<DapsRequestInfo> = None;
+        let mut ignore_mapping_rule_indication: Option<IgnoreMappingRuleIndication> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    72 => drb_qos = Some(QosFlowLevelQosParameters::decode(data)?),
+                    120 => daps_request_info = Some(DapsRequestInfo::decode(data)?),
+                    138 => {
+                        ignore_mapping_rule_indication =
+                            Some(IgnoreMappingRuleIndication::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             sdap_configuration,
@@ -5624,6 +5792,9 @@ impl DrbToSetupItemNgRan {
             drb_data_forwarding_information_request,
             drb_inactivity_timer,
             pdcp_sn_status_information,
+            drb_qos,
+            daps_request_info,
+            ignore_mapping_rule_indication,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5710,6 +5881,9 @@ pub struct DrbToSetupModItemNgRan {
     pub drb_data_forwarding_information_request: Option<DataForwardingInformationRequest>,
     pub drb_inactivity_timer: Option<InactivityTimer>,
     pub pdcp_sn_status_information: Option<PdcpSnStatusInformation>,
+    pub drb_qos: Option<QosFlowLevelQosParameters>,
+    pub ignore_mapping_rule_indication: Option<IgnoreMappingRuleIndication>,
+    pub daps_request_info: Option<DapsRequestInfo>,
 }
 
 impl DrbToSetupModItemNgRan {
@@ -5736,23 +5910,33 @@ impl DrbToSetupModItemNgRan {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut drb_qos: Option<QosFlowLevelQosParameters> = None;
+        let mut ignore_mapping_rule_indication: Option<IgnoreMappingRuleIndication> = None;
+        let mut daps_request_info: Option<DapsRequestInfo> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    72 => drb_qos = Some(QosFlowLevelQosParameters::decode(data)?),
+                    138 => {
+                        ignore_mapping_rule_indication =
+                            Some(IgnoreMappingRuleIndication::decode(data)?)
+                    }
+                    120 => daps_request_info = Some(DapsRequestInfo::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_id,
             sdap_configuration,
@@ -5762,6 +5946,9 @@ impl DrbToSetupModItemNgRan {
             drb_data_forwarding_information_request,
             drb_inactivity_timer,
             pdcp_sn_status_information,
+            drb_qos,
+            ignore_mapping_rule_indication,
+            daps_request_info,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -5854,23 +6041,24 @@ impl DrbUsageReportItem {
         let usage_count_ul = aper::decode::decode_integer(data, Some(0), None, false)?.0 as u64;
         let usage_count_dl = aper::decode::decode_integer(data, Some(0), None, false)?.0 as u64;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             start_time_stamp,
             end_time_stamp,
@@ -5936,6 +6124,7 @@ impl AperCodec for DrbUsageReportItem {
 #[repr(u8)]
 pub enum DuplicationActivation {
     Active,
+
     Inactive,
 }
 
@@ -5973,6 +6162,9 @@ pub struct Dynamic5qiDescriptor {
     pub delay_critical: Option<DelayCritical>,
     pub averaging_window: Option<AveragingWindow>,
     pub max_data_burst_volume: Option<MaxDataBurstVolume>,
+    pub extended_packet_delay_budget: Option<ExtendedPacketDelayBudget>,
+    pub cn_packet_delay_budget_downlink: Option<ExtendedPacketDelayBudget>,
+    pub cn_packet_delay_budget_uplink: Option<ExtendedPacketDelayBudget>,
 }
 
 impl Dynamic5qiDescriptor {
@@ -6003,23 +6195,39 @@ impl Dynamic5qiDescriptor {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[4] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut extended_packet_delay_budget: Option<ExtendedPacketDelayBudget> = None;
+        let mut cn_packet_delay_budget_downlink: Option<ExtendedPacketDelayBudget> = None;
+        let mut cn_packet_delay_budget_uplink: Option<ExtendedPacketDelayBudget> = None;
 
+        if optionals[4] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    103 => {
+                        extended_packet_delay_budget =
+                            Some(ExtendedPacketDelayBudget::decode(data)?)
+                    }
+                    101 => {
+                        cn_packet_delay_budget_downlink =
+                            Some(ExtendedPacketDelayBudget::decode(data)?)
+                    }
+                    102 => {
+                        cn_packet_delay_budget_uplink =
+                            Some(ExtendedPacketDelayBudget::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_priority_level,
             packet_delay_budget,
@@ -6028,6 +6236,9 @@ impl Dynamic5qiDescriptor {
             delay_critical,
             averaging_window,
             max_data_burst_volume,
+            extended_packet_delay_budget,
+            cn_packet_delay_budget_downlink,
+            cn_packet_delay_budget_uplink,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -6105,12 +6316,13 @@ impl AperCodec for DataDiscardRequired {
 #[derive(Clone, Debug)]
 pub enum EarlyForwardingCountInfo {
     FirstDlCount(FirstDlCount),
+
     DlDiscardingCount(DlDiscarding),
 }
 
 impl EarlyForwardingCountInfo {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -6119,20 +6331,18 @@ impl EarlyForwardingCountInfo {
         match idx {
             0 => Ok(Self::FirstDlCount(FirstDlCount::decode(data)?)),
             1 => Ok(Self::DlDiscardingCount(DlDiscarding::decode(data)?)),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::FirstDlCount(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::DlDiscardingCount(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -6155,6 +6365,7 @@ impl AperCodec for EarlyForwardingCountInfo {
 #[repr(u8)]
 pub enum EarlyForwardingCountReq {
     FirstDlCount,
+
     DlDiscarding,
 }
 
@@ -6194,23 +6405,24 @@ impl EhcCommonParameters {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let ehc_cid_length = EhcCidLength::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { ehc_cid_length })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -6239,6 +6451,7 @@ impl AperCodec for EhcCommonParameters {
 #[derive(Clone, Debug)]
 pub struct EhcDownlinkParameters {
     pub drb_continue_ehc_dl: DrbContinueEhcDl,
+    pub max_cidehcdl: Option<MaxCidehcdl>,
 }
 
 impl EhcDownlinkParameters {
@@ -6247,25 +6460,29 @@ impl EhcDownlinkParameters {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let drb_continue_ehc_dl = DrbContinueEhcDl::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut max_cidehcdl: Option<MaxCidehcdl> = None;
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    137 => max_cidehcdl = Some(MaxCidehcdl::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_continue_ehc_dl,
+            max_cidehcdl,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -6302,23 +6519,24 @@ impl EhcUplinkParameters {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let drb_continue_ehc_ul = DrbContinueEhcUl::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             drb_continue_ehc_ul,
         })
@@ -6369,23 +6587,24 @@ impl EhcParameters {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             ehc_common,
             ehc_downlink,
@@ -6462,23 +6681,24 @@ impl EndpointIpAddressAndPort {
         let endpoint_ip_address = TransportLayerAddress::decode(data)?;
         let port_number = PortNumber::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             endpoint_ip_address,
             port_number,
@@ -6522,23 +6742,24 @@ impl EutranAllocationAndRetentionPriority {
         let pre_emption_capability = PreEmptionCapability::decode(data)?;
         let pre_emption_vulnerability = PreEmptionVulnerability::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             priority_level,
             pre_emption_capability,
@@ -6642,23 +6863,24 @@ impl EutranQosSupportItem {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let eutran_qos = EutranQos::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { eutran_qos })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -6703,23 +6925,24 @@ impl EutranQos {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qci,
             eutran_allocation_and_retention_priority,
@@ -6800,23 +7023,24 @@ impl FirstDlCount {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let first_dl_count_val = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { first_dl_count_val })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -6889,23 +7113,24 @@ impl ExtendedGnbCuCpName {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             gnb_cu_cp_name_visible_string,
             gnb_cu_cp_name_utf8_string,
@@ -7112,23 +7337,24 @@ impl GnbCuUpCellGroupRelatedConfigurationItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             cell_group_id,
             up_tnl_information,
@@ -7243,23 +7469,24 @@ impl ExtendedGnbCuUpName {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             gnb_cu_up_name_visible_string,
             gnb_cu_up_name_utf8_string,
@@ -7396,23 +7623,24 @@ impl GnbCuCpTnlaSetupItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let tnl_association_transport_layer_address = CpTnlInformation::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tnl_association_transport_layer_address,
         })
@@ -7453,23 +7681,24 @@ impl GnbCuCpTnlaFailedToSetupItem {
         let tnl_association_transport_layer_address = CpTnlInformation::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tnl_association_transport_layer_address,
             cause,
@@ -7512,23 +7741,24 @@ impl GnbCuCpTnlaToAddItem {
         let tnl_association_transport_layer_address = CpTnlInformation::decode(data)?;
         let tnl_association_usage = TnlAssociationUsage::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tnl_association_transport_layer_address,
             tnl_association_usage,
@@ -7561,6 +7791,7 @@ impl AperCodec for GnbCuCpTnlaToAddItem {
 #[derive(Clone, Debug)]
 pub struct GnbCuCpTnlaToRemoveItem {
     pub tnl_association_transport_layer_address: CpTnlInformation,
+    pub tnl_association_transport_layer_address_gnb_cu_up: Option<CpTnlInformation>,
 }
 
 impl GnbCuCpTnlaToRemoveItem {
@@ -7569,25 +7800,32 @@ impl GnbCuCpTnlaToRemoveItem {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let tnl_association_transport_layer_address = CpTnlInformation::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut tnl_association_transport_layer_address_gnb_cu_up: Option<CpTnlInformation> = None;
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    75 => {
+                        tnl_association_transport_layer_address_gnb_cu_up =
+                            Some(CpTnlInformation::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tnl_association_transport_layer_address,
+            tnl_association_transport_layer_address_gnb_cu_up,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -7630,23 +7868,24 @@ impl GnbCuCpTnlaToUpdateItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tnl_association_transport_layer_address,
             tnl_association_usage,
@@ -7696,23 +7935,24 @@ impl GnbCuUpTnlaToRemoveItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tnl_association_transport_layer_address,
             tnl_association_transport_layer_address_gnb_cu_cp,
@@ -7764,23 +8004,24 @@ impl GbrQosInformation {
         let e_rab_guaranteed_bitrate_dl = BitRate::decode(data)?;
         let e_rab_guaranteed_bitrate_ul = BitRate::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             e_rab_maximum_bitrate_dl,
             e_rab_maximum_bitrate_ul,
@@ -7822,6 +8063,7 @@ pub struct GbrQosFlowInformation {
     pub guaranteed_flow_bit_rate_uplink: BitRate,
     pub max_packet_loss_rate_downlink: Option<MaxPacketLossRate>,
     pub max_packet_loss_rate_uplink: Option<MaxPacketLossRate>,
+    pub alternative_qos_para_set_list: Option<AlternativeQosParaSetList>,
 }
 
 impl GbrQosFlowInformation {
@@ -7842,23 +8084,29 @@ impl GbrQosFlowInformation {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut alternative_qos_para_set_list: Option<AlternativeQosParaSetList> = None;
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    124 => {
+                        alternative_qos_para_set_list =
+                            Some(AlternativeQosParaSetList::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             max_flow_bit_rate_downlink,
             max_flow_bit_rate_uplink,
@@ -7866,6 +8114,7 @@ impl GbrQosFlowInformation {
             guaranteed_flow_bit_rate_uplink,
             max_packet_loss_rate_downlink,
             max_packet_loss_rate_uplink,
+            alternative_qos_para_set_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -7974,23 +8223,24 @@ impl GtptlaItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let gtp_transport_layer_addresses = TransportLayerAddress::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             gtp_transport_layer_addresses,
         })
@@ -8029,23 +8279,24 @@ impl GtpTunnel {
         let transport_layer_address = TransportLayerAddress::decode(data)?;
         let gtp_teid = GtpTeid::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             transport_layer_address,
             gtp_teid,
@@ -8078,6 +8329,7 @@ impl AperCodec for GtpTunnel {
 #[repr(u8)]
 pub enum GnbCuUpOverloadInformation {
     Overloaded,
+
     NotOverloaded,
 }
 
@@ -8184,23 +8436,24 @@ impl HwCapacityIndicator {
         let available_throughput =
             aper::decode::decode_integer(data, Some(0), Some(100), true)?.0 as u8;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             offered_throughput,
             available_throughput,
@@ -8279,7 +8532,9 @@ impl AperCodec for IgnoreMappingRuleIndication {
 #[repr(u8)]
 pub enum IntegrityProtectionIndication {
     Required,
+
     Preferred,
+
     NotNeeded,
 }
 
@@ -8312,8 +8567,11 @@ impl AperCodec for IntegrityProtectionIndication {
 #[repr(u8)]
 pub enum IntegrityProtectionAlgorithm {
     Nia0,
+
     I128Nia1,
+
     I128Nia2,
+
     I128Nia3,
 }
 
@@ -8372,6 +8630,7 @@ impl AperCodec for IntegrityProtectionKey {
 #[repr(u8)]
 pub enum IntegrityProtectionResult {
     Performed,
+
     NotPerformed,
 }
 
@@ -8483,23 +8742,24 @@ impl ImmediateMdt {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             measurements_to_activate,
             measurement_four,
@@ -8545,7 +8805,9 @@ impl AperCodec for ImmediateMdt {
 #[repr(u8)]
 pub enum LinksToLog {
     Uplink,
+
     Downlink,
+
     BothUplinkAndDownlink,
 }
 
@@ -8609,23 +8871,24 @@ impl MaximumIPdatarate {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let max_i_prate = MaxIPrate::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { max_i_prate })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -8655,6 +8918,7 @@ impl AperCodec for MaximumIPdatarate {
 #[repr(u8)]
 pub enum MaxIPrate {
     Bitrate64kbs,
+
     MaxUeRate,
 }
 
@@ -8749,23 +9013,24 @@ impl MrdcDataUsageReportItem {
         let usage_count_ul = aper::decode::decode_integer(data, Some(0), None, false)?.0 as u64;
         let usage_count_dl = aper::decode::decode_integer(data, Some(0), None, false)?.0 as u64;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             start_time_stamp,
             end_time_stamp,
@@ -8847,23 +9112,24 @@ impl MrdcUsageInformation {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             data_usage_per_pdu_session_report,
             data_usage_per_qos_flow_list,
@@ -8911,23 +9177,24 @@ impl M4Configuration {
         let m4period = M4period::decode(data)?;
         let m4_links_to_log = LinksToLog::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             m4period,
             m4_links_to_log,
@@ -8961,9 +9228,13 @@ impl AperCodec for M4Configuration {
 #[repr(u8)]
 pub enum M4period {
     Ms1024,
+
     Ms2048,
+
     Ms5120,
+
     Ms10240,
+
     Min1,
 }
 
@@ -9003,23 +9274,24 @@ impl M6Configuration {
         let m6report_interval = M6reportInterval::decode(data)?;
         let m6_links_to_log = LinksToLog::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             m6report_interval,
             m6_links_to_log,
@@ -9053,18 +9325,31 @@ impl AperCodec for M6Configuration {
 #[repr(u8)]
 pub enum M6reportInterval {
     Ms120,
+
     Ms240,
+
     Ms480,
+
     Ms640,
+
     Ms1024,
+
     Ms2048,
+
     Ms5120,
+
     Ms10240,
+
     Ms20480,
+
     Ms40960,
+
     Min1,
+
     Min6,
+
     Min12,
+
     Min30,
 }
 
@@ -9105,23 +9390,24 @@ impl M7Configuration {
         let m7period = M7period::decode(data)?;
         let m7_links_to_log = LinksToLog::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             m7period,
             m7_links_to_log,
@@ -9180,6 +9466,7 @@ impl AperCodec for M7period {
 #[repr(u8)]
 pub enum MdtActivation {
     ImmediateMdtOnly,
+
     ImmediateMdtAndTrace,
 }
 
@@ -9220,23 +9507,24 @@ impl MdtConfiguration {
         let mdt_activation = MdtActivation::decode(data)?;
         let mdt_mode = MdtMode::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             mdt_activation,
             mdt_mode,
@@ -9273,7 +9561,7 @@ pub enum MdtMode {
 
 impl MdtMode {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -9281,16 +9569,13 @@ impl MdtMode {
         }
         match idx {
             0 => Ok(Self::ImmediateMdt(ImmediateMdt::decode(data)?)),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::ImmediateMdt(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -9443,23 +9728,24 @@ impl NgranAllocationAndRetentionPriority {
         let pre_emption_capability = PreEmptionCapability::decode(data)?;
         let pre_emption_vulnerability = PreEmptionVulnerability::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             priority_level,
             pre_emption_capability,
@@ -9537,23 +9823,24 @@ impl NgRanQosSupportItem {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let non_dynamic_5qi_descriptor = NonDynamic5qiDescriptor::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             non_dynamic_5qi_descriptor,
         })
@@ -9615,6 +9902,8 @@ pub struct NonDynamic5qiDescriptor {
     pub qos_priority_level: Option<QosPriorityLevel>,
     pub averaging_window: Option<AveragingWindow>,
     pub max_data_burst_volume: Option<MaxDataBurstVolume>,
+    pub cn_packet_delay_budget_downlink: Option<ExtendedPacketDelayBudget>,
+    pub cn_packet_delay_budget_uplink: Option<ExtendedPacketDelayBudget>,
 }
 
 impl NonDynamic5qiDescriptor {
@@ -9638,28 +9927,41 @@ impl NonDynamic5qiDescriptor {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut cn_packet_delay_budget_downlink: Option<ExtendedPacketDelayBudget> = None;
+        let mut cn_packet_delay_budget_uplink: Option<ExtendedPacketDelayBudget> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    101 => {
+                        cn_packet_delay_budget_downlink =
+                            Some(ExtendedPacketDelayBudget::decode(data)?)
+                    }
+                    102 => {
+                        cn_packet_delay_budget_uplink =
+                            Some(ExtendedPacketDelayBudget::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             five_qi,
             qos_priority_level,
             averaging_window,
             max_data_burst_volume,
+            cn_packet_delay_budget_downlink,
+            cn_packet_delay_budget_uplink,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -9704,7 +10006,7 @@ pub enum NpnSupportInfo {
 
 impl NpnSupportInfo {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -9712,16 +10014,13 @@ impl NpnSupportInfo {
         }
         match idx {
             0 => Ok(Self::Snpn(NpnSupportInfoSnpn::decode(data)?)),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Snpn(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -9751,23 +10050,24 @@ impl NpnSupportInfoSnpn {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let nid = Nid::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { nid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -9800,7 +10100,7 @@ pub enum NpnContextInfo {
 
 impl NpnContextInfo {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -9808,16 +10108,13 @@ impl NpnContextInfo {
         }
         match idx {
             0 => Ok(Self::Snpn(NpnContextInfoSnpn::decode(data)?)),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Snpn(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -9847,23 +10144,24 @@ impl NpnContextInfoSnpn {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let nid = Nid::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { nid })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -9931,23 +10229,24 @@ impl NrCgi {
         let plmn_identity = PlmnIdentity::decode(data)?;
         let nr_cell_identity = NrCellIdentity::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             plmn_identity,
             nr_cell_identity,
@@ -10022,23 +10321,24 @@ impl NrCgiSupportItem {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let nr_cgi = NrCgi::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10111,23 +10411,24 @@ impl ExtendedNrCgiSupportItem {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let nr_cgi = NrCgi::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { nr_cgi })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10222,23 +10523,24 @@ impl PacketErrorRate {
         let per_scalar = PerScalar::decode(data)?;
         let per_exponent = PerExponent::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             per_scalar,
             per_exponent,
@@ -10332,6 +10634,9 @@ pub struct PdcpConfiguration {
     pub pdcp_data_recovery: Option<PdcpDataRecovery>,
     pub duplication_activation: Option<DuplicationActivation>,
     pub out_of_order_delivery: Option<OutOfOrderDelivery>,
+    pub pdcp_status_report_indication: Option<PdcpStatusReportIndication>,
+    pub additional_pdc_pduplication_information: Option<AdditionalPdcPduplicationInformation>,
+    pub ehc_parameters: Option<EhcParameters>,
 }
 
 impl PdcpConfiguration {
@@ -10387,23 +10692,38 @@ impl PdcpConfiguration {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[9] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut pdcp_status_report_indication: Option<PdcpStatusReportIndication> = None;
+        let mut additional_pdc_pduplication_information: Option<
+            AdditionalPdcPduplicationInformation,
+        > = None;
+        let mut ehc_parameters: Option<EhcParameters> = None;
 
+        if optionals[9] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    88 => {
+                        pdcp_status_report_indication =
+                            Some(PdcpStatusReportIndication::decode(data)?)
+                    }
+                    104 => {
+                        additional_pdc_pduplication_information =
+                            Some(AdditionalPdcPduplicationInformation::decode(data)?)
+                    }
+                    118 => ehc_parameters = Some(EhcParameters::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdcp_sn_size_ul,
             pdcp_sn_size_dl,
@@ -10417,6 +10737,9 @@ impl PdcpConfiguration {
             pdcp_data_recovery,
             duplication_activation,
             out_of_order_delivery,
+            pdcp_status_report_indication,
+            additional_pdc_pduplication_information,
+            ehc_parameters,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10492,23 +10815,24 @@ impl PdcpCount {
         let pdcp_sn = PdcpSn::decode(data)?;
         let hfn = Hfn::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { pdcp_sn, hfn })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -10705,23 +11029,24 @@ impl PduSessionResourceDataUsageItem {
         let pdu_session_id = PduSessionId::decode(data)?;
         let mrdc_usage_information = MrdcUsageInformation::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             mrdc_usage_information,
@@ -10780,6 +11105,7 @@ impl AperCodec for PdcpSn {
 #[repr(u8)]
 pub enum PdcpSnSize {
     S12,
+
     S18,
 }
 
@@ -10819,23 +11145,24 @@ impl PdcpSnStatusInformation {
         let pdcp_status_transfer_ul = DrbBStatusTransfer::decode(data)?;
         let pdcp_status_transfer_dl = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdcp_status_transfer_ul,
             pdcp_status_transfer_dl,
@@ -10869,7 +11196,9 @@ impl AperCodec for PdcpSnStatusInformation {
 #[repr(u8)]
 pub enum PdcpStatusReportIndication {
     Downlink,
+
     Uplink,
+
     Both,
 }
 
@@ -10919,23 +11248,24 @@ impl DrbBStatusTransfer {
         };
         let count_value = PdcpCount::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             receive_statusof_pdcps_du,
             count_value,
@@ -10997,6 +11327,7 @@ impl AperCodec for PduSessionId {
 #[repr(u8)]
 pub enum PduSessionResourceActivity {
     Active,
+
     NotActive,
 }
 
@@ -11072,23 +11403,24 @@ impl PduSessionResourceActivityItem {
         let pdu_session_id = PduSessionId::decode(data)?;
         let pdu_session_resource_activity = PduSessionResourceActivity::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             pdu_session_resource_activity,
@@ -11169,23 +11501,24 @@ impl PduSessionResourceConfirmModifiedItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             drb_confirm_modified_list_ng_ran,
@@ -11265,23 +11598,24 @@ impl PduSessionResourceFailedItem {
         let pdu_session_id = PduSessionId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             cause,
@@ -11358,23 +11692,24 @@ impl PduSessionResourceFailedModItem {
         let pdu_session_id = PduSessionId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             cause,
@@ -11451,23 +11786,24 @@ impl PduSessionResourceFailedToModifyItem {
         let pdu_session_id = PduSessionId::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             cause,
@@ -11542,6 +11878,7 @@ pub struct PduSessionResourceModifiedItem {
     pub drb_failed_list_ng_ran: Option<DrbFailedListNgRan>,
     pub drb_modified_list_ng_ran: Option<DrbModifiedListNgRan>,
     pub drb_failed_to_modify_list_ng_ran: Option<DrbFailedToModifyListNgRan>,
+    pub redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation>,
 }
 
 impl PduSessionResourceModifiedItem {
@@ -11584,23 +11921,28 @@ impl PduSessionResourceModifiedItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[7] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation> = None;
 
+        if optionals[7] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    98 => {
+                        redundant_n_g_dl_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             ng_dl_up_tnl_information,
@@ -11610,6 +11952,7 @@ impl PduSessionResourceModifiedItem {
             drb_failed_list_ng_ran,
             drb_modified_list_ng_ran,
             drb_failed_to_modify_list_ng_ran,
+            redundant_n_g_dl_up_tnl_information,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11707,6 +12050,7 @@ pub struct PduSessionResourceRequiredToModifyItem {
     pub ng_dl_up_tnl_information: Option<UpTnlInformation>,
     pub drb_required_to_modify_list_ng_ran: Option<DrbRequiredToModifyListNgRan>,
     pub drb_required_to_remove_list_ng_ran: Option<DrbRequiredToRemoveListNgRan>,
+    pub redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation>,
 }
 
 impl PduSessionResourceRequiredToModifyItem {
@@ -11729,28 +12073,34 @@ impl PduSessionResourceRequiredToModifyItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    98 => {
+                        redundant_n_g_dl_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             ng_dl_up_tnl_information,
             drb_required_to_modify_list_ng_ran,
             drb_required_to_remove_list_ng_ran,
+            redundant_n_g_dl_up_tnl_information,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11832,6 +12182,8 @@ pub struct PduSessionResourceSetupItem {
     pub ng_dl_up_unchanged: Option<NgDlUpUnchanged>,
     pub drb_setup_list_ng_ran: DrbSetupListNgRan,
     pub drb_failed_list_ng_ran: Option<DrbFailedListNgRan>,
+    pub redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation>,
+    pub redundant_pdu_session_information_used: Option<RedundantPduSessionInformation>,
 }
 
 impl PduSessionResourceSetupItem {
@@ -11861,23 +12213,34 @@ impl PduSessionResourceSetupItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[4] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation> = None;
+        let mut redundant_pdu_session_information_used: Option<RedundantPduSessionInformation> =
+            None;
 
+        if optionals[4] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    98 => {
+                        redundant_n_g_dl_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    106 => {
+                        redundant_pdu_session_information_used =
+                            Some(RedundantPduSessionInformation::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             security_result,
@@ -11886,6 +12249,8 @@ impl PduSessionResourceSetupItem {
             ng_dl_up_unchanged,
             drb_setup_list_ng_ran,
             drb_failed_list_ng_ran,
+            redundant_n_g_dl_up_tnl_information,
+            redundant_pdu_session_information_used,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -11975,6 +12340,7 @@ pub struct PduSessionResourceSetupModItem {
     pub pdu_session_data_forwarding_information_response: Option<DataForwardingInformation>,
     pub drb_setup_mod_list_ng_ran: DrbSetupModListNgRan,
     pub drb_failed_mod_list_ng_ran: Option<DrbFailedModListNgRan>,
+    pub redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation>,
 }
 
 impl PduSessionResourceSetupModItem {
@@ -11999,23 +12365,28 @@ impl PduSessionResourceSetupModItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut redundant_n_g_dl_up_tnl_information: Option<UpTnlInformation> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    98 => {
+                        redundant_n_g_dl_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             security_result,
@@ -12023,6 +12394,7 @@ impl PduSessionResourceSetupModItem {
             pdu_session_data_forwarding_information_response,
             drb_setup_mod_list_ng_ran,
             drb_failed_mod_list_ng_ran,
+            redundant_n_g_dl_up_tnl_information,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -12113,6 +12485,11 @@ pub struct PduSessionResourceToModifyItem {
     pub drb_to_setup_list_ng_ran: Option<DrbToSetupListNgRan>,
     pub drb_to_modify_list_ng_ran: Option<DrbToModifyListNgRan>,
     pub drb_to_remove_list_ng_ran: Option<DrbToRemoveListNgRan>,
+    pub snssai: Option<Snssai>,
+    pub common_network_instance: Option<CommonNetworkInstance>,
+    pub redundant_n_g_ul_up_tnl_information: Option<UpTnlInformation>,
+    pub redundant_common_network_instance: Option<CommonNetworkInstance>,
+    pub data_forwardingto_eutran_information_list: Option<DataForwardingtoEutranInformationList>,
 }
 
 impl PduSessionResourceToModifyItem {
@@ -12171,23 +12548,44 @@ impl PduSessionResourceToModifyItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[10] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut snssai: Option<Snssai> = None;
+        let mut common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut redundant_n_g_ul_up_tnl_information: Option<UpTnlInformation> = None;
+        let mut redundant_common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut data_forwardingto_eutran_information_list: Option<
+            DataForwardingtoEutranInformationList,
+        > = None;
 
+        if optionals[10] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    69 => snssai = Some(Snssai::decode(data)?),
+                    78 => common_network_instance = Some(CommonNetworkInstance::decode(data)?),
+                    97 => {
+                        redundant_n_g_ul_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    96 => {
+                        redundant_common_network_instance =
+                            Some(CommonNetworkInstance::decode(data)?)
+                    }
+                    131 => {
+                        data_forwardingto_eutran_information_list =
+                            Some(DataForwardingtoEutranInformationList::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             security_indication,
@@ -12200,6 +12598,11 @@ impl PduSessionResourceToModifyItem {
             drb_to_setup_list_ng_ran,
             drb_to_modify_list_ng_ran,
             drb_to_remove_list_ng_ran,
+            snssai,
+            common_network_instance,
+            redundant_n_g_ul_up_tnl_information,
+            redundant_common_network_instance,
+            data_forwardingto_eutran_information_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -12306,6 +12709,7 @@ impl AperCodec for PduSessionResourceToRemoveList {
 #[derive(Clone, Debug)]
 pub struct PduSessionResourceToRemoveItem {
     pub pdu_session_id: PduSessionId,
+    pub cause: Option<Cause>,
 }
 
 impl PduSessionResourceToRemoveItem {
@@ -12313,24 +12717,30 @@ impl PduSessionResourceToRemoveItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let pdu_session_id = PduSessionId::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut cause: Option<Cause> = None;
 
-        Ok(Self { pdu_session_id })
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    0 => cause = Some(Cause::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            pdu_session_id,
+            cause,
+        })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         let mut optionals = BitVec::new();
@@ -12403,6 +12813,10 @@ pub struct PduSessionResourceToSetupItem {
     pub existing_allocated_ng_dl_up_tnl_info: Option<UpTnlInformation>,
     pub network_instance: Option<NetworkInstance>,
     pub drb_to_setup_list_ng_ran: DrbToSetupListNgRan,
+    pub common_network_instance: Option<CommonNetworkInstance>,
+    pub redundant_n_g_ul_up_tnl_information: Option<UpTnlInformation>,
+    pub redundant_common_network_instance: Option<CommonNetworkInstance>,
+    pub redundant_pdu_session_information: Option<RedundantPduSessionInformation>,
 }
 
 impl PduSessionResourceToSetupItem {
@@ -12440,23 +12854,40 @@ impl PduSessionResourceToSetupItem {
         };
         let drb_to_setup_list_ng_ran = DrbToSetupListNgRan::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[5] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut redundant_n_g_ul_up_tnl_information: Option<UpTnlInformation> = None;
+        let mut redundant_common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut redundant_pdu_session_information: Option<RedundantPduSessionInformation> = None;
 
+        if optionals[5] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    78 => common_network_instance = Some(CommonNetworkInstance::decode(data)?),
+                    97 => {
+                        redundant_n_g_ul_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    96 => {
+                        redundant_common_network_instance =
+                            Some(CommonNetworkInstance::decode(data)?)
+                    }
+                    105 => {
+                        redundant_pdu_session_information =
+                            Some(RedundantPduSessionInformation::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             pdu_session_type,
@@ -12469,6 +12900,10 @@ impl PduSessionResourceToSetupItem {
             existing_allocated_ng_dl_up_tnl_info,
             network_instance,
             drb_to_setup_list_ng_ran,
+            common_network_instance,
+            redundant_n_g_ul_up_tnl_information,
+            redundant_common_network_instance,
+            redundant_pdu_session_information,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -12568,6 +13003,10 @@ pub struct PduSessionResourceToSetupModItem {
     pub pdu_session_data_forwarding_information_request: Option<DataForwardingInformationRequest>,
     pub pdu_session_inactivity_timer: Option<InactivityTimer>,
     pub drb_to_setup_mod_list_ng_ran: DrbToSetupModListNgRan,
+    pub network_instance: Option<NetworkInstance>,
+    pub common_network_instance: Option<CommonNetworkInstance>,
+    pub redundant_n_g_ul_up_tnl_information: Option<UpTnlInformation>,
+    pub redundant_common_network_instance: Option<CommonNetworkInstance>,
 }
 
 impl PduSessionResourceToSetupModItem {
@@ -12595,23 +13034,37 @@ impl PduSessionResourceToSetupModItem {
         };
         let drb_to_setup_mod_list_ng_ran = DrbToSetupModListNgRan::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut network_instance: Option<NetworkInstance> = None;
+        let mut common_network_instance: Option<CommonNetworkInstance> = None;
+        let mut redundant_n_g_ul_up_tnl_information: Option<UpTnlInformation> = None;
+        let mut redundant_common_network_instance: Option<CommonNetworkInstance> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    79 => network_instance = Some(NetworkInstance::decode(data)?),
+                    78 => common_network_instance = Some(CommonNetworkInstance::decode(data)?),
+                    97 => {
+                        redundant_n_g_ul_up_tnl_information = Some(UpTnlInformation::decode(data)?)
+                    }
+                    96 => {
+                        redundant_common_network_instance =
+                            Some(CommonNetworkInstance::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             pdu_session_type,
@@ -12622,6 +13075,10 @@ impl PduSessionResourceToSetupModItem {
             pdu_session_data_forwarding_information_request,
             pdu_session_inactivity_timer,
             drb_to_setup_mod_list_ng_ran,
+            network_instance,
+            common_network_instance,
+            redundant_n_g_ul_up_tnl_information,
+            redundant_common_network_instance,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -12714,23 +13171,24 @@ impl PduSessionToNotifyItem {
         let pdu_session_id = PduSessionId::decode(data)?;
         let qos_flow_list = QosFlowList::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             pdu_session_id,
             qos_flow_list,
@@ -12764,9 +13222,13 @@ impl AperCodec for PduSessionToNotifyItem {
 #[repr(u8)]
 pub enum PduSessionType {
     Ipv4,
+
     Ipv6,
+
     Ipv4v6,
+
     Ethernet,
+
     Unstructured,
 }
 
@@ -12906,6 +13368,7 @@ impl AperCodec for PriorityLevel {
 #[repr(u8)]
 pub enum PreEmptionCapability {
     ShallNotTriggerPreEmption,
+
     MayTriggerPreEmption,
 }
 
@@ -12938,6 +13401,7 @@ impl AperCodec for PreEmptionCapability {
 #[repr(u8)]
 pub enum PreEmptionVulnerability {
     NotPreEmptable,
+
     PreEmptable,
 }
 
@@ -12970,6 +13434,7 @@ impl AperCodec for PreEmptionVulnerability {
 #[repr(u8)]
 pub enum PrivacyIndicator {
     ImmediateMdt,
+
     LoggedMdt,
 }
 
@@ -13026,12 +13491,13 @@ impl AperCodec for Qci {
 #[derive(Clone, Debug)]
 pub enum QosCharacteristics {
     NonDynamic5qi(NonDynamic5qiDescriptor),
+
     Dynamic5qi(Dynamic5qiDescriptor),
 }
 
 impl QosCharacteristics {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -13040,20 +13506,18 @@ impl QosCharacteristics {
         match idx {
             0 => Ok(Self::NonDynamic5qi(NonDynamic5qiDescriptor::decode(data)?)),
             1 => Ok(Self::Dynamic5qi(Dynamic5qiDescriptor::decode(data)?)),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::NonDynamic5qi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::Dynamic5qi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -13135,6 +13599,7 @@ impl AperCodec for QosFlowList {
 #[derive(Clone, Debug)]
 pub struct QosFlowItem {
     pub qos_flow_identifier: QosFlowIdentifier,
+    pub qos_flow_mapping_indication: Option<QosFlowMappingIndication>,
 }
 
 impl QosFlowItem {
@@ -13142,25 +13607,31 @@ impl QosFlowItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut qos_flow_mapping_indication: Option<QosFlowMappingIndication> = None;
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    80 => {
+                        qos_flow_mapping_indication = Some(QosFlowMappingIndication::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
+            qos_flow_mapping_indication,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -13232,23 +13703,24 @@ impl QosFlowFailedItem {
         let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
         let cause = Cause::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
             cause,
@@ -13329,23 +13801,24 @@ impl QosFlowMappingItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
             qos_flow_mapping_indication,
@@ -13382,6 +13855,7 @@ impl AperCodec for QosFlowMappingItem {
 #[repr(u8)]
 pub enum QosFlowMappingIndication {
     Ul,
+
     Dl,
 }
 
@@ -13430,23 +13904,24 @@ impl QosParametersSupportList {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             eutran_qos_support_list,
             ng_ran_qos_support_list,
@@ -13548,6 +14023,8 @@ pub struct QosFlowQosParameterItem {
     pub qos_flow_identifier: QosFlowIdentifier,
     pub qos_flow_level_qos_parameters: QosFlowLevelQosParameters,
     pub qos_flow_mapping_indication: Option<QosFlowMappingIndication>,
+    pub redundant_qos_flow_indicator: Option<RedundantQosFlowIndicator>,
+    pub tsc_traffic_characteristics: Option<TscTrafficCharacteristics>,
 }
 
 impl QosFlowQosParameterItem {
@@ -13561,27 +14038,39 @@ impl QosFlowQosParameterItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut redundant_qos_flow_indicator: Option<RedundantQosFlowIndicator> = None;
+        let mut tsc_traffic_characteristics: Option<TscTrafficCharacteristics> = None;
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    99 => {
+                        redundant_qos_flow_indicator =
+                            Some(RedundantQosFlowIndicator::decode(data)?)
+                    }
+                    100 => {
+                        tsc_traffic_characteristics = Some(TscTrafficCharacteristics::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
             qos_flow_level_qos_parameters,
             qos_flow_mapping_indication,
+            redundant_qos_flow_indicator,
+            tsc_traffic_characteristics,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -13621,6 +14110,10 @@ pub struct QosFlowLevelQosParameters {
     pub additional_qos_information: Option<AdditionalQosInformation>,
     pub paging_policy_indicator: Option<u8>,
     pub reflective_qos_indicator: Option<ReflectiveQosIndicator>,
+    pub qos_monitoring_request: Option<QosMonitoringRequest>,
+    pub mcg_offered_gbr_qos_flow_info: Option<GbrQosFlowInformation>,
+    pub qos_monitoring_reporting_frequency: Option<QosMonitoringReportingFrequency>,
+    pub qos_monitoring_disabled: Option<QosMonitoringDisabled>,
 }
 
 impl QosFlowLevelQosParameters {
@@ -13656,23 +14149,37 @@ impl QosFlowLevelQosParameters {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[5] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut qos_monitoring_request: Option<QosMonitoringRequest> = None;
+        let mut mcg_offered_gbr_qos_flow_info: Option<GbrQosFlowInformation> = None;
+        let mut qos_monitoring_reporting_frequency: Option<QosMonitoringReportingFrequency> = None;
+        let mut qos_monitoring_disabled: Option<QosMonitoringDisabled> = None;
 
+        if optionals[5] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    87 => qos_monitoring_request = Some(QosMonitoringRequest::decode(data)?),
+                    126 => {
+                        mcg_offered_gbr_qos_flow_info = Some(GbrQosFlowInformation::decode(data)?)
+                    }
+                    132 => {
+                        qos_monitoring_reporting_frequency =
+                            Some(QosMonitoringReportingFrequency::decode(data)?)
+                    }
+                    133 => qos_monitoring_disabled = Some(QosMonitoringDisabled::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_characteristics,
             ngran_allocation_retention_priority,
@@ -13681,6 +14188,10 @@ impl QosFlowLevelQosParameters {
             additional_qos_information,
             paging_policy_indicator,
             reflective_qos_indicator,
+            qos_monitoring_request,
+            mcg_offered_gbr_qos_flow_info,
+            qos_monitoring_reporting_frequency,
+            qos_monitoring_disabled,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -13731,7 +14242,9 @@ impl AperCodec for QosFlowLevelQosParameters {
 #[repr(u8)]
 pub enum QosMonitoringRequest {
     Ul,
+
     Dl,
+
     Both,
 }
 
@@ -13844,23 +14357,24 @@ impl QosFlowRemovedItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
             qos_flow_released_in_session,
@@ -13943,23 +14457,24 @@ impl QosFlowsToBeForwardedItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
         })
@@ -14099,23 +14614,24 @@ impl DataForwardingtoNgRanQosFlowInformationListItem {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let qos_flow_identifier = QosFlowIdentifier::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             qos_flow_identifier,
         })
@@ -14177,6 +14693,7 @@ impl AperCodec for RanUeId {
 #[repr(u8)]
 pub enum RatType {
     EUtra,
+
     Nr,
 }
 
@@ -14208,6 +14725,7 @@ impl AperCodec for RatType {
 #[repr(u8)]
 pub enum RedundantQosFlowIndicator {
     True,
+
     False,
 }
 
@@ -14246,23 +14764,24 @@ impl RedundantPduSessionInformation {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let rsn = Rsn::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { rsn })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -14292,6 +14811,7 @@ impl AperCodec for RedundantPduSessionInformation {
 #[repr(u8)]
 pub enum Rsn {
     V1,
+
     V2,
 }
 
@@ -14358,6 +14878,7 @@ impl AperCodec for RetainabilityMeasurementsInfo {
 #[repr(u8)]
 pub enum RegistrationRequest {
     Start,
+
     Stop,
 }
 
@@ -14419,20 +14940,35 @@ impl AperCodec for ReportCharacteristics {
 #[repr(u8)]
 pub enum ReportingPeriodicity {
     Ms500,
+
     Ms1000,
+
     Ms2000,
+
     Ms5000,
+
     Ms10000,
+
     Ms20000,
+
     Ms30000,
+
     Ms40000,
+
     Ms50000,
+
     Ms60000,
+
     Ms70000,
+
     Ms80000,
+
     Ms90000,
+
     Ms100000,
+
     Ms110000,
+
     Ms120000,
 }
 
@@ -14465,9 +15001,13 @@ impl AperCodec for ReportingPeriodicity {
 #[repr(u8)]
 pub enum RlcMode {
     RlcTm,
+
     RlcAm,
+
     RlcUmBidirectional,
+
     RlcUmUnidirectionalUl,
+
     RlcUmUnidirectionalDl,
 }
 
@@ -14498,12 +15038,13 @@ impl AperCodec for RlcMode {
 #[derive(Clone, Debug)]
 pub enum RohcParameters {
     Rohc(Rohc),
+
     UPlinkOnlyRohc(UplinkOnlyRohc),
 }
 
 impl RohcParameters {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -14512,20 +15053,18 @@ impl RohcParameters {
         match idx {
             0 => Ok(Self::Rohc(Rohc::decode(data)?)),
             1 => Ok(Self::UPlinkOnlyRohc(UplinkOnlyRohc::decode(data)?)),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::Rohc(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::UPlinkOnlyRohc(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -14563,23 +15102,24 @@ impl Rohc {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             max_cid,
             rohc_profiles,
@@ -14643,23 +15183,24 @@ impl SecurityAlgorithm {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             ciphering_algorithm,
             integrity_protection_algorithm,
@@ -14711,23 +15252,24 @@ impl SecurityIndication {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             integrity_protection_indication,
             confidentiality_protection_indication,
@@ -14774,23 +15316,24 @@ impl SecurityInformation {
         let security_algorithm = SecurityAlgorithm::decode(data)?;
         let up_securitykey = UpSecuritykey::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             security_algorithm,
             up_securitykey,
@@ -14832,23 +15375,24 @@ impl SecurityResult {
         let integrity_protection_result = IntegrityProtectionResult::decode(data)?;
         let confidentiality_protection_result = ConfidentialityProtectionResult::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             integrity_protection_result,
             confidentiality_protection_result,
@@ -14924,23 +15468,24 @@ impl SliceSupportItem {
             aper::decode::decode_sequence_header(data, false, 1)?;
         let snssai = Snssai::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { snssai })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -14987,23 +15532,24 @@ impl Snssai {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { sst, sd })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -15046,23 +15592,24 @@ impl SdapConfiguration {
         let sdap_header_ul = SdapHeaderUl::decode(data)?;
         let sdap_header_dl = SdapHeaderDl::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             default_drb,
             sdap_header_ul,
@@ -15098,6 +15645,7 @@ impl AperCodec for SdapConfiguration {
 #[repr(u8)]
 pub enum SdapHeaderDl {
     Present,
+
     Absent,
 }
 
@@ -15129,6 +15677,7 @@ impl AperCodec for SdapHeaderDl {
 #[repr(u8)]
 pub enum SdapHeaderUl {
     Present,
+
     Absent,
 }
 
@@ -15186,10 +15735,15 @@ impl AperCodec for SubscriberProfileIDforRfp {
 #[repr(u8)]
 pub enum TimeToWait {
     V1s,
+
     V2s,
+
     V5s,
+
     V10s,
+
     V20s,
+
     V60s,
 }
 
@@ -15221,7 +15775,9 @@ impl AperCodec for TimeToWait {
 #[repr(u8)]
 pub enum TnlAssociationUsage {
     Ue,
+
     NonUe,
+
     Both,
 }
 
@@ -15270,23 +15826,24 @@ impl TnlAvailableCapacityIndicator {
         let ul_tnl_available_capacity =
             aper::decode::decode_integer(data, Some(0), Some(100), true)?.0 as u8;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             dl_tnl_offered_capacity,
             dl_tnl_available_capacity,
@@ -15369,23 +15926,24 @@ impl TscTrafficCharacteristics {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             tsc_traffic_characteristics_ul,
             tsc_traffic_characteristics_dl,
@@ -15438,23 +15996,24 @@ impl TscTrafficInformation {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             periodicity,
             burst_arrival_time,
@@ -15544,6 +16103,8 @@ pub struct TraceActivation {
     pub interfaces_to_trace: InterfacesToTrace,
     pub trace_depth: TraceDepth,
     pub trace_collection_entity_ip_address: TransportLayerAddress,
+    pub mdt_configuration: Option<MdtConfiguration>,
+    pub trace_collection_entity_uri: Option<UrIaddress>,
 }
 
 impl TraceActivation {
@@ -15554,28 +16115,35 @@ impl TraceActivation {
         let trace_depth = TraceDepth::decode(data)?;
         let trace_collection_entity_ip_address = TransportLayerAddress::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut mdt_configuration: Option<MdtConfiguration> = None;
+        let mut trace_collection_entity_uri: Option<UrIaddress> = None;
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    112 => mdt_configuration = Some(MdtConfiguration::decode(data)?),
+                    116 => trace_collection_entity_uri = Some(UrIaddress::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             trace_id,
             interfaces_to_trace,
             trace_depth,
             trace_collection_entity_ip_address,
+            mdt_configuration,
+            trace_collection_entity_uri,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -15608,10 +16176,15 @@ impl AperCodec for TraceActivation {
 #[repr(u8)]
 pub enum TraceDepth {
     Minimum,
+
     Medium,
+
     Maximum,
+
     MinimumWithoutVendorSpecificExtension,
+
     MediumWithoutVendorSpecificExtension,
+
     MaximumWithoutVendorSpecificExtension,
 }
 
@@ -15726,40 +16299,75 @@ impl AperCodec for TransactionId {
 #[repr(u8)]
 pub enum TReordering {
     Ms0,
+
     Ms1,
+
     Ms2,
+
     Ms4,
+
     Ms5,
+
     Ms8,
+
     Ms10,
+
     Ms15,
+
     Ms20,
+
     Ms30,
+
     Ms40,
+
     Ms50,
+
     Ms60,
+
     Ms80,
+
     Ms100,
+
     Ms120,
+
     Ms140,
+
     Ms160,
+
     Ms180,
+
     Ms200,
+
     Ms220,
+
     Ms240,
+
     Ms260,
+
     Ms280,
+
     Ms300,
+
     Ms500,
+
     Ms750,
+
     Ms1000,
+
     Ms1250,
+
     Ms1500,
+
     Ms1750,
+
     Ms2000,
+
     Ms2250,
+
     Ms2500,
+
     Ms2750,
+
     Ms3000,
 }
 
@@ -15797,23 +16405,24 @@ impl TReorderingTimer {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let t_reordering = TReordering::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self { t_reordering })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -15843,6 +16452,7 @@ impl AperCodec for TReorderingTimer {
 #[repr(u8)]
 pub enum TypeOfError {
     NotUnderstood,
+
     Missing,
 }
 
@@ -15892,23 +16502,24 @@ impl TransportLayerAddressInfo {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             transport_up_layer_addresses_info_to_add_list,
             transport_up_layer_addresses_info_to_remove_list,
@@ -15998,23 +16609,24 @@ impl TransportUpLayerAddressesInfoToAddItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             ip_sec_transport_layer_address,
             gtp_transport_layer_addresses_to_add,
@@ -16102,23 +16714,24 @@ impl TransportUpLayerAddressesInfoToRemoveItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             ip_sec_transport_layer_address,
             gtp_transport_layer_addresses_to_remove,
@@ -16157,6 +16770,7 @@ impl AperCodec for TransportUpLayerAddressesInfoToRemoveItem {
 #[repr(u8)]
 pub enum UeActivity {
     Active,
+
     NotActive,
 }
 
@@ -16204,23 +16818,24 @@ impl UeAssociatedLogicalE1ConnectionItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[2] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[2] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             gnb_cu_cp_ue_e1ap_id,
             gnb_cu_up_ue_e1ap_id,
@@ -16260,7 +16875,9 @@ impl AperCodec for UeAssociatedLogicalE1ConnectionItem {
 #[repr(u8)]
 pub enum UlConfiguration {
     NoData,
+
     Shared,
+
     Only,
 }
 
@@ -16301,23 +16918,24 @@ impl UluptnlAddressToUpdateItem {
         let old_tnl_adress = TransportLayerAddress::decode(data)?;
         let new_tnl_adress = TransportLayerAddress::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             old_tnl_adress,
             new_tnl_adress,
@@ -16351,28 +16969,51 @@ impl AperCodec for UluptnlAddressToUpdateItem {
 #[repr(u8)]
 pub enum UlDataSplitThreshold {
     B0,
+
     B100,
+
     B200,
+
     B400,
+
     B800,
+
     B1600,
+
     B3200,
+
     B6400,
+
     B12800,
+
     B25600,
+
     B51200,
+
     B102400,
+
     B204800,
+
     B409600,
+
     B819200,
+
     B1228800,
+
     B1638400,
+
     B2457600,
+
     B3276800,
+
     B4096000,
+
     B4915200,
+
     B5734400,
+
     B6553600,
+
     Infinity,
 }
 
@@ -16439,6 +17080,7 @@ impl AperCodec for UpParameters {
 pub struct UpParametersItem {
     pub up_tnl_information: UpTnlInformation,
     pub cell_group_id: CellGroupId,
+    pub qos_mapping_information: Option<QosMappingInformation>,
 }
 
 impl UpParametersItem {
@@ -16447,26 +17089,30 @@ impl UpParametersItem {
         let up_tnl_information = UpTnlInformation::decode(data)?;
         let cell_group_id = CellGroupId::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut qos_mapping_information: Option<QosMappingInformation> = None;
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    107 => qos_mapping_information = Some(QosMappingInformation::decode(data)?),
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             up_tnl_information,
             cell_group_id,
+            qos_mapping_information,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -16509,23 +17155,24 @@ impl UpSecuritykey {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             encryption_key,
             integrity_protection_key,
@@ -16565,7 +17212,7 @@ pub enum UpTnlInformation {
 
 impl UpTnlInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -16573,16 +17220,13 @@ impl UpTnlInformation {
         }
         match idx {
             0 => Ok(Self::GtpTunnel(GtpTunnel::decode(data)?)),
-            1 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::GtpTunnel(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -16620,23 +17264,24 @@ impl UplinkOnlyRohc {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             max_cid,
             rohc_profiles,
@@ -16724,23 +17369,24 @@ impl CriticalityDiagnosticsIeList1 {
         let ie_id = ProtocolIeId::decode(data)?;
         let type_of_error = TypeOfError::decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[0] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             ie_criticality,
             ie_id,
@@ -16807,6 +17453,7 @@ impl AperCodec for DapsIndicator {
 #[repr(u8)]
 pub enum SecondaryRatType {
     Nr,
+
     EUtra,
 }
 
@@ -16839,6 +17486,7 @@ impl AperCodec for SecondaryRatType {
 #[repr(u8)]
 pub enum SecondaryRatType1 {
     Nr,
+
     EUtra,
 }
 
@@ -16871,6 +17519,7 @@ impl AperCodec for SecondaryRatType1 {
 #[repr(u8)]
 pub enum DrbReleasedInSession {
     ReleasedInSession,
+
     NotReleasedInSession,
 }
 
@@ -16934,6 +17583,7 @@ impl AperCodec for S1DlUpUnchanged {
 #[repr(u8)]
 pub enum DelayCritical {
     DelayCritical,
+
     NonDelayCritical,
 }
 
@@ -16966,6 +17616,7 @@ impl AperCodec for DelayCritical {
 #[repr(u8)]
 pub enum EhcCidLength {
     Bits7,
+
     Bits15,
 }
 
@@ -17183,6 +17834,7 @@ impl AperCodec for ReflectiveQosIndicator {
 #[repr(u8)]
 pub enum QosFlowReleasedInSession {
     ReleasedInSession,
+
     NotReleasedInSession,
 }
 

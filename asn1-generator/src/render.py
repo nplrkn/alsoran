@@ -179,27 +179,19 @@ class StructFieldsFrom(Interpreter):
 """
         self.optional_idx += 1
 
-    def extension_container(self, tree):
+    def extension_ies(self, tree):
+        fields_from = IeFieldsFrom()
+        fields_from.visit(tree.children[0])
+
         self.fields_from += f"""\
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[{self.optional_idx}] {{
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {{
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {{
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {{}} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }}
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }}
-        }};
-"""
+        // Process the extension container
+{fields_from.mut_field_vars}
+        if optionals[{self.optional_idx}] {{"""
+        self.fields_from += decode_ies_string(fields_from)
+        self.fields_from += "}"
         self.optional_idx += 1
+        self.self_fields += fields_from.self_fields
 
 
 class StructFindOptionals(Interpreter):
@@ -209,13 +201,13 @@ class StructFindOptionals(Interpreter):
 
     def optional_field(self, tree):
         name = tree.children[0]
-        self.find_optionals += f"""\
+        self.find_optionals += f"""
         optionals.set({self.num_optionals}, self.{name}.is_some());
 """
         self.num_optionals += 1
 
-    def extension_container(self, tree):
-        self.find_optionals += f"""\
+    def extension_ies(self, tree):
+        self.find_optionals += f"""
         optionals.set({self.num_optionals}, false);
 """
         self.num_optionals += 1
@@ -229,7 +221,7 @@ class EnumFields(Interpreter):
 
     def enum_field(self, tree):
         self.variants += 1
-        self.enum_fields += f"""\
+        self.enum_fields += f"""
     {tree.children[0]},
 """
 
@@ -248,14 +240,14 @@ class ChoiceFields(Interpreter):
     def choice_field(self, tree):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
-        self.choice_fields += f"""\
+        self.choice_fields += f"""
     {name}{"("+typ+")" if typ != "null" else ""},
 """
 
     def choice_ie_container(self, tree):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
-        self.choice_fields += f"""\
+        self.choice_fields += f"""
     {name}{"("+typ+")" if typ != "null" else ""},
 """
 
@@ -280,11 +272,11 @@ class ChoiceFieldsTo(Interpreter):
         name = tree.children[0]
         type_info = type_and_constraints(tree.children[1])
 
-        self.fields_to += f"""\
+        self.fields_to += f"""
             Self::{name}{"(x)" if type_info.typ != "null" else ""} => {{
                 aper::encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, {self.field_index}, false)?;
                 {encode_expression_fn(tree.children[1])(
-                    "x",copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
+                    "x", copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
             }}
 """
         self.field_index += 1
@@ -346,6 +338,11 @@ class StructFields(Interpreter):
         self.struct_fields += f"""\
     pub {name}: Option<{typ}>,
 """
+
+    def extension_ies(self, tree):
+        field_interpreter = IeFields()
+        field_interpreter.visit(tree.children[0])
+        self.struct_fields += field_interpreter.struct_fields
 
 
 class IeFields(Interpreter):
@@ -426,6 +423,46 @@ class IeFields(Interpreter):
 """
 
 
+class IeFieldsFrom(Interpreter):
+    def __init__(self):
+        self.extensible = False
+        self.mut_field_vars = ""
+        self.self_fields = ""
+        self.matches = ""
+        self.mandatory = ""
+        self.optionals_presence_list = ""
+        self.num_mandatory_fields = 0
+
+    def extension_marker(self, tree):
+        self.extensible = True
+
+    def common(self, tree):
+        name = tree.children[0]
+        id = tree.children[1]
+        typ = type_and_constraints(tree.children[3]).typ
+        self.mut_field_vars += f"""\
+        let mut {name}: Option<{typ}> = None;
+"""
+        self.self_fields += f"            {name},\n"
+        self.matches += f"""\
+                {id} => {name} = Some({decode_expression(tree.children[3])}),
+"""
+        return name
+
+    def ie(self, tree):
+        name = self.common(tree)
+        self.num_mandatory_fields += 1
+        self.mandatory += f"""\
+        let {name} = {name}.ok_or(aper::AperCodecError::new(format!(
+            "Missing mandatory IE {name}"
+        )))?;
+"""
+
+    def optional_ie(self, tree):
+        name = self.common(tree)
+        self.optionals_presence_list += f"self.{name}.is_some(),"
+
+
 def is_non_i128_int_type(t):
     return t in ["i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"]
 
@@ -468,7 +505,7 @@ class StructFieldsTo(Interpreter):
         }}
 """
 
-    def extension_container(self, tree):
+    def extension_ies(self, tree):
         self.add_optional_to_bitfield("false")
 
 
@@ -806,18 +843,19 @@ impl {name} {{
         pass
 
     def choice_pdu(self, tree):
-        self.pdu_common(tree, is_sequence=False)
+        self.ies_common(tree, is_sequence=False)
 
     def pdu(self, tree):
-        self.pdu_common(tree, is_sequence=True)
+        self.ies_common(tree, is_sequence=True)
 
-    def pdu_common(self, tree, is_sequence):
+    def ies_common(self, tree, is_sequence):
         orig_name = tree.children[0]
         print(orig_name)
         name = orig_name
 
-        field_interpreter = IeFields()
-        for i in [field_interpreter]:
+        fields = IeFields()
+        fields_from = IeFieldsFrom()
+        for i in [fields, fields_from]:
             i.visit(tree.children[1])
 
         #   ProtocolIE-Container {NGAP-PROTOCOL-IES : IEsSetParam} ::=
@@ -830,13 +868,13 @@ impl {name} {{
         # 	value			NGAP-PROTOCOL-IES.&Value			({IEsSetParam}{@id})
         # }
 
-        mut = "" if field_interpreter.struct_fields == "" else "mut "
+        mut = "" if fields.struct_fields == "" else "mut "
 
         self.outfile += f"""
 // {orig_name}
 # [derive(Clone, Debug)]
 pub struct {name} {{
-{field_interpreter.struct_fields}\
+{fields.struct_fields}\
 }}
 
 impl {orig_name} {{
@@ -849,25 +887,25 @@ impl {orig_name} {{
         self.outfile += f"""
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
-{field_interpreter.mut_field_vars}
+{fields_from.mut_field_vars}
         for _ in 0..len {{
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
-{field_interpreter.matches}\
+{fields_from.matches}\
                 x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {{}}", x)))
             }}
         }}
-{field_interpreter.mandatory}\
+{fields_from.mandatory}\
         Ok(Self {{
-{field_interpreter.self_fields}\
+{fields_from.self_fields}\
         }})
     }}
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
         let {mut}num_ies = 0;
         let ies = &mut AperCodecData::new();
-{field_interpreter.fields_to}"""
+{fields.fields_to}"""
 
         if is_sequence:
             self.outfile += f"""
@@ -891,13 +929,8 @@ impl {orig_name} {{
         print(orig_name)
         name = orig_name
 
-        fields = [
-            child for child in tree.children[1].children if child.data in ["field", "optional_field"]]
-
-        # Omit if there are 0 fields, as is normally the case for extension IEs
-        # if len(fields) == 0:
-        #     self.comment(tree, "omitted\n")
-        #     return
+        # fields = [
+        #     child for child in tree.children[1].children if child.data in ["field", "optional_field", "extension_container"]]
 
         field_interpreter = StructFields()
         fields_from_interpreter = StructFieldsFrom()
@@ -906,12 +939,6 @@ impl {orig_name} {{
         for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter, fields_to_interpreter]:
             i.visit(tree.children[1])
 
-        # for i in [field_interpreter, fields_from_interpreter, find_opt_interpreter, fields_to_interpreter]:
-        #     i.visit(tree.children[1])
-        # field_interpreter.visit(tree.children[1])
-        # fields_from_interpreter.visit(tree.children[1])
-        # find_opt_interpreter.visit(tree.children[1])
-        # fields_to_interpreter.visit(tree.children[1])
         num_optionals = find_opt_interpreter.num_optionals
         optionals_var = "optionals"
         if num_optionals == 0:
@@ -961,6 +988,23 @@ impl {orig_name} {{
     def generate_top_level_enums(self):
         if self.top_level_enums:
             self.outfile += self.top_level_enums.generate()
+
+
+def decode_ies_string(fields_from):
+    return f"""
+        let num_ies = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        for _ in 0..num_ies {{
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _criticality = Criticality::decode(data)?;
+            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {{
+{fields_from.matches}\
+                _ => {{
+                    data.decode_align()?;
+                    let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+                }}
+            }}
+        }}"""
 
 
 def generate(tree, constants=dict(), verbose=False):
@@ -2100,6 +2144,11 @@ GNB-CUSystemInformation ::= SEQUENCE {
 	iE-Extensions					ProtocolExtensionContainer { { GNB-CUSystemInformation-ExtIEs } } OPTIONAL,
 	...
 }
+
+GNB-CUSystemInformation-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
+	{ID id-systemInformationAreaID  CRITICALITY ignore	EXTENSION SystemInformationAreaID PRESENCE optional } ,
+	...
+}
 """, """\
 
 // GnbCuSystemInformation
@@ -2110,7 +2159,7 @@ pub struct GnbCuSystemInformation {
 
 impl GnbCuSystemInformation {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
+        let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let sibtypetobeupdatedlist = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
@@ -2120,25 +2169,9 @@ impl GnbCuSystemInformation {
             items
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
-
         Ok(Self {
             sibtypetobeupdatedlist,
+            system_information_area_id,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2164,7 +2197,7 @@ impl AperCodec for GnbCuSystemInformation {
     fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("GnbCuSystemInformation"))
     }
-}""", constants={"maxnoofSIBTypes": 32})
+}""", constants={"maxnoofSIBTypes": 32, "id-systemInformationAreaID": 239})
 
     def test_inline_choice(self):
         self.should_generate("""\

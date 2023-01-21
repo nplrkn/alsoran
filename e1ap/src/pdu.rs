@@ -105,12 +105,13 @@ impl AperCodec for Reset {
 #[derive(Clone, Debug)]
 pub enum ResetType {
     E1Interface(ResetAll),
+
     PartOfE1Interface(UeAssociatedLogicalE1ConnectionListRes),
 }
 
 impl ResetType {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -121,20 +122,18 @@ impl ResetType {
             1 => Ok(Self::PartOfE1Interface(
                 UeAssociatedLogicalE1ConnectionListRes::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::E1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::PartOfE1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -696,6 +695,9 @@ pub struct SupportedPlmnsItem {
     pub slice_support_list: Option<SliceSupportList>,
     pub nr_cgi_support_list: Option<NrCgiSupportList>,
     pub qos_parameters_support_list: Option<QosParametersSupportList>,
+    pub npn_support_info: Option<NpnSupportInfo>,
+    pub extended_slice_support_list: Option<ExtendedSliceSupportList>,
+    pub extended_nr_cgi_support_list: Option<ExtendedNrCgiSupportList>,
 }
 
 impl SupportedPlmnsItem {
@@ -718,28 +720,42 @@ impl SupportedPlmnsItem {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[3] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
+        let mut npn_support_info: Option<NpnSupportInfo> = None;
+        let mut extended_slice_support_list: Option<ExtendedSliceSupportList> = None;
+        let mut extended_nr_cgi_support_list: Option<ExtendedNrCgiSupportList> = None;
 
+        if optionals[3] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    110 => npn_support_info = Some(NpnSupportInfo::decode(data)?),
+                    125 => {
+                        extended_slice_support_list = Some(ExtendedSliceSupportList::decode(data)?)
+                    }
+                    135 => {
+                        extended_nr_cgi_support_list = Some(ExtendedNrCgiSupportList::decode(data)?)
+                    }
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             plmn_identity,
             slice_support_list,
             nr_cgi_support_list,
             qos_parameters_support_list,
+            npn_support_info,
+            extended_slice_support_list,
+            extended_nr_cgi_support_list,
         })
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
@@ -2778,12 +2794,13 @@ impl AperCodec for BearerContextSetupRequest {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextSetupRequest {
     EutranBearerContextSetupRequest(EutranBearerContextSetupRequest),
+
     NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest),
 }
 
 impl SystemBearerContextSetupRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -2796,20 +2813,18 @@ impl SystemBearerContextSetupRequest {
             1 => Ok(Self::NgRanBearerContextSetupRequest(
                 NgRanBearerContextSetupRequest::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranBearerContextSetupRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanBearerContextSetupRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -2930,12 +2945,13 @@ impl AperCodec for BearerContextSetupResponse {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextSetupResponse {
     EutranBearerContextSetupResponse(EutranBearerContextSetupResponse),
+
     NgRanBearerContextSetupResponse(NgRanBearerContextSetupResponse),
 }
 
 impl SystemBearerContextSetupResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -2948,20 +2964,18 @@ impl SystemBearerContextSetupResponse {
             1 => Ok(Self::NgRanBearerContextSetupResponse(
                 NgRanBearerContextSetupResponse::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranBearerContextSetupResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanBearerContextSetupResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -3331,12 +3345,13 @@ impl AperCodec for BearerContextModificationRequest {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationRequest {
     EutranBearerContextModificationRequest(EutranBearerContextModificationRequest),
+
     NgRanBearerContextModificationRequest(NgRanBearerContextModificationRequest),
 }
 
 impl SystemBearerContextModificationRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -3349,20 +3364,18 @@ impl SystemBearerContextModificationRequest {
             1 => Ok(Self::NgRanBearerContextModificationRequest(
                 NgRanBearerContextModificationRequest::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranBearerContextModificationRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanBearerContextModificationRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -3483,12 +3496,13 @@ impl AperCodec for BearerContextModificationResponse {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationResponse {
     EutranBearerContextModificationResponse(EutranBearerContextModificationResponse),
+
     NgRanBearerContextModificationResponse(NgRanBearerContextModificationResponse),
 }
 
 impl SystemBearerContextModificationResponse {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -3501,20 +3515,18 @@ impl SystemBearerContextModificationResponse {
             1 => Ok(Self::NgRanBearerContextModificationResponse(
                 NgRanBearerContextModificationResponse::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranBearerContextModificationResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanBearerContextModificationResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -3745,12 +3757,13 @@ impl AperCodec for BearerContextModificationRequired {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationRequired {
     EutranBearerContextModificationRequired(EutranBearerContextModificationRequired),
+
     NgRanBearerContextModificationRequired(NgRanBearerContextModificationRequired),
 }
 
 impl SystemBearerContextModificationRequired {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -3763,20 +3776,18 @@ impl SystemBearerContextModificationRequired {
             1 => Ok(Self::NgRanBearerContextModificationRequired(
                 NgRanBearerContextModificationRequired::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranBearerContextModificationRequired(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanBearerContextModificationRequired(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -3896,12 +3907,13 @@ impl AperCodec for BearerContextModificationConfirm {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationConfirm {
     EutranBearerContextModificationConfirm(EutranBearerContextModificationConfirm),
+
     NgRanBearerContextModificationConfirm(NgRanBearerContextModificationConfirm),
 }
 
 impl SystemBearerContextModificationConfirm {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -3914,20 +3926,18 @@ impl SystemBearerContextModificationConfirm {
             1 => Ok(Self::NgRanBearerContextModificationConfirm(
                 NgRanBearerContextModificationConfirm::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranBearerContextModificationConfirm(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanBearerContextModificationConfirm(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -4784,12 +4794,13 @@ impl AperCodec for GnbCuUpCounterCheckRequest {
 #[derive(Clone, Debug)]
 pub enum SystemGnbCuUpCounterCheckRequest {
     EutranGnbCuUpCounterCheckRequest(EutranGnbCuUpCounterCheckRequest),
+
     NgRanGnbCuUpCounterCheckRequest(NgRanGnbCuUpCounterCheckRequest),
 }
 
 impl SystemGnbCuUpCounterCheckRequest {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -4802,20 +4813,18 @@ impl SystemGnbCuUpCounterCheckRequest {
             1 => Ok(Self::NgRanGnbCuUpCounterCheckRequest(
                 NgRanGnbCuUpCounterCheckRequest::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::EutranGnbCuUpCounterCheckRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::NgRanGnbCuUpCounterCheckRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }

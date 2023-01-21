@@ -14,7 +14,9 @@ use slog::Logger;
 #[derive(Clone, Debug)]
 pub enum E1apPdu {
     InitiatingMessage(InitiatingMessage),
+
     SuccessfulOutcome(SuccessfulOutcome),
+
     UnsuccessfulOutcome(UnsuccessfulOutcome),
 }
 
@@ -41,10 +43,12 @@ impl E1apPdu {
                 aper::encode::encode_choice_idx(data, 0, 2, true, 0, false)?;
                 x.encode(data)
             }
+
             Self::SuccessfulOutcome(x) => {
                 aper::encode::encode_choice_idx(data, 0, 2, true, 1, false)?;
                 x.encode(data)
             }
+
             Self::UnsuccessfulOutcome(x) => {
                 aper::encode::encode_choice_idx(data, 0, 2, true, 2, false)?;
                 x.encode(data)

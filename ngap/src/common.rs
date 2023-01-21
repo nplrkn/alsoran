@@ -11,7 +11,9 @@ use num_enum::TryFromPrimitive;
 #[repr(u8)]
 pub enum Criticality {
     Reject,
+
     Ignore,
+
     Notify,
 }
 
@@ -43,7 +45,9 @@ impl AperCodec for Criticality {
 #[repr(u8)]
 pub enum Presence {
     Optional,
+
     Conditional,
+
     Mandatory,
 }
 
@@ -74,6 +78,7 @@ impl AperCodec for Presence {
 #[derive(Clone, Debug)]
 pub enum PrivateIeId {
     Local(u16),
+
     Global(Vec<u8>),
 }
 
@@ -101,6 +106,7 @@ impl PrivateIeId {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(65535), false, *x as i128, false)
             }
+
             Self::Global(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 aper::encode::encode_octetstring(data, None, None, false, &x, false)
@@ -201,7 +207,9 @@ impl AperCodec for ProtocolIeId {
 #[repr(u8)]
 pub enum TriggeringMessage {
     InitiatingMessage,
+
     SuccessfulOutcome,
+
     UnsuccessfullOutcome,
 }
 

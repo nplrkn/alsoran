@@ -105,12 +105,13 @@ impl AperCodec for Reset {
 #[derive(Clone, Debug)]
 pub enum ResetType {
     F1Interface(ResetAll),
+
     PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes),
 }
 
 impl ResetType {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -121,20 +122,18 @@ impl ResetType {
             1 => Ok(Self::PartOfF1Interface(
                 UeAssociatedLogicalF1ConnectionListRes::decode(data)?,
             )),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::F1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::PartOfF1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -15810,12 +15809,13 @@ impl AperCodec for PositioningActivationRequest {
 #[derive(Clone, Debug)]
 pub enum SrsType {
     SemipersistentSrs(SemipersistentSrs),
+
     AperiodicSrs(AperiodicSrs),
 }
 
 impl SrsType {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -15824,20 +15824,18 @@ impl SrsType {
         match idx {
             0 => Ok(Self::SemipersistentSrs(SemipersistentSrs::decode(data)?)),
             1 => Ok(Self::AperiodicSrs(AperiodicSrs::decode(data)?)),
-            2 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::SemipersistentSrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::AperiodicSrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -15871,23 +15869,24 @@ impl SemipersistentSrs {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             srs_resource_set_id,
             srs_spatial_relation,
@@ -15936,23 +15935,24 @@ impl AperiodicSrs {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+            let num_ies =
+                aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+            for _ in 0..num_ies {
+                let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _criticality = Criticality::decode(data)?;
+                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                match id {
+                    _ => {
+                        data.decode_align()?;
+                        let _ignored_bytes =
+                            aper::decode::decode_octetstring(data, None, None, false)?;
+                    }
+                }
+            }
+        }
         Ok(Self {
             aperiodic,
             srs_resource_trigger,

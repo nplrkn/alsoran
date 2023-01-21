@@ -14,13 +14,15 @@ use slog::Logger;
 #[derive(Clone, Debug)]
 pub enum F1apPdu {
     InitiatingMessage(InitiatingMessage),
+
     SuccessfulOutcome(SuccessfulOutcome),
+
     UnsuccessfulOutcome(UnsuccessfulOutcome),
 }
 
 impl F1apPdu {
     fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(aper::AperCodecError::new(
                 "CHOICE additions not implemented",
@@ -32,24 +34,23 @@ impl F1apPdu {
             2 => Ok(Self::UnsuccessfulOutcome(UnsuccessfulOutcome::decode(
                 data,
             )?)),
-            3 => Err(AperCodecError::new(
-                "Choice extension container not implemented",
-            )),
             _ => Err(AperCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
         match self {
             Self::InitiatingMessage(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
+
             Self::SuccessfulOutcome(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
+
             Self::UnsuccessfulOutcome(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
                 x.encode(data)
             }
         }
