@@ -2,7 +2,7 @@ use super::ies::*;
 use super::pdu::*;
 use super::top_pdu::*;
 use bitvec::prelude::*;
-use net::{AperCodecError, AperSerde};
+use net::{AperSerde, PerCodecError};
 
 fn make_ng_setup() -> NgSetupRequest {
     let plmn_identity = PlmnIdentity(vec![0x02, 0xf8, 0x39]);
@@ -22,7 +22,11 @@ fn make_ng_setup() -> NgSetupRequest {
                         sd: Some(Sd(vec![1, 2, 3])),
                     },
                 }]),
+                npn_support: None,
+                extended_tai_slice_support_list: None,
             }]),
+            configured_tac_indication: None,
+            rat_information: None,
         }]),
         default_paging_drx: PagingDrx::V128,
         ue_retention_information: None,
@@ -32,7 +36,7 @@ fn make_ng_setup() -> NgSetupRequest {
 }
 
 #[test]
-fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
+fn test_ngap_pdu_coding() -> Result<(), PerCodecError> {
     let ng_setup = make_ng_setup();
     let ngap_pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(ng_setup));
     let bytes = ngap_pdu.into_bytes()?;
@@ -50,7 +54,7 @@ fn test_ngap_pdu_coding() -> Result<(), AperCodecError> {
 }
 
 #[test]
-fn test_ng_setup() -> Result<(), AperCodecError> {
+fn test_ng_setup() -> Result<(), PerCodecError> {
     let pdu = NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(NgSetupRequest {
         global_ran_node_id: GlobalRanNodeId::GlobalGnbId(GlobalGnbId {
             plmn_identity: PlmnIdentity(vec![2, 3, 2]),
@@ -67,7 +71,11 @@ fn test_ng_setup() -> Result<(), AperCodecError> {
                         sd: None,
                     },
                 }]),
+                npn_support: None,
+                extended_tai_slice_support_list: None,
             }]),
+            configured_tac_indication: None,
+            rat_information: None,
         }]),
         default_paging_drx: PagingDrx::V128,
         ue_retention_information: None,
@@ -84,7 +92,7 @@ fn test_ng_setup() -> Result<(), AperCodecError> {
 }
 
 #[test]
-fn test_ran_ue_ngap_id() -> Result<(), AperCodecError> {
+fn test_ran_ue_ngap_id() -> Result<(), PerCodecError> {
     let ran_ue_ngap_id = RanUeNgapId(0x10203040);
     let bytes = ran_ue_ngap_id.into_bytes()?;
     let output_hex = hex::encode(bytes.clone());

@@ -63,6 +63,9 @@ impl MockCuUp {
             slice_support_list: None,
             nr_cgi_support_list: None,
             qos_parameters_support_list: None,
+            npn_support_info: None,
+            extended_slice_support_list: None,
+            extended_nr_cgi_support_list: None,
         }]);
         let pdu = e1ap::E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuUpE1SetupRequest(
             GnbCuUpE1SetupRequest {
@@ -200,42 +203,30 @@ impl MockCuUp {
                         NgRanBearerContextSetupResponse {
                             pdu_session_resource_setup_list: PduSessionResourceSetupList(vec![
                                 PduSessionResourceSetupItem {
-                                    pdu_session_id: PduSessionId(1),
-                                    security_result: None,
-                                    ng_dl_up_tnl_information: UpTnlInformation::GtpTunnel(
-                                        GtpTunnel {
-                                            transport_layer_address: TransportLayerAddress(
-                                                upf_facing_transport_layer_address,
-                                            ),
-                                            gtp_teid: GtpTeid(vec![2, 3, 2, 1]),
-                                        },
-                                    ),
-                                    pdu_session_data_forwarding_information_response: None,
-                                    ng_dl_up_unchanged: None,
-                                    drb_setup_list_ng_ran: DrbSetupListNgRan(vec![
-                                        DrbSetupItemNgRan {
-                                            drb_id: DrbId(1),
-                                            drb_data_forwarding_information_response: None,
-                                            ul_up_transport_parameters: UpParameters(vec![
-                                                UpParametersItem {
-                                                    up_tnl_information: UpTnlInformation::GtpTunnel(
-                                                        GtpTunnel {
-                                                            transport_layer_address:
-                                                                TransportLayerAddress(du_facing_transport_layer_address),
-                                                            gtp_teid: GtpTeid(vec![2, 3, 2, 1]),
-                                                        },
-                                                    ),
-                                                    cell_group_id: CellGroupId(1),
-                                                },
-                                            ]),
-                                            flow_setup_list: QosFlowList(vec![QosFlowItem {
-                                                qos_flow_identifier: QosFlowIdentifier(1),
-                                            }]),
-                                            flow_failed_list: None,
-                                        },
-                                    ]),
-                                    drb_failed_list_ng_ran: None,
-                                },
+                                    pdu_session_id:PduSessionId(1),
+                                    security_result:None,
+                                    ng_dl_up_tnl_information:UpTnlInformation::GtpTunnel(GtpTunnel{
+                                        transport_layer_address:TransportLayerAddress(upf_facing_transport_layer_address),
+                                        gtp_teid:GtpTeid(vec![2,3,2,1]),
+                                    }),
+                                    pdu_session_data_forwarding_information_response:None,
+                                    ng_dl_up_unchanged:None,
+                                    drb_setup_list_ng_ran:DrbSetupListNgRan(vec![DrbSetupItemNgRan{
+                                        drb_id:DrbId(1),
+                                        drb_data_forwarding_information_response:None,
+                                        ul_up_transport_parameters:UpParameters(vec![UpParametersItem{
+                                            up_tnl_information:UpTnlInformation::GtpTunnel(GtpTunnel{
+                                                transport_layer_address:TransportLayerAddress(du_facing_transport_layer_address),
+                                                gtp_teid:GtpTeid(vec![2,3,2,1])}),
+                                            cell_group_id:CellGroupId(1), 
+                                            qos_mapping_information: None }]),
+                                        flow_setup_list:QosFlowList(vec![QosFlowItem{
+                                            qos_flow_identifier:QosFlowIdentifier(1), 
+                                            qos_flow_mapping_indication: None }]),
+                                        flow_failed_list:None}]),
+                                    drb_failed_list_ng_ran:None, 
+                                    redundant_n_g_dl_up_tnl_information: None, 
+                                    redundant_pdu_session_information_used: None },
                             ]),
                             pdu_session_resource_failed_list: None,
                         },

@@ -84,7 +84,7 @@ def decode_expression(tree):
     if type_info.seqof:
         ie_extra_lines = """
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                let _ = Criticality::decode(data)?;
+                let _ = Criticality::aper_decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;""" if type_info.seqof == "ie_container_sequence_of" else ""
         return f"""{{
             let length = aper::decode::decode_length_determinent(data, {type_info.constraints})?;
@@ -108,7 +108,7 @@ def decode_expression(tree):
     elif type_info.typ == "bool":
         return f"aper::decode::decode_bool(data)?"
     else:
-        return f"""{type_info.typ.replace("<", "::<")}::decode(data)?"""
+        return f"""{type_info.typ.replace("<", "::<")}::aper_decode(data)?"""
 
 
 # Returns a lambda (x, data="data", copy_type_deref=""), where x is the field name, data is the
@@ -120,10 +120,10 @@ def encode_expression_fn(tree):
         return lambda x, data="data", copy_type_deref="": f"""\
 aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
-            let ie = &mut AperCodecData::new();
+            let ie = &mut PerCodecData::new_aper();
             {encode_expression_fn(tree.children[2])("x", "ie")}?;
             aper::encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.inner_type_info.code}, false)?;
-            Criticality::{type_info.inner_type_info.criticality.title()}.encode({data})?;
+            Criticality::{type_info.inner_type_info.criticality.title()}.aper_encode({data})?;
             aper::encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
             {data}.append_aligned(ie);
         }}
@@ -149,7 +149,7 @@ aper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len
     elif type_info.typ == "bool":
         format_string = f"aper::encode::encode_bool({{data}}, {{copy_type_deref}}{{value}})"
     else:
-        format_string = f"""{{value}}.encode({{data}})"""
+        format_string = f"""{{value}}.aper_encode({{data}})"""
 
     return lambda x, data="data", copy_type_deref="": format_string.format(value=x, data=data, copy_type_deref=copy_type_deref)
 
@@ -312,7 +312,7 @@ class ChoiceFieldsFrom(Interpreter):
 
     def extension_container(self, tree):
         self.fields_from += f"""\
-            {self.field_index} => Err(AperCodecError::new("Choice extension container not implemented")),
+            {self.field_index} => Err(PerCodecError::new("Choice extension container not implemented")),
 """
         self.field_index += 1
 
@@ -379,15 +379,15 @@ class IeFields(Interpreter):
 """
         self.num_mandatory_fields += 1
         self.mandatory += f"""\
-        let {name} = {name}.ok_or(aper::AperCodecError::new(format!(
+        let {name} = {name}.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE {name}"
         )))?;
 """
         self.fields_to += f"""
-        let ie = &mut AperCodecData::new();
+        let ie = &mut PerCodecData::new_aper();
         {encode_expression_fn(tree.children[3])("self."+ name, "ie")}?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
-        Criticality::{criticality.title()}.encode(ies)?;
+        Criticality::{criticality.title()}.aper_encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie);
         num_ies += 1;
@@ -412,10 +412,10 @@ class IeFields(Interpreter):
         self.optionals_presence_list += f"self.{name}.is_some(),"
         self.fields_to += f"""
         if let Some(x) = &self.{name} {{
-            let ie = &mut AperCodecData::new();
+            let ie = &mut PerCodecData::new_aper();
             {encode_expression_fn(tree.children[3])("x", "ie", copy_type_deref="*")}?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
-            Criticality::{criticality.title()}.encode(ies)?;
+            Criticality::{criticality.title()}.aper_encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
@@ -453,7 +453,7 @@ class IeFieldsFrom(Interpreter):
         name = self.common(tree)
         self.num_mandatory_fields += 1
         self.mandatory += f"""\
-        let {name} = {name}.ok_or(aper::AperCodecError::new(format!(
+        let {name} = {name}.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE {name}"
         )))?;
 """
@@ -512,11 +512,11 @@ class StructFieldsTo(Interpreter):
 APER_CODEC_IMPL_FORMAT = """\
 impl AperCodec for {name} {{
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
-        {name}::decode_inner(data).map_err(|e: AperCodecError| e.push_context("{name}"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
+        {name}::decode_inner(data).map_err(|mut e: PerCodecError| {{e.push_context("{name}"); e}})
     }}
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("{name}"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {{e.push_context("{name}"); e}})
     }}
 }}"""
 
@@ -560,14 +560,14 @@ pub enum UnsuccessfulOutcome {
     def add_procedure(self, p):
         self.initiating_enum += f"    {p.initiating}({p.initiating}),\n"
         self.initiating_decode_matches += f"""\
-            {p.code} => Ok(Self::{p.initiating}({p.initiating}::decode(data)?)),
+            {p.code} => Ok(Self::{p.initiating}({p.initiating}::aper_decode(data)?)),
 """
         self.initiating_encode_matches += f"""\
             Self::{p.initiating}(x) => {{
                 aper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
-                Criticality::{p.criticality.title()}.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::{p.criticality.title()}.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }}
@@ -575,14 +575,14 @@ pub enum UnsuccessfulOutcome {
         if p.successful:
             self.successful_enum += f"    {p.successful}({p.successful}),\n"
             self.successful_decode_matches += f"""\
-            {p.code} => Ok(Self::{p.successful}({p.successful}::decode(data)?)),
+            {p.code} => Ok(Self::{p.successful}({p.successful}::aper_decode(data)?)),
 """
             self.successful_encode_matches += f"""\
             Self::{p.successful}(x) => {{
                 aper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
-                Criticality::{p.criticality.title()}.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::{p.criticality.title()}.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }}
@@ -590,14 +590,14 @@ pub enum UnsuccessfulOutcome {
         if p.unsuccessful:
             self.unsuccessful_enum += f"    {p.unsuccessful}({p.unsuccessful}),\n"
             self.unsuccessful_decode_matches += f"""\
-            {p.code} => Ok(Self::{p.unsuccessful}({p.unsuccessful}::decode(data)?)),
+            {p.code} => Ok(Self::{p.unsuccessful}({p.unsuccessful}::aper_decode(data)?)),
 """
             self.unsuccessful_encode_matches += f"""\
             Self::{p.unsuccessful}(x) => {{
                 aper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
-                Criticality::{p.criticality.title()}.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::{p.criticality.title()}.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }}
@@ -606,16 +606,16 @@ pub enum UnsuccessfulOutcome {
     def generate(self):
         impl = """
 impl {name} {{
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::decode(data)?;
+        let _ = Criticality::aper_decode(data)?;
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         match id {{
 {decode_matches}\
-            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {{}}", x)))
+            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {{}}", x)))
         }}
     }}
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
         match self {{
 {encode_matches}\
         }}
@@ -705,7 +705,7 @@ impl Procedure for {p.name} {{
         }}
     }}
 
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {{
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError> {{
         {top_pdu}::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
     }}
 
@@ -740,7 +740,7 @@ impl Indication for {p.name} {{
         <T as IndicationHandler<{p.name}>>::handle(provider, req, logger).await;
     }}
 
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {{
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError> {{
         {top_pdu}::InitiatingMessage(InitiatingMessage::{p.initiating}(r)).into_bytes()
     }}
 }}
@@ -762,14 +762,14 @@ pub enum {name} {{
 }}
 
 impl {name} {{
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
-            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+            return Err(PerCodecError::new("Extended enum not implemented"));
         }}
-        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }}
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
         aper::encode::encode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)}, *self as i128, false)
     }}
 }}
@@ -798,17 +798,17 @@ pub enum {name} {{
 }}
 
 impl {name} {{
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }}
         match idx {{
 {fields_from_interpreter.fields_from}\
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }}
     }}
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
         match self {{
 {fields_to_interpreter.fields_to}\
         }}
@@ -829,10 +829,10 @@ impl {name} {{
 pub struct {name}(pub {inner});
 
 impl {name} {{
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         Ok(Self({decode_expression(tree.children[1])}))
     }}
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
         {encode_expression_fn(tree.children[1])("self.0")}
     }}
 }}
@@ -878,7 +878,7 @@ pub struct {name} {{
 }}
 
 impl {orig_name} {{
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{"""
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{"""
 
         if is_sequence:
             self.outfile += f"""
@@ -890,11 +890,11 @@ impl {orig_name} {{
 {fields_from.mut_field_vars}
         for _ in 0..len {{
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
+            let _ = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
-                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {{}}", x)))
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x)))
             }}
         }}
 {fields_from.mandatory}\
@@ -902,9 +902,9 @@ impl {orig_name} {{
 {fields_from.self_fields}\
         }})
     }}
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
         let {mut}num_ies = 0;
-        let ies = &mut AperCodecData::new();
+        let ies = &mut PerCodecData::new_aper();
 {fields.fields_to}"""
 
         if is_sequence:
@@ -952,14 +952,14 @@ pub struct {name} {{
 }}
 
 impl {orig_name} {{
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {{
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
         let ({optionals_var}, _extensions_present) = aper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
 {fields_from_interpreter.fields_from}
         Ok(Self {{
 {fields_from_interpreter.self_fields}\
         }})
     }}
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {{
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
 {fields_to_interpreter.optional_bitfield}
         aper::encode::encode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, &optionals, false)?;
 {fields_to_interpreter.fields_to}
@@ -992,10 +992,10 @@ impl {orig_name} {{
 
 def decode_ies_string(fields_from):
     return f"""
-        let num_ies = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let num_ies = aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
         for _ in 0..num_ies {{
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _criticality = Criticality::decode(data)?;
+            let _criticality = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
@@ -1077,7 +1077,7 @@ impl Procedure for AmfConfigurationUpdateProcedure {
         }
     }
 
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::AmfConfigurationUpdate(r)).into_bytes()
     }
 
@@ -1109,7 +1109,7 @@ impl Indication for HandoverNotificationProcedure {
         <T as IndicationHandler<HandoverNotificationProcedure>>::handle(provider, req, logger).await;
     }
 
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError> {
         NgapPdu::InitiatingMessage(InitiatingMessage::HandoverNotify(r)).into_bytes()
     }
 }
@@ -1121,31 +1121,31 @@ pub enum InitiatingMessage {
 }
 
 impl InitiatingMessage {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::decode(data)?;
+        let _ = Criticality::aper_decode(data)?;
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         match id {
-            0 => Ok(Self::AmfConfigurationUpdate(AmfConfigurationUpdate::decode(data)?)),
-            11 => Ok(Self::HandoverNotify(HandoverNotify::decode(data)?)),
-            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {}", x)))
+            0 => Ok(Self::AmfConfigurationUpdate(AmfConfigurationUpdate::aper_decode(data)?)),
+            11 => Ok(Self::HandoverNotify(HandoverNotify::aper_decode(data)?)),
+            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AmfConfigurationUpdate(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
-                Criticality::Reject.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::Reject.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
             Self::HandoverNotify(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
-                Criticality::Ignore.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::Ignore.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
@@ -1156,11 +1156,11 @@ impl InitiatingMessage {
 
 impl AperCodec for InitiatingMessage {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        InitiatingMessage::decode_inner(data).map_err(|e: AperCodecError| e.push_context("InitiatingMessage"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        InitiatingMessage::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("InitiatingMessage"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("InitiatingMessage"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("InitiatingMessage"))
     }
 }
 
@@ -1170,22 +1170,22 @@ pub enum SuccessfulOutcome {
 }
 
 impl SuccessfulOutcome {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::decode(data)?;
+        let _ = Criticality::aper_decode(data)?;
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         match id {
-            0 => Ok(Self::AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge::decode(data)?)),
-            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {}", x)))
+            0 => Ok(Self::AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge::aper_decode(data)?)),
+            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AmfConfigurationUpdateAcknowledge(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
-                Criticality::Reject.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::Reject.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
@@ -1196,11 +1196,11 @@ impl SuccessfulOutcome {
 
 impl AperCodec for SuccessfulOutcome {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SuccessfulOutcome::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SuccessfulOutcome"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        SuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SuccessfulOutcome"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SuccessfulOutcome"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SuccessfulOutcome"))
     }
 }
 
@@ -1210,22 +1210,22 @@ pub enum UnsuccessfulOutcome {
 }
 
 impl UnsuccessfulOutcome {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::decode(data)?;
+        let _ = Criticality::aper_decode(data)?;
         let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
         match id {
-            0 => Ok(Self::AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure::decode(data)?)),
-            x => return Err(aper::AperCodecError::new(format!("Unrecognised procedure code {}", x)))
+            0 => Ok(Self::AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure::aper_decode(data)?)),
+            x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AmfConfigurationUpdateFailure(x) => {
                 aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
-                Criticality::Reject.encode(data)?;
-                let container = &mut AperCodecData::new();
-                x.encode(container)?;
+                Criticality::Reject.aper_encode(data)?;
+                let container = &mut PerCodecData::new_aper();
+                x.aper_encode(container)?;
                 aper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
@@ -1236,11 +1236,11 @@ impl UnsuccessfulOutcome {
 
 impl AperCodec for UnsuccessfulOutcome {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UnsuccessfulOutcome::decode_inner(data).map_err(|e: AperCodecError| e.push_context("UnsuccessfulOutcome"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        UnsuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UnsuccessfulOutcome"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("UnsuccessfulOutcome"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UnsuccessfulOutcome"))
     }
 }
 """, constants={"id-AMFConfigurationUpdate": 0, "id-HandoverNotification": 11})
@@ -1255,21 +1255,21 @@ ProcedureCode		::= INTEGER (0..255)
 pub struct ProcedureCode(pub u8);
 
 impl ProcedureCode {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
 impl AperCodec for ProcedureCode {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        ProcedureCode::decode_inner(data).map_err(|e: AperCodecError| e.push_context("ProcedureCode"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        ProcedureCode::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ProcedureCode"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("ProcedureCode"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ProcedureCode"))
     }
 }""")
 
@@ -1289,25 +1289,25 @@ pub enum TriggeringMessage {
 }
 
 impl TriggeringMessage {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(2), false)?;
         if extended {
-            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+            return Err(PerCodecError::new("Extended enum not implemented"));
         }
-        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
     }
 }
 
 impl AperCodec for TriggeringMessage {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        TriggeringMessage::decode_inner(data).map_err(|e: AperCodecError| e.push_context("TriggeringMessage"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        TriggeringMessage::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("TriggeringMessage"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("TriggeringMessage"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("TriggeringMessage"))
     }
 }"""
         self.should_generate(input, output)
@@ -1333,11 +1333,11 @@ pub struct WlanMeasurementConfiguration {
 }
 
 impl WlanMeasurementConfiguration {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 2)?;
-        let wlan_meas_config = WlanMeasConfig::decode(data)?;
+        let wlan_meas_config = WlanMeasConfig::aper_decode(data)?;
         let wlan_rtt = if optionals[0] {
-            Some(WlanRtt::decode(data)?)
+            Some(WlanRtt::aper_decode(data)?)
         } else {
             None
         };
@@ -1348,8 +1348,8 @@ impl WlanMeasurementConfiguration {
             for _ in 0..num_fields {
                 let (protocol_extension_id, _) =
                     aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
+                if matches!(Criticality::aper_decode(data)?, Criticality::Reject) {
+                    return Err(PerCodecError::new(format!(
                         "Unknown protocol extension {} with criticality reject",
                         protocol_extension_id
                     )));
@@ -1364,15 +1364,15 @@ impl WlanMeasurementConfiguration {
             wlan_rtt,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(self.wlan_rtt.is_some());
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        self.wlan_meas_config.encode(data)?;
+        self.wlan_meas_config.aper_encode(data)?;
         if let Some(x) = &self.wlan_rtt {
-            x.encode(data)?;
+            x.aper_encode(data)?;
         }
 
         Ok(())
@@ -1381,11 +1381,11 @@ impl WlanMeasurementConfiguration {
 
 impl AperCodec for WlanMeasurementConfiguration {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        WlanMeasurementConfiguration::decode_inner(data).map_err(|e: AperCodecError| e.push_context("WlanMeasurementConfiguration"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        WlanMeasurementConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanMeasurementConfiguration"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("WlanMeasurementConfiguration"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanMeasurementConfiguration"))
     }
 }
 // WlanRtt
@@ -1396,25 +1396,25 @@ pub enum WlanRtt {
 }
 
 impl WlanRtt {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
         if extended {
-            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+            return Err(PerCodecError::new("Extended enum not implemented"));
         }
-        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
 impl AperCodec for WlanRtt {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        WlanRtt::decode_inner(data).map_err(|e: AperCodecError| e.push_context("WlanRtt"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        WlanRtt::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanRtt"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("WlanRtt"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanRtt"))
     }
 }"""
         self.should_generate(input, output)
@@ -1430,21 +1430,21 @@ LTEUERLFReportContainer::= OCTET STRING (CONTAINING Foo)
 pub struct LteUeRlfReportContainer(pub Vec<u8>);
 
 impl LteUeRlfReportContainer {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(aper::decode::decode_octetstring(data, None, None, false)?))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
 impl AperCodec for LteUeRlfReportContainer {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        LteUeRlfReportContainer::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LteUeRlfReportContainer"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        LteUeRlfReportContainer::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LteUeRlfReportContainer"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LteUeRlfReportContainer"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LteUeRlfReportContainer"))
     }
 }"""
         self.should_generate(input, output)
@@ -1460,21 +1460,21 @@ MaximumDataBurstVolume::= INTEGER(0..4095, ..., 4096.. 2000000)
 pub struct MaximumDataBurstVolume(pub i128);
 
 impl MaximumDataBurstVolume {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(0), Some(4095), true)?.0))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_integer(data, Some(0), Some(4095), true, self.0, false)
     }
 }
 
 impl AperCodec for MaximumDataBurstVolume {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        MaximumDataBurstVolume::decode_inner(data).map_err(|e: AperCodecError| e.push_context("MaximumDataBurstVolume"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        MaximumDataBurstVolume::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumDataBurstVolume"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("MaximumDataBurstVolume"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumDataBurstVolume"))
     }
 }"""
         self.should_generate(input, output)
@@ -1490,21 +1490,21 @@ MobilityInformation ::= BIT STRING(SIZE(16))
 pub struct MobilityInformation(pub BitString);
 
 impl MobilityInformation {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(aper::decode::decode_bitstring(data, Some(16), Some(16), false)?))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
 impl AperCodec for MobilityInformation {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        MobilityInformation::decode_inner(data).map_err(|e: AperCodecError| e.push_context("MobilityInformation"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        MobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MobilityInformation"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("MobilityInformation"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MobilityInformation"))
     }
 }"""
         self.should_generate(input, output)
@@ -1528,25 +1528,25 @@ pub enum MaximumIntegrityProtectedDataRate {
 }
 
 impl MaximumIntegrityProtectedDataRate {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
         if extended {
-            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+            return Err(PerCodecError::new("Extended enum not implemented"));
         }
-        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
 impl AperCodec for MaximumIntegrityProtectedDataRate {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        MaximumIntegrityProtectedDataRate::decode_inner(data).map_err(|e: AperCodecError| e.push_context("MaximumIntegrityProtectedDataRate"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        MaximumIntegrityProtectedDataRate::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumIntegrityProtectedDataRate"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("MaximumIntegrityProtectedDataRate"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumIntegrityProtectedDataRate"))
     }
 }"""
         self.should_generate(input, output)
@@ -1570,24 +1570,24 @@ pub enum EventTrigger {
 }
 
 impl EventTrigger {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::OutOfCoverage(OutOfCoverage::decode(data)?)),
+            0 => Ok(Self::OutOfCoverage(OutOfCoverage::aper_decode(data)?)),
             1 => Ok(Self::EventL1LoggedMdtConfig),
             2 => Ok(Self::ShortMacroEnbId(aper::decode::decode_bitstring(data, Some(18), Some(18), false)?)),
-            3 => Err(AperCodecError::new("Choice extension container not implemented")),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            3 => Err(PerCodecError::new("Choice extension container not implemented")),
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::OutOfCoverage(x) => {
                 aper::encode::encode_choice_idx(data, 0, 3, false, 0)?;
-                x.encode(data)
+                x.aper_encode(data)
             },
             Self::EventL1LoggedMdtConfig => {
                 aper::encode::encode_choice_idx(data, 0, 3, false, 1)?;
@@ -1609,14 +1609,14 @@ pub enum OutOfCoverage {
 }
 
 impl OutOfCoverage {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
         if extended {
-            return Err(aper::AperCodecError::new("Extended enum not implemented"));
+            return Err(PerCodecError::new("Extended enum not implemented"));
         }
-        Self::try_from(idx as u8).map_err(|_| AperCodecError::new("Unknown enum variant"))
+        Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
@@ -1645,7 +1645,7 @@ pub struct PduSessionResourceSetupRequest {
 }
 
 impl PduSessionResourceSetupRequest {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -1654,15 +1654,15 @@ impl PduSessionResourceSetupRequest {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
+            let _ = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
+                10 => amf_ue_ngap_id = Some(AmfUeNgapId::aper_decode(data)?),
                 83 => ran_paging_priority = Some(aper::decode::decode_octetstring(data, None, None, false)?),
-                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
-        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(aper::AperCodecError::new(format!(
+        let amf_ue_ngap_id = amf_ue_ngap_id.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE amf_ue_ngap_id"
         )))?;
         Ok(Self {
@@ -1670,23 +1670,23 @@ impl PduSessionResourceSetupRequest {
             ran_paging_priority,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut AperCodecData::new();
+        let ies = &mut PerCodecData::new_aper();
 
-        let ie = &mut AperCodecData::new();
-        self.amf_ue_ngap_id.encode(ie)?;
+        let ie = &mut PerCodecData::new_aper();
+        self.amf_ue_ngap_id.aper_encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
-        Criticality::Reject.encode(ies)?;
+        Criticality::Reject.aper_encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie);
         num_ies += 1;
 
         if let Some(x) = &self.ran_paging_priority {
-            let ie = &mut AperCodecData::new();
+            let ie = &mut PerCodecData::new_aper();
             aper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
-            Criticality::Ignore.encode(ies)?;
+            Criticality::Ignore.aper_encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
@@ -1701,11 +1701,11 @@ impl PduSessionResourceSetupRequest {
 
 impl AperCodec for PduSessionResourceSetupRequest {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        PduSessionResourceSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("PduSessionResourceSetupRequest"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        PduSessionResourceSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PduSessionResourceSetupRequest"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("PduSessionResourceSetupRequest"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PduSessionResourceSetupRequest"))
     }
 }""", constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
 
@@ -1724,18 +1724,18 @@ pub enum GnbId {
 }
 
 impl GnbId {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::GnbId(aper::decode::decode_bitstring(data, Some(22), Some(32), false)?)),
-            1 => Err(AperCodecError::new("Choice extension container not implemented")),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            1 => Err(PerCodecError::new("Choice extension container not implemented")),
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::GnbId(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
@@ -1747,11 +1747,11 @@ impl GnbId {
 
 impl AperCodec for GnbId {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        GnbId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("GnbId"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        GnbId::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbId"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("GnbId"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbId"))
     }
 }""")
 
@@ -1771,18 +1771,18 @@ pub enum PrivateIeId {
 }
 
 impl PrivateIeId {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::Local(aper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16)),
             1 => Ok(Self::Global(aper::decode::decode_octetstring(data, None, None, false)?)),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Local(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
@@ -1798,11 +1798,11 @@ impl PrivateIeId {
 
 impl AperCodec for PrivateIeId {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        PrivateIeId::decode_inner(data).map_err(|e: AperCodecError| e.push_context("PrivateIeId"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        PrivateIeId::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PrivateIeId"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("PrivateIeId"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PrivateIeId"))
     }
 }""")
 
@@ -1816,21 +1816,21 @@ ExpectedActivityPeriod ::= INTEGER (1..30|40|50, ..., -1..70)
 pub struct ExpectedActivityPeriod(pub i128);
 
 impl ExpectedActivityPeriod {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(aper::decode::decode_integer(data, Some(1), Some(50), true)?.0))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_integer(data, Some(1), Some(50), true, self.0, false)
     }
 }
 
 impl AperCodec for ExpectedActivityPeriod {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        ExpectedActivityPeriod::decode_inner(data).map_err(|e: AperCodecError| e.push_context("ExpectedActivityPeriod"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        ExpectedActivityPeriod::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ExpectedActivityPeriod"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("ExpectedActivityPeriod"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ExpectedActivityPeriod"))
     }
 }""")
 
@@ -1844,21 +1844,21 @@ URI-address ::= VisibleString
 pub struct UriAddress(pub String);
 
 impl UriAddress {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self(aper::decode::decode_visible_string(data, None, None, false)?))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_visible_string(data, None, None, false, &self.0, false)
     }
 }
 
 impl AperCodec for UriAddress {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UriAddress::decode_inner(data).map_err(|e: AperCodecError| e.push_context("UriAddress"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        UriAddress::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UriAddress"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("UriAddress"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UriAddress"))
     }
 }""")
 
@@ -1871,20 +1871,20 @@ AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..50)) OF AdditionalD
 pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInformationForHoItem>);
 
 impl AdditionalDluptnlInformationForHoList {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(50), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(AdditionalDluptnlInformationForHoItem::decode(data)?);
+                items.push(AdditionalDluptnlInformationForHoItem::aper_decode(data)?);
             }
             items
         }))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_length_determinent(data, Some(1), Some(50), false, self.0.len())?;
         for x in &self.0 {
-            x.encode(data)?;
+            x.aper_encode(data)?;
         }
         Ok(())
     }
@@ -1892,11 +1892,11 @@ impl AdditionalDluptnlInformationForHoList {
 
 impl AperCodec for AdditionalDluptnlInformationForHoList {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|e: AperCodecError| e.push_context("AdditionalDluptnlInformationForHoList"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AdditionalDluptnlInformationForHoList"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("AdditionalDluptnlInformationForHoList"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AdditionalDluptnlInformationForHoList"))
     }
 }""")
 
@@ -1917,13 +1917,13 @@ pub struct DlprsResourceCoordinates {
 }
 
 impl DlprsResourceCoordinates {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 2)?;
         let listof_dl_prs_resource_set_arp = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(DlprsResourceSetArp::decode(data)?);
+                items.push(DlprsResourceSetArp::aper_decode(data)?);
             }
             items
         };
@@ -1938,7 +1938,7 @@ impl DlprsResourceCoordinates {
             foo,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(self.foo.is_some());
         optionals.push(false);
@@ -1946,7 +1946,7 @@ impl DlprsResourceCoordinates {
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         aper::encode::encode_length_determinent(data, Some(1), Some(2), false, self.listof_dl_prs_resource_set_arp.len())?;
         for x in &self.listof_dl_prs_resource_set_arp {
-            x.encode(data)?;
+            x.aper_encode(data)?;
         }
         Ok(())?;
         if let Some(x) = &self.foo {
@@ -1959,11 +1959,11 @@ impl DlprsResourceCoordinates {
 
 impl AperCodec for DlprsResourceCoordinates {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        DlprsResourceCoordinates::decode_inner(data).map_err(|e: AperCodecError| e.push_context("DlprsResourceCoordinates"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        DlprsResourceCoordinates::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("DlprsResourceCoordinates"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("DlprsResourceCoordinates"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("DlprsResourceCoordinates"))
     }
 }""", constants={"maxnoofPRS-ResourceSets": 2})
 
@@ -1982,26 +1982,26 @@ UE-associatedLogicalF1-ConnectionItemRes F1AP-PROTOCOL-IES ::= {
 pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1ConnectionItem>);
 
 impl UeAssociatedLogicalF1ConnectionListRes {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(63356), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                let _ = Criticality::decode(data)?;
+                let _ = Criticality::aper_decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
+                items.push(UeAssociatedLogicalF1ConnectionItem::aper_decode(data)?);
             }
             items
         }))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_length_determinent(data, Some(1), Some(63356), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut AperCodecData::new();
-            x.encode(ie)?;
+            let ie = &mut PerCodecData::new_aper();
+            x.aper_encode(ie)?;
             aper::encode::encode_integer(data, Some(0), Some(65535), false, 80, false)?;
-            Criticality::Reject.encode(data)?;
+            Criticality::Reject.aper_encode(data)?;
             aper::encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
             data.append_aligned(ie);
         }
@@ -2011,11 +2011,11 @@ impl UeAssociatedLogicalF1ConnectionListRes {
 
 impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(|e: AperCodecError| e.push_context("UeAssociatedLogicalF1ConnectionListRes"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UeAssociatedLogicalF1ConnectionListRes"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("UeAssociatedLogicalF1ConnectionListRes"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UeAssociatedLogicalF1ConnectionListRes"))
     }
 }""", constants={"maxnoofIndividualF1ConnectionsToReset": 63356, "id-UE-associatedLogicalF1-ConnectionItem": 80})
 
@@ -2046,7 +2046,7 @@ pub struct BapMappingConfiguration {
 }
 
 impl BapMappingConfiguration {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
@@ -2054,26 +2054,26 @@ impl BapMappingConfiguration {
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
+            let _ = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                283 => bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?),
-                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+                283 => bh_routing_information_added_list = Some(BhRoutingInformationAddedList::aper_decode(data)?),
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
         Ok(Self {
             bh_routing_information_added_list,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut AperCodecData::new();
+        let ies = &mut PerCodecData::new_aper();
 
         if let Some(x) = &self.bh_routing_information_added_list {
-            let ie = &mut AperCodecData::new();
-            x.encode(ie)?;
+            let ie = &mut PerCodecData::new_aper();
+            x.aper_encode(ie)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 283, false)?;
-            Criticality::Ignore.encode(ies)?;
+            Criticality::Ignore.aper_encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
@@ -2088,11 +2088,11 @@ impl BapMappingConfiguration {
 
 impl AperCodec for BapMappingConfiguration {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        BapMappingConfiguration::decode_inner(data).map_err(|e: AperCodecError| e.push_context("BapMappingConfiguration"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        BapMappingConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BapMappingConfiguration"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("BapMappingConfiguration"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BapMappingConfiguration"))
     }
 }
 // BhRoutingInformationAddedList
@@ -2100,26 +2100,26 @@ impl AperCodec for BapMappingConfiguration {
 pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListItem>);
 
 impl BhRoutingInformationAddedList {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 let _ = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                let _ = Criticality::decode(data)?;
+                let _ = Criticality::aper_decode(data)?;
                 let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
-                items.push(BhRoutingInformationAddedListItem::decode(data)?);
+                items.push(BhRoutingInformationAddedListItem::aper_decode(data)?);
             }
             items
         }))
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         aper::encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
-            let ie = &mut AperCodecData::new();
-            x.encode(ie)?;
+            let ie = &mut PerCodecData::new_aper();
+            x.aper_encode(ie)?;
             aper::encode::encode_integer(data, Some(0), Some(65535), false, 284, false)?;
-            Criticality::Ignore.encode(data)?;
+            Criticality::Ignore.aper_encode(data)?;
             aper::encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
             data.append_aligned(ie);
         }
@@ -2129,11 +2129,11 @@ impl BhRoutingInformationAddedList {
 
 impl AperCodec for BhRoutingInformationAddedList {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        BhRoutingInformationAddedList::decode_inner(data).map_err(|e: AperCodecError| e.push_context("BhRoutingInformationAddedList"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        BhRoutingInformationAddedList::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BhRoutingInformationAddedList"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("BhRoutingInformationAddedList"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BhRoutingInformationAddedList"))
     }
 }""", constants={"maxnoofRoutingEntries": 1024, "id-BH-Routing-Information-Added-List": 283, "id-BH-Routing-Information-Added-List-Item": 284})
 
@@ -2158,13 +2158,13 @@ pub struct GnbCuSystemInformation {
 }
 
 impl GnbCuSystemInformation {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let sibtypetobeupdatedlist = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(SibtypetobeupdatedListItem::decode(data)?);
+                items.push(SibtypetobeupdatedListItem::aper_decode(data)?);
             }
             items
         };
@@ -2174,14 +2174,14 @@ impl GnbCuSystemInformation {
             system_information_area_id,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, true, &optionals, false)?;
         aper::encode::encode_length_determinent(data, Some(1), Some(32), false, self.sibtypetobeupdatedlist.len())?;
         for x in &self.sibtypetobeupdatedlist {
-            x.encode(data)?;
+            x.aper_encode(data)?;
         }
         Ok(())?;
 
@@ -2191,11 +2191,11 @@ impl GnbCuSystemInformation {
 
 impl AperCodec for GnbCuSystemInformation {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        GnbCuSystemInformation::decode_inner(data).map_err(|e: AperCodecError| e.push_context("GnbCuSystemInformation"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        GnbCuSystemInformation::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbCuSystemInformation"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("GnbCuSystemInformation"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbCuSystemInformation"))
     }
 }""", constants={"maxnoofSIBTypes": 32, "id-systemInformationAreaID": 239})
 
@@ -2216,22 +2216,22 @@ pub enum SbcchSlBchMessageType {
 }
 
 impl SbcchSlBchMessageType {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::C1(C1::decode(data)?)),
-            1 => Err(AperCodecError::new("Choice extension container not implemented")),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            0 => Ok(Self::C1(C1::aper_decode(data)?)),
+            1 => Err(PerCodecError::new("Choice extension container not implemented")),
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::C1(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
-                x.encode(data)
+                x.aper_encode(data)
             }
         }
     }
@@ -2239,11 +2239,11 @@ impl SbcchSlBchMessageType {
 
 impl AperCodec for SbcchSlBchMessageType {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SbcchSlBchMessageType::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SbcchSlBchMessageType"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        SbcchSlBchMessageType::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SbcchSlBchMessageType"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SbcchSlBchMessageType"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SbcchSlBchMessageType"))
     }
 }
 // C1
@@ -2254,22 +2254,22 @@ pub enum C1 {
 }
 
 impl C1 {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::MasterInformationBlockSidelink(MasterInformationBlockSidelink::decode(data)?)),
+            0 => Ok(Self::MasterInformationBlockSidelink(MasterInformationBlockSidelink::aper_decode(data)?)),
             1 => Ok(Self::Spare1),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::MasterInformationBlockSidelink(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
-                x.encode(data)
+                x.aper_encode(data)
             }
             Self::Spare1 => {
                 aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
@@ -2281,11 +2281,11 @@ impl C1 {
 
 impl AperCodec for C1 {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        C1::decode_inner(data).map_err(|e: AperCodecError| e.push_context("C1"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        C1::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("C1"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("C1"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("C1"))
     }
 }""")
 
@@ -2307,25 +2307,25 @@ pub struct OverloadStop {
 }
 
 impl OverloadStop {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let _ = aper::decode::decode_sequence_header(data, true, 0)?;
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
+            let _ = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
         Ok(Self {
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let num_ies = 0;
-        let ies = &mut AperCodecData::new();
+        let ies = &mut PerCodecData::new_aper();
 
         aper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
         aper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
@@ -2336,11 +2336,11 @@ impl OverloadStop {
 
 impl AperCodec for OverloadStop {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        OverloadStop::decode_inner(data).map_err(|e: AperCodecError| e.push_context("OverloadStop"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        OverloadStop::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("OverloadStop"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("OverloadStop"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("OverloadStop"))
     }
 }""")
 
@@ -2359,9 +2359,9 @@ pub struct LocationMeasurementIndicationIEs {
 }
 
 impl LocationMeasurementIndicationIEs {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
-        let measurement_indication = SetupRelease::<LocationMeasurementInfo>::decode(data)?;
+        let measurement_indication = SetupRelease::<LocationMeasurementInfo>::aper_decode(data)?;
 
         // Skip over the ProtocolExtensionContainer if present.
         if optionals[0] {
@@ -2369,8 +2369,8 @@ impl LocationMeasurementIndicationIEs {
             for _ in 0..num_fields {
                 let (protocol_extension_id, _) =
                     aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::decode(data)?, Criticality::Reject) {
-                    return Err(AperCodecError::new(format!(
+                if matches!(Criticality::aper_decode(data)?, Criticality::Reject) {
+                    return Err(PerCodecError::new(format!(
                         "Unknown protocol extension {} with criticality reject",
                         protocol_extension_id
                     )));
@@ -2384,12 +2384,12 @@ impl LocationMeasurementIndicationIEs {
             measurement_indication,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(false);
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.measurement_indication.encode(data)?;
+        self.measurement_indication.aper_encode(data)?;
 
         Ok(())
     }
@@ -2397,11 +2397,11 @@ impl LocationMeasurementIndicationIEs {
 
 impl AperCodec for LocationMeasurementIndicationIEs {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        LocationMeasurementIndicationIEs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        LocationMeasurementIndicationIEs::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LocationMeasurementIndicationIEs"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LocationMeasurementIndicationIEs"))
     }
 }""")
 
@@ -2427,7 +2427,7 @@ pub struct AvailabilityCombinationR16 {
 }
 
 impl AvailabilityCombinationR16 {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
         let resource_availability_r_16 = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(5), false)?;
@@ -2442,7 +2442,7 @@ impl AvailabilityCombinationR16 {
             resource_availability_r_16,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
@@ -2458,11 +2458,11 @@ impl AvailabilityCombinationR16 {
 
 impl AperCodec for AvailabilityCombinationR16 {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        AvailabilityCombinationR16::decode_inner(data).map_err(|e: AperCodecError| e.push_context("AvailabilityCombinationR16"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        AvailabilityCombinationR16::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AvailabilityCombinationR16"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("AvailabilityCombinationR16"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AvailabilityCombinationR16"))
     }
 }""", constants={"maxNrofResourceAvailabilityPerCombination-r16": 5})
 
@@ -2485,13 +2485,13 @@ pub struct SystemInformationIEs {
 }
 
 impl SystemInformationIEs {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
         let sib_type_and_info = {
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(SibTypeAndInfo::decode(data)?);
+                items.push(SibTypeAndInfo::aper_decode(data)?);
             }
             items
         };
@@ -2500,13 +2500,13 @@ impl SystemInformationIEs {
             sib_type_and_info,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
         aper::encode::encode_length_determinent(data, Some(1), Some(3), false, self.sib_type_and_info.len())?;
         for x in &self.sib_type_and_info {
-            x.encode(data)?;
+            x.aper_encode(data)?;
         }
         Ok(())?;
 
@@ -2516,11 +2516,11 @@ impl SystemInformationIEs {
 
 impl AperCodec for SystemInformationIEs {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SystemInformationIEs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemInformationIEs"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        SystemInformationIEs::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemInformationIEs"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemInformationIEs"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemInformationIEs"))
     }
 }
 // SibTypeAndInfo
@@ -2531,26 +2531,26 @@ pub enum SibTypeAndInfo {
 }
 
 impl SibTypeAndInfo {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, true)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::Sib2(Sib2::decode(data)?)),
-            1 => Ok(Self::Sib3(Sib3::decode(data)?)),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            0 => Ok(Self::Sib2(Sib2::aper_decode(data)?)),
+            1 => Ok(Self::Sib3(Sib3::aper_decode(data)?)),
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Sib2(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, true, 0, false)?;
-                x.encode(data)
+                x.aper_encode(data)
             }
             Self::Sib3(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, true, 1, false)?;
-                x.encode(data)
+                x.aper_encode(data)
             }
         }
     }
@@ -2558,11 +2558,11 @@ impl SibTypeAndInfo {
 
 impl AperCodec for SibTypeAndInfo {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SibTypeAndInfo::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        SibTypeAndInfo::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SibTypeAndInfo"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SibTypeAndInfo"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SibTypeAndInfo"))
     }
 }""")
 
@@ -2582,19 +2582,19 @@ pub struct CsiAssociatedReportConfigInfo {
 }
 
 impl CsiAssociatedReportConfigInfo {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 0)?;
-        let nzp_csi_rs = NzpCsiRs::decode(data)?;
+        let nzp_csi_rs = NzpCsiRs::aper_decode(data)?;
 
         Ok(Self {
             nzp_csi_rs,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let optionals = BitVec::new();
 
         aper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        self.nzp_csi_rs.encode(data)?;
+        self.nzp_csi_rs.aper_encode(data)?;
 
         Ok(())
     }
@@ -2602,11 +2602,11 @@ impl CsiAssociatedReportConfigInfo {
 
 impl AperCodec for CsiAssociatedReportConfigInfo {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        CsiAssociatedReportConfigInfo::decode_inner(data).map_err(|e: AperCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        CsiAssociatedReportConfigInfo::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
     }
 }
 // NzpCsiRs
@@ -2616,14 +2616,14 @@ pub struct NzpCsiRs {
 }
 
 impl NzpCsiRs {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
         let qcl_info = if optionals[0] {
             Some({
             let length = aper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(TciStateId::decode(data)?);
+                items.push(TciStateId::aper_decode(data)?);
             }
             items
         })
@@ -2635,7 +2635,7 @@ impl NzpCsiRs {
             qcl_info,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut optionals = BitVec::new();
         optionals.push(self.qcl_info.is_some());
 
@@ -2643,7 +2643,7 @@ impl NzpCsiRs {
         if let Some(x) = &self.qcl_info {
             aper::encode::encode_length_determinent(data, Some(1), Some(2), false, x.len())?;
         for x in *&x {
-            x.encode(data)?;
+            x.aper_encode(data)?;
         }
         Ok(())?;
         }
@@ -2654,11 +2654,11 @@ impl NzpCsiRs {
 
 impl AperCodec for NzpCsiRs {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NzpCsiRs::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        NzpCsiRs::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NzpCsiRs"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("NzpCsiRs"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NzpCsiRs"))
     }
 }""")
 
@@ -2687,27 +2687,27 @@ pub enum SystemBearerContextSetupRequest {
 }
 
 impl SystemBearerContextSetupRequest {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
-            return Err(aper::AperCodecError::new("CHOICE additions not implemented"))
+            return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::EutranBearerContextSetupRequest(EutranBearerContextSetupRequest::decode(data)?)),
-            1 => Ok(Self::NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest::decode(data)?)),
-            2 => Err(AperCodecError::new("Choice extension container not implemented")),
-            _ => Err(AperCodecError::new("Unknown choice idx"))
+            0 => Ok(Self::EutranBearerContextSetupRequest(EutranBearerContextSetupRequest::aper_decode(data)?)),
+            1 => Ok(Self::NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest::aper_decode(data)?)),
+            2 => Err(PerCodecError::new("Choice extension container not implemented")),
+            _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextSetupRequest(x) => {
                 aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
-                x.encode(data)
+                x.aper_encode(data)
             }
             Self::NgRanBearerContextSetupRequest(x) => {
                 aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
-                x.encode(data)
+                x.aper_encode(data)
             }
         }
     }
@@ -2715,11 +2715,11 @@ impl SystemBearerContextSetupRequest {
 
 impl AperCodec for SystemBearerContextSetupRequest {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        SystemBearerContextSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemBearerContextSetupRequest"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        SystemBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemBearerContextSetupRequest"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("SystemBearerContextSetupRequest"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemBearerContextSetupRequest"))
     }
 }
 // EutranBearerContextSetupRequest
@@ -2729,33 +2729,33 @@ pub struct EutranBearerContextSetupRequest {
 }
 
 impl EutranBearerContextSetupRequest {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut subscriber_profile_i_dfor_rfp: Option<u16> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
+            let _ = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 43 => subscriber_profile_i_dfor_rfp = Some(aper::decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16),
-                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
         Ok(Self {
             subscriber_profile_i_dfor_rfp,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut AperCodecData::new();
+        let ies = &mut PerCodecData::new_aper();
 
         if let Some(x) = &self.subscriber_profile_i_dfor_rfp {
-            let ie = &mut AperCodecData::new();
+            let ie = &mut PerCodecData::new_aper();
             aper::encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
             aper::encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
-            Criticality::Ignore.encode(ies)?;
+            Criticality::Ignore.aper_encode(ies)?;
             aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
@@ -2769,11 +2769,11 @@ impl EutranBearerContextSetupRequest {
 
 impl AperCodec for EutranBearerContextSetupRequest {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        EutranBearerContextSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupRequest"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        EutranBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("EutranBearerContextSetupRequest"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("EutranBearerContextSetupRequest"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("EutranBearerContextSetupRequest"))
     }
 }
 // NgRanBearerContextSetupRequest
@@ -2783,35 +2783,35 @@ pub struct NgRanBearerContextSetupRequest {
 }
 
 impl NgRanBearerContextSetupRequest {
-    fn decode_inner(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         let len = aper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut pdu_session_resource_to_setup_list: Option<PduSessionResourceToSetupList> = None;
 
         for _ in 0..len {
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-            let _ = Criticality::decode(data)?;
+            let _ = Criticality::aper_decode(data)?;
             let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                321 => pdu_session_resource_to_setup_list = Some(PduSessionResourceToSetupList::decode(data)?),
-                x => return Err(aper::AperCodecError::new(format!("Unrecognised IE type {}", x)))
+                321 => pdu_session_resource_to_setup_list = Some(PduSessionResourceToSetupList::aper_decode(data)?),
+                x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
-        let pdu_session_resource_to_setup_list = pdu_session_resource_to_setup_list.ok_or(aper::AperCodecError::new(format!(
+        let pdu_session_resource_to_setup_list = pdu_session_resource_to_setup_list.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE pdu_session_resource_to_setup_list"
         )))?;
         Ok(Self {
             pdu_session_resource_to_setup_list,
         })
     }
-    fn encode_inner(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         let mut num_ies = 0;
-        let ies = &mut AperCodecData::new();
+        let ies = &mut PerCodecData::new_aper();
 
-        let ie = &mut AperCodecData::new();
-        self.pdu_session_resource_to_setup_list.encode(ie)?;
+        let ie = &mut PerCodecData::new_aper();
+        self.pdu_session_resource_to_setup_list.aper_encode(ie)?;
         aper::encode::encode_integer(ies, Some(0), Some(65535), false, 321, false)?;
-        Criticality::Reject.encode(ies)?;
+        Criticality::Reject.aper_encode(ies)?;
         aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie);
         num_ies += 1;
@@ -2824,11 +2824,11 @@ impl NgRanBearerContextSetupRequest {
 
 impl AperCodec for NgRanBearerContextSetupRequest {
     type Output = Self;
-    fn decode(data: &mut AperCodecData) -> Result<Self, AperCodecError> {
-        NgRanBearerContextSetupRequest::decode_inner(data).map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        NgRanBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NgRanBearerContextSetupRequest"))
     }
-    fn encode(&self, data: &mut AperCodecData) -> Result<(), AperCodecError> {
-        self.encode_inner(data).map_err(|e: AperCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NgRanBearerContextSetupRequest"))
     }
 }""", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
 

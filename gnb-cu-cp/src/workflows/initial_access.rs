@@ -82,6 +82,8 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                         tac: Tac(vec![0, 0, 1]),
                     },
                     time_stamp: None,
+                    ps_cell_information: None,
+                    nid: None,
                 },
             ),
             rrc_establishment_cause,
