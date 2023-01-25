@@ -193,11 +193,15 @@ class StructFieldsFrom(Interpreter):
         self.optional_idx += 1
         self.self_fields += fields_from.self_fields
 
+    def empty_sequence(self, tree):
+        self.optional_idx += 1
+
 
 class StructFindOptionals(Interpreter):
     def __init__(self):
         self.find_optionals = ""
         self.num_optionals = 0
+        self.has_empty_sequence = False
 
     def optional_field(self, tree):
         name = tree.children[0]
@@ -212,6 +216,10 @@ class StructFindOptionals(Interpreter):
 """
         self.num_optionals += 1
 
+    def empty_sequence(self, tree):
+        self.has_empty_sequence = True
+        self.num_optionals += 1
+
 
 class EnumFields(Interpreter):
     def __init__(self):
@@ -221,7 +229,7 @@ class EnumFields(Interpreter):
 
     def enum_field(self, tree):
         self.variants += 1
-        self.enum_fields += f"""
+        self.enum_fields += f"""\
     {tree.children[0]},
 """
 
@@ -240,7 +248,7 @@ class ChoiceFields(Interpreter):
     def choice_field(self, tree):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
-        self.choice_fields += f"""
+        self.choice_fields += f"""\
     {name}{"("+typ+")" if typ != "null" else ""},
 """
 
@@ -248,8 +256,8 @@ class ChoiceFields(Interpreter):
         name = tree.children[0]
         typ = type_and_constraints(tree.children[1]).typ
         self.choice_fields += f"""
-    {name}{"("+typ+")" if typ != "null" else ""},
-"""
+            {name}{"("+typ+")" if typ != "null" else ""},
+        """
 
     def extension_marker(self, tree):
         self.extensible = True
@@ -272,7 +280,7 @@ class ChoiceFieldsTo(Interpreter):
         name = tree.children[0]
         type_info = type_and_constraints(tree.children[1])
 
-        self.fields_to += f"""
+        self.fields_to += f"""\
             Self::{name}{"(x)" if type_info.typ != "null" else ""} => {{
                 aper::encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, {self.field_index}, false)?;
                 {encode_expression_fn(tree.children[1])(
@@ -506,6 +514,9 @@ class StructFieldsTo(Interpreter):
 """
 
     def extension_ies(self, tree):
+        self.add_optional_to_bitfield("false")
+
+    def empty_sequence(self, tree):
         self.add_optional_to_bitfield("false")
 
 
@@ -941,7 +952,7 @@ impl {orig_name} {{
 
         num_optionals = find_opt_interpreter.num_optionals
         optionals_var = "optionals"
-        if num_optionals == 0:
+        if num_optionals == 0 or (num_optionals == 1 and find_opt_interpreter.has_empty_sequence):
             optionals_var = "_optionals"
 
         self.outfile += f"""
@@ -1157,10 +1168,10 @@ impl InitiatingMessage {
 impl AperCodec for InitiatingMessage {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        InitiatingMessage::decode_inner(data).map_err(|mut e: PerCodecError| { e.push_context("InitiatingMessage"); e})
+        InitiatingMessage::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("InitiatingMessage"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| { e.push_context("InitiatingMessage"); e})
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("InitiatingMessage"); e})
     }
 }
 
@@ -1197,10 +1208,10 @@ impl SuccessfulOutcome {
 impl AperCodec for SuccessfulOutcome {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SuccessfulOutcome"))
+        SuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SuccessfulOutcome"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SuccessfulOutcome"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SuccessfulOutcome"); e})
     }
 }
 
@@ -1237,10 +1248,10 @@ impl UnsuccessfulOutcome {
 impl AperCodec for UnsuccessfulOutcome {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UnsuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UnsuccessfulOutcome"))
+        UnsuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UnsuccessfulOutcome"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UnsuccessfulOutcome"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UnsuccessfulOutcome"); e})
     }
 }
 """, constants={"id-AMFConfigurationUpdate": 0, "id-HandoverNotification": 11})
@@ -1266,10 +1277,10 @@ impl ProcedureCode {
 impl AperCodec for ProcedureCode {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        ProcedureCode::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ProcedureCode"))
+        ProcedureCode::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("ProcedureCode"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ProcedureCode"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("ProcedureCode"); e})
     }
 }""")
 
@@ -1304,10 +1315,10 @@ impl TriggeringMessage {
 impl AperCodec for TriggeringMessage {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        TriggeringMessage::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("TriggeringMessage"))
+        TriggeringMessage::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("TriggeringMessage"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("TriggeringMessage"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("TriggeringMessage"); e})
     }
 }"""
         self.should_generate(input, output)
@@ -1320,6 +1331,10 @@ WLANMeasurementConfiguration ::= SEQUENCE {
 	wlanMeasConfig             	WLANMeasConfig,
 	wlan-rtt                   	ENUMERATED {thing1, ..., thing2} OPTIONAL,
 	iE-Extensions		ProtocolExtensionContainer {{WLANMeasurementConfiguration-ExtIEs}} 	OPTIONAL,
+	...
+}
+
+WLANMeasurementConfiguration-ExtIEs NGAP-PROTOCOL-EXTENSION ::= {
 	...
 }
 """
@@ -1342,23 +1357,20 @@ impl WlanMeasurementConfiguration {
             None
         };
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[1] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::aper_decode(data)?, Criticality::Reject) {
-                    return Err(PerCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
+        // Process the extension container
 
+        if optionals[1] {
+        let num_ies = aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        for _ in 0..num_ies {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _criticality = Criticality::aper_decode(data)?;
+            let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                _ => {
+                    aper::advance(data, ie_length)?;
+                }
+            }
+        }}
         Ok(Self {
             wlan_meas_config,
             wlan_rtt,
@@ -1382,10 +1394,10 @@ impl WlanMeasurementConfiguration {
 impl AperCodec for WlanMeasurementConfiguration {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        WlanMeasurementConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanMeasurementConfiguration"))
+        WlanMeasurementConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("WlanMeasurementConfiguration"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanMeasurementConfiguration"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("WlanMeasurementConfiguration"); e})
     }
 }
 // WlanRtt
@@ -1411,10 +1423,10 @@ impl WlanRtt {
 impl AperCodec for WlanRtt {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        WlanRtt::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanRtt"))
+        WlanRtt::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("WlanRtt"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("WlanRtt"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("WlanRtt"); e})
     }
 }"""
         self.should_generate(input, output)
@@ -1441,10 +1453,10 @@ impl LteUeRlfReportContainer {
 impl AperCodec for LteUeRlfReportContainer {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        LteUeRlfReportContainer::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LteUeRlfReportContainer"))
+        LteUeRlfReportContainer::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("LteUeRlfReportContainer"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LteUeRlfReportContainer"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("LteUeRlfReportContainer"); e})
     }
 }"""
         self.should_generate(input, output)
@@ -1471,10 +1483,10 @@ impl MaximumDataBurstVolume {
 impl AperCodec for MaximumDataBurstVolume {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        MaximumDataBurstVolume::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumDataBurstVolume"))
+        MaximumDataBurstVolume::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("MaximumDataBurstVolume"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumDataBurstVolume"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("MaximumDataBurstVolume"); e})
     }
 }"""
         self.should_generate(input, output)
@@ -1501,10 +1513,10 @@ impl MobilityInformation {
 impl AperCodec for MobilityInformation {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        MobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MobilityInformation"))
+        MobilityInformation::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("MobilityInformation"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MobilityInformation"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("MobilityInformation"); e})
     }
 }"""
         self.should_generate(input, output)
@@ -1543,10 +1555,10 @@ impl MaximumIntegrityProtectedDataRate {
 impl AperCodec for MaximumIntegrityProtectedDataRate {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        MaximumIntegrityProtectedDataRate::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumIntegrityProtectedDataRate"))
+        MaximumIntegrityProtectedDataRate::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("MaximumIntegrityProtectedDataRate"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("MaximumIntegrityProtectedDataRate"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("MaximumIntegrityProtectedDataRate"); e})
     }
 }"""
         self.should_generate(input, output)
@@ -1702,10 +1714,10 @@ impl PduSessionResourceSetupRequest {
 impl AperCodec for PduSessionResourceSetupRequest {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        PduSessionResourceSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PduSessionResourceSetupRequest"))
+        PduSessionResourceSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("PduSessionResourceSetupRequest"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PduSessionResourceSetupRequest"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("PduSessionResourceSetupRequest"); e})
     }
 }""", constants={"id-AMF-UE-NGAP-ID": 10, "id-RANPagingPriority": 83})
 
@@ -1748,10 +1760,10 @@ impl GnbId {
 impl AperCodec for GnbId {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        GnbId::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbId"))
+        GnbId::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("GnbId"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbId"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("GnbId"); e})
     }
 }""")
 
@@ -1799,10 +1811,10 @@ impl PrivateIeId {
 impl AperCodec for PrivateIeId {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        PrivateIeId::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PrivateIeId"))
+        PrivateIeId::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("PrivateIeId"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("PrivateIeId"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("PrivateIeId"); e})
     }
 }""")
 
@@ -1827,10 +1839,10 @@ impl ExpectedActivityPeriod {
 impl AperCodec for ExpectedActivityPeriod {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        ExpectedActivityPeriod::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ExpectedActivityPeriod"))
+        ExpectedActivityPeriod::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("ExpectedActivityPeriod"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("ExpectedActivityPeriod"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("ExpectedActivityPeriod"); e})
     }
 }""")
 
@@ -1855,10 +1867,10 @@ impl UriAddress {
 impl AperCodec for UriAddress {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UriAddress::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UriAddress"))
+        UriAddress::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UriAddress"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UriAddress"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UriAddress"); e})
     }
 }""")
 
@@ -1893,10 +1905,10 @@ impl AdditionalDluptnlInformationForHoList {
 impl AperCodec for AdditionalDluptnlInformationForHoList {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AdditionalDluptnlInformationForHoList"))
+        AdditionalDluptnlInformationForHoList::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AdditionalDluptnlInformationForHoList"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AdditionalDluptnlInformationForHoList"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AdditionalDluptnlInformationForHoList"); e})
     }
 }""")
 
@@ -1907,6 +1919,11 @@ DLPRSResourceCoordinates ::= SEQUENCE {
     foo                             INTEGER (-5..5) OPTIONAL,
 	iE-Extensions					ProtocolExtensionContainer { { DLPRSResourceCoordinates-ExtIEs } } OPTIONAL
 }
+
+DLPRSResourceCoordinates-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
+	...
+}
+
 """, """\
 
 // DlprsResourceCoordinates
@@ -1960,10 +1977,10 @@ impl DlprsResourceCoordinates {
 impl AperCodec for DlprsResourceCoordinates {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        DlprsResourceCoordinates::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("DlprsResourceCoordinates"))
+        DlprsResourceCoordinates::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("DlprsResourceCoordinates"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("DlprsResourceCoordinates"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("DlprsResourceCoordinates"); e})
     }
 }""", constants={"maxnoofPRS-ResourceSets": 2})
 
@@ -2012,10 +2029,10 @@ impl UeAssociatedLogicalF1ConnectionListRes {
 impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UeAssociatedLogicalF1ConnectionListRes"))
+        UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UeAssociatedLogicalF1ConnectionListRes"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("UeAssociatedLogicalF1ConnectionListRes"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("UeAssociatedLogicalF1ConnectionListRes"); e})
     }
 }""", constants={"maxnoofIndividualF1ConnectionsToReset": 63356, "id-UE-associatedLogicalF1-ConnectionItem": 80})
 
@@ -2089,10 +2106,10 @@ impl BapMappingConfiguration {
 impl AperCodec for BapMappingConfiguration {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        BapMappingConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BapMappingConfiguration"))
+        BapMappingConfiguration::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("BapMappingConfiguration"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BapMappingConfiguration"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("BapMappingConfiguration"); e})
     }
 }
 // BhRoutingInformationAddedList
@@ -2130,10 +2147,10 @@ impl BhRoutingInformationAddedList {
 impl AperCodec for BhRoutingInformationAddedList {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        BhRoutingInformationAddedList::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BhRoutingInformationAddedList"))
+        BhRoutingInformationAddedList::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("BhRoutingInformationAddedList"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("BhRoutingInformationAddedList"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("BhRoutingInformationAddedList"); e})
     }
 }""", constants={"maxnoofRoutingEntries": 1024, "id-BH-Routing-Information-Added-List": 283, "id-BH-Routing-Information-Added-List-Item": 284})
 
@@ -2155,6 +2172,7 @@ GNB-CUSystemInformation-ExtIEs F1AP-PROTOCOL-EXTENSION ::= {
 # [derive(Clone, Debug)]
 pub struct GnbCuSystemInformation {
     pub sibtypetobeupdatedlist: Vec<SibtypetobeupdatedListItem>,
+    pub system_information_area_id: Option<SystemInformationAreaId>,
 }
 
 impl GnbCuSystemInformation {
@@ -2169,6 +2187,22 @@ impl GnbCuSystemInformation {
             items
         };
 
+        // Process the extension container
+        let mut system_information_area_id: Option<SystemInformationAreaId> = None;
+
+        if optionals[0] {
+        let num_ies = aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        for _ in 0..num_ies {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _criticality = Criticality::aper_decode(data)?;
+            let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                239 => system_information_area_id = Some(SystemInformationAreaId::aper_decode(data)?),
+                _ => {
+                    aper::advance(data, ie_length)?;
+                }
+            }
+        }}
         Ok(Self {
             sibtypetobeupdatedlist,
             system_information_area_id,
@@ -2192,10 +2226,10 @@ impl GnbCuSystemInformation {
 impl AperCodec for GnbCuSystemInformation {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        GnbCuSystemInformation::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbCuSystemInformation"))
+        GnbCuSystemInformation::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("GnbCuSystemInformation"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("GnbCuSystemInformation"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("GnbCuSystemInformation"); e})
     }
 }""", constants={"maxnoofSIBTypes": 32, "id-systemInformationAreaID": 239})
 
@@ -2240,10 +2274,10 @@ impl SbcchSlBchMessageType {
 impl AperCodec for SbcchSlBchMessageType {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SbcchSlBchMessageType::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SbcchSlBchMessageType"))
+        SbcchSlBchMessageType::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SbcchSlBchMessageType"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SbcchSlBchMessageType"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SbcchSlBchMessageType"); e})
     }
 }
 // C1
@@ -2282,10 +2316,10 @@ impl C1 {
 impl AperCodec for C1 {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        C1::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("C1"))
+        C1::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("C1"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("C1"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("C1"); e})
     }
 }""")
 
@@ -2337,10 +2371,10 @@ impl OverloadStop {
 impl AperCodec for OverloadStop {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        OverloadStop::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("OverloadStop"))
+        OverloadStop::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("OverloadStop"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("OverloadStop"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("OverloadStop"); e})
     }
 }""")
 
@@ -2363,23 +2397,6 @@ impl LocationMeasurementIndicationIEs {
         let (_optionals, _extensions_present) = aper::decode::decode_sequence_header(data, false, 1)?;
         let measurement_indication = SetupRelease::<LocationMeasurementInfo>::aper_decode(data)?;
 
-        // Skip over the ProtocolExtensionContainer if present.
-        if optionals[0] {
-            let (num_fields, _) = aper::decode::decode_integer(data, Some(1), Some(65535), false)?;
-            for _ in 0..num_fields {
-                let (protocol_extension_id, _) =
-                    aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
-                if matches!(Criticality::aper_decode(data)?, Criticality::Reject) {
-                    return Err(PerCodecError::new(format!(
-                        "Unknown protocol extension {} with criticality reject",
-                        protocol_extension_id
-                    )));
-                }
-                data.decode_align()?;
-                let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
-            }
-        };
-
         Ok(Self {
             measurement_indication,
         })
@@ -2398,10 +2415,10 @@ impl LocationMeasurementIndicationIEs {
 impl AperCodec for LocationMeasurementIndicationIEs {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        LocationMeasurementIndicationIEs::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+        LocationMeasurementIndicationIEs::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("LocationMeasurementIndicationIEs"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("LocationMeasurementIndicationIEs"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("LocationMeasurementIndicationIEs"); e})
     }
 }""")
 
@@ -2459,10 +2476,10 @@ impl AvailabilityCombinationR16 {
 impl AperCodec for AvailabilityCombinationR16 {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        AvailabilityCombinationR16::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AvailabilityCombinationR16"))
+        AvailabilityCombinationR16::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AvailabilityCombinationR16"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("AvailabilityCombinationR16"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("AvailabilityCombinationR16"); e})
     }
 }""", constants={"maxNrofResourceAvailabilityPerCombination-r16": 5})
 
@@ -2517,10 +2534,10 @@ impl SystemInformationIEs {
 impl AperCodec for SystemInformationIEs {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SystemInformationIEs::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemInformationIEs"))
+        SystemInformationIEs::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SystemInformationIEs"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemInformationIEs"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SystemInformationIEs"); e})
     }
 }
 // SibTypeAndInfo
@@ -2559,10 +2576,10 @@ impl SibTypeAndInfo {
 impl AperCodec for SibTypeAndInfo {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SibTypeAndInfo::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SibTypeAndInfo"))
+        SibTypeAndInfo::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SibTypeAndInfo"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SibTypeAndInfo"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SibTypeAndInfo"); e})
     }
 }""")
 
@@ -2603,10 +2620,10 @@ impl CsiAssociatedReportConfigInfo {
 impl AperCodec for CsiAssociatedReportConfigInfo {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        CsiAssociatedReportConfigInfo::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+        CsiAssociatedReportConfigInfo::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("CsiAssociatedReportConfigInfo"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("CsiAssociatedReportConfigInfo"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("CsiAssociatedReportConfigInfo"); e})
     }
 }
 // NzpCsiRs
@@ -2655,10 +2672,10 @@ impl NzpCsiRs {
 impl AperCodec for NzpCsiRs {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        NzpCsiRs::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NzpCsiRs"))
+        NzpCsiRs::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("NzpCsiRs"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NzpCsiRs"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("NzpCsiRs"); e})
     }
 }""")
 
@@ -2716,10 +2733,10 @@ impl SystemBearerContextSetupRequest {
 impl AperCodec for SystemBearerContextSetupRequest {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SystemBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemBearerContextSetupRequest"))
+        SystemBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SystemBearerContextSetupRequest"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("SystemBearerContextSetupRequest"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("SystemBearerContextSetupRequest"); e})
     }
 }
 // EutranBearerContextSetupRequest
@@ -2770,10 +2787,10 @@ impl EutranBearerContextSetupRequest {
 impl AperCodec for EutranBearerContextSetupRequest {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        EutranBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("EutranBearerContextSetupRequest"))
+        EutranBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("EutranBearerContextSetupRequest"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("EutranBearerContextSetupRequest"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("EutranBearerContextSetupRequest"); e})
     }
 }
 // NgRanBearerContextSetupRequest
@@ -2825,10 +2842,10 @@ impl NgRanBearerContextSetupRequest {
 impl AperCodec for NgRanBearerContextSetupRequest {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        NgRanBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+        NgRanBearerContextSetupRequest::decode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("NgRanBearerContextSetupRequest"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("NgRanBearerContextSetupRequest"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| {e.push_context("NgRanBearerContextSetupRequest"); e})
     }
 }""", constants={"id-DRB-To-Setup-List-EUTRAN": 42, "id-SubscriberProfileIDforRFP": 43, "id-AdditionalRRMPriorityIndex": 123, "id-PDU-Session-Resource-To-Setup-List": 321})
 

@@ -7,7 +7,7 @@ edition = "2021"
 doctest = false
 
 [dependencies]
-asn1-codecs = { git = "https://github.com/nplrkn/hampi",  branch="advance" }
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="advance" }
 bitvec = "1.0.1"
 num_enum = "0.5.7"
 net = { path = "../net" }

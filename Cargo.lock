@@ -44,7 +44,7 @@ checksum = "983cd8b9d4b02a6dc6ffa557262eb5858a27a0038ffffe21a0f133eaa819a164"
 [[package]]
 name = "asn1-codecs"
 version = "0.5.6"
-source = "git+https://github.com/nplrkn/hampi?branch=advance#9bbb8715c4997cdb114d8a5a1261a21d3fc6bcde"
+source = "git+https://github.com/nplrkn/hampi?branch=advance#5ec65337745b4f1272c68dafdc4298f968c4beac"
 dependencies = [
  "bitvec",
  "log",

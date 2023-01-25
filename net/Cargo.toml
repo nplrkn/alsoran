@@ -23,6 +23,6 @@ errno = "0.2.8"
 stop-token = "0.6.1"
 async-stream = "0.3.2"
 futures-core = "0.3.19"
-asn1-codecs = { git = "https://github.com/nplrkn/hampi",  branch="advance" }
+asn1-codecs = { git = "https://github.com/nplrkn/hampi", branch="advance" }
 thiserror = "1.0.36"
 bitvec = "1.0.1"

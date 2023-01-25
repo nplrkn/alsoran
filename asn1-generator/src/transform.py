@@ -859,7 +859,8 @@ document
       choice_field
         C1
         C1
-      empty_sequence\tmessageClassExtension
+      choice_extension_container
+        empty_sequence\tmessageClassExtension
   choice_def
     C1
     choice

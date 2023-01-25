@@ -12679,11 +12679,14 @@ pub struct FreqBandNrItem {
 
 impl FreqBandNrItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+        println!("arse!");
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let freq_band_indicator_nr =
             aper::decode::decode_integer(data, Some(1), Some(1024), true)?.0 as u16;
+        println!("yo 1!");
         let supported_sul_band_list = {
             let length = aper::decode::decode_length_determinent(data, Some(0), Some(32), false)?;
+            println!("yo 2! length {}", length);
             let mut items = vec![];
             for _ in 0..length {
                 items.push(SupportedSulFreqBandItem::aper_decode(data)?);
@@ -12693,18 +12696,19 @@ impl FreqBandNrItem {
 
         // Process the extension container
 
+        println!("got here! 1");
         if optionals[0] {
             let num_ies =
                 aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+            println!("got here! num_ies {}", num_ies);
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
+                println!("got here! len = {}", ie_length);
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15966,10 +15970,12 @@ impl IabDuCellResourceConfigurationModeInfo {
 impl AperCodec for IabDuCellResourceConfigurationModeInfo {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        IabDuCellResourceConfigurationModeInfo::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("IabDuCellResourceConfigurationModeInfo");
-            e
-        })
+        IabDuCellResourceConfigurationModeInfo::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("IabDuCellResourceConfigurationModeInfo");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -27294,10 +27300,12 @@ impl RequestedSrsTransmissionCharacteristics {
 impl AperCodec for RequestedSrsTransmissionCharacteristics {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        RequestedSrsTransmissionCharacteristics::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("RequestedSrsTransmissionCharacteristics");
-            e
-        })
+        RequestedSrsTransmissionCharacteristics::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("RequestedSrsTransmissionCharacteristics");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -27471,10 +27479,12 @@ impl ResourceCoordinationTransferInformation {
 impl AperCodec for ResourceCoordinationTransferInformation {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        ResourceCoordinationTransferInformation::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("ResourceCoordinationTransferInformation");
-            e
-        })
+        ResourceCoordinationTransferInformation::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("ResourceCoordinationTransferInformation");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -37530,10 +37540,12 @@ impl TransportUpLayerAddressInfoToRemoveList {
 impl AperCodec for TransportUpLayerAddressInfoToRemoveList {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        TransportUpLayerAddressInfoToRemoveList::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("TransportUpLayerAddressInfoToRemoveList");
-            e
-        })
+        TransportUpLayerAddressInfoToRemoveList::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("TransportUpLayerAddressInfoToRemoveList");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -37601,10 +37613,12 @@ impl TransportUpLayerAddressInfoToRemoveItem {
 impl AperCodec for TransportUpLayerAddressInfoToRemoveItem {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        TransportUpLayerAddressInfoToRemoveItem::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("TransportUpLayerAddressInfoToRemoveItem");
-            e
-        })
+        TransportUpLayerAddressInfoToRemoveItem::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("TransportUpLayerAddressInfoToRemoveItem");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {

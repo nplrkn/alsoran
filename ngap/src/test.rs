@@ -87,7 +87,6 @@ fn test_ng_setup() -> Result<(), PerCodecError> {
     println!("Output of encode is {}", output_hex);
 
     let _pdu = NgapPdu::from_bytes(&bytes)?;
-    //Error: Error { msg: "3 Padding bits at Offset 125 not all '0'." }
     Ok(())
 }
 
