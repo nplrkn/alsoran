@@ -281,7 +281,7 @@ class ChoiceFieldsTo(Interpreter):
 """
         self.field_index += 1
 
-    def extension_container(self, tree):
+    def choice_extension_container(self, tree):
         self.field_index += 1
 
 
@@ -310,7 +310,7 @@ class ChoiceFieldsFrom(Interpreter):
 """
         self.field_index += 1
 
-    def extension_container(self, tree):
+    def choice_extension_container(self, tree):
         self.fields_from += f"""\
             {self.field_index} => Err(PerCodecError::new("Choice extension container not implemented")),
 """
@@ -980,6 +980,7 @@ impl {orig_name} {{
     #     print("Warning - object_def not implemented")
 
     def extension_container(self, tree):
+        assert(False)
         pass
 
     def extended_item(self, tree):
@@ -996,12 +997,11 @@ def decode_ies_string(fields_from):
         for _ in 0..num_ies {{
             let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _criticality = Criticality::aper_decode(data)?;
-            let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+            let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
                 _ => {{
-                    data.decode_align()?;
-                    let _ignored_bytes = aper::decode::decode_octetstring(data, None, None, false)?;
+                    aper::advance(data, ie_length)?;
                 }}
             }}
         }}"""
@@ -1157,10 +1157,10 @@ impl InitiatingMessage {
 impl AperCodec for InitiatingMessage {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        InitiatingMessage::decode_inner(data).map_err(|mut e: PerCodecError| e.push_context("InitiatingMessage"))
+        InitiatingMessage::decode_inner(data).map_err(|mut e: PerCodecError| { e.push_context("InitiatingMessage"); e})
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        self.encode_inner(data).map_err(|mut e: PerCodecError| e.push_context("InitiatingMessage"))
+        self.encode_inner(data).map_err(|mut e: PerCodecError| { e.push_context("InitiatingMessage"); e})
     }
 }
 
