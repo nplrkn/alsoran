@@ -1,6 +1,5 @@
 # NEXT UP
 ## O-RAN O-DU interop
-- ASN.1 decoder should cope protocol extensions being present.
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -66,6 +65,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- F1 Setup with O-RAN ODU
+- ASN.1 decoder should cope protocol extensions being present.
 - Allow local-ip to be passed in on command line
 - Triangular redirection 
 - Get rid of revision number
