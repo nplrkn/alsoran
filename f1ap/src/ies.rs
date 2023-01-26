@@ -11,31 +11,32 @@ use num_enum::TryFromPrimitive;
 #[derive(Clone, Debug)]
 pub enum AbortTransmission {
     SrsResourceSetId(SrsResourceSetId),
-
     ReleaseAll,
 }
 
 impl AbortTransmission {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::SrsResourceSetId(SrsResourceSetId::aper_decode(data)?)),
             1 => Ok(Self::ReleaseAll),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::SrsResourceSetId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::ReleaseAll => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 Ok(())
             }
         }
@@ -100,12 +101,10 @@ impl AccessPointPosition {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -276,12 +275,10 @@ impl ActivatedCellsToBeUpdatedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -355,12 +352,10 @@ impl ActiveUlbwp {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -427,7 +422,6 @@ impl AperCodec for ActiveUlbwp {
 #[repr(u8)]
 pub enum AdditionalDuplicationIndication {
     Three,
-
     Four,
 }
 
@@ -524,12 +518,10 @@ impl AdditionalPathItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -630,13 +622,11 @@ impl AdditionalPdcpDuplicationTnlItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     280 => bh_info = Some(BhInfo::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -732,12 +722,10 @@ impl AdditionalSibMessageListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -862,12 +850,10 @@ impl AggressorCellListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -920,12 +906,10 @@ impl AggressorGnbSetId {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -983,12 +967,10 @@ impl AllocationAndRetentionPriority {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1109,12 +1091,10 @@ impl AlternativeQosParaSetItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1198,12 +1178,10 @@ impl AngleMeasurementQuality {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1341,12 +1319,10 @@ impl AssociatedSCellItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1438,12 +1414,10 @@ impl AvailablePlmnListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1536,12 +1510,10 @@ impl AvailableSnpnIdListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1647,31 +1619,32 @@ impl AperCodec for AreaScope {
 #[derive(Clone, Debug)]
 pub enum BandwidthSrs {
     Fr1(Fr1Bandwidth),
-
     Fr2(Fr2Bandwidth),
 }
 
 impl BandwidthSrs {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Fr1(Fr1Bandwidth::aper_decode(data)?)),
             1 => Ok(Self::Fr2(Fr2Bandwidth::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Fr1(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Fr2(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -1790,12 +1763,10 @@ impl BaPlayerBhrlCchannelMappingInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -1930,12 +1901,10 @@ impl BaPlayerBhrlCchannelMappingInfoItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2045,12 +2014,10 @@ impl BapRoutingId {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2218,12 +2185,10 @@ impl BhChannelsFailedToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2289,12 +2254,10 @@ impl BhChannelsFailedToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2360,12 +2323,10 @@ impl BhChannelsFailedToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2425,12 +2386,10 @@ impl BhChannelsModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2483,12 +2442,10 @@ impl BhChannelsRequiredToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2541,12 +2498,10 @@ impl BhChannelsSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2599,12 +2554,10 @@ impl BhChannelsSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2677,12 +2630,10 @@ impl BhChannelsToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2754,12 +2705,10 @@ impl BhChannelsToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2828,12 +2777,10 @@ impl BhChannelsToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2918,12 +2865,10 @@ impl BhChannelsToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3002,12 +2947,10 @@ impl BhInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3054,15 +2997,13 @@ impl AperCodec for BhInfo {
 #[derive(Clone, Debug)]
 pub enum BhQosInformation {
     BhrlcchQos(QosFlowLevelQosParameters),
-
     EutranBhrlcchQos(EutranQos),
-
     CpTrafficType(CpTrafficType),
 }
 
 impl BhQosInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -3072,23 +3013,24 @@ impl BhQosInformation {
             )?)),
             1 => Ok(Self::EutranBhrlcchQos(EutranQos::aper_decode(data)?)),
             2 => Ok(Self::CpTrafficType(CpTrafficType::aper_decode(data)?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::BhrlcchQos(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::EutranBhrlcchQos(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::CpTrafficType(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -3132,12 +3074,10 @@ impl BhRoutingInformationAddedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3194,12 +3134,10 @@ impl BhRoutingInformationRemovedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3314,7 +3252,7 @@ impl BPlmnIdInfoItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     425 => {
                         configured_tac_indication =
@@ -3325,9 +3263,7 @@ impl BPlmnIdInfoItem {
                             Some(NpnBroadcastInformation::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3445,7 +3381,7 @@ impl ServedPlmnsItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     131 => tai_slice_support_list = Some(SliceSupportList::aper_decode(data)?),
                     384 => npn_support_info = Some(NpnSupportInfo::aper_decode(data)?),
@@ -3454,9 +3390,7 @@ impl ServedPlmnsItem {
                             Some(ExtendedSliceSupportList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3632,12 +3566,10 @@ impl BroadcastSnpnIdListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3734,12 +3666,10 @@ impl BroadcastPniNpnIdListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3893,12 +3823,10 @@ impl CandidateSpCellItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -3959,12 +3887,10 @@ impl CapacityValue {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4015,17 +3941,14 @@ impl AperCodec for CapacityValue {
 #[derive(Clone, Debug)]
 pub enum Cause {
     RadioNetwork(CauseRadioNetwork),
-
     Transport(CauseTransport),
-
     Protocol(CauseProtocol),
-
     Misc(CauseMisc),
 }
 
 impl Cause {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -4034,28 +3957,28 @@ impl Cause {
             1 => Ok(Self::Transport(CauseTransport::aper_decode(data)?)),
             2 => Ok(Self::Protocol(CauseProtocol::aper_decode(data)?)),
             3 => Ok(Self::Misc(CauseMisc::aper_decode(data)?)),
+            4 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::RadioNetwork(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Transport(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::Protocol(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 x.aper_encode(data)
             }
-
             Self::Misc(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 x.aper_encode(data)
             }
         }
@@ -4082,13 +4005,9 @@ impl AperCodec for Cause {
 #[repr(u8)]
 pub enum CauseMisc {
     ControlProcessingOverload,
-
     NotEnoughUserPlaneProcessingResources,
-
     HardwareFailure,
-
     OmIntervention,
-
     Unspecified,
 }
 
@@ -4125,17 +4044,11 @@ impl AperCodec for CauseMisc {
 #[repr(u8)]
 pub enum CauseProtocol {
     TransferSyntaxError,
-
     AbstractSyntaxErrorReject,
-
     AbstractSyntaxErrorIgnoreAndNotify,
-
     MessageNotCompatibleWithReceiverState,
-
     SemanticError,
-
     AbstractSyntaxErrorFalselyConstructedMessage,
-
     Unspecified,
 }
 
@@ -4172,25 +4085,15 @@ impl AperCodec for CauseProtocol {
 #[repr(u8)]
 pub enum CauseRadioNetwork {
     Unspecified,
-
     RlFailureRlc,
-
     UnknownOrAlreadyAllocatedGnbCuUeF1apId,
-
     UnknownOrAlreadyAllocatedGnbDuUeF1apId,
-
     UnknownOrInconsistentPairOfUeF1apId,
-
     InteractionWithOtherProcedure,
-
     NotSupportedQciValue,
-
     ActionDesirableForRadioReasons,
-
     NoRadioResourcesAvailable,
-
     ProcedureCancelled,
-
     NormalRelease,
 }
 
@@ -4227,7 +4130,6 @@ impl AperCodec for CauseRadioNetwork {
 #[repr(u8)]
 pub enum CauseTransport {
     Unspecified,
-
     TransportResourceUnavailable,
 }
 
@@ -4324,7 +4226,6 @@ impl AperCodec for CellCapacityClassValue {
 #[repr(u8)]
 pub enum CellDirection {
     DlOnly,
-
     UlOnly,
 }
 
@@ -4439,12 +4340,10 @@ impl CellMeasurementResultItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4550,12 +4449,10 @@ impl CellsFailedToBeActivatedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4610,12 +4507,10 @@ impl CellsStatusItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4671,12 +4566,10 @@ impl CellsToBeBroadcastItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4728,12 +4621,10 @@ impl CellsBroadcastCompletedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4785,12 +4676,10 @@ impl BroadcastToBeCancelledItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4844,12 +4733,10 @@ impl CellsBroadcastCancelledItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -4921,7 +4808,7 @@ impl CellsToBeActivatedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     118 => {
                         gnb_cu_system_information = Some(GnbCuSystemInformation::aper_decode(data)?)
@@ -4934,9 +4821,7 @@ impl CellsToBeActivatedListItem {
                     291 => iab_info_iab_donor_cu = Some(IabInfoIabDonorCu::aper_decode(data)?),
                     386 => available_snpn_id_list = Some(AvailableSnpnIdList::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5000,12 +4885,10 @@ impl CellsToBeDeactivatedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5062,13 +4945,11 @@ impl CellsToBeBarredItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     298 => iab_barred = Some(IabBarred::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5111,7 +4992,6 @@ impl AperCodec for CellsToBeBarredItem {
 #[repr(u8)]
 pub enum CellBarred {
     Barred,
-
     NotBarred,
 }
 
@@ -5148,11 +5028,8 @@ impl AperCodec for CellBarred {
 #[repr(u8)]
 pub enum CellSize {
     Verysmall,
-
     Small,
-
     Medium,
-
     Large,
 }
 
@@ -5255,12 +5132,10 @@ impl CellToReportItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5324,12 +5199,10 @@ impl CellType {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5367,11 +5240,8 @@ impl AperCodec for CellType {
 #[repr(u8)]
 pub enum CellUlConfigured {
     None,
-
     Ul,
-
     Sul,
-
     UlAndSul,
 }
 
@@ -5517,12 +5387,10 @@ impl ChildNodeCellsListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5669,12 +5537,10 @@ impl ChildNodesListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5721,7 +5587,6 @@ impl AperCodec for ChildNodesListItem {
 #[repr(u8)]
 pub enum ChOtriggerInterDu {
     ChoInitiation,
-
     ChoReplace,
 }
 
@@ -5758,9 +5623,7 @@ impl AperCodec for ChOtriggerInterDu {
 #[repr(u8)]
 pub enum ChOtriggerIntraDu {
     ChoInitiation,
-
     ChoReplace,
-
     ChoCancel,
 }
 
@@ -5800,7 +5663,7 @@ pub enum CnUePagingIdentity {
 
 impl CnUePagingIdentity {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -5811,13 +5674,16 @@ impl CnUePagingIdentity {
                 Some(48),
                 false,
             )?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::FiveGSTmsi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 aper::encode::encode_bitstring(data, Some(48), Some(48), false, &x, false)
             }
         }
@@ -5861,12 +5727,10 @@ impl CompositeAvailableCapacityGroup {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -5930,12 +5794,10 @@ impl CompositeAvailableCapacity {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6032,13 +5894,11 @@ impl ConditionalInterDuMobilityInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     433 => estimated_arrival_probability = Some(ChoProbability::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6106,13 +5966,11 @@ impl ConditionalIntraDuMobilityInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     433 => estimated_arrival_probability = Some(ChoProbability::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6222,13 +6080,12 @@ impl AperCodec for CoordinateId {
 #[derive(Clone, Debug)]
 pub enum CpTransportLayerAddress {
     EndpointIpAddress(TransportLayerAddress),
-
     EndpointIpAddressAndPort(EndpointIpAddressAndPort),
 }
 
 impl CpTransportLayerAddress {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -6239,18 +6096,20 @@ impl CpTransportLayerAddress {
             1 => Ok(Self::EndpointIpAddressAndPort(
                 EndpointIpAddressAndPort::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EndpointIpAddress(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::EndpointIpAddressAndPort(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -6349,12 +6208,10 @@ impl CriticalityDiagnostics {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6474,12 +6331,10 @@ impl CriticalityDiagnosticsIeItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6556,19 +6411,22 @@ pub enum CuDuRadioInformationType {
 
 impl CuDuRadioInformationType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Rim(CuDuRimInformation::aper_decode(data)?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Rim(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.aper_encode(data)
             }
         }
@@ -6612,12 +6470,10 @@ impl CuDuRimInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6701,7 +6557,7 @@ impl CuToDuRrcInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     119 => {
                         handover_preparation_information =
@@ -6722,9 +6578,7 @@ impl CuToDuRrcInformation {
                             Some(UeAssistanceInformationEutra::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6834,12 +6688,10 @@ impl DedicatedSiDeliveryNeededUeItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6904,12 +6756,10 @@ impl DlPrs {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -6955,21 +6805,16 @@ impl AperCodec for DlPrs {
 #[derive(Clone, Debug)]
 pub enum DlPrsMutingPattern {
     Two(BitString),
-
     Four(BitString),
-
     Six(BitString),
-
     Eight(BitString),
-
     Sixteen(BitString),
-
     ThirtyTwo(BitString),
 }
 
 impl DlPrsMutingPattern {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 5, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 6, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -7010,38 +6855,36 @@ impl DlPrsMutingPattern {
                 Some(32),
                 false,
             )?)),
+            6 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Two(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 0, false)?;
                 aper::encode::encode_bitstring(data, Some(2), Some(2), false, &x, false)
             }
-
             Self::Four(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 1, false)?;
                 aper::encode::encode_bitstring(data, Some(4), Some(4), false, &x, false)
             }
-
             Self::Six(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 2, false)?;
                 aper::encode::encode_bitstring(data, Some(6), Some(6), false, &x, false)
             }
-
             Self::Eight(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 3, false)?;
                 aper::encode::encode_bitstring(data, Some(8), Some(8), false, &x, false)
             }
-
             Self::Sixteen(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 4, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 4, false)?;
                 aper::encode::encode_bitstring(data, Some(16), Some(16), false, &x, false)
             }
-
             Self::ThirtyTwo(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 5, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 5, false)?;
                 aper::encode::encode_bitstring(data, Some(32), Some(32), false, &x, false)
             }
         }
@@ -7090,12 +6933,10 @@ impl DlprsResourceCoordinates {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7171,12 +7012,10 @@ impl DlprsResourceSetArp {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7229,13 +7068,12 @@ impl AperCodec for DlprsResourceSetArp {
 #[derive(Clone, Debug)]
 pub enum DlPrsResourceSetArpLocation {
     RelativeGeodeticLocation(RelativeGeodeticLocation),
-
     RelativeCartesianLocation(RelativeCartesianLocation),
 }
 
 impl DlPrsResourceSetArpLocation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -7246,18 +7084,20 @@ impl DlPrsResourceSetArpLocation {
             1 => Ok(Self::RelativeCartesianLocation(
                 RelativeCartesianLocation::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::RelativeGeodeticLocation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::RelativeCartesianLocation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -7301,12 +7141,10 @@ impl DlprsResourceArp {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7347,13 +7185,12 @@ impl AperCodec for DlprsResourceArp {
 #[derive(Clone, Debug)]
 pub enum DlPrsResourceArpLocation {
     RelativeGeodeticLocation(RelativeGeodeticLocation),
-
     RelativeCartesianLocation(RelativeCartesianLocation),
 }
 
 impl DlPrsResourceArpLocation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -7364,18 +7201,20 @@ impl DlPrsResourceArpLocation {
             1 => Ok(Self::RelativeCartesianLocation(
                 RelativeCartesianLocation::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::RelativeGeodeticLocation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::RelativeCartesianLocation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -7418,12 +7257,10 @@ impl DlUpTnlAddressToUpdateListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7518,12 +7355,10 @@ impl DluptnlInformationToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7583,12 +7418,10 @@ impl DrbActivityItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7633,7 +7466,6 @@ impl AperCodec for DrbActivityItem {
 #[repr(u8)]
 pub enum DrbActivity {
     Active,
-
     NotActive,
 }
 
@@ -7720,12 +7552,10 @@ impl DrbsFailedToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7787,12 +7617,10 @@ impl DrbsFailedToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7854,12 +7682,10 @@ impl DrbsFailedToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -7926,12 +7752,10 @@ impl DrbInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8010,7 +7834,7 @@ impl DrbsModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     160 => rlc_status = Some(RlcStatus::aper_decode(data)?),
                     370 => {
@@ -8019,9 +7843,7 @@ impl DrbsModifiedItem {
                     }
                     344 => current_qos_para_set_index = Some(QosParaSetIndex::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8092,16 +7914,14 @@ impl DrbsModifiedConfItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     370 => {
                         additional_pdcp_duplication_tnl_list =
                             Some(AdditionalPdcpDuplicationTnlList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8163,15 +7983,13 @@ impl DrbNotifyItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     344 => {
                         current_qos_para_set_index = Some(QosParaSetNotifyIndex::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8236,7 +8054,7 @@ impl DrbsRequiredToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     160 => rlc_status = Some(RlcStatus::aper_decode(data)?),
                     370 => {
@@ -8244,9 +8062,7 @@ impl DrbsRequiredToBeModifiedItem {
                             Some(AdditionalPdcpDuplicationTnlList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8305,12 +8121,10 @@ impl DrbsRequiredToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8376,7 +8190,7 @@ impl DrbsSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     370 => {
                         additional_pdcp_duplication_tnl_list =
@@ -8384,9 +8198,7 @@ impl DrbsSetupItem {
                     }
                     344 => current_qos_para_set_index = Some(QosParaSetIndex::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8464,7 +8276,7 @@ impl DrbsSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     370 => {
                         additional_pdcp_duplication_tnl_list =
@@ -8472,9 +8284,7 @@ impl DrbsSetupModItem {
                     }
                     344 => current_qos_para_set_index = Some(QosParaSetIndex::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8574,7 +8384,7 @@ impl DrbsToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     161 => dlpdcpsn_length = Some(PdcpsnLength::aper_decode(data)?),
                     192 => ulpdcpsn_length = Some(PdcpsnLength::aper_decode(data)?),
@@ -8602,9 +8412,7 @@ impl DrbsToBeModifiedItem {
                             Some(TransmissionStopIndicator::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8681,12 +8489,10 @@ impl DrbsToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8770,7 +8576,7 @@ impl DrbsToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     176 => {
                         dc_based_duplication_configured =
@@ -8791,9 +8597,7 @@ impl DrbsToBeSetupItem {
                             Some(RlcDuplicationInformation::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -8902,7 +8706,7 @@ impl DrbsToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     176 => {
                         dc_based_duplication_configured =
@@ -8923,9 +8727,7 @@ impl DrbsToBeSetupModItem {
                             Some(RlcDuplicationInformation::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -9014,12 +8816,10 @@ impl DrxCycle {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -9269,19 +9069,22 @@ pub enum DuCuRadioInformationType {
 
 impl DuCuRadioInformationType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Rim(DuCuRimInformation::aper_decode(data)?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Rim(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.aper_encode(data)
             }
         }
@@ -9327,12 +9130,10 @@ impl DuCuRimInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -9375,31 +9176,32 @@ impl AperCodec for DuCuRimInformation {
 #[derive(Clone, Debug)]
 pub enum DuFSlotConfigItem {
     ExplicitFormat(ExplicitFormat),
-
     ImplicitFormat(ImplicitFormat),
 }
 
 impl DuFSlotConfigItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::ExplicitFormat(ExplicitFormat::aper_decode(data)?)),
             1 => Ok(Self::ImplicitFormat(ImplicitFormat::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::ExplicitFormat(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::ImplicitFormat(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -9495,19 +9297,12 @@ impl AperCodec for DuFSlotformatIndex {
 #[repr(u8)]
 pub enum DuFTransmissionPeriodicity {
     Ms0p5,
-
     Ms0p625,
-
     Ms1,
-
     Ms1p25,
-
     Ms2,
-
     Ms2p5,
-
     Ms5,
-
     Ms10,
 }
 
@@ -9544,7 +9339,6 @@ impl AperCodec for DuFTransmissionPeriodicity {
 #[repr(u8)]
 pub enum DuRxMtRx {
     Supported,
-
     NotSupported,
 }
 
@@ -9581,7 +9375,6 @@ impl AperCodec for DuRxMtRx {
 #[repr(u8)]
 pub enum DuTxMtTx {
     Supported,
-
     NotSupported,
 }
 
@@ -9618,7 +9411,6 @@ impl AperCodec for DuTxMtTx {
 #[repr(u8)]
 pub enum DuRxMtTx {
     Supported,
-
     NotSupported,
 }
 
@@ -9655,7 +9447,6 @@ impl AperCodec for DuRxMtTx {
 #[repr(u8)]
 pub enum DuTxMtRx {
     Supported,
-
     NotSupported,
 }
 
@@ -9746,7 +9537,7 @@ impl DuToCuRrcInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     191 => {
                         drx_long_cycle_start_offset =
@@ -9786,9 +9577,7 @@ impl DuToCuRrcInformation {
                     }
                     211 => requested_p_max_fr2 = Some(RequestedPMaxFr2::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -9852,7 +9641,6 @@ impl AperCodec for DuToCuRrcInformation {
 #[repr(u8)]
 pub enum DuplicationActivation {
     Active,
-
     Inactive,
 }
 
@@ -9924,7 +9712,6 @@ impl AperCodec for DuplicationIndication {
 #[repr(u8)]
 pub enum DuplicationState {
     Active,
-
     Inactive,
 }
 
@@ -10011,7 +9798,7 @@ impl Dynamic5qiDescriptor {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     363 => {
                         extended_packet_delay_budget =
@@ -10026,9 +9813,7 @@ impl Dynamic5qiDescriptor {
                             Some(ExtendedPacketDelayBudget::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10140,12 +9925,10 @@ impl DynamicPqiDescriptor {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10273,12 +10056,10 @@ impl ECidMeasurementQuantitiesItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10318,7 +10099,6 @@ impl AperCodec for ECidMeasurementQuantitiesItem {
 #[repr(u8)]
 pub enum ECidMeasurementQuantitiesValue {
     Default,
-
     AngleOfArrivalNr,
 }
 
@@ -10380,12 +10160,10 @@ impl ECidMeasurementResult {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10487,12 +10265,10 @@ impl ECidMeasuredResultsItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10535,19 +10311,22 @@ pub enum ECidMeasuredResultsValue {
 
 impl ECidMeasuredResultsValue {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::ValueAngleofArrivalNr(UlAoA::aper_decode(data)?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::ValueAngleofArrivalNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.aper_encode(data)
             }
         }
@@ -10574,7 +10353,6 @@ impl AperCodec for ECidMeasuredResultsValue {
 #[repr(u8)]
 pub enum ECidReportCharacteristics {
     OnDemand,
-
     Periodic,
 }
 
@@ -10667,12 +10445,10 @@ impl EgressBhrlcchItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10731,13 +10507,11 @@ impl EndpointIpAddressAndPort {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     230 => port_number = Some(PortNumber::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10832,12 +10606,10 @@ impl ExtendedAvailablePlmnItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -10902,12 +10674,10 @@ impl ExplicitFormat {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11020,7 +10790,7 @@ impl ExtendedServedPlmnsItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     384 => npn_support_info = Some(NpnSupportInfo::aper_decode(data)?),
                     390 => {
@@ -11028,9 +10798,7 @@ impl ExtendedServedPlmnsItem {
                             Some(ExtendedSliceSupportList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11173,12 +10941,10 @@ impl EutraCellsListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11281,12 +11047,10 @@ impl EutraCoexFddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11337,7 +11101,6 @@ impl AperCodec for EutraCoexFddInfo {
 #[derive(Clone, Debug)]
 pub enum EutraCoexModeInfo {
     Fdd(EutraCoexFddInfo),
-
     Tdd(EutraCoexTddInfo),
 }
 
@@ -11359,7 +11122,6 @@ impl EutraCoexModeInfo {
                 aper::encode::encode_choice_idx(data, 0, 1, true, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Tdd(x) => {
                 aper::encode::encode_choice_idx(data, 0, 1, true, 1, false)?;
                 x.aper_encode(data)
@@ -11408,12 +11170,10 @@ impl EutraCoexTddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11459,7 +11219,6 @@ impl AperCodec for EutraCoexTddInfo {
 #[repr(u8)]
 pub enum EutraCyclicPrefixDl {
     Normal,
-
     Extended,
 }
 
@@ -11496,7 +11255,6 @@ impl AperCodec for EutraCyclicPrefixDl {
 #[repr(u8)]
 pub enum EutraCyclicPrefixUl {
     Normal,
-
     Extended,
 }
 
@@ -11562,12 +11320,10 @@ impl EutraPrachConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11657,12 +11413,10 @@ impl EutraSpecialSubframeInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11706,25 +11460,15 @@ impl AperCodec for EutraSpecialSubframeInfo {
 #[repr(u8)]
 pub enum EutraSpecialSubframePatterns {
     Ssp0,
-
     Ssp1,
-
     Ssp2,
-
     Ssp3,
-
     Ssp4,
-
     Ssp5,
-
     Ssp6,
-
     Ssp7,
-
     Ssp8,
-
     Ssp9,
-
     Ssp10,
 }
 
@@ -11761,17 +11505,11 @@ impl AperCodec for EutraSpecialSubframePatterns {
 #[repr(u8)]
 pub enum EutraSubframeAssignment {
     Sa0,
-
     Sa1,
-
     Sa2,
-
     Sa3,
-
     Sa4,
-
     Sa5,
-
     Sa6,
 }
 
@@ -11808,15 +11546,10 @@ impl AperCodec for EutraSubframeAssignment {
 #[repr(u8)]
 pub enum EutraTransmissionBandwidth {
     Bw6,
-
     Bw15,
-
     Bw25,
-
     Bw50,
-
     Bw75,
-
     Bw100,
 }
 
@@ -11875,12 +11608,10 @@ impl EutranQos {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -11991,31 +11722,32 @@ impl AperCodec for ExtendedEarfcn {
 #[derive(Clone, Debug)]
 pub enum EutraModeInfo {
     Eutrafdd(EutraFddInfo),
-
     Eutratdd(EutraTddInfo),
 }
 
 impl EutraModeInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Eutrafdd(EutraFddInfo::aper_decode(data)?)),
             1 => Ok(Self::Eutratdd(EutraTddInfo::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Eutrafdd(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Eutratdd(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -12122,12 +11854,10 @@ impl EutraFddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -12183,12 +11913,10 @@ impl EutraTddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -12226,9 +11954,7 @@ impl AperCodec for EutraTddInfo {
 #[repr(u8)]
 pub enum EventType {
     OnDemand,
-
     Periodic,
-
     Stop,
 }
 
@@ -12295,9 +12021,7 @@ impl AperCodec for ExtendedPacketDelayBudget {
 #[repr(u8)]
 pub enum F1cPathNsa {
     Lte,
-
     Nr,
-
     Both,
 }
 
@@ -12348,12 +12072,10 @@ impl F1cTransferPath {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -12415,14 +12137,12 @@ impl FddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     355 => ul_carrier_list = Some(NrCarrierList::aper_decode(data)?),
                     389 => dl_carrier_list = Some(NrCarrierList::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -12530,7 +12250,7 @@ impl FlowsMappedToDrbItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     183 => {
                         qos_flow_mapping_indication =
@@ -12541,9 +12261,7 @@ impl FlowsMappedToDrbItem {
                             Some(TscTrafficCharacteristics::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -12587,17 +12305,11 @@ impl AperCodec for FlowsMappedToDrbItem {
 #[repr(u8)]
 pub enum Fr1Bandwidth {
     Bw5,
-
     Bw10,
-
     Bw20,
-
     Bw40,
-
     Bw50,
-
     Bw80,
-
     Bw100,
 }
 
@@ -12634,11 +12346,8 @@ impl AperCodec for Fr1Bandwidth {
 #[repr(u8)]
 pub enum Fr2Bandwidth {
     Bw50,
-
     Bw100,
-
     Bw200,
-
     Bw400,
 }
 
@@ -12679,14 +12388,11 @@ pub struct FreqBandNrItem {
 
 impl FreqBandNrItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        println!("arse!");
         let (optionals, _extensions_present) = aper::decode::decode_sequence_header(data, true, 1)?;
         let freq_band_indicator_nr =
             aper::decode::decode_integer(data, Some(1), Some(1024), true)?.0 as u16;
-        println!("yo 1!");
         let supported_sul_band_list = {
             let length = aper::decode::decode_length_determinent(data, Some(0), Some(32), false)?;
-            println!("yo 2! length {}", length);
             let mut items = vec![];
             for _ in 0..length {
                 items.push(SupportedSulFreqBandItem::aper_decode(data)?);
@@ -12696,16 +12402,13 @@ impl FreqBandNrItem {
 
         // Process the extension container
 
-        println!("got here! 1");
         if optionals[0] {
             let num_ies =
                 aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
-            println!("got here! num_ies {}", num_ies);
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
-                println!("got here! len = {}", ie_length);
                 match id {
                     _ => {
                         data.advance(ie_length)?;
@@ -12766,31 +12469,32 @@ impl AperCodec for FreqBandNrItem {
 #[derive(Clone, Debug)]
 pub enum FreqDomainLength {
     L839(L839Info),
-
     L139(L139Info),
 }
 
 impl FreqDomainLength {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::L839(L839Info::aper_decode(data)?)),
             1 => Ok(Self::L139(L139Info::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::L839(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::L139(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -12817,7 +12521,6 @@ impl AperCodec for FreqDomainLength {
 #[repr(u8)]
 pub enum FrequencyShift7p5khz {
     False,
-
     True,
 }
 
@@ -12942,12 +12645,10 @@ impl FlowsMappedToSlDrbItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13007,12 +12708,10 @@ impl GbrQosInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13092,16 +12791,14 @@ impl GbrQosFlowInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     343 => {
                         alternative_qos_para_set_list =
                             Some(AlternativeQosParaSetList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13209,12 +12906,10 @@ impl GeographicalCoordinates {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13342,16 +13037,14 @@ impl GnbCuSystemInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     239 => {
                         system_information_area_id =
                             Some(SystemInformationAreaId::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13417,12 +13110,10 @@ impl GnbCuTnlAssociationSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13480,12 +13171,10 @@ impl GnbCuTnlAssociationFailedToSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13545,12 +13234,10 @@ impl GnbCuTnlAssociationToAddItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13611,16 +13298,14 @@ impl GnbCuTnlAssociationToRemoveItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     229 => {
                         tnl_association_transport_layer_address_gnb_du =
                             Some(CpTransportLayerAddress::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13683,12 +13368,10 @@ impl GnbCuTnlAssociationToUpdateItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -13806,12 +13489,10 @@ impl GnbDuCellResourceConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14032,12 +13713,10 @@ impl ExtendedGnbCuName {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14175,12 +13854,10 @@ impl ExtendedGnbDuName {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14314,12 +13991,10 @@ impl GnbDuServedCellsItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14388,16 +14063,14 @@ impl GnbDuSystemInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     310 => sib12_message = Some(Sib12Message::aper_decode(data)?),
                     311 => sib13_message = Some(Sib13Message::aper_decode(data)?),
                     312 => sib14_message = Some(Sib14Message::aper_decode(data)?),
                     387 => sib10_message = Some(Sib10Message::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14478,7 +14151,6 @@ impl AperCodec for GnbDuConfigurationQuery {
 #[repr(u8)]
 pub enum GnbDuOverloadInformation {
     Overloaded,
-
     NotOverloaded,
 }
 
@@ -14536,12 +14208,10 @@ impl GnbDuTnlAssociationToRemoveItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14611,12 +14281,10 @@ impl GnbRxTxTimeDiff {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14660,21 +14328,16 @@ impl AperCodec for GnbRxTxTimeDiff {
 #[derive(Clone, Debug)]
 pub enum GnbRxTxTimeDiffMeas {
     K0(u32),
-
     K1(u32),
-
     K2(u32),
-
     K3(u32),
-
     K4(u32),
-
     K5(u16),
 }
 
 impl GnbRxTxTimeDiffMeas {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 5, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 6, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -14697,38 +14360,36 @@ impl GnbRxTxTimeDiffMeas {
             5 => Ok(Self::K5(
                 aper::decode::decode_integer(data, Some(0), Some(61565), false)?.0 as u16,
             )),
+            6 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::K0(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 0, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(1970049), false, *x as i128, false)
             }
-
             Self::K1(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 1, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(985025), false, *x as i128, false)
             }
-
             Self::K2(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 2, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(492513), false, *x as i128, false)
             }
-
             Self::K3(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 3, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(246257), false, *x as i128, false)
             }
-
             Self::K4(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 4, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 4, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(123129), false, *x as i128, false)
             }
-
             Self::K5(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 5, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 5, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(61565), false, *x as i128, false)
             }
         }
@@ -14875,12 +14536,10 @@ impl GtptlaItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -14936,12 +14595,10 @@ impl GtpTunnel {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15031,12 +14688,10 @@ impl HardwareLoadIndicator {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15162,12 +14817,10 @@ impl HsnaSlotConfigItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15220,9 +14873,7 @@ impl AperCodec for HsnaSlotConfigItem {
 #[repr(u8)]
 pub enum HsnaDownlink {
     Hard,
-
     Soft,
-
     Notavailable,
 }
 
@@ -15259,9 +14910,7 @@ impl AperCodec for HsnaDownlink {
 #[repr(u8)]
 pub enum HsnaFlexible {
     Hard,
-
     Soft,
-
     Notavailable,
 }
 
@@ -15298,9 +14947,7 @@ impl AperCodec for HsnaFlexible {
 #[repr(u8)]
 pub enum HsnaUplink {
     Hard,
-
     Soft,
-
     Notavailable,
 }
 
@@ -15337,27 +14984,16 @@ impl AperCodec for HsnaUplink {
 #[repr(u8)]
 pub enum HsnaTransmissionPeriodicity {
     Ms0p5,
-
     Ms0p625,
-
     Ms1,
-
     Ms1p25,
-
     Ms2,
-
     Ms2p5,
-
     Ms5,
-
     Ms10,
-
     Ms20,
-
     Ms40,
-
     Ms80,
-
     Ms160,
 }
 
@@ -15394,7 +15030,6 @@ impl AperCodec for HsnaTransmissionPeriodicity {
 #[repr(u8)]
 pub enum IabBarred {
     Barred,
-
     NotBarred,
 }
 
@@ -15450,12 +15085,10 @@ impl IabInfoIabDonorCu {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15521,12 +15154,10 @@ impl IabInfoIabDu {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15636,12 +15267,10 @@ impl IabMtCellListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15704,12 +15333,10 @@ impl IabStcInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15809,12 +15436,10 @@ impl IabStcInfoItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15883,12 +15508,10 @@ impl IabAllocatedTnlAddressItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -15932,13 +15555,12 @@ impl AperCodec for IabAllocatedTnlAddressItem {
 #[derive(Clone, Debug)]
 pub enum IabDuCellResourceConfigurationModeInfo {
     Fdd(IabDuCellResourceConfigurationFddInfo),
-
     Tdd(IabDuCellResourceConfigurationTddInfo),
 }
 
 impl IabDuCellResourceConfigurationModeInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -15949,18 +15571,20 @@ impl IabDuCellResourceConfigurationModeInfo {
             1 => Ok(Self::Tdd(
                 IabDuCellResourceConfigurationTddInfo::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Fdd(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Tdd(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -16007,12 +15631,10 @@ impl IabDuCellResourceConfigurationFddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16071,12 +15693,10 @@ impl IabDuCellResourceConfigurationTddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16116,13 +15736,12 @@ impl AperCodec for IabDuCellResourceConfigurationTddInfo {
 #[derive(Clone, Debug)]
 pub enum IabiPv6RequestType {
     IPv6Address(IabtnlAddressesRequested),
-
     IPv6Prefix(IabtnlAddressesRequested),
 }
 
 impl IabiPv6RequestType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -16133,18 +15752,20 @@ impl IabiPv6RequestType {
             1 => Ok(Self::IPv6Prefix(IabtnlAddressesRequested::aper_decode(
                 data,
             )?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::IPv6Address(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::IPv6Prefix(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -16170,15 +15791,13 @@ impl AperCodec for IabiPv6RequestType {
 #[derive(Clone, Debug)]
 pub enum IabtnlAddress {
     IPv4Address(BitString),
-
     IPv6Address(BitString),
-
     IPv6Prefix(BitString),
 }
 
 impl IabtnlAddress {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -16201,23 +15820,24 @@ impl IabtnlAddress {
                 Some(64),
                 false,
             )?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::IPv4Address(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 aper::encode::encode_bitstring(data, Some(32), Some(32), false, &x, false)
             }
-
             Self::IPv6Address(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 aper::encode::encode_bitstring(data, Some(128), Some(128), false, &x, false)
             }
-
             Self::IPv6Prefix(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 aper::encode::encode_bitstring(data, Some(64), Some(64), false, &x, false)
             }
         }
@@ -16281,12 +15901,10 @@ impl IabtnlAddressesRequested {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16362,12 +15980,10 @@ impl IabTnlAddressesToRemoveItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16405,9 +16021,7 @@ impl AperCodec for IabTnlAddressesToRemoveItem {
 #[repr(u8)]
 pub enum IabtnlAddressUsage {
     F1C,
-
     F1U,
-
     NonF1,
 }
 
@@ -16459,12 +16073,10 @@ impl IaBv4AddressesRequested {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16519,12 +16131,10 @@ impl ImplicitFormat {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16758,12 +16368,10 @@ impl IntendedTddDlUlConfig {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16840,12 +16448,10 @@ impl IpHeaderInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16919,12 +16525,10 @@ impl IPtolayer2TrafficMappingInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17036,12 +16640,10 @@ impl IPtolayer2TrafficMappingInfoItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17105,12 +16707,10 @@ impl L139Info {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17172,12 +16772,10 @@ impl L839Info {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17274,12 +16872,10 @@ impl LcsToGcsTranslationAoA {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17395,12 +16991,10 @@ impl LcStoGcsTranslation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17544,12 +17138,10 @@ impl LocationUncertainty {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17623,43 +17215,24 @@ impl AperCodec for LocationUncertainty {
 #[repr(u8)]
 pub enum LongDrxCycleLength {
     Ms10,
-
     Ms20,
-
     Ms32,
-
     Ms40,
-
     Ms60,
-
     Ms64,
-
     Ms70,
-
     Ms80,
-
     Ms128,
-
     Ms160,
-
     Ms256,
-
     Ms320,
-
     Ms512,
-
     Ms640,
-
     Ms1024,
-
     Ms1280,
-
     Ms2048,
-
     Ms2560,
-
     Ms5120,
-
     Ms10240,
 }
 
@@ -17696,7 +17269,6 @@ impl AperCodec for LongDrxCycleLength {
 #[repr(u8)]
 pub enum LowerLayerPresenceStatusChange {
     SuspendLowerLayers,
-
     ResumeLowerLayers,
 }
 
@@ -17748,12 +17320,10 @@ impl LteUeSidelinkAggregateMaximumBitrate {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -17819,12 +17389,10 @@ impl Ltev2xServicesAuthorized {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -18230,12 +17798,10 @@ impl MeasurementBeamInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -18366,12 +17932,10 @@ impl MultiplexingInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -18460,12 +18024,10 @@ impl M5Configuration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -18507,13 +18069,9 @@ impl AperCodec for M5Configuration {
 #[repr(u8)]
 pub enum M5period {
     Ms1024,
-
     Ms2048,
-
     Ms5120,
-
     Ms10240,
-
     Min1,
 }
 
@@ -18550,9 +18108,7 @@ impl AperCodec for M5period {
 #[repr(u8)]
 pub enum M5LinksToLog {
     Uplink,
-
     Downlink,
-
     BothUplinkAndDownlink,
 }
 
@@ -18605,12 +18161,10 @@ impl M6Configuration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -18652,29 +18206,17 @@ impl AperCodec for M6Configuration {
 #[repr(u8)]
 pub enum M6reportInterval {
     Ms120,
-
     Ms240,
-
     Ms640,
-
     Ms1024,
-
     Ms2048,
-
     Ms5120,
-
     Ms10240,
-
     Ms20480,
-
     Ms40960,
-
     Min1,
-
     Min6,
-
     Min12,
-
     Min30,
 }
 
@@ -18711,9 +18253,7 @@ impl AperCodec for M6reportInterval {
 #[repr(u8)]
 pub enum M6LinksToLog {
     Uplink,
-
     Downlink,
-
     BothUplinkAndDownlink,
 }
 
@@ -18766,12 +18306,10 @@ impl M7Configuration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -18878,7 +18416,6 @@ impl AperCodec for M7LinksToLog {
 #[repr(u8)]
 pub enum MdtActivation {
     ImmediateMdtOnly,
-
     ImmediateMdtAndTrace,
 }
 
@@ -18955,12 +18492,10 @@ impl MdtConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19060,17 +18595,14 @@ impl AperCodec for MdtPlmnList {
 #[derive(Clone, Debug)]
 pub enum MeasuredResultsValue {
     UlAngleOfArrival(UlAoA),
-
     UlSrsRsrp(UlSrsRsrp),
-
     UlRtoa(UlRtoaMeasurement),
-
     GnbRxTxTimeDiff(GnbRxTxTimeDiff),
 }
 
 impl MeasuredResultsValue {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -19079,28 +18611,28 @@ impl MeasuredResultsValue {
             1 => Ok(Self::UlSrsRsrp(UlSrsRsrp::aper_decode(data)?)),
             2 => Ok(Self::UlRtoa(UlRtoaMeasurement::aper_decode(data)?)),
             3 => Ok(Self::GnbRxTxTimeDiff(GnbRxTxTimeDiff::aper_decode(data)?)),
+            4 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::UlAngleOfArrival(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::UlSrsRsrp(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::UlRtoa(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 x.aper_encode(data)
             }
-
             Self::GnbRxTxTimeDiff(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 x.aper_encode(data)
             }
         }
@@ -19216,12 +18748,10 @@ impl NeighbourCellInformationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19285,12 +18815,10 @@ impl NgranAllocationAndRetentionPriority {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19376,12 +18904,10 @@ impl NgranHighAccuracyAccessPointPosition {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19547,12 +19073,10 @@ impl NrCgiListForRestartItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19611,12 +19135,10 @@ impl NrPrsBeamInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19717,12 +19239,10 @@ impl NrPrsBeamInformationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19801,7 +19321,7 @@ impl NonDynamic5qiDescriptor {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     362 => {
                         cn_packet_delay_budget_downlink =
@@ -19812,9 +19332,7 @@ impl NonDynamic5qiDescriptor {
                             Some(ExtendedPacketDelayBudget::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19904,12 +19422,10 @@ impl NonDynamicPqiDescriptor {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -19964,11 +19480,8 @@ impl AperCodec for NonDynamicPqiDescriptor {
 #[repr(u8)]
 pub enum NonUpTrafficType {
     UeAssociated,
-
     NonUeAssociated,
-
     NonF1,
-
     BapControlPdu,
 }
 
@@ -20065,7 +19578,6 @@ impl AperCodec for NoofUplinkSymbols {
 #[repr(u8)]
 pub enum NotificationCause {
     Fulfilled,
-
     NotFulfilled,
 }
 
@@ -20102,7 +19614,6 @@ impl AperCodec for NotificationCause {
 #[repr(u8)]
 pub enum NotificationControl {
     Active,
-
     NotActive,
 }
 
@@ -20155,12 +19666,10 @@ impl NotificationInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20201,13 +19710,12 @@ impl AperCodec for NotificationInformation {
 #[derive(Clone, Debug)]
 pub enum NpnBroadcastInformation {
     SnpnBroadcastInformation(NpnBroadcastInformationSnpn),
-
     PniNpnBroadcastInformation(NpnBroadcastInformationPniNpn),
 }
 
 impl NpnBroadcastInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -20218,18 +19726,20 @@ impl NpnBroadcastInformation {
             1 => Ok(Self::PniNpnBroadcastInformation(
                 NpnBroadcastInformationPniNpn::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::SnpnBroadcastInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::PniNpnBroadcastInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -20270,12 +19780,10 @@ impl NpnBroadcastInformationSnpn {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20329,12 +19837,10 @@ impl NpnBroadcastInformationPniNpn {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20377,19 +19883,22 @@ pub enum NpnSupportInfo {
 
 impl NpnSupportInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::SnpnInformation(Nid::aper_decode(data)?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::SnpnInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.aper_encode(data)
             }
         }
@@ -20475,12 +19984,10 @@ impl NrCarrierItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20569,13 +20076,11 @@ impl NrFreqInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     356 => frequency_shift7p5khz = Some(FrequencyShift7p5khz::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20656,12 +20161,10 @@ impl NrCgi {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20702,31 +20205,32 @@ impl AperCodec for NrCgi {
 #[derive(Clone, Debug)]
 pub enum NrModeInfo {
     Fdd(FddInfo),
-
     Tdd(TddInfo),
 }
 
 impl NrModeInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Fdd(FddInfo::aper_decode(data)?)),
             1 => Ok(Self::Tdd(TddInfo::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Fdd(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Tdd(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -20777,12 +20281,10 @@ impl NrPrachConfig {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -20863,61 +20365,33 @@ impl AperCodec for NrCellIdentity {
 #[repr(u8)]
 pub enum NrNrB {
     Nrb11,
-
     Nrb18,
-
     Nrb24,
-
     Nrb25,
-
     Nrb31,
-
     Nrb32,
-
     Nrb38,
-
     Nrb51,
-
     Nrb52,
-
     Nrb65,
-
     Nrb66,
-
     Nrb78,
-
     Nrb79,
-
     Nrb93,
-
     Nrb106,
-
     Nrb107,
-
     Nrb121,
-
     Nrb132,
-
     Nrb133,
-
     Nrb135,
-
     Nrb160,
-
     Nrb162,
-
     Nrb189,
-
     Nrb216,
-
     Nrb217,
-
     Nrb245,
-
     Nrb264,
-
     Nrb270,
-
     Nrb273,
 }
 
@@ -21051,12 +20525,10 @@ impl NrPrachConfigItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -21129,11 +20601,8 @@ impl AperCodec for NrPrachConfigItem {
 #[repr(u8)]
 pub enum NrScs {
     Scs15,
-
     Scs30,
-
     Scs60,
-
     Scs120,
 }
 
@@ -21307,12 +20776,10 @@ impl NumDlulSymbols {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -21393,12 +20860,10 @@ impl NrV2xServicesAuthorized {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -21461,12 +20926,10 @@ impl NrUeSidelinkAggregateMaximumBitrate {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -21613,12 +21076,10 @@ impl PacketErrorRate {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -21735,12 +21196,10 @@ impl PagingCellItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -21778,11 +21237,8 @@ impl AperCodec for PagingCellItem {
 #[repr(u8)]
 pub enum PagingDrx {
     V32,
-
     V64,
-
     V128,
-
     V256,
 }
 
@@ -21818,13 +21274,12 @@ impl AperCodec for PagingDrx {
 #[derive(Clone, Debug)]
 pub enum PagingIdentity {
     RanUePagingIdentity(RanUePagingIdentity),
-
     CnUePagingIdentity(CnUePagingIdentity),
 }
 
 impl PagingIdentity {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -21835,18 +21290,20 @@ impl PagingIdentity {
             1 => Ok(Self::CnUePagingIdentity(CnUePagingIdentity::aper_decode(
                 data,
             )?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::RanUePagingIdentity(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::CnUePagingIdentity(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -21908,19 +21365,12 @@ impl AperCodec for PagingOrigin {
 #[repr(u8)]
 pub enum PagingPriority {
     Priolevel1,
-
     Priolevel2,
-
     Priolevel3,
-
     Priolevel4,
-
     Priolevel5,
-
     Priolevel6,
-
     Priolevel7,
-
     Priolevel8,
 }
 
@@ -21956,21 +21406,16 @@ impl AperCodec for PagingPriority {
 #[derive(Clone, Debug)]
 pub enum RelativePathDelay {
     K0(u16),
-
     K1(u16),
-
     K2(u16),
-
     K3(u16),
-
     K4(u16),
-
     K5(u16),
 }
 
 impl RelativePathDelay {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 5, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 6, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -21993,38 +21438,36 @@ impl RelativePathDelay {
             5 => Ok(Self::K5(
                 aper::decode::decode_integer(data, Some(0), Some(511), false)?.0 as u16,
             )),
+            6 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::K0(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 0, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(16351), false, *x as i128, false)
             }
-
             Self::K1(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 1, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(8176), false, *x as i128, false)
             }
-
             Self::K2(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 2, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(4088), false, *x as i128, false)
             }
-
             Self::K3(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 3, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(2044), false, *x as i128, false)
             }
-
             Self::K4(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 4, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 4, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(1022), false, *x as i128, false)
             }
-
             Self::K5(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 5, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 5, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(511), false, *x as i128, false)
             }
         }
@@ -22066,12 +21509,10 @@ impl PathlossReferenceInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -22110,31 +21551,32 @@ impl AperCodec for PathlossReferenceInfo {
 #[derive(Clone, Debug)]
 pub enum PathlossReferenceSignal {
     Ssb(Ssb),
-
     DlPrs(DlPrs),
 }
 
 impl PathlossReferenceSignal {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Ssb(Ssb::aper_decode(data)?)),
             1 => Ok(Self::DlPrs(DlPrs::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Ssb(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::DlPrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -22190,13 +21632,12 @@ impl AperCodec for Pc5QosFlowIdentifier {
 #[derive(Clone, Debug)]
 pub enum Pc5QosCharacteristics {
     NonDynamicPqi(NonDynamicPqiDescriptor),
-
     DynamicPqi(DynamicPqiDescriptor),
 }
 
 impl Pc5QosCharacteristics {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -22205,18 +21646,20 @@ impl Pc5QosCharacteristics {
                 data,
             )?)),
             1 => Ok(Self::DynamicPqi(DynamicPqiDescriptor::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::NonDynamicPqi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::DynamicPqi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -22263,12 +21706,10 @@ impl Pc5QosParameters {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -22329,12 +21770,10 @@ impl Pc5FlowBitRates {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -22436,7 +21875,6 @@ impl AperCodec for PdcpSn {
 #[repr(u8)]
 pub enum PdcpsnLength {
     TwelveBits,
-
     EighteenBits,
 }
 
@@ -22563,53 +22001,29 @@ impl AperCodec for Periodicity {
 #[repr(u8)]
 pub enum PeriodicitySrs {
     Ms0p125,
-
     Ms0p25,
-
     Ms0p5,
-
     Ms0p625,
-
     Ms1,
-
     Ms1p25,
-
     Ms2,
-
     Ms2p5,
-
     Ms4,
-
     Ms5,
-
     Ms8,
-
     Ms10,
-
     Ms16,
-
     Ms20,
-
     Ms32,
-
     Ms40,
-
     Ms64,
-
     Ms80,
-
     Ms160,
-
     Ms320,
-
     Ms640,
-
     Ms1280,
-
     Ms2560,
-
     Ms5120,
-
     Ms10240,
 }
 
@@ -22700,12 +22114,10 @@ impl PeriodicityListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -22743,7 +22155,6 @@ impl AperCodec for PeriodicityListItem {
 #[repr(u8)]
 pub enum Permutation {
     Dfu,
-
     Ufd,
 }
 
@@ -22966,7 +22377,6 @@ impl AperCodec for PosAssistanceInformationFailureList {
 #[repr(u8)]
 pub enum PosBroadcast {
     Start,
-
     Stop,
 }
 
@@ -23043,27 +22453,16 @@ impl AperCodec for PositioningBroadcastCells {
 #[repr(u8)]
 pub enum MeasurementPeriodicity {
     Ms120,
-
     Ms240,
-
     Ms480,
-
     Ms640,
-
     Ms1024,
-
     Ms2048,
-
     Ms5120,
-
     Ms10240,
-
     Min1,
-
     Min6,
-
     Min12,
-
     Min30,
 }
 
@@ -23161,12 +22560,10 @@ impl PosMeasurementQuantitiesItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23280,12 +22677,10 @@ impl PosMeasurementResultItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23395,13 +22790,11 @@ impl PosMeasurementResultListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     111 => nr_cgi = Some(NrCgi::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23444,11 +22837,8 @@ impl AperCodec for PosMeasurementResultListItem {
 #[repr(u8)]
 pub enum PosMeasurementType {
     GnbRxTx,
-
     UlSrsRsrp,
-
     UlAoa,
-
     UlRtoa,
 }
 
@@ -23485,7 +22875,6 @@ impl AperCodec for PosMeasurementType {
 #[repr(u8)]
 pub enum PosReportCharacteristics {
     Ondemand,
-
     Periodic,
 }
 
@@ -23521,15 +22910,13 @@ impl AperCodec for PosReportCharacteristics {
 #[derive(Clone, Debug)]
 pub enum PosResourceSetType {
     Periodic(PosResourceSetTypePr),
-
     SemiPersistent(PosResourceSetTypeSp),
-
     Aperiodic(PosResourceSetTypeAp),
 }
 
 impl PosResourceSetType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -23539,23 +22926,24 @@ impl PosResourceSetType {
                 data,
             )?)),
             2 => Ok(Self::Aperiodic(PosResourceSetTypeAp::aper_decode(data)?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Periodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::SemiPersistent(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::Aperiodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -23597,12 +22985,10 @@ impl PosResourceSetTypePr {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23655,12 +23041,10 @@ impl PosResourceSetTypeSp {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23716,12 +23100,10 @@ impl PosResourceSetTypeAp {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23845,12 +23227,10 @@ impl PosSrsResourceItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -23991,12 +23371,10 @@ impl PosSrsResourceSetItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24086,7 +23464,6 @@ impl AperCodec for PosSrsResourceSetList {
 #[repr(u8)]
 pub enum PrimaryPathIndication {
     True,
-
     False,
 }
 
@@ -24123,7 +23500,6 @@ impl AperCodec for PrimaryPathIndication {
 #[repr(u8)]
 pub enum PreEmptionCapability {
     ShallNotTriggerPreEmption,
-
     MayTriggerPreEmption,
 }
 
@@ -24160,7 +23536,6 @@ impl AperCodec for PreEmptionCapability {
 #[repr(u8)]
 pub enum PreEmptionVulnerability {
     NotPreEmptable,
-
     PreEmptable,
 }
 
@@ -24274,12 +23649,10 @@ impl ProtectedEutraResourcesItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24336,12 +23709,10 @@ impl PrsConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24405,12 +23776,10 @@ impl PrsInformationPos {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24485,12 +23854,10 @@ impl PotentialSpCellItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24594,12 +23961,10 @@ impl PrsAngleItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24690,12 +24055,10 @@ impl PrsMuting {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24754,12 +24117,10 @@ impl PrsMutingOption1 {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24816,12 +24177,10 @@ impl PrsMutingOption2 {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -24959,12 +24318,10 @@ impl PrsResourceItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25037,13 +24394,12 @@ impl AperCodec for PrsResourceItem {
 #[derive(Clone, Debug)]
 pub enum PrsResourceQclInfo {
     QclSourceSsb(PrsResourceQclSourceSsb),
-
     QclSourcePrs(PrsResourceQclSourcePrs),
 }
 
 impl PrsResourceQclInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -25054,18 +24410,20 @@ impl PrsResourceQclInfo {
             1 => Ok(Self::QclSourcePrs(PrsResourceQclSourcePrs::aper_decode(
                 data,
             )?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::QclSourceSsb(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::QclSourcePrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -25112,12 +24470,10 @@ impl PrsResourceQclSourceSsb {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25180,12 +24536,10 @@ impl PrsResourceQclSourcePrs {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25348,12 +24702,10 @@ impl PrsResourceSetItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25475,12 +24827,10 @@ impl PwsFailedNrCgiItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25542,7 +24892,7 @@ impl PwsSystemInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     220 => {
                         notification_information = Some(NotificationInformation::aper_decode(data)?)
@@ -25552,9 +24902,7 @@ impl PwsSystemInformation {
                             Some(AdditionalSibMessageList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25598,7 +24946,6 @@ impl AperCodec for PwsSystemInformation {
 #[repr(u8)]
 pub enum PrivacyIndicator {
     ImmediateMdt,
-
     LoggedMdt,
 }
 
@@ -25664,13 +25011,12 @@ impl AperCodec for Qci {
 #[derive(Clone, Debug)]
 pub enum QosCharacteristics {
     NonDynamic5qi(NonDynamic5qiDescriptor),
-
     Dynamic5qi(Dynamic5qiDescriptor),
 }
 
 impl QosCharacteristics {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -25679,18 +25025,20 @@ impl QosCharacteristics {
                 data,
             )?)),
             1 => Ok(Self::Dynamic5qi(Dynamic5qiDescriptor::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::NonDynamic5qi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Dynamic5qi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -25783,7 +25131,7 @@ impl QosFlowLevelQosParameters {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     180 => pdu_session_id = Some(PduSessionId::aper_decode(data)?),
                     181 => {
@@ -25791,9 +25139,7 @@ impl QosFlowLevelQosParameters {
                     }
                     257 => qos_monitoring_request = Some(QosMonitoringRequest::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -25848,7 +25194,6 @@ impl AperCodec for QosFlowLevelQosParameters {
 #[repr(u8)]
 pub enum QosFlowMappingIndication {
     Ul,
-
     Dl,
 }
 
@@ -25888,19 +25233,22 @@ pub enum QosInformation {
 
 impl QosInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::EutranQos(EutranQos::aper_decode(data)?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranQos(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.aper_encode(data)
             }
         }
@@ -25927,9 +25275,7 @@ impl AperCodec for QosInformation {
 #[repr(u8)]
 pub enum QosMonitoringRequest {
     Ul,
-
     Dl,
-
     Both,
 }
 
@@ -26175,12 +25521,10 @@ impl RachReportInformationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -26241,12 +25585,10 @@ impl RadioResourceStatus {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -26424,12 +25766,10 @@ impl RanUePagingIdentity {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -26466,13 +25806,12 @@ impl AperCodec for RanUePagingIdentity {
 #[derive(Clone, Debug)]
 pub enum RatFrequencyPriorityInformation {
     Endc(SubscriberProfileIDforRfp),
-
     Ngran(RatFrequencySelectionPriority),
 }
 
 impl RatFrequencyPriorityInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -26481,18 +25820,20 @@ impl RatFrequencyPriorityInformation {
             1 => Ok(Self::Ngran(RatFrequencySelectionPriority::aper_decode(
                 data,
             )?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Endc(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Ngran(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -26583,15 +25924,13 @@ impl AperCodec for ReestablishmentIndication {
 #[derive(Clone, Debug)]
 pub enum ReferencePoint {
     CoordinateId(CoordinateId),
-
     ReferencePointCoordinate(AccessPointPosition),
-
     ReferencePointCoordinateHa(NgranHighAccuracyAccessPointPosition),
 }
 
 impl ReferencePoint {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -26603,23 +25942,24 @@ impl ReferencePoint {
             2 => Ok(Self::ReferencePointCoordinateHa(
                 NgranHighAccuracyAccessPointPosition::aper_decode(data)?,
             )),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::CoordinateId(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::ReferencePointCoordinate(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::ReferencePointCoordinateHa(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -26675,19 +26015,15 @@ impl AperCodec for ReferenceSfn {
 #[derive(Clone, Debug)]
 pub enum ReferenceSignal {
     NzpCsiRs(NzpCsiRsResourceId),
-
     Ssb(Ssb),
-
     Srs(SrsResourceId),
-
     PositioningSrs(SrsPosResourceId),
-
     DlPrs(DlPrs),
 }
 
 impl ReferenceSignal {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 5, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -26697,33 +26033,32 @@ impl ReferenceSignal {
             2 => Ok(Self::Srs(SrsResourceId::aper_decode(data)?)),
             3 => Ok(Self::PositioningSrs(SrsPosResourceId::aper_decode(data)?)),
             4 => Ok(Self::DlPrs(DlPrs::aper_decode(data)?)),
+            5 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::NzpCsiRs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Ssb(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::Srs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 2, false)?;
                 x.aper_encode(data)
             }
-
             Self::PositioningSrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 3, false)?;
                 x.aper_encode(data)
             }
-
             Self::DlPrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 4, false, 4, false)?;
+                aper::encode::encode_choice_idx(data, 0, 5, false, 4, false)?;
                 x.aper_encode(data)
             }
         }
@@ -26773,12 +26108,10 @@ impl RelativeCartesianLocation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -26875,12 +26208,10 @@ impl RelativeGeodeticLocation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -26981,9 +26312,7 @@ impl AperCodec for ReferenceTime {
 #[repr(u8)]
 pub enum RegistrationRequest {
     Start,
-
     Stop,
-
     Add,
 }
 
@@ -27053,13 +26382,9 @@ impl AperCodec for ReportCharacteristics {
 #[repr(u8)]
 pub enum ReportingPeriodicity {
     Ms500,
-
     Ms1000,
-
     Ms2000,
-
     Ms5000,
-
     Ms10000,
 }
 
@@ -27253,13 +26578,11 @@ impl RequestedSrsTransmissionCharacteristics {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     431 => srs_frequency = Some(SrsFrequency::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27319,7 +26642,6 @@ impl AperCodec for RequestedSrsTransmissionCharacteristics {
 #[repr(u8)]
 pub enum RequestType {
     Offer,
-
     Execution,
 }
 
@@ -27374,16 +26696,14 @@ impl ResourceCoordinationEutraCellInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     233 => {
                         ignore_prach_configuration =
                             Some(IgnorePrachConfiguration::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27446,12 +26766,10 @@ impl ResourceCoordinationTransferInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27527,15 +26845,13 @@ impl AperCodec for ResourceCoordinationTransferContainer {
 #[derive(Clone, Debug)]
 pub enum ResourceSetType {
     Periodic(ResourceSetTypePeriodic),
-
     SemiPersistent(ResourceSetTypeSemiPersistent),
-
     Aperiodic(ResourceSetTypeAperiodic),
 }
 
 impl ResourceSetType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -27547,23 +26863,24 @@ impl ResourceSetType {
             2 => Ok(Self::Aperiodic(ResourceSetTypeAperiodic::aper_decode(
                 data,
             )?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Periodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::SemiPersistent(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::Aperiodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -27605,12 +26922,10 @@ impl ResourceSetTypePeriodic {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27663,12 +26978,10 @@ impl ResourceSetTypeSemiPersistent {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27726,12 +27039,10 @@ impl ResourceSetTypeAperiodic {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27838,12 +27149,10 @@ impl ReportingRequestType {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -27887,15 +27196,13 @@ impl AperCodec for ReportingRequestType {
 #[derive(Clone, Debug)]
 pub enum ResourceType {
     Periodic(ResourceTypePeriodic),
-
     SemiPersistent(ResourceTypeSemiPersistent),
-
     Aperiodic(ResourceTypeAperiodic),
 }
 
 impl ResourceType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -27905,23 +27212,24 @@ impl ResourceType {
                 ResourceTypeSemiPersistent::aper_decode(data)?,
             )),
             2 => Ok(Self::Aperiodic(ResourceTypeAperiodic::aper_decode(data)?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Periodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::SemiPersistent(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::Aperiodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -27965,12 +27273,10 @@ impl ResourceTypePeriodic {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28029,12 +27335,10 @@ impl ResourceTypeSemiPersistent {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28091,12 +27395,10 @@ impl ResourceTypeAperiodic {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28135,15 +27437,13 @@ impl AperCodec for ResourceTypeAperiodic {
 #[derive(Clone, Debug)]
 pub enum ResourceTypePos {
     Periodic(ResourceTypePeriodicPos),
-
     SemiPersistent(ResourceTypeSemiPersistentPos),
-
     Aperiodic(ResourceTypeAperiodicPos),
 }
 
 impl ResourceTypePos {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -28155,23 +27455,24 @@ impl ResourceTypePos {
             2 => Ok(Self::Aperiodic(ResourceTypeAperiodicPos::aper_decode(
                 data,
             )?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Periodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::SemiPersistent(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::Aperiodic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -28215,12 +27516,10 @@ impl ResourceTypePeriodicPos {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28279,12 +27578,10 @@ impl ResourceTypeSemiPersistentPos {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28341,12 +27638,10 @@ impl ResourceTypeAperiodicPos {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28412,12 +27707,10 @@ impl RlcDuplicationInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28515,12 +27808,10 @@ impl RlcDuplicationStateItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28573,12 +27864,10 @@ impl RlcFailureIndication {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28616,11 +27905,8 @@ impl AperCodec for RlcFailureIndication {
 #[repr(u8)]
 pub enum RlcMode {
     RlcAm,
-
     RlcUmBidirectional,
-
     RlcUmUnidirectionalUl,
-
     RlcUmUnidirectionalDl,
 }
 
@@ -28671,12 +27957,10 @@ impl RlcStatus {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28775,12 +28059,10 @@ impl RlfReportInformationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -28825,7 +28107,6 @@ impl AperCodec for RlfReportInformationItem {
 #[repr(u8)]
 pub enum RimrsDetectionStatus {
     RsDetected,
-
     RsDisappeared,
 }
 
@@ -28939,12 +28220,10 @@ impl RrcDeliveryStatus {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29073,7 +28352,7 @@ impl RrcVersion {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     199 => {
                         latest_rrc_version_enhanced = Some(aper::decode::decode_octetstring(
@@ -29084,9 +28363,7 @@ impl RrcVersion {
                         )?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29184,12 +28461,10 @@ impl SCellFailedtoSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29251,12 +28526,10 @@ impl SCellFailedtoSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29312,12 +28585,10 @@ impl SCellToBeRemovedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29379,13 +28650,11 @@ impl SCellToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     182 => serving_cell_mo = Some(ServingCellMo::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29457,13 +28726,11 @@ impl SCellToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     182 => serving_cell_mo = Some(ServingCellMo::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29597,12 +28864,10 @@ impl ScsSpecificCarrier {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -29679,12 +28944,10 @@ impl SearchWindowInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30012,7 +29275,7 @@ impl ServedCellInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     139 => ranac = Some(Ranac::aper_decode(data)?),
                     196 => {
@@ -30033,9 +29296,7 @@ impl ServedCellInformation {
                     358 => nr_prach_config = Some(NrPrachConfig::aper_decode(data)?),
                     429 => sfn_offset = Some(SfnOffset::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30126,12 +29387,10 @@ impl SfnOffset {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30196,12 +29455,10 @@ impl ServedCellsToAddItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30260,12 +29517,10 @@ impl ServedCellsToDeleteItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30325,12 +29580,10 @@ impl ServedCellsToModifyItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30394,12 +29647,10 @@ impl ServedEutraCellsInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30441,7 +29692,6 @@ impl AperCodec for ServedEutraCellsInformation {
 #[repr(u8)]
 pub enum ServiceState {
     InService,
-
     OutOfService,
 }
 
@@ -30498,12 +29748,10 @@ impl ServiceStatus {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30581,49 +29829,27 @@ impl AperCodec for RelativeTime1900 {
 #[repr(u8)]
 pub enum ShortDrxCycleLength {
     Ms2,
-
     Ms3,
-
     Ms4,
-
     Ms5,
-
     Ms6,
-
     Ms7,
-
     Ms8,
-
     Ms10,
-
     Ms14,
-
     Ms16,
-
     Ms20,
-
     Ms30,
-
     Ms32,
-
     Ms35,
-
     Ms40,
-
     Ms64,
-
     Ms80,
-
     Ms128,
-
     Ms160,
-
     Ms256,
-
     Ms320,
-
     Ms512,
-
     Ms640,
 }
 
@@ -30924,12 +30150,10 @@ impl SItypeItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -30987,13 +30211,11 @@ impl SibtypetobeupdatedListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     240 => area_scope = Some(AreaScope::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31134,12 +30356,10 @@ impl SlDrbsFailedToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31202,12 +30422,10 @@ impl SlDrbsFailedToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31270,12 +30488,10 @@ impl SlDrbsFailedToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31332,12 +30548,10 @@ impl SlDrbsModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31390,12 +30604,10 @@ impl SlDrbsModifiedConfItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31448,12 +30660,10 @@ impl SlDrbsRequiredToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31506,12 +30716,10 @@ impl SlDrbsRequiredToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31564,12 +30772,10 @@ impl SlDrbsSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31622,12 +30828,10 @@ impl SlDrbsSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31692,12 +30896,10 @@ impl SlDrbsToBeModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31762,12 +30964,10 @@ impl SlDrbsToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31824,12 +31024,10 @@ impl SlDrbsToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -31896,12 +31094,10 @@ impl SlDrbsToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32023,12 +31219,10 @@ impl SliceAvailableCapacity {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32124,12 +31318,10 @@ impl SliceAvailableCapacityItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32237,12 +31429,10 @@ impl SnssaiAvailableCapacityItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32346,12 +31536,10 @@ impl SliceSupportItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32445,12 +31633,10 @@ impl SliceToReportItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32576,12 +31762,10 @@ impl SnssaiItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32675,12 +31859,10 @@ impl SlotConfigurationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32755,12 +31937,10 @@ impl Snssai {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32817,12 +31997,10 @@ impl SpatialDirectionInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32877,12 +32055,10 @@ impl SpatialRelationInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -32976,12 +32152,10 @@ impl SpatialRelationforResourceIdItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33018,13 +32192,12 @@ impl AperCodec for SpatialRelationforResourceIdItem {
 #[derive(Clone, Debug)]
 pub enum SpatialRelationPos {
     SsbPos(Ssb),
-
     PrsInformationPos(PrsInformationPos),
 }
 
 impl SpatialRelationPos {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -33033,18 +32206,20 @@ impl SpatialRelationPos {
             1 => Ok(Self::PrsInformationPos(PrsInformationPos::aper_decode(
                 data,
             )?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::SsbPos(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::PrsInformationPos(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -33151,12 +32326,10 @@ impl SrbsFailedToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33218,12 +32391,10 @@ impl SrbsFailedToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33281,12 +32452,10 @@ impl SrbsModifiedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33339,12 +32508,10 @@ impl SrbsRequiredToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33398,12 +32565,10 @@ impl SrbsSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33458,12 +32623,10 @@ impl SrbsSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33516,12 +32679,10 @@ impl SrbsToBeReleasedItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33581,16 +32742,14 @@ impl SrbsToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     372 => {
                         additional_duplication_indication =
                             Some(AdditionalDuplicationIndication::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33658,16 +32817,14 @@ impl SrbsToBeSetupModItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     372 => {
                         additional_duplication_indication =
                             Some(AdditionalDuplicationIndication::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33777,12 +32934,10 @@ impl SrsCarrierListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33875,12 +33030,10 @@ impl SrsConfig {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -33953,12 +33106,10 @@ impl SrsConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -34099,12 +33250,10 @@ impl SrsResource {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -34325,12 +33474,10 @@ impl SrsResourceSet {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -34480,12 +33627,10 @@ impl SrsResourceSetItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -34598,12 +33743,10 @@ impl SrsResourceTrigger {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -34664,12 +33807,10 @@ impl Ssb {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -34771,17 +33912,11 @@ impl AperCodec for SsbIndex {
 #[repr(u8)]
 pub enum SsbSubcarrierSpacing {
     KHz15,
-
     KHz30,
-
     KHz120,
-
     KHz240,
-
     Spare3,
-
     Spare2,
-
     Spare1,
 }
 
@@ -34818,17 +33953,11 @@ impl AperCodec for SsbSubcarrierSpacing {
 #[repr(u8)]
 pub enum SsbTransmissionPeriodicity {
     Sf10,
-
     Sf20,
-
     Sf40,
-
     Sf80,
-
     Sf160,
-
     Sf320,
-
     Sf640,
 }
 
@@ -34894,15 +34023,13 @@ impl AperCodec for SsbTransmissionTimingOffset {
 #[derive(Clone, Debug)]
 pub enum SsbTransmissionBitmap {
     ShortBitmap(BitString),
-
     MediumBitmap(BitString),
-
     LongBitmap(BitString),
 }
 
 impl SsbTransmissionBitmap {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -34925,23 +34052,24 @@ impl SsbTransmissionBitmap {
                 Some(64),
                 false,
             )?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::ShortBitmap(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 aper::encode::encode_bitstring(data, Some(4), Some(4), false, &x, false)
             }
-
             Self::MediumBitmap(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 aper::encode::encode_bitstring(data, Some(8), Some(8), false, &x, false)
             }
-
             Self::LongBitmap(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 aper::encode::encode_bitstring(data, Some(64), Some(64), false, &x, false)
             }
         }
@@ -35025,12 +34153,10 @@ impl SsbAreaCapacityValueItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35170,12 +34296,10 @@ impl SsbAreaRadioResourceStatusItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35301,12 +34425,10 @@ impl SsbInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35402,12 +34524,10 @@ impl SsbInformationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35448,15 +34568,13 @@ impl AperCodec for SsbInformationItem {
 #[derive(Clone, Debug)]
 pub enum SsbPositionsInBurst {
     ShortBitmap(BitString),
-
     MediumBitmap(BitString),
-
     LongBitmap(BitString),
 }
 
 impl SsbPositionsInBurst {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -35479,23 +34597,24 @@ impl SsbPositionsInBurst {
                 Some(64),
                 false,
             )?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::ShortBitmap(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 aper::encode::encode_bitstring(data, Some(4), Some(4), false, &x, false)
             }
-
             Self::MediumBitmap(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 aper::encode::encode_bitstring(data, Some(8), Some(8), false, &x, false)
             }
-
             Self::LongBitmap(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 aper::encode::encode_bitstring(data, Some(64), Some(64), false, &x, false)
             }
         }
@@ -35562,12 +34681,10 @@ impl SsbTfConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35709,12 +34826,10 @@ impl SsbToReportItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35780,14 +34895,12 @@ impl SulInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     354 => carrier_list = Some(NrCarrierList::aper_decode(data)?),
                     356 => frequency_shift7p5khz = Some(FrequencyShift7p5khz::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -35838,19 +34951,12 @@ impl AperCodec for SulInformation {
 #[repr(u8)]
 pub enum SubcarrierSpacing {
     KHz15,
-
     KHz30,
-
     KHz60,
-
     KHz120,
-
     KHz240,
-
     Spare3,
-
     Spare2,
-
     Spare1,
 }
 
@@ -35967,12 +35073,10 @@ impl SupportedSulFreqBandItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36018,15 +35122,13 @@ impl AperCodec for SupportedSulFreqBandItem {
 #[derive(Clone, Debug)]
 pub enum SymbolAllocInSlot {
     AllDl,
-
     AllUl,
-
     BothDlAndUl(NumDlulSymbols),
 }
 
 impl SymbolAllocInSlot {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -36034,23 +35136,24 @@ impl SymbolAllocInSlot {
             0 => Ok(Self::AllDl),
             1 => Ok(Self::AllUl),
             2 => Ok(Self::BothDlAndUl(NumDlulSymbols::aper_decode(data)?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AllDl => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 Ok(())
             }
-
             Self::AllUl => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 Ok(())
             }
-
             Self::BothDlAndUl(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -36260,12 +35363,10 @@ impl TargetCellListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36325,7 +35426,7 @@ impl TddInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     256 => {
                         intended_tdd_dl_ul_config = Some(IntendedTddDlUlConfig::aper_decode(data)?)
@@ -36335,9 +35436,7 @@ impl TddInfo {
                     }
                     354 => carrier_list = Some(NrCarrierList::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36433,12 +35532,10 @@ impl TimeReferenceInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36542,12 +35639,10 @@ impl TimeStamp {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36593,17 +35688,14 @@ impl AperCodec for TimeStamp {
 #[derive(Clone, Debug)]
 pub enum TimeStampSlotIndex {
     Scs15(u8),
-
     Scs30(u8),
-
     Scs60(u8),
-
     Scs120(u8),
 }
 
 impl TimeStampSlotIndex {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 4, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -36620,28 +35712,28 @@ impl TimeStampSlotIndex {
             3 => Ok(Self::Scs120(
                 aper::decode::decode_integer(data, Some(0), Some(79), false)?.0 as u8,
             )),
+            4 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Scs15(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 0, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(9), false, *x as i128, false)
             }
-
             Self::Scs30(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 1, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(19), false, *x as i128, false)
             }
-
             Self::Scs60(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 2, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(39), false, *x as i128, false)
             }
-
             Self::Scs120(x) => {
-                aper::encode::encode_choice_idx(data, 0, 3, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 4, false, 3, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(79), false, *x as i128, false)
             }
         }
@@ -36668,15 +35760,10 @@ impl AperCodec for TimeStampSlotIndex {
 #[repr(u8)]
 pub enum TimeToWait {
     V1s,
-
     V2s,
-
     V5s,
-
     V10s,
-
     V20s,
-
     V60s,
 }
 
@@ -36731,12 +35818,10 @@ impl TimingMeasurementQuality {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36785,9 +35870,7 @@ impl AperCodec for TimingMeasurementQuality {
 #[repr(u8)]
 pub enum TnlAssociationUsage {
     Ue,
-
     NonUe,
-
     Both,
 }
 
@@ -36849,12 +35932,10 @@ impl TnlCapacityIndicator {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -36953,14 +36034,12 @@ impl TraceActivation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     381 => mdt_configuration = Some(MdtConfiguration::aper_decode(data)?),
                     380 => trace_collection_entity_uri = Some(UriAddress::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -37008,15 +36087,10 @@ impl AperCodec for TraceActivation {
 #[repr(u8)]
 pub enum TraceDepth {
     Minimum,
-
     Medium,
-
     Maximum,
-
     MinimumWithoutVendorSpecificExtension,
-
     MediumWithoutVendorSpecificExtension,
-
     MaximumWithoutVendorSpecificExtension,
 }
 
@@ -37085,13 +36159,12 @@ impl AperCodec for TraceId {
 #[derive(Clone, Debug)]
 pub enum TrafficMappingInfo {
     IPtolayer2TrafficMappingInfo(IPtolayer2TrafficMappingInfo),
-
     BaPlayerBhrlCchannelMappingInfo(BaPlayerBhrlCchannelMappingInfo),
 }
 
 impl TrafficMappingInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -37102,18 +36175,20 @@ impl TrafficMappingInfo {
             1 => Ok(Self::BaPlayerBhrlCchannelMappingInfo(
                 BaPlayerBhrlCchannelMappingInfo::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::IPtolayer2TrafficMappingInfo(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::BaPlayerBhrlCchannelMappingInfo(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -37219,12 +36294,10 @@ impl TransmissionBandwidth {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -37262,31 +36335,32 @@ impl AperCodec for TransmissionBandwidth {
 #[derive(Clone, Debug)]
 pub enum TransmissionComb {
     N2(N2),
-
     N4(N4),
 }
 
 impl TransmissionComb {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::N2(N2::aper_decode(data)?)),
             1 => Ok(Self::N4(N4::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::N2(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::N4(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -37312,15 +36386,13 @@ impl AperCodec for TransmissionComb {
 #[derive(Clone, Debug)]
 pub enum TransmissionCombPos {
     N2(N2_1),
-
     N4(N4_1),
-
     N8(N8),
 }
 
 impl TransmissionCombPos {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -37328,23 +36400,24 @@ impl TransmissionCombPos {
             0 => Ok(Self::N2(N2_1::aper_decode(data)?)),
             1 => Ok(Self::N4(N4_1::aper_decode(data)?)),
             2 => Ok(Self::N8(N8::aper_decode(data)?)),
+            3 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::N2(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::N4(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::N8(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 3, false, 2, false)?;
                 x.aper_encode(data)
             }
         }
@@ -37466,12 +36539,10 @@ impl TransportUpLayerAddressInfoToAddItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -37580,12 +36651,10 @@ impl TransportUpLayerAddressInfoToRemoveItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -37714,12 +36783,10 @@ impl TrpInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -37776,12 +36843,10 @@ impl TrpInformationItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -37819,19 +36884,12 @@ impl AperCodec for TrpInformationItem {
 #[repr(u8)]
 pub enum TrpInformationTypeItem {
     NrPci,
-
     NgRanCgi,
-
     Arfcn,
-
     PrsConfig,
-
     SsbConfig,
-
     SfnInitTime,
-
     SpatialDirectInfo,
-
     GeoCoord,
 }
 
@@ -37906,25 +36964,18 @@ impl AperCodec for TrpInformationTypeResponseList {
 #[derive(Clone, Debug)]
 pub enum TrpInformationTypeResponseItem {
     PciNr(NrPci),
-
     NgRanCgi(NrCgi),
-
     NrArfcn(u32),
-
     PrsConfiguration(PrsConfiguration),
-
     SsBinformation(SsbInformation),
-
     SfnInitialisationTime(RelativeTime1900),
-
     SpatialDirectionInformation(SpatialDirectionInformation),
-
     GeographicalCoordinates(GeographicalCoordinates),
 }
 
 impl TrpInformationTypeResponseItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 7, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 8, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -37945,48 +36996,44 @@ impl TrpInformationTypeResponseItem {
             7 => Ok(Self::GeographicalCoordinates(
                 GeographicalCoordinates::aper_decode(data)?,
             )),
+            8 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::PciNr(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanCgi(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 1, false)?;
                 x.aper_encode(data)
             }
-
             Self::NrArfcn(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 2, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(3279165), false, *x as i128, false)
             }
-
             Self::PrsConfiguration(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 3, false)?;
                 x.aper_encode(data)
             }
-
             Self::SsBinformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 4, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 4, false)?;
                 x.aper_encode(data)
             }
-
             Self::SfnInitialisationTime(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 5, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 5, false)?;
                 x.aper_encode(data)
             }
-
             Self::SpatialDirectionInformation(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 6, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 6, false)?;
                 x.aper_encode(data)
             }
-
             Self::GeographicalCoordinates(x) => {
-                aper::encode::encode_choice_idx(data, 0, 7, false, 7, false)?;
+                aper::encode::encode_choice_idx(data, 0, 8, false, 7, false)?;
                 x.aper_encode(data)
             }
         }
@@ -38068,12 +37115,10 @@ impl TrpListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38126,12 +37171,10 @@ impl TrpMeasurementQuality {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38170,13 +37213,12 @@ impl AperCodec for TrpMeasurementQuality {
 #[derive(Clone, Debug)]
 pub enum TrpMeasurementQualityItem {
     TimingMeasurementQuality(TimingMeasurementQuality),
-
     AngleMeasurementQuality(AngleMeasurementQuality),
 }
 
 impl TrpMeasurementQualityItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -38187,18 +37229,20 @@ impl TrpMeasurementQualityItem {
             1 => Ok(Self::AngleMeasurementQuality(
                 AngleMeasurementQuality::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::TimingMeasurementQuality(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::AngleMeasurementQuality(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -38287,13 +37331,11 @@ impl TrpMeasurementRequestItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     111 => nr_cgi = Some(NrCgi::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38338,31 +37380,32 @@ impl AperCodec for TrpMeasurementRequestItem {
 #[derive(Clone, Debug)]
 pub enum TrpPositionDefinitionType {
     Direct(TrpPositionDirect),
-
     Referenced(TrpPositionReferenced),
 }
 
 impl TrpPositionDefinitionType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::Direct(TrpPositionDirect::aper_decode(data)?)),
             1 => Ok(Self::Referenced(TrpPositionReferenced::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Direct(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::Referenced(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -38404,12 +37447,10 @@ impl TrpPositionDirect {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38446,13 +37487,12 @@ impl AperCodec for TrpPositionDirect {
 #[derive(Clone, Debug)]
 pub enum TrpPositionDirectAccuracy {
     TrpPosition(AccessPointPosition),
-
     TrphAposition(NgranHighAccuracyAccessPointPosition),
 }
 
 impl TrpPositionDirectAccuracy {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -38461,18 +37501,20 @@ impl TrpPositionDirectAccuracy {
             1 => Ok(Self::TrphAposition(
                 NgranHighAccuracyAccessPointPosition::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::TrpPosition(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::TrphAposition(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -38516,12 +37558,10 @@ impl TrpPositionReferenced {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38562,13 +37602,12 @@ impl AperCodec for TrpPositionReferenced {
 #[derive(Clone, Debug)]
 pub enum TrpReferencePointType {
     TrpPositionRelativeGeodetic(RelativeGeodeticLocation),
-
     TrpPositionRelativeCartesian(RelativeCartesianLocation),
 }
 
 impl TrpReferencePointType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -38579,18 +37618,20 @@ impl TrpReferencePointType {
             1 => Ok(Self::TrpPositionRelativeCartesian(
                 RelativeCartesianLocation::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::TrpPositionRelativeGeodetic(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::TrpPositionRelativeCartesian(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -38617,7 +37658,6 @@ impl AperCodec for TrpReferencePointType {
 #[repr(u8)]
 pub enum TypeOfError {
     NotUnderstood,
-
     Missing,
 }
 
@@ -38680,12 +37720,10 @@ impl TransportLayerAddressInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38756,12 +37794,10 @@ impl TscAssistanceInformation {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38830,12 +37866,10 @@ impl TscTrafficCharacteristics {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38898,12 +37932,10 @@ impl UacAssistanceInfo {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -38999,13 +38031,11 @@ impl UacPlmnItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     385 => nid = Some(Nid::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39104,12 +38134,10 @@ impl UacTypeItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39150,13 +38178,12 @@ impl AperCodec for UacTypeItem {
 #[derive(Clone, Debug)]
 pub enum UacCategoryType {
     UaCstandardized(UacAction),
-
     UacOperatorDefined(UacOperatorDefined),
 }
 
 impl UacCategoryType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -39165,18 +38192,20 @@ impl UacCategoryType {
             1 => Ok(Self::UacOperatorDefined(UacOperatorDefined::aper_decode(
                 data,
             )?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::UaCstandardized(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::UacOperatorDefined(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -39220,12 +38249,10 @@ impl UacOperatorDefined {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39281,11 +38308,8 @@ impl AperCodec for UacOperatorDefined {
 #[repr(u8)]
 pub enum UacAction {
     RejectNonEmergencyMoDt,
-
     RejectRrcCrSignalling,
-
     PermitEmergencySessionsAndMobileTerminatedServicesOnly,
-
     PermitHighPrioritySessionsAndMobileTerminatedServicesOnly,
 }
 
@@ -39376,12 +38400,10 @@ impl UeAssociatedLogicalF1ConnectionItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39557,7 +38579,7 @@ pub enum UeIdentityIndexValue {
 
 impl UeIdentityIndexValue {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -39568,13 +38590,16 @@ impl UeIdentityIndexValue {
                 Some(10),
                 false,
             )?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::IndexLength10(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 aper::encode::encode_bitstring(data, Some(10), Some(10), false, &x, false)
             }
         }
@@ -39628,12 +38653,10 @@ impl UlAoA {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39705,12 +38728,10 @@ impl UlBhNonUpTrafficMapping {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39806,12 +38827,10 @@ impl UlBhNonUpTrafficMappingItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39867,12 +38886,10 @@ impl UlConfiguration {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39933,12 +38950,10 @@ impl UlRtoaMeasurement {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -39982,21 +38997,16 @@ impl AperCodec for UlRtoaMeasurement {
 #[derive(Clone, Debug)]
 pub enum UlRtoaMeasurementItem {
     K0(u32),
-
     K1(u32),
-
     K2(u32),
-
     K3(u32),
-
     K4(u32),
-
     K5(u16),
 }
 
 impl UlRtoaMeasurementItem {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 5, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 6, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -40019,38 +39029,36 @@ impl UlRtoaMeasurementItem {
             5 => Ok(Self::K5(
                 aper::decode::decode_integer(data, Some(0), Some(61565), false)?.0 as u16,
             )),
+            6 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::K0(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 0, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(1970049), false, *x as i128, false)
             }
-
             Self::K1(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 1, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(985025), false, *x as i128, false)
             }
-
             Self::K2(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 2, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 2, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(492513), false, *x as i128, false)
             }
-
             Self::K3(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 3, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 3, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(246257), false, *x as i128, false)
             }
-
             Self::K4(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 4, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 4, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(123129), false, *x as i128, false)
             }
-
             Self::K5(x) => {
-                aper::encode::encode_choice_idx(data, 0, 5, false, 5, false)?;
+                aper::encode::encode_choice_idx(data, 0, 6, false, 5, false)?;
                 aper::encode::encode_integer(data, Some(0), Some(61565), false, *x as i128, false)
             }
         }
@@ -40107,9 +39115,7 @@ impl AperCodec for UlSrsRsrp {
 #[repr(u8)]
 pub enum UlUeConfiguration {
     NoData,
-
     Shared,
-
     Only,
 }
 
@@ -40168,12 +39174,10 @@ impl UlUpTnlInformationToUpdateListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -40236,12 +39240,10 @@ impl UlUpTnlAddressToUpdateListItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -40338,13 +39340,11 @@ impl UluptnlInformationToBeSetupItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     280 => bh_info = Some(BhInfo::aper_decode(data)?),
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -40487,19 +39487,22 @@ pub enum UpTransportLayerInformation {
 
 impl UpTransportLayerInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 0, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
             0 => Ok(Self::GtpTunnel(GtpTunnel::aper_decode(data)?)),
+            1 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::GtpTunnel(x) => {
-                aper::encode::encode_choice_idx(data, 0, 0, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.aper_encode(data)
             }
         }
@@ -40571,12 +39574,10 @@ impl VictimGnbSetId {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -40614,7 +39615,6 @@ impl AperCodec for VictimGnbSetId {
 #[repr(u8)]
 pub enum VehicleUe {
     Authorized,
-
     NotAuthorized,
 }
 
@@ -40651,7 +39651,6 @@ impl AperCodec for VehicleUe {
 #[repr(u8)]
 pub enum PedestrianUe {
     Authorized,
-
     NotAuthorized,
 }
 
@@ -40688,7 +39687,6 @@ impl AperCodec for PedestrianUe {
 #[repr(u8)]
 pub enum LatitudeSign {
     North,
-
     South,
 }
 
@@ -40725,7 +39723,6 @@ impl AperCodec for LatitudeSign {
 #[repr(u8)]
 pub enum DirectionOfAltitude {
     Height,
-
     Depth,
 }
 
@@ -40762,11 +39759,8 @@ impl AperCodec for DirectionOfAltitude {
 #[repr(u8)]
 pub enum SubcarrierSpacing1 {
     KHz15,
-
     KHz30,
-
     KHz60,
-
     KHz120,
 }
 
@@ -40803,7 +39797,6 @@ impl AperCodec for SubcarrierSpacing1 {
 #[repr(u8)]
 pub enum CyclicPrefix {
     Normal,
-
     Extended,
 }
 
@@ -40910,7 +39903,6 @@ impl AperCodec for Resolution {
 #[repr(u8)]
 pub enum DelayCritical {
     DelayCritical,
-
     NonDelayCritical,
 }
 
@@ -40947,9 +39939,7 @@ impl AperCodec for DelayCritical {
 #[repr(u8)]
 pub enum ResourceType1 {
     Gbr,
-
     NonGbr,
-
     DelayCriticalGrb,
 }
 
@@ -40986,11 +39976,8 @@ impl AperCodec for ResourceType1 {
 #[repr(u8)]
 pub enum NrScs1 {
     Scs15,
-
     Scs30,
-
     Scs60,
-
     Scs120,
 }
 
@@ -41027,7 +40014,6 @@ impl AperCodec for NrScs1 {
 #[repr(u8)]
 pub enum NrCp {
     Normal,
-
     Extended,
 }
 
@@ -41064,39 +40050,22 @@ impl AperCodec for NrCp {
 #[repr(u8)]
 pub enum NrDlulTxPeriodicity {
     Ms0p5,
-
     Ms0p625,
-
     Ms1,
-
     Ms1p25,
-
     Ms2,
-
     Ms2p5,
-
     Ms3,
-
     Ms4,
-
     Ms5,
-
     Ms10,
-
     Ms20,
-
     Ms40,
-
     Ms60,
-
     Ms80,
-
     Ms100,
-
     Ms120,
-
     Ms140,
-
     Ms160,
 }
 
@@ -41133,11 +40102,8 @@ impl AperCodec for NrDlulTxPeriodicity {
 #[repr(u8)]
 pub enum Msg1scs {
     Scs15,
-
     Scs30,
-
     Scs60,
-
     Scs120,
 }
 
@@ -41174,9 +40140,7 @@ impl AperCodec for Msg1scs {
 #[repr(u8)]
 pub enum RestrictedSetConfig {
     UnrestrictedSet,
-
     RestrictedSetTypeA,
-
     RestrictedSetTypeB,
 }
 
@@ -41213,11 +40177,8 @@ impl AperCodec for RestrictedSetConfig {
 #[repr(u8)]
 pub enum Msg1fdm {
     One,
-
     Two,
-
     Four,
-
     Eight,
 }
 
@@ -41254,19 +40215,12 @@ impl AperCodec for Msg1fdm {
 #[repr(u8)]
 pub enum SsbPerRachOccasion {
     OneEighth,
-
     OneFourth,
-
     OneHalf,
-
     One,
-
     Two,
-
     Four,
-
     Eight,
-
     Sixteen,
 }
 
@@ -41373,13 +40327,9 @@ impl AperCodec for PossemiPersistentSet {
 #[repr(u8)]
 pub enum NrofSymbols {
     N1,
-
     N2,
-
     N4,
-
     N8,
-
     N12,
 }
 
@@ -41416,9 +40366,7 @@ impl AperCodec for NrofSymbols {
 #[repr(u8)]
 pub enum GroupOrSequenceHopping {
     Neither,
-
     GroupHopping,
-
     SequenceHopping,
 }
 
@@ -41455,11 +40403,8 @@ impl AperCodec for GroupOrSequenceHopping {
 #[repr(u8)]
 pub enum MutingBitRepetitionFactor {
     Rf1,
-
     Rf2,
-
     Rf4,
-
     Rf8,
 }
 
@@ -41496,11 +40441,8 @@ impl AperCodec for MutingBitRepetitionFactor {
 #[repr(u8)]
 pub enum SubcarrierSpacing2 {
     KHz15,
-
     KHz30,
-
     KHz60,
-
     KHz120,
 }
 
@@ -41537,11 +40479,8 @@ impl AperCodec for SubcarrierSpacing2 {
 #[repr(u8)]
 pub enum CombSize {
     N2,
-
     N4,
-
     N6,
-
     N12,
 }
 
@@ -41578,7 +40517,6 @@ impl AperCodec for CombSize {
 #[repr(u8)]
 pub enum CpType {
     Normal,
-
     Extended,
 }
 
@@ -41615,43 +40553,24 @@ impl AperCodec for CpType {
 #[repr(u8)]
 pub enum ResourceSetPeriodicity {
     N4,
-
     N5,
-
     N8,
-
     N10,
-
     N16,
-
     N20,
-
     N32,
-
     N40,
-
     N64,
-
     N80,
-
     N160,
-
     N320,
-
     N640,
-
     N1280,
-
     N2560,
-
     N5120,
-
     N10240,
-
     N20480,
-
     N40960,
-
     N81920,
 }
 
@@ -41688,17 +40607,11 @@ impl AperCodec for ResourceSetPeriodicity {
 #[repr(u8)]
 pub enum ResourceRepetitionFactor {
     Rf1,
-
     Rf2,
-
     Rf4,
-
     Rf6,
-
     Rf8,
-
     Rf16,
-
     Rf32,
 }
 
@@ -41735,15 +40648,10 @@ impl AperCodec for ResourceRepetitionFactor {
 #[repr(u8)]
 pub enum ResourceTimeGap {
     Tg1,
-
     Tg2,
-
     Tg4,
-
     Tg8,
-
     Tg16,
-
     Tg32,
 }
 
@@ -41780,11 +40688,8 @@ impl AperCodec for ResourceTimeGap {
 #[repr(u8)]
 pub enum ResourceNumberofSymbols {
     N2,
-
     N4,
-
     N6,
-
     N12,
 }
 
@@ -41856,9 +40761,7 @@ impl AperCodec for ReflectiveQosAttribute {
 #[repr(u8)]
 pub enum XyZunit {
     Mm,
-
     Cm,
-
     Dm,
 }
 
@@ -41895,9 +40798,7 @@ impl AperCodec for XyZunit {
 #[repr(u8)]
 pub enum MilliArcSecondUnits {
     Zerodot03,
-
     Zerodot3,
-
     Three,
 }
 
@@ -41934,9 +40835,7 @@ impl AperCodec for MilliArcSecondUnits {
 #[repr(u8)]
 pub enum HeightUnits {
     Mm,
-
     Cm,
-
     M,
 }
 
@@ -41973,9 +40872,7 @@ impl AperCodec for HeightUnits {
 #[repr(u8)]
 pub enum ResourceType2 {
     Periodic,
-
     SemiPersistent,
-
     Aperiodic,
 }
 
@@ -42082,37 +40979,21 @@ impl AperCodec for SemiPersistentSet {
 #[repr(u8)]
 pub enum Periodicity1 {
     Slot1,
-
     Slot2,
-
     Slot4,
-
     Slot5,
-
     Slot8,
-
     Slot10,
-
     Slot16,
-
     Slot20,
-
     Slot32,
-
     Slot40,
-
     Slot64,
-
     Slot80,
-
     Slot160,
-
     Slot320,
-
     Slot640,
-
     Slot1280,
-
     Slot2560,
 }
 
@@ -42149,37 +41030,21 @@ impl AperCodec for Periodicity1 {
 #[repr(u8)]
 pub enum Periodicity2 {
     Slot1,
-
     Slot2,
-
     Slot4,
-
     Slot5,
-
     Slot8,
-
     Slot10,
-
     Slot16,
-
     Slot20,
-
     Slot32,
-
     Slot40,
-
     Slot64,
-
     Slot80,
-
     Slot160,
-
     Slot320,
-
     Slot640,
-
     Slot1280,
-
     Slot2560,
 }
 
@@ -42251,45 +41116,25 @@ impl AperCodec for AperiodicResourceType {
 #[repr(u8)]
 pub enum Periodicity3 {
     Slot1,
-
     Slot2,
-
     Slot4,
-
     Slot5,
-
     Slot8,
-
     Slot10,
-
     Slot16,
-
     Slot20,
-
     Slot32,
-
     Slot40,
-
     Slot64,
-
     Slot80,
-
     Slot160,
-
     Slot320,
-
     Slot640,
-
     Slot1280,
-
     Slot2560,
-
     Slot5120,
-
     Slot10240,
-
     Slot40960,
-
     Slot81920,
 }
 
@@ -42326,45 +41171,25 @@ impl AperCodec for Periodicity3 {
 #[repr(u8)]
 pub enum Periodicity4 {
     Slot1,
-
     Slot2,
-
     Slot4,
-
     Slot5,
-
     Slot8,
-
     Slot10,
-
     Slot16,
-
     Slot20,
-
     Slot32,
-
     Slot40,
-
     Slot64,
-
     Slot80,
-
     Slot160,
-
     Slot320,
-
     Slot640,
-
     Slot1280,
-
     Slot2560,
-
     Slot5120,
-
     Slot10240,
-
     Slot40960,
-
     Slot81920,
 }
 
@@ -42401,11 +41226,8 @@ impl AperCodec for Periodicity4 {
 #[repr(u8)]
 pub enum SubcarrierSpacing3 {
     KHz15,
-
     KHz30,
-
     KHz60,
-
     KHz120,
 }
 
@@ -42477,9 +41299,7 @@ impl AperCodec for SwitchingOffOngoing {
 #[repr(u8)]
 pub enum NrofSrsPorts {
     Port1,
-
     Ports2,
-
     Ports4,
 }
 
@@ -42516,9 +41336,7 @@ impl AperCodec for NrofSrsPorts {
 #[repr(u8)]
 pub enum NrofSymbols1 {
     N1,
-
     N2,
-
     N4,
 }
 
@@ -42555,9 +41373,7 @@ impl AperCodec for NrofSymbols1 {
 #[repr(u8)]
 pub enum RepetitionFactor {
     N1,
-
     N2,
-
     N4,
 }
 
@@ -42594,9 +41410,7 @@ impl AperCodec for RepetitionFactor {
 #[repr(u8)]
 pub enum GroupOrSequenceHopping1 {
     Neither,
-
     GroupHopping,
-
     SequenceHopping,
 }
 
@@ -42633,13 +41447,9 @@ impl AperCodec for GroupOrSequenceHopping1 {
 #[repr(u8)]
 pub enum SsbSubcarrierSpacing1 {
     KHz15,
-
     KHz30,
-
     KHz60,
-
     KHz120,
-
     KHz240,
 }
 
@@ -42676,15 +41486,10 @@ impl AperCodec for SsbSubcarrierSpacing1 {
 #[repr(u8)]
 pub enum SsbPeriodicity {
     Ms5,
-
     Ms10,
-
     Ms20,
-
     Ms40,
-
     Ms80,
-
     Ms160,
 }
 
@@ -42721,11 +41526,8 @@ impl AperCodec for SsbPeriodicity {
 #[repr(u8)]
 pub enum Resolution1 {
     M0dot1,
-
     M1,
-
     M10,
-
     M30,
 }
 

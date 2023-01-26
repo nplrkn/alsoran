@@ -103,13 +103,12 @@ impl AperCodec for Reset {
 #[derive(Clone, Debug)]
 pub enum ResetType {
     E1Interface(ResetAll),
-
     PartOfE1Interface(UeAssociatedLogicalE1ConnectionListRes),
 }
 
 impl ResetType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -118,18 +117,20 @@ impl ResetType {
             1 => Ok(Self::PartOfE1Interface(
                 UeAssociatedLogicalE1ConnectionListRes::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::E1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::PartOfE1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -222,10 +223,12 @@ impl UeAssociatedLogicalE1ConnectionListRes {
 impl AperCodec for UeAssociatedLogicalE1ConnectionListRes {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UeAssociatedLogicalE1ConnectionListRes::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UeAssociatedLogicalE1ConnectionListRes");
-            e
-        })
+        UeAssociatedLogicalE1ConnectionListRes::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("UeAssociatedLogicalE1ConnectionListRes");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -368,10 +371,12 @@ impl UeAssociatedLogicalE1ConnectionListResAck {
 impl AperCodec for UeAssociatedLogicalE1ConnectionListResAck {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UeAssociatedLogicalE1ConnectionListResAck::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UeAssociatedLogicalE1ConnectionListResAck");
-            e
-        })
+        UeAssociatedLogicalE1ConnectionListResAck::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("UeAssociatedLogicalE1ConnectionListResAck");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -748,7 +753,7 @@ impl SupportedPlmnsItem {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     110 => npn_support_info = Some(NpnSupportInfo::aper_decode(data)?),
                     125 => {
@@ -760,9 +765,7 @@ impl SupportedPlmnsItem {
                             Some(ExtendedNrCgiSupportList::aper_decode(data)?)
                     }
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -2855,13 +2858,12 @@ impl AperCodec for BearerContextSetupRequest {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextSetupRequest {
     EutranBearerContextSetupRequest(EutranBearerContextSetupRequest),
-
     NgRanBearerContextSetupRequest(NgRanBearerContextSetupRequest),
 }
 
 impl SystemBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -2872,18 +2874,20 @@ impl SystemBearerContextSetupRequest {
             1 => Ok(Self::NgRanBearerContextSetupRequest(
                 NgRanBearerContextSetupRequest::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextSetupRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanBearerContextSetupRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -3007,13 +3011,12 @@ impl AperCodec for BearerContextSetupResponse {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextSetupResponse {
     EutranBearerContextSetupResponse(EutranBearerContextSetupResponse),
-
     NgRanBearerContextSetupResponse(NgRanBearerContextSetupResponse),
 }
 
 impl SystemBearerContextSetupResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -3024,18 +3027,20 @@ impl SystemBearerContextSetupResponse {
             1 => Ok(Self::NgRanBearerContextSetupResponse(
                 NgRanBearerContextSetupResponse::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextSetupResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanBearerContextSetupResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -3413,13 +3418,12 @@ impl AperCodec for BearerContextModificationRequest {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationRequest {
     EutranBearerContextModificationRequest(EutranBearerContextModificationRequest),
-
     NgRanBearerContextModificationRequest(NgRanBearerContextModificationRequest),
 }
 
 impl SystemBearerContextModificationRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -3430,18 +3434,20 @@ impl SystemBearerContextModificationRequest {
             1 => Ok(Self::NgRanBearerContextModificationRequest(
                 NgRanBearerContextModificationRequest::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextModificationRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanBearerContextModificationRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -3451,10 +3457,12 @@ impl SystemBearerContextModificationRequest {
 impl AperCodec for SystemBearerContextModificationRequest {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SystemBearerContextModificationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SystemBearerContextModificationRequest");
-            e
-        })
+        SystemBearerContextModificationRequest::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("SystemBearerContextModificationRequest");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -3565,13 +3573,12 @@ impl AperCodec for BearerContextModificationResponse {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationResponse {
     EutranBearerContextModificationResponse(EutranBearerContextModificationResponse),
-
     NgRanBearerContextModificationResponse(NgRanBearerContextModificationResponse),
 }
 
 impl SystemBearerContextModificationResponse {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -3582,18 +3589,20 @@ impl SystemBearerContextModificationResponse {
             1 => Ok(Self::NgRanBearerContextModificationResponse(
                 NgRanBearerContextModificationResponse::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextModificationResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanBearerContextModificationResponse(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -3603,10 +3612,12 @@ impl SystemBearerContextModificationResponse {
 impl AperCodec for SystemBearerContextModificationResponse {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SystemBearerContextModificationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SystemBearerContextModificationResponse");
-            e
-        })
+        SystemBearerContextModificationResponse::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("SystemBearerContextModificationResponse");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -3824,13 +3835,12 @@ impl AperCodec for BearerContextModificationRequired {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationRequired {
     EutranBearerContextModificationRequired(EutranBearerContextModificationRequired),
-
     NgRanBearerContextModificationRequired(NgRanBearerContextModificationRequired),
 }
 
 impl SystemBearerContextModificationRequired {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -3841,18 +3851,20 @@ impl SystemBearerContextModificationRequired {
             1 => Ok(Self::NgRanBearerContextModificationRequired(
                 NgRanBearerContextModificationRequired::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextModificationRequired(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanBearerContextModificationRequired(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -3862,10 +3874,12 @@ impl SystemBearerContextModificationRequired {
 impl AperCodec for SystemBearerContextModificationRequired {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SystemBearerContextModificationRequired::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SystemBearerContextModificationRequired");
-            e
-        })
+        SystemBearerContextModificationRequired::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("SystemBearerContextModificationRequired");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -3975,13 +3989,12 @@ impl AperCodec for BearerContextModificationConfirm {
 #[derive(Clone, Debug)]
 pub enum SystemBearerContextModificationConfirm {
     EutranBearerContextModificationConfirm(EutranBearerContextModificationConfirm),
-
     NgRanBearerContextModificationConfirm(NgRanBearerContextModificationConfirm),
 }
 
 impl SystemBearerContextModificationConfirm {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -3992,18 +4005,20 @@ impl SystemBearerContextModificationConfirm {
             1 => Ok(Self::NgRanBearerContextModificationConfirm(
                 NgRanBearerContextModificationConfirm::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextModificationConfirm(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanBearerContextModificationConfirm(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -4013,10 +4028,12 @@ impl SystemBearerContextModificationConfirm {
 impl AperCodec for SystemBearerContextModificationConfirm {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        SystemBearerContextModificationConfirm::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("SystemBearerContextModificationConfirm");
-            e
-        })
+        SystemBearerContextModificationConfirm::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("SystemBearerContextModificationConfirm");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -4857,13 +4874,12 @@ impl AperCodec for GnbCuUpCounterCheckRequest {
 #[derive(Clone, Debug)]
 pub enum SystemGnbCuUpCounterCheckRequest {
     EutranGnbCuUpCounterCheckRequest(EutranGnbCuUpCounterCheckRequest),
-
     NgRanGnbCuUpCounterCheckRequest(NgRanGnbCuUpCounterCheckRequest),
 }
 
 impl SystemGnbCuUpCounterCheckRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -4874,18 +4890,20 @@ impl SystemGnbCuUpCounterCheckRequest {
             1 => Ok(Self::NgRanGnbCuUpCounterCheckRequest(
                 NgRanGnbCuUpCounterCheckRequest::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranGnbCuUpCounterCheckRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::NgRanGnbCuUpCounterCheckRequest(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -6981,10 +6999,12 @@ impl EutranBearerContextModificationRequest {
 impl AperCodec for EutranBearerContextModificationRequest {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        EutranBearerContextModificationRequest::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("EutranBearerContextModificationRequest");
-            e
-        })
+        EutranBearerContextModificationRequest::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("EutranBearerContextModificationRequest");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -7201,10 +7221,12 @@ impl EutranBearerContextModificationResponse {
 impl AperCodec for EutranBearerContextModificationResponse {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        EutranBearerContextModificationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("EutranBearerContextModificationResponse");
-            e
-        })
+        EutranBearerContextModificationResponse::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("EutranBearerContextModificationResponse");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -7335,10 +7357,12 @@ impl NgRanBearerContextModificationResponse {
 impl AperCodec for NgRanBearerContextModificationResponse {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        NgRanBearerContextModificationResponse::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("NgRanBearerContextModificationResponse");
-            e
-        })
+        NgRanBearerContextModificationResponse::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("NgRanBearerContextModificationResponse");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -7415,10 +7439,12 @@ impl EutranBearerContextModificationRequired {
 impl AperCodec for EutranBearerContextModificationRequired {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        EutranBearerContextModificationRequired::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("EutranBearerContextModificationRequired");
-            e
-        })
+        EutranBearerContextModificationRequired::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("EutranBearerContextModificationRequired");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -7498,10 +7524,12 @@ impl NgRanBearerContextModificationRequired {
 impl AperCodec for NgRanBearerContextModificationRequired {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        NgRanBearerContextModificationRequired::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("NgRanBearerContextModificationRequired");
-            e
-        })
+        NgRanBearerContextModificationRequired::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("NgRanBearerContextModificationRequired");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -7561,10 +7589,12 @@ impl EutranBearerContextModificationConfirm {
 impl AperCodec for EutranBearerContextModificationConfirm {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        EutranBearerContextModificationConfirm::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("EutranBearerContextModificationConfirm");
-            e
-        })
+        EutranBearerContextModificationConfirm::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("EutranBearerContextModificationConfirm");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {

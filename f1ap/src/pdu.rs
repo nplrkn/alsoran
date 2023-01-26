@@ -103,13 +103,12 @@ impl AperCodec for Reset {
 #[derive(Clone, Debug)]
 pub enum ResetType {
     F1Interface(ResetAll),
-
     PartOfF1Interface(UeAssociatedLogicalF1ConnectionListRes),
 }
 
 impl ResetType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -118,18 +117,20 @@ impl ResetType {
             1 => Ok(Self::PartOfF1Interface(
                 UeAssociatedLogicalF1ConnectionListRes::aper_decode(data)?,
             )),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::F1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::PartOfF1Interface(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -222,10 +223,12 @@ impl UeAssociatedLogicalF1ConnectionListRes {
 impl AperCodec for UeAssociatedLogicalF1ConnectionListRes {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UeAssociatedLogicalF1ConnectionListRes");
-            e
-        })
+        UeAssociatedLogicalF1ConnectionListRes::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("UeAssociatedLogicalF1ConnectionListRes");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -368,10 +371,12 @@ impl UeAssociatedLogicalF1ConnectionListResAck {
 impl AperCodec for UeAssociatedLogicalF1ConnectionListResAck {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        UeAssociatedLogicalF1ConnectionListResAck::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("UeAssociatedLogicalF1ConnectionListResAck");
-            e
-        })
+        UeAssociatedLogicalF1ConnectionListResAck::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("UeAssociatedLogicalF1ConnectionListResAck");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -14031,10 +14036,12 @@ impl ReferenceTimeInformationReportingControl {
 impl AperCodec for ReferenceTimeInformationReportingControl {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        ReferenceTimeInformationReportingControl::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("ReferenceTimeInformationReportingControl");
-            e
-        })
+        ReferenceTimeInformationReportingControl::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("ReferenceTimeInformationReportingControl");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -14326,10 +14333,12 @@ impl PositioningAssistanceInformationControl {
 impl AperCodec for PositioningAssistanceInformationControl {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        PositioningAssistanceInformationControl::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("PositioningAssistanceInformationControl");
-            e
-        })
+        PositioningAssistanceInformationControl::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("PositioningAssistanceInformationControl");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -14453,10 +14462,12 @@ impl PositioningAssistanceInformationFeedback {
 impl AperCodec for PositioningAssistanceInformationFeedback {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        PositioningAssistanceInformationFeedback::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("PositioningAssistanceInformationFeedback");
-            e
-        })
+        PositioningAssistanceInformationFeedback::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("PositioningAssistanceInformationFeedback");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -15239,10 +15250,12 @@ impl PositioningMeasurementFailureIndication {
 impl AperCodec for PositioningMeasurementFailureIndication {
     type Output = Self;
     fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        PositioningMeasurementFailureIndication::decode_inner(data).map_err(|mut e: PerCodecError| {
-            e.push_context("PositioningMeasurementFailureIndication");
-            e
-        })
+        PositioningMeasurementFailureIndication::decode_inner(data).map_err(
+            |mut e: PerCodecError| {
+                e.push_context("PositioningMeasurementFailureIndication");
+                e
+            },
+        )
     }
     fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
@@ -16167,13 +16180,12 @@ impl AperCodec for PositioningActivationRequest {
 #[derive(Clone, Debug)]
 pub enum SrsType {
     SemipersistentSrs(SemipersistentSrs),
-
     AperiodicSrs(AperiodicSrs),
 }
 
 impl SrsType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
@@ -16182,18 +16194,20 @@ impl SrsType {
                 data,
             )?)),
             1 => Ok(Self::AperiodicSrs(AperiodicSrs::aper_decode(data)?)),
+            2 => Err(PerCodecError::new(
+                "Choice extension container not implemented",
+            )),
             _ => Err(PerCodecError::new("Unknown choice idx")),
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::SemipersistentSrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.aper_encode(data)
             }
-
             Self::AperiodicSrs(x) => {
-                aper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                aper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.aper_encode(data)
             }
         }
@@ -16240,12 +16254,10 @@ impl SemipersistentSrs {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }
@@ -16310,12 +16322,10 @@ impl AperiodicSrs {
             for _ in 0..num_ies {
                 let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _criticality = Criticality::aper_decode(data)?;
-                let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+                let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     _ => {
-                        data.decode_align()?;
-                        let _ignored_bytes =
-                            aper::decode::decode_octetstring(data, None, None, false)?;
+                        data.advance(ie_length)?;
                     }
                 }
             }

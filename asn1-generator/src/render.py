@@ -1012,7 +1012,7 @@ def decode_ies_string(fields_from):
             match id {{
 {fields_from.matches}\
                 _ => {{
-                    aper::advance(data, ie_length)?;
+                    data.advance(ie_length)?;
                 }}
             }}
         }}"""
@@ -1367,7 +1367,7 @@ impl WlanMeasurementConfiguration {
             let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 _ => {
-                    aper::advance(data, ie_length)?;
+                    data.advance(ie_length)?;
                 }
             }
         }}
@@ -1950,6 +1950,20 @@ impl DlprsResourceCoordinates {
             None
         };
 
+        // Process the extension container
+
+        if optionals[1] {
+        let num_ies = aper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        for _ in 0..num_ies {
+            let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let _criticality = Criticality::aper_decode(data)?;
+            let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
+            match id {
+                _ => {
+                    data.advance(ie_length)?;
+                }
+            }
+        }}
         Ok(Self {
             listof_dl_prs_resource_set_arp,
             foo,
@@ -2199,7 +2213,7 @@ impl GnbCuSystemInformation {
             match id {
                 239 => system_information_area_id = Some(SystemInformationAreaId::aper_decode(data)?),
                 _ => {
-                    aper::advance(data, ie_length)?;
+                    data.advance(ie_length)?;
                 }
             }
         }}
