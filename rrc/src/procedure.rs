@@ -1,7 +1,7 @@
 use crate::{RrcSetupComplete, UlDcchMessage};
 
 use crate::*;
-use asn1_codecs::aper::AperCodecError;
+use asn1_codecs::PerCodecError;
 use async_trait::async_trait;
 use net::{AperSerde, Procedure, RequestError, RequestProvider, ResponseAction};
 use slog::Logger;
@@ -24,7 +24,7 @@ impl Procedure for RrcSetupProcedure {
         todo!()
     }
 
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError> {
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError> {
         DlCcchMessage {
             message: DlCcchMessageType::C1(C1_1::RrcSetup(r)),
         }

@@ -30,6 +30,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                 transaction_id: r.transaction_id,
                 gnb_cu_rrc_version: RrcVersion {
                     latest_rrc_version: bitvec![u8, Msb0;0, 0, 0],
+                    latest_rrc_version_enhanced: None,
                 },
                 gnb_cu_name: self.gnb_cu_cp.config().clone().name.map(GnbCuName),
                 cells_to_be_activated_list: None,

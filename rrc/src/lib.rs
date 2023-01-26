@@ -1,6 +1,6 @@
 mod rrc;
 pub use crate::rrc::*;
-use asn1_codecs::aper::{AperCodec, AperCodecData, AperCodecError};
+use asn1_codecs::{aper::AperCodec, PerCodecData, PerCodecError};
 mod procedure;
 pub use procedure::*;
 
@@ -12,10 +12,10 @@ pub enum SetupRelease<T: AperCodec> {
 
 impl<T: AperCodec> AperCodec for SetupRelease<T> {
     type Output = Self;
-    fn decode(_data: &mut AperCodecData) -> Result<Self, AperCodecError> {
+    fn aper_decode(_data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         todo!()
     }
-    fn encode(&self, _data: &mut AperCodecData) -> Result<(), AperCodecError> {
+    fn aper_encode(&self, _data: &mut PerCodecData) -> Result<(), PerCodecError> {
         todo!()
     }
 }

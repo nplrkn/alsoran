@@ -9,3 +9,5 @@ pub use common::BitString;
 pub use top_pdu::*;
 mod f1ap_cu;
 pub use f1ap_cu::*;
+#[cfg(test)]
+mod test;

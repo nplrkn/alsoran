@@ -1,7 +1,5 @@
 # NEXT UP
 ## O-RAN O-DU interop
-- ASN.1 decode failed - Error { msg: "For a signed number in 2's compliment form, requested bits 512 not supported!", context: ["FreqBandNrItem", "NrFreqInfo", "FddInfo", "NrModeInfo", "ServedCellInformation", "GnbDuServedCellsItem", "GnbDuServedCellsList", "F1SetupRequest", "InitiatingMessage", "F1apPdu"] }
-
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -67,6 +65,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- F1 Setup with O-RAN ODU
+- ASN.1 decoder should cope protocol extensions being present.
 - Allow local-ip to be passed in on command line
 - Triangular redirection 
 - Get rid of revision number

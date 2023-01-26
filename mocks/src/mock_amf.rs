@@ -73,6 +73,7 @@ impl MockAmf {
         let served_guami_list = ServedGuamiList(vec![ServedGuamiItem {
             guami: self.guami(),
             backup_amf_name: None,
+            guami_type: None,
         }]);
 
         let response =
@@ -85,6 +86,8 @@ impl MockAmf {
                     slice_support_list: SliceSupportList(vec![SliceSupportItem {
                         s_nssai: self.snssai(),
                     }]),
+                    npn_support: None,
+                    extended_slice_support_list: None,
                 }]),
                 criticality_diagnostics: None,
                 ue_retention_information: None,
@@ -291,6 +294,8 @@ impl MockAmf {
                             priority_level_qos: None,
                             averaging_window: None,
                             maximum_data_burst_volume: None,
+                            cn_packet_delay_budget_dl: None,
+                            cn_packet_delay_budget_ul: None,
                         },
                     ),
                     allocation_and_retention_priority: AllocationAndRetentionPriority {
@@ -301,8 +306,12 @@ impl MockAmf {
                     gbr_qos_information: None,
                     reflective_qos_attribute: None,
                     additional_qos_flow_information: None,
+                    qos_monitoring_request: None,
+                    qos_monitoring_reporting_frequency: None,
                 },
                 e_rab_id: None,
+                tsc_traffic_characteristics: None,
+                redundant_qos_flow_indicator: None,
             }]),
             common_network_instance: None,
             direct_forwarding_path_availability: None,

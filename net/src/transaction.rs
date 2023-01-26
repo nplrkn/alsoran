@@ -1,7 +1,7 @@
 //! transactions - allows definition of procedures using individual ASN.1 requests and responses
 
 use anyhow::Result;
-use asn1_codecs::aper::{self, AperCodecData};
+use asn1_codecs::{aper::AperCodec, PerCodecData};
 use async_channel::RecvError;
 use async_trait::async_trait;
 use slog::{debug, warn, Logger};
@@ -15,7 +15,7 @@ pub trait Procedure {
     type Request: Send + Sync + 'static + Debug;
     type Success;
     type Failure;
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError>;
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError>;
     fn decode_response(bytes: &[u8]) -> Result<Self::Success, RequestError<Self::Failure>>;
     async fn call_provider<T: RequestProvider<Self>>(
         provider: &T,
@@ -29,7 +29,7 @@ pub trait Indication {
     const CODE: u8;
     type TopPdu: AperSerde + Send + Sync + 'static;
     type Request: Send + Sync + 'static + Debug;
-    fn encode_request(r: Self::Request) -> Result<Vec<u8>, AperCodecError>;
+    fn encode_request(r: Self::Request) -> Result<Vec<u8>, PerCodecError>;
     async fn call_provider<T: IndicationHandler<Self>>(
         provider: &T,
         req: Self::Request,
@@ -38,23 +38,23 @@ pub trait Indication {
 }
 
 pub trait AperSerde: Sized {
-    fn into_bytes(self) -> Result<Vec<u8>, AperCodecError>;
-    fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError>;
+    fn into_bytes(self) -> Result<Vec<u8>, PerCodecError>;
+    fn from_bytes(bytes: &[u8]) -> Result<Self, PerCodecError>;
 }
-pub use aper::AperCodecError;
+pub use asn1_codecs::PerCodecError;
 
 use crate::ResponseAction;
 
-impl<T: aper::AperCodec<Output = T>> AperSerde for T {
-    fn into_bytes(self) -> Result<Vec<u8>, AperCodecError> {
-        let mut d = AperCodecData::new();
-        self.encode(&mut d)?;
+impl<T: AperCodec<Output = T>> AperSerde for T {
+    fn into_bytes(self) -> Result<Vec<u8>, PerCodecError> {
+        let mut d = PerCodecData::new_aper();
+        self.aper_encode(&mut d)?;
         Ok(d.into_bytes())
     }
 
-    fn from_bytes(bytes: &[u8]) -> Result<Self, AperCodecError> {
-        let mut d = AperCodecData::from_slice(bytes);
-        Self::decode(&mut d)
+    fn from_bytes(bytes: &[u8]) -> Result<Self, PerCodecError> {
+        let mut d = PerCodecData::from_slice_aper(bytes);
+        Self::aper_decode(&mut d)
     }
 }
 
@@ -66,8 +66,8 @@ pub enum RequestError<U> {
     Other(String),
 }
 
-impl<T> From<AperCodecError> for RequestError<T> {
-    fn from(e: AperCodecError) -> Self {
+impl<T> From<PerCodecError> for RequestError<T> {
+    fn from(e: PerCodecError) -> Self {
         RequestError::Other(format!("Codec error: {:?}", e))
     }
 }
