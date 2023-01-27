@@ -764,9 +764,7 @@ impl SupportedPlmnsItem {
                         extended_nr_cgi_support_list =
                             Some(ExtendedNrCgiSupportList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
