@@ -16256,9 +16256,7 @@ impl SemipersistentSrs {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -16324,9 +16322,7 @@ impl AperiodicSrs {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }

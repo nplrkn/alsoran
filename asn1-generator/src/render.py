@@ -1011,9 +1011,7 @@ def decode_ies_string(fields_from):
             let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
-                _ => {{
-                    data.advance(ie_length)?;
-                }}
+                _ => data.advance_maybe_err(ie_length, false)?,
             }}
         }}"""
 
@@ -1366,9 +1364,7 @@ impl WlanMeasurementConfiguration {
             let _criticality = Criticality::aper_decode(data)?;
             let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                _ => {
-                    data.advance(ie_length)?;
-                }
+                _ => data.advance_maybe_err(ie_length, false)?,
             }
         }}
         Ok(Self {
@@ -1959,9 +1955,7 @@ impl DlprsResourceCoordinates {
             let _criticality = Criticality::aper_decode(data)?;
             let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                _ => {
-                    data.advance(ie_length)?;
-                }
+                _ => data.advance_maybe_err(ie_length, false)?,
             }
         }}
         Ok(Self {
@@ -2212,9 +2206,7 @@ impl GnbCuSystemInformation {
             let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 239 => system_information_area_id = Some(SystemInformationAreaId::aper_decode(data)?),
-                _ => {
-                    data.advance(ie_length)?;
-                }
+                _ => data.advance_maybe_err(ie_length, false)?,
             }
         }}
         Ok(Self {

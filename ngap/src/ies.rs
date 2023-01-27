@@ -84,9 +84,7 @@ impl AdditionalDluptnlInformationForHoItem {
                         additional_redundant_dl_ngu_up_tnl_information =
                             Some(UpTransportLayerInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -190,9 +188,7 @@ impl AllocationAndRetentionPriority {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -329,9 +325,7 @@ impl AllowedNssaiItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -427,9 +421,7 @@ impl AllowedPniNpnItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -650,9 +642,7 @@ impl AlternativeQosParaSetItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1015,9 +1005,7 @@ impl AmfTnlAssociationSetupItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1119,9 +1107,7 @@ impl AmfTnlAssociationToAddItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1229,9 +1215,7 @@ impl AmfTnlAssociationToRemoveItem {
                         tnl_association_transport_layer_address_ngran =
                             Some(CpTransportLayerInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1338,9 +1322,7 @@ impl AmfTnlAssociationToUpdateItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1458,9 +1440,7 @@ impl AreaOfInterest {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1567,9 +1547,7 @@ impl AreaOfInterestCellItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1663,9 +1641,7 @@ impl AreaOfInterestItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1761,9 +1737,7 @@ impl AreaOfInterestRanNodeItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1855,9 +1829,7 @@ impl AreaOfInterestTaiItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1932,9 +1904,7 @@ impl AssistanceDataForPaging {
                         paging_assis_datafor_c_ecapab_ue =
                             Some(PagingAssisDataforCEcapabUe::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -1999,9 +1969,7 @@ impl AssistanceDataForRecommendedCells {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -2107,9 +2075,7 @@ impl AssociatedQosFlowItem {
                         current_qos_para_set_index =
                             Some(AlternativeQosParaSetIndex::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -2406,9 +2372,7 @@ impl AreaScopeOfNeighCellsItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -2725,9 +2689,7 @@ impl BroadcastPlmnItem {
                         extended_tai_slice_support_list =
                             Some(ExtendedSliceSupportList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -2798,9 +2760,7 @@ impl BluetoothMeasurementConfiguration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -2904,9 +2864,7 @@ impl BluetoothMeasConfigNameItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3167,9 +3125,7 @@ impl CancelledCellsInEaiEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3268,9 +3224,7 @@ impl CancelledCellsInEaiNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3369,9 +3323,7 @@ impl CancelledCellsInTaiEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3470,9 +3422,7 @@ impl CancelledCellsInTaiNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3568,9 +3518,7 @@ impl CandidateCellItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3674,9 +3622,7 @@ impl CandidateCellId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -3732,9 +3678,7 @@ impl CandidatePci {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4110,9 +4054,7 @@ impl CellCagInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4248,9 +4190,7 @@ impl CellIdBroadcastEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4343,9 +4283,7 @@ impl CellIdBroadcastNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4440,9 +4378,7 @@ impl CellIdCancelledEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4541,9 +4477,7 @@ impl CellIdCancelledNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4691,9 +4625,7 @@ impl CellType {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4821,9 +4753,7 @@ impl CnAssistedRanTuning {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -4922,9 +4852,7 @@ impl CnTypeRestrictionsForEquivalentItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5086,9 +5014,7 @@ impl CompletedCellsInEaiEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5181,9 +5107,7 @@ impl CompletedCellsInEaiNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5276,9 +5200,7 @@ impl CompletedCellsInTaiEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5371,9 +5293,7 @@ impl CompletedCellsInTaiNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5609,9 +5529,7 @@ impl CoreNetworkAssistanceInformationForInactive {
                         ue_radio_capability_for_paging =
                             Some(UeRadioCapabilityForPaging::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5693,9 +5611,7 @@ impl CountValueForPdcpSn12 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5769,9 +5685,7 @@ impl CountValueForPdcpSn18 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -5941,9 +5855,7 @@ impl CriticalityDiagnostics {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6059,9 +5971,7 @@ impl CriticalityDiagnosticsIeItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6120,9 +6030,7 @@ impl CellBasedMdtNr {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6216,9 +6124,7 @@ impl CellBasedMdtEutra {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6466,9 +6372,7 @@ impl DataForwardingResponseDrbItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6533,9 +6437,7 @@ impl DapsRequestInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6629,9 +6531,7 @@ impl DapsResponseInfoItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6688,9 +6588,7 @@ impl DapsResponseInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6786,9 +6684,7 @@ impl DataForwardingResponseErabListItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -6881,9 +6777,7 @@ impl DlCpSecurityInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7154,9 +7048,7 @@ impl DrbsSubjectToStatusTransferItem {
                         old_associated_qos_flow_list_u_lendmarkerexpected =
                             Some(AssociatedQosFlowList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7267,9 +7159,7 @@ impl DrbStatusDl12 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7322,9 +7212,7 @@ impl DrbStatusDl18 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7439,9 +7327,7 @@ impl DrbStatusUl12 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7512,9 +7398,7 @@ impl DrbStatusUl18 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7618,9 +7502,7 @@ impl DrbsToQosFlowsMappingItem {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     266 => daps_request_info = Some(DapsRequestInfo::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7724,9 +7606,7 @@ impl Dynamic5qiDescriptor {
                         cn_packet_delay_budget_ul =
                             Some(ExtendedPacketDelayBudget::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7808,9 +7688,7 @@ impl EarlyStatusTransferTransparentContainer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -7911,9 +7789,7 @@ impl FirstDlCount {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8010,9 +7886,7 @@ impl DrbsSubjectToEarlyStatusTransferItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8179,9 +8053,7 @@ impl EmergencyAreaIdBroadcastEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8280,9 +8152,7 @@ impl EmergencyAreaIdBroadcastNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8381,9 +8251,7 @@ impl EmergencyAreaIdCancelledEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8482,9 +8350,7 @@ impl EmergencyAreaIdCancelledNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8627,9 +8493,7 @@ impl EmergencyFallbackIndicator {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -8942,9 +8806,7 @@ impl EndpointIpAddressAndPort {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -9111,9 +8973,7 @@ impl EpsTai {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -9245,9 +9105,7 @@ impl ERabInformationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -9342,9 +9200,7 @@ impl EutraCgi {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -9703,9 +9559,7 @@ impl ExpectedUeActivityBehaviour {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -9795,9 +9649,7 @@ impl ExpectedUeBehaviour {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -9951,9 +9803,7 @@ impl ExpectedUeMovingTrajectoryItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10023,9 +9873,7 @@ impl ExtendedAmfName {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10128,9 +9976,7 @@ impl ExtendedRanNodeName {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10196,9 +10042,7 @@ impl ExtendedRatRestrictionInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10429,9 +10273,7 @@ impl EventL1LoggedMdtConfig {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10541,9 +10383,7 @@ impl FailureIndication {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10602,9 +10442,7 @@ impl FiveGSTmsi {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10767,9 +10605,7 @@ impl ForbiddenAreaInformationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10868,9 +10704,7 @@ impl FromEutranToNgran {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -10930,9 +10764,7 @@ impl FromNgranToEutran {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11019,9 +10851,7 @@ impl GbrQosInformation {
                         alternative_qos_para_set_list =
                             Some(AlternativeQosParaSetList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11130,9 +10960,7 @@ impl GlobalEnbId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11191,9 +11019,7 @@ impl GlobalGnbId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11252,9 +11078,7 @@ impl GlobalN3IwfId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11317,9 +11141,7 @@ impl GlobalLineId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11411,9 +11233,7 @@ impl GlobalNgEnbId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11529,9 +11349,7 @@ impl GlobalTngfId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11590,9 +11408,7 @@ impl GlobalTwifId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11651,9 +11467,7 @@ impl GlobalWAgfId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11795,9 +11609,7 @@ impl GtpTunnel {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -11860,9 +11672,7 @@ impl Guami {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12002,9 +11812,7 @@ impl HandoverCommandTransfer {
                         data_forwarding_response_erab_list =
                             Some(DataForwardingResponseErabList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12111,9 +11919,7 @@ impl HandoverPreparationUnsuccessfulTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12237,9 +12043,7 @@ impl HandoverRequestAcknowledgeTransfer {
                             Some(RedundantPduSessionInformation::aper_decode(data)?)
                     }
                     27 => global_ran_node_id = Some(GlobalRanNodeId::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12327,9 +12131,7 @@ impl HandoverRequiredTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12393,9 +12195,7 @@ impl HandoverResourceAllocationUnsuccessfulTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12565,9 +12365,7 @@ impl HoReport {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -12857,9 +12655,7 @@ impl InfoOnRecommendedCellsAndRanNodesForPaging {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13109,9 +12905,7 @@ impl ImmediateMdtNr {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13215,9 +13009,7 @@ impl InterSystemFailureIndication {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13277,9 +13069,7 @@ impl IntersystemSonConfigurationTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13393,9 +13183,7 @@ impl IntersystemSonEnbId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13454,9 +13242,7 @@ impl IntersystemSonNgranNodeId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13615,9 +13401,7 @@ impl InterSystemHoReport {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13733,9 +13517,7 @@ impl IntersystemUnnecessaryHo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13831,9 +13613,7 @@ impl Lai {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -13958,9 +13738,7 @@ impl LastVisitedCellItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -14091,9 +13869,7 @@ impl LastVisitedNgranCellInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -14313,9 +14089,7 @@ impl LocationReportingRequestType {
                         location_reporting_additional_info =
                             Some(LocationReportingAdditionalInfo::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -14414,9 +14188,7 @@ impl LoggedMdtNr {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -14743,9 +14515,7 @@ impl Ltev2xServicesAuthorized {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -14808,9 +14578,7 @@ impl LteUeSidelinkAggregateMaximumBitrate {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15110,9 +14878,7 @@ impl MobilityRestrictionList {
                     261 => {
                         npn_mobility_information = Some(NpnMobilityInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15240,9 +15006,7 @@ impl MdtConfiguration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15315,9 +15079,7 @@ impl MdtConfigurationNr {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15391,9 +15153,7 @@ impl MdtConfigurationEutra {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15620,9 +15380,7 @@ impl M1Configuration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15724,9 +15482,7 @@ impl M1ThresholdEventA2 {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15838,9 +15594,7 @@ impl M1PeriodicReporting {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15899,9 +15653,7 @@ impl M4Configuration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -15999,9 +15751,7 @@ impl M5Configuration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -16099,9 +15849,7 @@ impl M6Configuration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -16208,9 +15956,7 @@ impl M7Configuration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -16297,9 +16043,7 @@ impl MdtLocationInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -16679,9 +16423,7 @@ impl NbIotPagingEDrxInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -17107,9 +16849,7 @@ impl NgranTnlAssociationToRemoveItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -17266,9 +17006,7 @@ impl NonDynamic5qiDescriptor {
                         cn_packet_delay_budget_ul =
                             Some(ExtendedPacketDelayBudget::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -17679,9 +17417,7 @@ impl NrCgi {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18133,9 +17869,7 @@ impl NrFrequencyBandItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18190,9 +17924,7 @@ impl NrFrequencyInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18289,9 +18021,7 @@ impl NrV2xServicesAuthorized {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18426,9 +18156,7 @@ impl NrUeSidelinkAggregateMaximumBitrate {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18618,9 +18346,7 @@ impl OverloadStartNssaiItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18717,9 +18443,7 @@ impl PacketErrorRate {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18815,9 +18539,7 @@ impl PagingAssisDataforCEcapabUe {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -18882,9 +18604,7 @@ impl PagingAttemptInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19097,9 +18817,7 @@ impl PagingeDrxInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19348,9 +19066,7 @@ impl PathSwitchRequestAcknowledgeTransfer {
                     277 => {
                         qos_flow_parameters_list = Some(QosFlowParametersList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19417,9 +19133,7 @@ impl PathSwitchRequestSetupFailedTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19522,9 +19236,7 @@ impl PathSwitchRequestTransfer {
                             Some(RedundantPduSessionInformation::aper_decode(data)?)
                     }
                     27 => global_ran_node_id = Some(GlobalRanNodeId::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19597,9 +19309,7 @@ impl PathSwitchRequestUnsuccessfulTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19658,9 +19368,7 @@ impl Pc5QosParameters {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19771,9 +19479,7 @@ impl Pc5QosFlowItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19840,9 +19546,7 @@ impl Pc5FlowBitRates {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -19976,9 +19680,7 @@ impl PduSessionAggregateMaximumBitRate {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20109,9 +19811,7 @@ impl PduSessionResourceAdmittedItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20223,9 +19923,7 @@ impl PduSessionResourceFailedToModifyItemModCfm {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20339,9 +20037,7 @@ impl PduSessionResourceFailedToModifyItemModRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20454,9 +20150,7 @@ impl PduSessionResourceFailedToResumeItemResReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20562,9 +20256,7 @@ impl PduSessionResourceFailedToResumeItemResRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20671,9 +20363,7 @@ impl PduSessionResourceFailedToSetupItemCxtFail {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20787,9 +20477,7 @@ impl PduSessionResourceFailedToSetupItemCxtRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -20901,9 +20589,7 @@ impl PduSessionResourceFailedToSetupItemHoAck {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21015,9 +20701,7 @@ impl PduSessionResourceFailedToSetupItemPsReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21129,9 +20813,7 @@ impl PduSessionResourceFailedToSetupItemSuRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21238,9 +20920,7 @@ impl PduSessionResourceHandoverItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21351,9 +21031,7 @@ impl PduSessionResourceInformationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21460,9 +21138,7 @@ impl PduSessionResourceItemCxtRelCpl {
                         pdu_session_resource_release_response_transfer =
                             Some(aper::decode::decode_octetstring(data, None, None, false)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21557,9 +21233,7 @@ impl PduSessionResourceItemCxtRelReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21653,9 +21327,7 @@ impl PduSessionResourceItemHoRqd {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21747,9 +21419,7 @@ impl PduSessionResourceModifyConfirmTransfer {
                         additional_redundant_ngu_up_tnl_information =
                             Some(UpTransportLayerInformationPairList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -21820,9 +21490,7 @@ impl PduSessionResourceModifyIndicationUnsuccessfulTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22166,9 +21834,7 @@ impl PduSessionResourceModifyResponseTransfer {
                         additional_redundant_ngu_up_tnl_information =
                             Some(UpTransportLayerInformationPairList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22285,9 +21951,7 @@ impl PduSessionResourceModifyIndicationTransfer {
                             Some(QosFlowPerTnlInformationList::aper_decode(data)?)
                     }
                     27 => global_ran_node_id = Some(GlobalRanNodeId::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22396,9 +22060,7 @@ impl PduSessionResourceModifyItemModCfm {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22504,9 +22166,7 @@ impl PduSessionResourceModifyItemModInd {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22621,9 +22281,7 @@ impl PduSessionResourceModifyItemModReq {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     148 => s_nssai = Some(SNssai::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22735,9 +22393,7 @@ impl PduSessionResourceModifyItemModRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22807,9 +22463,7 @@ impl PduSessionResourceModifyUnsuccessfulTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22913,9 +22567,7 @@ impl PduSessionResourceNotifyItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -22985,9 +22637,7 @@ impl PduSessionResourceNotifyReleasedTransfer {
                         secondary_rat_usage_information =
                             Some(SecondaryRatUsageInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23064,9 +22714,7 @@ impl PduSessionResourceNotifyTransfer {
                             Some(SecondaryRatUsageInformation::aper_decode(data)?)
                     }
                     278 => qos_flow_feedback_list = Some(QosFlowFeedbackList::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23131,9 +22779,7 @@ impl PduSessionResourceReleaseCommandTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23230,9 +22876,7 @@ impl PduSessionResourceReleasedItemNot {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23338,9 +22982,7 @@ impl PduSessionResourceReleasedItemPsAck {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23446,9 +23088,7 @@ impl PduSessionResourceReleasedItemPsFail {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23554,9 +23194,7 @@ impl PduSessionResourceReleasedItemRelRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23624,9 +23262,7 @@ impl PduSessionResourceReleaseResponseTransfer {
                         secondary_rat_usage_information =
                             Some(SecondaryRatUsageInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23724,9 +23360,7 @@ impl PduSessionResourceResumeItemResReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23832,9 +23466,7 @@ impl PduSessionResourceResumeItemResRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -23944,9 +23576,7 @@ impl PduSessionResourceSecondaryRatUsageItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24062,9 +23692,7 @@ impl PduSessionResourceSetupItemCxtReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24177,9 +23805,7 @@ impl PduSessionResourceSetupItemCxtRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24286,9 +23912,7 @@ impl PduSessionResourceSetupItemHoReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24404,9 +24028,7 @@ impl PduSessionResourceSetupItemSuReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24519,9 +24141,7 @@ impl PduSessionResourceSetupItemSuRes {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24909,9 +24529,7 @@ impl PduSessionResourceSetupResponseTransfer {
                             Some(RedundantPduSessionInformation::aper_decode(data)?)
                     }
                     27 => global_ran_node_id = Some(GlobalRanNodeId::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -24993,9 +24611,7 @@ impl PduSessionResourceSetupUnsuccessfulTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25099,9 +24715,7 @@ impl PduSessionResourceSuspendItemSusReq {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25207,9 +24821,7 @@ impl PduSessionResourceSwitchedItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25315,9 +24927,7 @@ impl PduSessionResourceToBeSwitchedDlItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25423,9 +25033,7 @@ impl PduSessionResourceToReleaseItemHoCmd {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25531,9 +25139,7 @@ impl PduSessionResourceToReleaseItemRelCmd {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25638,9 +25244,7 @@ impl PduSessionUsageReport {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25843,9 +25447,7 @@ impl PlmnSupportItem {
                         extended_slice_support_list =
                             Some(ExtendedSliceSupportList::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -25904,9 +25506,7 @@ impl PniNpnMobilityInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -26277,9 +25877,7 @@ impl QosFlowAcceptedItem {
                         current_qos_para_set_index =
                             Some(AlternativeQosParaSetIndex::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -26398,9 +25996,7 @@ impl QosFlowAddOrModifyRequestItem {
                         redundant_qos_flow_indicator =
                             Some(RedundantQosFlowIndicator::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -26512,9 +26108,7 @@ impl QosFlowAddOrModifyResponseItem {
                         current_qos_para_set_index =
                             Some(AlternativeQosParaSetIndex::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -26627,9 +26221,7 @@ impl QosFlowFeedbackItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -26777,9 +26369,7 @@ impl QosFlowInformationItem {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     163 => ul_forwarding = Some(UlForwarding::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -26869,9 +26459,7 @@ impl QosFlowLevelQosParameters {
                         qos_monitoring_reporting_frequency =
                             Some(QosMonitoringReportingFrequency::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27053,9 +26641,7 @@ impl QosFlowWithCauseItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27151,9 +26737,7 @@ impl QosFlowModifyConfirmItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27255,9 +26839,7 @@ impl QosFlowNotifyItem {
                         current_qos_para_set_index =
                             Some(AlternativeQosParaSetNotifyIndex::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27375,9 +26957,7 @@ impl QosFlowParametersItem {
                             Some(ExtendedPacketDelayBudget::aper_decode(data)?)
                     }
                     279 => burst_arrival_time_downlink = Some(BurstArrivalTime::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27442,9 +27022,7 @@ impl QosFlowPerTnlInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27540,9 +27118,7 @@ impl QosFlowPerTnlInformationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27656,9 +27232,7 @@ impl QosFlowSetupRequestItem {
                         redundant_qos_flow_indicator =
                             Some(RedundantQosFlowIndicator::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27773,9 +27347,7 @@ impl QosFlowItemWithDataForwarding {
                         current_qos_para_set_index =
                             Some(AlternativeQosParaSetIndex::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27875,9 +27447,7 @@ impl QosFlowToBeForwardedItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -27975,9 +27545,7 @@ impl QosFlowsUsageReportItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28209,9 +27777,7 @@ impl RanStatusTransferTransparentContainer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28388,9 +27954,7 @@ impl RatRestrictionsItem {
                         extended_rat_restriction_information =
                             Some(ExtendedRatRestrictionInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28481,9 +28045,7 @@ impl RecommendedCellsForPaging {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28583,9 +28145,7 @@ impl RecommendedCellItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28645,9 +28205,7 @@ impl RecommendedRanNodesForPaging {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28741,9 +28299,7 @@ impl RecommendedRanNodeItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -28832,9 +28388,7 @@ impl RedundantPduSessionInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -29507,9 +29061,7 @@ impl RimInformationTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -29570,9 +29122,7 @@ impl RimInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -29683,9 +29233,7 @@ impl ScheduledCommunicationTime {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -29835,9 +29383,7 @@ impl SecondaryRatUsageInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -29904,9 +29450,7 @@ impl SecondaryRatDataUsageReportTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -29966,9 +29510,7 @@ impl SecurityContext {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30042,9 +29584,7 @@ impl SecurityIndication {
                         maximum_integrity_protected_data_rate_dl =
                             Some(MaximumIntegrityProtectedDataRate::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30143,9 +29683,7 @@ impl SecurityResult {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30208,9 +29746,7 @@ impl SensorMeasurementConfiguration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30309,9 +29845,7 @@ impl SensorMeasConfigNameItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30541,9 +30075,7 @@ impl ServedGuamiItem {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     176 => guami_type = Some(GuamiType::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30655,9 +30187,7 @@ impl ServiceAreaInformationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30798,9 +30328,7 @@ impl SliceOverloadItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30892,9 +30420,7 @@ impl SliceSupportItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -30947,9 +30473,7 @@ impl SnpnMobilityInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31008,9 +30532,7 @@ impl SNssai {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31077,9 +30599,7 @@ impl SonConfigurationTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31202,9 +30722,7 @@ impl SonInformationReply {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31381,9 +30899,7 @@ impl SourceNgranNodeToTargetNgranNodeTransparentContainer {
                         ue_history_information_from_the_ue =
                             Some(UeHistoryInformationFromTheUe::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31501,9 +31017,7 @@ impl SourceRanNodeId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31606,9 +31120,7 @@ impl SourceToTargetAmfInformationReroute {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -31894,9 +31406,7 @@ impl SupportedTaItem {
                             Some(ConfiguredTacIndication::aper_decode(data)?)
                     }
                     179 => rat_information = Some(RatInformation::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32095,9 +31605,7 @@ impl Tai {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32193,9 +31701,7 @@ impl TaiBroadcastEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32294,9 +31800,7 @@ impl TaiBroadcastNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32395,9 +31899,7 @@ impl TaiCancelledEutraItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32496,9 +31998,7 @@ impl TaiCancelledNrItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32594,9 +32094,7 @@ impl TaiListForInactiveItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32688,9 +32186,7 @@ impl TaiListForPagingItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32824,9 +32320,7 @@ impl TargetEnbId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32937,9 +32431,7 @@ impl TargetNgranNodeToSourceNgranNodeTransparentContainer {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     267 => daps_response_info_list = Some(DapsResponseInfoList::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -32997,9 +32489,7 @@ impl TargetNgranNodeToSourceNgranNodeFailureTransparentContainer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -33058,9 +32548,7 @@ impl TargetRanNodeId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -33125,9 +32613,7 @@ impl TargetRncId {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -33570,9 +33056,7 @@ impl TnlAssociationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -33674,9 +33158,7 @@ impl TooearlyIntersystemHo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -33750,9 +33232,7 @@ impl TraceActivation {
                 match id {
                     255 => mdt_configuration = Some(MdtConfiguration::aper_decode(data)?),
                     257 => trace_collection_entity_uri = Some(UriAddress::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -33954,9 +33434,7 @@ impl TaiBasedMdt {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34048,9 +33526,7 @@ impl TaBasedMdt {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34368,9 +33844,7 @@ impl TscAssistanceInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34440,9 +33914,7 @@ impl TscTrafficCharacteristics {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34507,9 +33979,7 @@ impl UeAggregateMaximumBitRate {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34616,9 +34086,7 @@ impl UeAssociatedLogicalNgConnectionItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34755,9 +34223,7 @@ impl UeContextResumeRequestTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34819,9 +34285,7 @@ impl UeContextResumeResponseTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34883,9 +34347,7 @@ impl UeContextSuspendRequestTransfer {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -34975,9 +34437,7 @@ impl UeDifferentiationInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -35247,9 +34707,7 @@ impl UeNgapIdPair {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -35429,9 +34887,7 @@ impl UePresenceInAreaOfInterestItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -35536,9 +34992,7 @@ impl UeRadioCapabilityForPaging {
                         ue_radio_capability_for_paging_of_nb_iot =
                             Some(UeRadioCapabilityForPagingOfNbIot::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -35816,9 +35270,7 @@ impl UeSecurityCapabilities {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -35917,9 +35369,7 @@ impl UlCpSecurityInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36095,9 +35545,7 @@ impl UlNguUpTnlModifyItem {
                         redundant_dl_ngu_up_tnl_information =
                             Some(UpTransportLayerInformation::aper_decode(data)?)
                     }
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36207,9 +35655,7 @@ impl UnavailableGuamiItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36426,9 +35872,7 @@ impl UpTransportLayerInformationItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36524,9 +35968,7 @@ impl UpTransportLayerInformationPairItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36687,9 +36129,7 @@ impl UserLocationInformationEutra {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     149 => ps_cell_information = Some(NgranCgi::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36754,9 +36194,7 @@ impl UserLocationInformationN3Iwf {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36821,9 +36259,7 @@ impl UserLocationInformationTngf {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -36893,9 +36329,7 @@ impl UserLocationInformationTwif {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37022,9 +36456,7 @@ impl UserLocationInformationNr {
                 match id {
                     149 => ps_cell_information = Some(NgranCgi::aper_decode(data)?),
                     263 => nid = Some(Nid::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37090,9 +36522,7 @@ impl UserPlaneSecurityInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37194,9 +36624,7 @@ impl VolumeTimedReportItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37556,9 +36984,7 @@ impl WlanMeasurementConfiguration {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37667,9 +37093,7 @@ impl WlanMeasConfigNameItem {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37790,9 +37214,7 @@ impl WusAssistanceInformation {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -37899,9 +37321,7 @@ impl XnExtTlaItem {
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
                     173 => sctp_tl_as = Some(SctpTlAs::aper_decode(data)?),
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
@@ -38049,9 +37469,7 @@ impl XnTnlConfigurationInfo {
                 let _criticality = Criticality::aper_decode(data)?;
                 let ie_length = aper::decode::decode_length_determinent(data, None, None, false)?;
                 match id {
-                    _ => {
-                        data.advance(ie_length)?;
-                    }
+                    _ => data.advance_maybe_err(ie_length, false)?,
                 }
             }
         }
