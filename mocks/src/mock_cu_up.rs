@@ -111,7 +111,7 @@ impl MockCuUp {
         expected_address: &TransportLayerAddress,
     ) -> Result<(TransactionId, u32)> {
         debug!(self.logger, "Wait for Cu Cp Configuration Update");
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
 
         let E1apPdu::InitiatingMessage(InitiatingMessage::GnbCuCpConfigurationUpdate(cu_cp_configuration_update)) = pdu
         else {
@@ -165,7 +165,7 @@ impl MockCuUp {
     }
 
     pub async fn handle_bearer_context_setup(&mut self, ue_id: u32) -> Result<UeContext> {
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
         let ue_context = self.process_bearer_context_setup(pdu, ue_id).await?;
         info!(self.logger, "BearerContextSetupRequest <<");
         let pdu = self.build_bearer_context_setup_response(&ue_context);
@@ -236,7 +236,7 @@ impl MockCuUp {
     }
 
     pub async fn handle_bearer_context_modification(&self, ue_context: &UeContext) -> Result<()> {
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
         self.check_bearer_context_modification(pdu, ue_context)
             .await?;
         info!(self.logger, "BearerContextModificationRequest <<");

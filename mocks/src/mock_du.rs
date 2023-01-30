@@ -88,7 +88,7 @@ impl MockDu {
     }
 
     async fn receive_f1_setup_response(&self) -> Result<()> {
-        let pdu = self.receive_pdu().await;
+        let pdu = self.receive_pdu().await.unwrap();
         let F1apPdu::SuccessfulOutcome(SuccessfulOutcome::F1SetupResponse(_)) = pdu
         else {
             bail!("Unexpected F1ap message {:?}", pdu)
@@ -152,7 +152,7 @@ impl MockDu {
 
     async fn receive_rrc_setup(&self, ue_context: &mut UeContext) -> Result<RrcSetup> {
         // Receive DL Rrc Message Transfer and extract RRC Setup
-        let pdu = self.receive_pdu().await;
+        let pdu = self.receive_pdu().await.unwrap();
         let F1apPdu::InitiatingMessage(InitiatingMessage::DlRrcMessageTransfer(dl_rrc_message_transfer)) = pdu
         else {
             bail!("Unexpected F1ap message {:?}", pdu)
@@ -256,7 +256,7 @@ impl MockDu {
     }
 
     async fn receive_dl_rrc(&self, ue_context: &UeContext) -> Result<DlRrcMessageTransfer> {
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
 
         // Check that the PDU arrived on the expected binding.
         assert_eq!(assoc_id, ue_context.binding.assoc_id);
@@ -291,7 +291,7 @@ impl MockDu {
     }
 
     pub async fn handle_ue_context_setup(&self, ue_context: &UeContext) -> Result<()> {
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
         let _ = self.check_ue_context_setup_request(pdu, ue_context)?;
         info!(&self.logger, "UeContextSetupRequest <<");
 
@@ -488,7 +488,7 @@ impl MockDu {
         expected_address: &TransportLayerAddress,
     ) -> Result<(TransactionId, u32)> {
         debug!(self.logger, "Wait for Cu Configuration Update");
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
 
         let F1apPdu::InitiatingMessage(InitiatingMessage::GnbCuConfigurationUpdate(cu_configuration_update)) = pdu
         else {
