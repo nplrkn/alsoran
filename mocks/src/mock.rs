@@ -10,7 +10,7 @@ use net::{
 use slog::{debug, info, Logger};
 use std::fmt::Debug;
 
-pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
+pub trait Pdu: AperSerde + 'static + Send + Sync + Clone + Debug {}
 
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
@@ -81,12 +81,11 @@ impl<P: Pdu> Mock<P> {
     /// Wait for connection to be established or terminated.
     pub async fn expect_connection(&self) {
         debug!(self.logger, "Wait for connection from worker");
-        assert!(self
-            .receiver
-            .recv()
-            .await
-            .expect("Failed mock recv")
-            .is_none());
+        let message = self.receiver.recv().await.expect("Failed mock recv");
+        if let Some(x) = message {
+            panic!("Expected connection, got {:?}", x.pdu);
+        }
+
         info!(
             self.logger,
             "Association list is now {:?}",
