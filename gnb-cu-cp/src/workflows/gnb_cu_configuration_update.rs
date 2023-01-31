@@ -44,7 +44,10 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
         self.log_message(">> GnbCuConfigurationUpdateAcknowledge");
 
         // Associate this TNLA with the F1AP interface instance.
-        //self.associate_connection();
+        // It is essential to spawn this, not await it, to avoid a deadlock
+        // with the coordinator.  (The coordinator is already waiting on us, so it can't
+        // process our next message to it until we have returned.)
+        async_std::task::spawn(self.associate_connection());
 
         Ok(())
     }

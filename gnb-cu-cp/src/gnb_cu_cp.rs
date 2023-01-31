@@ -65,5 +65,12 @@ pub trait GnbCuCp: Send + Sync + Clone + 'static + UeStateStore {
     /// Returns a revision number.  Each change in the interface state results in a new
     /// number.
     // TODO: add parameters that actually define the association.
+    //
+    // This can be used in ways.
+    // 1) You can simply spawn() it to run a follow on action.
+    // 2) You can return it in a ResponseAction to the Stack.  This is necessary
+    //    if the follow-on processing may use the same connection that triggered the
+    //    current workflow.  The Stack will ensure that the response is transmitted
+    //    before the follow-on action is run.
     fn associate_connection(&self) -> Pin<Box<dyn Future<Output = ()> + Send>>;
 }
