@@ -1,6 +1,6 @@
 //! mock - 'base class' for the mocks
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use net::{
@@ -10,15 +10,20 @@ use net::{
 use slog::{debug, info, Logger};
 use std::fmt::Debug;
 
-pub trait Pdu: AperSerde + 'static + Send + Sync + Clone {}
+pub trait Pdu: AperSerde + 'static + Send + Sync + Clone + Debug {}
 
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
     pub transport: SctpTransportProvider,
-    receiver: Receiver<Option<ReceivedPdu<P>>>,
+    receiver: Receiver<MockEvent<P>>,
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Vec<ShutdownHandle>,
+}
+
+pub enum MockEvent<P: Pdu> {
+    Pdu(ReceivedPdu<P>),
+    Connection(Sender<()>),
 }
 
 pub struct ReceivedPdu<P: Pdu> {
@@ -27,7 +32,7 @@ pub struct ReceivedPdu<P: Pdu> {
 }
 
 #[derive(Debug, Clone)]
-pub struct Handler<P: Pdu>(pub Sender<Option<ReceivedPdu<P>>>);
+pub struct Handler<P: Pdu>(pub Sender<MockEvent<P>>);
 
 impl<P: Pdu> Mock<P> {
     pub async fn new(logger: Logger) -> Self {
@@ -81,17 +86,17 @@ impl<P: Pdu> Mock<P> {
     /// Wait for connection to be established or terminated.
     pub async fn expect_connection(&self) {
         debug!(self.logger, "Wait for connection from worker");
-        assert!(self
-            .receiver
-            .recv()
-            .await
-            .expect("Failed mock recv")
-            .is_none());
-        info!(
-            self.logger,
-            "Association list is now {:?}",
-            self.transport.remote_tnla_addresses().await
-        );
+        match self.receiver.recv().await.expect("Failed mock recv") {
+            MockEvent::Pdu(x) => panic!("Expected connection, got {:?}", x.pdu),
+            MockEvent::Connection(reply_sender) => {
+                info!(
+                    self.logger,
+                    "Association list is now {:?}",
+                    self.transport.remote_tnla_addresses().await
+                );
+                reply_sender.send(()).await.unwrap();
+            }
+        }
     }
 
     pub async fn send(&self, message: Vec<u8>, assoc_id: Option<u32>) {
@@ -102,18 +107,21 @@ impl<P: Pdu> Mock<P> {
     }
 
     /// Receive a Pdu, with a 0.5s timeout.
-    pub async fn receive_pdu(&self) -> P {
-        self.receive_pdu_with_assoc_id().await.pdu
+    pub async fn receive_pdu(&self) -> Result<P> {
+        self.receive_pdu_with_assoc_id().await.map(|r| r.pdu)
     }
 
     /// Receive a Pdu, with a 0.5s timeout.
-    pub async fn receive_pdu_with_assoc_id(&self) -> ReceivedPdu<P> {
+    pub async fn receive_pdu_with_assoc_id(&self) -> Result<ReceivedPdu<P>> {
         let f = self.receiver.recv();
-        async_std::future::timeout(std::time::Duration::from_millis(500), f)
+        let event = async_std::future::timeout(std::time::Duration::from_millis(500), f)
             .await
             .unwrap()
-            .expect("Expected message")
-            .expect("Expected message")
+            .expect("Expected message");
+        match event {
+            MockEvent::Pdu(p) => Ok(p),
+            MockEvent::Connection(_) => bail!("Expected Pdu but got connection"),
+        }
     }
 
     pub async fn rebind(&self, binding: &mut Binding, ip_addr: &str) -> Result<()> {
@@ -125,7 +133,15 @@ impl<P: Pdu> Mock<P> {
 #[async_trait]
 impl<P: Pdu> TnlaEventHandler for Handler<P> {
     async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
-        let _ = self.0.send(None).await;
+        // A connection establishment is typically chased by a message.
+        // This handler is guaranteed to be called before handle_message() but
+        // if they both call send() on the internal mock channel at around the same time,
+        // the internal MockEvents can arrive in the wrong order.
+        //
+        // So, wait for the acknowledgement of the connection event before returning.
+        let (sender, receiver) = async_channel::bounded(1);
+        self.0.send(MockEvent::Connection(sender)).await.unwrap();
+        receiver.recv().await.expect("Expected completion message")
     }
 
     async fn handle_message(
@@ -135,7 +151,7 @@ impl<P: Pdu> TnlaEventHandler for Handler<P> {
         _logger: &Logger,
     ) -> Option<ResponseAction<Vec<u8>>> {
         self.0
-            .send(Some(ReceivedPdu {
+            .send(MockEvent::Pdu(ReceivedPdu {
                 pdu: P::from_bytes(&message).unwrap(),
                 assoc_id: tnla_id,
             }))

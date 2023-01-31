@@ -62,7 +62,7 @@ impl MockAmf {
         let logger = &self.logger;
         debug!(logger, "Wait for NG Setup from GNB");
 
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
 
         let NgapPdu::InitiatingMessage(InitiatingMessage::NgSetupRequest(_ng_setup)) = pdu
         else {
@@ -105,7 +105,7 @@ impl MockAmf {
         let logger = &self.logger;
         debug!(logger, "Wait for RAN Configuration Update from GNB");
 
-        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await;
+        let ReceivedPdu { pdu, assoc_id } = self.receive_pdu_with_assoc_id().await.unwrap();
 
         let NgapPdu::InitiatingMessage(InitiatingMessage::RanConfigurationUpdate(
             _ran_configuration_update,
@@ -150,7 +150,7 @@ impl MockAmf {
 
     pub async fn receive_initial_ue_message(&self, ue_id: u32) -> Result<UeContext> {
         let logger = &self.logger;
-        match self.receive_pdu_with_assoc_id().await {
+        match self.receive_pdu_with_assoc_id().await.unwrap() {
             ReceivedPdu {
                 pdu:
                     NgapPdu::InitiatingMessage(InitiatingMessage::InitialUeMessage(InitialUeMessage {
@@ -240,7 +240,7 @@ impl MockAmf {
         &self,
         ue_context: &UeContext,
     ) -> Result<()> {
-        let pdu = self.receive_pdu().await;
+        let pdu = self.receive_pdu().await.unwrap();
         let NgapPdu::SuccessfulOutcome(SuccessfulOutcome::InitialContextSetupResponse(
             InitialContextSetupResponse { amf_ue_ngap_id, .. },
         )) = pdu else {
@@ -348,7 +348,7 @@ impl MockAmf {
         &self,
         ue_context: &UeContext,
     ) -> Result<()> {
-        match self.receive_pdu().await {
+        match self.receive_pdu().await.unwrap() {
             NgapPdu::SuccessfulOutcome(SuccessfulOutcome::PduSessionResourceSetupResponse(
                 PduSessionResourceSetupResponse {
                     amf_ue_ngap_id,
