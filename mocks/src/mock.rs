@@ -15,7 +15,7 @@ pub trait Pdu: AperSerde + 'static + Send + Sync + Clone + Debug {}
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
     pub transport: SctpTransportProvider,
-    receiver: Receiver<MockEvent<P>>,
+    receiver: DebugReceiver<P>,
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Vec<ShutdownHandle>,
@@ -34,9 +34,24 @@ pub struct ReceivedPdu<P: Pdu> {
 #[derive(Debug, Clone)]
 pub struct Handler<P: Pdu>(pub Sender<MockEvent<P>>);
 
+struct DebugReceiver<P: Pdu>(pub Receiver<MockEvent<P>>, Logger);
+impl<P: Pdu> Drop for DebugReceiver<P> {
+    fn drop(&mut self) {
+        info!(self.1, "Dropped");
+    }
+}
+impl<P: Pdu> std::ops::Deref for DebugReceiver<P> {
+    type Target = Receiver<MockEvent<P>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl<P: Pdu> Mock<P> {
     pub async fn new(logger: Logger) -> Self {
         let (sender, receiver) = async_channel::unbounded();
+        let receiver = DebugReceiver(receiver, logger.clone());
         let transport = SctpTransportProvider::new();
 
         Mock {
@@ -81,6 +96,7 @@ impl<P: Pdu> Mock<P> {
             t.graceful_shutdown().await;
         }
         self.transport.graceful_shutdown().await;
+        info!(self.logger, "Termination complete");
     }
 
     /// Wait for connection to be established or terminated.
@@ -132,13 +148,14 @@ impl<P: Pdu> Mock<P> {
 
 #[async_trait]
 impl<P: Pdu> TnlaEventHandler for Handler<P> {
-    async fn handle_event(&self, _event: TnlaEvent, _tnla_id: u32, _logger: &Logger) {
+    async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
         // A connection establishment is typically chased by a message.
         // This handler is guaranteed to be called before handle_message() but
         // if they both call send() on the internal mock channel at around the same time,
         // the internal MockEvents can arrive in the wrong order.
         //
         // So, wait for the acknowledgement of the connection event before returning.
+        info!(logger, "TNLA {} {:?}", tnla_id, event);
         let (sender, receiver) = async_channel::bounded(1);
         self.0.send(MockEvent::Connection(sender)).await.unwrap();
         receiver.recv().await.expect("Expected completion message")

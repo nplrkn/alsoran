@@ -23,6 +23,7 @@ pub trait TnlaEventHandler: 'static + Send + Sync + Clone {
     ) -> Option<ResponseAction<Message>>;
 }
 
+#[derive(Debug)]
 pub enum TnlaEvent {
     Established(SocketAddr),
     Terminated,
