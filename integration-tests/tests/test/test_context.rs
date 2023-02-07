@@ -246,7 +246,7 @@ impl TestContext {
         match stage {
             &Stage::Init => (),
             &Stage::AmfConnected => {
-                self.amf.expect_connection().await;
+                self.amf.expect_connection_established().await;
                 if setup_interface {
                     self.amf.handle_ng_setup().await?;
                 } else {

@@ -16,7 +16,7 @@ pdcp = {path = "../pdcp" }
 async-std = { version = "1.10.0", features = ["attributes"] }
 async-trait = "0.1.51"
 slog = "2.7.0"
-stop-token = "0.6.1"
+stop-token = "0.7.0"
 async-channel = "1.6.1"
 bitvec = "1.0.1"
 anyhow = "1.0.52"
