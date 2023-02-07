@@ -15,7 +15,7 @@ pub trait Pdu: AperSerde + 'static + Send + Sync + Clone + Debug {}
 /// Base struct for building mocks
 pub struct Mock<P: Pdu> {
     pub transport: SctpTransportProvider,
-    receiver: DebugReceiver<P>,
+    receiver: Receiver<MockEvent<P>>,
     pub logger: Logger,
     handler: Handler<P>,
     transport_tasks: Vec<ShutdownHandle>,
@@ -34,24 +34,24 @@ pub struct ReceivedPdu<P: Pdu> {
 #[derive(Debug, Clone)]
 pub struct Handler<P: Pdu>(pub Sender<MockEvent<P>>);
 
-struct DebugReceiver<P: Pdu>(pub Receiver<MockEvent<P>>, Logger);
-impl<P: Pdu> Drop for DebugReceiver<P> {
-    fn drop(&mut self) {
-        info!(self.1, "Dropped");
-    }
-}
-impl<P: Pdu> std::ops::Deref for DebugReceiver<P> {
-    type Target = Receiver<MockEvent<P>>;
+// struct DebugReceiver<P: Pdu>(pub Receiver<MockEvent<P>>, Logger);
+// impl<P: Pdu> Drop for DebugReceiver<P> {
+//     fn drop(&mut self) {
+//         info!(self.1, "Dropped");
+//     }
+// }
+// impl<P: Pdu> std::ops::Deref for DebugReceiver<P> {
+//     type Target = Receiver<MockEvent<P>>;
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         &self.0
+//     }
+// }
 
 impl<P: Pdu> Mock<P> {
     pub async fn new(logger: Logger) -> Self {
         let (sender, receiver) = async_channel::unbounded();
-        let receiver = DebugReceiver(receiver, logger.clone());
+        //let receiver = DebugReceiver(receiver, logger.clone());
         let transport = SctpTransportProvider::new();
 
         Mock {
@@ -88,7 +88,7 @@ impl<P: Pdu> Mock<P> {
 
         // Wait for the connection to be accepted.
         debug!(self.logger, "Wait for connection to be accepted");
-        self.expect_connection().await;
+        self.expect_connection_established().await;
     }
 
     pub async fn terminate(mut self) {
@@ -100,7 +100,7 @@ impl<P: Pdu> Mock<P> {
     }
 
     /// Wait for connection to be established or terminated.
-    pub async fn expect_connection(&self) {
+    pub async fn expect_connection_established(&self) {
         debug!(self.logger, "Wait for connection from worker");
         match self.receiver.recv().await.expect("Failed mock recv") {
             MockEvent::Pdu(x) => panic!("Expected connection, got {:?}", x.pdu),
@@ -149,16 +149,24 @@ impl<P: Pdu> Mock<P> {
 #[async_trait]
 impl<P: Pdu> TnlaEventHandler for Handler<P> {
     async fn handle_event(&self, event: TnlaEvent, tnla_id: u32, logger: &Logger) {
-        // A connection establishment is typically chased by a message.
-        // This handler is guaranteed to be called before handle_message() but
-        // if they both call send() on the internal mock channel at around the same time,
-        // the internal MockEvents can arrive in the wrong order.
-        //
-        // So, wait for the acknowledgement of the connection event before returning.
         info!(logger, "TNLA {} {:?}", tnla_id, event);
-        let (sender, receiver) = async_channel::bounded(1);
-        self.0.send(MockEvent::Connection(sender)).await.unwrap();
-        receiver.recv().await.expect("Expected completion message")
+
+        // Notify the mock if this is an establish event.  Ignore termination events.
+
+        if let TnlaEvent::Established(_) = event {
+            // A connection establishment is typically chased by a message.
+            // This handler is guaranteed to be called before handle_message() but
+            // if they both call send() on the internal mock channel at around the same time,
+            // the internal MockEvents can arrive in the wrong order.
+            //
+            // So, wait for the acknowledgement of the connection event before returning.
+            let (sender, receiver) = async_channel::bounded(1);
+            self.0
+                .send(MockEvent::Connection(sender))
+                .await
+                .expect("Channel closed");
+            receiver.recv().await.expect("Expected completion message")
+        }
     }
 
     async fn handle_message(
