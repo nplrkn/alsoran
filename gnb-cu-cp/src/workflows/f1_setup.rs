@@ -24,6 +24,12 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
 
         let coordinator_notify = self.associate_connection();
 
+        // Activate all served cells in the setup response.
+        // TODO: store information about served cells for use later.
+        let cells_to_be_activated_list = r.gnb_du_served_cells_list.map(|cells| {
+            CellsToBeActivatedList(cells.0.iter().map(served_cell_to_activated).collect())
+        });
+
         self.log_message("<< F1SetupResponse");
         Ok((
             F1SetupResponse {
@@ -33,7 +39,7 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
                     latest_rrc_version_enhanced: None,
                 },
                 gnb_cu_name: self.gnb_cu_cp.config().clone().name.map(GnbCuName),
-                cells_to_be_activated_list: None,
+                cells_to_be_activated_list,
                 transport_layer_address_info: None,
                 ul_bh_non_up_traffic_mapping: None,
                 bap_address: None,
@@ -42,5 +48,19 @@ impl<'a, G: GnbCuCp> Workflow<'a, G> {
             // Notify the coordinator as a follow on action after sending the response
             Some(coordinator_notify),
         ))
+    }
+}
+
+fn served_cell_to_activated(served_cell: &GnbDuServedCellsItem) -> CellsToBeActivatedListItem {
+    let served_cell_information = &served_cell.served_cell_information;
+
+    CellsToBeActivatedListItem {
+        nr_cgi: served_cell_information.nr_cgi.clone(),
+        nr_pci: None,
+        gnb_cu_system_information: None,
+        available_plmn_list: None,
+        extended_available_plmn_list: None,
+        iab_info_iab_donor_cu: None,
+        available_snpn_id_list: None,
     }
 }
