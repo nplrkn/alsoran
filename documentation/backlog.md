@@ -1,5 +1,6 @@
 # NEXT UP
 ## O-RAN O-DU interop
+- Respond to GNBDUConfigurationUpdate
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -65,6 +66,8 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Include CellsToBeActivated on F1SetupResponse.
+- Fix intermittent failures in mock connection checking 
 - F1 Setup with O-RAN ODU
 - ASN.1 decoder should cope protocol extensions being present.
 - Allow local-ip to be passed in on command line
