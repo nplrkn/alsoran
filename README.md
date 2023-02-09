@@ -14,7 +14,7 @@ This project is currently a proof of concept and not yet a fully functional gNB-
 - ASN.1 libraries for NGAP, E1AP, F1AP and RRC.
 - Connection management stack 
 - Scale-out of GNB-CU-CP workers using multiple TNLAs.
-- Procedures: NG Setup, RAN Configuration Update, F1 Setup, E1 Setup, Initial Access, Uplink NAS, Downlink NAS, Initial Context Setup, Pdu Session Resource Setup, AMF Status Indication, GNB CU Configuration Update, GNB CU CP Configuration Update.
+- Procedures: NG Setup, RAN Configuration Update, F1 Setup, E1 Setup, Initial Access, Uplink NAS, Downlink NAS, Initial Context Setup, Pdu Session Resource Setup, AMF Status Indication, GNB CU Configuration Update, GNB DU Configuration Update, GNB CU CP Configuration Update.
 - [Triangular redirection](documentation/design/triangular-redirection.md)
 - Rust ASN.1 autogenerator (written in Python).
 
