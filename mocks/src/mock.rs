@@ -130,10 +130,7 @@ impl<P: Pdu> Mock<P> {
     /// Receive a Pdu, with a 0.5s timeout.
     pub async fn receive_pdu_with_assoc_id(&self) -> Result<ReceivedPdu<P>> {
         let f = self.receiver.recv();
-        let event = async_std::future::timeout(std::time::Duration::from_millis(500), f)
-            .await
-            .unwrap()
-            .expect("Expected message");
+        let event = async_std::future::timeout(std::time::Duration::from_millis(500), f).await??;
         match event {
             MockEvent::Pdu(p) => Ok(p),
             MockEvent::Connection(_) => bail!("Expected Pdu but got connection"),

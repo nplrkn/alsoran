@@ -32,6 +32,7 @@ where
 
 impl<T> Application for F1apCu<T> where
     T: RequestProvider<F1SetupProcedure>
+        + RequestProvider<GnbDuConfigurationUpdateProcedure>
         + EventHandler
         + Clone
         + IndicationHandler<InitialUlRrcMessageTransferProcedure>
@@ -46,6 +47,7 @@ where
         + Sync
         + EventHandler
         + RequestProvider<F1SetupProcedure>
+        + RequestProvider<GnbDuConfigurationUpdateProcedure>
         + IndicationHandler<InitialUlRrcMessageTransferProcedure>
         + IndicationHandler<UlRrcMessageTransferProcedure>,
     // Todo - add all other procedures
@@ -70,6 +72,9 @@ where
             InitiatingMessage::UlRrcMessageTransfer(req) => {
                 UlRrcMessageTransferProcedure::call_provider(&self.0, req, logger).await;
                 None
+            }
+            InitiatingMessage::GnbDuConfigurationUpdate(req) => {
+                GnbDuConfigurationUpdateProcedure::call_provider(&self.0, req, logger).await
             }
             _ => todo!(),
         }
