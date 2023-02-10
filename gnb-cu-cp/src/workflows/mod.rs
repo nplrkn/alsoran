@@ -10,6 +10,7 @@ mod e1_setup;
 mod f1_setup;
 mod gnb_cu_configuration_update;
 mod gnb_cu_cp_configuration_update;
+mod gnb_du_configuration_update;
 mod initial_access;
 mod initial_context_setup;
 mod ng_setup;

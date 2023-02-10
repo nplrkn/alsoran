@@ -1,6 +1,6 @@
 # NEXT UP
 ## O-RAN O-DU interop
-- Respond to GNBDUConfigurationUpdate
+- ASN.1 decode failed - Error { msg: "Missing mandatory IE transaction_id", context: ["InitialUlRrcMessageTransfer", "InitiatingMessage", "F1apPdu"] }
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -66,6 +66,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Respond to GNBDUConfigurationUpdate
 - Include CellsToBeActivated on F1SetupResponse.
 - Fix intermittent failures in mock connection checking 
 - F1 Setup with O-RAN ODU

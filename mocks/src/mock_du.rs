@@ -545,6 +545,40 @@ impl MockDu {
         self.send(pdu.into_bytes()?, Some(assoc_id)).await;
         Ok(())
     }
+
+    pub async fn perform_du_configuration_update(&self) -> Result<()> {
+        self.send_gnb_du_configuration_update().await?;
+        self.receive_gnb_du_configuration_update_acknowledge().await
+    }
+
+    async fn send_gnb_du_configuration_update(&self) -> Result<()> {
+        let pdu = f1ap::F1apPdu::InitiatingMessage(InitiatingMessage::GnbDuConfigurationUpdate(
+            GnbDuConfigurationUpdate {
+                transaction_id: TransactionId(1),
+                served_cells_to_add_list: None,
+                served_cells_to_modify_list: None,
+                served_cells_to_delete_list: None,
+                cells_status_list: None,
+                dedicated_si_delivery_needed_ue_list: None,
+                gnb_du_id: None,
+                gnb_du_tnl_association_to_remove_list: None,
+                transport_layer_address_info: None,
+            },
+        ));
+        info!(self.logger, "GnbDuConfigurationUpdate >>");
+        self.send(pdu.into_bytes()?, None).await;
+        Ok(())
+    }
+
+    async fn receive_gnb_du_configuration_update_acknowledge(&self) -> Result<()> {
+        let pdu = self.receive_pdu().await.unwrap();
+        let F1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbDuConfigurationUpdateAcknowledge(_)) = pdu
+        else {
+            bail!("Unexpected F1ap message {:?}", pdu)
+        };
+        info!(self.logger, "GnbDuConfigurationUpdateAcknowledge <<");
+        Ok(())
+    }
 }
 
 fn make_rrc_cell_group_config() -> rrc::CellGroupConfig {

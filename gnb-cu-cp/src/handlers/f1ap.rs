@@ -40,6 +40,22 @@ impl<G: GnbCuCp> RequestProvider<F1SetupProcedure> for F1apHandler<G> {
 }
 
 #[async_trait]
+impl<G: GnbCuCp> RequestProvider<GnbDuConfigurationUpdateProcedure> for F1apHandler<G> {
+    async fn request(
+        &self,
+        r: GnbDuConfigurationUpdate,
+        logger: &Logger,
+    ) -> Result<
+        ResponseAction<GnbDuConfigurationUpdateAcknowledge>,
+        RequestError<GnbDuConfigurationUpdateFailure>,
+    > {
+        Workflow::new(&self.gnb_cu_cp, logger)
+            .gnb_du_configuration_update(r)
+            .await
+    }
+}
+
+#[async_trait]
 impl<G: GnbCuCp> IndicationHandler<InitialUlRrcMessageTransferProcedure> for F1apHandler<G> {
     async fn handle(&self, r: InitialUlRrcMessageTransfer, logger: &Logger) {
         if let Err(e) = Workflow::new(&self.gnb_cu_cp, logger)
