@@ -138,7 +138,7 @@ impl MockDu {
                 rrc_container: RrcContainer(rrc_setup_request),
                 du_to_cu_rrc_container,
                 sul_access_indication: None,
-                transaction_id: TransactionId(1),
+                transaction_id: Some(TransactionId(1)), // Should be mandatory - ODU ORAN interop hack
                 ran_ue_id: None,
                 rrc_container_rrc_setup_complete: None,
             })?;

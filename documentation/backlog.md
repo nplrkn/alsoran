@@ -1,6 +1,6 @@
 # NEXT UP
 ## O-RAN O-DU interop
-- ASN.1 decode failed - Error { msg: "Missing mandatory IE transaction_id", context: ["InitialUlRrcMessageTransfer", "InitiatingMessage", "F1apPdu"] }
+- [EstablishmentCause.RrcSetupRequestIEs.RrcSetupRequest.C1_4.UlCcchMessageType.UlCcchMessage]:PerCodec:DecodeError:Requested Bits to decode 4, Remaining bits 1
 
 ## SCALE OUT / MULTIPLE TNLA
 - Allow AMF to specify 2nd endpoint - ask worker 1
@@ -66,6 +66,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Tolerate missing mandatory IE TransactionId on InitialULRrcMessageTransfer for ORAN ODU interop
 - Respond to GNBDUConfigurationUpdate
 - Include CellsToBeActivated on F1SetupResponse.
 - Fix intermittent failures in mock connection checking 

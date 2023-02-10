@@ -9632,7 +9632,7 @@ pub struct InitialUlRrcMessageTransfer {
     pub rrc_container: RrcContainer,
     pub du_to_cu_rrc_container: Option<DuToCuRrcContainer>,
     pub sul_access_indication: Option<SulAccessIndication>,
-    pub transaction_id: TransactionId,
+    pub transaction_id: Option<TransactionId>,
     pub ran_ue_id: Option<RanUeId>,
     pub rrc_container_rrc_setup_complete: Option<RrcContainerRrcSetupComplete>,
 }
@@ -9679,9 +9679,6 @@ impl InitialUlRrcMessageTransfer {
         let c_rnti = c_rnti.ok_or(PerCodecError::new(format!("Missing mandatory IE c_rnti")))?;
         let rrc_container = rrc_container.ok_or(PerCodecError::new(format!(
             "Missing mandatory IE rrc_container"
-        )))?;
-        let transaction_id = transaction_id.ok_or(PerCodecError::new(format!(
-            "Missing mandatory IE transaction_id"
         )))?;
         Ok(Self {
             gnb_du_ue_f1ap_id,
@@ -9751,13 +9748,15 @@ impl InitialUlRrcMessageTransfer {
             num_ies += 1;
         }
 
-        let ie = &mut PerCodecData::new_aper();
-        self.transaction_id.aper_encode(ie)?;
-        aper::encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
-        Criticality::Ignore.aper_encode(ies)?;
-        aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
-        ies.append_aligned(ie);
-        num_ies += 1;
+        if let Some(x) = &self.transaction_id {
+            let ie = &mut PerCodecData::new_aper();
+            x.aper_encode(ie)?;
+            aper::encode::encode_integer(ies, Some(0), Some(65535), false, 78, false)?;
+            Criticality::Ignore.aper_encode(ies)?;
+            aper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            ies.append_aligned(ie);
+            num_ies += 1;
+        }
 
         if let Some(x) = &self.ran_ue_id {
             let ie = &mut PerCodecData::new_aper();
