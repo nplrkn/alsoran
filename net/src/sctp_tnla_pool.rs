@@ -124,8 +124,7 @@ impl SctpTnlaPool {
     ) where
         H: TnlaEventHandler,
     {
-        // Notify new association establishment.  Note that we do not spawn a separate task for this event.  This is
-        // to guarantee that the establishment event is processed before we move onto delivering any packets to the handler.
+        // Notify new association establishment.
         handler
             .handle_event(
                 TnlaEvent::Established(assoc.remote_address),
@@ -145,33 +144,22 @@ impl SctpTnlaPool {
 
                 // Local shutdown
                 None => {
-                    spawn_handle_event(
-                        handler.clone(),
-                        TnlaEvent::Terminated,
-                        assoc_id,
-                        logger.clone(),
-                    );
+                    handler
+                        .handle_event(TnlaEvent::Terminated, assoc_id, &logger)
+                        .await;
                     break;
                 }
                 // Remote end terminated connection
                 Some(Err(_)) => {
-                    spawn_handle_event(
-                        handler.clone(),
-                        TnlaEvent::Terminated,
-                        assoc_id,
-                        logger.clone(),
-                    );
+                    handler
+                        .handle_event(TnlaEvent::Terminated, assoc_id, &logger)
+                        .await;
                     break;
                 }
                 // Received a message
                 Some(Ok(message)) => {
-                    async_std::task::spawn(handle_message(
-                        handler.clone(),
-                        message,
-                        assoc.clone(),
-                        assoc_id,
-                        logger.clone(),
-                    ));
+                    handle_message(&handler, message, assoc.clone(), assoc_id, logger.clone())
+                        .await;
                 }
             }
         }
@@ -180,17 +168,8 @@ impl SctpTnlaPool {
     }
 }
 
-fn spawn_handle_event<H: TnlaEventHandler>(
-    handler: H,
-    event: TnlaEvent,
-    tnla_id: u32,
-    logger: Logger,
-) {
-    async_std::task::spawn(async move { handler.handle_event(event, tnla_id, &logger).await });
-}
-
 async fn handle_message<H: TnlaEventHandler>(
-    handler: H,
+    handler: &H,
     message: Vec<u8>,
     assoc: Arc<SctpAssociation>,
     assoc_id: u32,
