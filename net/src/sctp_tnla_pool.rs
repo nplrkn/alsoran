@@ -10,7 +10,7 @@ use common::ShutdownHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{debug, warn, Logger};
+use slog::{debug, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::{StopSource, StopToken};
@@ -158,30 +158,12 @@ impl SctpTnlaPool {
                 }
                 // Received a message
                 Some(Ok(message)) => {
-                    handle_message(&handler, message, assoc.clone(), assoc_id, logger.clone())
-                        .await;
+                    debug!(logger, "Received message on assoc {}", assoc_id);
+                    handler.handle_message(message, assoc_id, &logger).await
                 }
             }
         }
 
         self.assocs.lock().await.remove(&assoc_id);
-    }
-}
-
-async fn handle_message<H: TnlaEventHandler>(
-    handler: &H,
-    message: Vec<u8>,
-    assoc: Arc<SctpAssociation>,
-    assoc_id: u32,
-    logger: Logger,
-) {
-    debug!(logger, "Received message on assoc {}", assoc_id);
-    if let Some((response, future)) = handler.handle_message(message, assoc_id, &logger).await {
-        if let Err(e) = assoc.send_msg(response).await {
-            warn!(logger, "Failed to send response - {}", e);
-        } else if let Some(future) = future {
-            debug!(logger, "Post response action - run it");
-            future.await;
-        }
     }
 }

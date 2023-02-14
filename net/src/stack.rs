@@ -1,6 +1,7 @@
 // stack - transaction layer allowing workflow business logic to await a response to its ??AP requests
 
 use crate::tnla_event_handler::{ResponseAction, TnlaEventHandler};
+use crate::transport_provider::AssocId;
 use crate::{
     Indication, IndicationHandler, Message, Procedure, RequestError, RequestMessageHandler,
     RequestProvider, SctpTransportProvider, ShutdownHandle, TnlaEvent, TransportProvider,
@@ -10,7 +11,7 @@ use async_channel::Sender;
 use async_net::SocketAddr;
 use async_std::sync::{Arc, Mutex};
 use async_trait::async_trait;
-use slog::{warn, Logger};
+use slog::{debug, warn, Logger};
 
 type TransactionMatchFn = Box<dyn Fn(&Message) -> bool + Send + Sync>;
 type SharedTransactions = Arc<Mutex<Box<Vec<(TransactionMatchFn, Sender<Message>)>>>>;
@@ -46,6 +47,7 @@ impl Stack {
     ) -> Result<()> {
         let receiver = StackReceiver {
             application,
+            transport_provider: self.transport_provider.clone(),
             pending_requests: self.pending_requests.clone(),
         };
         self.transport_provider
@@ -63,6 +65,7 @@ impl Stack {
     ) -> Result<ShutdownHandle> {
         let receiver = StackReceiver {
             application,
+            transport_provider: self.transport_provider.clone(),
             pending_requests: self.pending_requests.clone(),
         };
 
@@ -124,7 +127,30 @@ impl<I: Indication> IndicationHandler<I> for Stack {
 #[derive(Clone)]
 struct StackReceiver<A: Application> {
     application: A,
+    transport_provider: SctpTransportProvider,
     pending_requests: SharedTransactions,
+}
+
+impl<A: Application> StackReceiver<A> {
+    fn spawn_workflow_task(&self, message: Message, tnla_id: AssocId, logger: &Logger) {
+        let application = self.application.clone();
+        let logger = logger.clone();
+        let transport_provider = self.transport_provider.clone();
+        async_std::task::spawn(async move {
+            let response_action = application.handle_request(&message, &logger).await;
+            if let Some((response, future)) = response_action {
+                if let Err(e) = transport_provider
+                    .send_message(response, Some(tnla_id), &logger)
+                    .await
+                {
+                    warn!(logger, "Failed to send response - {}", e);
+                } else if let Some(future) = future {
+                    debug!(logger, "Post response action - run it");
+                    future.await;
+                }
+            }
+        });
+    }
 }
 
 #[async_trait]
@@ -133,12 +159,7 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
         self.application.handle_event(event, tnla_id, logger).await
     }
 
-    async fn handle_message(
-        &self,
-        message: Message,
-        _tnla_id: u32,
-        logger: &Logger,
-    ) -> Option<ResponseAction<Message>> {
+    async fn handle_message(&self, message: Message, tnla_id: u32, logger: &Logger) {
         // TODO figure out if it is a response and warn / drop if there are no matches
 
         // If it matches a pending request, route it back over the response channel.
@@ -152,15 +173,18 @@ impl<A: Application> TnlaEventHandler for StackReceiver<A> {
 
         match position {
             Some(index) => {
+                // Response - send it to the existing task that is waiting for it.
                 let (_, response_channel) = self.pending_requests.lock().await.swap_remove(index);
                 response_channel
                     .send(message)
                     .await
                     .unwrap_or_else(|_| warn!(logger, "Internal response channel down"));
-                // TODO
-                None
+                // TODO - don't unwrap
             }
-            _ => self.application.handle_request(&message, logger).await,
+            _ => {
+                // New request - spawn a new task to handle the workflow.
+                self.spawn_workflow_task(message, tnla_id, logger);
+            }
         }
     }
 }
