@@ -1,8 +1,5 @@
 # NEXT UP
 
-- Intermittent test (https://github.com/nplrkn/alsoran/actions/runs/4121968536/jobs/7118194267#step:5:1773)
-  - two_workers_f1_before_e1
-  - Error: Expected GnbCuCpConfigurationUpdate, got SuccessfulOutcome(GnbCuUpE1SetupResponse(GnbCuUpE1SetupResponse { transaction_id: TransactionId(0), gnb_cu_cp_name: Some(GnbCuCpName("Alsoran")), transport_layer_address_info: None, extended_gnb_cu_cp_name: None }))
 ## O-RAN O-DU interop
 - [EstablishmentCause.RrcSetupRequestIEs.RrcSetupRequest.C1_4.UlCcchMessageType.UlCcchMessage]:PerCodec:DecodeError:Requested Bits to decode 4, Remaining bits 1
 
@@ -70,6 +67,7 @@
 - Distributed timers and failure path cleanup mechanism
 
 # DONE
+- Call TnlaEventHandler serially for a given association allowing message ordering control by upper layers (...meaning that intermittent reordering in scripted tests can be avoided)
 - Tolerate missing mandatory IE TransactionId on InitialULRrcMessageTransfer for ORAN ODU interop
 - Respond to GNBDUConfigurationUpdate
 - Include CellsToBeActivated on F1SetupResponse.
