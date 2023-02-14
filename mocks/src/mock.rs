@@ -23,7 +23,7 @@ pub struct Mock<P: Pdu> {
 
 pub enum MockEvent<P: Pdu> {
     Pdu(ReceivedPdu<P>),
-    Connection(Sender<()>),
+    Connection,
 }
 
 pub struct ReceivedPdu<P: Pdu> {
@@ -104,13 +104,12 @@ impl<P: Pdu> Mock<P> {
         debug!(self.logger, "Wait for connection from worker");
         match self.receiver.recv().await.expect("Failed mock recv") {
             MockEvent::Pdu(x) => panic!("Expected connection, got {:?}", x.pdu),
-            MockEvent::Connection(reply_sender) => {
+            MockEvent::Connection => {
                 info!(
                     self.logger,
                     "Association list is now {:?}",
                     self.transport.remote_tnla_addresses().await
                 );
-                reply_sender.send(()).await.unwrap();
             }
         }
     }
@@ -133,7 +132,7 @@ impl<P: Pdu> Mock<P> {
         let event = async_std::future::timeout(std::time::Duration::from_millis(500), f).await??;
         match event {
             MockEvent::Pdu(p) => Ok(p),
-            MockEvent::Connection(_) => bail!("Expected Pdu but got connection"),
+            MockEvent::Connection => bail!("Expected Pdu but got connection"),
         }
     }
 
@@ -149,20 +148,11 @@ impl<P: Pdu> TnlaEventHandler for Handler<P> {
         info!(logger, "TNLA {} {:?}", tnla_id, event);
 
         // Notify the mock if this is an establish event.  Ignore termination events.
-
         if let TnlaEvent::Established(_) = event {
-            // A connection establishment is typically chased by a message.
-            // This handler is guaranteed to be called before handle_message() but
-            // if they both call send() on the internal mock channel at around the same time,
-            // the internal MockEvents can arrive in the wrong order.
-            //
-            // So, wait for the acknowledgement of the connection event before returning.
-            let (sender, receiver) = async_channel::bounded(1);
             self.0
-                .send(MockEvent::Connection(sender))
+                .send(MockEvent::Connection)
                 .await
                 .expect("Channel closed");
-            receiver.recv().await.expect("Expected completion message")
         }
     }
 
