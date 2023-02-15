@@ -53,8 +53,7 @@ impl MockCuUp {
         self.connect(&transport_address, "0.0.0.0", E1AP_SCTP_PPID)
             .await;
         self.send_e1_setup_request().await?;
-        self.receive_e1_setup_response().await;
-        Ok(())
+        self.receive_e1_setup_response().await
     }
 
     async fn send_e1_setup_request(&self) -> Result<()> {
@@ -84,9 +83,14 @@ impl MockCuUp {
         Ok(())
     }
 
-    async fn receive_e1_setup_response(&self) {
-        let _response = self.receive_pdu().await;
+    async fn receive_e1_setup_response(&self) -> Result<()> {
+        let pdu = self.receive_pdu().await?;
+        let E1apPdu::SuccessfulOutcome(SuccessfulOutcome::GnbCuUpE1SetupResponse(_response)) = pdu
+        else {
+            bail!("Expected GnbCuUpE1SetupResponse, got {:?}", pdu)
+        };
         info!(self.logger, "GnbCuUpE1SetupResponse <<");
+        Ok(())
     }
 
     pub async fn handle_cu_cp_configuration_update(

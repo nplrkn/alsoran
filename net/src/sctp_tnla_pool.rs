@@ -10,7 +10,7 @@ use common::ShutdownHandle;
 use futures::pin_mut;
 use futures::stream::StreamExt;
 use sctp::{Message, SctpAssociation};
-use slog::{debug, warn, Logger};
+use slog::{debug, Logger};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use stop_token::{StopSource, StopToken};
@@ -124,8 +124,7 @@ impl SctpTnlaPool {
     ) where
         H: TnlaEventHandler,
     {
-        // Notify new association establishment.  Note that we do not spawn a separate task for this event.  This is
-        // to guarantee that the establishment event is processed before we move onto delivering any packets to the handler.
+        // Notify new association establishment.
         handler
             .handle_event(
                 TnlaEvent::Established(assoc.remote_address),
@@ -145,64 +144,26 @@ impl SctpTnlaPool {
 
                 // Local shutdown
                 None => {
-                    spawn_handle_event(
-                        handler.clone(),
-                        TnlaEvent::Terminated,
-                        assoc_id,
-                        logger.clone(),
-                    );
+                    handler
+                        .handle_event(TnlaEvent::Terminated, assoc_id, &logger)
+                        .await;
                     break;
                 }
                 // Remote end terminated connection
                 Some(Err(_)) => {
-                    spawn_handle_event(
-                        handler.clone(),
-                        TnlaEvent::Terminated,
-                        assoc_id,
-                        logger.clone(),
-                    );
+                    handler
+                        .handle_event(TnlaEvent::Terminated, assoc_id, &logger)
+                        .await;
                     break;
                 }
                 // Received a message
                 Some(Ok(message)) => {
-                    async_std::task::spawn(handle_message(
-                        handler.clone(),
-                        message,
-                        assoc.clone(),
-                        assoc_id,
-                        logger.clone(),
-                    ));
+                    debug!(logger, "Received message on assoc {}", assoc_id);
+                    handler.handle_message(message, assoc_id, &logger).await
                 }
             }
         }
 
         self.assocs.lock().await.remove(&assoc_id);
-    }
-}
-
-fn spawn_handle_event<H: TnlaEventHandler>(
-    handler: H,
-    event: TnlaEvent,
-    tnla_id: u32,
-    logger: Logger,
-) {
-    async_std::task::spawn(async move { handler.handle_event(event, tnla_id, &logger).await });
-}
-
-async fn handle_message<H: TnlaEventHandler>(
-    handler: H,
-    message: Vec<u8>,
-    assoc: Arc<SctpAssociation>,
-    assoc_id: u32,
-    logger: Logger,
-) {
-    debug!(logger, "Received message on assoc {}", assoc_id);
-    if let Some((response, future)) = handler.handle_message(message, assoc_id, &logger).await {
-        if let Err(e) = assoc.send_msg(response).await {
-            warn!(logger, "Failed to send response - {}", e);
-        } else if let Some(future) = future {
-            debug!(logger, "Post response action - run it");
-            future.await;
-        }
     }
 }
