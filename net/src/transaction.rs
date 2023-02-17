@@ -1,7 +1,7 @@
 //! transactions - allows definition of procedures using individual ASN.1 requests and responses
 
 use anyhow::Result;
-use asn1_codecs::{aper::AperCodec, PerCodecData};
+use asn1_codecs::PerCodecData;
 use async_channel::RecvError;
 use async_trait::async_trait;
 use slog::{debug, warn, Logger};
@@ -37,24 +37,38 @@ pub trait Indication {
     );
 }
 
+pub use asn1_codecs::PerCodecError;
+
+pub fn new_codec_data_aper() -> PerCodecData {
+    PerCodecData::new_aper()
+}
+
+pub fn new_codec_data_uper() -> PerCodecData {
+    PerCodecData::new_uper()
+}
+
+pub trait PerCodec: Sized {
+    fn decode(data: &mut PerCodecData) -> Result<Self, crate::PerCodecError>;
+    fn encode(&self, _data: &mut PerCodecData) -> Result<(), crate::PerCodecError>;
+}
+
 pub trait AperSerde: Sized {
     fn into_bytes(self) -> Result<Vec<u8>, PerCodecError>;
     fn from_bytes(bytes: &[u8]) -> Result<Self, PerCodecError>;
 }
-pub use asn1_codecs::PerCodecError;
 
 use crate::ResponseAction;
 
-impl<T: AperCodec<Output = T>> AperSerde for T {
+impl<T: PerCodec> AperSerde for T {
     fn into_bytes(self) -> Result<Vec<u8>, PerCodecError> {
         let mut d = PerCodecData::new_aper();
-        self.aper_encode(&mut d)?;
+        self.encode(&mut d)?;
         Ok(d.into_bytes())
     }
 
     fn from_bytes(bytes: &[u8]) -> Result<Self, PerCodecError> {
         let mut d = PerCodecData::from_slice_aper(bytes);
-        Self::aper_decode(&mut d)
+        Self::decode(&mut d)
     }
 }
 

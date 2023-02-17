@@ -2011,6 +2011,7 @@ dependencies = [
  "asn1-codecs",
  "async-trait",
  "bitvec",
+ "hex",
  "net",
  "num_enum",
  "slog",

@@ -2,8 +2,9 @@
 use super::pdu::*;
 use crate::common::Criticality;
 use anyhow::Result;
-use asn1_codecs::{aper, aper::AperCodec, PerCodecData, PerCodecError};
+use asn1_codecs::{aper as xper, PerCodecData, PerCodecError};
 use async_trait::async_trait;
+use net::{new_codec_data_aper as new_codec_data, PerCodec};
 use net::{
     AperSerde, Indication, IndicationHandler, Procedure, RequestError, RequestProvider,
     ResponseAction,
@@ -20,18 +21,14 @@ pub enum E1apPdu {
 
 impl E1apPdu {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = aper::decode::decode_choice_idx(data, 0, 2, true)?;
+        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 2, true)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"));
         }
         match idx {
-            0 => Ok(Self::InitiatingMessage(InitiatingMessage::aper_decode(
-                data,
-            )?)),
-            1 => Ok(Self::SuccessfulOutcome(SuccessfulOutcome::aper_decode(
-                data,
-            )?)),
-            2 => Ok(Self::UnsuccessfulOutcome(UnsuccessfulOutcome::aper_decode(
+            0 => Ok(Self::InitiatingMessage(InitiatingMessage::decode(data)?)),
+            1 => Ok(Self::SuccessfulOutcome(SuccessfulOutcome::decode(data)?)),
+            2 => Ok(Self::UnsuccessfulOutcome(UnsuccessfulOutcome::decode(
                 data,
             )?)),
             _ => Err(PerCodecError::new("Unknown choice idx")),
@@ -40,30 +37,29 @@ impl E1apPdu {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::InitiatingMessage(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, true, 0, false)?;
-                x.aper_encode(data)
+                xper::encode::encode_choice_idx(data, 0, 2, true, 0, false)?;
+                x.encode(data)
             }
             Self::SuccessfulOutcome(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, true, 1, false)?;
-                x.aper_encode(data)
+                xper::encode::encode_choice_idx(data, 0, 2, true, 1, false)?;
+                x.encode(data)
             }
             Self::UnsuccessfulOutcome(x) => {
-                aper::encode::encode_choice_idx(data, 0, 2, true, 2, false)?;
-                x.aper_encode(data)
+                xper::encode::encode_choice_idx(data, 0, 2, true, 2, false)?;
+                x.encode(data)
             }
         }
     }
 }
 
-impl AperCodec for E1apPdu {
-    type Output = Self;
-    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+impl PerCodec for E1apPdu {
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         E1apPdu::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("E1apPdu");
             e
         })
     }
-    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("E1apPdu");
             e
@@ -948,76 +944,72 @@ pub enum InitiatingMessage {
 
 impl InitiatingMessage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::aper_decode(data)?;
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
         match id {
-            0 => Ok(Self::Reset(Reset::aper_decode(data)?)),
-            1 => Ok(Self::ErrorIndication(ErrorIndication::aper_decode(data)?)),
-            3 => Ok(Self::GnbCuUpE1SetupRequest(
-                GnbCuUpE1SetupRequest::aper_decode(data)?,
-            )),
-            4 => Ok(Self::GnbCuCpE1SetupRequest(
-                GnbCuCpE1SetupRequest::aper_decode(data)?,
-            )),
+            0 => Ok(Self::Reset(Reset::decode(data)?)),
+            1 => Ok(Self::ErrorIndication(ErrorIndication::decode(data)?)),
+            3 => Ok(Self::GnbCuUpE1SetupRequest(GnbCuUpE1SetupRequest::decode(
+                data,
+            )?)),
+            4 => Ok(Self::GnbCuCpE1SetupRequest(GnbCuCpE1SetupRequest::decode(
+                data,
+            )?)),
             5 => Ok(Self::GnbCuUpConfigurationUpdate(
-                GnbCuUpConfigurationUpdate::aper_decode(data)?,
+                GnbCuUpConfigurationUpdate::decode(data)?,
             )),
             6 => Ok(Self::GnbCuCpConfigurationUpdate(
-                GnbCuCpConfigurationUpdate::aper_decode(data)?,
+                GnbCuCpConfigurationUpdate::decode(data)?,
             )),
-            7 => Ok(Self::E1ReleaseRequest(E1ReleaseRequest::aper_decode(data)?)),
+            7 => Ok(Self::E1ReleaseRequest(E1ReleaseRequest::decode(data)?)),
             8 => Ok(Self::BearerContextSetupRequest(
-                BearerContextSetupRequest::aper_decode(data)?,
+                BearerContextSetupRequest::decode(data)?,
             )),
             9 => Ok(Self::BearerContextModificationRequest(
-                BearerContextModificationRequest::aper_decode(data)?,
+                BearerContextModificationRequest::decode(data)?,
             )),
             10 => Ok(Self::BearerContextModificationRequired(
-                BearerContextModificationRequired::aper_decode(data)?,
+                BearerContextModificationRequired::decode(data)?,
             )),
             11 => Ok(Self::BearerContextReleaseCommand(
-                BearerContextReleaseCommand::aper_decode(data)?,
+                BearerContextReleaseCommand::decode(data)?,
             )),
             12 => Ok(Self::BearerContextReleaseRequest(
-                BearerContextReleaseRequest::aper_decode(data)?,
+                BearerContextReleaseRequest::decode(data)?,
             )),
             13 => Ok(Self::BearerContextInactivityNotification(
-                BearerContextInactivityNotification::aper_decode(data)?,
+                BearerContextInactivityNotification::decode(data)?,
             )),
-            14 => Ok(Self::DlDataNotification(DlDataNotification::aper_decode(
-                data,
-            )?)),
-            18 => Ok(Self::UlDataNotification(UlDataNotification::aper_decode(
-                data,
-            )?)),
-            15 => Ok(Self::DataUsageReport(DataUsageReport::aper_decode(data)?)),
+            14 => Ok(Self::DlDataNotification(DlDataNotification::decode(data)?)),
+            18 => Ok(Self::UlDataNotification(UlDataNotification::decode(data)?)),
+            15 => Ok(Self::DataUsageReport(DataUsageReport::decode(data)?)),
             16 => Ok(Self::GnbCuUpCounterCheckRequest(
-                GnbCuUpCounterCheckRequest::aper_decode(data)?,
+                GnbCuUpCounterCheckRequest::decode(data)?,
             )),
             17 => Ok(Self::GnbCuUpStatusIndication(
-                GnbCuUpStatusIndication::aper_decode(data)?,
+                GnbCuUpStatusIndication::decode(data)?,
             )),
             27 => Ok(Self::GnbCuCpMeasurementResultsInformation(
-                GnbCuCpMeasurementResultsInformation::aper_decode(data)?,
+                GnbCuCpMeasurementResultsInformation::decode(data)?,
             )),
-            19 => Ok(Self::MrdcDataUsageReport(MrdcDataUsageReport::aper_decode(
+            19 => Ok(Self::MrdcDataUsageReport(MrdcDataUsageReport::decode(
                 data,
             )?)),
-            21 => Ok(Self::DeactivateTrace(DeactivateTrace::aper_decode(data)?)),
-            20 => Ok(Self::TraceStart(TraceStart::aper_decode(data)?)),
-            22 => Ok(Self::ResourceStatusRequest(
-                ResourceStatusRequest::aper_decode(data)?,
-            )),
-            23 => Ok(Self::ResourceStatusUpdate(
-                ResourceStatusUpdate::aper_decode(data)?,
-            )),
-            24 => Ok(Self::IabUptnlAddressUpdate(
-                IabUptnlAddressUpdate::aper_decode(data)?,
-            )),
-            25 => Ok(Self::CellTrafficTrace(CellTrafficTrace::aper_decode(data)?)),
+            21 => Ok(Self::DeactivateTrace(DeactivateTrace::decode(data)?)),
+            20 => Ok(Self::TraceStart(TraceStart::decode(data)?)),
+            22 => Ok(Self::ResourceStatusRequest(ResourceStatusRequest::decode(
+                data,
+            )?)),
+            23 => Ok(Self::ResourceStatusUpdate(ResourceStatusUpdate::decode(
+                data,
+            )?)),
+            24 => Ok(Self::IabUptnlAddressUpdate(IabUptnlAddressUpdate::decode(
+                data,
+            )?)),
+            25 => Ok(Self::CellTrafficTrace(CellTrafficTrace::decode(data)?)),
             26 => Ok(Self::EarlyForwardingSnTransfer(
-                EarlyForwardingSnTransfer::aper_decode(data)?,
+                EarlyForwardingSnTransfer::decode(data)?,
             )),
             x => {
                 return Err(PerCodecError::new(format!(
@@ -1030,11 +1022,11 @@ impl InitiatingMessage {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Reset(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1044,11 +1036,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::ErrorIndication(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 1, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1058,11 +1050,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuUpE1SetupRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1072,11 +1064,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuCpE1SetupRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1086,11 +1078,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuUpConfigurationUpdate(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1100,11 +1092,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuCpConfigurationUpdate(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1114,11 +1106,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::E1ReleaseRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1128,11 +1120,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::BearerContextSetupRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1142,11 +1134,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::BearerContextModificationRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1156,11 +1148,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::BearerContextModificationRequired(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1170,11 +1162,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::BearerContextReleaseCommand(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1184,11 +1176,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::BearerContextReleaseRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 12, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1198,11 +1190,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::BearerContextInactivityNotification(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 13, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1212,11 +1204,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::DlDataNotification(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 14, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 14, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1226,11 +1218,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::UlDataNotification(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 18, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 18, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1240,11 +1232,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::DataUsageReport(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 15, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 15, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1254,11 +1246,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuUpCounterCheckRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 16, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 16, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1268,11 +1260,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuUpStatusIndication(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 17, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 17, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1282,11 +1274,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::GnbCuCpMeasurementResultsInformation(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 27, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 27, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1296,11 +1288,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::MrdcDataUsageReport(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 19, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 19, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1310,11 +1302,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::DeactivateTrace(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 21, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1324,11 +1316,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::TraceStart(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 20, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 20, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1338,11 +1330,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::ResourceStatusRequest(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1352,11 +1344,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::ResourceStatusUpdate(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 23, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 23, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1366,11 +1358,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::IabUptnlAddressUpdate(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1380,11 +1372,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::CellTrafficTrace(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 25, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 25, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1394,11 +1386,11 @@ impl InitiatingMessage {
                 data.append_aligned(container);
             }
             Self::EarlyForwardingSnTransfer(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
-                Criticality::Ignore.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 26, false)?;
+                Criticality::Ignore.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1412,15 +1404,14 @@ impl InitiatingMessage {
     }
 }
 
-impl AperCodec for InitiatingMessage {
-    type Output = Self;
-    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+impl PerCodec for InitiatingMessage {
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         InitiatingMessage::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InitiatingMessage");
             e
         })
     }
-    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("InitiatingMessage");
             e
@@ -1446,43 +1437,41 @@ pub enum SuccessfulOutcome {
 
 impl SuccessfulOutcome {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::aper_decode(data)?;
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
         match id {
-            0 => Ok(Self::ResetAcknowledge(ResetAcknowledge::aper_decode(data)?)),
+            0 => Ok(Self::ResetAcknowledge(ResetAcknowledge::decode(data)?)),
             3 => Ok(Self::GnbCuUpE1SetupResponse(
-                GnbCuUpE1SetupResponse::aper_decode(data)?,
+                GnbCuUpE1SetupResponse::decode(data)?,
             )),
             4 => Ok(Self::GnbCuCpE1SetupResponse(
-                GnbCuCpE1SetupResponse::aper_decode(data)?,
+                GnbCuCpE1SetupResponse::decode(data)?,
             )),
             5 => Ok(Self::GnbCuUpConfigurationUpdateAcknowledge(
-                GnbCuUpConfigurationUpdateAcknowledge::aper_decode(data)?,
+                GnbCuUpConfigurationUpdateAcknowledge::decode(data)?,
             )),
             6 => Ok(Self::GnbCuCpConfigurationUpdateAcknowledge(
-                GnbCuCpConfigurationUpdateAcknowledge::aper_decode(data)?,
+                GnbCuCpConfigurationUpdateAcknowledge::decode(data)?,
             )),
-            7 => Ok(Self::E1ReleaseResponse(E1ReleaseResponse::aper_decode(
-                data,
-            )?)),
+            7 => Ok(Self::E1ReleaseResponse(E1ReleaseResponse::decode(data)?)),
             8 => Ok(Self::BearerContextSetupResponse(
-                BearerContextSetupResponse::aper_decode(data)?,
+                BearerContextSetupResponse::decode(data)?,
             )),
             9 => Ok(Self::BearerContextModificationResponse(
-                BearerContextModificationResponse::aper_decode(data)?,
+                BearerContextModificationResponse::decode(data)?,
             )),
             10 => Ok(Self::BearerContextModificationConfirm(
-                BearerContextModificationConfirm::aper_decode(data)?,
+                BearerContextModificationConfirm::decode(data)?,
             )),
             11 => Ok(Self::BearerContextReleaseComplete(
-                BearerContextReleaseComplete::aper_decode(data)?,
+                BearerContextReleaseComplete::decode(data)?,
             )),
             22 => Ok(Self::ResourceStatusResponse(
-                ResourceStatusResponse::aper_decode(data)?,
+                ResourceStatusResponse::decode(data)?,
             )),
             24 => Ok(Self::IabUptnlAddressUpdateAcknowledge(
-                IabUptnlAddressUpdateAcknowledge::aper_decode(data)?,
+                IabUptnlAddressUpdateAcknowledge::decode(data)?,
             )),
             x => {
                 return Err(PerCodecError::new(format!(
@@ -1495,11 +1484,11 @@ impl SuccessfulOutcome {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::ResetAcknowledge(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1509,11 +1498,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuUpE1SetupResponse(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1523,11 +1512,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuCpE1SetupResponse(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1537,11 +1526,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuUpConfigurationUpdateAcknowledge(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1551,11 +1540,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuCpConfigurationUpdateAcknowledge(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1565,11 +1554,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::E1ReleaseResponse(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 7, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1579,11 +1568,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::BearerContextSetupResponse(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1593,11 +1582,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::BearerContextModificationResponse(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1607,11 +1596,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::BearerContextModificationConfirm(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 10, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1621,11 +1610,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::BearerContextReleaseComplete(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1635,11 +1624,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::ResourceStatusResponse(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1649,11 +1638,11 @@ impl SuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::IabUptnlAddressUpdateAcknowledge(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1667,15 +1656,14 @@ impl SuccessfulOutcome {
     }
 }
 
-impl AperCodec for SuccessfulOutcome {
-    type Output = Self;
-    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+impl PerCodec for SuccessfulOutcome {
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         SuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SuccessfulOutcome");
             e
         })
     }
-    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("SuccessfulOutcome");
             e
@@ -1697,33 +1685,33 @@ pub enum UnsuccessfulOutcome {
 
 impl UnsuccessfulOutcome {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (id, _ext) = aper::decode::decode_integer(data, Some(0), Some(255), false)?;
-        let _ = Criticality::aper_decode(data)?;
-        let _ = aper::decode::decode_length_determinent(data, None, None, false)?;
+        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let _ = Criticality::decode(data)?;
+        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
         match id {
-            3 => Ok(Self::GnbCuUpE1SetupFailure(
-                GnbCuUpE1SetupFailure::aper_decode(data)?,
-            )),
-            4 => Ok(Self::GnbCuCpE1SetupFailure(
-                GnbCuCpE1SetupFailure::aper_decode(data)?,
-            )),
+            3 => Ok(Self::GnbCuUpE1SetupFailure(GnbCuUpE1SetupFailure::decode(
+                data,
+            )?)),
+            4 => Ok(Self::GnbCuCpE1SetupFailure(GnbCuCpE1SetupFailure::decode(
+                data,
+            )?)),
             5 => Ok(Self::GnbCuUpConfigurationUpdateFailure(
-                GnbCuUpConfigurationUpdateFailure::aper_decode(data)?,
+                GnbCuUpConfigurationUpdateFailure::decode(data)?,
             )),
             6 => Ok(Self::GnbCuCpConfigurationUpdateFailure(
-                GnbCuCpConfigurationUpdateFailure::aper_decode(data)?,
+                GnbCuCpConfigurationUpdateFailure::decode(data)?,
             )),
             8 => Ok(Self::BearerContextSetupFailure(
-                BearerContextSetupFailure::aper_decode(data)?,
+                BearerContextSetupFailure::decode(data)?,
             )),
             9 => Ok(Self::BearerContextModificationFailure(
-                BearerContextModificationFailure::aper_decode(data)?,
+                BearerContextModificationFailure::decode(data)?,
             )),
-            22 => Ok(Self::ResourceStatusFailure(
-                ResourceStatusFailure::aper_decode(data)?,
-            )),
+            22 => Ok(Self::ResourceStatusFailure(ResourceStatusFailure::decode(
+                data,
+            )?)),
             24 => Ok(Self::IabUptnlAddressUpdateFailure(
-                IabUptnlAddressUpdateFailure::aper_decode(data)?,
+                IabUptnlAddressUpdateFailure::decode(data)?,
             )),
             x => {
                 return Err(PerCodecError::new(format!(
@@ -1736,11 +1724,11 @@ impl UnsuccessfulOutcome {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::GnbCuUpE1SetupFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 3, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1750,11 +1738,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuCpE1SetupFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 4, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1764,11 +1752,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuUpConfigurationUpdateFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 5, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1778,11 +1766,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::GnbCuCpConfigurationUpdateFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 6, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1792,11 +1780,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::BearerContextSetupFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 8, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1806,11 +1794,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::BearerContextModificationFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 9, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1820,11 +1808,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::ResourceStatusFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 22, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1834,11 +1822,11 @@ impl UnsuccessfulOutcome {
                 data.append_aligned(container);
             }
             Self::IabUptnlAddressUpdateFailure(x) => {
-                aper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
-                Criticality::Reject.aper_encode(data)?;
-                let container = &mut PerCodecData::new_aper();
-                x.aper_encode(container)?;
-                aper::encode::encode_length_determinent(
+                xper::encode::encode_integer(data, Some(0), Some(255), false, 24, false)?;
+                Criticality::Reject.encode(data)?;
+                let container = &mut new_codec_data();
+                x.encode(container)?;
+                xper::encode::encode_length_determinent(
                     data,
                     None,
                     None,
@@ -1852,15 +1840,14 @@ impl UnsuccessfulOutcome {
     }
 }
 
-impl AperCodec for UnsuccessfulOutcome {
-    type Output = Self;
-    fn aper_decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
+impl PerCodec for UnsuccessfulOutcome {
+    fn decode(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         UnsuccessfulOutcome::decode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UnsuccessfulOutcome");
             e
         })
     }
-    fn aper_encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
+    fn encode(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         self.encode_inner(data).map_err(|mut e: PerCodecError| {
             e.push_context("UnsuccessfulOutcome");
             e
