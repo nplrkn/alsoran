@@ -83,11 +83,11 @@ def decode_expression(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof:
         ie_extra_lines = """
-                let _ = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
-                let _ = xper::decode::decode_length_determinent(data, None, None, false)?;""" if type_info.seqof == "ie_container_sequence_of" else ""
+                let _ = decode::decode_length_determinent(data, None, None, false)?;""" if type_info.seqof == "ie_container_sequence_of" else ""
         return f"""{{
-            let length = xper::decode::decode_length_determinent(data, {type_info.constraints})?;
+            let length = decode::decode_length_determinent(data, {type_info.constraints})?;
             let mut items = vec![];
             for _ in 0..length {{\
 {ie_extra_lines}
@@ -96,17 +96,17 @@ def decode_expression(tree):
             items
         }}"""
     elif type_info.typ == "Vec<u8>":
-        return f"xper::decode::decode_octetstring(data, {type_info.constraints})?"
+        return f"decode::decode_octetstring(data, {type_info.constraints})?"
     elif type_info.typ == "BitString":
-        return f"xper::decode::decode_bitstring(data, {type_info.constraints})?"
+        return f"decode::decode_bitstring(data, {type_info.constraints})?"
     elif type_info.typ == "String":
-        return f"xper::decode::decode_{type_info.extra_type}(data, {type_info.constraints})?"
+        return f"decode::decode_{type_info.extra_type}(data, {type_info.constraints})?"
     elif type_info.typ == "i128":
-        return f"xper::decode::decode_integer(data, {type_info.constraints})?.0"
+        return f"decode::decode_integer(data, {type_info.constraints})?.0"
     elif is_non_i128_int_type(type_info.typ):
-        return f"xper::decode::decode_integer(data, {type_info.constraints})?.0 as {type_info.typ}"
+        return f"decode::decode_integer(data, {type_info.constraints})?.0 as {type_info.typ}"
     elif type_info.typ == "bool":
-        return f"xper::decode::decode_bool(data)?"
+        return f"decode::decode_bool(data)?"
     else:
         return f"""{type_info.typ.replace("<", "::<")}::decode(data)?"""
 
@@ -118,36 +118,36 @@ def encode_expression_fn(tree):
     type_info = type_and_constraints(tree)
     if type_info.seqof == "ie_container_sequence_of":
         return lambda x, data="data", copy_type_deref="": f"""\
-xper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
+encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in &{x} {{
             let ie = &mut new_codec_data();
             {encode_expression_fn(tree.children[2])("x", "ie")}?;
-            xper::encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.inner_type_info.code}, false)?;
+            encode::encode_integer({data}, Some(0), Some(65535), false, {type_info.inner_type_info.code}, false)?;
             Criticality::{type_info.inner_type_info.criticality.title()}.encode({data})?;
-            xper::encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent({data}, None, None, false, ie.length_in_bytes())?;
             {data}.append_aligned(ie);
         }}
         Ok(())"""
     elif type_info.seqof:
         return lambda x, data="data", copy_type_deref="": f"""\
-xper::encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
+encode::encode_length_determinent({data}, {type_info.constraints}, {x}.len())?;
         for x in {copy_type_deref}&{x} {{
             {encode_expression_fn(tree.children[2])("x", data, "*")}?;
         }}
         Ok(())"""
 
     if type_info.typ == "Vec<u8>":
-        format_string = f"xper::encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
+        format_string = f"encode::encode_octetstring({{data}}, {type_info.constraints}, &{{value}}, false)"
     elif type_info.typ == "BitString":
-        format_string = f"xper::encode::encode_bitstring({{data}}, {type_info.constraints}, &{{value}}, false)"
+        format_string = f"encode::encode_bitstring({{data}}, {type_info.constraints}, &{{value}}, false)"
     elif type_info.typ == "String":
-        format_string = f"xper::encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, &{{value}}, false)"
+        format_string = f"encode::encode_{type_info.extra_type}({{data}}, {type_info.constraints}, &{{value}}, false)"
     elif type_info.typ == "i128":
-        format_string = f"xper::encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}}, false)"
+        format_string = f"encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}}, false)"
     elif is_non_i128_int_type(type_info.typ):
-        format_string = f"xper::encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}} as i128, false)"
+        format_string = f"encode::encode_integer({{data}}, {type_info.constraints}, {{copy_type_deref}}{{value}} as i128, false)"
     elif type_info.typ == "bool":
-        format_string = f"xper::encode::encode_bool({{data}}, {{copy_type_deref}}{{value}})"
+        format_string = f"encode::encode_bool({{data}}, {{copy_type_deref}}{{value}})"
     else:
         format_string = f"""{{value}}.encode({{data}})"""
 
@@ -282,7 +282,7 @@ class ChoiceFieldsTo(Interpreter):
 
         self.fields_to += f"""\
             Self::{name}{"(x)" if type_info.typ != "null" else ""} => {{
-                xper::encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, {self.field_index}, false)?;
+                encode::encode_choice_idx(data, 0, {self.num_choices}, {bool_to_rust(self.extensible)}, {self.field_index}, false)?;
                 {encode_expression_fn(tree.children[1])(
                     "x", copy_type_deref="*") if type_info.typ != "null" else "Ok(())"}
             }}
@@ -394,9 +394,9 @@ class IeFields(Interpreter):
         self.fields_to += f"""
         let ie = &mut new_codec_data();
         {encode_expression_fn(tree.children[3])("self."+ name, "ie")}?;
-        xper::encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
+        encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
         Criticality::{criticality.title()}.encode(ies)?;
-        xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie);
         num_ies += 1;
 """
@@ -422,9 +422,9 @@ class IeFields(Interpreter):
         if let Some(x) = &self.{name} {{
             let ie = &mut new_codec_data();
             {encode_expression_fn(tree.children[3])("x", "ie", copy_type_deref="*")}?;
-            xper::encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, {id}, false)?;
             Criticality::{criticality.title()}.encode(ies)?;
-            xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
         }}
@@ -484,13 +484,13 @@ class StructFieldsTo(Interpreter):
         self.fields_to = ""
         self.found_optionals = False
         self.optional_bitfield = """\
-        let optionals = BitVec::new();
+        let optionals = BitString::new();
 """
 
     def add_optional_to_bitfield(self, expression):
         if not self.found_optionals:
             self.optional_bitfield = """\
-        let mut optionals = BitVec::new();
+        let mut optionals = BitString::new();
 """
             self.found_optionals = True
 
@@ -574,11 +574,11 @@ pub enum UnsuccessfulOutcome {
 """
         self.initiating_encode_matches += f"""\
             Self::{p.initiating}(x) => {{
-                xper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
                 Criticality::{p.criticality.title()}.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }}
 """
@@ -589,11 +589,11 @@ pub enum UnsuccessfulOutcome {
 """
             self.successful_encode_matches += f"""\
             Self::{p.successful}(x) => {{
-                xper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
                 Criticality::{p.criticality.title()}.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }}
 """
@@ -604,11 +604,11 @@ pub enum UnsuccessfulOutcome {
 """
             self.unsuccessful_encode_matches += f"""\
             Self::{p.unsuccessful}(x) => {{
-                xper::encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, {p.code}, false)?;
                 Criticality::{p.criticality.title()}.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }}
 """
@@ -617,9 +617,9 @@ pub enum UnsuccessfulOutcome {
         impl = """
 impl {name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
-        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let (id, _ext) = decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
-        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {{
 {decode_matches}\
             x => return Err(PerCodecError::new(format!("Unrecognised procedure code {{}}", x)))
@@ -773,14 +773,14 @@ pub enum {name} {{
 
 impl {name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
-        let (idx, extended) = xper::decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
+        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
             return Err(PerCodecError::new("Extended enum not implemented"));
         }}
         Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }}
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
-        xper::encode::encode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)}, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some({field_interpreter.variants - 1}), {bool_to_rust(field_interpreter.extensible)}, *self as i128, false)
     }}
 }}
 
@@ -809,7 +809,7 @@ pub enum {name} {{
 
 impl {name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, {bool_to_rust(field_interpreter.extensible)})?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, {fields_from_interpreter.field_index - 1}, {bool_to_rust(field_interpreter.extensible)})?;
         if extended {{
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }}
@@ -892,16 +892,16 @@ impl {orig_name} {{
 
         if is_sequence:
             self.outfile += f"""
-        let _ = xper::decode::decode_sequence_header(data, true, 0)?;"""
+        let _ = decode::decode_sequence_header(data, true, 0)?;"""
 
         self.outfile += f"""
-        let len = xper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 {fields_from.mut_field_vars}
         for _ in 0..len {{
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
-            let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {{}}", x)))
@@ -919,10 +919,10 @@ impl {orig_name} {{
 
         if is_sequence:
             self.outfile += f"""
-        xper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;"""
+        encode::encode_sequence_header(data, true, &BitString::new(), false)?;"""
 
         self.outfile += f"""
-        xper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }}
@@ -963,7 +963,7 @@ pub struct {name} {{
 
 impl {orig_name} {{
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {{
-        let ({optionals_var}, _extensions_present) = xper::decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
+        let ({optionals_var}, _extensions_present) = decode::decode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, {num_optionals})?;
 {fields_from_interpreter.fields_from}
         Ok(Self {{
 {fields_from_interpreter.self_fields}\
@@ -971,7 +971,7 @@ impl {orig_name} {{
     }}
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {{
 {fields_to_interpreter.optional_bitfield}
-        xper::encode::encode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, &optionals, false)?;
+        encode::encode_sequence_header(data, {bool_to_rust(field_interpreter.extensible)}, &optionals, false)?;
 {fields_to_interpreter.fields_to}
         Ok(())
     }}
@@ -1003,11 +1003,11 @@ impl {orig_name} {{
 
 def decode_ies_string(fields_from):
     return f"""
-        let num_ies = xper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
         for _ in 0..num_ies {{
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _criticality = Criticality::decode(data)?;
-            let ie_length = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let ie_length = decode::decode_length_determinent(data, None, None, false)?;
             match id {{
 {fields_from.matches}\
                 _ => data.advance_maybe_err(ie_length, false)?,
@@ -1130,9 +1130,9 @@ pub enum InitiatingMessage {
 
 impl InitiatingMessage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let (id, _ext) = decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
-        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {
             0 => Ok(Self::AmfConfigurationUpdate(AmfConfigurationUpdate::decode(data)?)),
             11 => Ok(Self::HandoverNotify(HandoverNotify::decode(data)?)),
@@ -1142,19 +1142,19 @@ impl InitiatingMessage {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AmfConfigurationUpdate(x) => {
-                xper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
             Self::HandoverNotify(x) => {
-                xper::encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, 11, false)?;
                 Criticality::Ignore.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
         }
@@ -1178,9 +1178,9 @@ pub enum SuccessfulOutcome {
 
 impl SuccessfulOutcome {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let (id, _ext) = decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
-        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {
             0 => Ok(Self::AmfConfigurationUpdateAcknowledge(AmfConfigurationUpdateAcknowledge::decode(data)?)),
             x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
@@ -1189,11 +1189,11 @@ impl SuccessfulOutcome {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AmfConfigurationUpdateAcknowledge(x) => {
-                xper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
         }
@@ -1217,9 +1217,9 @@ pub enum UnsuccessfulOutcome {
 
 impl UnsuccessfulOutcome {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(255), false)?;
+        let (id, _ext) = decode::decode_integer(data, Some(0), Some(255), false)?;
         let _ = Criticality::decode(data)?;
-        let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+        let _ = decode::decode_length_determinent(data, None, None, false)?;
         match id {
             0 => Ok(Self::AmfConfigurationUpdateFailure(AmfConfigurationUpdateFailure::decode(data)?)),
             x => return Err(PerCodecError::new(format!("Unrecognised procedure code {}", x)))
@@ -1228,11 +1228,11 @@ impl UnsuccessfulOutcome {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::AmfConfigurationUpdateFailure(x) => {
-                xper::encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
+                encode::encode_integer(data, Some(0), Some(255), false, 0, false)?;
                 Criticality::Reject.encode(data)?;
                 let container = &mut new_codec_data();
                 x.encode(container)?;
-                xper::encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
+                encode::encode_length_determinent(data, None, None, false, container.length_in_bytes())?;
                 data.append_aligned(container);
             }
         }
@@ -1261,10 +1261,10 @@ pub struct ProcedureCode(pub u8);
 
 impl ProcedureCode {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(xper::decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8))
+        Ok(Self(decode::decode_integer(data, Some(0), Some(255), false)?.0 as u8))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
+        encode::encode_integer(data, Some(0), Some(255), false, self.0 as i128, false)
     }
 }
 
@@ -1294,14 +1294,14 @@ pub enum TriggeringMessage {
 
 impl TriggeringMessage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_enumerated(data, Some(0), Some(2), false)?;
+        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(2), false)?;
         if extended {
             return Err(PerCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(2), false, *self as i128, false)
     }
 }
 
@@ -1341,7 +1341,7 @@ pub struct WlanMeasurementConfiguration {
 
 impl WlanMeasurementConfiguration {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (optionals, _extensions_present) = xper::decode::decode_sequence_header(data, true, 2)?;
+        let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 2)?;
         let wlan_meas_config = WlanMeasConfig::decode(data)?;
         let wlan_rtt = if optionals[0] {
             Some(WlanRtt::decode(data)?)
@@ -1352,11 +1352,11 @@ impl WlanMeasurementConfiguration {
         // Process the extension container
 
         if optionals[1] {
-        let num_ies = xper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
         for _ in 0..num_ies {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _criticality = Criticality::decode(data)?;
-            let ie_length = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let ie_length = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 _ => data.advance_maybe_err(ie_length, false)?,
             }
@@ -1367,11 +1367,11 @@ impl WlanMeasurementConfiguration {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut optionals = BitVec::new();
+        let mut optionals = BitString::new();
         optionals.push(self.wlan_rtt.is_some());
         optionals.push(false);
 
-        xper::encode::encode_sequence_header(data, true, &optionals, false)?;
+        encode::encode_sequence_header(data, true, &optionals, false)?;
         self.wlan_meas_config.encode(data)?;
         if let Some(x) = &self.wlan_rtt {
             x.encode(data)?;
@@ -1398,14 +1398,14 @@ pub enum WlanRtt {
 
 impl WlanRtt {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
         if extended {
             return Err(PerCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -1431,10 +1431,10 @@ pub struct LteUeRlfReportContainer(pub Vec<u8>);
 
 impl LteUeRlfReportContainer {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(xper::decode::decode_octetstring(data, None, None, false)?))
+        Ok(Self(decode::decode_octetstring(data, None, None, false)?))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_octetstring(data, None, None, false, &self.0, false)
+        encode::encode_octetstring(data, None, None, false, &self.0, false)
     }
 }
 
@@ -1460,10 +1460,10 @@ pub struct MaximumDataBurstVolume(pub i128);
 
 impl MaximumDataBurstVolume {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(xper::decode::decode_integer(data, Some(0), Some(4095), true)?.0))
+        Ok(Self(decode::decode_integer(data, Some(0), Some(4095), true)?.0))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_integer(data, Some(0), Some(4095), true, self.0, false)
+        encode::encode_integer(data, Some(0), Some(4095), true, self.0, false)
     }
 }
 
@@ -1489,10 +1489,10 @@ pub struct MobilityInformation(pub BitString);
 
 impl MobilityInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(xper::decode::decode_bitstring(data, Some(16), Some(16), false)?))
+        Ok(Self(decode::decode_bitstring(data, Some(16), Some(16), false)?))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
+        encode::encode_bitstring(data, Some(16), Some(16), false, &self.0, false)
     }
 }
 
@@ -1526,14 +1526,14 @@ pub enum MaximumIntegrityProtectedDataRate {
 
 impl MaximumIntegrityProtectedDataRate {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_enumerated(data, Some(0), Some(1), true)?;
+        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(1), true)?;
         if extended {
             return Err(PerCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(1), true, *self as i128, false)
     }
 }
 
@@ -1567,14 +1567,14 @@ pub enum EventTrigger {
 
 impl EventTrigger {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 3, false)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 3, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
             0 => Ok(Self::OutOfCoverage(OutOfCoverage::decode(data)?)),
             1 => Ok(Self::EventL1LoggedMdtConfig),
-            2 => Ok(Self::ShortMacroEnbId(xper::decode::decode_bitstring(data, Some(18), Some(18), false)?)),
+            2 => Ok(Self::ShortMacroEnbId(decode::decode_bitstring(data, Some(18), Some(18), false)?)),
             3 => Err(PerCodecError::new("Choice extension container not implemented")),
             _ => Err(PerCodecError::new("Unknown choice idx"))
         }
@@ -1582,16 +1582,16 @@ impl EventTrigger {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::OutOfCoverage(x) => {
-                xper::encode::encode_choice_idx(data, 0, 3, false, 0)?;
+                encode::encode_choice_idx(data, 0, 3, false, 0)?;
                 x.encode(data)
             },
             Self::EventL1LoggedMdtConfig => {
-                xper::encode::encode_choice_idx(data, 0, 3, false, 1)?;
+                encode::encode_choice_idx(data, 0, 3, false, 1)?;
                 Ok(())
             },
             Self::ShortMacroEnbId(x) => {
-                xper::encode::encode_choice_idx(data, 0, 3, false, 2)?;
-                xper::encode::encode_bitstring(data, Some(18), Some(18), false, &x, false)
+                encode::encode_choice_idx(data, 0, 3, false, 2)?;
+                encode::encode_bitstring(data, Some(18), Some(18), false, &x, false)
             }
         }
     }
@@ -1606,14 +1606,14 @@ pub enum OutOfCoverage {
 
 impl OutOfCoverage {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_enumerated(data, Some(0), Some(0), true)?;
+        let (idx, extended) = decode::decode_enumerated(data, Some(0), Some(0), true)?;
         if extended {
             return Err(PerCodecError::new("Extended enum not implemented"));
         }
         Self::try_from(idx as u8).map_err(|_| PerCodecError::new("Unknown enum variant"))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
+        encode::encode_enumerated(data, Some(0), Some(0), true, *self as i128, false)
     }
 }
 
@@ -1642,19 +1642,19 @@ pub struct PduSessionResourceSetupRequest {
 
 impl PduSessionResourceSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let _ = xper::decode::decode_sequence_header(data, true, 0)?;
-        let len = xper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let _ = decode::decode_sequence_header(data, true, 0)?;
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut amf_ue_ngap_id: Option<AmfUeNgapId> = None;
         let mut ran_paging_priority: Option<Vec<u8>> = None;
 
         for _ in 0..len {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
-            let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 10 => amf_ue_ngap_id = Some(AmfUeNgapId::decode(data)?),
-                83 => ran_paging_priority = Some(xper::decode::decode_octetstring(data, None, None, false)?),
+                83 => ran_paging_priority = Some(decode::decode_octetstring(data, None, None, false)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
@@ -1672,24 +1672,24 @@ impl PduSessionResourceSetupRequest {
 
         let ie = &mut new_codec_data();
         self.amf_ue_ngap_id.encode(ie)?;
-        xper::encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
+        encode::encode_integer(ies, Some(0), Some(65535), false, 10, false)?;
         Criticality::Reject.encode(ies)?;
-        xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie);
         num_ies += 1;
 
         if let Some(x) = &self.ran_paging_priority {
             let ie = &mut new_codec_data();
-            xper::encode::encode_octetstring(ie, None, None, false, &x, false)?;
-            xper::encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
+            encode::encode_octetstring(ie, None, None, false, &x, false)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 83, false)?;
             Criticality::Ignore.encode(ies)?;
-            xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
         }
 
-        xper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
-        xper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        encode::encode_sequence_header(data, true, &BitString::new(), false)?;
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }
@@ -1720,12 +1720,12 @@ pub enum GnbId {
 
 impl GnbId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::GnbId(xper::decode::decode_bitstring(data, Some(22), Some(32), false)?)),
+            0 => Ok(Self::GnbId(decode::decode_bitstring(data, Some(22), Some(32), false)?)),
             1 => Err(PerCodecError::new("Choice extension container not implemented")),
             _ => Err(PerCodecError::new("Unknown choice idx"))
         }
@@ -1733,8 +1733,8 @@ impl GnbId {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::GnbId(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
-                xper::encode::encode_bitstring(data, Some(22), Some(32), false, &x, false)
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                encode::encode_bitstring(data, Some(22), Some(32), false, &x, false)
             }
         }
     }
@@ -1766,25 +1766,25 @@ pub enum PrivateIeId {
 
 impl PrivateIeId {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
         match idx {
-            0 => Ok(Self::Local(xper::decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16)),
-            1 => Ok(Self::Global(xper::decode::decode_octetstring(data, None, None, false)?)),
+            0 => Ok(Self::Local(decode::decode_integer(data, Some(0), Some(65535), false)?.0 as u16)),
+            1 => Ok(Self::Global(decode::decode_octetstring(data, None, None, false)?)),
             _ => Err(PerCodecError::new("Unknown choice idx"))
         }
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Local(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
-                xper::encode::encode_integer(data, Some(0), Some(65535), false, *x as i128, false)
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                encode::encode_integer(data, Some(0), Some(65535), false, *x as i128, false)
             }
             Self::Global(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
-                xper::encode::encode_octetstring(data, None, None, false, &x, false)
+                encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                encode::encode_octetstring(data, None, None, false, &x, false)
             }
         }
     }
@@ -1810,10 +1810,10 @@ pub struct ExpectedActivityPeriod(pub i128);
 
 impl ExpectedActivityPeriod {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(xper::decode::decode_integer(data, Some(1), Some(50), true)?.0))
+        Ok(Self(decode::decode_integer(data, Some(1), Some(50), true)?.0))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_integer(data, Some(1), Some(50), true, self.0, false)
+        encode::encode_integer(data, Some(1), Some(50), true, self.0, false)
     }
 }
 
@@ -1837,10 +1837,10 @@ pub struct UriAddress(pub String);
 
 impl UriAddress {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        Ok(Self(xper::decode::decode_visible_string(data, None, None, false)?))
+        Ok(Self(decode::decode_visible_string(data, None, None, false)?))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_visible_string(data, None, None, false, &self.0, false)
+        encode::encode_visible_string(data, None, None, false, &self.0, false)
     }
 }
 
@@ -1864,7 +1864,7 @@ pub struct AdditionalDluptnlInformationForHoList(pub Vec<AdditionalDluptnlInform
 impl AdditionalDluptnlInformationForHoList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(50), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(50), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 items.push(AdditionalDluptnlInformationForHoItem::decode(data)?);
@@ -1873,7 +1873,7 @@ impl AdditionalDluptnlInformationForHoList {
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_length_determinent(data, Some(1), Some(50), false, self.0.len())?;
+        encode::encode_length_determinent(data, Some(1), Some(50), false, self.0.len())?;
         for x in &self.0 {
             x.encode(data)?;
         }
@@ -1913,9 +1913,9 @@ pub struct DlprsResourceCoordinates {
 
 impl DlprsResourceCoordinates {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (optionals, _extensions_present) = xper::decode::decode_sequence_header(data, false, 2)?;
+        let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 2)?;
         let listof_dl_prs_resource_set_arp = {
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 items.push(DlprsResourceSetArp::decode(data)?);
@@ -1923,7 +1923,7 @@ impl DlprsResourceCoordinates {
             items
         };
         let foo = if optionals[0] {
-            Some(xper::decode::decode_integer(data, Some(-5), Some(5), false)?.0 as i8)
+            Some(decode::decode_integer(data, Some(-5), Some(5), false)?.0 as i8)
         } else {
             None
         };
@@ -1931,11 +1931,11 @@ impl DlprsResourceCoordinates {
         // Process the extension container
 
         if optionals[1] {
-        let num_ies = xper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
         for _ in 0..num_ies {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _criticality = Criticality::decode(data)?;
-            let ie_length = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let ie_length = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 _ => data.advance_maybe_err(ie_length, false)?,
             }
@@ -1946,18 +1946,18 @@ impl DlprsResourceCoordinates {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut optionals = BitVec::new();
+        let mut optionals = BitString::new();
         optionals.push(self.foo.is_some());
         optionals.push(false);
 
-        xper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        xper::encode::encode_length_determinent(data, Some(1), Some(2), false, self.listof_dl_prs_resource_set_arp.len())?;
+        encode::encode_sequence_header(data, false, &optionals, false)?;
+        encode::encode_length_determinent(data, Some(1), Some(2), false, self.listof_dl_prs_resource_set_arp.len())?;
         for x in &self.listof_dl_prs_resource_set_arp {
             x.encode(data)?;
         }
         Ok(())?;
         if let Some(x) = &self.foo {
-            xper::encode::encode_integer(data, Some(-5), Some(5), false, *x as i128, false)?;
+            encode::encode_integer(data, Some(-5), Some(5), false, *x as i128, false)?;
         }
 
         Ok(())
@@ -1990,25 +1990,25 @@ pub struct UeAssociatedLogicalF1ConnectionListRes(pub Vec<UeAssociatedLogicalF1C
 impl UeAssociatedLogicalF1ConnectionListRes {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(63356), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(63356), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                let _ = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
-                let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(UeAssociatedLogicalF1ConnectionItem::decode(data)?);
             }
             items
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_length_determinent(data, Some(1), Some(63356), false, self.0.len())?;
+        encode::encode_length_determinent(data, Some(1), Some(63356), false, self.0.len())?;
         for x in &self.0 {
             let ie = &mut new_codec_data();
             x.encode(ie)?;
-            xper::encode::encode_integer(data, Some(0), Some(65535), false, 80, false)?;
+            encode::encode_integer(data, Some(0), Some(65535), false, 80, false)?;
             Criticality::Reject.encode(data)?;
-            xper::encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
             data.append_aligned(ie);
         }
         Ok(())
@@ -2052,15 +2052,15 @@ pub struct BapMappingConfiguration {
 
 impl BapMappingConfiguration {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let _ = xper::decode::decode_sequence_header(data, true, 0)?;
-        let len = xper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let _ = decode::decode_sequence_header(data, true, 0)?;
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut bh_routing_information_added_list: Option<BhRoutingInformationAddedList> = None;
 
         for _ in 0..len {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
-            let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 283 => bh_routing_information_added_list = Some(BhRoutingInformationAddedList::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
@@ -2077,15 +2077,15 @@ impl BapMappingConfiguration {
         if let Some(x) = &self.bh_routing_information_added_list {
             let ie = &mut new_codec_data();
             x.encode(ie)?;
-            xper::encode::encode_integer(ies, Some(0), Some(65535), false, 283, false)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 283, false)?;
             Criticality::Ignore.encode(ies)?;
-            xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
         }
 
-        xper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
-        xper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        encode::encode_sequence_header(data, true, &BitString::new(), false)?;
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }
@@ -2106,25 +2106,25 @@ pub struct BhRoutingInformationAddedList(pub Vec<BhRoutingInformationAddedListIt
 impl BhRoutingInformationAddedList {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
         Ok(Self({
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(1024), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                let _ = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+                let _ = decode::decode_integer(data, Some(0), Some(65535), false)?;
                 let _ = Criticality::decode(data)?;
-                let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+                let _ = decode::decode_length_determinent(data, None, None, false)?;
                 items.push(BhRoutingInformationAddedListItem::decode(data)?);
             }
             items
         }))
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        xper::encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
+        encode::encode_length_determinent(data, Some(1), Some(1024), false, self.0.len())?;
         for x in &self.0 {
             let ie = &mut new_codec_data();
             x.encode(ie)?;
-            xper::encode::encode_integer(data, Some(0), Some(65535), false, 284, false)?;
+            encode::encode_integer(data, Some(0), Some(65535), false, 284, false)?;
             Criticality::Ignore.encode(data)?;
-            xper::encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent(data, None, None, false, ie.length_in_bytes())?;
             data.append_aligned(ie);
         }
         Ok(())
@@ -2163,9 +2163,9 @@ pub struct GnbCuSystemInformation {
 
 impl GnbCuSystemInformation {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (optionals, _extensions_present) = xper::decode::decode_sequence_header(data, true, 1)?;
+        let (optionals, _extensions_present) = decode::decode_sequence_header(data, true, 1)?;
         let sibtypetobeupdatedlist = {
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(32), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(32), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 items.push(SibtypetobeupdatedListItem::decode(data)?);
@@ -2177,11 +2177,11 @@ impl GnbCuSystemInformation {
         let mut system_information_area_id: Option<SystemInformationAreaId> = None;
 
         if optionals[0] {
-        let num_ies = xper::decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
+        let num_ies = decode::decode_length_determinent(data, Some(1), Some(65535), false)?;
         for _ in 0..num_ies {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _criticality = Criticality::decode(data)?;
-            let ie_length = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let ie_length = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 239 => system_information_area_id = Some(SystemInformationAreaId::decode(data)?),
                 _ => data.advance_maybe_err(ie_length, false)?,
@@ -2193,11 +2193,11 @@ impl GnbCuSystemInformation {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut optionals = BitVec::new();
+        let mut optionals = BitString::new();
         optionals.push(false);
 
-        xper::encode::encode_sequence_header(data, true, &optionals, false)?;
-        xper::encode::encode_length_determinent(data, Some(1), Some(32), false, self.sibtypetobeupdatedlist.len())?;
+        encode::encode_sequence_header(data, true, &optionals, false)?;
+        encode::encode_length_determinent(data, Some(1), Some(32), false, self.sibtypetobeupdatedlist.len())?;
         for x in &self.sibtypetobeupdatedlist {
             x.encode(data)?;
         }
@@ -2234,7 +2234,7 @@ pub enum SbcchSlBchMessageType {
 
 impl SbcchSlBchMessageType {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
@@ -2247,7 +2247,7 @@ impl SbcchSlBchMessageType {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::C1(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
         }
@@ -2271,7 +2271,7 @@ pub enum C1 {
 
 impl C1 {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 1, false)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
@@ -2284,11 +2284,11 @@ impl C1 {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::MasterInformationBlockSidelink(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
+                encode::encode_choice_idx(data, 0, 1, false, 0, false)?;
                 x.encode(data)
             }
             Self::Spare1 => {
-                xper::encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
+                encode::encode_choice_idx(data, 0, 1, false, 1, false)?;
                 Ok(())
             }
         }
@@ -2323,14 +2323,14 @@ pub struct OverloadStop {
 
 impl OverloadStop {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let _ = xper::decode::decode_sequence_header(data, true, 0)?;
-        let len = xper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let _ = decode::decode_sequence_header(data, true, 0)?;
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
 
         for _ in 0..len {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
-            let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
@@ -2342,8 +2342,8 @@ impl OverloadStop {
         let num_ies = 0;
         let ies = &mut new_codec_data();
 
-        xper::encode::encode_sequence_header(data, true, &BitVec::new(), false)?;
-        xper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        encode::encode_sequence_header(data, true, &BitString::new(), false)?;
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }
@@ -2374,7 +2374,7 @@ pub struct LocationMeasurementIndicationIEs {
 
 impl LocationMeasurementIndicationIEs {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (_optionals, _extensions_present) = xper::decode::decode_sequence_header(data, false, 1)?;
+        let (_optionals, _extensions_present) = decode::decode_sequence_header(data, false, 1)?;
         let measurement_indication = SetupRelease::<LocationMeasurementInfo>::decode(data)?;
 
         Ok(Self {
@@ -2382,10 +2382,10 @@ impl LocationMeasurementIndicationIEs {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut optionals = BitVec::new();
+        let mut optionals = BitString::new();
         optionals.push(false);
 
-        xper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        encode::encode_sequence_header(data, false, &optionals, false)?;
         self.measurement_indication.encode(data)?;
 
         Ok(())
@@ -2424,12 +2424,12 @@ pub struct AvailabilityCombinationR16 {
 
 impl AvailabilityCombinationR16 {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (_optionals, _extensions_present) = xper::decode::decode_sequence_header(data, false, 0)?;
+        let (_optionals, _extensions_present) = decode::decode_sequence_header(data, false, 0)?;
         let resource_availability_r_16 = {
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(5), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(5), false)?;
             let mut items = vec![];
             for _ in 0..length {
-                items.push(xper::decode::decode_integer(data, Some(0), Some(7), false)?.0 as u8);
+                items.push(decode::decode_integer(data, Some(0), Some(7), false)?.0 as u8);
             }
             items
         };
@@ -2439,12 +2439,12 @@ impl AvailabilityCombinationR16 {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let optionals = BitVec::new();
+        let optionals = BitString::new();
 
-        xper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        xper::encode::encode_length_determinent(data, Some(1), Some(5), false, self.resource_availability_r_16.len())?;
+        encode::encode_sequence_header(data, false, &optionals, false)?;
+        encode::encode_length_determinent(data, Some(1), Some(5), false, self.resource_availability_r_16.len())?;
         for x in &self.resource_availability_r_16 {
-            xper::encode::encode_integer(data, Some(0), Some(7), false, *x as i128, false)?;
+            encode::encode_integer(data, Some(0), Some(7), false, *x as i128, false)?;
         }
         Ok(())?;
 
@@ -2481,9 +2481,9 @@ pub struct SystemInformationIEs {
 
 impl SystemInformationIEs {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (_optionals, _extensions_present) = xper::decode::decode_sequence_header(data, false, 0)?;
+        let (_optionals, _extensions_present) = decode::decode_sequence_header(data, false, 0)?;
         let sib_type_and_info = {
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(3), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(3), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 items.push(SibTypeAndInfo::decode(data)?);
@@ -2496,10 +2496,10 @@ impl SystemInformationIEs {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let optionals = BitVec::new();
+        let optionals = BitString::new();
 
-        xper::encode::encode_sequence_header(data, false, &optionals, false)?;
-        xper::encode::encode_length_determinent(data, Some(1), Some(3), false, self.sib_type_and_info.len())?;
+        encode::encode_sequence_header(data, false, &optionals, false)?;
+        encode::encode_length_determinent(data, Some(1), Some(3), false, self.sib_type_and_info.len())?;
         for x in &self.sib_type_and_info {
             x.encode(data)?;
         }
@@ -2526,7 +2526,7 @@ pub enum SibTypeAndInfo {
 
 impl SibTypeAndInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 1, true)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 1, true)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
@@ -2539,11 +2539,11 @@ impl SibTypeAndInfo {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::Sib2(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, true, 0, false)?;
+                encode::encode_choice_idx(data, 0, 1, true, 0, false)?;
                 x.encode(data)
             }
             Self::Sib3(x) => {
-                xper::encode::encode_choice_idx(data, 0, 1, true, 1, false)?;
+                encode::encode_choice_idx(data, 0, 1, true, 1, false)?;
                 x.encode(data)
             }
         }
@@ -2576,7 +2576,7 @@ pub struct CsiAssociatedReportConfigInfo {
 
 impl CsiAssociatedReportConfigInfo {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (_optionals, _extensions_present) = xper::decode::decode_sequence_header(data, false, 0)?;
+        let (_optionals, _extensions_present) = decode::decode_sequence_header(data, false, 0)?;
         let nzp_csi_rs = NzpCsiRs::decode(data)?;
 
         Ok(Self {
@@ -2584,9 +2584,9 @@ impl CsiAssociatedReportConfigInfo {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let optionals = BitVec::new();
+        let optionals = BitString::new();
 
-        xper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        encode::encode_sequence_header(data, false, &optionals, false)?;
         self.nzp_csi_rs.encode(data)?;
 
         Ok(())
@@ -2609,10 +2609,10 @@ pub struct NzpCsiRs {
 
 impl NzpCsiRs {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (optionals, _extensions_present) = xper::decode::decode_sequence_header(data, false, 1)?;
+        let (optionals, _extensions_present) = decode::decode_sequence_header(data, false, 1)?;
         let qcl_info = if optionals[0] {
             Some({
-            let length = xper::decode::decode_length_determinent(data, Some(1), Some(2), false)?;
+            let length = decode::decode_length_determinent(data, Some(1), Some(2), false)?;
             let mut items = vec![];
             for _ in 0..length {
                 items.push(TciStateId::decode(data)?);
@@ -2628,12 +2628,12 @@ impl NzpCsiRs {
         })
     }
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
-        let mut optionals = BitVec::new();
+        let mut optionals = BitString::new();
         optionals.push(self.qcl_info.is_some());
 
-        xper::encode::encode_sequence_header(data, false, &optionals, false)?;
+        encode::encode_sequence_header(data, false, &optionals, false)?;
         if let Some(x) = &self.qcl_info {
-            xper::encode::encode_length_determinent(data, Some(1), Some(2), false, x.len())?;
+            encode::encode_length_determinent(data, Some(1), Some(2), false, x.len())?;
         for x in *&x {
             x.encode(data)?;
         }
@@ -2679,7 +2679,7 @@ pub enum SystemBearerContextSetupRequest {
 
 impl SystemBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let (idx, extended) = xper::decode::decode_choice_idx(data, 0, 2, false)?;
+        let (idx, extended) = decode::decode_choice_idx(data, 0, 2, false)?;
         if extended {
             return Err(PerCodecError::new("CHOICE additions not implemented"))
         }
@@ -2693,11 +2693,11 @@ impl SystemBearerContextSetupRequest {
     fn encode_inner(&self, data: &mut PerCodecData) -> Result<(), PerCodecError> {
         match self {
             Self::EutranBearerContextSetupRequest(x) => {
-                xper::encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
+                encode::encode_choice_idx(data, 0, 2, false, 0, false)?;
                 x.encode(data)
             }
             Self::NgRanBearerContextSetupRequest(x) => {
-                xper::encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
+                encode::encode_choice_idx(data, 0, 2, false, 1, false)?;
                 x.encode(data)
             }
         }
@@ -2720,16 +2720,16 @@ pub struct EutranBearerContextSetupRequest {
 
 impl EutranBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = xper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut subscriber_profile_i_dfor_rfp: Option<u16> = None;
 
         for _ in 0..len {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
-            let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
-                43 => subscriber_profile_i_dfor_rfp = Some(xper::decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16),
+                43 => subscriber_profile_i_dfor_rfp = Some(decode::decode_integer(data, Some(1), Some(4095), true)?.0 as u16),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
             }
         }
@@ -2743,15 +2743,15 @@ impl EutranBearerContextSetupRequest {
 
         if let Some(x) = &self.subscriber_profile_i_dfor_rfp {
             let ie = &mut new_codec_data();
-            xper::encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
-            xper::encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
+            encode::encode_integer(ie, Some(1), Some(4095), true, *x as i128, false)?;
+            encode::encode_integer(ies, Some(0), Some(65535), false, 43, false)?;
             Criticality::Ignore.encode(ies)?;
-            xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+            encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
             ies.append_aligned(ie);
             num_ies += 1;
         }
 
-        xper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }
@@ -2773,14 +2773,14 @@ pub struct NgRanBearerContextSetupRequest {
 
 impl NgRanBearerContextSetupRequest {
     fn decode_inner(data: &mut PerCodecData) -> Result<Self, PerCodecError> {
-        let len = xper::decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
+        let len = decode::decode_length_determinent(data, Some(0), Some(65535), false)?;
 
         let mut pdu_session_resource_to_setup_list: Option<PduSessionResourceToSetupList> = None;
 
         for _ in 0..len {
-            let (id, _ext) = xper::decode::decode_integer(data, Some(0), Some(65535), false)?;
+            let (id, _ext) = decode::decode_integer(data, Some(0), Some(65535), false)?;
             let _ = Criticality::decode(data)?;
-            let _ = xper::decode::decode_length_determinent(data, None, None, false)?;
+            let _ = decode::decode_length_determinent(data, None, None, false)?;
             match id {
                 321 => pdu_session_resource_to_setup_list = Some(PduSessionResourceToSetupList::decode(data)?),
                 x => return Err(PerCodecError::new(format!("Unrecognised IE type {}", x)))
@@ -2799,13 +2799,13 @@ impl NgRanBearerContextSetupRequest {
 
         let ie = &mut new_codec_data();
         self.pdu_session_resource_to_setup_list.encode(ie)?;
-        xper::encode::encode_integer(ies, Some(0), Some(65535), false, 321, false)?;
+        encode::encode_integer(ies, Some(0), Some(65535), false, 321, false)?;
         Criticality::Reject.encode(ies)?;
-        xper::encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
+        encode::encode_length_determinent(ies, None, None, false, ie.length_in_bytes())?;
         ies.append_aligned(ie);
         num_ies += 1;
 
-        xper::encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
+        encode::encode_length_determinent(data, Some(0), Some(65535), false, num_ies)?;
         data.append_aligned(ies);
         Ok(())
     }

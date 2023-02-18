@@ -1,7 +1,6 @@
 mod rrc;
 pub use crate::rrc::*;
-use asn1_codecs::{PerCodecData, PerCodecError};
-use net::PerCodec;
+use asn1_per::*;
 mod procedure;
 pub use procedure::*;
 

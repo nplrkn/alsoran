@@ -2,11 +2,9 @@
 
 use super::top_pdu::*;
 use crate::{F1apPdu, InitiatingMessage};
+use asn1_per::*;
 use async_trait::async_trait;
-use net::{
-    Application, EventHandler, Indication, IndicationHandler, InterfaceProvider, Procedure,
-    RequestProvider, ResponseAction, TnlaEvent,
-};
+use net::{Application, EventHandler, TnlaEvent};
 use slog::{error, Logger};
 
 #[derive(Clone)]

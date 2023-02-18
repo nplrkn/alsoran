@@ -5,7 +5,6 @@ pub use ies::*;
 pub mod pdu;
 pub use pdu::*;
 mod top_pdu;
-pub use common::BitString;
 pub use top_pdu::*;
 mod f1ap_cu;
 pub use f1ap_cu::*;
